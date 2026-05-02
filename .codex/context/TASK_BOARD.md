@@ -42,13 +42,6 @@
   - Scope: Store ClickUp and future integration settings under workspace
     ownership with protected secret handling.
 
-- CCV1-015 Workspace guardrail test matrix
-  - Stage: planning
-  - Owner: QA/Test
-  - Priority: P0
-  - Scope: Define required allowed/denied workspace tests for every protected
-    route.
-
 - CCV1-016 Migration safety and seed/bootstrap policy
   - Stage: planning
   - Owner: DB/Migrations
@@ -108,3 +101,4 @@
 - CCV1-001 Canonical architecture and deployment docs alignment.
 - CCV1-011 Workspace ownership and auth architecture contract.
 - CCV1-014 API contract and error response standard.
+- CCV1-015 Workspace guardrail test matrix.

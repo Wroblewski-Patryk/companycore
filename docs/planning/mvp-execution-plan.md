@@ -166,7 +166,7 @@ CRM UI during this plan.
 
 ## Phase 9: Tests
 
-- [ ] CCV1-015 Workspace guardrail test matrix
+- [x] CCV1-015 Workspace guardrail test matrix
   - Why now: Workspace ownership is the highest regression-risk area. Every
     route must prove allowed and denied paths, not just happy paths.
   - Depends on: CCV1-011, CCV1-014.

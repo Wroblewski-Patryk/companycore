@@ -66,23 +66,22 @@ Last updated: 2026-05-02
   Postgres volume.
 
 ## Current Focus
-- Main active objective: define the workspace guardrail test matrix before
-  implementing workspace-scoped runtime routes.
+- Main active objective: implement owner registration, login, and workspace
+  bootstrap.
 - Top blockers: native ClickUp integration contract needs design before
   implementation; production migration policy is undecided; API namespace and
-  API key hardening implementation details remain open; workspace guardrail
-  tests need definition before route surface expands.
+  API key hardening implementation details remain open.
 - Success criteria for this phase: canonical docs, workspace/auth model,
   task board, planning queue, deployment domains, migration strategy, event
   coverage, API/error contracts, regression guardrails, tests, observability,
   and deployment smoke evidence are aligned.
 
 ## Autonomous Iteration State
-- Current iteration: CCV1-015 workspace guardrail test matrix.
-- Current operation mode: TESTER
-- Last completed iteration: CCV1-014 API contract and error response standard.
-- Last completed task: documented stable success/error envelopes, safe error
-  codes, and API error redaction rules.
+- Current iteration: CCV1-012 registration, login, and workspace bootstrap.
+- Current operation mode: BUILDER
+- Last completed iteration: CCV1-015 workspace guardrail test matrix.
+- Last completed task: documented route-level workspace guardrail test cases
+  for auth, cross-workspace access, service API keys, secrets, and sync.
 - Next required mode: ARCHITECT for CCV1-003 if following iteration rotation.
 
 ## Recent Progress
@@ -112,6 +111,9 @@ Last updated: 2026-05-02
   workspace-scoped service API keys.
 - 2026-05-02: Completed CCV1-014 by documenting stable API response envelopes,
   error response shape, standard error codes, and safe error redaction rules.
+- 2026-05-02: Completed CCV1-015 by expanding the workspace guardrail test
+  matrix for protected route types, service keys, integration settings, secret
+  redaction, and native sync behavior.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

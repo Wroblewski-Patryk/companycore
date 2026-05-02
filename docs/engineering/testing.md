@@ -27,13 +27,63 @@ Keep this file aligned with `.codex/context/PROJECT_STATE.md`.
 
 Every protected workspace-scoped route should include tests for:
 
-- unauthenticated request is denied
-- authenticated same-workspace request is allowed
-- cross-workspace read is denied
-- cross-workspace write is denied
-- missing or insufficient service API key scope is denied when scopes exist
-- responses do not reveal whether another workspace's record exists
-- writes persist the expected `workspace_id`
+| Case | Expected result |
+| --- | --- |
+| unauthenticated request | denied with `unauthorized` |
+| authenticated owner, same workspace | allowed |
+| valid workspace service API key, same workspace | allowed when scope permits |
+| inactive service API key | denied with `unauthorized` or `forbidden` |
+| missing service API key scope | denied with `forbidden` when scopes exist |
+| cross-workspace read by ID | denied with `not_found` or `forbidden` without leaking existence |
+| cross-workspace list | returns only active workspace data |
+| cross-workspace create with foreign relation ID | denied with `not_found` or `forbidden` |
+| cross-workspace update/patch | denied with `not_found` or `forbidden` |
+| cross-workspace delete/archive | denied with `not_found` or `forbidden` |
+| missing workspace context | denied with `workspace_required` |
+| integration secret response | secret value redacted or omitted |
+| provider failure | safe integration error without data corruption |
+| successful write | persists expected `workspace_id` |
+
+## Route-Type Requirements
+
+List endpoints:
+
+- return only active workspace records
+- never include records from another workspace
+- preserve response envelope `{ "data": [] }`
+
+Read-by-ID endpoints:
+
+- allow same-workspace reads
+- deny cross-workspace reads without confirming the record exists
+
+Create endpoints:
+
+- persist `workspace_id` from auth context, not request body
+- reject foreign relation IDs from another workspace
+- emit expected event when the state change is meaningful
+
+Update/Patch endpoints:
+
+- allow same-workspace updates
+- reject cross-workspace updates
+- reject attempts to change `workspace_id`
+- emit expected event when the state change is meaningful
+
+Integration settings endpoints:
+
+- allow owner or authorized service access only when explicitly approved
+- never return raw secret values
+- reject cross-workspace reads/writes
+- log settings changes without secret material
+
+Native sync endpoints:
+
+- read provider settings from active workspace
+- reject missing settings with `integration_not_configured`
+- upsert by `(workspace_id, source, external_id)`
+- preserve existing records on provider failure
+- emit sync event on success
 
 ## API Error Contract Tests
 

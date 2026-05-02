@@ -44,9 +44,13 @@ Every new business route should be tested for:
 
 - unauthenticated request denied
 - valid same-workspace request allowed
-- cross-workspace request denied
+- cross-workspace read request denied
+- cross-workspace write request denied
 - response does not leak another workspace's data
 - writes persist `workspace_id`
+- foreign relation IDs from another workspace are rejected
+- integration settings responses redact secrets
+- native sync uses active workspace settings only
 
 ### 3. Migration Safety
 

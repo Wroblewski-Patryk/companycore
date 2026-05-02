@@ -553,8 +553,8 @@ P0
 - ID: CCV1-015
 - Title: Workspace guardrail test matrix
 - Task Type: research
-- Current Stage: planning
-- Status: READY
+- Current Stage: verification
+- Status: DONE
 - Owner: QA/Test
 - Depends on: CCV1-011, CCV1-014
 - Priority: P0
@@ -576,13 +576,26 @@ leaking cross-workspace data.
 - future endpoint tests under `tests/*`
 
 ### Acceptance Criteria
-- [ ] Test matrix covers unauthenticated denied path.
-- [ ] Test matrix covers valid same-workspace allowed path.
-- [ ] Test matrix covers cross-workspace read denied path.
-- [ ] Test matrix covers cross-workspace write denied path.
-- [ ] Test matrix covers missing/insufficient API key scope where scopes exist.
-- [ ] Test matrix covers secret redaction for integration settings.
-- [ ] Test matrix is referenced from CCV1-006.
+- [x] Test matrix covers unauthenticated denied path.
+- [x] Test matrix covers valid same-workspace allowed path.
+- [x] Test matrix covers cross-workspace read denied path.
+- [x] Test matrix covers cross-workspace write denied path.
+- [x] Test matrix covers missing/insufficient API key scope where scopes exist.
+- [x] Test matrix covers secret redaction for integration settings.
+- [x] Test matrix is referenced from CCV1-006.
+
+### Result Report
+- Task summary: Expanded workspace guardrail testing into a route-type matrix
+  covering list/read/create/update/delete, service API keys, foreign relation
+  IDs, integration settings, secret redaction, and native sync behavior.
+- Files changed: `docs/engineering/testing.md`,
+  `docs/planning/regression-prevention-plan.md`, `docs/API.md`,
+  `.codex/context/PROJECT_STATE.md`, `.codex/context/TASK_BOARD.md`,
+  `docs/planning/mvp-next-commits.md`, and this task contract.
+- How tested: Reviewed matrix against CCV1-015 acceptance criteria and ran
+  `git diff --check`.
+- What is incomplete: Automated tests are still implemented later in CCV1-006.
+- Next steps: Start CCV1-012 registration, login, and workspace bootstrap.
 
 ### Priority
 P0

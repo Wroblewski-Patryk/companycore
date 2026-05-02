@@ -60,6 +60,21 @@ Rules:
 - Protected endpoints should not reveal whether another workspace's record
   exists.
 
+## Workspace Guardrail Contract
+
+Every protected workspace-scoped endpoint must follow these API rules:
+
+- derive `workspaceId` from auth context or service API key
+- ignore or reject client attempts to set `workspaceId` directly unless an
+  endpoint explicitly documents a safe bootstrap exception
+- list only active workspace records
+- reject foreign relation IDs from another workspace
+- return `not_found` or `forbidden` for cross-workspace record access without
+  leaking whether the record exists
+- return `workspace_required` when auth succeeds but no workspace can be
+  resolved
+- never return integration secret values
+
 ## Standard Error Codes
 
 | HTTP | Code | Use |
