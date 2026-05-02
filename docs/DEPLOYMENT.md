@@ -14,7 +14,7 @@ Services:
 The backend startup command runs:
 
 ```bash
-npx prisma db push
+npm run prisma:migrate:deploy
 npm run seed
 node dist/server.js
 ```
@@ -25,6 +25,7 @@ node dist/server.js
 cp .env.example .env
 npm install
 npm run prisma:generate
+npm run prisma:migrate:dev
 npm run dev
 ```
 
@@ -44,6 +45,9 @@ Required environment values:
 Map domains to the `backend` service on container port `3000`.
 
 Keep Postgres storage persistent through Coolify volume configuration.
+
+Production deploys must use Prisma migrations. Do not use `prisma db push` for
+production once data matters.
 
 ## Smoke Check
 

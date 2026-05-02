@@ -33,9 +33,9 @@ only the backend API publicly.
 - Env example file: `.env.example`.
 - Health/readiness endpoint: `GET /health`.
 - Migration entrypoint:
-  - Current foundation uses `prisma db push` in the runtime command.
-  - CCV1-003 must replace production reliance on `db push` with controlled
-    Prisma migrations.
+  - Runtime startup runs `npm run prisma:migrate:deploy`.
+  - Local development may use `npm run prisma:migrate:dev`.
+  - `prisma db push` is not the production deploy path.
 
 ## Env And Secrets Contract
 

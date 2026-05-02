@@ -60,7 +60,7 @@ CRM UI during this plan.
 
 ## Phase 3: Database
 
-- [ ] CCV1-003 Prisma migration baseline and deployment entrypoint
+- [x] CCV1-003 Prisma migration baseline and deployment entrypoint
   - Why now: Runtime currently uses `prisma db push`, which is not the desired
     production migration path.
   - Depends on: CCV1-001.

@@ -69,8 +69,9 @@ Last updated: 2026-05-02
 - Main active objective: implement owner registration, login, and workspace
   bootstrap.
 - Top blockers: native ClickUp integration contract needs design before
-  implementation; production migration policy is undecided; API namespace and
-  API key hardening implementation details remain open.
+  implementation; API namespace and API key hardening implementation details
+  remain open; deployed databases initialized with `db push` may need migration
+  reconciliation before production rollout.
 - Success criteria for this phase: canonical docs, workspace/auth model,
   task board, planning queue, deployment domains, migration strategy, event
   coverage, API/error contracts, regression guardrails, tests, observability,
@@ -114,6 +115,9 @@ Last updated: 2026-05-02
 - 2026-05-02: Completed CCV1-015 by expanding the workspace guardrail test
   matrix for protected route types, service keys, integration settings, secret
   redaction, and native sync behavior.
+- 2026-05-02: Completed CCV1-003 by adding the v1 foundation Prisma migration,
+  switching Docker startup to `prisma migrate deploy`, and documenting rollback
+  expectations.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

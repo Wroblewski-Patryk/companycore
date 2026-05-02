@@ -158,10 +158,10 @@ CompanyCore v1 execution queue.
 - ID: CCV1-003
 - Title: Prisma migration baseline and deployment entrypoint
 - Task Type: release
-- Current Stage: planning
-- Status: READY
+- Current Stage: verification
+- Status: DONE
 - Owner: DB/Migrations
-- Depends on: CCV1-001, DEC-004
+- Depends on: CCV1-001
 - Priority: P0
 - Iteration: v1-003
 - Operation Mode: ARCHITECT
@@ -181,13 +181,30 @@ migration baseline and deployment command.
 - `docs/operations/coolify-vps-deployment-contract.md`
 
 ### Acceptance Criteria
-- [ ] A baseline migration represents the current Prisma schema.
-- [ ] Workspace/auth/integration settings schema changes are represented by
+- [x] A baseline migration represents the current Prisma schema.
+- [x] Workspace/auth/integration settings schema changes are represented by
   explicit migrations when those tasks are implemented.
-- [ ] Production startup no longer depends on uncontrolled `prisma db push`.
-- [ ] Local development still has a documented schema setup path.
-- [ ] Deployment docs describe migration command, rollback trigger, and backup
+- [x] Production startup no longer depends on uncontrolled `prisma db push`.
+- [x] Local development still has a documented schema setup path.
+- [x] Deployment docs describe migration command, rollback trigger, and backup
   expectation.
+
+### Result Report
+- Task summary: Added a baseline Prisma migration for the existing v1 schema,
+  added migration scripts, switched the Docker runtime startup to
+  `prisma migrate deploy`, and updated deployment/rollback docs.
+- Files changed: `prisma/migrations/202605021_v1_foundation/migration.sql`,
+  `package.json`, `Dockerfile`, `docs/DEPLOYMENT.md`,
+  `docs/operations/coolify-vps-deployment-contract.md`,
+  `docs/operations/rollback-and-recovery.md`,
+  `docs/planning/open-decisions.md`, `.codex/context/PROJECT_STATE.md`,
+  `.codex/context/TASK_BOARD.md`, `docs/planning/mvp-next-commits.md`, and
+  this task contract.
+- How tested: Ran Prisma validation, TypeScript build, and `git diff --check`.
+- What is incomplete: Existing deployed databases that were initialized with
+  `db push` may need migration reconciliation before applying this in
+  production.
+- Next steps: Continue CCV1-012 registration, login, and workspace bootstrap.
 
 ### Priority
 P0

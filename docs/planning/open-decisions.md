@@ -33,19 +33,6 @@ Track unresolved decisions that can block or reshape execution.
   - Needed by: CCV1-008
   - Current owner: Product Docs / Backend Builder
 
-- DEC-004 Production migration policy
-  - Question: What is the exact production migration command and rollback
-    expectation for Coolify deployments?
-  - Why it matters: The current Docker runtime uses `prisma db push`; v1 should
-    move to a migration flow before production data becomes valuable.
-  - Options:
-    - Run `prisma migrate deploy` during backend startup.
-    - Run migrations as a separate one-off deploy step before backend rollout.
-    - Keep `db push` only for local development and block production deploys
-      without migrations.
-  - Needed by: CCV1-003
-  - Current owner: DB/Migrations / Ops/Release
-
 - DEC-005 Native ClickUp integration scope
   - Question: What is the smallest v1-native ClickUp integration that is useful
     for Jarvis and future integrations without overbuilding?
@@ -81,3 +68,6 @@ Track unresolved decisions that can block or reshape execution.
 - 2026-05-02: v1 includes `workspace_memberships` now for future growth, but
   only the `owner` role is active. Invitations, non-owner roles, and advanced
   RBAC are deferred.
+- 2026-05-02: Production deployments use `prisma migrate deploy` during backend
+  startup. Local development may use `prisma migrate dev`; `db push` is not the
+  production path.
