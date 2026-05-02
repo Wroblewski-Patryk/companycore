@@ -19,6 +19,15 @@ npm run seed
 node dist/server.js
 ```
 
+Production startup must use `prisma migrate deploy`. Do not use
+`prisma db push` against production.
+
+The current seed command is for local/bootstrap use. For production, run seed
+only when intentionally creating the first owner workspace and first workspace
+API key, with `SEED_OWNER_EMAIL`, `SEED_OWNER_PASSWORD`,
+`SEED_WORKSPACE_NAME`, and `SEED_API_KEY` explicitly set. After the first owner
+exists, do not rerun seed as a standing production shortcut.
+
 ## Local Development
 
 ```bash
@@ -55,6 +64,17 @@ Keep Postgres storage persistent through Coolify volume configuration.
 
 Production deploys must use Prisma migrations. Do not use `prisma db push` for
 production once data matters.
+
+Migration release checklist:
+
+- Review generated SQL before deploy.
+- Test migration against an empty database.
+- Test migration against a copy of the current foundation database when schema
+  changes touch auth, workspaces, API keys, integrations, tasks, or external ID
+  uniqueness.
+- Confirm rollback or forward-fix plan before deploy.
+- Back up the PostgreSQL volume/database before risky ownership or integration
+  migrations.
 
 ## Smoke Check
 

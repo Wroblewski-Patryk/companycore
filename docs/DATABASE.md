@@ -27,6 +27,25 @@ integration fields such as `external_id` and `source` where relevant.
 - `integration_settings`: workspace-scoped provider configuration and protected
   secret material, starting with ClickUp.
 
+## Migration Policy
+
+Production schema changes must be represented by Prisma migrations committed
+under `prisma/migrations/`. `prisma db push` is not a production migration
+mechanism.
+
+Every migration that touches ownership, auth, service keys, integration
+settings, tasks, events, or external ID uniqueness must include:
+
+- generated SQL review
+- empty-database validation
+- existing-database validation or a documented reason it cannot be run locally
+- rollback or forward-fix note
+- data ownership impact review
+
+Applied production migrations should normally be recovered through forward-fix
+migrations. Restore from backup only when data corruption or unsafe ownership
+state makes forward-fix unsafe.
+
 ## Important Relations
 
 - Users can own workspaces.
@@ -92,6 +111,22 @@ Planned v1 shape:
 
 Registration must create the user, workspace, and owner membership in one
 transaction.
+
+## Seed And Bootstrap
+
+`prisma/seed.ts` creates local/bootstrap data:
+
+- owner user from `SEED_OWNER_EMAIL`
+- owner password from `SEED_OWNER_PASSWORD`
+- workspace from `SEED_WORKSPACE_NAME`
+- local workspace API key from `SEED_API_KEY`
+- default pipeline stages
+
+This seed path is acceptable for local development and intentional first-owner
+bootstrap. It must not become a permanent production admin shortcut. Production
+operators should prefer `POST /auth/register` for the first owner when public
+registration is acceptable, or run seed once with explicit deployment secrets
+and then rotate bootstrap credentials.
 
 ## Service API Keys
 

@@ -66,6 +66,9 @@ Required checks before deploy:
 
 - `npm run build`
 - migration review for schema changes
+- migration validation against empty and existing database shapes when schema
+  changes touch ownership, auth, API keys, integrations, tasks, or external ID
+  uniqueness
 - relevant endpoint/integration tests once CCV1-006 is implemented
 - `git diff --check` before commit/release handoff
 
@@ -93,6 +96,16 @@ Rollback method:
 - preserve the PostgreSQL volume
 - restore database from backup if migration or data corruption occurred
 - record the incident and add a regression check before retrying
+
+First-owner bootstrap:
+
+- Prefer `POST /auth/register` when public registration is temporarily allowed
+  and immediately protect/disable that path if deployment policy requires it.
+- Alternatively run `npm run seed` once with explicit production bootstrap
+  secrets.
+- After bootstrap, rotate temporary owner password/API key material if it was
+  shared through deployment tooling.
+- Do not rely on repeat production seed runs as an admin access mechanism.
 
 ## Data Safety
 

@@ -90,8 +90,27 @@ Use this prompt when risk is meaningful:
   - ClickUp failure returns safe error and preserves data
 - Residual risk:
   - rate limiting and lockout policy still need implementation planning
-  - token/session storage details must be finalized during CCV1-012
   - production secret rotation must be verified during deployment tasks
+  - production seed/bootstrap must be run once intentionally or replaced by
+    owner registration, never left as an ungoverned admin shortcut
+
+## Bootstrap Security
+
+First-owner bootstrap is security-sensitive because it creates the identity
+that owns the company workspace. Allowed v1 bootstrap paths:
+
+- owner registration through `POST /auth/register`
+- one-time production seed with explicit `SEED_OWNER_EMAIL`,
+  `SEED_OWNER_PASSWORD`, `SEED_WORKSPACE_NAME`, and `SEED_API_KEY`
+
+After bootstrap:
+
+- rotate temporary passwords and service keys when they were shared through
+  deployment tooling
+- do not expose seed credentials in docs, logs, screenshots, or support notes
+- prefer workspace-scoped service keys for agents rather than owner tokens
+- keep `AUTH_TOKEN_SECRET` and `INTEGRATION_SECRET_KEY` stable across redeploys
+  unless a planned rotation is in progress
 
 ## Hard Blocks
 

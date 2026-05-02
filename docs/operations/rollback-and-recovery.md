@@ -21,6 +21,11 @@ Document the first safe rollback path before the first production deploy.
     requires it.
   - Never run ad hoc schema edits directly against production without a
     documented recovery decision.
+  - Before risky migrations, take a PostgreSQL backup or verified volume
+    snapshot.
+  - After restoring from backup, rerun smoke checks before accepting traffic.
+  - If a migration added ownership or external ID uniqueness, verify there are
+    no cross-workspace records or duplicate external IDs before retrying deploy.
 - Worker rollback: not applicable in v1 because there are no worker services.
 - Cache or queue considerations: not applicable in v1.
 
@@ -40,3 +45,4 @@ Document the first safe rollback path before the first production deploy.
 - Prefer deterministic rollback or forward-fix rules over improvisation.
 - If rollback is unsafe for a given change type, record the required mitigation
   before deployment.
+- Keep the PostgreSQL volume. Deleting the volume is data loss, not rollback.

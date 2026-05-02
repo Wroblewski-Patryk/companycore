@@ -68,7 +68,7 @@ CRM UI during this plan.
     and deployment docs describe migration behavior.
   - Deployment impact: Medium. Database startup behavior changes.
 
-- [ ] CCV1-016 Migration safety and seed/bootstrap policy
+- [x] CCV1-016 Migration safety and seed/bootstrap policy
   - Why now: Workspace/auth migration and first-owner bootstrap can create
     long-lived security or data ownership bugs if not standardized early.
   - Depends on: CCV1-011, CCV1-003.

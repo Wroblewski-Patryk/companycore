@@ -5,16 +5,15 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NOW
 
-- [ ] CCV1-016 Migration safety and seed/bootstrap policy
+- [ ] CCV1-007 API key hardening plan and implementation
 
 ## NEXT
 
-- [ ] CCV1-007 API key hardening plan and implementation
 - [ ] CCV1-006 Endpoint test foundation
+- [ ] CCV1-008 Missing module route decision and minimal route slice
 
 ## PIPELINE
 
-- [ ] CCV1-008 Missing module route decision and minimal route slice
 - [ ] CCV1-009 Production deployment verification
 
 ## GROUP QUEUE

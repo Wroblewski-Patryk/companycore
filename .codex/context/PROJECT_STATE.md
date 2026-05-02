@@ -67,7 +67,8 @@ Last updated: 2026-05-02
   Postgres volume.
 
 ## Current Focus
-- Main active objective: document migration safety and seed/bootstrap policy.
+- Main active objective: harden workspace-scoped API key storage and
+  service-client access.
 - Top blockers: API namespace and API key hardening implementation details
   remain open; deployed databases initialized with `db push` may need migration
   reconciliation before production rollout.
@@ -77,14 +78,14 @@ Last updated: 2026-05-02
   and deployment smoke evidence are aligned.
 
 ## Autonomous Iteration State
-- Current iteration: CCV1-016 migration safety and seed/bootstrap policy.
+- Current iteration: CCV1-007 API key hardening plan and implementation.
 - Current operation mode: BUILDER
-- Last completed iteration: CCV1-005 deployment domain documentation and smoke
-  checklist.
-- Last completed task: recorded production domains, deployment smoke checks,
-  required Coolify secrets, ClickUp sync smoke evidence, and Postgres volume
-  rollback expectations.
-- Next required mode: BUILDER for CCV1-016.
+- Last completed iteration: CCV1-016 migration safety and seed/bootstrap
+  policy.
+- Last completed task: documented migration safety, local seed behavior,
+  production first-owner bootstrap, bootstrap credential rotation, and database
+  rollback/recovery expectations.
+- Next required mode: BUILDER for CCV1-007.
 
 ## Recent Progress
 - 2026-05-02: Created Company Core backend foundation, Prisma schema, Docker
@@ -137,6 +138,9 @@ Last updated: 2026-05-02
 - 2026-05-02: Completed CCV1-005 by recording production domains, smoke
   checks, required deployment secrets, and rollback notes for preserving the
   PostgreSQL volume.
+- 2026-05-02: Completed CCV1-016 by documenting migration review/testing,
+  local seed, production first-owner bootstrap, credential rotation, and
+  rollback/recovery policy.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

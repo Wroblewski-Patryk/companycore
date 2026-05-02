@@ -673,8 +673,8 @@ P0
 - ID: CCV1-016
 - Title: Migration safety and seed/bootstrap policy
 - Task Type: release
-- Current Stage: planning
-- Status: READY
+- Current Stage: verification
+- Status: DONE
 - Owner: DB/Migrations
 - Depends on: CCV1-011, CCV1-003
 - Priority: P0
@@ -698,11 +698,27 @@ Make database changes predictable and protect production from accidental
 - `Dockerfile` during implementation
 
 ### Acceptance Criteria
-- [ ] Docs define local seed behavior.
-- [ ] Docs define production first-owner bootstrap behavior.
-- [ ] Docs define how bootstrap is disabled or protected after first owner.
-- [ ] Docs define migration apply command and rollback/recovery notes.
-- [ ] Docs require migration testing on empty and existing databases.
+- [x] Docs define local seed behavior.
+- [x] Docs define production first-owner bootstrap behavior.
+- [x] Docs define how bootstrap is disabled or protected after first owner.
+- [x] Docs define migration apply command and rollback/recovery notes.
+- [x] Docs require migration testing on empty and existing databases.
+
+### Result Report
+- Task summary: Documented migration safety, seed behavior, production
+  first-owner bootstrap paths, bootstrap credential rotation, rollback/recovery
+  expectations, and empty/existing database validation requirements.
+- Files changed: `docs/DEPLOYMENT.md`, `docs/DATABASE.md`,
+  `docs/operations/rollback-and-recovery.md`,
+  `docs/operations/coolify-vps-deployment-contract.md`,
+  `docs/security/secure-development-lifecycle.md`,
+  `.codex/context/PROJECT_STATE.md`, `.codex/context/TASK_BOARD.md`,
+  `docs/planning/mvp-execution-plan.md`, `docs/planning/mvp-next-commits.md`,
+  and this task contract.
+- How tested: Reviewed docs against CCV1-016 acceptance criteria and ran
+  `git diff --check`.
+- What is incomplete: Automated migration tests remain in CCV1-006.
+- Next steps: Start CCV1-007 API key hardening plan and implementation.
 
 ### Priority
 P0
