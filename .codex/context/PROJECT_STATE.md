@@ -197,6 +197,12 @@ Last updated: 2026-05-02
 - 2026-05-02: Completed CCV1-023 by adding workspace-scoped agents API routes,
   `agent_created` event emission, manifest capabilities for agents, and tests
   for same-workspace creation plus cross-workspace log denial.
+- 2026-05-02: Deployed CCV1-022 and CCV1-023 to production. Coolify manual
+  redeploy for `c564d0a` finished successfully. The `ebc660b` deployment was
+  initially queued behind other server deployments, then force-started from the
+  CompanyCore deployment detail page and finished successfully. Public
+  `/v1/health` returned `200`; unauthenticated `/v1/agents` and
+  `/v1/connection` returned `401` as expected.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

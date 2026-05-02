@@ -116,6 +116,43 @@ Use this file to record the minimum checks after each deploy.
   - GitHub was not logged in in the browser, so repository webhook creation
     could not be completed from this session.
 
+## Adapter Connection Deployment Evidence
+
+- Timestamp: 2026-05-02
+- Environment: Coolify production, Root Team, `companycore (localhost)`
+- Deployment:
+  - Manual redeploy `qn7wcxnony0jdm2o2q4ex7rc`.
+  - Coolify imported commit `4a4554f`.
+  - Manual redeploy for commit `c564d0a` finished successfully after the
+    adapter manifest change.
+- Public checks:
+  - `GET https://api.companycore.luckysparrow.ch/v1/health` returned `200`.
+  - `GET https://api.companycore.luckysparrow.ch/v1/connection` without auth
+    returned `401`, which is the expected protected-route negative path.
+- Residual risks:
+  - Full protected adapter handshake still needs a real production workspace
+    service API key.
+
+## Agents API Deployment Evidence
+
+- Timestamp: 2026-05-02
+- Environment: Coolify production, Root Team, `companycore (localhost)`
+- Deployment:
+  - Manual redeploy was queued by Coolify, then force-started from the
+    CompanyCore deployment detail page.
+  - Coolify imported commit `ebc660b3761464c4571cfba822d22c2a2923b5d8`.
+  - Deployment finished, created new backend/postgres containers, and the app
+    status stayed `Running`.
+- Public checks:
+  - `GET https://api.companycore.luckysparrow.ch/v1/health` returned `200`.
+  - `GET https://api.companycore.luckysparrow.ch/v1/agents` without auth
+    returned `401`, which is the expected protected-route negative path.
+  - `GET https://api.companycore.luckysparrow.ch/v1/connection` without auth
+    returned `401`, which is the expected protected-route negative path.
+- Residual risks:
+  - Full protected agent creation and connection manifest smoke still needs a
+    real production workspace service API key.
+
 ## Local Docker Reproduction Evidence
 
 - Timestamp: 2026-05-02
