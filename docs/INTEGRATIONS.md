@@ -1,5 +1,19 @@
 # Integrations
 
+## Service Adapter Onboarding
+
+Paperclip, Jarvis, Jarvan, Aviary, n8n, and future service clients should start
+from `docs/integrations/adapter-onboarding.md`.
+
+The required first call for adapters is:
+
+```http
+GET /v1/connection
+```
+
+This validates the workspace API key, returns safe capability metadata, and
+shows whether ClickUp is configured without exposing secret material.
+
 ## ClickUp To Company Core
 
 v1 primary integration path:

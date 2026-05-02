@@ -78,6 +78,69 @@ access.
 ### Priority
 P0
 
+## CCV1-021 Adapter Connection Handshake For Paperclip And Jarvis
+
+### Header
+- ID: CCV1-021
+- Title: Adapter connection handshake for Paperclip and Jarvis
+- Task Type: feature
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder
+- Depends on: CCV1-018, CCV1-019
+- Priority: P0
+- Iteration: v1-021
+- Operation Mode: BUILDER
+
+### Context
+Paperclip, Jarvis, Jarvan, Aviary, and similar adapters need a stable first API
+call that proves their key works and tells them what CompanyCore can safely do
+for the active workspace.
+
+### Goal
+Expose a safe connection handshake that returns API version, workspace identity,
+auth type, capabilities, and non-secret integration readiness.
+
+### Scope
+- `src/modules/connection/connection.routes.ts`
+- `src/app.ts`
+- `src/tests/api.test.ts`
+- `docs/API.md`
+- `docs/INTEGRATIONS.md`
+- `docs/integrations/adapter-onboarding.md`
+- `.codex/context/*`
+
+### Implementation Plan
+1. Add a protected `/connection` route mounted at root and `/v1`.
+2. Return only safe auth, workspace, capability, and integration metadata.
+3. Add endpoint coverage using a workspace service API key.
+4. Document adapter environment variables and first-call sequence.
+
+### Acceptance Criteria
+- [x] `GET /v1/connection` works with `X-API-Key`.
+- [x] Response contains service name, API version, workspace identity, auth
+  type, capabilities, and ClickUp readiness.
+- [x] Response does not include raw API keys or integration tokens.
+- [x] Endpoint test covers service-key handshake.
+- [x] Adapter onboarding docs explain Paperclip/Jarvis setup.
+
+### Result Report
+- Task summary: Added a service-adapter handshake and onboarding doc so
+  Paperclip/Jarvis-style clients can connect through CompanyCore safely.
+- Files changed: `src/modules/connection/connection.routes.ts`, `src/app.ts`,
+  `src/tests/api.test.ts`, `docs/API.md`, `docs/INTEGRATIONS.md`,
+  `docs/integrations/adapter-onboarding.md`, `.codex/context/PROJECT_STATE.md`,
+  `.codex/context/TASK_BOARD.md`, and this task contract.
+- How tested: `npm run build` and `npm test` against a disposable PostgreSQL
+  database.
+- What is incomplete: Production adapter smoke still needs an actual
+  production workspace service API key.
+- Next steps: Create/obtain Paperclip and Jarvis production API keys, store
+  them in those apps, and call `/v1/connection`.
+
+### Priority
+P0
+
 ## CCV1-019 Database/API Workspace Coverage For Core Records
 
 ### Header

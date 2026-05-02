@@ -6,6 +6,7 @@ import { agentLogsRouter } from "./modules/agent-logs/agent-logs.routes";
 import { apiKeysRouter } from "./modules/api-keys/api-keys.routes";
 import { authRouter } from "./modules/auth/auth.routes";
 import { clientsRouter } from "./modules/clients/clients.routes";
+import { connectionRouter } from "./modules/connection/connection.routes";
 import { dealsRouter } from "./modules/deals/deals.routes";
 import { decisionsRouter } from "./modules/decisions/decisions.routes";
 import { eventsRouter } from "./modules/events/events.routes";
@@ -19,6 +20,7 @@ import { healthRouter } from "./health/health.routes";
 
 function mountProtectedRoutes(router: Router) {
   router.use("/projects", projectsRouter);
+  router.use("/connection", connectionRouter);
   router.use("/goals", goalsRouter);
   router.use("/targets", targetsRouter);
   router.use("/tasks", tasksRouter);

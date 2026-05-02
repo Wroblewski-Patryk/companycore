@@ -79,13 +79,13 @@ Last updated: 2026-05-02
   and deployment smoke evidence are aligned.
 
 ## Autonomous Iteration State
-- Current iteration: CCV1-019 database/API workspace coverage.
+- Current iteration: CCV1-021 adapter connection handshake.
 - Current operation mode: BUILDER
-- Last completed iteration: CCV1-019 database/API workspace coverage.
-- Last completed task: added workspace ownership columns for remaining core
-  business records, scoped protected reads/writes by auth workspace, added
-  relation guardrails, and expanded endpoint tests for cross-workspace denial.
-- Next required mode: BUILDER for the next v1 database/API coverage task.
+- Last completed iteration: CCV1-021 adapter connection handshake.
+- Last completed task: added `/v1/connection` as a safe service-adapter
+  handshake for Paperclip, Jarvis, Jarvan, Aviary, n8n, and similar clients.
+- Next required mode: BUILDER for adapter production smoke once credentials are
+  available.
 
 ## Recent Progress
 - 2026-05-02: Created Company Core backend foundation, Prisma schema, Docker
@@ -186,6 +186,10 @@ Last updated: 2026-05-02
   passed. Coolify `Auto Deploy` is enabled, but no GitHub webhook deployment
   fired after push because GitHub repository settings were not authenticated in
   the browser session.
+- 2026-05-02: Completed CCV1-021 by adding `/v1/connection` and `/connection`
+  so service adapters can verify API key auth, workspace identity,
+  capabilities, and safe ClickUp configuration status before syncing or writing
+  operational records.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

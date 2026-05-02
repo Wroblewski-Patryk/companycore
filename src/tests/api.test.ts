@@ -147,6 +147,30 @@ test("CompanyCore v1 protected API flow", async () => {
   });
   assert.equal(serviceProject.status, 201);
 
+  const connection = await request("/v1/connection", {
+    headers: { "X-API-Key": serviceKey }
+  });
+  assert.equal(connection.status, 200);
+  const connectionBody = connection.body as {
+    data: {
+      service: string;
+      apiVersion: string;
+      status: string;
+      auth: { type: string; workspaceId: string; apiKeyId?: string };
+      workspace: { id: string; name: string };
+      capabilities: string[];
+      integrations: { clickup: { configured: boolean; active: boolean; config: unknown } };
+    };
+  };
+  assert.equal(connectionBody.data.service, "companycore");
+  assert.equal(connectionBody.data.apiVersion, "v1");
+  assert.equal(connectionBody.data.status, "ok");
+  assert.equal(connectionBody.data.auth.type, "api_key");
+  assert.equal(connectionBody.data.auth.workspaceId, ownerA.workspace.id);
+  assert.equal(connectionBody.data.workspace.id, ownerA.workspace.id);
+  assert.ok(connectionBody.data.capabilities.includes("tasks:write"));
+  assert.equal(connectionBody.data.integrations.clickup.configured, false);
+
   const projectListB = await request("/v1/projects", { headers: authB });
   assert.equal(projectListB.status, 200);
   assert.equal((projectListB.body as { data: unknown[] }).data.length, 0);

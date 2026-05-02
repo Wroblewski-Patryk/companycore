@@ -261,6 +261,47 @@ setting requires a token.
 GET /health
 ```
 
+## Connection Handshake
+
+Adapters should call this endpoint first to verify that their workspace API key
+is valid and to discover safe v1 capabilities.
+
+```http
+GET /v1/connection
+GET /connection
+```
+
+Safe response:
+
+```json
+{
+  "data": {
+    "service": "companycore",
+    "apiVersion": "v1",
+    "status": "ok",
+    "auth": {
+      "type": "api_key",
+      "workspaceId": "uuid"
+    },
+    "workspace": {
+      "id": "uuid",
+      "name": "LuckySparrow"
+    },
+    "capabilities": ["tasks:read", "tasks:write", "events:read"],
+    "integrations": {
+      "clickup": {
+        "configured": true,
+        "active": true,
+        "config": {
+          "listIds": ["clickup-list-id"],
+          "syncMode": "pull"
+        }
+      }
+    }
+  }
+}
+```
+
 ## Projects
 
 ```http
