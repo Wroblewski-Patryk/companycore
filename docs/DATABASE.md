@@ -135,3 +135,7 @@ responses or logs.
 records should be unique per workspace and source, for example
 `(workspace_id, source, external_id)`, so ClickUp sync can upsert records
 without crossing workspace boundaries.
+
+The first runtime workspace-scoped business table is `tasks`. Native ClickUp
+sync writes `tasks.workspace_id` from auth context and uses the
+`(workspace_id, source, external_id)` unique key for idempotent task imports.

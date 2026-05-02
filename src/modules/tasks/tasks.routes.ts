@@ -2,6 +2,8 @@ import { Prisma, TaskStatus } from "@prisma/client";
 import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../../db/prisma";
+import { IntegrationError } from "../../integrations/errors";
+import { syncClickUpTasksForWorkspace } from "../../integrations/clickup/clickup.sync";
 import { asyncHandler } from "../../middleware/async-handler";
 import { createEvent } from "../events/event.service";
 
@@ -39,14 +41,22 @@ const clickUpSyncSchema = z.object({
 
 export const tasksRouter = Router();
 
-tasksRouter.get("/", asyncHandler(async (_req, res) => {
-  const tasks = await prisma.task.findMany({ orderBy: { createdAt: "desc" } });
+tasksRouter.get("/", asyncHandler(async (req, res) => {
+  const tasks = await prisma.task.findMany({
+    where: { workspaceId: req.auth!.workspaceId },
+    orderBy: { createdAt: "desc" }
+  });
   res.json({ data: tasks });
 }));
 
 tasksRouter.post("/", asyncHandler(async (req, res) => {
   const input = createTaskSchema.parse(req.body);
-  const task = await prisma.task.create({ data: input });
+  const task = await prisma.task.create({
+    data: {
+      ...input,
+      workspaceId: req.auth!.workspaceId
+    }
+  });
   await createEvent({
     type: "task_created",
     projectId: task.projectId,
@@ -60,7 +70,10 @@ tasksRouter.post("/", asyncHandler(async (req, res) => {
 tasksRouter.patch("/:id", asyncHandler(async (req, res) => {
   const input = updateTaskSchema.parse(req.body);
   const task = await prisma.task.update({
-    where: { id: String(req.params.id) },
+    where: {
+      id: String(req.params.id),
+      workspaceId: req.auth!.workspaceId
+    },
     data: input
   });
   await createEvent({
@@ -76,6 +89,7 @@ tasksRouter.patch("/:id", asyncHandler(async (req, res) => {
 tasksRouter.post("/sync/clickup", asyncHandler(async (req, res) => {
   const input = clickUpSyncSchema.parse(req.body);
   const data: Prisma.TaskUncheckedCreateInput = {
+    workspaceId: req.auth!.workspaceId,
     title: input.title,
     description: input.description,
     status: input.status ?? "todo",
@@ -91,7 +105,8 @@ tasksRouter.post("/sync/clickup", asyncHandler(async (req, res) => {
 
   const task = await prisma.task.upsert({
     where: {
-      source_externalId: {
+      workspaceId_source_externalId: {
+        workspaceId: req.auth!.workspaceId,
         source: "clickup",
         externalId: input.externalId
       }
@@ -108,9 +123,24 @@ tasksRouter.post("/sync/clickup", asyncHandler(async (req, res) => {
     payload: {
       taskId: task.id,
       externalId: input.externalId,
+      workspaceId: req.auth!.workspaceId,
       raw: (input.raw ?? null) as Prisma.InputJsonValue | null
     }
   });
 
   res.json({ data: task });
+}));
+
+tasksRouter.post("/sync/clickup/native", asyncHandler(async (req, res) => {
+  try {
+    const result = await syncClickUpTasksForWorkspace(req.auth!.workspaceId);
+    return res.json({ data: result });
+  } catch (error) {
+    if (error instanceof IntegrationError) {
+      return res.status(error.status).json({
+        error: error.code
+      });
+    }
+    throw error;
+  }
 }));

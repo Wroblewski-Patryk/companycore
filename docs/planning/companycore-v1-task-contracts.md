@@ -439,10 +439,10 @@ P1
 - ID: CCV1-010
 - Title: Native ClickUp integration contract and first adapter slice
 - Task Type: feature
-- Current Stage: planning
-- Status: READY
+- Current Stage: verification
+- Status: DONE
 - Owner: Backend Builder
-- Depends on: CCV1-001, DEC-005, CCV1-003
+- Depends on: CCV1-001, DEC-005, CCV1-003, CCV1-013, CCV1-017
 - Priority: P0
 - Iteration: v1-010
 - Operation Mode: BUILDER
@@ -495,16 +495,38 @@ workspace, and emit events.
 - `docs/NEXT_STEPS.md`
 
 ### Acceptance Criteria
-- [ ] CompanyCore can call the ClickUp API using workspace-owned credentials.
-- [ ] ClickUp tasks are normalized into CompanyCore tasks inside the active
+- [x] CompanyCore can call the ClickUp API using workspace-owned credentials.
+- [x] ClickUp tasks are normalized into CompanyCore tasks inside the active
   workspace.
-- [ ] Sync upserts by `(workspace_id, source = clickup, external_id)`.
-- [ ] Sync emits `task_synced_from_clickup`.
-- [ ] Integration failures return safe API errors and do not corrupt existing
+- [x] Sync upserts by `(workspace_id, source = clickup, external_id)`.
+- [x] Sync emits `task_synced_from_clickup`.
+- [x] Integration failures return safe API errors and do not corrupt existing
   tasks.
-- [ ] ClickUp secrets are not logged, not returned by API responses, and are
+- [x] ClickUp secrets are not logged, not returned by API responses, and are
   documented in integration/deployment docs.
-- [ ] `npm run build` passes.
+- [x] `npm run build` passes.
+
+### Result Report
+- Task summary: Implemented the first native ClickUp pull-sync adapter with a
+  provider client, mapper, sync service, protected trigger route, task
+  workspace ownership, idempotent task upsert, and sync events.
+- Files changed: `prisma/schema.prisma`,
+  `prisma/migrations/202605024_clickup_task_workspace_scope/migration.sql`,
+  `src/integrations/errors.ts`, `src/integrations/clickup/clickup.client.ts`,
+  `src/integrations/clickup/clickup.mapper.ts`,
+  `src/integrations/clickup/clickup.sync.ts`,
+  `src/modules/tasks/tasks.routes.ts`, `docs/API.md`, `docs/DATABASE.md`,
+  `docs/INTEGRATIONS.md`, `docs/planning/open-decisions.md`,
+  `.codex/context/PROJECT_STATE.md`, `.codex/context/TASK_BOARD.md`,
+  `docs/planning/mvp-execution-plan.md`, `docs/planning/mvp-next-commits.md`,
+  and this task contract.
+- How tested: Reviewed official ClickUp API docs for task filtering, ran
+  `npx prisma generate`, `npm run build`, `npx prisma validate` with a local
+  `DATABASE_URL`, and `git diff --check`.
+- What is incomplete: Automated endpoint tests and real ClickUp production
+  smoke remain in CCV1-006 and CCV1-009.
+- Next steps: Continue with CCV1-004 event coverage or CCV1-007 API key
+  hardening, depending on release-risk priority.
 
 ### Priority
 P0

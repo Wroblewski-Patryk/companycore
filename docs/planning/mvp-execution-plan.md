@@ -143,7 +143,7 @@ CRM UI during this plan.
     structured logs/events, idempotency, and smoke signals.
   - Deployment impact: Low for docs; medium when implemented.
 
-- [ ] CCV1-010 Native ClickUp integration contract and first adapter slice
+- [x] CCV1-010 Native ClickUp integration contract and first adapter slice
   - Why now: User confirmed ClickUp should be the first native integration so
     Jarvis can inspect, improve, and extend real operational data without
     requiring separate n8n workflows.

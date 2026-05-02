@@ -67,7 +67,8 @@ Last updated: 2026-05-02
   Postgres volume.
 
 ## Current Focus
-- Main active objective: implement the first native ClickUp adapter slice.
+- Main active objective: complete required v1 event emission for client, deal,
+  and note creation.
 - Top blockers: native ClickUp integration contract needs design before
   implementation; API namespace and API key hardening implementation details
   remain open; deployed databases initialized with `db push` may need migration
@@ -78,15 +79,14 @@ Last updated: 2026-05-02
   and deployment smoke evidence are aligned.
 
 ## Autonomous Iteration State
-- Current iteration: CCV1-010 native ClickUp integration contract and first
-  adapter slice.
+- Current iteration: CCV1-004 complete required v1 event emission.
 - Current operation mode: BUILDER
-- Last completed iteration: CCV1-017 integration adapter contract and
-  observability minimum.
-- Last completed task: documented reusable adapter layers, idempotency,
-  provider failure behavior, sync start/success/failure signals, secret
-  redaction, and ClickUp smoke signals.
-- Next required mode: BUILDER for CCV1-010.
+- Last completed iteration: CCV1-010 native ClickUp integration contract and
+  first adapter slice.
+- Last completed task: implemented pull-only native ClickUp task sync from
+  workspace integration settings into workspace-scoped CompanyCore tasks with
+  idempotent upsert and sync events.
+- Next required mode: BUILDER for CCV1-004.
 
 ## Recent Progress
 - 2026-05-02: Created Company Core backend foundation, Prisma schema, Docker
@@ -131,6 +131,9 @@ Last updated: 2026-05-02
 - 2026-05-02: Completed CCV1-017 by documenting the native integration adapter
   contract, idempotency, safe provider errors, observability fields, and
   ClickUp smoke signals.
+- 2026-05-02: Completed CCV1-010 by implementing the first native pull-only
+  ClickUp task sync adapter, workspace-scoped task ownership, idempotent
+  `(workspace_id, source, external_id)` upsert, and safe sync events.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

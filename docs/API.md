@@ -260,6 +260,7 @@ GET /tasks
 POST /tasks
 PATCH /tasks/:id
 POST /tasks/sync/clickup
+POST /tasks/sync/clickup/native
 ```
 
 ```json
@@ -289,6 +290,26 @@ The primary v1 ClickUp path should be the native CompanyCore ClickUp adapter.
 tests, manual repair, or optional orchestration. Native sync should use the
 active workspace's ClickUp settings and upsert by `(workspace_id, source,
 external_id)`.
+
+`POST /tasks/sync/clickup/native` triggers the native pull-only ClickUp adapter
+for the authenticated workspace. It reads `teamId` and `listIds` from
+`/integration-settings/clickup`, calls ClickUp using the encrypted workspace
+token, upserts tasks, and emits sync events.
+
+Safe native sync response:
+
+```json
+{
+  "data": {
+    "provider": "clickup",
+    "workspaceId": "uuid",
+    "itemCount": 12,
+    "createdCount": 4,
+    "updatedCount": 8,
+    "skippedCount": 0
+  }
+}
+```
 
 ## Clients
 

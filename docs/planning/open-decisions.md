@@ -33,21 +33,6 @@ Track unresolved decisions that can block or reshape execution.
   - Needed by: CCV1-008
   - Current owner: Product Docs / Backend Builder
 
-- DEC-005 Native ClickUp integration scope
-  - Question: What is the smallest v1-native ClickUp integration that is useful
-    for Jarvis and future integrations without overbuilding?
-  - Why it matters: ClickUp is now the first native integration adapter pattern.
-    Its boundaries should guide future integrations instead of becoming a
-    one-off implementation.
-  - Options:
-    - Pull-only task sync from configured ClickUp lists/spaces into
-      CompanyCore.
-    - Pull tasks plus write selected CompanyCore task updates back to ClickUp.
-    - Read-only discovery first: list ClickUp spaces/folders/lists/tasks so
-      Jarvis can inspect and propose mapping before enabling sync writes.
-  - Needed by: CCV1-010
-  - Current owner: Product Docs / Backend Builder
-
 ## Resolved Decisions
 
 - 2026-05-02: CompanyCore v1 has no GUI.
@@ -71,3 +56,6 @@ Track unresolved decisions that can block or reshape execution.
 - 2026-05-02: Production deployments use `prisma migrate deploy` during backend
   startup. Local development may use `prisma migrate dev`; `db push` is not the
   production path.
+- 2026-05-02: DEC-005 resolved. The smallest v1-native ClickUp slice is
+  pull-only task sync from workspace-configured ClickUp lists into CompanyCore
+  tasks. It does not write changes back to ClickUp in v1.

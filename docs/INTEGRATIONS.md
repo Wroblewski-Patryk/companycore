@@ -31,6 +31,17 @@ Company Core is responsible for:
 n8n may still be used for optional orchestration when a workflow is better kept
 outside the backend, but n8n is not the required primary ClickUp path in v1.
 
+Implemented first native slice:
+
+```http
+POST /tasks/sync/clickup/native
+```
+
+The endpoint performs pull-only task sync from configured ClickUp lists. It uses
+ClickUp's `GET /api/v2/team/{team_Id}/task` endpoint with `list_ids[]` filters,
+`include_closed=true`, `subtasks=true`, and
+`include_markdown_description=true`. v1 does not write changes back to ClickUp.
+
 ## Adapter Contract
 
 Every first-class integration adapter must use the same runtime layers:

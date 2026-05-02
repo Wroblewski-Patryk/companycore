@@ -14,13 +14,6 @@
   - Priority: P0
   - Scope: Record production domains and smoke path.
 
-- CCV1-010 Native ClickUp integration contract and first adapter slice
-  - Stage: planning
-  - Owner: Backend Builder
-  - Priority: P0
-  - Scope: Implement ClickUp as the first native CompanyCore integration
-    adapter after CCV1-001 and DEC-005 are resolved.
-
 - CCV1-016 Migration safety and seed/bootstrap policy
   - Stage: planning
   - Owner: DB/Migrations
@@ -78,3 +71,4 @@
 - CCV1-012 Registration, login, and workspace bootstrap.
 - CCV1-013 Workspace-scoped integration settings and secret storage.
 - CCV1-017 Integration adapter contract and observability minimum.
+- CCV1-010 Native ClickUp integration contract and first adapter slice.
