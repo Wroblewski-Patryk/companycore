@@ -31,6 +31,61 @@ Company Core is responsible for:
 n8n may still be used for optional orchestration when a workflow is better kept
 outside the backend, but n8n is not the required primary ClickUp path in v1.
 
+## Adapter Contract
+
+Every first-class integration adapter must use the same runtime layers:
+
+- `settings reader`: loads active workspace-owned provider settings and
+  decrypts secrets inside the backend process
+- `provider client`: owns external HTTP calls, timeouts, provider
+  authentication, and provider response normalization boundaries
+- `mapper`: converts provider records into CompanyCore input shapes without DB
+  writes
+- `sync service`: owns idempotency, persistence, event emission, and result
+  summaries
+- `safe error mapper`: converts provider/network/backend failures into stable
+  CompanyCore error codes without leaking raw payloads or tokens
+
+Provider clients must not read environment-level provider tokens directly. They
+receive credentials from the settings reader for the active workspace.
+
+## Idempotency
+
+External records must be upserted by workspace, source, and external ID:
+
+```text
+(workspace_id, source, external_id)
+```
+
+For ClickUp, `source` is `clickup` and `external_id` is the ClickUp task ID.
+Sync must not use a provider ID alone because two workspaces can connect to
+different ClickUp accounts with overlapping IDs.
+
+## Sync Signals
+
+Native sync should emit or record the following safe signals:
+
+- `sync_started`: provider, workspace ID, requested scope, correlation ID
+- `sync_succeeded`: provider, workspace ID, item counts, created/updated counts
+- `sync_failed`: provider, workspace ID, safe error code, correlation ID
+- `task_synced_from_clickup`: per meaningful task upsert, linked to the task
+
+Logs and events must not include provider tokens, raw API keys, passwords, auth
+tokens, or full raw provider payloads. Store only safe counts, IDs, and
+redacted diagnostics.
+
+## Provider Failure Behavior
+
+Integration failures must fail closed:
+
+- missing workspace settings returns `integration_not_configured`
+- provider auth/network/5xx failures return `integration_unavailable`
+- malformed provider data returns `sync_failed` or a more specific safe code
+- partial sync must preserve existing CompanyCore records unless a validated
+  upsert succeeds
+- failed sync must not mark tasks as deleted, archived, or completed
+- provider errors must not expose raw provider response bodies to clients
+
 ## Legacy Or External Payload Sync
 
 `POST /tasks/sync/clickup` remains useful for manually shaped payloads, tests,
@@ -60,6 +115,17 @@ Secrets are encrypted at rest with the application integration secret key and
 are not returned in API responses or written to logs. Native adapters should
 read provider settings through `src/integrations/integration-settings.service.ts`
 instead of querying the table directly.
+
+## ClickUp Smoke Signals
+
+The first native ClickUp implementation must be smoke-tested by verifying:
+
+- owner can configure ClickUp settings and the response redacts the token
+- missing settings return `integration_not_configured`
+- provider failure returns a safe integration error
+- selected ClickUp list sync creates or updates tasks idempotently
+- `task_synced_from_clickup` appears in `GET /events`
+- logs/events include provider, workspace, counts, and safe error codes only
 
 ## Paperclip
 

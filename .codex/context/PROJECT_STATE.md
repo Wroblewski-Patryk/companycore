@@ -67,8 +67,7 @@ Last updated: 2026-05-02
   Postgres volume.
 
 ## Current Focus
-- Main active objective: define the integration adapter contract and
-  observability minimum before implementing native ClickUp sync.
+- Main active objective: implement the first native ClickUp adapter slice.
 - Top blockers: native ClickUp integration contract needs design before
   implementation; API namespace and API key hardening implementation details
   remain open; deployed databases initialized with `db push` may need migration
@@ -79,15 +78,15 @@ Last updated: 2026-05-02
   and deployment smoke evidence are aligned.
 
 ## Autonomous Iteration State
-- Current iteration: CCV1-017 integration adapter contract and observability
-  minimum.
+- Current iteration: CCV1-010 native ClickUp integration contract and first
+  adapter slice.
 - Current operation mode: BUILDER
-- Last completed iteration: CCV1-013 workspace-scoped integration settings and
-  secret storage.
-- Last completed task: implemented encrypted workspace integration settings,
-  ClickUp configuration endpoints, and a backend settings read service for
-  native adapters.
-- Next required mode: BUILDER for CCV1-017.
+- Last completed iteration: CCV1-017 integration adapter contract and
+  observability minimum.
+- Last completed task: documented reusable adapter layers, idempotency,
+  provider failure behavior, sync start/success/failure signals, secret
+  redaction, and ClickUp smoke signals.
+- Next required mode: BUILDER for CCV1-010.
 
 ## Recent Progress
 - 2026-05-02: Created Company Core backend foundation, Prisma schema, Docker
@@ -129,6 +128,9 @@ Last updated: 2026-05-02
 - 2026-05-02: Completed CCV1-013 by adding workspace-scoped integration
   settings, encrypted token storage, ClickUp configuration routes, integration
   settings service helpers, and source-of-truth docs.
+- 2026-05-02: Completed CCV1-017 by documenting the native integration adapter
+  contract, idempotency, safe provider errors, observability fields, and
+  ClickUp smoke signals.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

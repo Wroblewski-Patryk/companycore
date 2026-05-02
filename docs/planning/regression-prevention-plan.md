@@ -74,6 +74,10 @@ Every integration adapter should use the same shape:
 - safe error mapping
 - tests for provider failure and idempotent sync
 
+The adapter must never read provider credentials from process env. It must use
+the workspace settings reader and emit safe start/success/failure signals with
+counts and stable error codes.
+
 ### 5. Observability Minimum
 
 Before production verification, add:

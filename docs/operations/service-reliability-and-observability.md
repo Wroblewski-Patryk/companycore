@@ -93,6 +93,39 @@ Production smoke should verify:
 - native ClickUp sync
 - `GET /events` includes the expected sync event
 
+## Integration Adapter Observability
+
+Every native adapter should expose enough information to answer:
+
+- which workspace requested the sync
+- which provider and sync scope were used
+- whether workspace settings were present and active
+- whether the provider call failed before persistence
+- how many provider items were seen, created, updated, skipped, or failed
+- which safe event or log line correlates the request to resulting records
+
+Minimum event/log fields:
+
+- `provider`
+- `workspaceId`
+- `correlationId`
+- `operation`, such as `discover` or `sync_tasks`
+- `status`, such as `started`, `succeeded`, or `failed`
+- `itemCount`, `createdCount`, `updatedCount`, `skippedCount` when relevant
+- `errorCode` for failures
+
+Forbidden fields:
+
+- raw provider token
+- raw API key
+- password or auth token
+- full provider response body
+- stack trace in API response
+
+The disable path for a failing integration is to set the workspace provider
+setting `active = false` and retry after configuration or provider health is
+recovered.
+
 ## Incident Learning
 
 After a production incident, failed deploy, or serious smoke failure:

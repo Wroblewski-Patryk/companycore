@@ -119,11 +119,14 @@ Native integration tests should cover:
 
 - provider client success path
 - provider unavailable/failure path
+- missing workspace settings return `integration_not_configured`
 - mapper handles missing optional provider fields
 - sync is idempotent by `(workspace_id, source, external_id)`
 - sync emits the expected event
 - provider secrets are not logged or returned
 - one workspace cannot sync or read another workspace's integration settings
+- sync result logs/events include safe provider, workspace, counts, and error
+  code fields only
 
 Use mocked provider responses for repeatable automated tests, plus manual smoke
 against real ClickUp credentials before production verification.

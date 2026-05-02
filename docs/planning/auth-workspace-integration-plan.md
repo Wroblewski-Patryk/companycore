@@ -142,6 +142,23 @@ Recommended first ClickUp slice:
 Write-back to ClickUp should be planned later after the read/pull path is
 verified.
 
+## Integration Adapter Implementation Contract
+
+ClickUp should establish the reusable adapter pattern:
+
+1. Load active workspace settings through the integration settings service.
+2. Instantiate a provider client with decrypted token material in memory only.
+3. Fetch provider records through the provider client.
+4. Map provider records into CompanyCore task inputs without writing to the DB.
+5. Upsert records through a sync service using
+   `(workspace_id, source, external_id)`.
+6. Emit safe sync start/success/failure signals and per-task sync events.
+7. Return stable CompanyCore error codes for missing config, provider
+   unavailability, and sync failures.
+
+Provider clients must not read ClickUp credentials from process env. Process env
+only owns backend encryption/auth secrets.
+
 ## Required Safety Rules
 
 - No integration token may be hardcoded.

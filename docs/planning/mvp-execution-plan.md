@@ -135,7 +135,7 @@ CRM UI during this plan.
 
 ## Phase 7: Native ClickUp Integration
 
-- [ ] CCV1-017 Integration adapter contract and observability minimum
+- [x] CCV1-017 Integration adapter contract and observability minimum
   - Why now: ClickUp should become the reusable integration pattern, not a
     one-off. Sync failures must be visible without leaking secrets.
   - Depends on: CCV1-011, CCV1-013, CCV1-014.

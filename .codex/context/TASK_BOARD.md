@@ -28,13 +28,6 @@
   - Scope: Define migration, local seed, production first-owner bootstrap, and
     rollback expectations.
 
-- CCV1-017 Integration adapter contract and observability minimum
-  - Stage: planning
-  - Owner: Backend Builder
-  - Priority: P0
-  - Scope: Define reusable integration adapter layers, idempotency, safe errors,
-    logs/events, and smoke signals.
-
 - CCV1-007 API key hardening plan and implementation
   - Stage: planning
   - Owner: Security
@@ -84,3 +77,4 @@
 - CCV1-003 Prisma migration baseline and deployment entrypoint.
 - CCV1-012 Registration, login, and workspace bootstrap.
 - CCV1-013 Workspace-scoped integration settings and secret storage.
+- CCV1-017 Integration adapter contract and observability minimum.

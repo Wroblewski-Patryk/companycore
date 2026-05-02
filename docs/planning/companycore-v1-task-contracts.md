@@ -663,8 +663,8 @@ P0
 - ID: CCV1-017
 - Title: Integration adapter contract and observability minimum
 - Task Type: research
-- Current Stage: planning
-- Status: READY
+- Current Stage: verification
+- Status: DONE
 - Owner: Backend Builder
 - Depends on: CCV1-011, CCV1-013, CCV1-014
 - Priority: P0
@@ -686,13 +686,31 @@ one-off route with hidden assumptions.
 - `src/integrations/README.md` during implementation
 
 ### Acceptance Criteria
-- [ ] Docs define required adapter layers: client, mapper, sync service,
+- [x] Docs define required adapter layers: client, mapper, sync service,
   workspace settings reader, safe error mapper.
-- [ ] Docs define idempotency rule for external records.
-- [ ] Docs define sync start/success/failure logs or events.
-- [ ] Docs define provider failure behavior.
-- [ ] Docs define secret redaction requirements.
-- [ ] Docs define smoke signals for ClickUp sync.
+- [x] Docs define idempotency rule for external records.
+- [x] Docs define sync start/success/failure logs or events.
+- [x] Docs define provider failure behavior.
+- [x] Docs define secret redaction requirements.
+- [x] Docs define smoke signals for ClickUp sync.
+
+### Result Report
+- Task summary: Defined the reusable native integration adapter contract,
+  idempotency rule, provider failure behavior, secret redaction requirements,
+  sync observability fields, and ClickUp smoke signals.
+- Files changed: `docs/INTEGRATIONS.md`,
+  `docs/operations/service-reliability-and-observability.md`,
+  `docs/planning/auth-workspace-integration-plan.md`,
+  `docs/planning/regression-prevention-plan.md`,
+  `docs/engineering/testing.md`, `src/integrations/README.md`,
+  `.codex/context/PROJECT_STATE.md`, `.codex/context/TASK_BOARD.md`,
+  `docs/planning/mvp-next-commits.md`, and this task contract.
+- How tested: Reviewed docs against CCV1-017 acceptance criteria and ran
+  `git diff --check`.
+- What is incomplete: Runtime ClickUp provider client, mapper, and sync service
+  remain in CCV1-010.
+- Next steps: Start CCV1-010 native ClickUp integration contract and first
+  adapter slice.
 
 ### Priority
 P0
