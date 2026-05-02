@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_DB: companycore
       POSTGRES_USER: companycore
-      POSTGRES_PASSWORD: ${SERVICE_PASSWORD_POSTGRES:-companycore}
+      POSTGRES_PASSWORD: ${SERVICE_PASSWORD_POSTGRES}
     volumes:
       - companycore_postgres:/var/lib/postgresql/data
     healthcheck:
@@ -21,11 +21,11 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: postgresql://companycore:${SERVICE_PASSWORD_POSTGRES:-companycore}@postgres:5432/companycore?schema=public
-      SEED_API_KEY: ${SERVICE_PASSWORD_API_KEY:-dev-companycore-key}
-      SERVICE_URL_BACKEND_3000: ${SERVICE_URL_BACKEND_3000:-http://localhost:3000}
-    ports:
-      - "${BACKEND_PORT:-3000}:3000"
+      DATABASE_URL: postgresql://companycore:${SERVICE_PASSWORD_POSTGRES}@postgres:5432/companycore?schema=public
+      SEED_API_KEY: ${SERVICE_PASSWORD_API_KEY}
+      SERVICE_URL_BACKEND_3000: ${SERVICE_URL_BACKEND_3000}
+    expose:
+      - "3000"
 
 volumes:
   companycore_postgres:

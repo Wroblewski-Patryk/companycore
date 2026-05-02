@@ -23,3 +23,6 @@ dist/
 # Prisma local database variants
 *.db
 *.db-journal
+
+# Local automation session artifacts
+.tmp-*.json

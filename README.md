@@ -21,6 +21,9 @@ docker compose up -d
 The Docker path starts Postgres and the backend, pushes the Prisma schema, seeds
 the local API key, and exposes the API on `http://localhost:3000`.
 
+Coolify uses `docker-compose.coolify.yml`, which keeps Postgres private and
+routes traffic through the Coolify proxy.
+
 Local development key:
 
 ```text

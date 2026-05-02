@@ -33,17 +33,17 @@ For local development without Docker, provide a reachable PostgreSQL
 
 ## Coolify
 
-Use Docker Compose deployment with the repository root as the compose context.
+Use Docker Compose deployment with the repository root as the compose context
+and `docker-compose.coolify.yml` as the compose file.
 
 Required environment values:
 
-- `DATABASE_URL`
-- `PORT`
-- `SEED_API_KEY`
+- `SERVICE_PASSWORD_POSTGRES`
+- `SERVICE_PASSWORD_API_KEY`
 
-For production, replace `SEED_API_KEY` with a private value and rotate it after
-first deploy if needed. Keep Postgres storage persistent through Coolify volume
-configuration.
+Map domains to the `backend` service on container port `3000`.
+
+Keep Postgres storage persistent through Coolify volume configuration.
 
 ## Smoke Check
 
