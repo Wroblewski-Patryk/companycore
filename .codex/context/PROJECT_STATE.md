@@ -68,10 +68,10 @@ Last updated: 2026-05-02
   Postgres volume.
 
 ## Current Focus
-- Main active objective: verify production deployment.
-- Top blockers: production deploy is waiting for the Docker runtime seed/client
-  hotfix to be deployed; production owner/API key and ClickUp settings are
-  needed for protected smoke.
+- Main active objective: complete protected production smoke and continue v1
+  database/API coverage.
+- Top blockers: production owner/API key plus ClickUp settings are needed for
+  protected smoke.
 - Success criteria for this phase: canonical docs, workspace/auth model,
   task board, planning queue, deployment domains, migration strategy, event
   coverage, API/error contracts, regression guardrails, tests, observability,
@@ -80,12 +80,11 @@ Last updated: 2026-05-02
 ## Autonomous Iteration State
 - Current iteration: CCV1-009 production deployment verification.
 - Current operation mode: ARCHITECT
-- Last completed iteration: CCV1-008 missing module route decision and minimal
-  route slice.
-- Last completed task: resolved `/v1/*` namespace without `/api`, preserved
-  root aliases, and added workspace-scoped `decisions` and `agent-logs` routes.
-- Next required mode: ARCHITECT for CCV1-009 after deploy/credential blockers
-  are cleared.
+- Last completed iteration: CCV1-009 production deployment verification.
+- Last completed task: recovered production deployment by baselining existing
+  foundation schema in Prisma metadata, redeployed commit `3f64a72`, and
+  verified public health plus unauthenticated negative smoke.
+- Next required mode: BUILDER for the next database/API coverage task.
 
 ## Recent Progress
 - 2026-05-02: Created Company Core backend foundation, Prisma schema, Docker
@@ -167,6 +166,13 @@ Last updated: 2026-05-02
   files, and fixed the runtime image to copy the generated Prisma Client from
   the build stage. Local `docker compose up --build -d` now applies migrations,
   runs seed, starts the API, and returns `ok` for `/health` and `/v1/health`.
+- 2026-05-02: Recovered production Coolify deployment. Root cause was Prisma
+  `P3005` because production already had the foundation schema but no
+  `_prisma_migrations` baseline. Added a one-time baseline row for
+  `202605021_v1_foundation`, forced redeploy `r4hgrbmh5obfvz9v61mlbgyc` to
+  commit `3f64a72`, confirmed backend logs show no pending migrations, seed
+  success, and `companycore listening on port 3000`, then verified public
+  `/health`, `/v1/health`, and unauthenticated `/v1/projects` negative smoke.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

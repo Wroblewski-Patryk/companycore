@@ -5,11 +5,11 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NOW
 
-- [ ] CCV1-009 Production deployment verification
+- [ ] CCV1-009P Protected production smoke
 
 ## NEXT
 
-No queued v1 implementation tasks after production verification.
+- [ ] CCV1-019 Database/API coverage review for remaining core models
 
 ## PIPELINE
 

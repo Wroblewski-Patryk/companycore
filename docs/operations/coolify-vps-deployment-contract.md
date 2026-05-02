@@ -36,6 +36,9 @@ only the backend API publicly.
   - Runtime startup runs `npm run prisma:migrate:deploy`.
   - Local development may use `npm run prisma:migrate:dev`.
   - `prisma db push` is not the production deploy path.
+  - Existing production databases that predate Prisma migration history must
+    be baselined once in `_prisma_migrations` only after table shape is
+    verified against the baseline migration.
 
 ## Env And Secrets Contract
 
@@ -97,6 +100,15 @@ Rollback method:
 - preserve the PostgreSQL volume
 - restore database from backup if migration or data corruption occurred
 - record the incident and add a regression check before retrying
+
+Production baseline recovery:
+
+- Prisma `P3005` means the database is not empty and migration history is
+  missing; it is not a reason to delete the PostgreSQL volume.
+- Verify existing tables first, then baseline only the migration that exactly
+  matches the existing schema.
+- After baseline, redeploy the latest commit and verify backend logs show
+  migration success before running protected smoke.
 
 First-owner bootstrap:
 

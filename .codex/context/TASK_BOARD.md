@@ -4,13 +4,13 @@
 
 ## Blocked
 
-- CCV1-009 Production deployment verification
+- CCV1-009P Protected production smoke
   - Stage: verification
   - Owner: Ops/Release
   - Priority: P1
-  - Blocked by: Docker runtime startup hotfix not yet deployed to production
-    and production owner/API key plus ClickUp settings unavailable for
-    protected smoke.
+  - Blocked by: production owner/API key plus ClickUp settings unavailable for
+    protected project/task, integration settings, native sync, and event
+    readback smoke.
 
 ## Backlog
 
@@ -46,3 +46,4 @@ No backlog v1 tasks.
 - CCV1-006 Endpoint test foundation.
 - CCV1-008 Missing module route decision and minimal route slice.
 - CCV1-018 Owner-managed adapter API keys.
+- CCV1-009 Production deployment recovery and public smoke.

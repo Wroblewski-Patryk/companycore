@@ -19,6 +19,9 @@ Document the first safe rollback path before the first production deploy.
   - Prefer forward-fix migrations for already-applied production migrations.
   - Restore from backup only when data corruption or unsafe ownership migration
     requires it.
+  - If Prisma reports `P3005` against an existing schema, verify table shape
+    and add a one-time baseline migration metadata row instead of deleting the
+    volume.
   - Never run ad hoc schema edits directly against production without a
     documented recovery decision.
   - Before risky migrations, take a PostgreSQL backup or verified volume

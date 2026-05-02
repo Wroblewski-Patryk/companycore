@@ -4,19 +4,19 @@ Use this file to record the minimum checks after each deploy.
 
 ## Global Checks
 
-- [ ] `https://api.companycore.luckysparrow.ch/health` returns success
+- [x] `https://api.companycore.luckysparrow.ch/health` returns success
 - [ ] `https://companycore.luckysparrow.ch` reaches the configured project
   surface or intentional backend/API response
-- [ ] `https://api.companycore.luckysparrow.ch` reaches the backend API
-- [ ] Logs show no startup crash loop
-- [ ] No unexpected worker checks are required because v1 has no workers
+- [x] `https://api.companycore.luckysparrow.ch` reaches the backend API
+- [x] Logs show no startup crash loop
+- [x] No unexpected worker checks are required because v1 has no workers
 
 ## User Journey Checks
 
 - [ ] Owner registration/login or approved first-owner bootstrap works
 - [ ] Protected project/task API call works with owner token or workspace API
   key
-- [ ] Missing auth is denied
+- [x] Missing auth is denied
 - [ ] ClickUp integration settings can be read without returning token material
 - [ ] Native ClickUp sync creates or updates at least one task when credentials
   and list IDs are configured
@@ -24,7 +24,7 @@ Use this file to record the minimum checks after each deploy.
 
 ## Ops Checks
 
-- [ ] Migrations completed successfully
+- [x] Migrations completed successfully
 - [ ] Required env values are present
 - [ ] Metrics or error tracking show no new critical issue
 - [ ] Rollback target is known and PostgreSQL volume preservation is confirmed
@@ -59,6 +59,36 @@ Use this file to record the minimum checks after each deploy.
   - Full CCV1-009 cannot be marked done until the latest commits are deployed
     and production credentials are available for protected owner/API-key,
     ClickUp settings, native sync, and event readback checks.
+
+## Production Recovery Evidence
+
+- Timestamp: 2026-05-02
+- Environment: Coolify production, Root Team, `companycore (localhost)`
+- Deployment:
+  - Forced redeploy `r4hgrbmh5obfvz9v61mlbgyc`.
+  - Coolify imported commit `3f64a72da107c112c4ced8f0ba7aa88602650c2a`.
+  - Deployment finished and the application status changed to `Running`.
+- Recovery action:
+  - Production PostgreSQL already contained the foundation schema but lacked
+    `_prisma_migrations`.
+  - Added a one-time Prisma baseline row for
+    `202605021_v1_foundation` with checksum
+    `097fade7aa0850b167c9a76966742759deb85a5358e1ff11def2f5bd29b247c3`.
+  - Preserved the existing PostgreSQL volume and did not delete business data.
+- Logs:
+  - Backend log after redeploy:
+    - `7 migrations found in prisma/migrations`
+    - `No pending migrations to apply.`
+    - `npm run seed`
+    - `companycore listening on port 3000`
+- Public checks:
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `200`.
+  - `GET https://api.companycore.luckysparrow.ch/v1/health` returned `200`.
+  - `GET https://api.companycore.luckysparrow.ch/v1/projects` without auth
+    returned `401`, which is the expected protected-route negative path.
+- Residual risks:
+  - Protected production smoke still needs an approved owner token or
+    workspace API key plus configured ClickUp workspace settings.
 
 ## Local Docker Reproduction Evidence
 

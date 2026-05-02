@@ -63,3 +63,24 @@ fixes for this repository.
   migrations apply cleanly.
 - Evidence: `npm test` initially failed with PostgreSQL error code `42601` at
   the BOM character, then passed after rewriting the migration without BOM.
+
+### 2026-05-02 - Existing production schemas need Prisma baseline before migrate deploy
+
+- Context: CompanyCore production on Coolify already contained the foundation
+  schema before the runtime switched to `prisma migrate deploy`.
+- Symptom: Backend restarted continuously and logs showed Prisma `P3005`
+  because the database schema was not empty.
+- Root cause: The production database had application tables but no
+  `_prisma_migrations` metadata row for the already-applied foundation schema.
+- Guardrail: Before enabling `prisma migrate deploy` against an existing
+  production database, compare current tables to the intended baseline and add
+  only the matching baseline migration metadata; never delete the Postgres
+  volume to clear `P3005`.
+- Preferred pattern: Baseline the exact already-applied migration, redeploy the
+  latest commit, then verify backend logs and public health endpoints.
+- Avoid: Treating `P3005` as a reason to reset production data or blindly mark
+  later migrations as applied.
+- Evidence: Coolify backend logs showed `P3005`; after a one-time baseline for
+  `202605021_v1_foundation`, redeploying commit `3f64a72` finished, logs showed
+  `No pending migrations to apply`, seed success, and `/health` plus
+  `/v1/health` returned `200`.
