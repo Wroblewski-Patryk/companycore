@@ -71,7 +71,8 @@ Last updated: 2026-05-02
 - Main active objective: complete protected production smoke and prepare the
   next v1 database/API coverage slice.
 - Top blockers: production owner/API key plus ClickUp settings are needed for
-  protected smoke.
+  protected smoke; GitHub repository webhook setup needs an authenticated
+  GitHub session or token with webhook administration permissions.
 - Success criteria for this phase: canonical docs, workspace/auth model,
   task board, planning queue, deployment domains, migration strategy, event
   coverage, API/error contracts, regression guardrails, tests, observability,
@@ -178,6 +179,13 @@ Last updated: 2026-05-02
   notes, agents, and events. Protected routes for projects, goals, targets,
   clients, deals, notes, events, decisions, agent logs, and tasks now filter by
   the active workspace and reject foreign relation IDs with `not_found`.
+- 2026-05-02: Deployed CCV1-019 to production with manual Coolify redeploy
+  `zibcl0a0rih1vmhig3vkf4ce` at commit `1d6f21a`. Backend logs confirmed
+  migration `202605028_workspace_core_records`, seed success, and server start;
+  public `/health`, `/v1/health`, and unauthenticated `/v1/projects` smoke
+  passed. Coolify `Auto Deploy` is enabled, but no GitHub webhook deployment
+  fired after push because GitHub repository settings were not authenticated in
+  the browser session.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

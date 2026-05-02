@@ -12,6 +12,15 @@
     protected project/task, integration settings, native sync, and event
     readback smoke.
 
+- CCV1-020 GitHub webhook auto-deploy completion
+  - Stage: release
+  - Owner: Ops/Release
+  - Priority: P2
+  - Blocked by: GitHub repository settings require an authenticated GitHub
+    session or token with webhook administration permissions. Coolify
+    `Auto Deploy` is enabled, but no deployment was created automatically after
+    push.
+
 ## Backlog
 
 No backlog v1 tasks.

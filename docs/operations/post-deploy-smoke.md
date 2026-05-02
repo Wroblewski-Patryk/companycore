@@ -90,6 +90,32 @@ Use this file to record the minimum checks after each deploy.
   - Protected production smoke still needs an approved owner token or
     workspace API key plus configured ClickUp workspace settings.
 
+## Workspace Scope Deployment Evidence
+
+- Timestamp: 2026-05-02
+- Environment: Coolify production, Root Team, `companycore (localhost)`
+- Deployment:
+  - Manual redeploy `zibcl0a0rih1vmhig3vkf4ce`.
+  - Coolify imported commit `1d6f21abc8da90c83cdab32ea279ce3872d574b2`.
+  - Deployment finished and the application status stayed `Running`.
+- Logs:
+  - Backend log after redeploy:
+    - `8 migrations found in prisma/migrations`
+    - `Applying migration 202605028_workspace_core_records`
+    - `All migrations have been successfully applied.`
+    - `npm run seed`
+    - `companycore listening on port 3000`
+- Public checks:
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `200`.
+  - `GET https://api.companycore.luckysparrow.ch/v1/health` returned `200`.
+  - `GET https://api.companycore.luckysparrow.ch/v1/projects` without auth
+    returned `401`, which is the expected protected-route negative path.
+- Auto-deploy note:
+  - Coolify `Auto Deploy` is enabled.
+  - No deployment was created automatically after pushing `1d6f21a`.
+  - GitHub was not logged in in the browser, so repository webhook creation
+    could not be completed from this session.
+
 ## Local Docker Reproduction Evidence
 
 - Timestamp: 2026-05-02
