@@ -295,44 +295,44 @@ Safe response:
         "ownerHeader": "Authorization: Bearer <token>"
       },
       "routes": {
-    "tasks": [
-      {
-        "method": "POST",
-        "path": "/v1/tasks",
-        "capability": "tasks:write"
-      }
-    ],
-    "taskLists": [
-      {
-        "method": "PATCH",
-        "path": "/v1/task-lists/:id",
-        "capability": "task-lists:write"
-      }
-    ],
-    "pipelineStages": [
-      {
-        "method": "PATCH",
-        "path": "/v1/pipeline-stages/:id",
-        "capability": "pipeline-stages:write"
-      }
-    ],
-    "agents": [
-      {
-        "method": "POST",
-        "path": "/v1/agents",
-        "capability": "agents:write"
-      }
-    ],
-    "interactions": [
-      {
-        "method": "POST",
-        "path": "/v1/interactions",
-        "capability": "interactions:write"
-      }
-    ],
-    "events": [
-      {
-        "method": "GET",
+        "tasks": [
+          {
+            "method": "POST",
+            "path": "/v1/tasks",
+            "capability": "tasks:write"
+          }
+        ],
+        "taskLists": [
+          {
+            "method": "PATCH",
+            "path": "/v1/task-lists/:id",
+            "capability": "task-lists:write"
+          }
+        ],
+        "pipelineStages": [
+          {
+            "method": "PATCH",
+            "path": "/v1/pipeline-stages/:id",
+            "capability": "pipeline-stages:write"
+          }
+        ],
+        "agents": [
+          {
+            "method": "POST",
+            "path": "/v1/agents",
+            "capability": "agents:write"
+          }
+        ],
+        "interactions": [
+          {
+            "method": "POST",
+            "path": "/v1/interactions",
+            "capability": "interactions:write"
+          }
+        ],
+        "events": [
+          {
+            "method": "GET",
             "path": "/v1/events",
             "capability": "events:read"
           }
