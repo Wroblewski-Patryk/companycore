@@ -59,3 +59,26 @@ Use this file to record the minimum checks after each deploy.
   - Full CCV1-009 cannot be marked done until the latest commits are deployed
     and production credentials are available for protected owner/API-key,
     ClickUp settings, native sync, and event readback checks.
+
+## Local Docker Reproduction Evidence
+
+- Timestamp: 2026-05-02
+- Environment: local production-like Docker Compose
+- Commands run:
+  - `docker compose down -v`
+  - `docker compose up --build -d`
+  - `docker compose logs backend --tail=160`
+  - `GET http://localhost:3000/health`
+  - `GET http://localhost:3000/v1/health`
+- Result:
+  - Reproduced production startup failures before the hotfix:
+    - seed could not import helpers from `src/` because runtime image only
+      copied `dist` and `prisma`
+    - Prisma Client was not generated in runtime because `node_modules` came
+      from the dependency stage before `prisma generate`
+  - After the hotfix, local Docker startup applied all migrations, ran seed,
+    logged `companycore listening on port 3000`, and both `/health` and
+    `/v1/health` returned `ok`.
+- Residual risks:
+  - Production still needs redeploy from the fixed commit and protected smoke
+    with real owner/API-key and ClickUp workspace settings.

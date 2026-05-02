@@ -69,9 +69,9 @@ Last updated: 2026-05-02
 
 ## Current Focus
 - Main active objective: verify production deployment.
-- Top blockers: latest commits are not yet verified as deployed to production;
-  `/v1/health` returns `401 Unauthorized` on production; production owner/API
-  key and ClickUp settings are needed for protected smoke.
+- Top blockers: production deploy is waiting for the Docker runtime seed/client
+  hotfix to be deployed; production owner/API key and ClickUp settings are
+  needed for protected smoke.
 - Success criteria for this phase: canonical docs, workspace/auth model,
   task board, planning queue, deployment domains, migration strategy, event
   coverage, API/error contracts, regression guardrails, tests, observability,
@@ -162,6 +162,11 @@ Last updated: 2026-05-02
 - 2026-05-02: Added production seed transition fix so existing legacy plaintext
   `SEED_API_KEY` rows are updated with `key_hash` instead of creating a
   duplicate unique key during redeploy.
+- 2026-05-02: Reproduced the production startup failure in local Docker. Fixed
+  runtime seed imports so `prisma/seed.ts` does not depend on uncopied `src/`
+  files, and fixed the runtime image to copy the generated Prisma Client from
+  the build stage. Local `docker compose up --build -d` now applies migrations,
+  runs seed, starts the API, and returns `ok` for `/health` and `/v1/health`.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

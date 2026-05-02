@@ -1,8 +1,29 @@
 import { PrismaClient } from "@prisma/client";
-import { apiKeyPrefix, hashApiKey } from "../src/auth/api-key";
-import { hashPassword } from "../src/auth/password";
+import { createHmac, randomBytes, scrypt as scryptCallback } from "crypto";
+import { promisify } from "util";
 
 const prisma = new PrismaClient();
+const scrypt = promisify(scryptCallback);
+const keyLength = 64;
+
+async function hashPassword(password: string) {
+  const salt = randomBytes(16).toString("hex");
+  const derivedKey = (await scrypt(password, salt, keyLength)) as Buffer;
+  return `scrypt:${salt}:${derivedKey.toString("hex")}`;
+}
+
+function hashApiKey(apiKey: string) {
+  const secret =
+    process.env.API_KEY_HASH_SECRET ??
+    process.env.AUTH_TOKEN_SECRET ??
+    "companycore-api-key-hash-secret";
+
+  return createHmac("sha256", secret).update(apiKey).digest("hex");
+}
+
+function apiKeyPrefix(apiKey: string) {
+  return apiKey.slice(0, 10);
+}
 
 async function main() {
   const key = process.env.SEED_API_KEY ?? "dev-companycore-key";

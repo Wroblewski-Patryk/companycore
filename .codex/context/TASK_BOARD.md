@@ -8,8 +8,9 @@
   - Stage: verification
   - Owner: Ops/Release
   - Priority: P1
-  - Blocked by: latest commits not deployed to production and production
-    owner/API key plus ClickUp settings unavailable for protected smoke.
+  - Blocked by: Docker runtime startup hotfix not yet deployed to production
+    and production owner/API key plus ClickUp settings unavailable for
+    protected smoke.
 
 ## Backlog
 
