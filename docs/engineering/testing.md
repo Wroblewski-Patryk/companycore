@@ -7,10 +7,31 @@ is not enough.
 ## Required Commands
 
 - Typecheck/build: `npm run build`
-- Test command: not configured yet; CCV1-006 must add and document it.
+- Integration tests: `npm test`
 - Docker smoke: `docker compose up -d --build`
 
 Keep this file aligned with `.codex/context/PROJECT_STATE.md`.
+
+`npm test` expects `DATABASE_URL` to point at a disposable PostgreSQL database.
+The script builds TypeScript, applies migrations with `prisma migrate deploy`,
+and runs Node's built-in test runner against compiled tests.
+
+Example local disposable database:
+
+```powershell
+docker run -d --name companycore-test-postgres `
+  -e POSTGRES_DB=companycore_test `
+  -e POSTGRES_USER=companycore `
+  -e POSTGRES_PASSWORD=companycore `
+  -p 55432:5432 postgres:16-alpine
+
+$env:DATABASE_URL='postgresql://companycore:companycore@localhost:55432/companycore_test?schema=public'
+npm test
+```
+
+Migration files must be UTF-8 without BOM. A fresh `prisma migrate deploy`
+test is required because TypeScript build does not prove migration SQL can be
+applied.
 
 ## Critical Areas
 

@@ -44,7 +44,8 @@ Last updated: 2026-05-02
 - Lint: Not configured.
 - Typecheck: `npm run build`
 - Unit tests: Not configured in v1.
-- Integration tests: manual HTTP smoke against Docker Compose.
+- Integration tests: `npm test` with `DATABASE_URL` pointed at a disposable
+  PostgreSQL database.
 - E2E / smoke: `GET /health`, register owner/workspace, authenticate, create
   project, create task, configure workspace ClickUp settings, trigger native
   ClickUp sync, verify synced task and event.
@@ -67,22 +68,26 @@ Last updated: 2026-05-02
   Postgres volume.
 
 ## Current Focus
-- Main active objective: add endpoint test foundation.
-- Top blockers: API namespace and API key hardening implementation details
-  remain open; deployed databases initialized with `db push` may need migration
-  reconciliation before production rollout.
+- Main active objective: resolve v1 API namespace and missing module route
+  scope before implementing CCV1-008.
+- Top blockers: DEC-001 and DEC-003 need explicit product/architecture
+  decisions before CCV1-008 can proceed; deployed databases initialized with
+  `db push` may need migration reconciliation before production rollout.
 - Success criteria for this phase: canonical docs, workspace/auth model,
   task board, planning queue, deployment domains, migration strategy, event
   coverage, API/error contracts, regression guardrails, tests, observability,
   and deployment smoke evidence are aligned.
 
 ## Autonomous Iteration State
-- Current iteration: CCV1-006 endpoint test foundation.
-- Current operation mode: ARCHITECT
-- Last completed iteration: CCV1-007 API key hardening plan and implementation.
-- Last completed task: added hashed API key fields, hash/prefix helpers,
-  transition-compatible middleware lookup, and local seed hash population.
-- Next required mode: ARCHITECT for CCV1-006.
+- Current iteration: CCV1-008 missing module route decision and minimal route
+  slice.
+- Current operation mode: BUILDER
+- Last completed iteration: CCV1-006 endpoint test foundation.
+- Last completed task: added `npm test` integration coverage for health,
+  owner registration/login, API key auth, task workspace scoping, ClickUp
+  settings redaction, native ClickUp sync, events, and fresh migration apply.
+- Next required mode: BUILDER for CCV1-008 after DEC-001 and DEC-003 are
+  resolved.
 
 ## Recent Progress
 - 2026-05-02: Created Company Core backend foundation, Prisma schema, Docker
@@ -141,6 +146,10 @@ Last updated: 2026-05-02
 - 2026-05-02: Completed CCV1-007 by adding hashed workspace service API key
   storage, transition-compatible lookup, seed hash population, and rotation
   documentation.
+- 2026-05-02: Completed CCV1-006 by adding Node integration tests covering
+  health, auth, workspace API keys, task scoping, ClickUp settings redaction,
+  native ClickUp sync, events, and fresh `prisma migrate deploy`; removed a BOM
+  from the foundation migration after the fresh migration test exposed it.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

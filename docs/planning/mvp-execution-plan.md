@@ -174,7 +174,7 @@ CRM UI during this plan.
     same-workspace, cross-workspace, missing-scope, and secret-redaction paths.
   - Deployment impact: None.
 
-- [ ] CCV1-006 Endpoint test foundation
+- [x] CCV1-006 Endpoint test foundation
   - Why now: Build passes, but route/auth/event behavior is not covered by
     automated tests.
   - Depends on: CCV1-003, CCV1-011, CCV1-012, CCV1-014, CCV1-015.

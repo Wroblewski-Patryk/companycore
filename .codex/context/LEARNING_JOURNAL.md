@@ -48,11 +48,18 @@ fixes for this repository.
   keep feedback local to user actions, hide raw technical errors from end
   users, and convert findings into the next one or two implementation slices.
 
-### YYYY-MM-DD - Add first real repository-specific learning
-- Context:
-- Symptom:
-- Root cause:
-- Guardrail:
-- Preferred pattern:
-- Avoid:
-- Evidence:
+### 2026-05-02 - Prisma SQL migrations must not contain BOM
+- Context: CCV1-006 integration tests applied Prisma migrations to a fresh
+  PostgreSQL database through `prisma migrate deploy`.
+- Symptom: The first migration failed with PostgreSQL syntax error at the first
+  character before `-- CreateEnum`.
+- Root cause: `prisma/migrations/202605021_v1_foundation/migration.sql`
+  started with a UTF-8 BOM.
+- Guardrail: SQL migration files must be UTF-8 without BOM before commit and
+  `prisma migrate deploy` must be exercised against a fresh database.
+- Preferred pattern: Run the endpoint test command against a disposable fresh
+  PostgreSQL database so migration encoding and ordering issues surface early.
+- Avoid: Trusting `npm run build` or Prisma Client generation as proof that
+  migrations apply cleanly.
+- Evidence: `npm test` initially failed with PostgreSQL error code `42601` at
+  the BOM character, then passed after rewriting the migration without BOM.

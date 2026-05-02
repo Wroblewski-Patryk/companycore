@@ -313,8 +313,8 @@ P0
 - ID: CCV1-006
 - Title: Endpoint test foundation
 - Task Type: feature
-- Current Stage: planning
-- Status: BACKLOG
+- Current Stage: verification
+- Status: DONE
 - Owner: QA/Test
 - Depends on: CCV1-003
 - Priority: P1
@@ -332,15 +332,33 @@ product scope.
 - `docs/engineering/testing.md`
 
 ### Acceptance Criteria
-- [ ] Tests cover public `GET /health`.
-- [ ] Tests cover owner registration/login and workspace bootstrap.
-- [ ] Tests cover missing/invalid/valid workspace-scoped `X-API-Key`.
-- [ ] Tests cover standard API error responses from CCV1-014.
-- [ ] Tests cover create/list project and create/update task inside one
+- [x] Tests cover public `GET /health`.
+- [x] Tests cover owner registration/login and workspace bootstrap.
+- [x] Tests cover missing/invalid/valid workspace-scoped `X-API-Key`.
+- [x] Tests cover standard API error responses from CCV1-014.
+- [x] Tests cover create/list project and create/update task inside one
   workspace.
-- [ ] Tests cover cross-workspace access denial.
-- [ ] Tests cover ClickUp native sync upsert and event emission.
-- [ ] Test command is documented in project state.
+- [x] Tests cover cross-workspace access denial.
+- [x] Tests cover ClickUp native sync upsert and event emission.
+- [x] Test command is documented in project state.
+
+### Result Report
+- Task summary: Added a native Node integration test foundation that starts the
+  Express app, uses a disposable PostgreSQL database, applies Prisma migrations,
+  exercises owner auth, workspace API keys, task scoping, ClickUp settings,
+  native ClickUp sync, and event readback.
+- Files changed: `package.json`, `src/tests/api.test.ts`,
+  `prisma/migrations/202605021_v1_foundation/migration.sql`,
+  `docs/engineering/testing.md`, `.codex/context/PROJECT_STATE.md`,
+  `.codex/context/TASK_BOARD.md`, `.codex/context/LEARNING_JOURNAL.md`,
+  `docs/planning/mvp-execution-plan.md`,
+  `docs/planning/mvp-next-commits.md`, and this task contract.
+- How tested: Ran `npm test` with
+  `DATABASE_URL=postgresql://companycore:companycore@localhost:55432/companycore_test?schema=public`,
+  plus `git diff --check`.
+- What is incomplete: Production smoke remains in CCV1-009; broader
+  route-by-route tests should expand as CCV1-008 adds more surface.
+- Next steps: Resolve DEC-001 and DEC-003 before CCV1-008 implementation.
 
 ### Priority
 P1

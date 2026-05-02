@@ -5,11 +5,10 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NOW
 
-- [ ] CCV1-006 Endpoint test foundation
+- [ ] CCV1-008 Missing module route decision and minimal route slice
 
 ## NEXT
 
-- [ ] CCV1-008 Missing module route decision and minimal route slice
 - [ ] CCV1-009 Production deployment verification
 
 ## PIPELINE
