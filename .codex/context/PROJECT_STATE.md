@@ -10,7 +10,9 @@ Last updated: 2026-05-02
 - Current phase: v1 foundation.
 
 ## Product Decisions (Confirmed)
-- 2026-05-02: No GUI in v1.
+- 2026-05-03: v1 includes a minimal owner-only web console for production
+  ClickUp connection setup. A broader company operations dashboard and mobile
+  app are v2 scope; mobile should follow the web product shape.
 - 2026-05-02: PostgreSQL is the source of truth.
 - 2026-05-02: API is the only supported access layer.
 - 2026-05-02: CompanyCore owns the first native integration adapter:
@@ -22,8 +24,9 @@ Last updated: 2026-05-02
 
 ## Technical Baseline
 - Backend: Node.js 22, Express, TypeScript.
-- Frontend: None.
-- Mobile: None.
+- Frontend: minimal static owner console served by the backend for v1
+  integration setup only.
+- Mobile: None in v1; planned from v2 based on the web product experience.
 - Database: PostgreSQL with Prisma.
 - Infra: Docker Compose.
 - Hosting target: Coolify-compatible Docker Compose.
@@ -229,6 +232,31 @@ Last updated: 2026-05-02
   `COMPANYCORE_BASE_URL`, `COMPANYCORE_ADAPTER_SOURCE=jarvis`, and a dedicated
   service key with prefix `cc_v1_GaF4`. Both containers were recreated and both
   dedicated keys passed `npm run adapter:smoke`.
+- 2026-05-03: Seeded production CompanyCore with Jarvis/Paperclip smoke
+  records through the official API: a project, task list, two tasks, one
+  decision, one note, and one agent. Prepared Jarvis application-side chat
+  context code that reads CompanyCore via `COMPANYCORE_BASE_URL` and
+  `COMPANYCORE_API_KEY`; production chat still answered that it has no
+  CompanyCore access, so deployment of the prepared Jarvis runtime change is
+  tracked as CCV1-028.
+- 2026-05-03: Extended the prepared Jarvis runtime change for CCV1-028 with a
+  native CompanyCore Data Source connector. The connector registers as
+  `companycore`, verifies `/v1/connection`, syncs CompanyCore projects, task
+  lists, tasks, clients, deals, interactions, notes, decisions, agents, and
+  events into the Jarvis knowledge pipeline, and was locally validated with
+  targeted connector/context tests.
+- 2026-05-03: Completed CCV1-029 by adding an operator-only ClickUp production
+  bootstrap script and deployment doc. Operators can provide temporary
+  `CLICKUP_API_TOKEN`, `CLICKUP_TEAM_ID`, and `CLICKUP_LIST_IDS` values to save
+  encrypted workspace ClickUp settings through the protected API and trigger
+  the first native pull sync. Continuous listening is not active yet; it
+  requires an approved scheduled sync, webhook receiver, or external
+  orchestration follow-up.
+- 2026-05-03: Completed CCV1-031P by checking official ClickUp API docs and
+  publishing the guided owner-console deployment plan. ClickUp personal tokens
+  can access multiple Workspaces available to the user, so v1 owner setup must
+  discover `GET /api/v2/team`, let the owner select the ClickUp Workspace, then
+  discover Spaces/Folders/Lists before saving selected `listIds`.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

@@ -4,6 +4,329 @@ These task contracts turn the v1 audit into executable work. Each task must be
 completed as its own small iteration and must update `.codex/context/TASK_BOARD.md`,
 `.codex/context/PROJECT_STATE.md`, and relevant docs when status changes.
 
+## CCV1-031P ClickUp Owner Console Deployment Plan
+
+### Header
+- ID: CCV1-031P
+- Title: ClickUp owner console deployment plan
+- Task Type: planning
+- Current Stage: verification
+- Status: DONE
+- Owner: Planner
+- Depends on: CCV1-030
+- Priority: P0
+- Iteration: v1-031P
+- Operation Mode: BUILDER
+
+### Process Self-Audit
+- [x] All seven autonomous loop steps are represented.
+- [x] Exactly one priority task was selected.
+- [x] Operation mode matches the current queue.
+- [x] The task aligns with repository source-of-truth documents.
+
+### Context
+The first minimal owner console still required manual ClickUp `teamId` and
+`listIds`. Official ClickUp docs show that personal tokens can access multiple
+Workspaces and that `GET /api/v2/team` returns the Workspaces available to the
+authenticated token.
+
+### Goal
+Plan the production-ready guided ClickUp setup flow before implementation.
+
+### Scope
+- `docs/planning/clickup-owner-console-deployment-plan.md`
+- `.codex/context/TASK_BOARD.md`
+- `.codex/context/PROJECT_STATE.md`
+- `docs/planning/mvp-next-commits.md`
+- this task contract
+
+### Implementation Plan
+1. Verify official ClickUp API endpoints for token, Workspace, Space, Folder,
+   List, and task-sync behavior.
+2. Define the correct owner-console UX states.
+3. Define backend discovery and sync changes.
+4. Split implementation into backend, frontend, and production smoke tasks.
+5. Update canonical planning queue.
+
+### Acceptance Criteria
+- [x] Plan references official ClickUp API endpoint behavior.
+- [x] Plan includes ClickUp Workspace selection before List selection.
+- [x] Plan separates discovery, save, sync, and continuous-update scope.
+- [x] Plan defines implementation tasks and deployment smoke.
+- [x] Canonical queue is updated.
+
+### Definition of Done
+- [x] Plan is committed to canonical planning docs.
+- [x] No runtime workaround is introduced.
+- [x] Architecture source of truth remains API-first with minimal v1 GUI.
+- [x] `DEFINITION_OF_DONE.md` was checked before status changed to `DONE`.
+
+### Validation Evidence
+- Source review: official ClickUp docs for personal tokens, authorized
+  Workspaces, Spaces, Folders, folder Lists, folderless Lists, and filtered
+  Workspace tasks.
+- Local checks: documentation-only planning update.
+
+### Result Report
+- Task summary: Published the guided ClickUp owner-console deployment plan and
+  queued backend discovery, frontend guide flow, and production smoke tasks.
+- Files changed: `docs/planning/clickup-owner-console-deployment-plan.md`,
+  `.codex/context/TASK_BOARD.md`, `.codex/context/PROJECT_STATE.md`,
+  `docs/planning/mvp-next-commits.md`, and this task contract.
+- How tested: reviewed official docs and checked queue consistency.
+- What is incomplete: implementation remains in CCV1-031, CCV1-032, and
+  CCV1-033.
+- Next steps: implement ClickUp discovery backend.
+
+### Priority
+P0
+
+## CCV1-030 Minimal Owner ClickUp Web Console
+
+### Header
+- ID: CCV1-030
+- Title: Minimal owner ClickUp web console
+- Task Type: feature
+- Current Stage: verification
+- Status: DONE
+- Owner: Frontend Builder
+- Depends on: CCV1-012, CCV1-013, CCV1-010
+- Priority: P0
+- Iteration: v1-030
+- Operation Mode: BUILDER
+
+### Process Self-Audit
+- [x] All seven autonomous loop steps are represented.
+- [x] Exactly one priority task was selected.
+- [x] Operation mode matches the current queue.
+- [x] The task aligns with the newly approved v1 direction.
+
+### Context
+The owner approved changing v1 from no GUI to a minimal owner-only web console
+for ClickUp setup. The backend remains API-first and separately scalable;
+broader company dashboard and mobile are v2 scope.
+
+### Goal
+Add the smallest humane v1 UI for owner login, ClickUp activation, token entry,
+settings save, and first native sync.
+
+### Scope
+- `public/index.html`
+- `public/styles.css`
+- `public/app.js`
+- `src/app.ts`
+- `Dockerfile`
+- architecture, API, deployment, planning, and context docs
+
+### Implementation Plan
+1. Serve static owner console assets from the existing backend.
+2. Let owners log in through `POST /auth/login`.
+3. Load connection and ClickUp status through `GET /v1/connection`.
+4. Save settings through `PUT /v1/integration-settings/clickup`.
+5. Trigger first sync through `POST /v1/tasks/sync/clickup/native`.
+6. Keep the backend/API boundary intact for agents and future clients.
+
+### Acceptance Criteria
+- [x] Owner can load a web console from `/`.
+- [x] Owner can log in with the existing owner account.
+- [x] Owner can enable/disable ClickUp integration.
+- [x] Owner can enter token, team ID, and list IDs.
+- [x] Owner can save settings without exposing the stored token.
+- [x] Owner can save and trigger native ClickUp sync from the UI.
+- [x] Docs state v2 dashboard and mobile scope.
+- [x] `npm run build` passes.
+
+### Definition of Done
+- [x] Code builds without errors.
+- [x] Feature works through the real API surface.
+- [x] No mock, placeholder, fake, or temporary path remains.
+- [x] No existing functionality is broken.
+- [x] Changes are documented in the relevant source of truth.
+- [x] `DEFINITION_OF_DONE.md` was checked before status changed to `DONE`.
+
+### Validation Evidence
+- Tests: `npm run build`.
+- Manual checks: started `node dist/server.js` on local port `3100` and
+  confirmed `GET /` returned `200`.
+- High-risk checks: no schema change; Docker runtime copies `public/` into the
+  production image.
+
+### Result Report
+- Task summary: Added a minimal owner-only static web console for ClickUp setup
+  and sync while preserving the API-first backend architecture.
+- Files changed: `public/index.html`, `public/styles.css`, `public/app.js`,
+  `src/app.ts`, `Dockerfile`, architecture/API/deployment docs, task board,
+  project state, next commits, and this task contract.
+- How tested: `npm run build`; local static runtime smoke returned `200` for
+  `/`.
+- What is incomplete: v2 company dashboard and mobile app are intentionally out
+  of scope; continuous ClickUp updates remain a follow-up strategy decision.
+- Next steps: deploy, open `/`, log in, save ClickUp settings, and run sync.
+
+### Priority
+P0
+
+## CCV1-029 ClickUp Production Bootstrap Slot
+
+### Header
+- ID: CCV1-029
+- Title: ClickUp production bootstrap slot
+- Task Type: release
+- Current Stage: verification
+- Status: DONE
+- Owner: Ops/Release
+- Depends on: CCV1-010, CCV1-013, CCV1-026
+- Priority: P1
+- Iteration: v1-029
+- Operation Mode: BUILDER
+
+### Process Self-Audit
+- [x] All seven autonomous loop steps are represented.
+- [x] Exactly one priority task was selected.
+- [x] Operation mode matches the current queue.
+- [x] The task aligns with repository source-of-truth documents.
+
+### Context
+The owner is ready to provide a real ClickUp token for production. Existing
+architecture requires ClickUp credentials to belong to the workspace through
+integration settings, not as permanent backend process globals.
+
+### Goal
+Prepare a safe operator path for entering the ClickUp token, saving workspace
+ClickUp settings, and triggering the first native production pull sync.
+
+### Scope
+- `package.json`
+- `scripts/clickup-production-bootstrap.mjs`
+- `.env.example`
+- `docs/operations/clickup-production-bootstrap.md`
+- `docs/operations/coolify-vps-deployment-contract.md`
+- `docs/INTEGRATIONS.md`
+- `.codex/context/PROJECT_STATE.md`
+- `.codex/context/TASK_BOARD.md`
+- `docs/planning/mvp-next-commits.md`
+- this task contract
+
+### Implementation Plan
+1. Add a dependency-free operator script that reads temporary env values.
+2. Verify the CompanyCore service key with `/v1/connection`.
+3. Save ClickUp settings through the protected integration settings API.
+4. Trigger the native pull sync endpoint and print only safe counts.
+5. Document the Coolify/operator handoff and current limitation around
+   continuous updates.
+
+### Autonomous Loop Evidence
+
+#### 1. Analyze Current State
+- ClickUp native sync already exists and reads workspace-owned settings.
+- There is no background worker or listener in v1.
+- Production Jarvis/Paperclip service keys already exist, but ClickUp provider
+  credentials are still missing.
+
+#### 2. Select One Priority Task
+- Selected task: CCV1-029 ClickUp production bootstrap slot.
+- Priority rationale: enables the first real ClickUp data import without
+  violating the workspace secret boundary.
+- Why other candidates were deferred: continuous sync strategy needs a design
+  decision after the first pull succeeds.
+
+#### 3. Plan Implementation
+- Files or surfaces to modify: package script, operator script, deployment and
+  integration docs, canonical queue/context.
+- Logic: configure settings and sync through public protected API only.
+- Edge cases: missing env fails closed; tokens are never printed.
+
+#### 4. Execute Implementation
+- Implementation notes: added `npm run clickup:bootstrap`.
+
+#### 5. Verify and Test
+- Validation performed: `npm run build` and missing-env bootstrap invocation.
+- Result: see Validation Evidence.
+
+#### 6. Self-Review
+- Architecture alignment: token is stored through workspace integration
+  settings, not as a permanent backend env.
+- Existing system reuse: reuses `/v1/integration-settings/clickup` and
+  `/v1/tasks/sync/clickup/native`.
+- No workaround: yes; this is an operator bootstrap around existing approved
+  APIs.
+- Duplication: no provider sync logic duplicated.
+
+#### 7. Update Documentation and Knowledge
+- Docs updated: operations bootstrap, Coolify deployment contract,
+  integrations, task board, project state, next commits.
+- Learning journal updated: not applicable.
+
+### Acceptance Criteria
+- [x] A clear Coolify/operator place exists for the ClickUp token and list
+  configuration.
+- [x] The token is not committed or documented as raw secret material.
+- [x] Bootstrap saves settings through the protected CompanyCore API.
+- [x] Bootstrap triggers native ClickUp sync after settings are saved.
+- [x] Docs state that continuous listening is not active yet.
+- [x] `npm run build` passes.
+
+### Definition of Done
+- [x] Code builds without errors.
+- [x] Feature works through the real API surface when production credentials
+  are provided.
+- [x] No mock, placeholder, fake, or temporary path remains.
+- [x] No existing functionality is broken.
+- [x] Changes are documented in the relevant source of truth.
+- [x] `DEFINITION_OF_DONE.md` was checked before status changed to `DONE`.
+
+### Validation Evidence
+- Tests: `npm run build`.
+- Manual checks: `npm run clickup:bootstrap` without env fails closed and lists
+  missing env names without printing secrets.
+- High-risk checks: no schema or runtime secret model changes.
+
+### Integration Evidence
+- `INTEGRATION_CHECKLIST.md` reviewed: yes.
+- Real API/service path used: yes; script uses CompanyCore HTTP API.
+- Endpoint and client contract match: yes.
+- DB schema and migrations verified: not applicable.
+- Error state verified: missing env fails closed.
+- Regression check performed: TypeScript build.
+
+### Security / Privacy Evidence
+- `docs/security/secure-development-lifecycle.md` reviewed: yes.
+- Data classification: ClickUp provider token and operational task data.
+- Trust boundaries: operator shell/Coolify secret input, CompanyCore API key,
+  workspace integration settings.
+- Permission or ownership checks: active workspace is derived from the
+  CompanyCore service API key.
+- Secret handling: tokens are read from env, sent over HTTPS to CompanyCore,
+  encrypted at rest, and never printed.
+- Fail-closed behavior: missing env or failed API calls exit non-zero.
+
+### Deployment / Ops Evidence
+- Deploy impact: script and docs only; backend runtime behavior unchanged.
+- Env or secret changes: temporary operator env values documented.
+- Health-check impact: none.
+- Smoke steps updated: yes.
+- Rollback note: remove the script/docs or redeploy the previous commit; no DB
+  migration involved.
+- `DEPLOYMENT_GATE.md` reviewed: yes.
+
+### Result Report
+- Task summary: Added a safe operator bootstrap path for production ClickUp
+  token entry and first native pull sync.
+- Files changed: `package.json`, `scripts/clickup-production-bootstrap.mjs`,
+  `.env.example`, `docs/operations/clickup-production-bootstrap.md`,
+  `docs/operations/coolify-vps-deployment-contract.md`,
+  `docs/INTEGRATIONS.md`, `.codex/context/PROJECT_STATE.md`,
+  `.codex/context/TASK_BOARD.md`, `docs/planning/mvp-next-commits.md`, and this
+  task contract.
+- How tested: `npm run build` and missing-env bootstrap invocation.
+- What is incomplete: continuous ClickUp listening/scheduled sync remains a
+  follow-up decision.
+- Next steps: run the bootstrap with real production token, team ID, list IDs,
+  and a CompanyCore workspace service key.
+
+### Priority
+P1
+
 ## v1 Architecture Addendum: Workspace Ownership
 
 CompanyCore v1 must include a workspace ownership boundary. Registration creates

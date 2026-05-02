@@ -2,6 +2,29 @@
 
 ## Ready
 
+- CCV1-031 ClickUp Discovery Backend
+  - Stage: planning
+  - Owner: Backend Builder
+  - Priority: P0
+  - Scope: add token validation/discovery for ClickUp Workspaces, Spaces,
+    Folders, and Lists, plus task pagination, so the owner console can select
+    the ClickUp Workspace instead of requiring manual IDs.
+
+- CCV1-032 Guided Owner Console
+  - Stage: planning
+  - Owner: Frontend Builder
+  - Priority: P0
+  - Scope: replace manual `teamId/listIds` fields with a guided
+    token-check, Workspace select, and grouped List checklist.
+
+- CCV1-028 Jarvis application-side CompanyCore Data Source deployment
+  - Stage: release
+  - Owner: Backend Builder
+  - Priority: P1
+  - Scope: deploy the prepared Jarvis CompanyCore connector and chat context
+    injector that read `COMPANYCORE_BASE_URL` and `COMPANYCORE_API_KEY`, then
+    verify production chat answers from CompanyCore records.
+
 ## Blocked
 
 - CCV1-020 GitHub webhook auto-deploy completion
@@ -15,7 +38,13 @@
 
 ## Backlog
 
-No backlog v1 tasks.
+- ClickUp continuous update strategy
+  - Stage: planning
+  - Owner: Backend Builder
+  - Priority: P1
+  - Scope: choose and implement either scheduled native pull sync, ClickUp
+    webhook ingestion with signature validation, or external orchestration once
+    the first production ClickUp pull is verified.
 
 ## Done
 
@@ -57,3 +86,6 @@ No backlog v1 tasks.
 - CCV1-026 Adapter smoke script.
 - CCV1-009P Protected production smoke for adapter CRUD.
 - CCV1-027 Paperclip and Jarvis production env wiring.
+- CCV1-029 ClickUp production bootstrap slot.
+- CCV1-030 Minimal owner ClickUp web console.
+- CCV1-031P ClickUp owner console deployment plan.
