@@ -7,6 +7,7 @@ import { clientsRouter } from "./modules/clients/clients.routes";
 import { dealsRouter } from "./modules/deals/deals.routes";
 import { eventsRouter } from "./modules/events/events.routes";
 import { goalsRouter } from "./modules/goals/goals.routes";
+import { integrationSettingsRouter } from "./modules/integration-settings/integration-settings.routes";
 import { notesRouter } from "./modules/notes/notes.routes";
 import { projectsRouter } from "./modules/projects/projects.routes";
 import { targetsRouter } from "./modules/targets/targets.routes";
@@ -30,6 +31,7 @@ export function createApp() {
   app.use("/clients", clientsRouter);
   app.use("/deals", dealsRouter);
   app.use("/notes", notesRouter);
+  app.use("/integration-settings", integrationSettingsRouter);
   app.use("/events", eventsRouter);
 
   app.use(errorHandler);

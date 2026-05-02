@@ -1,9 +1,14 @@
 # API
 
-All endpoints except `GET /health` require:
+All endpoints except `GET /health`, `POST /auth/register`, and
+`POST /auth/login` require one supported auth mechanism:
 
 ```text
 X-API-Key: dev-companycore-key
+```
+
+```text
+Authorization: Bearer <owner-auth-token>
 ```
 
 Base URL in local Docker:
@@ -86,6 +91,7 @@ Every protected workspace-scoped endpoint must follow these API rules:
 | 409 | `conflict` | Unique constraint or state conflict. |
 | 422 | `workspace_required` | Request cannot resolve an active workspace. |
 | 422 | `integration_not_configured` | Workspace lacks required provider settings. |
+| 400 | `integration_secret_required` | New provider setting was created without required token material. |
 | 502 | `integration_unavailable` | External provider is unavailable or returned an unsafe response. |
 | 500 | `sync_failed` | Sync failed after request validation and provider call handling. |
 | 500 | `internal_server_error` | Unexpected server error with no safe specific code. |
@@ -113,12 +119,12 @@ Approved v1 auth direction:
   API key and resolve `workspaceId`.
 - Requests without a resolvable workspace fail closed.
 
-Planned minimum:
+Implemented minimum:
 
 ```http
 POST /auth/register
 POST /auth/login
-GET /me
+GET /auth/me
 ```
 
 Planned registration payload:
@@ -148,6 +154,54 @@ n8n, and other agents. In v1 it must become workspace-scoped:
 - Inactive keys fail closed.
 - Future scopes may restrict service clients to narrower permissions.
 - Raw keys are only shown once if an API key creation endpoint is added.
+
+## Integration Settings
+
+Workspace-owned integration settings are configured through protected routes.
+The active `workspaceId` is derived from bearer auth or `X-API-Key`; clients do
+not send `workspaceId`.
+
+```http
+GET /integration-settings/clickup
+PUT /integration-settings/clickup
+```
+
+ClickUp configuration payload:
+
+```json
+{
+  "token": "clickup-api-token",
+  "config": {
+    "teamId": "clickup-team-id",
+    "spaceIds": ["clickup-space-id"],
+    "folderIds": ["clickup-folder-id"],
+    "listIds": ["clickup-list-id"],
+    "syncMode": "pull"
+  },
+  "active": true
+}
+```
+
+Safe responses include only metadata and non-secret config:
+
+```json
+{
+  "data": {
+    "provider": "clickup",
+    "workspaceId": "uuid",
+    "config": {
+      "listIds": ["clickup-list-id"],
+      "syncMode": "pull"
+    },
+    "active": true,
+    "secretConfigured": true
+  }
+}
+```
+
+`token` is encrypted before storage and is never returned. Updating config
+without a `token` preserves the existing encrypted secret. Creating a new
+setting requires a token.
 
 ## Health
 

@@ -116,13 +116,15 @@ rotation plan before production use.
 
 - `workspace_id`
 - `provider`, for example `clickup`
-- protected secret material
+- `secret_ciphertext`, encrypted with authenticated encryption
 - non-secret configuration JSON
 - `active`
 - `last_validated_at`
 - timestamps
 
-Secret values must not be returned in API responses or logs.
+Each workspace can have one setting per provider through the
+`(workspace_id, provider)` unique key. Secret values must not be returned in API
+responses or logs.
 
 ## Integration Fields
 

@@ -5,7 +5,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NOW
 
-- [ ] CCV1-013 Workspace-scoped integration settings and secret storage
+- [ ] CCV1-017 Integration adapter contract and observability minimum
 
 ## NEXT
 
@@ -20,7 +20,6 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [ ] CCV1-008 Missing module route decision and minimal route slice
 - [ ] CCV1-009 Production deployment verification
 - [ ] CCV1-016 Migration safety and seed/bootstrap policy
-- [ ] CCV1-017 Integration adapter contract and observability minimum
 
 ## GROUP QUEUE
 

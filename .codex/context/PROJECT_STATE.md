@@ -38,7 +38,7 @@ Last updated: 2026-05-02
   integration adapter; n8n may call API endpoints for optional orchestration.
 - Auth / ownership: v1 workspace owner model with user registration, login,
   automatic workspace bootstrap, bearer auth context, workspace-scoped API key
-  context, and planned workspace-scoped integration settings.
+  context, and workspace-scoped integration settings.
 
 ## Validation Commands
 - Lint: Not configured.
@@ -55,7 +55,7 @@ Last updated: 2026-05-02
 - Coolify app/service layout: one backend service plus one Postgres service.
 - Dockerfiles / compose paths: `Dockerfile`, `docker-compose.yml`.
 - Required secrets: `DATABASE_URL`, `SEED_API_KEY`, `AUTH_TOKEN_SECRET`,
-  optional `PORT`; local seed may use `SEED_OWNER_EMAIL`,
+  `INTEGRATION_SECRET_KEY`, optional `PORT`; local seed may use `SEED_OWNER_EMAIL`,
   `SEED_OWNER_PASSWORD`, and `SEED_WORKSPACE_NAME`; ClickUp tokens must be
   stored as workspace integration settings, not hardcoded process globals.
 - Public URLs / ports: backend on `3000`; deployed domains to document and
@@ -67,8 +67,8 @@ Last updated: 2026-05-02
   Postgres volume.
 
 ## Current Focus
-- Main active objective: implement workspace-scoped integration settings and
-  secret storage.
+- Main active objective: define the integration adapter contract and
+  observability minimum before implementing native ClickUp sync.
 - Top blockers: native ClickUp integration contract needs design before
   implementation; API namespace and API key hardening implementation details
   remain open; deployed databases initialized with `db push` may need migration
@@ -79,15 +79,15 @@ Last updated: 2026-05-02
   and deployment smoke evidence are aligned.
 
 ## Autonomous Iteration State
-- Current iteration: CCV1-013 workspace-scoped integration settings and secret
-  storage.
+- Current iteration: CCV1-017 integration adapter contract and observability
+  minimum.
 - Current operation mode: BUILDER
-- Last completed iteration: CCV1-012 registration, login, and workspace
-  bootstrap.
-- Last completed task: implemented owner registration/login, signed bearer
-  tokens, password hashing, workspace/membership schema, workspace-aware API key
-  context, and local owner workspace seed bootstrap.
-- Next required mode: BUILDER for CCV1-013.
+- Last completed iteration: CCV1-013 workspace-scoped integration settings and
+  secret storage.
+- Last completed task: implemented encrypted workspace integration settings,
+  ClickUp configuration endpoints, and a backend settings read service for
+  native adapters.
+- Next required mode: BUILDER for CCV1-017.
 
 ## Recent Progress
 - 2026-05-02: Created Company Core backend foundation, Prisma schema, Docker
@@ -126,6 +126,9 @@ Last updated: 2026-05-02
   automatic workspace creation, bearer token auth, password hashing,
   workspace-aware API key context, workspace/auth migration, and local seed
   bootstrap.
+- 2026-05-02: Completed CCV1-013 by adding workspace-scoped integration
+  settings, encrypted token storage, ClickUp configuration routes, integration
+  settings service helpers, and source-of-truth docs.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

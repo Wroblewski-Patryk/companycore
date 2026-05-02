@@ -215,8 +215,8 @@ P0
 - ID: CCV1-004
 - Title: Complete required v1 event emission
 - Task Type: feature
-- Current Stage: planning
-- Status: READY
+- Current Stage: verification
+- Status: DONE
 - Owner: Backend Builder
 - Depends on: Existing event service
 - Priority: P0
@@ -834,8 +834,8 @@ P0
 - ID: CCV1-013
 - Title: Workspace-scoped integration settings and secret storage
 - Task Type: feature
-- Current Stage: planning
-- Status: READY
+- Current Stage: verification
+- Status: DONE
 - Owner: Backend Builder
 - Depends on: CCV1-011, CCV1-012, CCV1-003
 - Priority: P0
@@ -864,16 +864,37 @@ non-leaking, and usable by native integration adapters.
 - `docs/security/security-baseline.md`
 
 ### Acceptance Criteria
-- [ ] Workspace can store ClickUp token/config through an authenticated route or
+- [x] Workspace can store ClickUp token/config through an authenticated route or
   approved bootstrap path.
-- [ ] Integration settings are tied to `workspaceId`.
-- [ ] Secret values are encrypted or otherwise protected according to the
+- [x] Integration settings are tied to `workspaceId`.
+- [x] Secret values are encrypted or otherwise protected according to the
   approved v1 security plan.
-- [ ] Secret values are never returned in API responses or logs.
-- [ ] Cross-workspace access is rejected.
-- [ ] ClickUp adapter contract reads settings through this workspace-scoped
+- [x] Secret values are never returned in API responses or logs.
+- [x] Cross-workspace access is rejected.
+- [x] ClickUp adapter contract reads settings through this workspace-scoped
   mechanism.
-- [ ] `npm run build` passes.
+- [x] `npm run build` passes.
+
+### Result Report
+- Task summary: Added workspace-owned integration settings, encrypted provider
+  secret storage, ClickUp settings routes, and service helpers for native
+  adapters to read decrypted workspace settings inside the backend process.
+- Files changed: `prisma/schema.prisma`,
+  `prisma/migrations/202605023_integration_settings/migration.sql`,
+  `.env.example`, `src/config/env.ts`, `src/app.ts`,
+  `src/integrations/secrets.ts`,
+  `src/integrations/integration-settings.service.ts`,
+  `src/modules/integration-settings/integration-settings.routes.ts`,
+  `docs/API.md`, `docs/DATABASE.md`, `docs/INTEGRATIONS.md`,
+  `docs/security/security-baseline.md`, `.codex/context/PROJECT_STATE.md`,
+  `.codex/context/TASK_BOARD.md`, `docs/planning/mvp-execution-plan.md`,
+  `docs/planning/mvp-next-commits.md`, and this task contract.
+- How tested: Ran `npx prisma generate`, `npm run build`,
+  `npx prisma validate` with a local `DATABASE_URL`, and `git diff --check`.
+- What is incomplete: Native ClickUp API calls and sync behavior remain in
+  CCV1-010 after CCV1-017 defines the adapter observability contract.
+- Next steps: Start CCV1-017 integration adapter contract and observability
+  minimum, then implement CCV1-010 native ClickUp sync.
 
 ### Priority
 P0

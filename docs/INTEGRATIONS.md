@@ -49,8 +49,17 @@ first, with a structure that future integrations can reuse:
 - non-secret sync configuration such as team, space, folder, or list IDs
 - sync status and last successful sync timestamp when needed
 
-Secrets must not be returned in API responses, written to logs, or stored in
-plain text without an approved v1 security decision.
+Implemented v1 configuration endpoints:
+
+```http
+GET /integration-settings/clickup
+PUT /integration-settings/clickup
+```
+
+Secrets are encrypted at rest with the application integration secret key and
+are not returned in API responses or written to logs. Native adapters should
+read provider settings through `src/integrations/integration-settings.service.ts`
+instead of querying the table directly.
 
 ## Paperclip
 

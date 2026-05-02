@@ -21,7 +21,8 @@
 - Protected routes must resolve `workspaceId` from user auth or service API key.
 - Cross-workspace access must fail closed.
 - Integration settings and tokens belong to a workspace.
-- Integration secrets must not be logged or returned in API responses.
+- Integration secrets must be encrypted at rest, must not be logged, and must
+  not be returned in API responses.
 - Raw provider/backend errors must not be exposed directly to API clients.
 
 ## API Error Safety
@@ -34,6 +35,14 @@ API errors must use the standard error envelope from `docs/API.md`.
   keys, session tokens, or integration tokens.
 - For records outside the active workspace, prefer `not_found` or `forbidden`
   without confirming the record exists.
+
+## Integration Secret Storage
+
+v1 stores provider token material in `integration_settings.secret_ciphertext`.
+The backend encrypts token material using AES-256-GCM with key material derived
+from `INTEGRATION_SECRET_KEY`. The only supported read path for native adapters
+is `src/integrations/integration-settings.service.ts`, which decrypts settings
+inside the backend process and never exposes the token through API responses.
 
 ## Elevated Risk Areas
 

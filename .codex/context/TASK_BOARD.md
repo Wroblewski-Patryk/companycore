@@ -21,13 +21,6 @@
   - Scope: Implement ClickUp as the first native CompanyCore integration
     adapter after CCV1-001 and DEC-005 are resolved.
 
-- CCV1-013 Workspace-scoped integration settings and secret storage
-  - Stage: planning
-  - Owner: Backend Builder
-  - Priority: P0
-  - Scope: Store ClickUp and future integration settings under workspace
-    ownership with protected secret handling.
-
 - CCV1-016 Migration safety and seed/bootstrap policy
   - Stage: planning
   - Owner: DB/Migrations
@@ -42,13 +35,13 @@
   - Scope: Define reusable integration adapter layers, idempotency, safe errors,
     logs/events, and smoke signals.
 
-## Blocked
-
 - CCV1-007 API key hardening plan and implementation
   - Stage: planning
   - Owner: Security
   - Priority: P1
-  - Blocked by: CCV1-012, CCV1-003
+  - Scope: Harden workspace-scoped API key storage and service-client access.
+
+## Blocked
 
 - CCV1-008 Missing module route decision and minimal route slice
   - Stage: planning
@@ -90,3 +83,4 @@
 - CCV1-015 Workspace guardrail test matrix.
 - CCV1-003 Prisma migration baseline and deployment entrypoint.
 - CCV1-012 Registration, login, and workspace bootstrap.
+- CCV1-013 Workspace-scoped integration settings and secret storage.

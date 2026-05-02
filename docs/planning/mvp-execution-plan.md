@@ -98,7 +98,7 @@ CRM UI during this plan.
 
 ## Phase 5: Workspace-Scoped Settings
 
-- [ ] CCV1-013 Workspace-scoped integration settings and secret storage
+- [x] CCV1-013 Workspace-scoped integration settings and secret storage
   - Why now: ClickUp token/list/team configuration must be assigned to a
     workspace and secured before the native adapter can run safely.
   - Depends on: CCV1-011, CCV1-012, CCV1-003.
