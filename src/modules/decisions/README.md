@@ -1,4 +1,11 @@
 # Decisions Module
 
-Database structure exists in v1. API routes are deferred until decision capture
-workflows are specified.
+Minimal v1 API routes exist for durable AI/project decision memory:
+
+- `GET /v1/decisions`
+- `POST /v1/decisions`
+
+Root aliases are kept for compatibility:
+
+- `GET /decisions`
+- `POST /decisions`

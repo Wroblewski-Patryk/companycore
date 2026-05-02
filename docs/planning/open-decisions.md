@@ -4,34 +4,7 @@ Track unresolved decisions that can block or reshape execution.
 
 ## Active Decisions
 
-- DEC-001 API namespace for v1
-  - Question: Should v1 keep the current root-level endpoints
-    (`/projects`, `/tasks`, `/events`) or introduce `/api/v1/*` before external
-    consumers depend on the API?
-  - Why it matters: Paperclip, Jarvis, n8n, and future GUI clients need a
-    stable base path. Changing it later would require client migration.
-  - Options:
-    - Keep root-level endpoints for v1 and document them as stable.
-    - Add `/api/v1/*` now while preserving root-level aliases during a short
-      transition.
-    - Add `/api/v1/*` only when a breaking v2 API appears.
-  - Needed by: CCV1-008
-  - Current owner: Planner / Backend Builder
-
-- DEC-003 Missing module API scope for v1
-  - Question: Which DB-backed modules need public API routes in v1:
-    task lists, pipeline stages, interactions, decisions, agents, and agent
-    logs?
-  - Why it matters: The schema already includes these entities, but adding
-    routes without real workflows may expand the API surface too early.
-  - Options:
-    - Add minimal GET/POST routes for all existing models.
-    - Add routes only for decisions and agent logs because AI consumers need
-      durable memory and traceability.
-    - Keep README-only placeholders until Paperclip/Jarvis workflows are
-      specified.
-  - Needed by: CCV1-008
-  - Current owner: Product Docs / Backend Builder
+No active decisions.
 
 ## Resolved Decisions
 
@@ -59,3 +32,9 @@ Track unresolved decisions that can block or reshape execution.
 - 2026-05-02: DEC-005 resolved. The smallest v1-native ClickUp slice is
   pull-only task sync from workspace-configured ClickUp lists into CompanyCore
   tasks. It does not write changes back to ClickUp in v1.
+- 2026-05-02: DEC-001 resolved. v1 uses `/v1/*` route aliases without `/api`
+  because the API already has a dedicated domain. Root routes remain available
+  as compatibility aliases during v1.
+- 2026-05-02: DEC-003 resolved. v1 adds minimal API routes only for
+  `decisions` and `agent-logs`; task lists, pipeline stages, interactions, and
+  agents remain deferred until workflows require them.

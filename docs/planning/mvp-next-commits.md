@@ -5,11 +5,11 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NOW
 
-- [ ] CCV1-008 Missing module route decision and minimal route slice
+- [ ] CCV1-009 Production deployment verification
 
 ## NEXT
 
-- [ ] CCV1-009 Production deployment verification
+No queued v1 implementation tasks after production verification.
 
 ## PIPELINE
 

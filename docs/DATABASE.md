@@ -180,3 +180,6 @@ without crossing workspace boundaries.
 The first runtime workspace-scoped business table is `tasks`. Native ClickUp
 sync writes `tasks.workspace_id` from auth context and uses the
 `(workspace_id, source, external_id)` unique key for idempotent task imports.
+
+`decisions` and `agent_logs` are workspace-scoped in v1 because they are the
+approved minimal AI memory and audit surfaces.

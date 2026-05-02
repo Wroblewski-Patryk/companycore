@@ -54,6 +54,8 @@ model Workspace {
   apiKeys             ApiKey[]
   integrationSettings IntegrationSetting[]
   tasks               Task[]
+  decisions           Decision[]
+  agentLogs           AgentLog[]
   createdAt           DateTime              @default(now()) @map("created_at")
   updatedAt           DateTime              @updatedAt @map("updated_at")
 
@@ -259,6 +261,8 @@ model Note {
 
 model Decision {
   id         String   @id @default(uuid()) @db.Uuid
+  workspaceId String? @map("workspace_id") @db.Uuid
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   projectId  String?  @map("project_id") @db.Uuid
   project    Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
   title      String
@@ -288,6 +292,8 @@ model Agent {
 
 model AgentLog {
   id        String   @id @default(uuid()) @db.Uuid
+  workspaceId String? @map("workspace_id") @db.Uuid
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   agentId   String?  @map("agent_id") @db.Uuid
   agent     Agent?   @relation(fields: [agentId], references: [id], onDelete: SetNull)
   level     String   @default("info")

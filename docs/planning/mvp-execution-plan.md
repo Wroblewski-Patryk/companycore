@@ -124,7 +124,7 @@ CRM UI during this plan.
     event.
   - Deployment impact: Low.
 
-- [ ] CCV1-008 Missing module route decision and minimal route slice
+- [x] CCV1-008 Missing module route decision and minimal route slice
   - Why now: DB models exist for task lists, pipeline stages, interactions,
     decisions, agents, and agent logs, but several modules have README-only
     placeholders.

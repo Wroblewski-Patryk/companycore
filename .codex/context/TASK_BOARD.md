@@ -4,11 +4,7 @@
 
 ## Blocked
 
-- CCV1-008 Missing module route decision and minimal route slice
-  - Stage: decision
-  - Owner: Backend Builder
-  - Priority: P1
-  - Blocked by: DEC-001, DEC-003
+No blocked v1 tasks.
 
 ## Backlog
 
@@ -46,3 +42,4 @@
 - CCV1-016 Migration safety and seed/bootstrap policy.
 - CCV1-007 API key hardening plan and implementation.
 - CCV1-006 Endpoint test foundation.
+- CCV1-008 Missing module route decision and minimal route slice.

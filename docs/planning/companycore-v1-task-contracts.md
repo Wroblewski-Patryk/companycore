@@ -427,8 +427,8 @@ P1
 - ID: CCV1-008
 - Title: Missing module route decision and minimal route slice
 - Task Type: feature
-- Current Stage: planning
-- Status: BLOCKED
+- Current Stage: verification
+- Status: DONE
 - Owner: Backend Builder
 - Depends on: DEC-001, DEC-003
 - Priority: P1
@@ -451,12 +451,33 @@ needed for v1 consumers.
 - `docs/DATABASE.md`
 
 ### Acceptance Criteria
-- [ ] User-approved v1 route scope is recorded before implementation.
-- [ ] Added routes are protected by API key middleware.
-- [ ] Added routes resolve and enforce `workspaceId`.
-- [ ] Added routes use Zod validation.
-- [ ] API docs describe each added route and payload.
-- [ ] `npm run build` passes.
+- [x] User-approved v1 route scope is recorded before implementation.
+- [x] Added routes are protected by API key middleware.
+- [x] Added routes resolve and enforce `workspaceId`.
+- [x] Added routes use Zod validation.
+- [x] API docs describe each added route and payload.
+- [x] `npm run build` passes.
+
+### Result Report
+- Task summary: Resolved v1 route namespace as `/v1/*` without `/api`, kept
+  root aliases for compatibility, and added minimal workspace-scoped
+  `decisions` and `agent-logs` routes.
+- Files changed: `prisma/schema.prisma`,
+  `prisma/migrations/202605026_v1_decisions_agent_logs/migration.sql`,
+  `src/app.ts`, `src/modules/decisions/decisions.routes.ts`,
+  `src/modules/decisions/README.md`,
+  `src/modules/agent-logs/agent-logs.routes.ts`,
+  `src/modules/agent-logs/README.md`, `src/tests/api.test.ts`,
+  `docs/API.md`, `docs/DATABASE.md`, `docs/planning/open-decisions.md`,
+  `.codex/context/PROJECT_STATE.md`, `.codex/context/TASK_BOARD.md`,
+  `docs/planning/mvp-execution-plan.md`, `docs/planning/mvp-next-commits.md`,
+  and this task contract.
+- How tested: Ran `npm test` against a disposable PostgreSQL database at
+  `localhost:55432`, which built TypeScript, applied all migrations from
+  scratch, and passed the endpoint integration test.
+- What is incomplete: Deferred modules remain without routes until workflows
+  justify them: task lists, pipeline stages, interactions, and agents.
+- Next steps: Start CCV1-009 production deployment verification.
 
 ### Priority
 P1

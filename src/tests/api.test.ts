@@ -11,6 +11,8 @@ let server: ReturnType<ReturnType<typeof createApp>["listen"]>;
 
 async function resetDatabase() {
   await prisma.event.deleteMany();
+  await prisma.agentLog.deleteMany();
+  await prisma.decision.deleteMany();
   await prisma.note.deleteMany();
   await prisma.deal.deleteMany();
   await prisma.client.deleteMany();
@@ -82,6 +84,8 @@ after(async () => {
 test("CompanyCore v1 protected API flow", async () => {
   const health = await request("/health");
   assert.equal(health.status, 200);
+  const v1Health = await request("/v1/health");
+  assert.equal(v1Health.status, 200);
 
   const missingAuth = await request("/projects");
   assert.equal(missingAuth.status, 401);
@@ -148,11 +152,40 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(updatedTask.status, 200);
 
   const taskListA = await request("/tasks", { headers: authA });
-  const taskListB = await request("/tasks", { headers: authB });
+  const taskListB = await request("/v1/tasks", { headers: authB });
   assert.equal(taskListA.status, 200);
   assert.equal(taskListB.status, 200);
   assert.equal((taskListA.body as { data: unknown[] }).data.length, 1);
   assert.equal((taskListB.body as { data: unknown[] }).data.length, 0);
+
+  const decision = await request("/v1/decisions", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      title: "Use CompanyCore as source of truth",
+      rationale: "Agents need durable operational memory",
+      outcome: "approved"
+    })
+  });
+  assert.equal(decision.status, 201);
+
+  const agentLog = await request("/v1/agent-logs", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      level: "info",
+      message: "Jarvis inspected CompanyCore memory",
+      metadata: { source: "test" }
+    })
+  });
+  assert.equal(agentLog.status, 201);
+
+  const decisionsB = await request("/v1/decisions", { headers: authB });
+  const agentLogsB = await request("/v1/agent-logs", { headers: authB });
+  assert.equal(decisionsB.status, 200);
+  assert.equal(agentLogsB.status, 200);
+  assert.equal((decisionsB.body as { data: unknown[] }).data.length, 0);
+  assert.equal((agentLogsB.body as { data: unknown[] }).data.length, 0);
 
   const settings = await request("/integration-settings/clickup", {
     method: "PUT",
@@ -202,6 +235,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(events.status, 200);
   const eventTypes = (events.body as { data: Array<{ type: string }> }).data.map((event) => event.type);
   assert.ok(eventTypes.includes("task_created"));
+  assert.ok(eventTypes.includes("decision_created"));
   assert.ok(eventTypes.includes("task_synced_from_clickup"));
   assert.ok(eventTypes.includes("sync_succeeded"));
 });

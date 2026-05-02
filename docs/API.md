@@ -17,6 +17,10 @@ Base URL in local Docker:
 http://localhost:3000
 ```
 
+v1 routes are available under `/v1/*` without an `/api` prefix because the API
+uses a dedicated API domain in production. Root-level routes remain as v1
+compatibility aliases.
+
 ## Response Contract
 
 CompanyCore v1 should use stable response envelopes so Paperclip, Jarvis,
@@ -214,6 +218,8 @@ GET /health
 ## Projects
 
 ```http
+GET /v1/projects
+POST /v1/projects
 GET /projects
 POST /projects
 ```
@@ -258,6 +264,11 @@ POST /targets
 ## Tasks
 
 ```http
+GET /v1/tasks
+POST /v1/tasks
+PATCH /v1/tasks/:id
+POST /v1/tasks/sync/clickup
+POST /v1/tasks/sync/clickup/native
 GET /tasks
 POST /tasks
 PATCH /tasks/:id
@@ -347,6 +358,8 @@ POST /deals
 ## Notes
 
 ```http
+GET /v1/notes
+POST /v1/notes
 GET /notes
 POST /notes
 ```
@@ -355,6 +368,43 @@ POST /notes
 {
   "projectId": "uuid",
   "content": "Important context for the next agent."
+}
+```
+
+## Decisions
+
+```http
+GET /v1/decisions
+POST /v1/decisions
+GET /decisions
+POST /decisions
+```
+
+```json
+{
+  "title": "Use CompanyCore as source of truth",
+  "rationale": "Agents need durable operational memory",
+  "outcome": "approved",
+  "projectId": "uuid"
+}
+```
+
+## Agent Logs
+
+```http
+GET /v1/agent-logs
+POST /v1/agent-logs
+GET /agent-logs
+POST /agent-logs
+```
+
+```json
+{
+  "level": "info",
+  "message": "Jarvis inspected CompanyCore memory",
+  "metadata": {
+    "source": "jarvis"
+  }
 }
 ```
 
@@ -375,6 +425,7 @@ Generated v1 events:
 - `client_created`
 - `deal_created`
 - `note_created`
+- `decision_created`
 - `sync_started`
 - `sync_succeeded`
 - `sync_failed`

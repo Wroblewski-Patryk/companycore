@@ -1,10 +1,12 @@
 import cors from "cors";
-import express from "express";
+import express, { Router } from "express";
 import { requireApiKey } from "./auth/api-key.middleware";
 import { errorHandler } from "./middleware/error-handler";
+import { agentLogsRouter } from "./modules/agent-logs/agent-logs.routes";
 import { authRouter } from "./modules/auth/auth.routes";
 import { clientsRouter } from "./modules/clients/clients.routes";
 import { dealsRouter } from "./modules/deals/deals.routes";
+import { decisionsRouter } from "./modules/decisions/decisions.routes";
 import { eventsRouter } from "./modules/events/events.routes";
 import { goalsRouter } from "./modules/goals/goals.routes";
 import { integrationSettingsRouter } from "./modules/integration-settings/integration-settings.routes";
@@ -14,6 +16,20 @@ import { targetsRouter } from "./modules/targets/targets.routes";
 import { tasksRouter } from "./modules/tasks/tasks.routes";
 import { healthRouter } from "./health/health.routes";
 
+function mountProtectedRoutes(router: Router) {
+  router.use("/projects", projectsRouter);
+  router.use("/goals", goalsRouter);
+  router.use("/targets", targetsRouter);
+  router.use("/tasks", tasksRouter);
+  router.use("/clients", clientsRouter);
+  router.use("/deals", dealsRouter);
+  router.use("/notes", notesRouter);
+  router.use("/decisions", decisionsRouter);
+  router.use("/agent-logs", agentLogsRouter);
+  router.use("/integration-settings", integrationSettingsRouter);
+  router.use("/events", eventsRouter);
+}
+
 export function createApp() {
   const app = express();
 
@@ -21,18 +37,16 @@ export function createApp() {
   app.use(express.json({ limit: "1mb" }));
 
   app.use("/health", healthRouter);
+  app.use("/v1/health", healthRouter);
   app.use("/auth", authRouter);
+  app.use("/v1/auth", authRouter);
 
   app.use(requireApiKey);
-  app.use("/projects", projectsRouter);
-  app.use("/goals", goalsRouter);
-  app.use("/targets", targetsRouter);
-  app.use("/tasks", tasksRouter);
-  app.use("/clients", clientsRouter);
-  app.use("/deals", dealsRouter);
-  app.use("/notes", notesRouter);
-  app.use("/integration-settings", integrationSettingsRouter);
-  app.use("/events", eventsRouter);
+  mountProtectedRoutes(app);
+
+  const v1Router = Router();
+  mountProtectedRoutes(v1Router);
+  app.use("/v1", v1Router);
 
   app.use(errorHandler);
 

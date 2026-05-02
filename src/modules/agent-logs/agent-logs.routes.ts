@@ -1,0 +1,35 @@
+import { Prisma } from "@prisma/client";
+import { Router } from "express";
+import { z } from "zod";
+import { prisma } from "../../db/prisma";
+import { asyncHandler } from "../../middleware/async-handler";
+
+const createAgentLogSchema = z.object({
+  agentId: z.string().uuid().optional(),
+  level: z.string().min(1).optional(),
+  message: z.string().min(1),
+  metadata: z.record(z.unknown()).optional()
+});
+
+export const agentLogsRouter = Router();
+
+agentLogsRouter.get("/", asyncHandler(async (req, res) => {
+  const logs = await prisma.agentLog.findMany({
+    where: { workspaceId: req.auth!.workspaceId },
+    orderBy: { createdAt: "desc" }
+  });
+  res.json({ data: logs });
+}));
+
+agentLogsRouter.post("/", asyncHandler(async (req, res) => {
+  const input = createAgentLogSchema.parse(req.body);
+  const log = await prisma.agentLog.create({
+    data: {
+      ...input,
+      metadata: input.metadata as Prisma.InputJsonValue | undefined,
+      workspaceId: req.auth!.workspaceId
+    }
+  });
+
+  res.status(201).json({ data: log });
+}));
