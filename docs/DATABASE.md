@@ -61,8 +61,7 @@ state makes forward-fix unsafe.
 
 ## Workspace Ownership
 
-All business tables should include `workspace_id` before v1 is production
-stable:
+All business tables include `workspace_id` for v1 workspace isolation:
 
 - `projects`
 - `goals`
@@ -181,9 +180,12 @@ records should be unique per workspace and source, for example
 `(workspace_id, source, external_id)`, so ClickUp sync can upsert records
 without crossing workspace boundaries.
 
-The first runtime workspace-scoped business table is `tasks`. Native ClickUp
-sync writes `tasks.workspace_id` from auth context and uses the
+Runtime routes must write `workspace_id` from auth context and filter protected
+reads by that workspace. Relation IDs supplied by clients must be checked
+against the active workspace before creating dependent records.
+
+Native ClickUp sync writes `tasks.workspace_id` from auth context and uses the
 `(workspace_id, source, external_id)` unique key for idempotent task imports.
 
-`decisions` and `agent_logs` are workspace-scoped in v1 because they are the
-approved minimal AI memory and audit surfaces.
+`events` are workspace-scoped so agent and operator event readback cannot leak
+activity across workspaces.

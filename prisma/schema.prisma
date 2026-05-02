@@ -53,9 +53,20 @@ model Workspace {
   memberships         WorkspaceMembership[]
   apiKeys             ApiKey[]
   integrationSettings IntegrationSetting[]
+  projects            Project[]
+  goals               Goal[]
+  targets             Target[]
+  taskLists           TaskList[]
   tasks               Task[]
+  clients             Client[]
+  pipelineStages      PipelineStage[]
+  deals               Deal[]
+  interactions        Interaction[]
+  notes               Note[]
   decisions           Decision[]
+  agents              Agent[]
   agentLogs           AgentLog[]
+  events              Event[]
   createdAt           DateTime              @default(now()) @map("created_at")
   updatedAt           DateTime              @updatedAt @map("updated_at")
 
@@ -78,6 +89,8 @@ model WorkspaceMembership {
 
 model Project {
   id          String     @id @default(uuid()) @db.Uuid
+  workspaceId String?    @map("workspace_id") @db.Uuid
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   name        String
   description String?
   status      String     @default("active")
@@ -97,6 +110,8 @@ model Project {
 
 model Goal {
   id          String    @id @default(uuid()) @db.Uuid
+  workspaceId String?   @map("workspace_id") @db.Uuid
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   projectId   String?   @map("project_id") @db.Uuid
   project     Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
   title       String
@@ -114,6 +129,8 @@ model Goal {
 
 model Target {
   id           String    @id @default(uuid()) @db.Uuid
+  workspaceId  String?   @map("workspace_id") @db.Uuid
+  workspace    Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   goalId       String?   @map("goal_id") @db.Uuid
   goal         Goal?     @relation(fields: [goalId], references: [id], onDelete: SetNull)
   title        String
@@ -134,6 +151,8 @@ model Target {
 
 model TaskList {
   id          String    @id @default(uuid()) @db.Uuid
+  workspaceId String?   @map("workspace_id") @db.Uuid
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   projectId   String?   @map("project_id") @db.Uuid
   project     Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
   name        String
@@ -177,6 +196,8 @@ model Task {
 
 model Client {
   id           String        @id @default(uuid()) @db.Uuid
+  workspaceId  String?       @map("workspace_id") @db.Uuid
+  workspace    Workspace?    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   name         String
   companyName  String?       @map("company_name")
   email        String?
@@ -195,6 +216,8 @@ model Client {
 
 model PipelineStage {
   id         String   @id @default(uuid()) @db.Uuid
+  workspaceId String? @map("workspace_id") @db.Uuid
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   name       String
   position   Int      @default(0)
   externalId String?  @map("external_id")
@@ -208,6 +231,8 @@ model PipelineStage {
 
 model Deal {
   id              String         @id @default(uuid()) @db.Uuid
+  workspaceId     String?        @map("workspace_id") @db.Uuid
+  workspace       Workspace?     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   clientId        String?        @map("client_id") @db.Uuid
   client          Client?        @relation(fields: [clientId], references: [id], onDelete: SetNull)
   pipelineStageId String?        @map("pipeline_stage_id") @db.Uuid
@@ -227,6 +252,8 @@ model Deal {
 
 model Interaction {
   id         String   @id @default(uuid()) @db.Uuid
+  workspaceId String? @map("workspace_id") @db.Uuid
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   clientId   String?  @map("client_id") @db.Uuid
   client     Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
   type       String
@@ -242,6 +269,8 @@ model Interaction {
 
 model Note {
   id        String   @id @default(uuid()) @db.Uuid
+  workspaceId String? @map("workspace_id") @db.Uuid
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   content   String
   projectId String?  @map("project_id") @db.Uuid
   project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
@@ -278,6 +307,8 @@ model Decision {
 
 model Agent {
   id          String      @id @default(uuid()) @db.Uuid
+  workspaceId String?     @map("workspace_id") @db.Uuid
+  workspace   Workspace?  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   name        String
   role        String?
   status      AgentStatus @default(active)
@@ -307,6 +338,8 @@ model AgentLog {
 
 model Event {
   id        String   @id @default(uuid()) @db.Uuid
+  workspaceId String? @map("workspace_id") @db.Uuid
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   type      String
   payload   Json?
   source    String?  @default("companycore")

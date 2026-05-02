@@ -47,3 +47,4 @@ No backlog v1 tasks.
 - CCV1-008 Missing module route decision and minimal route slice.
 - CCV1-018 Owner-managed adapter API keys.
 - CCV1-009 Production deployment recovery and public smoke.
+- CCV1-019 Database/API workspace coverage for core records.

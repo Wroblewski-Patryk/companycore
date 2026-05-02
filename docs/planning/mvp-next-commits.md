@@ -9,7 +9,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NEXT
 
-- [ ] CCV1-019 Database/API coverage review for remaining core models
+No queued v1 implementation tasks after protected production smoke.
 
 ## PIPELINE
 

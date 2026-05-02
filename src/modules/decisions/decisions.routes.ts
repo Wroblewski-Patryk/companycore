@@ -25,6 +25,15 @@ decisionsRouter.get("/", asyncHandler(async (req, res) => {
 
 decisionsRouter.post("/", asyncHandler(async (req, res) => {
   const input = createDecisionSchema.parse(req.body);
+  if (input.projectId) {
+    const project = await prisma.project.findFirst({
+      where: { id: input.projectId, workspaceId: req.auth!.workspaceId }
+    });
+    if (!project) {
+      return res.status(404).json({ error: "not_found" });
+    }
+  }
+
   const decision = await prisma.decision.create({
     data: {
       ...input,
@@ -34,6 +43,7 @@ decisionsRouter.post("/", asyncHandler(async (req, res) => {
 
   await createEvent({
     type: "decision_created",
+    workspaceId: req.auth!.workspaceId,
     source: decision.source,
     projectId: decision.projectId,
     payload: {

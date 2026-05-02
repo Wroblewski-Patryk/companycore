@@ -84,6 +84,15 @@ Every protected workspace-scoped endpoint must follow these API rules:
   resolved
 - never return integration secret values
 
+Implemented v1 workspace-scoped record surfaces:
+
+- projects, goals, targets, tasks, clients, deals, notes, decisions,
+  agent logs, and events derive `workspaceId` from the auth context.
+- relation IDs such as `projectId`, `goalId`, `clientId`, `dealId`, and
+  `taskId` are accepted only when the related record belongs to the active
+  workspace.
+- attempts to attach a record to another workspace return `not_found`.
+
 ## Standard Error Codes
 
 | HTTP | Code | Use |
@@ -448,6 +457,7 @@ POST /agent-logs
 ## Events
 
 ```http
+GET /v1/events
 GET /events
 ```
 

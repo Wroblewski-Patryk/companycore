@@ -18,16 +18,43 @@ const createDealSchema = z.object({
 
 export const dealsRouter = Router();
 
-dealsRouter.get("/", asyncHandler(async (_req, res) => {
-  const deals = await prisma.deal.findMany({ orderBy: { createdAt: "desc" } });
+dealsRouter.get("/", asyncHandler(async (req, res) => {
+  const deals = await prisma.deal.findMany({
+    where: { workspaceId: req.auth!.workspaceId },
+    orderBy: { createdAt: "desc" }
+  });
   res.json({ data: deals });
 }));
 
 dealsRouter.post("/", asyncHandler(async (req, res) => {
   const input = createDealSchema.parse(req.body);
-  const deal = await prisma.deal.create({ data: input });
+  if (input.clientId) {
+    const client = await prisma.client.findFirst({
+      where: { id: input.clientId, workspaceId: req.auth!.workspaceId }
+    });
+    if (!client) {
+      return res.status(404).json({ error: "not_found" });
+    }
+  }
+
+  if (input.pipelineStageId) {
+    const stage = await prisma.pipelineStage.findFirst({
+      where: { id: input.pipelineStageId, workspaceId: req.auth!.workspaceId }
+    });
+    if (!stage) {
+      return res.status(404).json({ error: "not_found" });
+    }
+  }
+
+  const deal = await prisma.deal.create({
+    data: {
+      ...input,
+      workspaceId: req.auth!.workspaceId
+    }
+  });
   await createEvent({
     type: "deal_created",
+    workspaceId: req.auth!.workspaceId,
     source: deal.source,
     payload: {
       dealId: deal.id,

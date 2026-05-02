@@ -16,16 +16,39 @@ const createNoteSchema = z.object({
 
 export const notesRouter = Router();
 
-notesRouter.get("/", asyncHandler(async (_req, res) => {
-  const notes = await prisma.note.findMany({ orderBy: { createdAt: "desc" } });
+notesRouter.get("/", asyncHandler(async (req, res) => {
+  const notes = await prisma.note.findMany({
+    where: { workspaceId: req.auth!.workspaceId },
+    orderBy: { createdAt: "desc" }
+  });
   res.json({ data: notes });
 }));
 
 notesRouter.post("/", asyncHandler(async (req, res) => {
   const input = createNoteSchema.parse(req.body);
-  const note = await prisma.note.create({ data: input });
+  const workspaceId = req.auth!.workspaceId;
+
+  const relationChecks = [
+    input.projectId ? prisma.project.findFirst({ where: { id: input.projectId, workspaceId } }) : null,
+    input.taskId ? prisma.task.findFirst({ where: { id: input.taskId, workspaceId } }) : null,
+    input.clientId ? prisma.client.findFirst({ where: { id: input.clientId, workspaceId } }) : null,
+    input.dealId ? prisma.deal.findFirst({ where: { id: input.dealId, workspaceId } }) : null
+  ].filter(Boolean);
+
+  const relations = await Promise.all(relationChecks);
+  if (relations.some((relation) => !relation)) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  const note = await prisma.note.create({
+    data: {
+      ...input,
+      workspaceId
+    }
+  });
   await createEvent({
     type: "note_created",
+    workspaceId,
     source: note.source,
     projectId: note.projectId,
     taskId: note.taskId,

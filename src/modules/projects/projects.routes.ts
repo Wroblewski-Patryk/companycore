@@ -14,16 +14,25 @@ const createProjectSchema = z.object({
 
 export const projectsRouter = Router();
 
-projectsRouter.get("/", asyncHandler(async (_req, res) => {
-  const projects = await prisma.project.findMany({ orderBy: { createdAt: "desc" } });
+projectsRouter.get("/", asyncHandler(async (req, res) => {
+  const projects = await prisma.project.findMany({
+    where: { workspaceId: req.auth!.workspaceId },
+    orderBy: { createdAt: "desc" }
+  });
   res.json({ data: projects });
 }));
 
 projectsRouter.post("/", asyncHandler(async (req, res) => {
   const input = createProjectSchema.parse(req.body);
-  const project = await prisma.project.create({ data: input });
+  const project = await prisma.project.create({
+    data: {
+      ...input,
+      workspaceId: req.auth!.workspaceId
+    }
+  });
   await createEvent({
     type: "project_created",
+    workspaceId: req.auth!.workspaceId,
     projectId: project.id,
     source: project.source,
     payload: { projectId: project.id, name: project.name }

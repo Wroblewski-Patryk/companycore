@@ -23,6 +23,15 @@ agentLogsRouter.get("/", asyncHandler(async (req, res) => {
 
 agentLogsRouter.post("/", asyncHandler(async (req, res) => {
   const input = createAgentLogSchema.parse(req.body);
+  if (input.agentId) {
+    const agent = await prisma.agent.findFirst({
+      where: { id: input.agentId, workspaceId: req.auth!.workspaceId }
+    });
+    if (!agent) {
+      return res.status(404).json({ error: "not_found" });
+    }
+  }
+
   const log = await prisma.agentLog.create({
     data: {
       ...input,

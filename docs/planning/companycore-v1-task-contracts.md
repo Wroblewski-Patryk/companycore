@@ -78,6 +78,82 @@ access.
 ### Priority
 P0
 
+## CCV1-019 Database/API Workspace Coverage For Core Records
+
+### Header
+- ID: CCV1-019
+- Title: Database/API workspace coverage for core records
+- Task Type: feature
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder
+- Depends on: CCV1-012, CCV1-018
+- Priority: P0
+- Iteration: v1-019
+- Operation Mode: BUILDER
+
+### Process Self-Audit
+- [x] All seven autonomous loop steps are represented.
+- [x] Exactly one priority task was selected.
+- [x] Operation mode matches the current queue.
+- [x] The task aligns with the workspace source-of-truth contract.
+
+### Context
+Owner auth and workspace-scoped API keys existed, but several business tables
+and routes still behaved as global records. That could leak operational data
+between workspaces once more owners or adapter keys exist.
+
+### Goal
+Make remaining core business records workspace-owned at the database and API
+layers, and reject foreign relation IDs before creating dependent records.
+
+### Scope
+- `prisma/schema.prisma`
+- `prisma/migrations/202605028_workspace_core_records/migration.sql`
+- `prisma/seed.ts`
+- protected route modules for projects, goals, targets, tasks, clients, deals,
+  notes, decisions, agent logs, and events
+- ClickUp sync event emission
+- endpoint integration tests
+- API/database/planning/context docs
+
+### Implementation Plan
+1. Add nullable `workspace_id` columns, indexes, and foreign keys for remaining
+   core tables so existing production data is preserved.
+2. Persist `workspaceId` from auth context on new protected records and events.
+3. Filter protected list routes by active workspace.
+4. Validate supplied relation IDs against the active workspace.
+5. Expand integration tests for cross-workspace visibility and relation denial.
+6. Update source-of-truth docs and context.
+
+### Acceptance Criteria
+- [x] Core business tables have workspace ownership columns.
+- [x] Protected reads for implemented routes filter by active workspace.
+- [x] Protected writes persist `workspaceId` from auth context.
+- [x] Foreign relation IDs from another workspace return `not_found`.
+- [x] Events are workspace-scoped.
+- [x] Fresh `prisma migrate deploy` succeeds.
+- [x] Endpoint integration tests pass.
+
+### Result Report
+- Task summary: Added workspace ownership for remaining core records and closed
+  global-list leakage for implemented protected routes.
+- Files changed: `prisma/schema.prisma`,
+  `prisma/migrations/202605028_workspace_core_records/migration.sql`,
+  `prisma/seed.ts`, `src/modules/*`, `src/integrations/clickup/clickup.sync.ts`,
+  `src/tests/api.test.ts`, `docs/API.md`, `docs/DATABASE.md`,
+  `.codex/context/PROJECT_STATE.md`, `.codex/context/TASK_BOARD.md`,
+  `docs/planning/mvp-next-commits.md`, and this task contract.
+- How tested: `npx prisma generate`, `npm run build`, and `npm test` against a
+  disposable fresh PostgreSQL database.
+- What is incomplete: Protected production smoke still needs approved
+  production owner/API-key credentials and ClickUp settings.
+- Next steps: Complete CCV1-009P protected production smoke when credentials
+  are available.
+
+### Priority
+P0
+
 ## CCV1-001 Canonical Architecture And Deployment Docs Alignment
 
 ### Header

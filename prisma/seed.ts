@@ -110,9 +110,10 @@ async function main() {
   for (const [position, name] of stages.entries()) {
     await prisma.pipelineStage.upsert({
       where: { id: `00000000-0000-4000-8000-${String(position + 1).padStart(12, "0")}` },
-      update: { name, position },
+      update: { name, position, workspaceId: workspace.id },
       create: {
         id: `00000000-0000-4000-8000-${String(position + 1).padStart(12, "0")}`,
+        workspaceId: workspace.id,
         name,
         position
       }

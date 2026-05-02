@@ -68,8 +68,8 @@ Last updated: 2026-05-02
   Postgres volume.
 
 ## Current Focus
-- Main active objective: complete protected production smoke and continue v1
-  database/API coverage.
+- Main active objective: complete protected production smoke and prepare the
+  next v1 database/API coverage slice.
 - Top blockers: production owner/API key plus ClickUp settings are needed for
   protected smoke.
 - Success criteria for this phase: canonical docs, workspace/auth model,
@@ -78,13 +78,13 @@ Last updated: 2026-05-02
   and deployment smoke evidence are aligned.
 
 ## Autonomous Iteration State
-- Current iteration: CCV1-009 production deployment verification.
-- Current operation mode: ARCHITECT
-- Last completed iteration: CCV1-009 production deployment verification.
-- Last completed task: recovered production deployment by baselining existing
-  foundation schema in Prisma metadata, redeployed commit `3f64a72`, and
-  verified public health plus unauthenticated negative smoke.
-- Next required mode: BUILDER for the next database/API coverage task.
+- Current iteration: CCV1-019 database/API workspace coverage.
+- Current operation mode: BUILDER
+- Last completed iteration: CCV1-019 database/API workspace coverage.
+- Last completed task: added workspace ownership columns for remaining core
+  business records, scoped protected reads/writes by auth workspace, added
+  relation guardrails, and expanded endpoint tests for cross-workspace denial.
+- Next required mode: BUILDER for the next v1 database/API coverage task.
 
 ## Recent Progress
 - 2026-05-02: Created Company Core backend foundation, Prisma schema, Docker
@@ -173,6 +173,11 @@ Last updated: 2026-05-02
   commit `3f64a72`, confirmed backend logs show no pending migrations, seed
   success, and `companycore listening on port 3000`, then verified public
   `/health`, `/v1/health`, and unauthenticated `/v1/projects` negative smoke.
+- 2026-05-02: Completed CCV1-019 by adding workspace ownership to projects,
+  goals, targets, task lists, clients, pipeline stages, deals, interactions,
+  notes, agents, and events. Protected routes for projects, goals, targets,
+  clients, deals, notes, events, decisions, agent logs, and tasks now filter by
+  the active workspace and reject foreign relation IDs with `not_found`.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

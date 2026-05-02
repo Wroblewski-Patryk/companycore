@@ -41,6 +41,23 @@ const clickUpSyncSchema = z.object({
 
 export const tasksRouter = Router();
 
+async function visibleTaskRelations(workspaceId: string, input: {
+  projectId?: string;
+  goalId?: string;
+  targetId?: string;
+  taskListId?: string;
+}) {
+  const checks = [
+    input.projectId ? prisma.project.findFirst({ where: { id: input.projectId, workspaceId } }) : null,
+    input.goalId ? prisma.goal.findFirst({ where: { id: input.goalId, workspaceId } }) : null,
+    input.targetId ? prisma.target.findFirst({ where: { id: input.targetId, workspaceId } }) : null,
+    input.taskListId ? prisma.taskList.findFirst({ where: { id: input.taskListId, workspaceId } }) : null
+  ].filter(Boolean);
+
+  const relations = await Promise.all(checks);
+  return relations.every((relation) => Boolean(relation));
+}
+
 tasksRouter.get("/", asyncHandler(async (req, res) => {
   const tasks = await prisma.task.findMany({
     where: { workspaceId: req.auth!.workspaceId },
@@ -51,6 +68,10 @@ tasksRouter.get("/", asyncHandler(async (req, res) => {
 
 tasksRouter.post("/", asyncHandler(async (req, res) => {
   const input = createTaskSchema.parse(req.body);
+  if (!await visibleTaskRelations(req.auth!.workspaceId, input)) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
   const task = await prisma.task.create({
     data: {
       ...input,
@@ -59,6 +80,7 @@ tasksRouter.post("/", asyncHandler(async (req, res) => {
   });
   await createEvent({
     type: "task_created",
+    workspaceId: req.auth!.workspaceId,
     projectId: task.projectId,
     taskId: task.id,
     source: task.source,
@@ -69,6 +91,10 @@ tasksRouter.post("/", asyncHandler(async (req, res) => {
 
 tasksRouter.patch("/:id", asyncHandler(async (req, res) => {
   const input = updateTaskSchema.parse(req.body);
+  if (!await visibleTaskRelations(req.auth!.workspaceId, input)) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
   const task = await prisma.task.update({
     where: {
       id: String(req.params.id),
@@ -78,6 +104,7 @@ tasksRouter.patch("/:id", asyncHandler(async (req, res) => {
   });
   await createEvent({
     type: "task_updated",
+    workspaceId: req.auth!.workspaceId,
     projectId: task.projectId,
     taskId: task.id,
     source: task.source,
@@ -88,6 +115,10 @@ tasksRouter.patch("/:id", asyncHandler(async (req, res) => {
 
 tasksRouter.post("/sync/clickup", asyncHandler(async (req, res) => {
   const input = clickUpSyncSchema.parse(req.body);
+  if (!await visibleTaskRelations(req.auth!.workspaceId, input)) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
   const data: Prisma.TaskUncheckedCreateInput = {
     workspaceId: req.auth!.workspaceId,
     title: input.title,
@@ -117,6 +148,7 @@ tasksRouter.post("/sync/clickup", asyncHandler(async (req, res) => {
 
   await createEvent({
     type: "task_synced_from_clickup",
+    workspaceId: req.auth!.workspaceId,
     projectId: task.projectId,
     taskId: task.id,
     source: "clickup",

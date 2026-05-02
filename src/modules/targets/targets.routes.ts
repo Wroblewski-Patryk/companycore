@@ -19,16 +19,34 @@ const createTargetSchema = z.object({
 
 export const targetsRouter = Router();
 
-targetsRouter.get("/", asyncHandler(async (_req, res) => {
-  const targets = await prisma.target.findMany({ orderBy: { createdAt: "desc" } });
+targetsRouter.get("/", asyncHandler(async (req, res) => {
+  const targets = await prisma.target.findMany({
+    where: { workspaceId: req.auth!.workspaceId },
+    orderBy: { createdAt: "desc" }
+  });
   res.json({ data: targets });
 }));
 
 targetsRouter.post("/", asyncHandler(async (req, res) => {
   const input = createTargetSchema.parse(req.body);
-  const target = await prisma.target.create({ data: input });
+  if (input.goalId) {
+    const goal = await prisma.goal.findFirst({
+      where: { id: input.goalId, workspaceId: req.auth!.workspaceId }
+    });
+    if (!goal) {
+      return res.status(404).json({ error: "not_found" });
+    }
+  }
+
+  const target = await prisma.target.create({
+    data: {
+      ...input,
+      workspaceId: req.auth!.workspaceId
+    }
+  });
   await createEvent({
     type: "target_created",
+    workspaceId: req.auth!.workspaceId,
     source: target.source,
     payload: { targetId: target.id, title: target.title, goalId: target.goalId }
   });

@@ -40,6 +40,7 @@ export async function syncClickUpTasksForWorkspace(workspaceId: string): Promise
 
   await createEvent({
     type: "sync_started",
+    workspaceId,
     source: "clickup",
     payload: {
       provider: "clickup",
@@ -94,6 +95,7 @@ export async function syncClickUpTasksForWorkspace(workspaceId: string): Promise
 
       await createEvent({
         type: "task_synced_from_clickup",
+        workspaceId,
         projectId: task.projectId,
         taskId: task.id,
         source: "clickup",
@@ -110,6 +112,7 @@ export async function syncClickUpTasksForWorkspace(workspaceId: string): Promise
 
     await createEvent({
       type: "sync_succeeded",
+      workspaceId,
       source: "clickup",
       payload: {
         provider: "clickup",
@@ -136,6 +139,7 @@ export async function syncClickUpTasksForWorkspace(workspaceId: string): Promise
 
     await createEvent({
       type: "sync_failed",
+      workspaceId,
       source: "clickup",
       payload: {
         provider: "clickup",

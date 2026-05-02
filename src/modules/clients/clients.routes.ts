@@ -16,16 +16,25 @@ const createClientSchema = z.object({
 
 export const clientsRouter = Router();
 
-clientsRouter.get("/", asyncHandler(async (_req, res) => {
-  const clients = await prisma.client.findMany({ orderBy: { createdAt: "desc" } });
+clientsRouter.get("/", asyncHandler(async (req, res) => {
+  const clients = await prisma.client.findMany({
+    where: { workspaceId: req.auth!.workspaceId },
+    orderBy: { createdAt: "desc" }
+  });
   res.json({ data: clients });
 }));
 
 clientsRouter.post("/", asyncHandler(async (req, res) => {
   const input = createClientSchema.parse(req.body);
-  const client = await prisma.client.create({ data: input });
+  const client = await prisma.client.create({
+    data: {
+      ...input,
+      workspaceId: req.auth!.workspaceId
+    }
+  });
   await createEvent({
     type: "client_created",
+    workspaceId: req.auth!.workspaceId,
     source: client.source,
     payload: {
       clientId: client.id,

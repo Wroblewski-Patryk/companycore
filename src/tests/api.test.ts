@@ -14,11 +14,15 @@ async function resetDatabase() {
   await prisma.decision.deleteMany();
   await prisma.note.deleteMany();
   await prisma.deal.deleteMany();
+  await prisma.interaction.deleteMany();
   await prisma.client.deleteMany();
   await prisma.task.deleteMany();
   await prisma.target.deleteMany();
   await prisma.goal.deleteMany();
+  await prisma.taskList.deleteMany();
   await prisma.project.deleteMany();
+  await prisma.pipelineStage.deleteMany();
+  await prisma.agent.deleteMany();
   await prisma.integrationSetting.deleteMany();
   await prisma.apiKey.deleteMany();
   await prisma.workspaceMembership.deleteMany();
@@ -143,6 +147,22 @@ test("CompanyCore v1 protected API flow", async () => {
   });
   assert.equal(serviceProject.status, 201);
 
+  const projectListB = await request("/v1/projects", { headers: authB });
+  assert.equal(projectListB.status, 200);
+  assert.equal((projectListB.body as { data: unknown[] }).data.length, 0);
+
+  const projectAId = (serviceProject.body as { data: { id: string } }).data.id;
+
+  const foreignGoal = await request("/v1/goals", {
+    method: "POST",
+    headers: authB,
+    body: JSON.stringify({
+      projectId: projectAId,
+      title: "Should not attach to another workspace"
+    })
+  });
+  assert.equal(foreignGoal.status, 404);
+
   const serviceCannotCreateKeys = await request("/v1/api-keys", {
     method: "POST",
     headers: { "X-API-Key": serviceKey },
@@ -177,6 +197,59 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(taskListB.status, 200);
   assert.equal((taskListA.body as { data: unknown[] }).data.length, 1);
   assert.equal((taskListB.body as { data: unknown[] }).data.length, 0);
+
+  const client = await request("/v1/clients", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      name: "Workspace A client",
+      email: "client-a@example.com"
+    })
+  });
+  assert.equal(client.status, 201);
+  const clientId = (client.body as { data: { id: string } }).data.id;
+
+  const deal = await request("/v1/deals", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      clientId,
+      title: "Workspace A deal",
+      value: 1200
+    })
+  });
+  assert.equal(deal.status, 201);
+
+  const note = await request("/v1/notes", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      projectId: projectAId,
+      clientId,
+      content: "Workspace A scoped note"
+    })
+  });
+  assert.equal(note.status, 201);
+
+  const foreignNote = await request("/v1/notes", {
+    method: "POST",
+    headers: authB,
+    body: JSON.stringify({
+      projectId: projectAId,
+      content: "Should not attach to another workspace"
+    })
+  });
+  assert.equal(foreignNote.status, 404);
+
+  const clientsB = await request("/v1/clients", { headers: authB });
+  const dealsB = await request("/v1/deals", { headers: authB });
+  const notesB = await request("/v1/notes", { headers: authB });
+  assert.equal(clientsB.status, 200);
+  assert.equal(dealsB.status, 200);
+  assert.equal(notesB.status, 200);
+  assert.equal((clientsB.body as { data: unknown[] }).data.length, 0);
+  assert.equal((dealsB.body as { data: unknown[] }).data.length, 0);
+  assert.equal((notesB.body as { data: unknown[] }).data.length, 0);
 
   const decision = await request("/v1/decisions", {
     method: "POST",
@@ -252,7 +325,10 @@ test("CompanyCore v1 protected API flow", async () => {
   }
 
   const events = await request("/events", { headers: authA });
+  const eventsB = await request("/events", { headers: authB });
   assert.equal(events.status, 200);
+  assert.equal(eventsB.status, 200);
+  assert.equal((eventsB.body as { data: unknown[] }).data.length, 0);
   const eventTypes = (events.body as { data: Array<{ type: string }> }).data.map((event) => event.type);
   assert.ok(eventTypes.includes("task_created"));
   assert.ok(eventTypes.includes("decision_created"));
