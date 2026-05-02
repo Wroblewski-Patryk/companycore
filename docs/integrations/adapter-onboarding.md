@@ -64,6 +64,20 @@ Expected success shape:
             "capability": "tasks:write"
           }
         ],
+        "taskLists": [
+          {
+            "method": "PATCH",
+            "path": "/v1/task-lists/:id",
+            "capability": "task-lists:write"
+          }
+        ],
+        "pipelineStages": [
+          {
+            "method": "PATCH",
+            "path": "/v1/pipeline-stages/:id",
+            "capability": "pipeline-stages:write"
+          }
+        ],
         "agents": [
           {
             "method": "POST",
@@ -112,7 +126,9 @@ tokens.
 4. Read `data.adapterManifest.routes` for the canonical v1 paths the adapter
    should call.
 5. Write operational data through CompanyCore:
+   - `POST /v1/task-lists`
    - `POST /v1/tasks`
+   - `POST /v1/pipeline-stages`
    - `POST /v1/notes`
    - `POST /v1/decisions`
    - `POST /v1/interactions`
@@ -137,6 +153,33 @@ Content-Type: application/json
   "description": "Created by Paperclip adapter",
   "status": "todo",
   "source": "paperclip"
+}
+```
+
+Create a task list:
+
+```http
+POST /v1/task-lists
+X-API-Key: <workspace-service-key>
+Content-Type: application/json
+
+{
+  "projectId": "uuid",
+  "name": "Paperclip intake",
+  "source": "paperclip"
+}
+```
+
+Create a pipeline stage:
+
+```http
+POST /v1/pipeline-stages
+X-API-Key: <workspace-service-key>
+Content-Type: application/json
+
+{
+  "name": "Qualified",
+  "position": 10
 }
 ```
 

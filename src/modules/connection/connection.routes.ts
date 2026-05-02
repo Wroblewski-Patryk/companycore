@@ -10,11 +10,15 @@ const capabilities = [
   "goals:write",
   "targets:read",
   "targets:write",
+  "task-lists:read",
+  "task-lists:write",
   "tasks:read",
   "tasks:write",
   "tasks:sync:clickup",
   "clients:read",
   "clients:write",
+  "pipeline-stages:read",
+  "pipeline-stages:write",
   "deals:read",
   "deals:write",
   "interactions:read",
@@ -53,6 +57,11 @@ const adapterManifest = {
       { method: "GET", path: "/v1/targets", capability: "targets:read" },
       { method: "POST", path: "/v1/targets", capability: "targets:write" }
     ],
+    taskLists: [
+      { method: "GET", path: "/v1/task-lists", capability: "task-lists:read" },
+      { method: "POST", path: "/v1/task-lists", capability: "task-lists:write" },
+      { method: "PATCH", path: "/v1/task-lists/:id", capability: "task-lists:write" }
+    ],
     tasks: [
       { method: "GET", path: "/v1/tasks", capability: "tasks:read" },
       { method: "POST", path: "/v1/tasks", capability: "tasks:write" },
@@ -62,6 +71,11 @@ const adapterManifest = {
     clients: [
       { method: "GET", path: "/v1/clients", capability: "clients:read" },
       { method: "POST", path: "/v1/clients", capability: "clients:write" }
+    ],
+    pipelineStages: [
+      { method: "GET", path: "/v1/pipeline-stages", capability: "pipeline-stages:read" },
+      { method: "POST", path: "/v1/pipeline-stages", capability: "pipeline-stages:write" },
+      { method: "PATCH", path: "/v1/pipeline-stages/:id", capability: "pipeline-stages:write" }
     ],
     deals: [
       { method: "GET", path: "/v1/deals", capability: "deals:read" },

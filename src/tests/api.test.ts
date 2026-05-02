@@ -164,6 +164,8 @@ test("CompanyCore v1 protected API flow", async () => {
         auth: { serviceHeader: string };
         routes: {
           tasks: Array<{ method: string; path: string; capability: string }>;
+          taskLists: Array<{ method: string; path: string; capability: string }>;
+          pipelineStages: Array<{ method: string; path: string; capability: string }>;
           agents: Array<{ method: string; path: string; capability: string }>;
           agentLogs: Array<{ method: string; path: string; capability: string }>;
           interactions: Array<{ method: string; path: string; capability: string }>;
@@ -189,6 +191,16 @@ test("CompanyCore v1 protected API flow", async () => {
     && route.path === "/v1/tasks"
     && route.capability === "tasks:write"
   )));
+  assert.ok(connectionBody.data.adapterManifest.routes.taskLists.some((route) => (
+    route.method === "PATCH"
+    && route.path === "/v1/task-lists/:id"
+    && route.capability === "task-lists:write"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.pipelineStages.some((route) => (
+    route.method === "PATCH"
+    && route.path === "/v1/pipeline-stages/:id"
+    && route.capability === "pipeline-stages:write"
+  )));
   assert.ok(connectionBody.data.adapterManifest.routes.agentLogs.some((route) => (
     route.method === "POST"
     && route.path === "/v1/agent-logs"
@@ -213,6 +225,40 @@ test("CompanyCore v1 protected API flow", async () => {
 
   const projectAId = (serviceProject.body as { data: { id: string } }).data.id;
 
+  const taskList = await request("/v1/task-lists", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      projectId: projectAId,
+      name: "Paperclip intake"
+    })
+  });
+  assert.equal(taskList.status, 201);
+  const taskListId = (taskList.body as { data: { id: string } }).data.id;
+
+  const updatedTaskList = await request(`/v1/task-lists/${taskListId}`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({
+      description: "Lead capture tasks"
+    })
+  });
+  assert.equal(updatedTaskList.status, 200);
+
+  const foreignTaskList = await request("/v1/task-lists", {
+    method: "POST",
+    headers: authB,
+    body: JSON.stringify({
+      projectId: projectAId,
+      name: "Should not attach to another workspace"
+    })
+  });
+  assert.equal(foreignTaskList.status, 404);
+
+  const taskListsB = await request("/v1/task-lists", { headers: authB });
+  assert.equal(taskListsB.status, 200);
+  assert.equal((taskListsB.body as { data: unknown[] }).data.length, 0);
+
   const foreignGoal = await request("/v1/goals", {
     method: "POST",
     headers: authB,
@@ -236,6 +282,7 @@ test("CompanyCore v1 protected API flow", async () => {
     method: "POST",
     headers: authA,
     body: JSON.stringify({
+      taskListId,
       title: "Workspace A task"
     })
   });
@@ -269,11 +316,32 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(client.status, 201);
   const clientId = (client.body as { data: { id: string } }).data.id;
 
+  const pipelineStage = await request("/v1/pipeline-stages", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      name: "Qualified",
+      position: 10
+    })
+  });
+  assert.equal(pipelineStage.status, 201);
+  const pipelineStageId = (pipelineStage.body as { data: { id: string } }).data.id;
+
+  const updatedPipelineStage = await request(`/v1/pipeline-stages/${pipelineStageId}`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({
+      position: 20
+    })
+  });
+  assert.equal(updatedPipelineStage.status, 200);
+
   const deal = await request("/v1/deals", {
     method: "POST",
     headers: authA,
     body: JSON.stringify({
       clientId,
+      pipelineStageId,
       title: "Workspace A deal",
       value: 1200
     })
@@ -325,14 +393,17 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(foreignNote.status, 404);
 
   const clientsB = await request("/v1/clients", { headers: authB });
+  const pipelineStagesB = await request("/v1/pipeline-stages", { headers: authB });
   const dealsB = await request("/v1/deals", { headers: authB });
   const interactionsB = await request("/v1/interactions", { headers: authB });
   const notesB = await request("/v1/notes", { headers: authB });
   assert.equal(clientsB.status, 200);
+  assert.equal(pipelineStagesB.status, 200);
   assert.equal(dealsB.status, 200);
   assert.equal(interactionsB.status, 200);
   assert.equal(notesB.status, 200);
   assert.equal((clientsB.body as { data: unknown[] }).data.length, 0);
+  assert.equal((pipelineStagesB.body as { data: unknown[] }).data.length, 0);
   assert.equal((dealsB.body as { data: unknown[] }).data.length, 0);
   assert.equal((interactionsB.body as { data: unknown[] }).data.length, 0);
   assert.equal((notesB.body as { data: unknown[] }).data.length, 0);
@@ -443,6 +514,10 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal((eventsB.body as { data: unknown[] }).data.length, 0);
   const eventTypes = (events.body as { data: Array<{ type: string }> }).data.map((event) => event.type);
   assert.ok(eventTypes.includes("task_created"));
+  assert.ok(eventTypes.includes("task_list_created"));
+  assert.ok(eventTypes.includes("task_list_updated"));
+  assert.ok(eventTypes.includes("pipeline_stage_created"));
+  assert.ok(eventTypes.includes("pipeline_stage_updated"));
   assert.ok(eventTypes.includes("interaction_created"));
   assert.ok(eventTypes.includes("decision_created"));
   assert.ok(eventTypes.includes("agent_created"));

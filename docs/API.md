@@ -302,6 +302,20 @@ Safe response:
         "capability": "tasks:write"
       }
     ],
+    "taskLists": [
+      {
+        "method": "PATCH",
+        "path": "/v1/task-lists/:id",
+        "capability": "task-lists:write"
+      }
+    ],
+    "pipelineStages": [
+      {
+        "method": "PATCH",
+        "path": "/v1/pipeline-stages/:id",
+        "capability": "pipeline-stages:write"
+      }
+    ],
     "agents": [
       {
         "method": "POST",
@@ -392,6 +406,30 @@ POST /targets
 }
 ```
 
+## Task Lists
+
+```http
+GET /v1/task-lists
+POST /v1/task-lists
+PATCH /v1/task-lists/:id
+GET /task-lists
+POST /task-lists
+PATCH /task-lists/:id
+```
+
+```json
+{
+  "projectId": "uuid",
+  "name": "Paperclip intake",
+  "description": "Lead capture tasks",
+  "source": "paperclip"
+}
+```
+
+Task lists are workspace-scoped. If `projectId` is provided, it must belong to
+the active workspace. v1 supports list/create/update and intentionally does not
+delete task lists yet.
+
 ## Tasks
 
 ```http
@@ -469,6 +507,28 @@ POST /clients
   "email": "jane@example.com"
 }
 ```
+
+## Pipeline Stages
+
+```http
+GET /v1/pipeline-stages
+POST /v1/pipeline-stages
+PATCH /v1/pipeline-stages/:id
+GET /pipeline-stages
+POST /pipeline-stages
+PATCH /pipeline-stages/:id
+```
+
+```json
+{
+  "name": "Qualified",
+  "position": 10,
+  "source": "companycore"
+}
+```
+
+Pipeline stages are workspace-scoped CRM configuration records. v1 supports
+list/create/update and intentionally does not delete stages yet.
 
 ## Deals
 
@@ -594,10 +654,14 @@ Generated v1 events:
 - `project_created`
 - `task_created`
 - `task_updated`
+- `task_list_created`
+- `task_list_updated`
 - `task_synced_from_clickup`
 - `goal_created`
 - `target_created`
 - `client_created`
+- `pipeline_stage_created`
+- `pipeline_stage_updated`
 - `deal_created`
 - `interaction_created`
 - `note_created`

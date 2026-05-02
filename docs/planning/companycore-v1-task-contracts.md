@@ -25,6 +25,171 @@ Every runtime task must preserve these rules:
 - API errors use stable, safe response codes
 - tests include allowed and denied paths
 
+## CCV1-025 Task List And Pipeline Stage API
+
+### Header
+- ID: CCV1-025
+- Title: Task list and pipeline stage API
+- Task Type: feature
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder
+- Depends on: CCV1-019, CCV1-024
+- Priority: P0
+- Iteration: v1-025
+- Operation Mode: BUILDER
+
+### Process Self-Audit
+- [x] All seven autonomous loop steps are represented.
+- [x] Exactly one priority task was selected.
+- [x] Operation mode matches the current queue.
+- [x] The task aligns with repository source-of-truth documents.
+
+### Context
+Task lists and pipeline stages were in the database and referenced by tasks and
+deals, but they did not have runtime API routes. Adapters need these lightweight
+configuration records to organize tasks and CRM deals safely.
+
+### Goal
+Add workspace-scoped list/create/update routes for task lists and pipeline
+stages, emit create/update events, and expose the routes in the adapter
+manifest.
+
+### Scope
+- `src/app.ts`
+- `src/modules/task-lists/task-lists.routes.ts`
+- `src/modules/task-lists/README.md`
+- `src/modules/pipeline-stages/pipeline-stages.routes.ts`
+- `src/modules/pipeline-stages/README.md`
+- `src/modules/connection/connection.routes.ts`
+- `src/tests/api.test.ts`
+- `docs/API.md`
+- `docs/integrations/adapter-onboarding.md`
+- `.codex/context/PROJECT_STATE.md`
+- `.codex/context/TASK_BOARD.md`
+- this task contract
+
+### Implementation Plan
+1. Reuse the existing `TaskList` and `PipelineStage` models.
+2. Add `GET`, `POST`, and `PATCH` routes only.
+3. Validate optional `projectId` on task lists against the active workspace.
+4. Emit create/update events through the existing event service.
+5. Extend tests for creation, update, cross-workspace denial, list isolation,
+   and manifest coverage.
+
+### Autonomous Loop Evidence
+
+#### 1. Analyze Current State
+- Issues: tasks and deals could reference records that adapters could not
+  manage through the API.
+- Gaps: task-list and pipeline-stage modules were README-only placeholders.
+- Inconsistencies: schema supported these records, but API did not.
+- Architecture constraints: API-only access, workspace scoping, no GUI.
+
+#### 2. Select One Priority Task
+- Selected task: CCV1-025 task list and pipeline stage API.
+- Priority rationale: closes two remaining DB-backed configuration surfaces
+  needed for adapter-created tasks and deals.
+- Why other candidates were deferred: destructive delete semantics require a
+  separate retention decision.
+
+#### 3. Plan Implementation
+- Files or surfaces to modify: two route modules, app mount, connection
+  manifest, tests, docs, context.
+- Logic: derive `workspaceId`, validate task-list project relation, persist
+  records, emit events.
+- Edge cases: foreign `projectId` must return `not_found`; foreign record
+  updates must return `not_found`.
+
+#### 4. Execute Implementation
+- Implementation notes: added root aliases and `/v1` routes through the
+  existing protected route mounting.
+
+#### 5. Verify and Test
+- Validation performed: `npm test` against disposable PostgreSQL.
+- Result: pending when first recorded; final result is in Validation Evidence.
+
+#### 6. Self-Review
+- Simpler option considered: leave these as seed-only records.
+- Technical debt introduced: no.
+- Scalability assessment: routes reuse existing workspace and event patterns.
+- Refinements made: delete was explicitly deferred to avoid accidental data
+  loss around related tasks/deals.
+
+#### 7. Update Documentation and Knowledge
+- Docs updated: API, adapter onboarding, module READMEs, task contract, project
+  state, task board.
+- Context updated: yes.
+- Learning journal updated: not applicable.
+
+### Acceptance Criteria
+- [x] `GET /v1/task-lists` and `GET /v1/pipeline-stages` list only active
+  workspace records.
+- [x] `POST` routes create records in the active workspace.
+- [x] `PATCH` routes update only active workspace records.
+- [x] Task-list `projectId` is accepted only for active workspace projects.
+- [x] Create/update events are emitted.
+- [x] Adapter manifest includes both surfaces.
+
+### Definition of Done
+- [x] Code builds without errors.
+- [x] Feature works through the real API surface.
+- [x] No mock, placeholder, fake, or temporary data/path remains.
+- [x] No existing functionality is broken.
+- [x] Changes are documented in the relevant source of truth.
+- [x] `DEFINITION_OF_DONE.md` was checked before status changed to `DONE`.
+
+### Validation Evidence
+- Tests: `npm test` with `DATABASE_URL` pointed at disposable PostgreSQL.
+- Manual checks: endpoint behavior covered by integration test.
+- High-risk checks: no schema or secret changes.
+
+### Integration Evidence
+- `INTEGRATION_CHECKLIST.md` reviewed: yes.
+- Real API/service path used: yes.
+- Endpoint and client contract match: yes.
+- DB schema and migrations verified: not applicable; existing models reused.
+- Error state verified: foreign `projectId` in task-list creation returns
+  `404`.
+- Regression check performed: existing protected API flow test.
+
+### Security / Privacy Evidence
+- `docs/security/secure-development-lifecycle.md` reviewed: yes.
+- Data classification: workspace operational and CRM configuration.
+- Trust boundaries: protected API and workspace auth context.
+- Permission or ownership checks: all operations derive `workspaceId`; task
+  list relation IDs are workspace-validated.
+- Secret handling: no secrets returned or stored by these routes.
+- Fail-closed behavior: protected route auth and foreign relation denial.
+
+### Deployment / Ops Evidence
+- Deploy impact: low.
+- Env or secret changes: none.
+- Health-check impact: none.
+- Smoke steps updated: adapter onboarding docs updated.
+- Rollback note: redeploy previous commit if adapter route causes regression.
+- `DEPLOYMENT_GATE.md` reviewed: yes.
+
+### Result Report
+- Task summary: Added minimal workspace-scoped task-list and pipeline-stage API
+  routes with event emission and adapter manifest coverage.
+- Files changed: `src/app.ts`,
+  `src/modules/task-lists/task-lists.routes.ts`,
+  `src/modules/task-lists/README.md`,
+  `src/modules/pipeline-stages/pipeline-stages.routes.ts`,
+  `src/modules/pipeline-stages/README.md`,
+  `src/modules/connection/connection.routes.ts`, `src/tests/api.test.ts`,
+  `docs/API.md`, `docs/integrations/adapter-onboarding.md`,
+  `.codex/context/PROJECT_STATE.md`, `.codex/context/TASK_BOARD.md`, and this
+  task contract.
+- How tested: `npm test` against disposable PostgreSQL.
+- What is incomplete: delete routes remain intentionally deferred.
+- Next steps: deploy and run public smoke, then complete protected smoke once a
+  production service key exists.
+
+### Priority
+P0
+
 ## CCV1-024 Workspace-Scoped Interactions API
 
 ### Header

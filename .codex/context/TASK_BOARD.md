@@ -61,3 +61,4 @@ No backlog v1 tasks.
 - CCV1-022 Adapter manifest for service clients.
 - CCV1-023 Workspace-scoped agents API.
 - CCV1-024 Workspace-scoped interactions API.
+- CCV1-025 Task list and pipeline stage API.

@@ -79,12 +79,12 @@ Last updated: 2026-05-02
   and deployment smoke evidence are aligned.
 
 ## Autonomous Iteration State
-- Current iteration: CCV1-024 workspace-scoped interactions API.
+- Current iteration: CCV1-025 task list and pipeline stage API.
 - Current operation mode: BUILDER
-- Last completed iteration: CCV1-024 workspace-scoped interactions API.
-- Last completed task: added `GET /v1/interactions` and
-  `POST /v1/interactions` so Paperclip/Jarvis-style clients can write
-  workspace-scoped CRM timeline records and attach them to clients safely.
+- Last completed iteration: CCV1-025 task list and pipeline stage API.
+- Last completed task: added list/create/update routes for task lists and CRM
+  pipeline stages so Paperclip/Jarvis-style clients can organize task and deal
+  records without direct database access.
 - Next required mode: BUILDER for adapter production smoke once credentials are
   available.
 
@@ -207,6 +207,10 @@ Last updated: 2026-05-02
   routes, `interaction_created` event emission, adapter manifest capabilities
   for interactions, and tests for same-workspace creation plus cross-workspace
   client relation denial.
+- 2026-05-03: Completed CCV1-025 by adding workspace-scoped task list and
+  pipeline stage API routes, create/update events, adapter manifest
+  capabilities, and tests for same-workspace creation/update plus
+  cross-workspace relation isolation.
 
 ## Working Agreements
 - Keep task board and project state synchronized.
