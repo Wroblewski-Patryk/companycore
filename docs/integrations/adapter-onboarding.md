@@ -51,6 +51,31 @@ Expected success shape:
       "name": "LuckySparrow"
     },
     "capabilities": ["tasks:read", "tasks:write", "events:read"],
+    "adapterManifest": {
+      "basePath": "/v1",
+      "auth": {
+        "serviceHeader": "X-API-Key"
+      },
+      "routes": {
+        "tasks": [
+          {
+            "method": "POST",
+            "path": "/v1/tasks",
+            "capability": "tasks:write"
+          }
+        ],
+        "agentLogs": [
+          {
+            "method": "POST",
+            "path": "/v1/agent-logs",
+            "capability": "agent-logs:write"
+          }
+        ]
+      },
+      "writeRules": [
+        "Do not send workspaceId in write payloads."
+      ]
+    },
     "integrations": {
       "clickup": {
         "configured": false,
@@ -70,12 +95,17 @@ tokens.
 1. Call `GET /v1/connection`.
 2. Fail closed unless `data.status` is `ok`.
 3. Confirm the expected capability is present before using a route.
-4. Write operational data through CompanyCore:
+4. Read `data.adapterManifest.routes` for the canonical v1 paths the adapter
+   should call.
+5. Write operational data through CompanyCore:
    - `POST /v1/tasks`
    - `POST /v1/notes`
    - `POST /v1/decisions`
    - `POST /v1/agent-logs`
-5. Read event history through `GET /v1/events`.
+6. Read event history through `GET /v1/events`.
+
+The manifest is intentionally small and safe to log at debug level because it
+does not contain raw API keys, owner tokens, or provider secrets.
 
 ## Useful Requests
 

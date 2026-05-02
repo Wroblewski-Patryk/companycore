@@ -11,7 +11,8 @@ The required first call for adapters is:
 GET /v1/connection
 ```
 
-This validates the workspace API key, returns safe capability metadata, and
+This validates the workspace API key, returns safe capability metadata, exposes
+the machine-readable `adapterManifest.routes` map for canonical v1 paths, and
 shows whether ClickUp is configured without exposing secret material.
 
 ## ClickUp To Company Core

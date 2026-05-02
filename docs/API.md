@@ -288,6 +288,32 @@ Safe response:
       "name": "LuckySparrow"
     },
     "capabilities": ["tasks:read", "tasks:write", "events:read"],
+    "adapterManifest": {
+      "basePath": "/v1",
+      "auth": {
+        "serviceHeader": "X-API-Key",
+        "ownerHeader": "Authorization: Bearer <token>"
+      },
+      "routes": {
+        "tasks": [
+          {
+            "method": "POST",
+            "path": "/v1/tasks",
+            "capability": "tasks:write"
+          }
+        ],
+        "events": [
+          {
+            "method": "GET",
+            "path": "/v1/events",
+            "capability": "events:read"
+          }
+        ]
+      },
+      "writeRules": [
+        "Do not send workspaceId in write payloads."
+      ]
+    },
     "integrations": {
       "clickup": {
         "configured": true,
@@ -301,6 +327,10 @@ Safe response:
   }
 }
 ```
+
+The `adapterManifest` is the machine-readable v1 onboarding surface for
+Paperclip, Jarvis, Jarvan, Aviary, n8n, and similar clients. It lists canonical
+paths, methods, expected capabilities, and write rules without exposing secrets.
 
 ## Projects
 

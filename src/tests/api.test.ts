@@ -159,6 +159,16 @@ test("CompanyCore v1 protected API flow", async () => {
       auth: { type: string; workspaceId: string; apiKeyId?: string };
       workspace: { id: string; name: string };
       capabilities: string[];
+      adapterManifest: {
+        basePath: string;
+        auth: { serviceHeader: string };
+        routes: {
+          tasks: Array<{ method: string; path: string; capability: string }>;
+          agentLogs: Array<{ method: string; path: string; capability: string }>;
+          integrationSettings: Array<{ method: string; path: string; capability: string }>;
+        };
+        writeRules: string[];
+      };
       integrations: { clickup: { configured: boolean; active: boolean; config: unknown } };
     };
   };
@@ -168,7 +178,21 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(connectionBody.data.auth.type, "api_key");
   assert.equal(connectionBody.data.auth.workspaceId, ownerA.workspace.id);
   assert.equal(connectionBody.data.workspace.id, ownerA.workspace.id);
+  assert.ok(connectionBody.data.capabilities.includes("connection:read"));
   assert.ok(connectionBody.data.capabilities.includes("tasks:write"));
+  assert.equal(connectionBody.data.adapterManifest.basePath, "/v1");
+  assert.equal(connectionBody.data.adapterManifest.auth.serviceHeader, "X-API-Key");
+  assert.ok(connectionBody.data.adapterManifest.routes.tasks.some((route) => (
+    route.method === "POST"
+    && route.path === "/v1/tasks"
+    && route.capability === "tasks:write"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.agentLogs.some((route) => (
+    route.method === "POST"
+    && route.path === "/v1/agent-logs"
+  )));
+  assert.equal(connectionBody.data.adapterManifest.routes.integrationSettings[0].path, "/v1/integration-settings/clickup");
+  assert.ok(connectionBody.data.adapterManifest.writeRules.includes("Do not send workspaceId in write payloads."));
   assert.equal(connectionBody.data.integrations.clickup.configured, false);
 
   const projectListB = await request("/v1/projects", { headers: authB });

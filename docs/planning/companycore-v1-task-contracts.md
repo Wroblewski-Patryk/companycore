@@ -25,6 +25,162 @@ Every runtime task must preserve these rules:
 - API errors use stable, safe response codes
 - tests include allowed and denied paths
 
+## CCV1-022 Adapter Manifest For Service Clients
+
+### Header
+- ID: CCV1-022
+- Title: Adapter manifest for service clients
+- Task Type: feature
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder
+- Depends on: CCV1-021
+- Priority: P0
+- Iteration: v1-022
+- Operation Mode: BUILDER
+
+### Process Self-Audit
+- [x] All seven autonomous loop steps are represented.
+- [x] Exactly one priority task was selected.
+- [x] Operation mode matches the current queue.
+- [x] The task aligns with the adapter source-of-truth contract.
+
+### Context
+Paperclip, Jarvis, Jarvan, Aviary, n8n, and similar service clients need the
+first handshake to be useful without a GUI. The existing `/v1/connection`
+endpoint proves auth and workspace identity, but adapters also benefit from a
+small machine-readable route map.
+
+### Goal
+Expose canonical v1 routes, methods, capabilities, auth headers, and write
+rules through the existing safe connection handshake.
+
+### Scope
+- `src/modules/connection/connection.routes.ts`
+- `src/tests/api.test.ts`
+- `docs/API.md`
+- `docs/INTEGRATIONS.md`
+- `docs/integrations/adapter-onboarding.md`
+- `.codex/context/PROJECT_STATE.md`
+- `.codex/context/TASK_BOARD.md`
+- this task contract
+
+### Implementation Plan
+1. Reuse `/v1/connection`; do not add a parallel discovery system.
+2. Add a static safe `adapterManifest` with canonical v1 paths.
+3. Cover the manifest in the existing protected API flow test.
+4. Document how adapters should read the manifest before writing records.
+
+### Autonomous Loop Evidence
+
+#### 1. Analyze Current State
+- Issues: adapters can verify auth, but need a route map to avoid hardcoding
+  startup assumptions.
+- Gaps: no machine-readable canonical route list in runtime responses.
+- Inconsistencies: none found; `/v1/connection` is the approved onboarding
+  surface.
+- Architecture constraints: API remains the access layer; no GUI and no direct
+  database access for adapters.
+
+#### 2. Select One Priority Task
+- Selected task: CCV1-022 adapter manifest for service clients.
+- Priority rationale: directly improves Paperclip/Jarvis connection readiness.
+- Why other candidates were deferred: protected production smoke still needs a
+  production workspace key; GitHub webhook setup still needs GitHub auth.
+
+#### 3. Plan Implementation
+- Files or surfaces to modify: connection route, endpoint test, API and
+  integration docs, canonical context.
+- Logic: return safe static metadata under `data.adapterManifest`.
+- Edge cases: manifest must not include raw keys, owner tokens, or provider
+  secrets.
+
+#### 4. Execute Implementation
+- Implementation notes: added route groups for connection, projects, goals,
+  targets, tasks, clients, deals, notes, decisions, agent logs, events, and
+  ClickUp settings.
+
+#### 5. Verify and Test
+- Validation performed: `npm test` against disposable PostgreSQL.
+- Result: pending when first recorded; final result is in Validation Evidence.
+
+#### 6. Self-Review
+- Simpler option considered: docs-only onboarding.
+- Technical debt introduced: no.
+- Scalability assessment: future adapters can extend the same manifest without
+  introducing a separate discovery service.
+- Refinements made: kept the manifest under the existing protected handshake.
+
+#### 7. Update Documentation and Knowledge
+- Docs updated: API, integrations, adapter onboarding, task contract, project
+  state, task board.
+- Context updated: yes.
+- Learning journal updated: not applicable.
+
+### Acceptance Criteria
+- [x] `GET /v1/connection` includes `adapterManifest`.
+- [x] Manifest lists canonical `/v1` paths, HTTP methods, and capabilities for
+  adapter-facing v1 routes.
+- [x] Manifest documents service auth header and write rules.
+- [x] Endpoint test asserts representative manifest content.
+- [x] Docs explain how Paperclip/Jarvis-style adapters should use the manifest.
+
+### Definition of Done
+- [x] Code builds without errors.
+- [x] Feature works through the real API surface.
+- [x] No mock, placeholder, fake, or temporary data/path remains.
+- [x] No existing functionality is broken.
+- [x] Changes are documented in the relevant source of truth.
+- [x] Behavior is reproducible from the evidence recorded below.
+- [x] `DEFINITION_OF_DONE.md` was checked before status changed to `DONE`.
+
+### Validation Evidence
+- Tests: `npm test` with `DATABASE_URL` pointed at disposable PostgreSQL.
+- Manual checks: endpoint behavior covered by integration test.
+- High-risk checks: manifest contains only static routes and safe auth metadata.
+
+### Integration Evidence
+- `INTEGRATION_CHECKLIST.md` reviewed: yes.
+- Real API/service path used: yes.
+- Endpoint and client contract match: yes.
+- DB schema and migrations verified: not applicable.
+- Error state verified: existing unauthenticated protected route test remains.
+- Regression check performed: existing protected API flow test.
+
+### Security / Privacy Evidence
+- `docs/security/secure-development-lifecycle.md` reviewed: yes.
+- Data classification: non-secret API metadata.
+- Trust boundaries: protected API handshake with workspace auth context.
+- Permission or ownership checks: existing `requireApiKey`/bearer auth path.
+- Abuse cases: manifest must not expose secrets or cross-workspace data.
+- Secret handling: no raw key, token, password, or provider secret is returned.
+- Fail-closed behavior: auth failures remain `401`/`403`.
+
+### Deployment / Ops Evidence
+- Deploy impact: low.
+- Env or secret changes: none.
+- Health-check impact: none.
+- Smoke steps updated: adapter onboarding docs updated.
+- Rollback note: redeploy the previous commit if adapters reject the response.
+- `DEPLOYMENT_GATE.md` reviewed: yes.
+
+### Result Report
+- Task summary: Expanded `/v1/connection` with a safe adapter manifest for
+  service clients.
+- Files changed: `src/modules/connection/connection.routes.ts`,
+  `src/tests/api.test.ts`, `docs/API.md`, `docs/INTEGRATIONS.md`,
+  `docs/integrations/adapter-onboarding.md`,
+  `.codex/context/PROJECT_STATE.md`, `.codex/context/TASK_BOARD.md`, and this
+  task contract.
+- How tested: `npm test` against disposable PostgreSQL.
+- What is incomplete: protected production smoke still needs real production
+  owner/service credentials.
+- Next steps: create Paperclip/Jarvis production service API keys and run
+  `/v1/connection` against production.
+
+### Priority
+P0
+
 ## CCV1-018 Owner-Managed Adapter API Keys
 
 ### Header

@@ -58,3 +58,4 @@ No backlog v1 tasks.
 - CCV1-009 Production deployment recovery and public smoke.
 - CCV1-019 Database/API workspace coverage for core records.
 - CCV1-021 Adapter connection handshake for Paperclip and Jarvis.
+- CCV1-022 Adapter manifest for service clients.
