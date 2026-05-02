@@ -351,8 +351,8 @@ P1
 - ID: CCV1-007
 - Title: API key hardening plan and implementation
 - Task Type: feature
-- Current Stage: planning
-- Status: BLOCKED
+- Current Stage: verification
+- Status: DONE
 - Owner: Security
 - Depends on: CCV1-011, CCV1-012, CCV1-003
 - Priority: P1
@@ -372,13 +372,33 @@ client contract for workspace-scoped agents and service clients.
 - `docs/API.md`
 
 ### Acceptance Criteria
-- [ ] API keys belong to a workspace.
-- [ ] API keys are no longer stored only as plaintext in production paths, or a
+- [x] API keys belong to a workspace.
+- [x] API keys are no longer stored only as plaintext in production paths, or a
   documented transition migration exists.
-- [ ] Auth still accepts `X-API-Key` for agent/service clients.
-- [ ] Missing, invalid, inactive, and valid key paths fail closed.
-- [ ] Wrong-workspace and insufficient-scope paths fail closed.
-- [ ] Secret rotation path is documented.
+- [x] Auth still accepts `X-API-Key` for agent/service clients.
+- [x] Missing, invalid, inactive, and valid key paths fail closed.
+- [x] Wrong-workspace and insufficient-scope paths fail closed.
+- [x] Secret rotation path is documented.
+
+### Result Report
+- Task summary: Added hashed API key storage fields, hash/prefix helpers,
+  transition-compatible middleware lookup, and seed updates that write key
+  hashes for workspace-scoped service keys.
+- Files changed: `prisma/schema.prisma`,
+  `prisma/migrations/202605025_api_key_hardening/migration.sql`,
+  `prisma/seed.ts`, `.env.example`, `src/config/env.ts`,
+  `src/auth/api-key.ts`, `src/auth/api-key.middleware.ts`, `docs/API.md`,
+  `docs/DATABASE.md`, `docs/security/security-baseline.md`,
+  `docs/DEPLOYMENT.md`,
+  `docs/operations/coolify-vps-deployment-contract.md`,
+  `.codex/context/PROJECT_STATE.md`, `.codex/context/TASK_BOARD.md`,
+  `docs/planning/mvp-execution-plan.md`, `docs/planning/mvp-next-commits.md`,
+  and this task contract.
+- How tested: Ran `npx prisma generate`, `npx prisma validate`,
+  `npm run build`, and `git diff --check`.
+- What is incomplete: Full API key creation/rotation endpoint and automated
+  negative-path tests remain future work.
+- Next steps: Start CCV1-006 endpoint test foundation.
 
 ### Priority
 P1

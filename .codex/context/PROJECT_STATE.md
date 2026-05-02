@@ -67,8 +67,7 @@ Last updated: 2026-05-02
   Postgres volume.
 
 ## Current Focus
-- Main active objective: harden workspace-scoped API key storage and
-  service-client access.
+- Main active objective: add endpoint test foundation.
 - Top blockers: API namespace and API key hardening implementation details
   remain open; deployed databases initialized with `db push` may need migration
   reconciliation before production rollout.
@@ -78,14 +77,12 @@ Last updated: 2026-05-02
   and deployment smoke evidence are aligned.
 
 ## Autonomous Iteration State
-- Current iteration: CCV1-007 API key hardening plan and implementation.
-- Current operation mode: BUILDER
-- Last completed iteration: CCV1-016 migration safety and seed/bootstrap
-  policy.
-- Last completed task: documented migration safety, local seed behavior,
-  production first-owner bootstrap, bootstrap credential rotation, and database
-  rollback/recovery expectations.
-- Next required mode: BUILDER for CCV1-007.
+- Current iteration: CCV1-006 endpoint test foundation.
+- Current operation mode: ARCHITECT
+- Last completed iteration: CCV1-007 API key hardening plan and implementation.
+- Last completed task: added hashed API key fields, hash/prefix helpers,
+  transition-compatible middleware lookup, and local seed hash population.
+- Next required mode: ARCHITECT for CCV1-006.
 
 ## Recent Progress
 - 2026-05-02: Created Company Core backend foundation, Prisma schema, Docker
@@ -141,6 +138,9 @@ Last updated: 2026-05-02
 - 2026-05-02: Completed CCV1-016 by documenting migration review/testing,
   local seed, production first-owner bootstrap, credential rotation, and
   rollback/recovery policy.
+- 2026-05-02: Completed CCV1-007 by adding hashed workspace service API key
+  storage, transition-compatible lookup, seed hash population, and rotation
+  documentation.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

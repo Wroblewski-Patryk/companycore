@@ -88,7 +88,7 @@ CRM UI during this plan.
     `workspaceId`.
   - Deployment impact: Medium. Adds user/session or token secret requirements.
 
-- [ ] CCV1-007 API key hardening plan and implementation
+- [x] CCV1-007 API key hardening plan and implementation
   - Why now: Agents and service clients such as Paperclip/Jarvis need secure
     machine access tied to a workspace; current keys are plaintext and global.
   - Depends on: CCV1-011, CCV1-012, CCV1-003.

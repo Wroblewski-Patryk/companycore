@@ -136,7 +136,7 @@ and then rotate bootstrap credentials.
 - `name`
 - `key_hash`
 - optional `key_prefix` for operator identification
-- optional `scopes` for future service boundaries
+- `scopes`, JSON array reserved for service-client permissions
 - `active`
 - `last_used_at`
 - timestamps
@@ -144,6 +144,12 @@ and then rotate bootstrap credentials.
 Raw API keys should only be shown at creation time if a creation endpoint is
 added. Existing plaintext foundation keys require a migration or explicit
 rotation plan before production use.
+
+Current transition state keeps the legacy `key` column for compatibility while
+new seed/bootstrap paths populate `key_hash` and `key_prefix`. Middleware checks
+`key_hash` first and only falls back to plaintext rows when `key_hash` is null.
+Production should rotate service keys and remove plaintext dependence in a
+future cleanup migration.
 
 ## Integration Settings
 

@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { apiKeyPrefix, hashApiKey } from "../src/auth/api-key";
 import { hashPassword } from "../src/auth/password";
 
 const prisma = new PrismaClient();
@@ -51,10 +52,19 @@ async function main() {
 
   await prisma.apiKey.upsert({
     where: { key },
-    update: { active: true, workspaceId: workspace.id },
+    update: {
+      active: true,
+      workspaceId: workspace.id,
+      keyHash: hashApiKey(key),
+      keyPrefix: apiKeyPrefix(key),
+      scopes: []
+    },
     create: {
       name: "Local development key",
       key,
+      keyHash: hashApiKey(key),
+      keyPrefix: apiKeyPrefix(key),
+      scopes: [],
       workspaceId: workspace.id,
       active: true
     }

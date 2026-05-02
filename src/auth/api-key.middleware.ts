@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { prisma } from "../db/prisma";
+import { hashApiKey } from "./api-key";
 import { verifyAuthToken } from "./token";
 
 export type AuthContext = {
@@ -61,8 +62,17 @@ export async function requireAuthContext(req: Request, res: Response, next: Next
     return res.status(401).json({ error: "missing_api_key" });
   }
 
-  const record = await prisma.apiKey.findUnique({
-    where: { key: apiKey }
+  const apiKeyHash = hashApiKey(apiKey);
+  const record = await prisma.apiKey.findFirst({
+    where: {
+      OR: [
+        { keyHash: apiKeyHash },
+        {
+          key: apiKey,
+          keyHash: null
+        }
+      ]
+    }
   });
 
   if (!record?.active) {

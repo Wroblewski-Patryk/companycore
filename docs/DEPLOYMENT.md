@@ -56,6 +56,7 @@ Required environment values:
 - `SERVICE_PASSWORD_POSTGRES`
 - `SERVICE_PASSWORD_API_KEY`
 - `AUTH_TOKEN_SECRET`
+- `API_KEY_HASH_SECRET`
 - `INTEGRATION_SECRET_KEY`
 
 Map domains to the `backend` service on container port `3000`.

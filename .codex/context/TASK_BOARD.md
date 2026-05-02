@@ -2,12 +2,6 @@
 
 ## Ready
 
-- CCV1-007 API key hardening plan and implementation
-  - Stage: planning
-  - Owner: Security
-  - Priority: P1
-  - Scope: Harden workspace-scoped API key storage and service-client access.
-
 ## Blocked
 
 - CCV1-008 Missing module route decision and minimal route slice
@@ -56,3 +50,4 @@
 - CCV1-004 Complete required v1 event emission.
 - CCV1-005 Deployment domain documentation and smoke checklist.
 - CCV1-016 Migration safety and seed/bootstrap policy.
+- CCV1-007 API key hardening plan and implementation.
