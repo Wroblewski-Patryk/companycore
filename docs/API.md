@@ -20,6 +20,18 @@ transaction. Protected business and integration routes should resolve an active
 `workspaceId` from either a user auth context or a workspace-scoped service API
 key.
 
+Approved v1 auth direction:
+
+- Human owner auth uses email/password with hashed password storage.
+- Registration creates the owner user, workspace, and owner membership
+  atomically.
+- Workspace memberships are included in the data model, but v1 only activates
+  the `owner` role.
+- Agent/service access uses workspace-scoped hashed API keys.
+- Protected routes must accept a valid owner auth context or workspace service
+  API key and resolve `workspaceId`.
+- Requests without a resolvable workspace fail closed.
+
 Planned minimum:
 
 ```http
@@ -28,8 +40,33 @@ POST /auth/login
 GET /me
 ```
 
+Planned registration payload:
+
+```json
+{
+  "email": "owner@example.com",
+  "password": "strong-password",
+  "name": "Owner Name",
+  "workspaceName": "LuckySparrow"
+}
+```
+
+Safe auth responses may include user and workspace identifiers, but must not
+include password hashes, raw API keys, integration tokens, or secret material.
+
 Integration settings such as ClickUp credentials must belong to the active
 workspace and must not be returned in API responses.
+
+## Service API Keys
+
+`X-API-Key` remains the service-client auth mechanism for Paperclip, Jarvis,
+n8n, and other agents. In v1 it must become workspace-scoped:
+
+- API key resolves exactly one workspace.
+- API key material is stored hashed.
+- Inactive keys fail closed.
+- Future scopes may restrict service clients to narrower permissions.
+- Raw keys are only shown once if an API key creation endpoint is added.
 
 ## Health
 

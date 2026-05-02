@@ -49,11 +49,11 @@ CRM UI during this plan.
 
 ## Phase 2: Workspace And Auth Architecture
 
-- [ ] CCV1-011 Workspace ownership and auth architecture contract
+- [x] CCV1-011 Workspace ownership and auth architecture contract
   - Why now: ClickUp settings and future agent access must belong to a
     workspace, not global config. Registration must create the owner workspace
     before native integrations are implemented.
-  - Depends on: CCV1-001, DEC-002, DEC-006, DEC-007.
+  - Depends on: CCV1-001.
   - Validation: Docs define users, workspaces, ownership, auth boundary,
     workspace scoping rules, and migration impact.
   - Deployment impact: None for planning; high for implementation.
@@ -82,7 +82,7 @@ CRM UI during this plan.
   - Why now: Owner user and workspace creation are the root of secure
     CompanyCore usage and must exist before workspace-owned integration
     settings are accepted.
-  - Depends on: CCV1-011, CCV1-003, DEC-006, DEC-007.
+  - Depends on: CCV1-011, CCV1-003.
   - Validation: Registration atomically creates owner user and workspace;
     login returns an authenticated context; protected routes resolve
     `workspaceId`.
@@ -91,7 +91,7 @@ CRM UI during this plan.
 - [ ] CCV1-007 API key hardening plan and implementation
   - Why now: Agents and service clients such as Paperclip/Jarvis need secure
     machine access tied to a workspace; current keys are plaintext and global.
-  - Depends on: CCV1-011, CCV1-012, CCV1-003, DEC-002.
+  - Depends on: CCV1-011, CCV1-012, CCV1-003.
   - Validation: Missing, invalid, inactive, valid, wrong-workspace, and
     insufficient-scope paths are tested and fail closed.
   - Deployment impact: Medium. Requires key rotation or compatible migration.

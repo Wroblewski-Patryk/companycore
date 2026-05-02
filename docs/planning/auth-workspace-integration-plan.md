@@ -12,6 +12,9 @@ register owner -> create workspace -> authenticate -> configure integration
 
 - A user owns a workspace.
 - Registration creates the owner user and workspace atomically.
+- Owner authentication uses email/password with hashed password storage for v1.
+- Workspace memberships are included now for future growth, but v1 activates
+  only the `owner` role.
 - Business records belong to a workspace.
 - Service API keys belong to a workspace and are intended for Paperclip,
   Jarvis, n8n, and other agents.
@@ -28,7 +31,7 @@ Final schema names must be confirmed during CCV1-011, but the working target is:
 - `users`
   - `id`
   - `email`
-  - `password_hash` or external auth identifier, depending on DEC-006
+  - `password_hash`
   - `name`
   - `created_at`
   - `updated_at`
@@ -40,9 +43,9 @@ Final schema names must be confirmed during CCV1-011, but the working target is:
   - `created_at`
   - `updated_at`
 
-- `workspace_memberships` optional for v1
-  - Use only if DEC-007 selects future-proof memberships now.
-  - If added, v1 should only activate `owner`.
+- `workspace_memberships`
+  - Include now for future-proofing.
+  - v1 activates only `owner`.
 
 - `api_keys`
   - Existing table should become workspace-scoped.
@@ -80,7 +83,7 @@ Registration must:
 1. validate email and password or approved identity payload
 2. create the user
 3. create the workspace
-4. assign the user as owner
+4. assign the user as owner through `workspace_memberships`
 5. return a safe auth response without secrets
 6. emit `workspace_created` and `user_registered` or equivalent events if event
    scope is approved
@@ -148,6 +151,15 @@ verified.
 - Provider errors should return safe, actionable error codes.
 - Sync must not corrupt existing tasks when ClickUp is unavailable.
 - External IDs must be unique per workspace and source, not globally.
+
+## Resolved Architecture Choices For v1
+
+- Use email/password for owner registration/login.
+- Store password hashes, never plaintext passwords.
+- Include `workspace_memberships` now, but only use `owner` in v1.
+- Support both owner auth and workspace-scoped service API keys.
+- Treat service API keys as credentials for agents and automation clients.
+- Defer invitations, non-owner roles, and advanced RBAC.
 
 ## Implementation Order
 

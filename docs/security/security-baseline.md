@@ -8,6 +8,22 @@
 - rate limiting and abuse controls
 - logging without secret leakage
 
+## CompanyCore v1 Auth Baseline
+
+- Owner login uses email/password with hashed password storage.
+- Registration creates owner user, workspace, and owner membership in one
+  transaction.
+- Workspace memberships exist for future growth, but v1 only activates the
+  `owner` role.
+- Service API keys are workspace-scoped credentials for Paperclip, Jarvis, n8n,
+  and other agents.
+- API key material must be hashed at rest before production use.
+- Protected routes must resolve `workspaceId` from user auth or service API key.
+- Cross-workspace access must fail closed.
+- Integration settings and tokens belong to a workspace.
+- Integration secrets must not be logged or returned in API responses.
+- Raw provider/backend errors must not be exposed directly to API clients.
+
 ## Elevated Risk Areas
 
 - AI-assisted flows
@@ -20,6 +36,8 @@
 
 - fail-closed behavior
 - authorization boundaries
+- cross-workspace denied paths
+- secret redaction
 - retry and idempotency safety
 - negative-path verification
 

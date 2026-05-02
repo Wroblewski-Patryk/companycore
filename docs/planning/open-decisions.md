@@ -18,21 +18,6 @@ Track unresolved decisions that can block or reshape execution.
   - Needed by: CCV1-008
   - Current owner: Planner / Backend Builder
 
-- DEC-002 API key hardening depth for v1
-  - Question: How should service API keys coexist with owner-user
-    authentication and workspace scoping?
-  - Why it matters: Paperclip, Jarvis, and automation clients need secure
-    machine access, while human registration/login creates the workspace owner.
-    Both paths must resolve to a workspace and fail closed.
-  - Options:
-    - Keep API keys as workspace-scoped service credentials with hashed storage
-      and optional scopes.
-    - Replace API keys with user-issued personal tokens in v1.
-    - Support both: owner login for humans and hashed workspace API keys for
-      agents/services.
-  - Needed by: CCV1-007, CCV1-011, CCV1-012
-  - Current owner: Security / Backend Builder
-
 - DEC-003 Missing module API scope for v1
   - Question: Which DB-backed modules need public API routes in v1:
     task lists, pipeline stages, interactions, decisions, agents, and agent
@@ -76,33 +61,6 @@ Track unresolved decisions that can block or reshape execution.
   - Needed by: CCV1-010
   - Current owner: Product Docs / Backend Builder
 
-- DEC-006 Owner authentication mechanism
-  - Question: What should v1 use for owner registration and login?
-  - Why it matters: CompanyCore has no GUI in v1, but Paperclip/Jarvis and
-    future GUI clients need a secure auth foundation. Registration must create
-    an owner user and workspace atomically.
-  - Options:
-    - Email/password with hashed passwords and JWT or opaque sessions.
-    - External identity provider only, if Paperclip already has a reusable auth
-      provider.
-    - Start with API-only bootstrap endpoint for first owner, then add full
-      login when GUI work begins.
-  - Needed by: CCV1-011, CCV1-012
-  - Current owner: Security / Backend Builder
-
-- DEC-007 Workspace model depth for v1
-  - Question: Should v1 support one owner-only workspace, or owner plus future
-    membership rows now?
-  - Why it matters: The user wants settings assigned to a workspace with a user
-    owner, but not an overbuilt multi-tenant product. The schema should support
-    future users without requiring a rewrite.
-  - Options:
-    - Minimal `workspaces.owner_user_id` only, no memberships in v1.
-    - Add `workspace_memberships` now with only `owner` role active.
-    - Full roles and invitations now.
-  - Needed by: CCV1-011
-  - Current owner: Product Docs / Backend Builder
-
 ## Resolved Decisions
 
 - 2026-05-02: CompanyCore v1 has no GUI.
@@ -114,3 +72,12 @@ Track unresolved decisions that can block or reshape execution.
 - 2026-05-02: CompanyCore v1 should include a workspace ownership boundary.
   Registration creates an owner user and a workspace, and integration settings
   are assigned to the workspace.
+- 2026-05-02: Owner authentication uses email/password with hashed password
+  storage for v1. Token/session implementation details remain scoped to
+  CCV1-012.
+- 2026-05-02: v1 supports both owner-user auth for humans/API clients and
+  hashed workspace-scoped service API keys for Paperclip, Jarvis, n8n, and
+  other agents.
+- 2026-05-02: v1 includes `workspace_memberships` now for future growth, but
+  only the `owner` role is active. Invitations, non-owner roles, and advanced
+  RBAC are deferred.

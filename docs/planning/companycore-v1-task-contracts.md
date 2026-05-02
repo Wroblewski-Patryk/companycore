@@ -309,7 +309,7 @@ P1
 - Current Stage: planning
 - Status: BLOCKED
 - Owner: Security
-- Depends on: DEC-002, CCV1-003
+- Depends on: CCV1-011, CCV1-012, CCV1-003
 - Priority: P1
 - Iteration: v1-007
 - Operation Mode: BUILDER
@@ -660,10 +660,10 @@ P0
 - ID: CCV1-011
 - Title: Workspace ownership and auth architecture contract
 - Task Type: research
-- Current Stage: planning
-- Status: READY
+- Current Stage: verification
+- Status: DONE
 - Owner: Product Docs
-- Depends on: CCV1-001, DEC-002, DEC-006, DEC-007
+- Depends on: CCV1-001
 - Priority: P0
 - Iteration: v1-011
 - Operation Mode: ARCHITECT
@@ -688,13 +688,31 @@ service credentials, and integration settings belong to the workspace.
 - `.codex/context/PROJECT_STATE.md`
 
 ### Acceptance Criteria
-- [ ] Docs define `users`, `workspaces`, and owner relationship.
-- [ ] Docs define whether v1 uses direct owner relation or membership rows.
-- [ ] Docs define which existing models require `workspace_id`.
-- [ ] Docs define auth context resolution for user sessions and API keys.
-- [ ] Docs define fail-closed behavior when workspace cannot be resolved.
-- [ ] Docs define how integration settings belong to workspaces.
-- [ ] No runtime code changes are included.
+- [x] Docs define `users`, `workspaces`, and owner relationship.
+- [x] Docs define whether v1 uses direct owner relation or membership rows.
+- [x] Docs define which existing models require `workspace_id`.
+- [x] Docs define auth context resolution for user sessions and API keys.
+- [x] Docs define fail-closed behavior when workspace cannot be resolved.
+- [x] Docs define how integration settings belong to workspaces.
+- [x] No runtime code changes are included.
+
+### Result Report
+- Task summary: Finalized the v1 workspace/auth architecture contract:
+  email/password owner auth with hashed password storage, automatic workspace
+  creation, `workspace_memberships` with only `owner` active in v1, and
+  workspace-scoped service API keys for agents/automations.
+- Files changed: `docs/DATABASE.md`, `docs/API.md`,
+  `docs/security/security-baseline.md`,
+  `docs/security/secure-development-lifecycle.md`,
+  `docs/planning/auth-workspace-integration-plan.md`,
+  `docs/planning/open-decisions.md`, `.codex/context/PROJECT_STATE.md`,
+  `.codex/context/TASK_BOARD.md`, `docs/planning/mvp-next-commits.md`, and
+  this task contract.
+- How tested: Reviewed docs for CCV1-011 acceptance criteria and ran
+  `git diff --check`.
+- What is incomplete: Runtime schema/auth implementation remains in CCV1-012,
+  CCV1-013, and CCV1-007.
+- Next steps: Start CCV1-014 API contract and error response standard.
 
 ### Priority
 P0
@@ -708,7 +726,7 @@ P0
 - Current Stage: planning
 - Status: READY
 - Owner: Backend Builder
-- Depends on: CCV1-011, CCV1-003, DEC-006, DEC-007
+- Depends on: CCV1-011, CCV1-003
 - Priority: P0
 - Iteration: v1-012
 - Operation Mode: BUILDER

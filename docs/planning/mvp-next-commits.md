@@ -5,11 +5,10 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NOW
 
-- [ ] CCV1-011 Workspace ownership and auth architecture contract
+- [ ] CCV1-014 API contract and error response standard
 
 ## NEXT
 
-- [ ] CCV1-014 API contract and error response standard
 - [ ] CCV1-015 Workspace guardrail test matrix
 - [ ] CCV1-012 Registration, login, and workspace bootstrap
 - [ ] CCV1-013 Workspace-scoped integration settings and secret storage

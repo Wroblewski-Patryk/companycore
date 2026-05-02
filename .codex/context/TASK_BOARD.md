@@ -28,13 +28,6 @@
   - Scope: Implement ClickUp as the first native CompanyCore integration
     adapter after CCV1-001 and DEC-005 are resolved.
 
-- CCV1-011 Workspace ownership and auth architecture contract
-  - Stage: planning
-  - Owner: Product Docs
-  - Priority: P0
-  - Scope: Define owner user, workspace, auth context, workspace scoping, and
-    integration settings ownership.
-
 - CCV1-012 Registration, login, and workspace bootstrap
   - Stage: planning
   - Owner: Backend Builder
@@ -83,7 +76,7 @@
   - Stage: planning
   - Owner: Security
   - Priority: P1
-  - Blocked by: DEC-002, CCV1-011, CCV1-012, CCV1-003
+  - Blocked by: CCV1-012, CCV1-003
 
 - CCV1-008 Missing module route decision and minimal route slice
   - Stage: planning
@@ -120,3 +113,4 @@
 - Audit current repository architecture against CompanyCore v1 expectations.
 - CCV1-002 Real planning queue and task contracts.
 - CCV1-001 Canonical architecture and deployment docs alignment.
+- CCV1-011 Workspace ownership and auth architecture contract.
