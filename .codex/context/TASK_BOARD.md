@@ -3,7 +3,7 @@
 ## Ready
 
 No active P0/P1 Google Drive or web console implementation task remains ready
-after V2WEB-005.
+after V2WEB-006.
 
 ## Blocked
 
@@ -137,3 +137,4 @@ after V2WEB-005.
 - CCV1-020 GitHub webhook auto-deploy completion.
 - V2WEB-004 Dedicated Operating Areas View.
 - V2WEB-005 Dedicated Tasks Adapter View.
+- V2WEB-006 Settings Integration Taxonomy View.

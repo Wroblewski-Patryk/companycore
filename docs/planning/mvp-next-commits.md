@@ -5,6 +5,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NOW
 
+- [x] V2WEB-006 Settings Integration Taxonomy View
 - [x] V2WEB-005 Dedicated Tasks Adapter View
 - [x] V2WEB-004 Dedicated Operating Areas View
 - [x] V2WEB-002 Manual Provider Scope Mapping
@@ -70,9 +71,9 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NEXT
 
-- [ ] Continue v2 web console module extraction after `/tasks-adapter`:
-      integration taxonomy and pipeline surfaces should each become
-      route-level slices only when their data path is already implemented.
+- [ ] Continue v2 web console module extraction after
+      `/settings/integrations`: pipeline surfaces should become route-level
+      slices only when their data path is already implemented.
 - [x] Source handoff package: document the OpenJarvis
       `5a426370` connector hygiene commit and the Paperclip `4cfa476f`
       adapter commit for managed upstream handoff.
@@ -92,6 +93,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] 50. V2WEB-003 Main Branch Web Console Shell Reconciliation
 - [x] 51. V2WEB-004 Dedicated Operating Areas View
 - [x] 52. V2WEB-005 Dedicated Tasks Adapter View
+- [x] 53. V2WEB-006 Settings Integration Taxonomy View
 - [x] 48. V2WEB-001 Operating Map And Google Drive Console
 - [x] 39. V2GD-001 Google Drive Architecture And Queue
 - [x] 40. V2GD-002 Google Drive Persistence Foundation

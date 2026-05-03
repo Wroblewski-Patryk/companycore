@@ -112,12 +112,12 @@ Last updated: 2026-05-03
   pattern.
 
 ## Autonomous Iteration State
-- Current iteration: V2WEB-005 Dedicated Tasks Adapter View.
-- Current operation mode: TESTER
-- Last completed iteration: V2WEB-004 Dedicated Operating Areas View.
-- Last completed task: added a dedicated `/tasks-adapter` owner-console route
-  for implemented task records from `/v1/tasks`, preserved legacy protected API
-  `/tasks`, and kept dashboard as the summary and module navigation surface.
+- Current iteration: V2WEB-006 Settings Integration Taxonomy View.
+- Current operation mode: BUILDER
+- Last completed iteration: V2WEB-005 Dedicated Tasks Adapter View.
+- Last completed task: added `/settings/integrations` as an implemented-data
+  taxonomy for tasks, Drive, pipeline/CRM, API capabilities, and operating-area
+  mapping counts.
 - Next required mode: BUILDER for the next v2 web console iteration unless an
   architecture decision blocks the queue first.
 
@@ -688,6 +688,13 @@ Last updated: 2026-05-03
   cells render provider-controlled values as text instead of HTML. The slice
   intentionally avoided `/tasks` as a web route because `/tasks` is still a
   protected legacy API path covered by integration tests.
+- 2026-05-03: Completed V2WEB-006 by adding `/settings/integrations` as a
+  taxonomy view for implemented integrations and data paths. The owner console
+  now groups ClickUp/tasks, Google Drive/files, pipeline/CRM tables, and API
+  capabilities, then summarizes implemented tables, records, provider mappings,
+  and Drive files by operating area. Dashboard and sidebar links point to this
+  route, and every action opens an existing implemented surface rather than a
+  placeholder.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

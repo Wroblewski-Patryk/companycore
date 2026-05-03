@@ -31,6 +31,7 @@
           <a href="/dashboard" data-link data-nav="/dashboard">Dashboard</a>
           <a href="/areas" data-link data-nav="/areas">Operating areas</a>
           <a href="/tasks-adapter" data-link data-nav="/tasks-adapter">Tasks & adapters</a>
+          <a href="/settings/integrations" data-link data-nav="/settings/integrations">Integrations</a>
           <a href="/settings" data-link data-nav="/settings">ClickUp adapter</a>
           <a href="/settings/drive" data-link data-nav="/settings/drive">Google Drive</a>
           <a href="/settings/api" data-link data-nav="/settings/api">API settings</a>
@@ -184,6 +185,10 @@
               <strong>ClickUp Lists</strong>
               <span>Refresh provider structure and keep task lists aligned with the right department.</span>
             </a>
+            <a class="module-link" href="/settings/integrations" data-link>
+              <strong>Integration map</strong>
+              <span>Review implemented data groups by source, module, and operating area.</span>
+            </a>
           </div>
         </section>
 
@@ -197,6 +202,7 @@
           <div class="actions">
             <a class="button-link" href="/areas" data-link>Open areas</a>
             <a class="button-link" href="/tasks-adapter" data-link>Open tasks</a>
+            <a class="button-link" href="/settings/integrations" data-link>Open integrations</a>
             <a class="button-link" href="/settings" data-link>Open settings</a>
             <a class="button-link secondary" href="/settings/drive" data-link>Connect Drive</a>
             <a class="button-link secondary" href="/settings/api" data-link>View API</a>
@@ -316,6 +322,9 @@
             <h1>Settings</h1>
             <p>Manage workspace integrations and the first ClickUp connection.</p>
           </div>
+          <div class="actions">
+            <a class="button-link secondary compact" href="/settings/integrations" data-link>Integration map</a>
+          </div>
         </div>
 
         <section class="panel form" id="clickupPanel" aria-disabled="true">
@@ -379,6 +388,33 @@
             <button type="button" class="secondary" id="saveButton">Save connection</button>
             <button type="button" id="syncButton">Save and sync</button>
           </div>
+        </section>
+      </section>
+
+      <section class="view" data-view="/settings/integrations">
+        <div class="page-title">
+          <div>
+            <p class="label">Settings</p>
+            <h1>Integrations</h1>
+            <p id="integrationSummary">Sign in to load integration data.</p>
+          </div>
+          <div class="status-card">
+            <span class="dot ok"></span>
+            <span>Implemented paths</span>
+          </div>
+        </div>
+
+        <section class="integration-grid" id="integrationGroups" aria-live="polite"></section>
+
+        <section class="panel integration-matrix-panel">
+          <div class="section-title row-title">
+            <div>
+              <h2>Operating-area data map</h2>
+              <p>Implemented tables, provider mappings, and Drive records grouped by company area.</p>
+            </div>
+            <a class="button-link secondary compact" href="/areas" data-link>Correct mapping</a>
+          </div>
+          <div class="integration-area-list" id="integrationAreaMatrix"></div>
         </section>
       </section>
 

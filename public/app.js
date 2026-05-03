@@ -1,4 +1,4 @@
-const privateRoutes = new Set(["/dashboard", "/areas", "/tasks-adapter", "/settings", "/settings/drive", "/settings/api"]);
+const privateRoutes = new Set(["/dashboard", "/areas", "/tasks-adapter", "/settings", "/settings/integrations", "/settings/drive", "/settings/api"]);
 const publicRoutes = new Set(["/", "/auth/login", "/auth/register"]);
 
 const state = {
@@ -109,6 +109,9 @@ const metrics = document.querySelector("#metrics");
 const taskStats = document.querySelector("#taskStats");
 const tasksSummary = document.querySelector("#tasksSummary");
 const tasksTableBody = document.querySelector("#tasksTableBody");
+const integrationSummary = document.querySelector("#integrationSummary");
+const integrationGroups = document.querySelector("#integrationGroups");
+const integrationAreaMatrix = document.querySelector("#integrationAreaMatrix");
 const googleDrivePanel = document.querySelector("#googleDrivePanel");
 const googleDriveWorkspaceLabel = document.querySelector("#googleDriveWorkspaceLabel");
 const googleDriveAuthUrlButton = document.querySelector("#googleDriveAuthUrlButton");
@@ -141,6 +144,7 @@ const routeLabels = {
   "/dashboard": "Dashboard",
   "/areas": "Operating areas",
   "/tasks-adapter": "Tasks & adapters",
+  "/settings/integrations": "Integrations",
   "/settings": "ClickUp adapter",
   "/settings/drive": "Google Drive",
   "/settings/api": "API settings"
@@ -425,6 +429,7 @@ function renderTasks() {
     cell.textContent = "No tasks found yet.";
     row.append(cell);
     tasksTableBody.append(row);
+    renderIntegrationTaxonomy();
     return;
   }
 
@@ -440,6 +445,7 @@ function renderTasks() {
     appendTaskCell(row, formatDate(task.dueDate));
     tasksTableBody.append(row);
   }
+  renderIntegrationTaxonomy();
 }
 
 function renderTaskStat(label, value) {
@@ -458,6 +464,173 @@ function appendTaskCell(row, value) {
   const cell = document.createElement("td");
   cell.textContent = value || "-";
   row.append(cell);
+}
+
+function renderIntegrationTaxonomy() {
+  integrationGroups.innerHTML = "";
+  integrationAreaMatrix.innerHTML = "";
+
+  const clickUpTasks = state.tasks.filter((task) => task.source === "clickup").length;
+  const driveFolders = state.googleDrive.files.filter((file) => file.isFolder).length;
+  const pipelineRecords = recordCountForSlugs(["clients", "pipeline-stages", "deals", "interactions"]);
+  const groups = [
+    {
+      type: "Tasks",
+      name: "ClickUp task lists",
+      status: state.clickup.configured ? state.clickup.active ? "Active" : "Saved, inactive" : "Not connected",
+      metric: `${state.tasks.length} task${state.tasks.length === 1 ? "" : "s"}`,
+      detail: `${clickUpTasks} from ClickUp, ${(state.clickup.config.listIds || []).length} selected List${(state.clickup.config.listIds || []).length === 1 ? "" : "s"}.`,
+      primaryHref: "/tasks-adapter",
+      primaryLabel: "Open tasks",
+      secondaryHref: "/settings",
+      secondaryLabel: "Configure"
+    },
+    {
+      type: "Files",
+      name: "Google Drive",
+      status: state.googleDrive.configured ? state.googleDrive.active ? "Active" : "Saved, inactive" : "Not connected",
+      metric: `${state.googleDrive.files.length} Drive item${state.googleDrive.files.length === 1 ? "" : "s"}`,
+      detail: `${driveFolders} imported folder${driveFolders === 1 ? "" : "s"} available for area mapping.`,
+      primaryHref: "/settings/drive",
+      primaryLabel: "Open Drive",
+      secondaryHref: "/areas",
+      secondaryLabel: "Map areas"
+    },
+    {
+      type: "Pipelines",
+      name: "CRM and pipeline data",
+      status: "Implemented API",
+      metric: `${pipelineRecords} record${pipelineRecords === 1 ? "" : "s"}`,
+      detail: "Clients, pipeline stages, deals, and interactions are available through CompanyCore tables.",
+      primaryHref: "/areas",
+      primaryLabel: "Review tables",
+      secondaryHref: "/settings/api",
+      secondaryLabel: "API routes"
+    },
+    {
+      type: "API",
+      name: "Agents and service clients",
+      status: "Implemented API",
+      metric: `${state.capabilities.length} route${state.capabilities.length === 1 ? "" : "s"}`,
+      detail: "Jarvis, Paperclip, Aviary, and internal tools can use the protected CompanyCore API surface.",
+      primaryHref: "/settings/api",
+      primaryLabel: "Open API",
+      secondaryHref: "/dashboard",
+      secondaryLabel: "Dashboard"
+    }
+  ];
+
+  integrationSummary.textContent = isSignedIn()
+    ? `${groups.length} implemented integration/data groups are available in this workspace.`
+    : "Sign in to load integration data.";
+
+  for (const group of groups) {
+    integrationGroups.append(integrationGroupCard(group));
+  }
+
+  renderIntegrationAreaMatrix();
+}
+
+function integrationGroupCard(group) {
+  const article = document.createElement("article");
+  article.className = "panel integration-card";
+
+  const kicker = document.createElement("span");
+  kicker.className = "summary-kicker";
+  kicker.textContent = group.type;
+
+  const title = document.createElement("strong");
+  title.textContent = group.name;
+
+  const status = document.createElement("p");
+  status.className = "integration-status";
+  status.textContent = group.status;
+
+  const metric = document.createElement("p");
+  metric.className = "integration-metric";
+  metric.textContent = group.metric;
+
+  const detail = document.createElement("p");
+  detail.textContent = group.detail;
+
+  const actions = document.createElement("div");
+  actions.className = "actions";
+  actions.append(
+    integrationLink(group.primaryHref, group.primaryLabel, ""),
+    integrationLink(group.secondaryHref, group.secondaryLabel, "secondary")
+  );
+
+  article.append(kicker, title, status, metric, detail, actions);
+  return article;
+}
+
+function integrationLink(href, label, variant) {
+  const link = document.createElement("a");
+  link.className = `button-link compact ${variant}`.trim();
+  link.href = href;
+  link.dataset.link = "";
+  link.textContent = label;
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+    navigate(href);
+  });
+  return link;
+}
+
+function recordCountForSlugs(slugs) {
+  return slugs.reduce((sum, slug) => sum + (state.databaseTables.get(slug)?.records.length || 0), 0);
+}
+
+function renderIntegrationAreaMatrix() {
+  const areas = sortedOperatingAreas();
+
+  if (areas.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "empty-note";
+    empty.textContent = isSignedIn()
+      ? "Refresh the workspace connection to load the operating-area matrix."
+      : "Sign in to load the operating-area matrix.";
+    integrationAreaMatrix.append(empty);
+    return;
+  }
+
+  for (const area of areas) {
+    const providerMappings = state.operatingModel.externalMappings.filter((mapping) => mapping.operatingAreaId === area.id);
+    const driveFiles = state.googleDrive.files.filter((file) => file.operatingAreaId === area.id);
+    const tableRecords = (area.tables || []).reduce((sum, table) => sum + countForTable(table), 0);
+    const row = document.createElement("article");
+    row.className = "integration-area-row";
+    row.append(
+      integrationAreaLabel(area),
+      integrationAreaMetric("Tables", area.tables?.length || 0),
+      integrationAreaMetric("Records", tableRecords),
+      integrationAreaMetric("Mappings", providerMappings.length),
+      integrationAreaMetric("Drive", driveFiles.length)
+    );
+    integrationAreaMatrix.append(row);
+  }
+}
+
+function integrationAreaLabel(area) {
+  const block = document.createElement("div");
+  block.className = "integration-area-name";
+  const strong = document.createElement("strong");
+  strong.textContent = areaLabel(area);
+  const span = document.createElement("span");
+  span.textContent = areaDefinitionFor(area).description || area.description || "Company operating area.";
+  block.append(strong, span);
+  return block;
+}
+
+function integrationAreaMetric(label, value) {
+  const block = document.createElement("div");
+  block.className = "integration-area-metric";
+  const strong = document.createElement("strong");
+  strong.textContent = String(value);
+  const span = document.createElement("span");
+  span.textContent = label;
+  block.append(strong, span);
+  return block;
 }
 
 function renderDataCounters() {
@@ -497,6 +670,7 @@ function renderOperatingMap() {
     areaMappings.innerHTML = "";
     areaRecords.innerHTML = "";
     renderDataCounters();
+    renderIntegrationTaxonomy();
     return;
   }
 
@@ -577,6 +751,7 @@ function renderOperatingMap() {
   `, "No records in this area's mapped tables yet.");
 
   renderDataCounters();
+  renderIntegrationTaxonomy();
   bindScopeEditors();
 }
 
@@ -609,6 +784,7 @@ function renderGoogleDriveFiles() {
     const row = document.createElement("tr");
     row.innerHTML = '<td colspan="5">No Drive files loaded yet.</td>';
     googleDriveFilesBody.append(row);
+    renderIntegrationTaxonomy();
     return;
   }
 
@@ -635,6 +811,7 @@ function renderGoogleDriveFiles() {
     `;
     googleDriveFilesBody.append(row);
   }
+  renderIntegrationTaxonomy();
   bindScopeEditors();
 }
 
@@ -686,6 +863,7 @@ async function loadOperatingModel() {
     };
     state.databaseTables = new Map();
     renderOperatingMap();
+    renderIntegrationTaxonomy();
     return;
   }
 
@@ -693,6 +871,7 @@ async function loadOperatingModel() {
   state.operatingModel = response.data || state.operatingModel;
   await loadDatabaseSnapshot();
   renderOperatingMap();
+  renderIntegrationTaxonomy();
 }
 
 async function loadDatabaseSnapshot() {
@@ -1216,6 +1395,7 @@ logoutButton.addEventListener("click", () => {
   renderTasks();
   renderGoogleDriveFiles();
   renderOperatingMap();
+  renderIntegrationTaxonomy();
   resultPanel.hidden = true;
   navigate("/auth/login", { replace: true });
 });
@@ -1494,4 +1674,5 @@ if (state.ownerToken) {
   setGoogleDriveEnabled(false);
   renderOperatingMap();
   renderGoogleDriveFiles();
+  renderIntegrationTaxonomy();
 }

@@ -1,5 +1,60 @@
 # Web Console V2 Task Contracts
 
+## V2WEB-006 Settings Integration Taxonomy View
+
+- Task Type: design/frontend
+- Current Stage: done
+- Deliverable For This Stage: dedicated `/settings/integrations` owner-console
+  route that groups already implemented integrations and data paths by data
+  type and company operating area.
+- Goal: Make Settings usable as a control center for implemented integrations
+  without adding unimplemented provider behavior or changing backend contracts.
+- Scope:
+  - `public/index.html`
+  - `public/app.js`
+  - `public/styles.css`
+  - `src/app.ts`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+- Implementation Plan:
+  - Add `/settings/integrations` to authenticated web routes and navigation.
+  - Render implemented integration/data groups for tasks, Drive files, API
+    capabilities, and pipeline/CRM data.
+  - Render an operating-area matrix showing existing tables, provider mappings,
+    and Drive files per area.
+  - Link each group to the already implemented module/configuration route.
+  - Validate syntax, build, tests, local route rendering, and production smoke.
+- Acceptance Criteria:
+  - Signed-in navigation includes an integration taxonomy entry.
+  - `/settings/integrations` shows only implemented data paths.
+  - Integration groups link to existing routes instead of placeholder pages.
+  - The area matrix reflects the current operating model and imported Drive or
+    provider mapping data.
+  - Existing `/settings`, `/settings/drive`, `/settings/api`,
+    `/tasks-adapter`, and `/areas` routes still render.
+- Definition of Done:
+  - `node --check public/app.js`, `git diff --check`, `npm run build`, and
+    `npm test` pass.
+  - Browser smoke verifies `/settings/integrations` and dashboard links render
+    on desktop.
+  - Project state, task board, and next-commits docs are updated.
+- Result Report:
+  - Added `/settings/integrations` to the authenticated frontend route list,
+    signed-in navigation, dashboard module links, and Express web app route
+    allowlist.
+  - Added integration group cards for implemented task, Drive, pipeline/CRM,
+    and API data paths only.
+  - Added an operating-area matrix that summarizes implemented tables,
+    database records, provider mappings, and Drive records per area.
+  - Linked every group to an existing implemented route instead of a
+    placeholder module.
+  - `node --check public/app.js`, `git diff --check`, `npm run build`, and
+    `npm test` passed.
+  - Playwright smoke verified desktop `/settings/integrations`, active
+    navigation, integration cards, area rows, and dashboard links.
+
 ## V2WEB-005 Dedicated Tasks Adapter View
 
 - Task Type: design/frontend
