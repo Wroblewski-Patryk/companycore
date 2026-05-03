@@ -3,32 +3,50 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CompanyCore Integrations</title>
+    <title>CompanyCore</title>
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
+    <header class="topbar">
+      <a class="brand" href="/" data-link>
+        <span class="brand-mark">CC</span>
+        <span>CompanyCore</span>
+      </a>
+      <nav class="nav">
+        <a href="/dashboard" data-link data-private>Dashboard</a>
+        <a href="/settings" data-link data-private>Settings</a>
+        <a href="/settings/api" data-link data-private>API</a>
+        <a href="/auth/login" data-link data-public>Sign in</a>
+        <button type="button" class="link-button" id="logoutButton" data-private>Sign out</button>
+      </nav>
+    </header>
+
     <main class="shell">
-      <section class="panel intro">
+      <section class="view hero" data-view="/">
         <div>
-          <p class="label">CompanyCore owner console</p>
-          <h1>ClickUp connection</h1>
+          <p class="label">CompanyCore v1</p>
+          <h1>Company operations bridge</h1>
           <p class="lede">
-            Connect your ClickUp account once, choose the Workspace and Lists to
-            sync, then let Jarvis, Paperclip, and Aviary read the clean
-            CompanyCore API.
+            Connect company tools once, keep operational data in CompanyCore,
+            and let Jarvis, Paperclip, and Aviary read one clean API.
           </p>
+          <div class="actions">
+            <a class="button-link" href="/auth/login" data-link>Sign in</a>
+            <a class="button-link secondary" href="/auth/register" data-link>Create account</a>
+          </div>
         </div>
-        <div class="status-card" id="connectionStatus">
+        <div class="status-card" id="publicStatus">
           <span class="dot muted"></span>
-          <span>Not connected</span>
+          <span>Web UI</span>
         </div>
       </section>
 
-      <section class="grid">
-        <form class="panel form" id="loginForm">
+      <section class="view auth-grid" data-view="/auth/login">
+        <form class="panel form auth-card" id="loginForm">
           <div class="section-title">
-            <h2>Owner login</h2>
-            <p>Use the CompanyCore owner account.</p>
+            <p class="label">Owner access</p>
+            <h1>Sign in</h1>
+            <p>Use your CompanyCore owner account.</p>
           </div>
           <label>
             Email
@@ -39,13 +57,99 @@
             <input id="password" name="password" type="password" autocomplete="current-password" required>
           </label>
           <button type="submit">Sign in</button>
+          <p class="form-note">
+            No account yet? <a href="/auth/register" data-link>Create one</a>.
+          </p>
         </form>
+      </section>
+
+      <section class="view auth-grid" data-view="/auth/register">
+        <form class="panel form auth-card" id="registerForm">
+          <div class="section-title">
+            <p class="label">New workspace</p>
+            <h1>Create account</h1>
+            <p>Create an owner account and a new CompanyCore workspace.</p>
+          </div>
+          <label>
+            Name
+            <input id="registerName" name="name" type="text" autocomplete="name">
+          </label>
+          <label>
+            Email
+            <input id="registerEmail" name="email" type="email" autocomplete="email" required>
+          </label>
+          <label>
+            Password
+            <input id="registerPassword" name="password" type="password" autocomplete="new-password" minlength="12" required>
+          </label>
+          <label>
+            Workspace name
+            <input id="workspaceName" name="workspaceName" type="text" required>
+          </label>
+          <button type="submit">Create workspace</button>
+          <p class="form-note">
+            Already have an account? <a href="/auth/login" data-link>Sign in</a>.
+          </p>
+        </form>
+      </section>
+
+      <section class="view" data-view="/dashboard">
+        <div class="page-title">
+          <div>
+            <p class="label">Private workspace</p>
+            <h1>Dashboard</h1>
+            <p id="workspaceLabel">Sign in to load workspace status.</p>
+          </div>
+          <div class="status-card" id="connectionStatus">
+            <span class="dot muted"></span>
+            <span>Not connected</span>
+          </div>
+        </div>
+
+        <section class="dashboard-grid">
+          <article class="panel summary-card">
+            <span class="summary-kicker">Workspace</span>
+            <strong id="workspaceNameLabel">-</strong>
+            <p>Active owner session and workspace context.</p>
+          </article>
+          <article class="panel summary-card">
+            <span class="summary-kicker">ClickUp</span>
+            <strong id="clickupStatusLabel">Not configured</strong>
+            <p id="clickupStatusHint">Connect ClickUp in settings.</p>
+          </article>
+          <article class="panel summary-card">
+            <span class="summary-kicker">API</span>
+            <strong>Ready</strong>
+            <p>Jarvis, Paperclip, and Aviary read CompanyCore through the API domain.</p>
+          </article>
+        </section>
+
+        <section class="panel next-panel">
+          <div class="section-title">
+            <h2>Next action</h2>
+            <p>Connect or review ClickUp settings, then run the first sync.</p>
+          </div>
+          <div class="actions">
+            <a class="button-link" href="/settings" data-link>Open settings</a>
+            <a class="button-link secondary" href="/settings/api" data-link>View API</a>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" data-view="/settings">
+        <div class="page-title">
+          <div>
+            <p class="label">Private settings</p>
+            <h1>Settings</h1>
+            <p>Manage workspace integrations and the first ClickUp connection.</p>
+          </div>
+        </div>
 
         <section class="panel form" id="clickupPanel" aria-disabled="true">
           <div class="section-title row-title">
             <div>
               <h2>ClickUp setup</h2>
-              <p id="workspaceLabel">Sign in to load workspace settings.</p>
+              <p id="clickupWorkspaceLabel">Sign in to load workspace settings.</p>
             </div>
             <label class="switch">
               <input id="active" name="active" type="checkbox" checked>
@@ -85,6 +189,37 @@
             <button type="button" class="secondary" id="saveButton">Save connection</button>
             <button type="button" id="syncButton">Save and sync</button>
           </div>
+        </section>
+      </section>
+
+      <section class="view" data-view="/settings/api">
+        <div class="page-title">
+          <div>
+            <p class="label">Private settings</p>
+            <h1>API</h1>
+            <p>Use this API domain for agents, adapters, and internal tools.</p>
+          </div>
+        </div>
+
+        <section class="settings-grid">
+          <article class="panel summary-card">
+            <span class="summary-kicker">Base URL</span>
+            <strong>https://api.companycore.luckysparrow.ch</strong>
+            <p>Authenticated JSON API for CompanyCore v1.</p>
+          </article>
+          <article class="panel summary-card">
+            <span class="summary-kicker">Auth</span>
+            <strong>Owner token or service API key</strong>
+            <p>Browser settings use owner login. Agents should use scoped service keys.</p>
+          </article>
+        </section>
+
+        <section class="panel api-panel">
+          <div class="section-title">
+            <h2>Capabilities</h2>
+            <p id="capabilitySummary">Sign in to load available API capabilities.</p>
+          </div>
+          <div class="capability-list" id="capabilityList"></div>
         </section>
       </section>
 

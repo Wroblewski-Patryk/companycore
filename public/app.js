@@ -1,8 +1,14 @@
+const privateRoutes = new Set(["/dashboard", "/settings", "/settings/api"]);
+const publicRoutes = new Set(["/", "/auth/login", "/auth/register"]);
+
 const state = {
   ownerToken: sessionStorage.getItem("companycoreOwnerToken") || "",
   workspace: null,
+  user: null,
+  capabilities: [],
   clickup: {
     configured: false,
+    active: false,
     config: {},
     workspaces: [],
     selectedWorkspace: null,
@@ -15,7 +21,13 @@ const API_ORIGIN = window.location.hostname === "companycore.luckysparrow.ch"
   ? "https://api.companycore.luckysparrow.ch"
   : window.location.origin;
 
+const views = [...document.querySelectorAll("[data-view]")];
+const privateControls = [...document.querySelectorAll("[data-private]")];
+const publicControls = [...document.querySelectorAll("[data-public]")];
+const links = [...document.querySelectorAll("[data-link]")];
 const loginForm = document.querySelector("#loginForm");
+const registerForm = document.querySelector("#registerForm");
+const logoutButton = document.querySelector("#logoutButton");
 const clickupPanel = document.querySelector("#clickupPanel");
 const checkTokenButton = document.querySelector("#checkTokenButton");
 const refreshButton = document.querySelector("#refreshButton");
@@ -24,6 +36,12 @@ const syncButton = document.querySelector("#syncButton");
 const workspaceSelect = document.querySelector("#workspaceSelect");
 const connectionStatus = document.querySelector("#connectionStatus");
 const workspaceLabel = document.querySelector("#workspaceLabel");
+const clickupWorkspaceLabel = document.querySelector("#clickupWorkspaceLabel");
+const workspaceNameLabel = document.querySelector("#workspaceNameLabel");
+const clickupStatusLabel = document.querySelector("#clickupStatusLabel");
+const clickupStatusHint = document.querySelector("#clickupStatusHint");
+const capabilitySummary = document.querySelector("#capabilitySummary");
+const capabilityList = document.querySelector("#capabilityList");
 const listTree = document.querySelector("#listTree");
 const listSummary = document.querySelector("#listSummary");
 const resultPanel = document.querySelector("#resultPanel");
@@ -33,9 +51,22 @@ const metrics = document.querySelector("#metrics");
 const fields = {
   email: document.querySelector("#email"),
   password: document.querySelector("#password"),
+  registerName: document.querySelector("#registerName"),
+  registerEmail: document.querySelector("#registerEmail"),
+  registerPassword: document.querySelector("#registerPassword"),
+  workspaceName: document.querySelector("#workspaceName"),
   active: document.querySelector("#active"),
   token: document.querySelector("#token")
 };
+
+function normalizedPath(pathname = window.location.pathname) {
+  const trimmed = pathname.replace(/\/+$/, "");
+  return trimmed || "/";
+}
+
+function isSignedIn() {
+  return Boolean(state.ownerToken);
+}
 
 function authHeaders() {
   return {
@@ -44,11 +75,62 @@ function authHeaders() {
   };
 }
 
+function updateChrome() {
+  privateControls.forEach((element) => {
+    element.hidden = !isSignedIn();
+  });
+  publicControls.forEach((element) => {
+    element.hidden = isSignedIn();
+  });
+}
+
+function navigate(path, { replace = false } = {}) {
+  const nextPath = normalizedPath(path);
+  if (replace) {
+    window.history.replaceState({}, "", nextPath);
+  } else {
+    window.history.pushState({}, "", nextPath);
+  }
+  renderRoute();
+}
+
+function renderRoute() {
+  updateChrome();
+
+  let path = normalizedPath();
+  if (!publicRoutes.has(path) && !privateRoutes.has(path)) {
+    path = isSignedIn() ? "/dashboard" : "/";
+    window.history.replaceState({}, "", path);
+  }
+
+  if (privateRoutes.has(path) && !isSignedIn()) {
+    window.history.replaceState({}, "", "/auth/login");
+    path = "/auth/login";
+    showResult("Sign in to continue.", "error");
+  }
+
+  if ((path === "/auth/login" || path === "/auth/register") && isSignedIn()) {
+    window.history.replaceState({}, "", "/dashboard");
+    path = "/dashboard";
+  }
+
+  views.forEach((view) => {
+    view.hidden = view.dataset.view !== path;
+  });
+
+  document.body.dataset.route = path;
+  renderConnectionState();
+  setClickUpEnabled(isSignedIn());
+}
+
 function setBusy(isBusy) {
   document.querySelectorAll("button, input, select").forEach((control) => {
     control.disabled = isBusy;
   });
-  setClickUpEnabled(Boolean(state.ownerToken) && !isBusy);
+  links.forEach((link) => {
+    link.setAttribute("aria-disabled", String(isBusy));
+  });
+  setClickUpEnabled(isSignedIn() && !isBusy);
 }
 
 function setClickUpEnabled(isEnabled) {
@@ -89,6 +171,8 @@ function showResult(message, tone = "success", sync = null) {
 function friendlyError(error) {
   const message = error?.message || "Something went wrong.";
   const copy = {
+    email_already_registered: "This email already has a CompanyCore account.",
+    invalid_credentials: "Email or password is incorrect.",
     integration_invalid_token: "ClickUp rejected this token. Check that it belongs to your ClickUp account and has access to the Workspace.",
     integration_rate_limited: "ClickUp rate limit was reached. Wait a minute, then try again.",
     integration_secret_required: "Paste a ClickUp token first, or use a saved connection.",
@@ -123,20 +207,79 @@ async function api(path, options = {}) {
   return body;
 }
 
+async function authRequest(path, payload) {
+  const response = await fetch(`${API_ORIGIN}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  const body = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(parseApiError(body, "Auth failed."));
+  }
+  return body;
+}
+
+function applyAuthPayload(payload) {
+  state.ownerToken = payload.data.token;
+  state.user = payload.data.user;
+  state.workspace = payload.data.workspace;
+  sessionStorage.setItem("companycoreOwnerToken", state.ownerToken);
+}
+
+function renderConnectionState() {
+  const connected = isSignedIn() && state.workspace;
+  connectionStatus.innerHTML = connected
+    ? '<span class="dot ok"></span><span>Connected</span>'
+    : '<span class="dot muted"></span><span>Not connected</span>';
+
+  workspaceLabel.textContent = connected
+    ? `${state.workspace.name} workspace`
+    : "Sign in to load workspace status.";
+  clickupWorkspaceLabel.textContent = connected
+    ? `${state.workspace.name} workspace`
+    : "Sign in to load workspace settings.";
+  workspaceNameLabel.textContent = connected ? state.workspace.name : "-";
+
+  if (state.clickup.configured) {
+    clickupStatusLabel.textContent = state.clickup.active ? "Active" : "Saved, inactive";
+    clickupStatusHint.textContent = `${(state.clickup.config.listIds || []).length} ClickUp Lists selected.`;
+  } else {
+    clickupStatusLabel.textContent = "Not configured";
+    clickupStatusHint.textContent = "Connect ClickUp in settings.";
+  }
+
+  if (state.capabilities.length > 0) {
+    capabilitySummary.textContent = `${state.capabilities.length} capabilities available for this workspace.`;
+    capabilityList.innerHTML = "";
+    for (const capability of state.capabilities) {
+      const item = document.createElement("span");
+      item.textContent = capability;
+      capabilityList.append(item);
+    }
+  } else {
+    capabilitySummary.textContent = connected
+      ? "No capabilities returned by the connection endpoint."
+      : "Sign in to load available API capabilities.";
+    capabilityList.innerHTML = "";
+  }
+}
+
 function setConnected(connection) {
   state.workspace = connection.data.workspace;
+  state.capabilities = connection.data.capabilities || [];
   state.clickup.configured = connection.data.integrations.clickup.configured;
+  state.clickup.active = Boolean(connection.data.integrations.clickup.active);
   state.clickup.config = connection.data.integrations.clickup.config || {};
-  connectionStatus.innerHTML = '<span class="dot ok"></span><span>Connected</span>';
-  workspaceLabel.textContent = `${state.workspace.name} workspace`;
-  clickupPanel.removeAttribute("aria-disabled");
-  fields.active.checked = connection.data.integrations.clickup.active || !state.clickup.configured;
+  fields.active.checked = connection.data.integrations.clickup.active ?? !state.clickup.configured;
   state.clickup.selectedListIds = new Set(state.clickup.config.listIds || []);
 
   if (state.clickup.configured) {
-    showResult("ClickUp settings are saved. Refresh the saved structure to change selected Lists.");
+    showResult("ClickUp settings are saved. Open Settings to refresh the saved structure.");
   }
 
+  renderConnectionState();
   renderTree();
   setClickUpEnabled(true);
 }
@@ -167,7 +310,7 @@ function renderWorkspaces(workspaces, selectedId = "") {
     workspaceSelect.value = nextSelectedId;
   }
 
-  setClickUpEnabled(Boolean(state.ownerToken));
+  setClickUpEnabled(isSignedIn());
 }
 
 async function discoverClickUp({ includeStructure = false, useStoredToken = false } = {}) {
@@ -223,7 +366,7 @@ function renderTree() {
     listSummary.textContent = state.clickup.configured
       ? "Refresh the saved structure to review ClickUp Lists."
       : "Choose a ClickUp Workspace to load Lists.";
-    setClickUpEnabled(Boolean(state.ownerToken));
+    setClickUpEnabled(isSignedIn());
     return;
   }
 
@@ -245,7 +388,7 @@ function renderTree() {
   }
 
   updateListSummary();
-  setClickUpEnabled(Boolean(state.ownerToken));
+  setClickUpEnabled(isSignedIn());
 }
 
 function appendListGroup(parent, title, lists) {
@@ -275,7 +418,7 @@ function appendListGroup(parent, title, lists) {
         state.clickup.selectedListIds.delete(list.id);
       }
       updateListSummary();
-      setClickUpEnabled(Boolean(state.ownerToken));
+      setClickUpEnabled(isSignedIn());
     });
     group.append(item);
   }
@@ -324,32 +467,80 @@ async function saveSettings() {
 
   fields.token.value = "";
   state.clickup.configured = true;
+  state.clickup.active = fields.active.checked;
   state.clickup.config = config;
 }
+
+links.forEach((link) => {
+  link.addEventListener("click", (event) => {
+    if (link.getAttribute("aria-disabled") === "true") {
+      event.preventDefault();
+      return;
+    }
+    const url = new URL(link.href);
+    if (url.origin !== window.location.origin) {
+      return;
+    }
+    event.preventDefault();
+    navigate(url.pathname);
+  });
+});
+
+window.addEventListener("popstate", renderRoute);
+
+logoutButton.addEventListener("click", () => {
+  sessionStorage.removeItem("companycoreOwnerToken");
+  state.ownerToken = "";
+  state.workspace = null;
+  state.user = null;
+  state.capabilities = [];
+  state.clickup.configured = false;
+  state.clickup.active = false;
+  state.clickup.config = {};
+  state.clickup.workspaces = [];
+  state.clickup.spaces = [];
+  state.clickup.selectedListIds = new Set();
+  resultPanel.hidden = true;
+  navigate("/auth/login", { replace: true });
+});
 
 loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   setBusy(true);
 
   try {
-    const response = await fetch(`${API_ORIGIN}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: fields.email.value,
-        password: fields.password.value
-      })
+    const response = await authRequest("/auth/login", {
+      email: fields.email.value,
+      password: fields.password.value
     });
-    const body = await response.json().catch(() => ({}));
 
-    if (!response.ok) {
-      throw new Error(parseApiError(body, "Login failed."));
-    }
-
-    state.ownerToken = body.data.token;
-    sessionStorage.setItem("companycoreOwnerToken", state.ownerToken);
-    showResult("Signed in. Paste your ClickUp token or refresh the saved connection.");
+    applyAuthPayload(response);
     await loadConnection();
+    showResult("Signed in. Open Settings to connect ClickUp.");
+    navigate("/dashboard", { replace: true });
+  } catch (error) {
+    showResult(friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+});
+
+registerForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  setBusy(true);
+
+  try {
+    const response = await authRequest("/auth/register", {
+      email: fields.registerEmail.value,
+      password: fields.registerPassword.value,
+      name: fields.registerName.value || undefined,
+      workspaceName: fields.workspaceName.value
+    });
+
+    applyAuthPayload(response);
+    await loadConnection();
+    showResult("Workspace created. Open Settings to connect ClickUp.");
+    navigate("/dashboard", { replace: true });
   } catch (error) {
     showResult(friendlyError(error), "error");
   } finally {
@@ -433,11 +624,16 @@ syncButton.addEventListener("click", async () => {
   }
 });
 
+renderRoute();
+
 if (state.ownerToken) {
-  loadConnection().catch(() => {
+  loadConnection().then(() => {
+    renderRoute();
+  }).catch(() => {
     sessionStorage.removeItem("companycoreOwnerToken");
     state.ownerToken = "";
     setClickUpEnabled(false);
+    renderRoute();
   });
 } else {
   setClickUpEnabled(false);

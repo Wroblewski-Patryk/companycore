@@ -47,9 +47,19 @@ function isApiHost(host = "") {
   return host.split(":")[0] === "api.companycore.luckysparrow.ch";
 }
 
+const webAppRoutes = [
+  "/",
+  "/auth/login",
+  "/auth/register",
+  "/dashboard",
+  "/settings",
+  "/settings/api"
+];
+
 export function createApp() {
   const app = express();
-  const staticFiles = express.static(path.join(process.cwd(), "public"));
+  const publicRoot = path.join(process.cwd(), "public");
+  const staticFiles = express.static(publicRoot);
 
   app.use(cors());
   app.use(express.json({ limit: "1mb" }));
@@ -76,6 +86,14 @@ export function createApp() {
     }
 
     staticFiles(req, res, next);
+  });
+  app.get(webAppRoutes, (req, res, next) => {
+    if (isApiHost(req.headers.host)) {
+      next();
+      return;
+    }
+
+    res.sendFile(path.join(publicRoot, "index.html"));
   });
 
   app.use("/health", healthRouter);
