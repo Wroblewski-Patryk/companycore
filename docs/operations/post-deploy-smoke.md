@@ -5,6 +5,9 @@ Use this file to record the minimum checks after each deploy.
 ## Global Checks
 
 - [x] `https://api.companycore.luckysparrow.ch/health` returns success
+- [ ] `https://api.companycore.luckysparrow.ch/health` reports the expected
+  deployed build commit when `COMPANYCORE_BUILD_COMMIT` or a supported Coolify
+  commit env var is available
 - [ ] `https://companycore.luckysparrow.ch` reaches the configured project
   surface or intentional backend/API response
 - [x] `https://api.companycore.luckysparrow.ch` reaches the backend API
@@ -21,6 +24,10 @@ Use this file to record the minimum checks after each deploy.
 - [ ] Native ClickUp sync creates or updates at least one task when credentials
   and list IDs are configured
 - [ ] `GET /events` includes `task_synced_from_clickup` and sync status events
+- [ ] `npm run google-drive:smoke` passes with a real workspace API key
+- [ ] Google Drive settings can be read without returning OAuth material
+- [ ] Google Drive file list route returns imported files/snapshots for the
+  workspace
 
 ## Ops Checks
 

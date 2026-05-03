@@ -137,3 +137,4 @@ No active P0/P1 Google Drive implementation task remains ready after V2GD-006.
 - V2GD-004 Folder Discovery And File Import.
 - V2GD-005 Docs And Sheets Read/Create/Edit.
 - V2GD-006 Drive Changes Freshness.
+- V2GD-007 Google Drive Deploy Smoke Hardening.

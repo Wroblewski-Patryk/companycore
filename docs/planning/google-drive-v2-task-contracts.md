@@ -232,3 +232,38 @@ It follows the repository task contract and must stay synchronized with
   - Added changes page token advancement in Google Drive integration config.
   - Added tests for changed file refresh, removed file marking, inbox rows,
     agent outbox rows, and page-token update.
+
+## V2GD-007 Google Drive Deploy Smoke Hardening
+
+- Task Type: ops/release
+- Current Stage: done
+- Deliverable For This Stage: safer deploy identification and protected Google
+  Drive smoke script.
+- Goal: Make Google Drive production deploys easier to verify after Coolify
+  redeploys.
+- Scope:
+  - `src/health/health.routes.ts`
+  - `src/config/env.ts`
+  - `Dockerfile`
+  - `.env.example`
+  - `package.json`
+  - `scripts/google-drive-production-smoke.mjs`
+  - `docs/operations/post-deploy-smoke.md`
+- Implementation Plan:
+  - Add safe build metadata fields to health responses.
+  - Add environment names for build commit/image metadata.
+  - Add a protected Google Drive smoke script that checks the connection
+    manifest and file-list API with a workspace API key.
+  - Update post-deploy smoke documentation.
+- Acceptance Criteria:
+  - Health response remains public and contains no secret material.
+  - The smoke script fails closed when `COMPANYCORE_API_KEY` is missing.
+  - The smoke script checks Google Drive capabilities and file-list access.
+  - Build and test gates pass.
+- Definition of Done:
+  - `git diff --check`, `npm run build`, and `npm test` pass.
+  - Release docs are updated.
+- Result Report:
+  - Added public health build metadata sourced from safe env vars.
+  - Added `npm run google-drive:smoke`.
+  - Added Google Drive smoke checklist items to the post-deploy runbook.

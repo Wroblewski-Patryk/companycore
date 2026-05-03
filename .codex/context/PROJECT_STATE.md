@@ -108,7 +108,7 @@ Last updated: 2026-05-03
   implemented through the native integration pattern.
 
 ## Autonomous Iteration State
-- Current iteration: V2GD-006 Drive Changes Freshness.
+- Current iteration: V2GD-007 Google Drive Deploy Smoke Hardening.
 - Current operation mode: BUILDER
 - Last completed iteration: CCV1-060 V1 Operator Handoff.
 - Last completed task: added a concise v1 operator handoff that consolidates

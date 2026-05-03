@@ -5,6 +5,12 @@ export const env = {
   port: Number(process.env.PORT ?? 3000),
   databaseUrl: process.env.DATABASE_URL,
   publicApiBaseUrl: process.env.COMPANYCORE_PUBLIC_API_BASE_URL,
+  buildCommit: process.env.COMPANYCORE_BUILD_COMMIT
+    ?? process.env.SOURCE_COMMIT
+    ?? process.env.COOLIFY_GIT_COMMIT_SHA
+    ?? process.env.GIT_COMMIT
+    ?? "unknown",
+  buildImage: process.env.COMPANYCORE_BUILD_IMAGE ?? "unknown",
   clickUpMaintenanceIntervalMinutes: Number(process.env.CLICKUP_MAINTENANCE_INTERVAL_MINUTES ?? 15),
   authTokenSecret: process.env.AUTH_TOKEN_SECRET ?? "dev-companycore-auth-secret-change-me",
   integrationSecretKey: process.env.INTEGRATION_SECRET_KEY ?? "dev-companycore-integration-secret-change-me",

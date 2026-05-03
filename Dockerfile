@@ -16,7 +16,11 @@ RUN npm run build
 
 FROM node:22-alpine AS runtime
 WORKDIR /app
+ARG COMPANYCORE_BUILD_COMMIT=unknown
+ARG COMPANYCORE_BUILD_IMAGE=unknown
 ENV NODE_ENV=production
+ENV COMPANYCORE_BUILD_COMMIT=$COMPANYCORE_BUILD_COMMIT
+ENV COMPANYCORE_BUILD_IMAGE=$COMPANYCORE_BUILD_IMAGE
 RUN apk add --no-cache openssl
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
