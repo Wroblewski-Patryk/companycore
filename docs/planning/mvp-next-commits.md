@@ -18,13 +18,13 @@ synchronized with `.codex/context/TASK_BOARD.md`.
       plan
 - [x] CCV1-034A Operating Model Registry Schema
 - [x] CCV1-034B ClickUp Structure Persistence
+- [x] CCV1-034B2 ClickUp Views And Custom Fields Persistence
+- [x] CCV1-034C Registry-Backed Table API Contract
+- [x] CCV1-034D Storage And Knowledge Roots
+- [x] CCV1-034E Automation Scope Registry
 
 ## NEXT
 
-- [ ] CCV1-034C Registry-Backed Table API Contract.
-- [ ] CCV1-034B2 ClickUp Views And Custom Fields Persistence.
-- [ ] CCV1-034D Storage And Knowledge Roots.
-- [ ] CCV1-034E Automation Scope Registry.
 - [ ] Decide scheduled ClickUp sync versus webhook ingestion after the first
       production pull succeeds, including rate-limit and signature
       requirements.
@@ -39,10 +39,10 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] 4. CCV1-034 ClickUp-shaped operating model architecture
 - [x] 5. CCV1-034A Operating Model Registry Schema
 - [x] 6. CCV1-034B ClickUp Structure Persistence
-- [ ] 7. CCV1-034C Registry-Backed Table API Contract
-- [ ] 8. CCV1-034B2 ClickUp Views And Custom Fields Persistence
-- [ ] 9. CCV1-034D Storage And Knowledge Roots
-- [ ] 10. CCV1-034E Automation Scope Registry
+- [x] 7. CCV1-034C Registry-Backed Table API Contract
+- [x] 8. CCV1-034B2 ClickUp Views And Custom Fields Persistence
+- [x] 9. CCV1-034D Storage And Knowledge Roots
+- [x] 10. CCV1-034E Automation Scope Registry
 - [ ] 11. Continuous ClickUp update strategy decision
 
 

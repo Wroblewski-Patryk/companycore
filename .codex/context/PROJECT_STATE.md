@@ -91,17 +91,15 @@ Last updated: 2026-05-02
   and deployment smoke evidence are aligned.
 
 ## Autonomous Iteration State
-- Current iteration: CCV1-034A/034B operating model registry and ClickUp structure persistence.
+- Current iteration: CCV1-034B2/034C/034D/034E registry completion.
 - Current operation mode: BUILDER
-- Last completed iteration: CCV1-034A/034B operating model registry and
-  ClickUp structure persistence.
-- Last completed task: added the operating registry schema/migration, seeded
-  12 operating areas per workspace, registered first-party API tables including
-  goals and targets, persisted ClickUp Workspace/Space/Folder/List mappings
-  during discovery, exposed the operating model in `/v1/connection`, and
-  attached imported ClickUp tasks to the matching task list while preserving
-  ClickUp priority.
-- Next required mode: BUILDER for CCV1-034C unless priority changes.
+- Last completed iteration: CCV1-034B2/034C/034D/034E registry completion.
+- Last completed task: added dedicated operating model APIs, ClickUp Custom
+  Field and View metadata persistence, workspace-scoped storage and knowledge
+  root creation, and automation definition creation with fail-closed scope
+  validation.
+- Next required mode: BUILDER for continuous ClickUp update strategy unless
+  priority changes.
 
 ## Recent Progress
 - 2026-05-02: Created Company Core backend foundation, Prisma schema, Docker
@@ -314,6 +312,13 @@ Last updated: 2026-05-02
   priority and attaches imported tasks to a matching `task_lists` row by
   ClickUp List ID. `npm test` passed against a disposable PostgreSQL database
   on `localhost:55432`.
+- 2026-05-03: Completed CCV1-034B2, CCV1-034C, CCV1-034D, and CCV1-034E by
+  adding dedicated `/v1/operating-model/*` read/write APIs, persisting ClickUp
+  Workspace/List Views and Workspace/Space/Folder/List Custom Field metadata,
+  and exposing scoped storage locations, knowledge roots, and automation
+  definitions. Scope writes validate `areaId`, `folderId`, and `tableId`
+  inside the active workspace and fail closed for foreign IDs. `npm test`
+  passed against disposable PostgreSQL on `localhost:55432`.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

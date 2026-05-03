@@ -1,8 +1,11 @@
 import type { Prisma } from "@prisma/client";
 import type {
+  ClickUpClient,
+  ClickUpCustomField,
   ClickUpFolderSummary,
   ClickUpListSummary,
   ClickUpSpaceSummary,
+  ClickUpViewSummary,
   ClickUpWorkspaceSummary
 } from "../integrations/clickup/clickup.client";
 import { prisma } from "../db/prisma";
@@ -65,6 +68,64 @@ async function upsertContainerMapping(input: {
       folderId: input.folderId,
       tableId: input.tableId,
       raw: input.raw
+    }
+  });
+}
+
+async function upsertFieldMapping(input: {
+  workspaceId: string;
+  field: ClickUpCustomField;
+  tableId?: string | null;
+  nativeField?: string | null;
+}) {
+  await prisma.externalFieldMapping.upsert({
+    where: {
+      workspaceId_provider_externalId: {
+        workspaceId: input.workspaceId,
+        provider: "clickup",
+        externalId: input.field.id
+      }
+    },
+    update: {
+      name: input.field.name,
+      fieldType: input.field.type ?? null,
+      tableId: input.tableId ?? null,
+      nativeField: input.nativeField ?? null,
+      typeConfig: input.field.type_config as Prisma.InputJsonValue | undefined
+    },
+    create: {
+      workspaceId: input.workspaceId,
+      provider: "clickup",
+      externalId: input.field.id,
+      name: input.field.name,
+      fieldType: input.field.type ?? null,
+      tableId: input.tableId ?? null,
+      nativeField: input.nativeField ?? null,
+      typeConfig: input.field.type_config as Prisma.InputJsonValue | undefined
+    }
+  });
+}
+
+async function upsertViewMapping(input: {
+  workspaceId: string;
+  view: ClickUpViewSummary;
+  areaId?: string | null;
+  folderId?: string | null;
+  tableId?: string | null;
+}) {
+  await upsertContainerMapping({
+    workspaceId: input.workspaceId,
+    entityType: "view",
+    externalId: input.view.id,
+    name: input.view.name,
+    areaId: input.areaId,
+    folderId: input.folderId,
+    tableId: input.tableId,
+    raw: {
+      id: input.view.id,
+      name: input.view.name,
+      type: input.view.type ?? null,
+      parent: input.view.parent ?? null
     }
   });
 }
@@ -196,6 +257,7 @@ export async function persistClickUpStructure(input: {
   workspaceId: string;
   selectedWorkspace: ClickUpWorkspaceSummary | null;
   spaces: ClickUpSpaceSummary[];
+  client?: ClickUpClient;
 }) {
   await ensureOperatingModelForWorkspace(prisma, input.workspaceId);
 
@@ -207,6 +269,27 @@ export async function persistClickUpStructure(input: {
       name: input.selectedWorkspace.name,
       raw: input.selectedWorkspace
     });
+
+    if (input.client) {
+      const [workspaceFields, workspaceViews] = await Promise.all([
+        input.client.getWorkspaceCustomFields(input.selectedWorkspace.id),
+        input.client.getWorkspaceViews(input.selectedWorkspace.id)
+      ]);
+
+      for (const field of workspaceFields) {
+        await upsertFieldMapping({
+          workspaceId: input.workspaceId,
+          field
+        });
+      }
+
+      for (const view of workspaceViews) {
+        await upsertViewMapping({
+          workspaceId: input.workspaceId,
+          view
+        });
+      }
+    }
   }
 
   for (const space of input.spaces) {
@@ -224,14 +307,49 @@ export async function persistClickUpStructure(input: {
       }
     });
 
+    if (input.client) {
+      const spaceFields = await input.client.getSpaceCustomFields(space.id);
+      for (const field of spaceFields) {
+        await upsertFieldMapping({
+          workspaceId: input.workspaceId,
+          field
+        });
+      }
+    }
+
     for (const list of space.lists) {
       const listArea = await areaForNames(input.workspaceId, space.name, list.name);
-      await upsertClickUpListTable({
+      const table = await upsertClickUpListTable({
         workspaceId: input.workspaceId,
         areaId: listArea.id,
         list,
         spaceName: space.name
       });
+
+      if (input.client) {
+        const [listFields, listViews] = await Promise.all([
+          input.client.getListCustomFields(list.id),
+          input.client.getListViews(list.id)
+        ]);
+
+        for (const field of listFields) {
+          await upsertFieldMapping({
+            workspaceId: input.workspaceId,
+            field,
+            tableId: table.id
+          });
+        }
+
+        for (const view of listViews) {
+          await upsertViewMapping({
+            workspaceId: input.workspaceId,
+            view,
+            areaId: table.areaId,
+            folderId: table.folderId,
+            tableId: table.id
+          });
+        }
+      }
     }
 
     for (const folder of space.folders) {
@@ -243,9 +361,19 @@ export async function persistClickUpStructure(input: {
         spaceName: space.name
       });
 
+      if (input.client) {
+        const folderFields = await input.client.getFolderCustomFields(folder.id);
+        for (const field of folderFields) {
+          await upsertFieldMapping({
+            workspaceId: input.workspaceId,
+            field
+          });
+        }
+      }
+
       for (const list of folder.lists) {
         const listArea = await areaForNames(input.workspaceId, space.name, folder.name, list.name);
-        await upsertClickUpListTable({
+        const table = await upsertClickUpListTable({
           workspaceId: input.workspaceId,
           areaId: listArea.id,
           folderId: operatingFolder.id,
@@ -253,6 +381,31 @@ export async function persistClickUpStructure(input: {
           spaceName: space.name,
           folderName: folder.name
         });
+
+        if (input.client) {
+          const [listFields, listViews] = await Promise.all([
+            input.client.getListCustomFields(list.id),
+            input.client.getListViews(list.id)
+          ]);
+
+          for (const field of listFields) {
+            await upsertFieldMapping({
+              workspaceId: input.workspaceId,
+              field,
+              tableId: table.id
+            });
+          }
+
+          for (const view of listViews) {
+            await upsertViewMapping({
+              workspaceId: input.workspaceId,
+              view,
+              areaId: table.areaId,
+              folderId: table.folderId,
+              tableId: table.id
+            });
+          }
+        }
       }
     }
   }

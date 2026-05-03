@@ -4,6 +4,186 @@ These task contracts turn the v1 audit into executable work. Each task must be
 completed as its own small iteration and must update `.codex/context/TASK_BOARD.md`,
 `.codex/context/PROJECT_STATE.md`, and relevant docs when status changes.
 
+## CCV1-034B2 ClickUp Views And Custom Fields Persistence
+
+### Header
+- ID: CCV1-034B2
+- Title: ClickUp Views and Custom Fields persistence
+- Task Type: feature
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder
+- Depends on: CCV1-034B
+- Priority: P1
+- Iteration: v1-034B2
+- Operation Mode: BUILDER
+
+### Goal
+Persist ClickUp View and Custom Field metadata into CompanyCore provider
+mapping tables without storing provider secrets.
+
+### Scope
+- `src/integrations/clickup/clickup.client.ts`
+- `src/operating-model/clickup-structure.ts`
+- `src/modules/integration-settings/integration-settings.routes.ts`
+- `src/tests/api.test.ts`
+- API/integration docs and context files
+
+### Acceptance Criteria
+- [x] Workspace/List Views are persisted as external container mappings.
+- [x] Workspace/Space/Folder/List Custom Fields are persisted as external
+  field mappings.
+- [x] List-level Views and Custom Fields link to the mapped operating table.
+- [x] Provider errors remain safely mapped.
+
+### Validation Evidence
+- Tests: `npm test` with disposable PostgreSQL on `localhost:55432`.
+- Provider docs reviewed: official ClickUp docs for Views, List Views,
+  Workspace Views, Workspace/Space/Folder/List Custom Fields, and Custom Field
+  update behavior.
+
+### Result Report
+- Task summary: Extended ClickUp discovery persistence to Views and Custom
+  Fields.
+- Files changed: ClickUp client, operating model persistence, tests, docs, and
+  context.
+- How tested: build plus `npm test`.
+- What is incomplete: webhook ingestion remains a separate continuous update
+  strategy decision.
+- Next steps: continue with registry-backed operating model APIs.
+
+## CCV1-034C Registry-Backed Table API Contract
+
+### Header
+- ID: CCV1-034C
+- Title: Registry-backed table API contract
+- Task Type: feature
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder
+- Depends on: CCV1-034A
+- Priority: P1
+- Iteration: v1-034C
+- Operation Mode: BUILDER
+
+### Goal
+Expose the operating registry through protected API routes so service clients
+can discover areas, tables, provider mappings, storage roots, knowledge roots,
+and automations without database access.
+
+### Scope
+- `src/modules/operating-model/operating-model.routes.ts`
+- `src/app.ts`
+- `src/modules/connection/connection.routes.ts`
+- `src/tests/api.test.ts`
+- `docs/API.md`
+
+### Acceptance Criteria
+- [x] `/v1/operating-model` returns the full workspace registry summary.
+- [x] `/v1/operating-model/tables` returns table metadata.
+- [x] `/v1/operating-model/external-mappings` returns provider containers.
+- [x] `/v1/operating-model/external-fields` returns provider fields.
+- [x] `/v1/connection` advertises registry routes.
+
+### Validation Evidence
+- Tests: `npm test` with disposable PostgreSQL on `localhost:55432`.
+- Regression check: protected route tests still pass.
+
+### Result Report
+- Task summary: Added dedicated registry read APIs and manifest metadata.
+- Files changed: operating model route, app mount, connection route, tests, and
+  API docs.
+- How tested: build plus `npm test`.
+- What is incomplete: none for the planned read contract.
+- Next steps: use these routes from adapters when `/v1/connection` is too
+  compact.
+
+## CCV1-034D Storage And Knowledge Roots
+
+### Header
+- ID: CCV1-034D
+- Title: Storage and knowledge roots
+- Task Type: feature
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder
+- Depends on: CCV1-034C
+- Priority: P1
+- Iteration: v1-034D
+- Operation Mode: BUILDER
+
+### Goal
+Allow adapters and owner clients to register workspace/folder/table-scoped
+storage locations and knowledge roots.
+
+### Scope
+- `src/modules/operating-model/operating-model.routes.ts`
+- `src/tests/api.test.ts`
+- `docs/API.md`
+- `docs/DATABASE.md`
+
+### Acceptance Criteria
+- [x] Storage locations can be created with workspace-derived ownership.
+- [x] Knowledge roots can be created with workspace-derived ownership.
+- [x] Optional `areaId`, `folderId`, and `tableId` are validated in the active
+  workspace.
+- [x] Foreign scope IDs fail closed with `not_found`.
+
+### Validation Evidence
+- Tests: `npm test` creates Google Drive-style storage and Obsidian-style
+  knowledge roots for the `goals` table and rejects a foreign workspace write.
+
+### Result Report
+- Task summary: Added scoped storage and knowledge root APIs.
+- Files changed: operating model route, tests, API/database docs, and context.
+- How tested: build plus `npm test`.
+- What is incomplete: syncing file contents remains out of scope.
+- Next steps: connect concrete Drive/Obsidian adapters when needed.
+
+## CCV1-034E Automation Scope Registry
+
+### Header
+- ID: CCV1-034E
+- Title: Automation scope registry
+- Task Type: feature
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder
+- Depends on: CCV1-034C
+- Priority: P1
+- Iteration: v1-034E
+- Operation Mode: BUILDER
+
+### Goal
+Register automations against workspace, area, folder, or table scopes so
+scheduled syncs, webhooks, and external orchestrators can be tracked
+consistently.
+
+### Scope
+- `src/modules/operating-model/operating-model.routes.ts`
+- `src/tests/api.test.ts`
+- `docs/API.md`
+- planning/context docs
+
+### Acceptance Criteria
+- [x] Automation definitions can be created through the API.
+- [x] Automation scope IDs are validated inside the active workspace.
+- [x] Definitions store provider, trigger type, enabled state, and config.
+- [x] Continuous ClickUp scheduled/webhook behavior remains a separate
+  implementation decision.
+
+### Validation Evidence
+- Tests: `npm test` creates a ClickUp `scheduled_pull` automation definition
+  scoped to the `goals` table.
+
+### Result Report
+- Task summary: Added the automation definition API and scope validation.
+- Files changed: operating model route, tests, API docs, planning queue, task
+  board, and project state.
+- How tested: build plus `npm test`.
+- What is incomplete: automation execution/webhook receiver is not active yet.
+- Next steps: decide scheduled sync versus webhook ingestion.
+
 ## CCV1-034A Operating Model Registry Schema
 
 ### Header

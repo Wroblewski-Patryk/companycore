@@ -2,12 +2,13 @@
 
 ## Ready
 
-- CCV1-034C Registry-Backed Table API Contract
+- Continuous ClickUp update strategy
   - Stage: planning
   - Owner: Backend Builder
   - Priority: P1
-  - Scope: add dedicated registry read routes or metadata endpoints if
-    adapters need more than the `/v1/connection` operating model summary.
+  - Scope: choose either scheduled native pull sync, ClickUp webhook ingestion
+    with `X-Signature` verification and webhook state storage, or external
+    orchestration once the first production ClickUp pull is verified.
 
 ## Blocked
 
@@ -22,31 +23,9 @@
 
 ## Backlog
 
-- ClickUp continuous update strategy
-  - Stage: planning
-  - Owner: Backend Builder
-  - Priority: P1
-  - Scope: choose either scheduled native pull sync, ClickUp webhook ingestion
-    with `X-Signature` verification and webhook state storage, or external
-    orchestration once the first production ClickUp pull is verified.
-- CCV1-034B2 ClickUp Views And Custom Fields Persistence
-  - Stage: planning
-  - Owner: Backend Builder
-  - Priority: P1
-  - Scope: extend current ClickUp structure persistence beyond Workspaces,
-    Spaces, Folders, and Lists to include Views and Custom Field metadata.
-- CCV1-034D Storage And Knowledge Roots
-  - Stage: planning
-  - Owner: Backend Builder
-  - Priority: P1
-  - Scope: add workspace/folder/table-scoped storage and knowledge root
-    metadata for local disk, Google Drive, and Obsidian-style Markdown roots.
-- CCV1-034E Automation Scope Registry
-  - Stage: planning
-  - Owner: Backend Builder
-  - Priority: P1
-  - Scope: register scheduled sync, webhook, and external-orchestrator
-    automations against workspace, area, folder, table, or provider scopes.
+No active backlog item beyond the continuous ClickUp update strategy and
+Paperclip application-side adapter work tracked in
+`docs/planning/mvp-next-commits.md`.
 
 ## Done
 
@@ -98,3 +77,7 @@
 - CCV1-034 ClickUp-shaped operating model architecture and implementation plan.
 - CCV1-034A Operating Model Registry Schema.
 - CCV1-034B ClickUp Structure Persistence.
+- CCV1-034B2 ClickUp Views and Custom Fields Persistence.
+- CCV1-034C Registry-Backed Table API Contract.
+- CCV1-034D Storage and Knowledge Roots.
+- CCV1-034E Automation Scope Registry.

@@ -5,6 +5,7 @@ import { asyncHandler } from "../../middleware/async-handler";
 const capabilities = [
   "connection:read",
   "operating-model:read",
+  "operating-model:write",
   "projects:read",
   "projects:write",
   "goals:read",
@@ -49,7 +50,17 @@ const adapterManifest = {
       { method: "GET", path: "/v1/connection", capability: "connection:read" }
     ],
     operatingModel: [
-      { method: "GET", path: "/v1/connection", capability: "operating-model:read" }
+      { method: "GET", path: "/v1/connection", capability: "operating-model:read" },
+      { method: "GET", path: "/v1/operating-model", capability: "operating-model:read" },
+      { method: "GET", path: "/v1/operating-model/tables", capability: "operating-model:read" },
+      { method: "GET", path: "/v1/operating-model/external-mappings", capability: "operating-model:read" },
+      { method: "GET", path: "/v1/operating-model/external-fields", capability: "operating-model:read" },
+      { method: "GET", path: "/v1/operating-model/storage-locations", capability: "operating-model:read" },
+      { method: "POST", path: "/v1/operating-model/storage-locations", capability: "operating-model:write" },
+      { method: "GET", path: "/v1/operating-model/knowledge-roots", capability: "operating-model:read" },
+      { method: "POST", path: "/v1/operating-model/knowledge-roots", capability: "operating-model:write" },
+      { method: "GET", path: "/v1/operating-model/automation-definitions", capability: "operating-model:read" },
+      { method: "POST", path: "/v1/operating-model/automation-definitions", capability: "operating-model:write" }
     ],
     projects: [
       { method: "GET", path: "/v1/projects", capability: "projects:read" },

@@ -464,6 +464,68 @@ The `adapterManifest` is the machine-readable v1 onboarding surface for
 Paperclip, Jarvis, Jarvan, Aviary, n8n, and similar clients. It lists canonical
 paths, methods, expected capabilities, and write rules without exposing secrets.
 
+## Operating Model
+
+Adapters can read the workspace operating model and register scoped storage,
+knowledge, and automation metadata through protected routes.
+
+```http
+GET /v1/operating-model
+GET /v1/operating-model/tables
+GET /v1/operating-model/external-mappings
+GET /v1/operating-model/external-fields
+GET /v1/operating-model/storage-locations
+POST /v1/operating-model/storage-locations
+GET /v1/operating-model/knowledge-roots
+POST /v1/operating-model/knowledge-roots
+GET /v1/operating-model/automation-definitions
+POST /v1/operating-model/automation-definitions
+```
+
+Write payloads derive `workspaceId` from auth. Optional `areaId`, `folderId`,
+and `tableId` must belong to the active workspace and to each other; otherwise
+the API returns `not_found`.
+
+Storage location payload:
+
+```json
+{
+  "tableId": "uuid",
+  "provider": "google_drive",
+  "name": "Goals folder",
+  "locator": {
+    "folderId": "drive-folder-id"
+  }
+}
+```
+
+Knowledge root payload:
+
+```json
+{
+  "tableId": "uuid",
+  "provider": "obsidian",
+  "name": "Goals vault",
+  "locator": {
+    "path": "CompanyCore/Strategy/Goals"
+  }
+}
+```
+
+Automation definition payload:
+
+```json
+{
+  "tableId": "uuid",
+  "provider": "clickup",
+  "triggerType": "scheduled_pull",
+  "name": "Goals table scheduled pull",
+  "config": {
+    "cadence": "manual"
+  }
+}
+```
+
 ## Projects
 
 ```http

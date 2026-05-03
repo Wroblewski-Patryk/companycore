@@ -106,6 +106,11 @@ Registry tables:
 - `automation_definitions`: workspace/folder/table-scoped automations and
   provider triggers.
 
+The operating model API exposes these registry records through
+`/v1/operating-model`. Storage locations, knowledge roots, and automation
+definitions can be created through that API after their optional area, folder,
+or table scope has been validated inside the active workspace.
+
 Runtime routes should eventually resolve table API behavior through
 `operating_tables.api_slug` or an equivalent registry lookup, while preserving
 explicit typed routes for the stable first-party domain tables.

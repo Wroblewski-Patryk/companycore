@@ -180,6 +180,7 @@ test("CompanyCore v1 protected API flow", async () => {
         auth: { serviceHeader: string };
         routes: {
           tasks: Array<{ method: string; path: string; capability: string }>;
+          operatingModel: Array<{ method: string; path: string; capability: string }>;
           taskLists: Array<{ method: string; path: string; capability: string }>;
           pipelineStages: Array<{ method: string; path: string; capability: string }>;
           agents: Array<{ method: string; path: string; capability: string }>;
@@ -213,6 +214,11 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(connectionBody.data.capabilities.includes("tasks:write"));
   assert.equal(connectionBody.data.adapterManifest.basePath, "/v1");
   assert.equal(connectionBody.data.adapterManifest.auth.serviceHeader, "X-API-Key");
+  assert.ok(connectionBody.data.adapterManifest.routes.operatingModel.some((route) => (
+    route.method === "GET"
+    && route.path === "/v1/operating-model"
+    && route.capability === "operating-model:read"
+  )));
   assert.ok(connectionBody.data.adapterManifest.routes.tasks.some((route) => (
     route.method === "POST"
     && route.path === "/v1/tasks"
@@ -304,6 +310,86 @@ test("CompanyCore v1 protected API flow", async () => {
     })
   });
   assert.equal(serviceCannotCreateKeys.status, 403);
+
+  const operatingModel = await request("/v1/operating-model", { headers: authA });
+  assert.equal(operatingModel.status, 200);
+  const operatingModelBody = operatingModel.body as {
+    data: {
+      areas: Array<{ key: string; tables: Array<{ apiSlug: string }> }>;
+    };
+  };
+  assert.equal(operatingModelBody.data.areas.length, 12);
+  assert.ok(operatingModelBody.data.areas.some((area) => (
+    area.key === "strategy-governance"
+    && area.tables.some((table) => table.apiSlug === "goals")
+    && area.tables.some((table) => table.apiSlug === "targets")
+  )));
+
+  const goalsTable = await prisma.operatingTable.findUniqueOrThrow({
+    where: {
+      workspaceId_apiSlug: {
+        workspaceId: ownerA.workspace.id,
+        apiSlug: "goals"
+      }
+    }
+  });
+
+  const knowledgeRoot = await request("/v1/operating-model/knowledge-roots", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      tableId: goalsTable.id,
+      provider: "obsidian",
+      name: "Goals vault",
+      locator: {
+        path: "CompanyCore/Strategy/Goals"
+      }
+    })
+  });
+  assert.equal(knowledgeRoot.status, 201);
+
+  const storageLocation = await request("/v1/operating-model/storage-locations", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      tableId: goalsTable.id,
+      provider: "google_drive",
+      name: "Goals folder",
+      locator: {
+        folderId: "drive-folder-goals"
+      }
+    })
+  });
+  assert.equal(storageLocation.status, 201);
+
+  const automationDefinition = await request("/v1/operating-model/automation-definitions", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      tableId: goalsTable.id,
+      provider: "clickup",
+      triggerType: "scheduled_pull",
+      name: "Goals table scheduled pull",
+      config: {
+        cadence: "manual"
+      }
+    })
+  });
+  assert.equal(automationDefinition.status, 201);
+
+  const foreignStorageLocation = await request("/v1/operating-model/storage-locations", {
+    method: "POST",
+    headers: authB,
+    body: JSON.stringify({
+      tableId: goalsTable.id,
+      provider: "google_drive",
+      name: "Foreign goals folder",
+      locator: {
+        folderId: "foreign"
+      }
+    })
+  });
+  assert.equal(foreignStorageLocation.status, 404);
 
   const task = await request("/tasks", {
     method: "POST",
@@ -584,6 +670,71 @@ test("CompanyCore v1 protected API flow", async () => {
       }), { status: 200 });
     }
 
+    if (path === "/api/v2/team/team-1/field") {
+      return new Response(JSON.stringify({
+        fields: [
+          { id: "field-workspace", name: "Company Area", type: "drop_down", type_config: {} }
+        ]
+      }), { status: 200 });
+    }
+
+    if (path === "/api/v2/team/team-1/view") {
+      return new Response(JSON.stringify({
+        views: [
+          { id: "view-workspace", name: "Everything", type: "list", parent: { id: "team-1", type: 7 } }
+        ],
+        required_views: []
+      }), { status: 200 });
+    }
+
+    if (path === "/api/v2/space/space-1/field") {
+      return new Response(JSON.stringify({
+        fields: [
+          { id: "field-space", name: "Space Field", type: "short_text", type_config: {} }
+        ]
+      }), { status: 200 });
+    }
+
+    if (path === "/api/v2/folder/folder-1/field") {
+      return new Response(JSON.stringify({
+        fields: [
+          { id: "field-folder", name: "Folder Field", type: "checkbox", type_config: {} }
+        ]
+      }), { status: 200 });
+    }
+
+    if (path === "/api/v2/list/list-folderless/field") {
+      return new Response(JSON.stringify({ fields: [] }), { status: 200 });
+    }
+
+    if (path === "/api/v2/list/list-folderless/view") {
+      return new Response(JSON.stringify({ views: [], required_views: [] }), { status: 200 });
+    }
+
+    if (path === "/api/v2/list/list-1/field") {
+      return new Response(JSON.stringify({
+        fields: [
+          {
+            id: "field-priority",
+            name: "Business Priority",
+            type: "drop_down",
+            type_config: {
+              options: [{ id: "urgent", name: "Urgent" }]
+            }
+          }
+        ]
+      }), { status: 200 });
+    }
+
+    if (path === "/api/v2/list/list-1/view") {
+      return new Response(JSON.stringify({
+        views: [
+          { id: "view-list-1", name: "Jarvis Board", type: "board", parent: { id: "list-1", type: 6 } }
+        ],
+        required_views: []
+      }), { status: 200 });
+    }
+
     return new Response(JSON.stringify({ err: "Not found" }), { status: 404 });
   };
 
@@ -636,6 +787,31 @@ test("CompanyCore v1 protected API flow", async () => {
     assert.equal(mappedList?.name, "Jarvis");
     assert.equal(mappedList?.folder?.name, "Company");
     assert.equal(mappedList?.area.key, "ai-agents-observability");
+
+    const mappedField = await prisma.externalFieldMapping.findUnique({
+      where: {
+        workspaceId_provider_externalId: {
+          workspaceId: ownerA.workspace.id,
+          provider: "clickup",
+          externalId: "field-priority"
+        }
+      }
+    });
+    assert.equal(mappedField?.name, "Business Priority");
+    assert.equal(mappedField?.tableId, mappedList?.id);
+
+    const mappedView = await prisma.externalContainerMapping.findUnique({
+      where: {
+        workspaceId_provider_entityType_externalId: {
+          workspaceId: ownerA.workspace.id,
+          provider: "clickup",
+          entityType: "view",
+          externalId: "view-list-1"
+        }
+      }
+    });
+    assert.equal(mappedView?.name, "Jarvis Board");
+    assert.equal(mappedView?.tableId, mappedList?.id);
 
     const storedDiscovery = await request("/v1/integration-settings/clickup/discover", {
       method: "POST",

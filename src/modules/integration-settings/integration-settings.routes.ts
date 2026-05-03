@@ -87,7 +87,8 @@ integrationSettingsRouter.post("/clickup/discover", asyncHandler(async (req, res
       await persistClickUpStructure({
         workspaceId: req.auth!.workspaceId,
         selectedWorkspace,
-        spaces
+        spaces,
+        client
       });
     }
 

@@ -127,9 +127,10 @@ Deferred to CCV1-034B2:
 ### CCV1-034C Registry-Backed Table API Contract
 
 - Task Type: feature
-- Stage: planning
+- Stage: verification
 - Owner: Backend Builder
 - Priority: P1
+- Status: DONE
 
 Scope:
 
@@ -148,9 +149,10 @@ Acceptance criteria:
 ### CCV1-034D Storage And Knowledge Roots
 
 - Task Type: feature
-- Stage: planning
+- Stage: verification
 - Owner: Backend Builder
 - Priority: P1
+- Status: DONE
 
 Scope:
 
@@ -169,9 +171,10 @@ Acceptance criteria:
 ### CCV1-034E Automation Scope Registry
 
 - Task Type: feature
-- Stage: planning
+- Stage: verification
 - Owner: Backend Builder
 - Priority: P1
+- Status: DONE
 
 Scope:
 
@@ -186,6 +189,28 @@ Acceptance criteria:
   last run/error metadata.
 - ClickUp webhook processing requires signature verification and idempotency.
 - Scheduled sync respects provider rate limits.
+
+### CCV1-034B2 ClickUp Views And Custom Fields Persistence
+
+- Task Type: feature
+- Stage: verification
+- Owner: Backend Builder
+- Priority: P1
+- Status: DONE
+
+Scope:
+
+- Persist ClickUp Custom Field definitions from Workspace, Space, Folder, and
+  List endpoints.
+- Persist ClickUp Workspace/List Views as container mappings.
+- Link List-level fields and views to their mapped operating table.
+
+Acceptance criteria:
+
+- Custom Field IDs are unique per workspace/provider.
+- View IDs are unique per workspace/provider/entity type.
+- List-level metadata links to the right operating table.
+- Provider errors still map through safe integration errors.
 
 ## Provider Documentation Guardrail
 

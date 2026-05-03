@@ -115,6 +115,9 @@ Implemented now:
 - ClickUp discovery upserts Space/Folder/List container mappings.
 - ClickUp Lists become operating tables with `source = clickup` and
   `external_id = <list id>`.
+- ClickUp List Custom Fields are persisted as `external_field_mappings` and
+  linked to the mapped operating table when the field belongs to a List.
+- ClickUp Workspace and List Views are persisted as view container mappings.
 - Native ClickUp task sync preserves task priority and attaches imported tasks
   to a matching `task_lists` row by ClickUp List ID.
 

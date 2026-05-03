@@ -15,6 +15,7 @@ import { eventsRouter } from "./modules/events/events.routes";
 import { goalsRouter } from "./modules/goals/goals.routes";
 import { integrationSettingsRouter } from "./modules/integration-settings/integration-settings.routes";
 import { notesRouter } from "./modules/notes/notes.routes";
+import { operatingModelRouter } from "./modules/operating-model/operating-model.routes";
 import { pipelineStagesRouter } from "./modules/pipeline-stages/pipeline-stages.routes";
 import { projectsRouter } from "./modules/projects/projects.routes";
 import { targetsRouter } from "./modules/targets/targets.routes";
@@ -26,6 +27,7 @@ import { interactionsRouter } from "./modules/interactions/interactions.routes";
 function mountProtectedRoutes(router: Router) {
   router.use("/projects", projectsRouter);
   router.use("/connection", connectionRouter);
+  router.use("/operating-model", operatingModelRouter);
   router.use("/goals", goalsRouter);
   router.use("/targets", targetsRouter);
   router.use("/task-lists", taskListsRouter);

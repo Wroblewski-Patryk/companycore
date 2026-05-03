@@ -44,6 +44,23 @@ export type ClickUpSpaceSummary = {
   folders: ClickUpFolderSummary[];
 };
 
+export type ClickUpCustomField = {
+  id: string;
+  name: string;
+  type?: string | null;
+  type_config?: Record<string, unknown> | null;
+};
+
+export type ClickUpViewSummary = {
+  id: string;
+  name: string;
+  type?: string | null;
+  parent?: {
+    id?: string | number | null;
+    type?: number | null;
+  } | null;
+};
+
 type ClickUpTasksResponse = {
   tasks?: ClickUpTask[];
   last_page?: boolean;
@@ -74,6 +91,36 @@ type ClickUpListsResponse = {
   lists?: Array<{
     id?: string | number | null;
     name?: string | null;
+  }>;
+};
+
+type ClickUpCustomFieldsResponse = {
+  fields?: Array<{
+    id?: string | null;
+    name?: string | null;
+    type?: string | null;
+    type_config?: Record<string, unknown> | null;
+  }>;
+};
+
+type ClickUpViewsResponse = {
+  views?: Array<{
+    id?: string | number | null;
+    name?: string | null;
+    type?: string | null;
+    parent?: {
+      id?: string | number | null;
+      type?: number | null;
+    } | null;
+  }>;
+  required_views?: Array<{
+    id?: string | number | null;
+    name?: string | null;
+    type?: string | null;
+    parent?: {
+      id?: string | number | null;
+      type?: number | null;
+    } | null;
   }>;
 };
 
@@ -113,6 +160,36 @@ export class ClickUpClient {
     return (payload.lists ?? [])
       .map((list) => this.safeSummary(list))
       .filter((list): list is ClickUpListSummary => Boolean(list));
+  }
+
+  async getWorkspaceCustomFields(teamId: string) {
+    const payload = await this.request<ClickUpCustomFieldsResponse>(`/team/${encodeURIComponent(teamId)}/field`);
+    return this.safeCustomFields(payload.fields ?? []);
+  }
+
+  async getSpaceCustomFields(spaceId: string) {
+    const payload = await this.request<ClickUpCustomFieldsResponse>(`/space/${encodeURIComponent(spaceId)}/field`);
+    return this.safeCustomFields(payload.fields ?? []);
+  }
+
+  async getFolderCustomFields(folderId: string) {
+    const payload = await this.request<ClickUpCustomFieldsResponse>(`/folder/${encodeURIComponent(folderId)}/field`);
+    return this.safeCustomFields(payload.fields ?? []);
+  }
+
+  async getListCustomFields(listId: string) {
+    const payload = await this.request<ClickUpCustomFieldsResponse>(`/list/${encodeURIComponent(listId)}/field`);
+    return this.safeCustomFields(payload.fields ?? []);
+  }
+
+  async getWorkspaceViews(teamId: string) {
+    const payload = await this.request<ClickUpViewsResponse>(`/team/${encodeURIComponent(teamId)}/view`);
+    return this.safeViews(payload);
+  }
+
+  async getListViews(listId: string) {
+    const payload = await this.request<ClickUpViewsResponse>(`/list/${encodeURIComponent(listId)}/view`);
+    return this.safeViews(payload);
   }
 
   async getWorkspaceStructure(teamId: string) {
@@ -183,6 +260,33 @@ export class ClickUpClient {
       id: String(input.id),
       name: input.name
     };
+  }
+
+  private safeCustomFields(fields: Array<{
+    id?: string | null;
+    name?: string | null;
+    type?: string | null;
+    type_config?: Record<string, unknown> | null;
+  }>) {
+    return fields
+      .filter((field): field is ClickUpCustomField => Boolean(field.id && field.name))
+      .map((field) => ({
+        id: field.id,
+        name: field.name,
+        type: field.type ?? null,
+        type_config: field.type_config ?? null
+      }));
+  }
+
+  private safeViews(payload: ClickUpViewsResponse) {
+    return [...(payload.views ?? []), ...(payload.required_views ?? [])]
+      .filter((view): view is ClickUpViewSummary => Boolean(view.id && view.name))
+      .map((view) => ({
+        id: String(view.id),
+        name: view.name,
+        type: view.type ?? null,
+        parent: view.parent ?? null
+      }));
   }
 
   private async request<T>(pathOrUrl: string | URL): Promise<T> {
