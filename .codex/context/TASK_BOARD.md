@@ -2,13 +2,12 @@
 
 ## Ready
 
-- CCV1-034A Operating Model Registry Schema
+- CCV1-034C Registry-Backed Table API Contract
   - Stage: planning
-  - Owner: DB/Migrations
-  - Priority: P0
-  - Scope: add the workspace -> operating area -> folder -> table registry
-    plan and then implement the approved Prisma migration/backfill in the next
-    code iteration.
+  - Owner: Backend Builder
+  - Priority: P1
+  - Scope: add dedicated registry read routes or metadata endpoints if
+    adapters need more than the `/v1/connection` operating model summary.
 
 ## Blocked
 
@@ -30,19 +29,12 @@
   - Scope: choose either scheduled native pull sync, ClickUp webhook ingestion
     with `X-Signature` verification and webhook state storage, or external
     orchestration once the first production ClickUp pull is verified.
-- CCV1-034B ClickUp Structure Persistence
-  - Stage: planning
-  - Owner: Backend Builder
-  - Priority: P0
-  - Scope: persist ClickUp Spaces, Folders, Lists, Views, and Custom Fields
-    into provider mapping tables and connect them to operating areas, folders,
-    and tables.
-- CCV1-034C Registry-Backed Table API Contract
+- CCV1-034B2 ClickUp Views And Custom Fields Persistence
   - Stage: planning
   - Owner: Backend Builder
   - Priority: P1
-  - Scope: expose table API metadata from the operating registry while keeping
-    existing typed routes stable.
+  - Scope: extend current ClickUp structure persistence beyond Workspaces,
+    Spaces, Folders, and Lists to include Views and Custom Field metadata.
 - CCV1-034D Storage And Knowledge Roots
   - Stage: planning
   - Owner: Backend Builder
@@ -104,3 +96,5 @@
 - CCV1-032 Guided Owner Console.
 - CCV1-033 Production deploy and smoke for guided ClickUp owner console.
 - CCV1-034 ClickUp-shaped operating model architecture and implementation plan.
+- CCV1-034A Operating Model Registry Schema.
+- CCV1-034B ClickUp Structure Persistence.

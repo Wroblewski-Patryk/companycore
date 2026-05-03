@@ -5,6 +5,7 @@ import { IntegrationError } from "../errors";
 import { getClickUpSettingsForWorkspace } from "../integration-settings.service";
 import { ClickUpClient } from "./clickup.client";
 import { mapClickUpTaskToCompanyCoreTask, safeClickUpTaskPayload } from "./clickup.mapper";
+import { findClickUpListTable } from "../../operating-model/clickup-structure";
 
 type SyncResult = {
   provider: "clickup";
@@ -14,6 +15,37 @@ type SyncResult = {
   updatedCount: number;
   skippedCount: number;
 };
+
+async function findOrCreateClickUpTaskList(workspaceId: string, listId?: string | null) {
+  if (!listId) {
+    return null;
+  }
+
+  const existing = await prisma.taskList.findFirst({
+    where: {
+      workspaceId,
+      source: "clickup",
+      externalId: listId
+    }
+  });
+
+  if (existing) {
+    return existing;
+  }
+
+  const mappedTable = await findClickUpListTable(workspaceId, listId);
+  return prisma.taskList.create({
+    data: {
+      workspaceId,
+      name: mappedTable?.name ?? `ClickUp List ${listId}`,
+      description: mappedTable
+        ? "Created from ClickUp structural mapping."
+        : "Created from ClickUp task list reference.",
+      externalId: listId,
+      source: "clickup"
+    }
+  });
+}
 
 export async function syncClickUpTasksForWorkspace(workspaceId: string): Promise<SyncResult> {
   const correlationId = randomUUID();
@@ -65,6 +97,10 @@ export async function syncClickUpTasksForWorkspace(workspaceId: string): Promise
       }
 
       const data = mapClickUpTaskToCompanyCoreTask(clickUpTask, workspaceId);
+      const taskList = await findOrCreateClickUpTaskList(workspaceId, clickUpTask.list?.id);
+      if (taskList) {
+        data.taskListId = taskList.id;
+      }
       const existing = await prisma.task.findUnique({
         where: {
           workspaceId_source_externalId: {

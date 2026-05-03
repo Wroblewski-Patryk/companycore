@@ -4,6 +4,129 @@ These task contracts turn the v1 audit into executable work. Each task must be
 completed as its own small iteration and must update `.codex/context/TASK_BOARD.md`,
 `.codex/context/PROJECT_STATE.md`, and relevant docs when status changes.
 
+## CCV1-034A Operating Model Registry Schema
+
+### Header
+- ID: CCV1-034A
+- Title: Operating model registry schema
+- Task Type: feature
+- Current Stage: verification
+- Status: DONE
+- Owner: DB/Migrations
+- Depends on: CCV1-034
+- Priority: P0
+- Iteration: v1-034A
+- Operation Mode: BUILDER
+
+### Goal
+Create the runtime database registry for 12 operating areas, folders, tables,
+provider mappings, storage roots, knowledge roots, and automation scopes.
+
+### Scope
+- `prisma/schema.prisma`
+- `prisma/migrations/202605031_operating_model_registry/migration.sql`
+- `src/operating-model/catalog.ts`
+- `prisma/seed.ts`
+- `src/modules/auth/auth.routes.ts`
+- `src/modules/connection/connection.routes.ts`
+- `src/tests/api.test.ts`
+- docs and context files
+
+### Acceptance Criteria
+- [x] Every workspace gets the 12 approved operating areas.
+- [x] First-party API tables are registered under stable areas.
+- [x] `goals` and `targets` are assigned to Strategy and governance.
+- [x] System tables remain outside the 12-area business table catalog.
+- [x] Existing workspaces are backfilled by migration.
+- [x] New registrations and seed/bootstrap create the registry.
+- [x] `/v1/connection` exposes safe operating model metadata.
+
+### Validation Evidence
+- Tests: `npm test` with `DATABASE_URL=postgresql://companycore:companycore@localhost:55432/companycore_test?schema=public`.
+- Prisma: `npx prisma generate`; `npx prisma validate` with `DATABASE_URL`
+  set.
+- Migration: fresh disposable PostgreSQL applied all migrations including
+  `202605031_operating_model_registry`; second `npm test` run confirmed no
+  pending migrations.
+
+### Result Report
+- Task summary: Added the operating model registry and wired it into workspace
+  bootstrap and connection metadata.
+- Files changed: Prisma schema/migration, operating model service, auth
+  registration, seed, connection route, tests, docs, task board, project state,
+  and next commits.
+- How tested: build, Prisma validation/generation, fresh migration deploy, and
+  endpoint integration test.
+- What is incomplete: dedicated registry routes remain CCV1-034C.
+- Next steps: continue with ClickUp structure persistence and broader registry
+  API/read models.
+
+### Priority
+P0
+
+## CCV1-034B ClickUp Structure Persistence
+
+### Header
+- ID: CCV1-034B
+- Title: ClickUp structure persistence
+- Task Type: feature
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder
+- Depends on: CCV1-034A
+- Priority: P0
+- Iteration: v1-034B
+- Operation Mode: BUILDER
+
+### Goal
+Persist discovered ClickUp Workspaces, Spaces, Folders, and Lists into the
+operating registry so imported records land under the right CompanyCore table
+and task list.
+
+### Scope
+- `src/operating-model/clickup-structure.ts`
+- `src/modules/integration-settings/integration-settings.routes.ts`
+- `src/integrations/clickup/clickup.sync.ts`
+- `src/tests/api.test.ts`
+- `docs/API.md`
+- `docs/INTEGRATIONS.md`
+- context and planning files
+
+### Acceptance Criteria
+- [x] ClickUp discovery persists non-secret structural metadata.
+- [x] ClickUp Spaces are mapped to operating areas.
+- [x] ClickUp Folders are mapped to operating folders.
+- [x] ClickUp Lists are mapped to operating tables with `source = clickup`.
+- [x] Imported ClickUp tasks preserve priority.
+- [x] Imported ClickUp tasks attach to the matching CompanyCore `task_lists`
+  row by ClickUp List ID.
+- [x] Tests prove a `Jarvis` ClickUp List maps to AI agents and observability
+  and imported task list placement works.
+
+### Validation Evidence
+- Tests: `npm test` with disposable PostgreSQL on `localhost:55432`.
+- Provider docs reviewed: ClickUp Tasks, Custom Fields, Views, Rate Limits,
+  Webhook signature, and API v2/v3 terminology from the prior CCV1-034
+  documentation task.
+- High-risk checks: task priority and task list placement asserted in
+  `src/tests/api.test.ts`.
+
+### Result Report
+- Task summary: ClickUp discovery now saves structural mappings, and native
+  task sync uses those mappings to place imported tasks under the correct task
+  list while preserving priority.
+- Files changed: ClickUp structure service, integration settings route,
+  ClickUp sync service, tests, docs, task board, project state, next commits,
+  and this contract.
+- How tested: build, migration deploy, and integration test.
+- What is incomplete: Views and Custom Field metadata persistence are split to
+  CCV1-034B2.
+- Next steps: decide whether adapters need dedicated registry routes beyond
+  `/v1/connection`.
+
+### Priority
+P0
+
 ## CCV1-034 ClickUp-Shaped Operating Model Architecture
 
 ### Header

@@ -10,6 +10,14 @@ let server: ReturnType<ReturnType<typeof createApp>["listen"]>;
 
 async function resetDatabase() {
   await prisma.event.deleteMany();
+  await prisma.automationDefinition.deleteMany();
+  await prisma.knowledgeRoot.deleteMany();
+  await prisma.storageLocation.deleteMany();
+  await prisma.externalFieldMapping.deleteMany();
+  await prisma.externalContainerMapping.deleteMany();
+  await prisma.operatingTable.deleteMany();
+  await prisma.operatingFolder.deleteMany();
+  await prisma.operatingArea.deleteMany();
   await prisma.agentLog.deleteMany();
   await prisma.decision.deleteMany();
   await prisma.note.deleteMany();
@@ -158,6 +166,14 @@ test("CompanyCore v1 protected API flow", async () => {
       status: string;
       auth: { type: string; workspaceId: string; apiKeyId?: string };
       workspace: { id: string; name: string };
+      operatingModel: {
+        hierarchy: string;
+        areas: Array<{
+          key: string;
+          tables: Array<{ tableName: string; apiSlug: string; source: string; externalId: string | null }>;
+        }>;
+        systemTables: string[];
+      };
       capabilities: string[];
       adapterManifest: {
         basePath: string;
@@ -182,7 +198,18 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(connectionBody.data.auth.type, "api_key");
   assert.equal(connectionBody.data.auth.workspaceId, ownerA.workspace.id);
   assert.equal(connectionBody.data.workspace.id, ownerA.workspace.id);
+  assert.equal(
+    connectionBody.data.operatingModel.hierarchy,
+    "workspace -> operating_area -> operating_folder -> operating_table -> record"
+  );
+  assert.equal(connectionBody.data.operatingModel.areas.length, 12);
+  const strategyArea = connectionBody.data.operatingModel.areas.find((area) => area.key === "strategy-governance");
+  assert.ok(strategyArea);
+  assert.ok(strategyArea.tables.some((table) => table.apiSlug === "goals" && table.tableName === "goals"));
+  assert.ok(strategyArea.tables.some((table) => table.apiSlug === "targets" && table.tableName === "targets"));
+  assert.ok(connectionBody.data.operatingModel.systemTables.includes("users"));
   assert.ok(connectionBody.data.capabilities.includes("connection:read"));
+  assert.ok(connectionBody.data.capabilities.includes("operating-model:read"));
   assert.ok(connectionBody.data.capabilities.includes("tasks:write"));
   assert.equal(connectionBody.data.adapterManifest.basePath, "/v1");
   assert.equal(connectionBody.data.adapterManifest.auth.serviceHeader, "X-API-Key");
@@ -593,6 +620,23 @@ test("CompanyCore v1 protected API flow", async () => {
     assert.equal(discoveryBody.data.spaces[0].lists[0].id, "list-folderless");
     assert.equal(discoveryBody.data.spaces[0].folders[0].lists[0].id, "list-1");
 
+    const mappedList = await prisma.operatingTable.findUnique({
+      where: {
+        workspaceId_source_externalId: {
+          workspaceId: ownerA.workspace.id,
+          source: "clickup",
+          externalId: "list-1"
+        }
+      },
+      include: {
+        area: true,
+        folder: true
+      }
+    });
+    assert.equal(mappedList?.name, "Jarvis");
+    assert.equal(mappedList?.folder?.name, "Company");
+    assert.equal(mappedList?.area.key, "ai-agents-observability");
+
     const storedDiscovery = await request("/v1/integration-settings/clickup/discover", {
       method: "POST",
       headers: authA,
@@ -645,6 +689,19 @@ test("CompanyCore v1 protected API flow", async () => {
   }
 
   const events = await request("/events", { headers: authA });
+  const importedTask = await prisma.task.findUnique({
+    where: {
+      workspaceId_source_externalId: {
+        workspaceId: ownerA.workspace.id,
+        source: "clickup",
+        externalId: "clickup-task-1"
+      }
+    },
+    include: { taskList: true }
+  });
+  assert.equal(importedTask?.priority, "high");
+  assert.equal(importedTask?.taskList?.externalId, "list-1");
+  assert.equal(importedTask?.taskList?.name, "Jarvis");
   const eventsB = await request("/events", { headers: authB });
   assert.equal(events.status, 200);
   assert.equal(eventsB.status, 200);

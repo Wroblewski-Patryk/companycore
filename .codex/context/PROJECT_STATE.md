@@ -91,14 +91,17 @@ Last updated: 2026-05-02
   and deployment smoke evidence are aligned.
 
 ## Autonomous Iteration State
-- Current iteration: CCV1-034 ClickUp-shaped operating model architecture.
+- Current iteration: CCV1-034A/034B operating model registry and ClickUp structure persistence.
 - Current operation mode: BUILDER
-- Last completed iteration: CCV1-034 ClickUp-shaped operating model architecture.
-- Last completed task: documented the ClickUp-shaped operating registry target,
-  audited the current schema gap, and queued registry, provider mapping, table
-  API, storage/knowledge, and automation follow-up tasks.
-- Next required mode: TESTER for CCV1-035 unless the selected task number
-  changes.
+- Last completed iteration: CCV1-034A/034B operating model registry and
+  ClickUp structure persistence.
+- Last completed task: added the operating registry schema/migration, seeded
+  12 operating areas per workspace, registered first-party API tables including
+  goals and targets, persisted ClickUp Workspace/Space/Folder/List mappings
+  during discovery, exposed the operating model in `/v1/connection`, and
+  attached imported ClickUp tasks to the matching task list while preserving
+  ClickUp priority.
+- Next required mode: BUILDER for CCV1-034C unless priority changes.
 
 ## Recent Progress
 - 2026-05-02: Created Company Core backend foundation, Prisma schema, Docker
@@ -301,6 +304,16 @@ Last updated: 2026-05-02
   roots, knowledge roots, or automation scopes. Added the architecture and
   planning contract for the 12-area operating model and queued CCV1-034A
   through CCV1-034E.
+- 2026-05-03: Completed CCV1-034A and CCV1-034B by implementing the operating
+  model registry runtime slice. Added Prisma models and migration for
+  operating areas, folders, tables, external container/field mappings, storage
+  locations, knowledge roots, and automation definitions; registration and
+  seed paths now create the 12 approved operating areas and first-party table
+  assignments. ClickUp discovery persists Workspace/Space/Folder/List mappings
+  and ClickUp Lists as operating tables. Native ClickUp task sync now preserves
+  priority and attaches imported tasks to a matching `task_lists` row by
+  ClickUp List ID. `npm test` passed against a disposable PostgreSQL database
+  on `localhost:55432`.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

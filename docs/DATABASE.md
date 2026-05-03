@@ -27,12 +27,12 @@ integration fields such as `external_id` and `source` where relevant.
 - `integration_settings`: workspace-scoped provider configuration and protected
   secret material, starting with ClickUp.
 
-## Target Operating Registry
+## Operating Registry
 
-The current schema is workspace-scoped and usable for v1, but it does not yet
-fully mirror ClickUp's structural hierarchy. The next database architecture
-slice should add a registry that keeps business areas, folders, tables, API
+The schema includes a registry that keeps business areas, folders, tables, API
 surfaces, storage, knowledge roots, automations, and provider mappings aligned.
+Registration and seed/bootstrap paths create the standard operating model for
+each workspace.
 
 Target hierarchy:
 
@@ -85,7 +85,7 @@ System tables remain outside the 12 business areas:
 - provider mapping tables
 - migration, audit, schema, and platform metadata tables
 
-Planned registry tables:
+Registry tables:
 
 - `operating_areas`: one row per approved area per workspace, with a stable
   area key.
@@ -109,6 +109,22 @@ Planned registry tables:
 Runtime routes should eventually resolve table API behavior through
 `operating_tables.api_slug` or an equivalent registry lookup, while preserving
 explicit typed routes for the stable first-party domain tables.
+
+Implemented first-party table assignments:
+
+| Area | Tables |
+| --- | --- |
+| Strategy and governance | `goals`, `targets` |
+| Projects and delivery | `projects` |
+| Tasks and workflow | `task_lists`, `tasks` |
+| Sales and CRM | `clients`, `pipeline_stages`, `deals`, `interactions` |
+| Knowledge and decisions | `notes`, `decisions` |
+| AI agents and observability | `agents`, `agent_logs`, `events` |
+
+The remaining approved areas are created even when they do not yet have
+first-party tables, so future finance, people, marketing, operations, storage,
+and automation records can attach to stable area keys without reshaping the
+workspace contract.
 
 ## Migration Policy
 
@@ -160,6 +176,14 @@ All business tables include `workspace_id` for v1 workspace isolation:
 - `agents`
 - `agent_logs`
 - `events`
+- `operating_areas`
+- `operating_folders`
+- `operating_tables`
+- `external_container_mappings`
+- `external_field_mappings`
+- `storage_locations`
+- `knowledge_roots`
+- `automation_definitions`
 - `api_keys`
 - `integration_settings`
 

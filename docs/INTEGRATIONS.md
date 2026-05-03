@@ -81,7 +81,10 @@ Discovery calls ClickUp's authorized Workspaces, Spaces, Folders, folder Lists,
 and folderless Lists endpoints. A submitted discovery token is never stored;
 the save route remains the only path that encrypts token material. Existing
 connections can rediscover structure with the stored encrypted token without
-returning the token to the browser.
+returning the token to the browser. Discovery with a selected ClickUp
+Workspace persists non-secret structural metadata into the operating registry,
+so later sync can place ClickUp tasks under the matching CompanyCore task list
+and operating table.
 
 Setting a ClickUp token does not automatically start continuous listening.
 Continuous updates require an approved scheduled sync, webhook receiver, or
@@ -103,6 +106,17 @@ syncing flat tasks. The required structural mapping is:
 | Custom Field value | typed field value or raw mapped provider value |
 | View | saved view metadata scoped to workspace, area, folder, or table |
 | Webhook | workspace/folder/table-scoped provider trigger |
+
+Implemented now:
+
+- 12 CompanyCore operating areas are created per workspace.
+- First-party API tables such as `goals`, `targets`, `task_lists`, and `tasks`
+  are registered under stable operating areas.
+- ClickUp discovery upserts Space/Folder/List container mappings.
+- ClickUp Lists become operating tables with `source = clickup` and
+  `external_id = <list id>`.
+- Native ClickUp task sync preserves task priority and attaches imported tasks
+  to a matching `task_lists` row by ClickUp List ID.
 
 Official ClickUp docs that affected this contract:
 

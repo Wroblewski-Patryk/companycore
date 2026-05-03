@@ -33,44 +33,237 @@ enum WorkspaceRole {
 }
 
 model User {
-  id           String                @id @default(uuid()) @db.Uuid
-  email        String                @unique
-  name         String?
-  passwordHash String                @map("password_hash")
-  ownedWorkspaces Workspace[]        @relation("WorkspaceOwner")
-  memberships  WorkspaceMembership[]
-  createdAt    DateTime             @default(now()) @map("created_at")
-  updatedAt    DateTime             @updatedAt @map("updated_at")
+  id              String                @id @default(uuid()) @db.Uuid
+  email           String                @unique
+  name            String?
+  passwordHash    String                @map("password_hash")
+  ownedWorkspaces Workspace[]           @relation("WorkspaceOwner")
+  memberships     WorkspaceMembership[]
+  createdAt       DateTime              @default(now()) @map("created_at")
+  updatedAt       DateTime              @updatedAt @map("updated_at")
 
   @@map("users")
 }
 
 model Workspace {
-  id                  String                @id @default(uuid()) @db.Uuid
-  name                String
-  ownerUserId         String                @map("owner_user_id") @db.Uuid
-  owner               User                  @relation("WorkspaceOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
-  memberships         WorkspaceMembership[]
-  apiKeys             ApiKey[]
-  integrationSettings IntegrationSetting[]
-  projects            Project[]
-  goals               Goal[]
-  targets             Target[]
-  taskLists           TaskList[]
-  tasks               Task[]
-  clients             Client[]
-  pipelineStages      PipelineStage[]
-  deals               Deal[]
-  interactions        Interaction[]
-  notes               Note[]
-  decisions           Decision[]
-  agents              Agent[]
-  agentLogs           AgentLog[]
-  events              Event[]
-  createdAt           DateTime              @default(now()) @map("created_at")
-  updatedAt           DateTime              @updatedAt @map("updated_at")
+  id                        String                     @id @default(uuid()) @db.Uuid
+  name                      String
+  ownerUserId               String                     @map("owner_user_id") @db.Uuid
+  owner                     User                       @relation("WorkspaceOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
+  memberships               WorkspaceMembership[]
+  apiKeys                   ApiKey[]
+  integrationSettings       IntegrationSetting[]
+  projects                  Project[]
+  goals                     Goal[]
+  targets                   Target[]
+  taskLists                 TaskList[]
+  tasks                     Task[]
+  clients                   Client[]
+  pipelineStages            PipelineStage[]
+  deals                     Deal[]
+  interactions              Interaction[]
+  notes                     Note[]
+  decisions                 Decision[]
+  agents                    Agent[]
+  agentLogs                 AgentLog[]
+  events                    Event[]
+  operatingAreas            OperatingArea[]
+  operatingFolders          OperatingFolder[]
+  operatingTables           OperatingTable[]
+  externalContainerMappings ExternalContainerMapping[]
+  externalFieldMappings     ExternalFieldMapping[]
+  storageLocations          StorageLocation[]
+  knowledgeRoots            KnowledgeRoot[]
+  automationDefinitions     AutomationDefinition[]
+  createdAt                 DateTime                   @default(now()) @map("created_at")
+  updatedAt                 DateTime                   @updatedAt @map("updated_at")
 
   @@map("workspaces")
+}
+
+model OperatingArea {
+  id                        String                     @id @default(uuid()) @db.Uuid
+  workspaceId               String                     @map("workspace_id") @db.Uuid
+  workspace                 Workspace                  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  key                       String
+  name                      String
+  description               String?
+  position                  Int                        @default(0)
+  folders                   OperatingFolder[]
+  tables                    OperatingTable[]
+  externalContainerMappings ExternalContainerMapping[]
+  storageLocations          StorageLocation[]
+  knowledgeRoots            KnowledgeRoot[]
+  automationDefinitions     AutomationDefinition[]
+  createdAt                 DateTime                   @default(now()) @map("created_at")
+  updatedAt                 DateTime                   @updatedAt @map("updated_at")
+
+  @@unique([workspaceId, key])
+  @@index([workspaceId, position])
+  @@map("operating_areas")
+}
+
+model OperatingFolder {
+  id                        String                     @id @default(uuid()) @db.Uuid
+  workspaceId               String                     @map("workspace_id") @db.Uuid
+  workspace                 Workspace                  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  areaId                    String                     @map("area_id") @db.Uuid
+  area                      OperatingArea              @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  key                       String
+  name                      String
+  description               String?
+  source                    String                     @default("companycore")
+  externalId                String?                    @map("external_id")
+  tables                    OperatingTable[]
+  externalContainerMappings ExternalContainerMapping[]
+  storageLocations          StorageLocation[]
+  knowledgeRoots            KnowledgeRoot[]
+  automationDefinitions     AutomationDefinition[]
+  createdAt                 DateTime                   @default(now()) @map("created_at")
+  updatedAt                 DateTime                   @updatedAt @map("updated_at")
+
+  @@unique([workspaceId, key])
+  @@unique([workspaceId, source, externalId])
+  @@index([workspaceId, areaId])
+  @@map("operating_folders")
+}
+
+model OperatingTable {
+  id                        String                     @id @default(uuid()) @db.Uuid
+  workspaceId               String                     @map("workspace_id") @db.Uuid
+  workspace                 Workspace                  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  areaId                    String                     @map("area_id") @db.Uuid
+  area                      OperatingArea              @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  folderId                  String?                    @map("folder_id") @db.Uuid
+  folder                    OperatingFolder?           @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  tableName                 String                     @map("table_name")
+  apiSlug                   String                     @map("api_slug")
+  name                      String
+  description               String?
+  source                    String                     @default("companycore")
+  externalId                String?                    @map("external_id")
+  syncPolicy                Json                       @default("{}") @map("sync_policy")
+  externalContainerMappings ExternalContainerMapping[]
+  externalFieldMappings     ExternalFieldMapping[]
+  storageLocations          StorageLocation[]
+  knowledgeRoots            KnowledgeRoot[]
+  automationDefinitions     AutomationDefinition[]
+  createdAt                 DateTime                   @default(now()) @map("created_at")
+  updatedAt                 DateTime                   @updatedAt @map("updated_at")
+
+  @@unique([workspaceId, apiSlug])
+  @@unique([workspaceId, tableName])
+  @@unique([workspaceId, source, externalId])
+  @@index([workspaceId, areaId])
+  @@index([workspaceId, folderId])
+  @@map("operating_tables")
+}
+
+model ExternalContainerMapping {
+  id          String           @id @default(uuid()) @db.Uuid
+  workspaceId String           @map("workspace_id") @db.Uuid
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  provider    String
+  entityType  String           @map("entity_type")
+  externalId  String           @map("external_id")
+  name        String?
+  areaId      String?          @map("area_id") @db.Uuid
+  area        OperatingArea?   @relation(fields: [areaId], references: [id], onDelete: SetNull)
+  folderId    String?          @map("folder_id") @db.Uuid
+  folder      OperatingFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  tableId     String?          @map("table_id") @db.Uuid
+  table       OperatingTable?  @relation(fields: [tableId], references: [id], onDelete: SetNull)
+  raw         Json?
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  @@unique([workspaceId, provider, entityType, externalId])
+  @@index([workspaceId, provider, entityType])
+  @@map("external_container_mappings")
+}
+
+model ExternalFieldMapping {
+  id          String          @id @default(uuid()) @db.Uuid
+  workspaceId String          @map("workspace_id") @db.Uuid
+  workspace   Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  provider    String
+  externalId  String          @map("external_id")
+  name        String
+  fieldType   String?         @map("field_type")
+  tableId     String?         @map("table_id") @db.Uuid
+  table       OperatingTable? @relation(fields: [tableId], references: [id], onDelete: SetNull)
+  nativeField String?         @map("native_field")
+  typeConfig  Json?           @map("type_config")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+
+  @@unique([workspaceId, provider, externalId])
+  @@index([workspaceId, provider])
+  @@map("external_field_mappings")
+}
+
+model StorageLocation {
+  id          String           @id @default(uuid()) @db.Uuid
+  workspaceId String           @map("workspace_id") @db.Uuid
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  areaId      String?          @map("area_id") @db.Uuid
+  area        OperatingArea?   @relation(fields: [areaId], references: [id], onDelete: SetNull)
+  folderId    String?          @map("folder_id") @db.Uuid
+  folder      OperatingFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  tableId     String?          @map("table_id") @db.Uuid
+  table       OperatingTable?  @relation(fields: [tableId], references: [id], onDelete: SetNull)
+  provider    String
+  name        String
+  locator     Json
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  @@index([workspaceId, provider])
+  @@map("storage_locations")
+}
+
+model KnowledgeRoot {
+  id          String           @id @default(uuid()) @db.Uuid
+  workspaceId String           @map("workspace_id") @db.Uuid
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  areaId      String?          @map("area_id") @db.Uuid
+  area        OperatingArea?   @relation(fields: [areaId], references: [id], onDelete: SetNull)
+  folderId    String?          @map("folder_id") @db.Uuid
+  folder      OperatingFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  tableId     String?          @map("table_id") @db.Uuid
+  table       OperatingTable?  @relation(fields: [tableId], references: [id], onDelete: SetNull)
+  provider    String
+  name        String
+  locator     Json
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  @@index([workspaceId, provider])
+  @@map("knowledge_roots")
+}
+
+model AutomationDefinition {
+  id          String           @id @default(uuid()) @db.Uuid
+  workspaceId String           @map("workspace_id") @db.Uuid
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  areaId      String?          @map("area_id") @db.Uuid
+  area        OperatingArea?   @relation(fields: [areaId], references: [id], onDelete: SetNull)
+  folderId    String?          @map("folder_id") @db.Uuid
+  folder      OperatingFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  tableId     String?          @map("table_id") @db.Uuid
+  table       OperatingTable?  @relation(fields: [tableId], references: [id], onDelete: SetNull)
+  provider    String?
+  triggerType String           @map("trigger_type")
+  name        String
+  enabled     Boolean          @default(true)
+  config      Json             @default("{}")
+  lastRunAt   DateTime?        @map("last_run_at")
+  lastError   String?          @map("last_error")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  @@index([workspaceId, provider])
+  @@map("automation_definitions")
 }
 
 model WorkspaceMembership {
@@ -109,59 +302,59 @@ model Project {
 }
 
 model Goal {
-  id          String    @id @default(uuid()) @db.Uuid
-  workspaceId String?   @map("workspace_id") @db.Uuid
+  id          String     @id @default(uuid()) @db.Uuid
+  workspaceId String?    @map("workspace_id") @db.Uuid
   workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  projectId   String?   @map("project_id") @db.Uuid
-  project     Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  projectId   String?    @map("project_id") @db.Uuid
+  project     Project?   @relation(fields: [projectId], references: [id], onDelete: SetNull)
   title       String
   description String?
-  status      String    @default("active")
-  externalId  String?   @map("external_id")
-  source      String?   @default("companycore")
+  status      String     @default("active")
+  externalId  String?    @map("external_id")
+  source      String?    @default("companycore")
   targets     Target[]
   tasks       Task[]
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
 
   @@map("goals")
 }
 
 model Target {
-  id           String    @id @default(uuid()) @db.Uuid
-  workspaceId  String?   @map("workspace_id") @db.Uuid
+  id           String     @id @default(uuid()) @db.Uuid
+  workspaceId  String?    @map("workspace_id") @db.Uuid
   workspace    Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  goalId       String?   @map("goal_id") @db.Uuid
-  goal         Goal?     @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  goalId       String?    @map("goal_id") @db.Uuid
+  goal         Goal?      @relation(fields: [goalId], references: [id], onDelete: SetNull)
   title        String
   description  String?
   metric       String?
-  targetValue  Float?    @map("target_value")
-  currentValue Float?    @default(0) @map("current_value")
-  dueDate      DateTime? @map("due_date")
-  status       String    @default("active")
-  externalId   String?   @map("external_id")
-  source       String?   @default("companycore")
+  targetValue  Float?     @map("target_value")
+  currentValue Float?     @default(0) @map("current_value")
+  dueDate      DateTime?  @map("due_date")
+  status       String     @default("active")
+  externalId   String?    @map("external_id")
+  source       String?    @default("companycore")
   tasks        Task[]
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
 
   @@map("targets")
 }
 
 model TaskList {
-  id          String    @id @default(uuid()) @db.Uuid
-  workspaceId String?   @map("workspace_id") @db.Uuid
+  id          String     @id @default(uuid()) @db.Uuid
+  workspaceId String?    @map("workspace_id") @db.Uuid
   workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  projectId   String?   @map("project_id") @db.Uuid
-  project     Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  projectId   String?    @map("project_id") @db.Uuid
+  project     Project?   @relation(fields: [projectId], references: [id], onDelete: SetNull)
   name        String
   description String?
-  externalId  String?   @map("external_id")
-  source      String?   @default("companycore")
+  externalId  String?    @map("external_id")
+  source      String?    @default("companycore")
   tasks       Task[]
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
 
   @@map("task_lists")
 }
@@ -215,16 +408,16 @@ model Client {
 }
 
 model PipelineStage {
-  id         String   @id @default(uuid()) @db.Uuid
-  workspaceId String? @map("workspace_id") @db.Uuid
+  id          String     @id @default(uuid()) @db.Uuid
+  workspaceId String?    @map("workspace_id") @db.Uuid
   workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  name       String
-  position   Int      @default(0)
-  externalId String?  @map("external_id")
-  source     String?  @default("companycore")
-  deals      Deal[]
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  name        String
+  position    Int        @default(0)
+  externalId  String?    @map("external_id")
+  source      String?    @default("companycore")
+  deals       Deal[]
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
 
   @@map("pipeline_stages")
 }
@@ -251,56 +444,56 @@ model Deal {
 }
 
 model Interaction {
-  id         String   @id @default(uuid()) @db.Uuid
-  workspaceId String? @map("workspace_id") @db.Uuid
+  id          String     @id @default(uuid()) @db.Uuid
+  workspaceId String?    @map("workspace_id") @db.Uuid
   workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  clientId   String?  @map("client_id") @db.Uuid
-  client     Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  type       String
-  summary    String?
-  occurredAt DateTime @default(now()) @map("occurred_at")
-  externalId String?  @map("external_id")
-  source     String?  @default("companycore")
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  clientId    String?    @map("client_id") @db.Uuid
+  client      Client?    @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  type        String
+  summary     String?
+  occurredAt  DateTime   @default(now()) @map("occurred_at")
+  externalId  String?    @map("external_id")
+  source      String?    @default("companycore")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
 
   @@map("interactions")
 }
 
 model Note {
-  id        String   @id @default(uuid()) @db.Uuid
-  workspaceId String? @map("workspace_id") @db.Uuid
+  id          String     @id @default(uuid()) @db.Uuid
+  workspaceId String?    @map("workspace_id") @db.Uuid
   workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  content   String
-  projectId String?  @map("project_id") @db.Uuid
-  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  taskId    String?  @map("task_id") @db.Uuid
-  task      Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
-  clientId  String?  @map("client_id") @db.Uuid
-  client    Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  dealId    String?  @map("deal_id") @db.Uuid
-  deal      Deal?    @relation(fields: [dealId], references: [id], onDelete: SetNull)
-  externalId String? @map("external_id")
-  source    String?  @default("companycore")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  content     String
+  projectId   String?    @map("project_id") @db.Uuid
+  project     Project?   @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  taskId      String?    @map("task_id") @db.Uuid
+  task        Task?      @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  clientId    String?    @map("client_id") @db.Uuid
+  client      Client?    @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  dealId      String?    @map("deal_id") @db.Uuid
+  deal        Deal?      @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  externalId  String?    @map("external_id")
+  source      String?    @default("companycore")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
 
   @@map("notes")
 }
 
 model Decision {
-  id         String   @id @default(uuid()) @db.Uuid
-  workspaceId String? @map("workspace_id") @db.Uuid
+  id          String     @id @default(uuid()) @db.Uuid
+  workspaceId String?    @map("workspace_id") @db.Uuid
   workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  projectId  String?  @map("project_id") @db.Uuid
-  project    Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  title      String
-  rationale  String?
-  outcome    String?
-  externalId String?  @map("external_id")
-  source     String?  @default("companycore")
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  projectId   String?    @map("project_id") @db.Uuid
+  project     Project?   @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  title       String
+  rationale   String?
+  outcome     String?
+  externalId  String?    @map("external_id")
+  source      String?    @default("companycore")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
 
   @@map("decisions")
 }
@@ -322,50 +515,50 @@ model Agent {
 }
 
 model AgentLog {
-  id        String   @id @default(uuid()) @db.Uuid
-  workspaceId String? @map("workspace_id") @db.Uuid
+  id          String     @id @default(uuid()) @db.Uuid
+  workspaceId String?    @map("workspace_id") @db.Uuid
   workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  agentId   String?  @map("agent_id") @db.Uuid
-  agent     Agent?   @relation(fields: [agentId], references: [id], onDelete: SetNull)
-  level     String   @default("info")
-  message   String
-  metadata  Json?
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  agentId     String?    @map("agent_id") @db.Uuid
+  agent       Agent?     @relation(fields: [agentId], references: [id], onDelete: SetNull)
+  level       String     @default("info")
+  message     String
+  metadata    Json?
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
 
   @@map("agent_logs")
 }
 
 model Event {
-  id        String   @id @default(uuid()) @db.Uuid
-  workspaceId String? @map("workspace_id") @db.Uuid
+  id          String     @id @default(uuid()) @db.Uuid
+  workspaceId String?    @map("workspace_id") @db.Uuid
   workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  type      String
-  payload   Json?
-  source    String?  @default("companycore")
-  projectId String?  @map("project_id") @db.Uuid
-  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  taskId    String?  @map("task_id") @db.Uuid
-  task      Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  type        String
+  payload     Json?
+  source      String?    @default("companycore")
+  projectId   String?    @map("project_id") @db.Uuid
+  project     Project?   @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  taskId      String?    @map("task_id") @db.Uuid
+  task        Task?      @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
 
   @@map("events")
 }
 
 model ApiKey {
-  id        String    @id @default(uuid()) @db.Uuid
-  workspaceId String?   @map("workspace_id") @db.Uuid
-  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  name      String
-  key       String?   @unique
-  keyHash   String?   @unique @map("key_hash")
-  keyPrefix String?   @map("key_prefix")
-  scopes    Json      @default("[]")
-  active    Boolean   @default(true)
-  lastUsedAt DateTime? @map("last_used_at")
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
+  id          String     @id @default(uuid()) @db.Uuid
+  workspaceId String?    @map("workspace_id") @db.Uuid
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  key         String?    @unique
+  keyHash     String?    @unique @map("key_hash")
+  keyPrefix   String?    @map("key_prefix")
+  scopes      Json       @default("[]")
+  active      Boolean    @default(true)
+  lastUsedAt  DateTime?  @map("last_used_at")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
 
   @@map("api_keys")
 }

@@ -16,12 +16,13 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] CCV1-033 Production deploy and smoke for guided ClickUp owner console
 - [x] CCV1-034 ClickUp-shaped operating model architecture and implementation
       plan
+- [x] CCV1-034A Operating Model Registry Schema
+- [x] CCV1-034B ClickUp Structure Persistence
 
 ## NEXT
 
-- [ ] CCV1-034A Operating Model Registry Schema.
-- [ ] CCV1-034B ClickUp Structure Persistence.
 - [ ] CCV1-034C Registry-Backed Table API Contract.
+- [ ] CCV1-034B2 ClickUp Views And Custom Fields Persistence.
 - [ ] CCV1-034D Storage And Knowledge Roots.
 - [ ] CCV1-034E Automation Scope Registry.
 - [ ] Decide scheduled ClickUp sync versus webhook ingestion after the first
@@ -36,12 +37,13 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] 2. CCV1-032 Guided Owner Console
 - [x] 3. CCV1-033 Production deploy and smoke for guided ClickUp owner console
 - [x] 4. CCV1-034 ClickUp-shaped operating model architecture
-- [ ] 5. CCV1-034A Operating Model Registry Schema
-- [ ] 6. CCV1-034B ClickUp Structure Persistence
+- [x] 5. CCV1-034A Operating Model Registry Schema
+- [x] 6. CCV1-034B ClickUp Structure Persistence
 - [ ] 7. CCV1-034C Registry-Backed Table API Contract
-- [ ] 8. CCV1-034D Storage And Knowledge Roots
-- [ ] 9. CCV1-034E Automation Scope Registry
-- [ ] 10. Continuous ClickUp update strategy decision
+- [ ] 8. CCV1-034B2 ClickUp Views And Custom Fields Persistence
+- [ ] 9. CCV1-034D Storage And Knowledge Roots
+- [ ] 10. CCV1-034E Automation Scope Registry
+- [ ] 11. Continuous ClickUp update strategy decision
 
 
 ## GROUP QUEUE

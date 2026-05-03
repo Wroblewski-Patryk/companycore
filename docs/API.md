@@ -281,6 +281,17 @@ folderless Lists, and folder Lists for that ClickUp Workspace. If
 `useStoredToken` is true, CompanyCore uses the encrypted workspace ClickUp
 token and still does not return it to the browser.
 
+When discovery includes a selected `teamId`, CompanyCore also persists safe
+ClickUp structural metadata into the operating model registry:
+
+- ClickUp Workspace as an external container mapping.
+- ClickUp Spaces mapped to operating areas.
+- ClickUp Folders mapped to operating folders.
+- ClickUp Lists mapped to operating tables.
+
+This persistence is idempotent and stores provider IDs/names only, not token
+material.
+
 Safe discovery response:
 
 ```json
@@ -356,7 +367,31 @@ Safe response:
       "id": "uuid",
       "name": "LuckySparrow"
     },
-    "capabilities": ["tasks:read", "tasks:write", "events:read"],
+    "operatingModel": {
+      "hierarchy": "workspace -> operating_area -> operating_folder -> operating_table -> record",
+      "areas": [
+        {
+          "key": "strategy-governance",
+          "name": "Strategy and governance",
+          "tables": [
+            {
+              "tableName": "goals",
+              "apiSlug": "goals",
+              "name": "Goals",
+              "source": "companycore"
+            },
+            {
+              "tableName": "targets",
+              "apiSlug": "targets",
+              "name": "Targets",
+              "source": "companycore"
+            }
+          ]
+        }
+      ],
+      "systemTables": ["users", "workspaces", "api_keys"]
+    },
+    "capabilities": ["operating-model:read", "tasks:read", "tasks:write", "events:read"],
     "adapterManifest": {
       "basePath": "/v1",
       "auth": {
@@ -546,6 +581,20 @@ external_id)`.
 for the authenticated workspace. It reads `teamId` and `listIds` from
 `/integration-settings/clickup`, calls ClickUp using the encrypted workspace
 token, upserts tasks, and emits sync events.
+
+Imported ClickUp task fields currently mapped:
+
+- `name` -> `tasks.title`
+- Markdown/plain description -> `tasks.description`
+- ClickUp status/type -> `tasks.status`
+- ClickUp priority label -> `tasks.priority`
+- `due_date` -> `tasks.due_date`
+- task ID -> `tasks.external_id`
+- list ID -> matching `task_lists.external_id` when present or a created
+  ClickUp task list when missing
+
+This means task imports can preserve priority and land under the right
+CompanyCore task list once ClickUp discovery has persisted the List mapping.
 
 Safe native sync response:
 

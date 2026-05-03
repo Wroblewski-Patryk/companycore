@@ -6,6 +6,7 @@ import { requireAuthContext } from "../../auth/api-key.middleware";
 import { hashPassword, verifyPassword } from "../../auth/password";
 import { createAuthToken } from "../../auth/token";
 import { asyncHandler } from "../../middleware/async-handler";
+import { ensureOperatingModelForWorkspace } from "../../operating-model/catalog";
 
 const registerSchema = z.object({
   email: z.string().email().transform((value) => value.toLowerCase()),
@@ -49,6 +50,8 @@ authRouter.post("/register", asyncHandler(async (req, res) => {
           role: "owner"
         }
       });
+
+      await ensureOperatingModelForWorkspace(tx, workspace.id);
 
       return { user, workspace };
     });

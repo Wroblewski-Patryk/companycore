@@ -72,9 +72,10 @@ migrations, audit/event infrastructure, and schema metadata.
 ### CCV1-034A Operating Model Registry Schema
 
 - Task Type: feature
-- Stage: planning
+- Stage: verification
 - Owner: DB/Migrations
 - Priority: P0
+- Status: DONE
 
 Scope:
 
@@ -97,14 +98,14 @@ Acceptance criteria:
 ### CCV1-034B ClickUp Structure Persistence
 
 - Task Type: feature
-- Stage: planning
+- Stage: verification
 - Owner: Backend Builder
 - Priority: P0
+- Status: DONE
 
 Scope:
 
-- Persist discovered ClickUp Spaces, Folders, Lists, Views, and Custom Fields
-  into mapping tables.
+- Persist discovered ClickUp Spaces, Folders, and Lists into mapping tables.
 - Link ClickUp Spaces to operating areas, Folders to operating folders, and
   Lists to operating tables.
 - Preserve selected `listIds` compatibility until the registry becomes the
@@ -114,9 +115,14 @@ Acceptance criteria:
 
 - Discovery can be rerun idempotently.
 - Provider IDs are unique per workspace/provider/provider entity type.
-- Custom Field metadata is stored without assuming all fields map to native
-  columns.
+- Views and Custom Field metadata are not blocked by the container mapping
+  shape and are queued separately.
 - Rate-limit and invalid-token behavior remains safe.
+
+Deferred to CCV1-034B2:
+
+- ClickUp Views.
+- ClickUp Custom Field definitions and values.
 
 ### CCV1-034C Registry-Backed Table API Contract
 

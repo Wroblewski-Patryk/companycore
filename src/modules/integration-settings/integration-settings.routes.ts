@@ -6,6 +6,7 @@ import { IntegrationError } from "../../integrations/errors";
 import { getClickUpSettingsForWorkspace, toJsonInput } from "../../integrations/integration-settings.service";
 import { encryptSecret } from "../../integrations/secrets";
 import { asyncHandler } from "../../middleware/async-handler";
+import { persistClickUpStructure } from "../../operating-model/clickup-structure";
 
 const providerSchema = z.object({
   provider: z.literal("clickup")
@@ -81,6 +82,14 @@ integrationSettingsRouter.post("/clickup/discover", asyncHandler(async (req, res
     const spaces = input.teamId
       ? await client.getWorkspaceStructure(input.teamId)
       : [];
+
+    if (input.teamId) {
+      await persistClickUpStructure({
+        workspaceId: req.auth!.workspaceId,
+        selectedWorkspace,
+        spaces
+      });
+    }
 
     res.json({
       data: {
