@@ -23,13 +23,6 @@
 
 ## Backlog
 
-- CCV1-050 Tasks And Adapter Operations View
-  - Stage: planning
-  - Owner: Frontend Builder
-  - Priority: P1
-  - Scope: add `/tasks` for task/list inspection, ClickUp health, provider
-    events, Custom Fields, notes/comments, and retry visibility.
-
 - CCV1-051 Pipeline Module
   - Stage: planning
   - Owner: Frontend Builder
@@ -120,3 +113,4 @@
 - CCV1-047 Dashboard Command Center.
 - CCV1-048 Operating Areas Explorer.
 - CCV1-049 Settings Integration Taxonomy.
+- CCV1-050 Tasks And Adapter Operations View.

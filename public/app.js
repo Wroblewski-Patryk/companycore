@@ -122,6 +122,10 @@ const taskListSummary = document.querySelector("#taskListSummary");
 const taskListPanel = document.querySelector("#taskListPanel");
 const clickupEventSummary = document.querySelector("#clickupEventSummary");
 const clickupEventPanel = document.querySelector("#clickupEventPanel");
+const taskWebhookSummary = document.querySelector("#taskWebhookSummary");
+const taskWebhookPanel = document.querySelector("#taskWebhookPanel");
+const customFieldSummary = document.querySelector("#customFieldSummary");
+const customFieldPanel = document.querySelector("#customFieldPanel");
 
 const areasSummary = document.querySelector("#areasSummary");
 const areaGrid = document.querySelector("#areaGrid");
@@ -955,6 +959,39 @@ function renderTaskModule() {
   }
   if (state.clickupEvents.length === 0) {
     appendText(clickupEventPanel, "p", "No provider events loaded.", "empty-copy");
+  }
+
+  taskWebhookPanel.innerHTML = "";
+  const activeWebhooks = state.clickupWebhooks.filter((webhook) => webhook.status === "active").length;
+  taskWebhookSummary.textContent = state.clickupWebhooks.length > 0
+    ? `${activeWebhooks} active of ${state.clickupWebhooks.length} ClickUp webhook registrations.`
+    : "No ClickUp webhook registrations loaded.";
+  for (const webhook of state.clickupWebhooks.slice(0, 8)) {
+    const item = document.createElement("div");
+    item.className = "stack-item";
+    appendText(item, "strong", webhook.scopeType || "Webhook");
+    appendText(item, "span", `${webhook.status || "unknown"} - ${webhook.scopeExternalId || webhook.externalId}`);
+    item.append(createStatusPill(webhook.status || "unknown", webhook.status === "active" ? "ok" : "warn"));
+    taskWebhookPanel.append(item);
+  }
+  if (state.clickupWebhooks.length === 0) {
+    appendText(taskWebhookPanel, "p", "No ClickUp webhook registrations loaded.", "empty-copy");
+  }
+
+  customFieldPanel.innerHTML = "";
+  const fields = (state.operatingModel?.externalFields || []).filter((field) => field.provider === "clickup");
+  customFieldSummary.textContent = fields.length > 0
+    ? `${fields.length} ClickUp Custom Fields persisted.`
+    : "No ClickUp Custom Fields loaded.";
+  for (const field of fields.slice(0, 10)) {
+    const item = document.createElement("div");
+    item.className = "stack-item";
+    appendText(item, "strong", field.name);
+    appendText(item, "span", `${field.fieldType || "field"} - ${field.nativeField || "unmapped"}`);
+    customFieldPanel.append(item);
+  }
+  if (fields.length === 0) {
+    appendText(customFieldPanel, "p", "No Custom Fields loaded.", "empty-copy");
   }
 }
 

@@ -377,8 +377,8 @@ Acceptance Criteria:
 ### CCV1-050 Tasks And Adapter Operations View
 
 - Task Type: feature
-- Current Stage: planning
-- Status: READY
+- Current Stage: verification
+- Status: DONE
 - Owner: Frontend Builder
 - Priority: P1
 
