@@ -550,7 +550,12 @@ Last updated: 2026-05-03
   without emitting duplicate task sync events. OpenJarvis CompanyCore connector
   no longer indexes CompanyCore events by default; event indexing is opt-in via
   `COMPANYCORE_SYNC_EVENTS`. Production backups were created under
-  `/home/codex/backups/companycore-cleanup-20260503` before cleanup.
+  `/home/codex/backups/companycore-cleanup-20260503` before cleanup. After
+  cleanup, CompanyCore retained 219 ClickUp tasks, 0 duplicate ClickUp task
+  external IDs, 0 smoke tasks/agents/projects, and 219 latest ClickUp task sync
+  events. A production maintenance run skipped all 219 unchanged tasks and did
+  not create new task sync events. Jarvis rebuilt the CompanyCore connector
+  index to 259 chunks.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

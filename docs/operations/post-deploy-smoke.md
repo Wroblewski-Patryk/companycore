@@ -490,3 +490,13 @@ Use this file to record the minimum checks after each deploy.
     event per ClickUp task.
   - Jarvis CompanyCore knowledge chunks were cleared and rebuilt from clean
     business records.
+- Verification:
+  - CompanyCore retained 219 ClickUp tasks and 0 duplicate ClickUp task
+    external IDs.
+  - CompanyCore retained 219 `task_synced_from_clickup` events after pruning.
+  - A production maintenance run with `merge` returned 219 items, 0 created,
+    0 updated, and 219 skipped.
+  - The same maintenance run did not increase `task_synced_from_clickup`
+    events.
+  - Jarvis rebuilt the CompanyCore connector index to 259 chunks with event
+    indexing disabled by default.

@@ -67,7 +67,9 @@ connector syncs.
   `src/openjarvis/connectors/companycore.py` and
   `tests/connectors/test_companycore.py`.
 - How tested: CompanyCore `npm test`; OpenJarvis targeted CompanyCore tests;
-  production SQL audit; production Jarvis connector smoke.
+  production SQL audit; production maintenance merge smoke showed 219
+  unchanged items skipped and no new `task_synced_from_clickup` events;
+  production Jarvis connector smoke rebuilt 259 CompanyCore chunks.
 - What is incomplete: GitHub-to-Coolify auto-deploy webhook administration
   remains blocked by repository settings access.
 - Next steps: Continue with v2 scope decisions or auto-deploy administration

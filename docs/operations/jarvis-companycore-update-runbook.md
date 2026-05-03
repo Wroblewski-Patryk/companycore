@@ -38,6 +38,14 @@ Production Jarvis must have these environment variables:
 - `COMPANYCORE_API_KEY=<Jarvis workspace service API key>`
 - `COMPANYCORE_ADAPTER_SOURCE=jarvis`
 
+Optional:
+
+- `COMPANYCORE_SYNC_EVENTS=1` only when Jarvis should index CompanyCore audit
+  events as knowledge. Leave it unset for ordinary business context so Jarvis
+  indexes projects, task lists, tasks, clients, deals, interactions, notes,
+  decisions, and agents without turning repeated sync audit events into
+  ordinary answer context.
+
 Do not commit or document raw service API keys. CompanyCore raw keys are
 one-time secret material and should only be stored in the target runtime
 environment.
