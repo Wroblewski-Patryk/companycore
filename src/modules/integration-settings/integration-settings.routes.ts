@@ -11,6 +11,11 @@ import {
   retryFailedClickUpProviderEvents
 } from "../../integrations/clickup/clickup.webhooks";
 import { IntegrationError } from "../../integrations/errors";
+import {
+  buildGoogleDriveAuthorizationUrl,
+  exchangeGoogleDriveAuthorizationCode,
+  mergeGoogleDriveConfig
+} from "../../integrations/google-drive/google-drive.auth";
 import { importGoogleDriveFoldersForWorkspace, reconcileGoogleDriveChangesForWorkspace } from "../../integrations/google-drive/google-drive.sync";
 import { getClickUpSettingsForWorkspace, toJsonInput } from "../../integrations/integration-settings.service";
 import { encryptSecret } from "../../integrations/secrets";
@@ -59,6 +64,19 @@ const googleDriveOAuthSchema = z.object({
   expiresAt: z.string().min(1).optional(),
   tokenType: z.string().min(1).optional(),
   scope: z.string().min(1).optional()
+}).strict();
+
+const googleDriveAuthorizeUrlSchema = z.object({
+  redirectUri: z.string().url(),
+  state: z.string().min(1).optional(),
+  loginHint: z.string().email().optional()
+}).strict();
+
+const googleDriveOAuthExchangeSchema = z.object({
+  code: z.string().min(1),
+  redirectUri: z.string().url(),
+  config: googleDriveConfigSchema.optional(),
+  active: z.boolean().optional()
 }).strict();
 
 const upsertGoogleDriveSettingSchema = z.object({
@@ -264,6 +282,75 @@ integrationSettingsRouter.post("/google_drive/import", asyncHandler(async (req, 
       maxPagesPerFolder: input.maxPagesPerFolder
     });
     return res.json({ data: result });
+  } catch (error) {
+    if (error instanceof IntegrationError) {
+      return res.status(error.status).json({ error: error.code });
+    }
+    throw error;
+  }
+}));
+
+integrationSettingsRouter.post("/google_drive/oauth/authorize-url", asyncHandler(async (req, res) => {
+  if (req.auth!.authType !== "user") {
+    return res.status(403).json({ error: "forbidden" });
+  }
+
+  const input = googleDriveAuthorizeUrlSchema.parse(req.body);
+  try {
+    return res.json({
+      data: {
+        authorizationUrl: buildGoogleDriveAuthorizationUrl(input)
+      }
+    });
+  } catch (error) {
+    if (error instanceof IntegrationError) {
+      return res.status(error.status).json({ error: error.code });
+    }
+    throw error;
+  }
+}));
+
+integrationSettingsRouter.post("/google_drive/oauth/exchange", asyncHandler(async (req, res) => {
+  if (req.auth!.authType !== "user") {
+    return res.status(403).json({ error: "forbidden" });
+  }
+
+  const input = googleDriveOAuthExchangeSchema.parse(req.body);
+  try {
+    const oauth = await exchangeGoogleDriveAuthorizationCode({
+      code: input.code,
+      redirectUri: input.redirectUri
+    });
+    const existing = await prisma.integrationSetting.findUnique({
+      where: {
+        workspaceId_provider: {
+          workspaceId: req.auth!.workspaceId,
+          provider: "google_drive"
+        }
+      }
+    });
+    const setting = await prisma.integrationSetting.upsert({
+      where: {
+        workspaceId_provider: {
+          workspaceId: req.auth!.workspaceId,
+          provider: "google_drive"
+        }
+      },
+      create: {
+        workspaceId: req.auth!.workspaceId,
+        provider: "google_drive",
+        secretCiphertext: encryptSecret(JSON.stringify(oauth)),
+        config: toJsonInput(input.config ?? {}),
+        active: input.active ?? true
+      },
+      update: {
+        secretCiphertext: encryptSecret(JSON.stringify(oauth)),
+        config: mergeGoogleDriveConfig(existing?.config as never, input.config),
+        active: input.active ?? existing?.active ?? true,
+        lastValidatedAt: new Date()
+      }
+    });
+    return res.json({ data: safeIntegrationSetting(setting) });
   } catch (error) {
     if (error instanceof IntegrationError) {
       return res.status(error.status).json({ error: error.code });

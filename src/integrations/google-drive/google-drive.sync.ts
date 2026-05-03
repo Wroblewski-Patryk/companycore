@@ -3,6 +3,7 @@ import { IntegrationError } from "../errors";
 import { getGoogleDriveSettingsForWorkspace, toJsonInput, type GoogleDriveIntegrationConfig } from "../integration-settings.service";
 import { GoogleDriveClient, type GoogleDriveFileMetadata } from "./google-drive.client";
 import { refreshGoogleDriveFileContent, upsertGoogleDriveFileFromMetadata } from "./google-drive.content";
+import { getGoogleDriveClientForWorkspace } from "./google-drive.auth";
 
 export type GoogleDriveImportMode = "merge" | "skip_existing" | "replace_selected_folders" | "inspect_only";
 
@@ -45,14 +46,6 @@ export async function importGoogleDriveFoldersForWorkspace(input: {
     );
   }
 
-  if (!settings.oauth.accessToken) {
-    throw new IntegrationError(
-      "integration_invalid_token",
-      401,
-      "Google Drive access token is required before folder import can run."
-    );
-  }
-
   const config = settings.config ?? {};
   const folderIds = uniqueNonEmpty(input.folderIds ?? config.selectedFolderIds ?? config.rootFolderIds ?? []);
   if (folderIds.length === 0) {
@@ -64,7 +57,7 @@ export async function importGoogleDriveFoldersForWorkspace(input: {
   }
 
   const importMode = input.importMode ?? config.importMode ?? "merge";
-  const client = new GoogleDriveClient(settings.oauth.accessToken);
+  const client = await getGoogleDriveClientForWorkspace(input.workspaceId);
   const files = await fetchSelectedFolderFiles({
     client,
     folderIds,
@@ -292,14 +285,6 @@ export async function reconcileGoogleDriveChangesForWorkspace(input: {
     );
   }
 
-  if (!settings.oauth.accessToken) {
-    throw new IntegrationError(
-      "integration_invalid_token",
-      401,
-      "Google Drive access token is required before changes can be reconciled."
-    );
-  }
-
   const pageToken = input.pageToken ?? settings.config.changesPageToken;
   if (!pageToken) {
     throw new IntegrationError(
@@ -309,7 +294,7 @@ export async function reconcileGoogleDriveChangesForWorkspace(input: {
     );
   }
 
-  const client = new GoogleDriveClient(settings.oauth.accessToken);
+  const client = await getGoogleDriveClientForWorkspace(input.workspaceId);
   const response = await client.listChanges({
     pageToken,
     driveId: input.driveId

@@ -46,6 +46,7 @@ const capabilities = [
   "integration-settings:google-drive:write",
   "integration-settings:google-drive:import",
   "integration-settings:google-drive:changes:reconcile",
+  "integration-settings:google-drive:oauth",
   "google-drive:files:read",
   "google-drive:docs:write",
   "google-drive:sheets:write"
@@ -148,7 +149,9 @@ const adapterManifest = {
       { method: "GET", path: "/v1/integration-settings/google_drive", capability: "integration-settings:google-drive:read" },
       { method: "PUT", path: "/v1/integration-settings/google_drive", capability: "integration-settings:google-drive:write" },
       { method: "POST", path: "/v1/integration-settings/google_drive/import", capability: "integration-settings:google-drive:import" },
-      { method: "POST", path: "/v1/integration-settings/google_drive/changes/reconcile", capability: "integration-settings:google-drive:changes:reconcile" }
+      { method: "POST", path: "/v1/integration-settings/google_drive/changes/reconcile", capability: "integration-settings:google-drive:changes:reconcile" },
+      { method: "POST", path: "/v1/integration-settings/google_drive/oauth/authorize-url", capability: "integration-settings:google-drive:oauth" },
+      { method: "POST", path: "/v1/integration-settings/google_drive/oauth/exchange", capability: "integration-settings:google-drive:oauth" }
     ],
     googleDrive: [
       { method: "GET", path: "/v1/google-drive/files", capability: "google-drive:files:read" },

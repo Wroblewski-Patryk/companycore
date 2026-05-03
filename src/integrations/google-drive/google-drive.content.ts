@@ -2,7 +2,8 @@ import { Prisma, type GoogleDriveFile } from "@prisma/client";
 import { prisma } from "../../db/prisma";
 import { createEvent } from "../../modules/events/event.service";
 import { IntegrationError } from "../errors";
-import { getGoogleDriveSettingsForWorkspace, toJsonInput } from "../integration-settings.service";
+import { toJsonInput } from "../integration-settings.service";
+import { getGoogleDriveClientForWorkspace } from "./google-drive.auth";
 import { GoogleDriveClient, type GoogleDriveFileMetadata } from "./google-drive.client";
 
 const googleDocMimeType = "application/vnd.google-apps.document";
@@ -163,14 +164,7 @@ export async function updateGoogleSheetValues(input: {
 }
 
 async function getWorkspaceGoogleDriveClient(workspaceId: string) {
-  const settings = await getGoogleDriveSettingsForWorkspace(workspaceId);
-  if (!settings) {
-    throw new IntegrationError("integration_not_configured", 404, "Google Drive is not configured.");
-  }
-  if (!settings.oauth.accessToken) {
-    throw new IntegrationError("integration_invalid_token", 401, "Google Drive access token is required.");
-  }
-  return new GoogleDriveClient(settings.oauth.accessToken);
+  return getGoogleDriveClientForWorkspace(workspaceId);
 }
 
 async function getWorkspaceDriveFile(workspaceId: string, id: string) {

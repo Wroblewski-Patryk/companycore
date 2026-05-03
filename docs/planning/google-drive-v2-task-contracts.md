@@ -267,3 +267,44 @@ It follows the repository task contract and must stay synchronized with
   - Added public health build metadata sourced from safe env vars.
   - Added `npm run google-drive:smoke`.
   - Added Google Drive smoke checklist items to the post-deploy runbook.
+
+## V2GD-008 Google Drive OAuth Runtime Hardening
+
+- Task Type: backend/security
+- Current Stage: done
+- Deliverable For This Stage: OAuth authorization URL, code exchange, and
+  refresh-token runtime flow.
+- Goal: Let Google Drive sync run from long-lived encrypted refresh-token
+  material instead of requiring a still-valid access token in settings.
+- Scope:
+  - `src/integrations/google-drive/google-drive.auth.ts`
+  - `src/integrations/google-drive/google-drive.content.ts`
+  - `src/integrations/google-drive/google-drive.sync.ts`
+  - `src/modules/integration-settings/integration-settings.routes.ts`
+  - `src/modules/connection/connection.routes.ts`
+  - `src/config/env.ts`
+  - `.env.example`
+  - `src/tests/api.test.ts`
+  - `docs/INTEGRATIONS.md`
+- Implementation Plan:
+  - Use current Google OAuth web-server docs for authorization code exchange
+    and refresh-token requests.
+  - Add owner-only authorization URL and code exchange routes.
+  - Add automatic access-token refresh before Drive/Docs/Sheets provider calls.
+  - Keep OAuth material encrypted and never returned in API responses.
+  - Add tests for URL generation, owner-only OAuth initiation, refresh-token
+    exchange, and provider calls using refreshed tokens.
+- Acceptance Criteria:
+  - Service API keys cannot create owner consent URLs.
+  - Expired access tokens are refreshed before provider calls.
+  - Refreshed access-token material is re-encrypted in workspace settings.
+  - Build and test gates pass.
+- Definition of Done:
+  - `git diff --check`, `npm run build`, and `npm test` pass.
+  - Integration docs record OAuth runtime behavior.
+- Result Report:
+  - Added OAuth URL generation with offline access and approved scopes.
+  - Added authorization-code exchange route.
+  - Added refresh-token flow against Google's token endpoint.
+  - Updated sync/content services to use fresh Google Drive clients.
+  - Added regression tests for consent URL and token refresh.

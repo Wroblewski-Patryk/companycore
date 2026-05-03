@@ -157,6 +157,14 @@ Implemented foundation:
   inbox, refreshes changed file metadata/content snapshots, marks removed files
   safely, updates the stored changes page token, and emits provider-neutral
   agent outbox events.
+- `POST /v1/integration-settings/google_drive/oauth/authorize-url` generates a
+  Google OAuth consent URL for owners using `access_type=offline`,
+  `include_granted_scopes=true`, and the approved Drive/Docs/Sheets scopes.
+- `POST /v1/integration-settings/google_drive/oauth/exchange` exchanges an
+  authorization code through Google's token endpoint and stores encrypted
+  OAuth material in the workspace setting.
+- Runtime Google Drive calls refresh expired access tokens with the stored
+  refresh token before calling Drive, Docs, or Sheets APIs.
 
 Implemented first native slice:
 

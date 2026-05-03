@@ -779,7 +779,7 @@ test("CompanyCore v1 protected API flow", async () => {
       oauth: {
         refreshToken: "google-refresh-token",
         accessToken: "google-access-token",
-        expiresAt: "2026-05-03T12:00:00.000Z",
+        expiresAt: "2099-05-03T12:00:00.000Z",
         scope: "https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/spreadsheets"
       },
       config: {
@@ -814,6 +814,31 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(loadedGoogleDriveSettings?.oauth.refreshToken, "google-refresh-token");
   assert.equal(loadedGoogleDriveSettings?.oauth.accessToken, "google-access-token");
   assert.equal(loadedGoogleDriveSettings?.config.rootFolderIds?.[0], "drive-folder-root");
+
+  const googleDriveAuthorizeUrl = await request("/v1/integration-settings/google_drive/oauth/authorize-url", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      redirectUri: "https://companycore.luckysparrow.ch/settings/google-drive/callback",
+      state: "workspace-a-google-drive",
+      loginHint: "owner-a@example.com"
+    })
+  });
+  assert.equal(googleDriveAuthorizeUrl.status, 200);
+  const authorizationUrl = new URL((googleDriveAuthorizeUrl.body as { data: { authorizationUrl: string } }).data.authorizationUrl);
+  assert.equal(authorizationUrl.origin, "https://accounts.google.com");
+  assert.equal(authorizationUrl.searchParams.get("access_type"), "offline");
+  assert.equal(authorizationUrl.searchParams.get("include_granted_scopes"), "true");
+  assert.ok(authorizationUrl.searchParams.get("scope")?.includes("https://www.googleapis.com/auth/drive.file"));
+
+  const serviceCannotCreateGoogleDriveAuthUrl = await request("/v1/integration-settings/google_drive/oauth/authorize-url", {
+    method: "POST",
+    headers: { "X-API-Key": serviceKey },
+    body: JSON.stringify({
+      redirectUri: "https://companycore.luckysparrow.ch/settings/google-drive/callback"
+    })
+  });
+  assert.equal(serviceCannotCreateGoogleDriveAuthUrl.status, 403);
 
   const originalFetchBeforeGoogleDriveImport = globalThis.fetch;
   let googleDriveListCallCount = 0;
@@ -1217,6 +1242,68 @@ test("CompanyCore v1 protected API flow", async () => {
     }
   });
   assert.equal(driveAgentEvents.length, 2);
+
+  const expiredGoogleDriveSettings = await request("/integration-settings/google_drive", {
+    method: "PUT",
+    headers: authA,
+    body: JSON.stringify({
+      oauth: {
+        refreshToken: "google-refresh-token",
+        accessToken: "expired-google-access-token",
+        expiresAt: "2000-01-01T00:00:00.000Z"
+      },
+      config: {
+        rootFolderIds: ["drive-folder-root"],
+        selectedFolderIds: ["drive-folder-root"],
+        importMode: "inspect_only",
+        changesPageToken: "changes-token-2"
+      }
+    })
+  });
+  assert.equal(expiredGoogleDriveSettings.status, 200);
+
+  const originalFetchBeforeGoogleDriveRefresh = globalThis.fetch;
+  let oauthRefreshCalled = false;
+  globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
+    const url = new URL(String(input));
+
+    if (url.origin === "https://oauth2.googleapis.com" && url.pathname === "/token") {
+      oauthRefreshCalled = true;
+      const body = new URLSearchParams(String(init?.body ?? ""));
+      assert.equal(body.get("grant_type"), "refresh_token");
+      assert.equal(body.get("refresh_token"), "google-refresh-token");
+      return new Response(JSON.stringify({
+        access_token: "refreshed-google-access-token",
+        expires_in: 3600,
+        scope: "https://www.googleapis.com/auth/drive.file",
+        token_type: "Bearer"
+      }), { status: 200 });
+    }
+
+    if (url.pathname === "/drive/v3/files") {
+      assert.equal(init?.headers ? (init.headers as Record<string, string>).Authorization : undefined, "Bearer refreshed-google-access-token");
+      return new Response(JSON.stringify({ files: [] }), { status: 200 });
+    }
+
+    return new Response(JSON.stringify({ error: "not mocked", path: url.pathname }), { status: 404 });
+  }) as typeof fetch;
+
+  try {
+    const importWithRefresh = await request("/v1/integration-settings/google_drive/import", {
+      method: "POST",
+      headers: authA,
+      body: JSON.stringify({
+        importMode: "inspect_only"
+      })
+    });
+    assert.equal(importWithRefresh.status, 200);
+    assert.equal((importWithRefresh.body as { data: { itemCount: number } }).data.itemCount, 0);
+  } finally {
+    globalThis.fetch = originalFetchBeforeGoogleDriveRefresh;
+  }
+  assert.equal(oauthRefreshCalled, true);
+  const refreshedGoogleDriveSettings = await getGoogleDriveSettingsForWorkspace(ownerA.workspace.id);
+  assert.equal(refreshedGoogleDriveSettings?.oauth.accessToken, "refreshed-google-access-token");
 
   const updatedSettingsWithoutToken = await request("/integration-settings/clickup", {
     method: "PUT",
