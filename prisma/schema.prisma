@@ -308,6 +308,7 @@ model ProviderEventInbox {
   signatureVerified     Boolean                      @default(false) @map("signature_verified")
   processingStatus      String                       @default("pending") @map("processing_status")
   retryCount            Int                          @default(0) @map("retry_count")
+  lastErrorCode         String?                      @map("last_error_code")
   receivedAt            DateTime                     @default(now()) @map("received_at")
   processedAt           DateTime?                    @map("processed_at")
   createdAt             DateTime                     @default(now()) @map("created_at")

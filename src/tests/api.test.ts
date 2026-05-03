@@ -1160,6 +1160,95 @@ test("CompanyCore v1 protected API flow", async () => {
     notify_all: false
   });
 
+  const webhookRegistration = await prisma.externalWebhookRegistration.findUniqueOrThrow({
+    where: {
+      workspaceId_provider_externalId: {
+        workspaceId: ownerA.workspace.id,
+        provider: "clickup",
+        externalId: "webhook-list-1"
+      }
+    }
+  });
+  const failedInbox = await prisma.providerEventInbox.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      provider: "clickup",
+      webhookRegistrationId: webhookRegistration.id,
+      externalWebhookId: "webhook-list-1",
+      eventName: "taskUpdated",
+      externalTaskId: "clickup-task-retry",
+      idempotencyKey: "webhook-list-1:history-retry-1",
+      payloadHash: "retry-hash",
+      payload: {
+        webhook_id: "webhook-list-1",
+        event: "taskUpdated",
+        task_id: "clickup-task-retry"
+      },
+      signatureVerified: true,
+      processingStatus: "failed",
+      retryCount: 1,
+      lastErrorCode: "integration_unavailable"
+    }
+  });
+
+  const failedProviderEvents = await request("/v1/integration-settings/clickup/events?status=failed", {
+    headers: authA
+  });
+  assert.equal(failedProviderEvents.status, 200);
+  assert.ok((failedProviderEvents.body as { data: Array<{ id: string; lastErrorCode: string }> }).data.some((event) => (
+    event.id === failedInbox.id && event.lastErrorCode === "integration_unavailable"
+  )));
+
+  globalThis.fetch = (async (input: string | URL | Request) => {
+    const url = new URL(String(input));
+    if (url.pathname === "/api/v2/task/clickup-task-retry") {
+      return new Response(JSON.stringify({
+        id: "clickup-task-retry",
+        name: "Retried provider event task",
+        markdown_description: "Recovered from failed inbox replay",
+        status: { status: "to do", type: "open" },
+        priority: { priority: "normal" },
+        list: { id: "list-1" }
+      }), { status: 200 });
+    }
+    return new Response(JSON.stringify({ err: "Not found" }), { status: 404 });
+  }) as typeof fetch;
+
+  try {
+    const retriedProviderEvents = await request("/v1/integration-settings/clickup/events/retry-failed", {
+      method: "POST",
+      headers: authA,
+      body: JSON.stringify({
+        eventIds: [failedInbox.id]
+      })
+    });
+    assert.equal(retriedProviderEvents.status, 200);
+    const retryBody = retriedProviderEvents.body as {
+      data: { attemptedCount: number; processedCount: number; failedCount: number };
+    };
+    assert.equal(retryBody.data.attemptedCount, 1);
+    assert.equal(retryBody.data.processedCount, 1);
+    assert.equal(retryBody.data.failedCount, 0);
+  } finally {
+    globalThis.fetch = originalFetchBeforeDiscovery;
+  }
+
+  const retriedInbox = await prisma.providerEventInbox.findUniqueOrThrow({
+    where: { id: failedInbox.id }
+  });
+  assert.equal(retriedInbox.processingStatus, "processed");
+  assert.equal(retriedInbox.lastErrorCode, null);
+  const retriedTask = await prisma.task.findUnique({
+    where: {
+      workspaceId_source_externalId: {
+        workspaceId: ownerA.workspace.id,
+        source: "clickup",
+        externalId: "clickup-task-retry"
+      }
+    }
+  });
+  assert.equal(retriedTask?.title, "Retried provider event task");
+
   const serviceCannotDiscoverClickUp = await request("/v1/integration-settings/clickup/discover", {
     method: "POST",
     headers: { "X-API-Key": serviceKey },
@@ -1397,7 +1486,7 @@ test("CompanyCore v1 protected API flow", async () => {
     assert.equal(replaceBody.data.itemCount, 1);
     assert.equal(replaceBody.data.createdCount, 1);
     assert.equal(replaceBody.data.updatedCount, 0);
-    assert.equal(replaceBody.data.deletedCount, 3);
+    assert.equal(replaceBody.data.deletedCount, 4);
   } finally {
     globalThis.fetch = originalFetch;
   }

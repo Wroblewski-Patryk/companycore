@@ -101,6 +101,55 @@ export async function listClickUpWebhookRegistrations(workspaceId: string) {
   return registrations.map(safeRegistration);
 }
 
+function safeProviderEvent(event: {
+  id: string;
+  provider: string;
+  externalWebhookId: string;
+  eventName: string;
+  externalTaskId: string | null;
+  processingStatus: string;
+  retryCount: number;
+  lastErrorCode: string | null;
+  signatureVerified: boolean;
+  receivedAt: Date;
+  processedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}) {
+  return {
+    id: event.id,
+    provider: event.provider,
+    externalWebhookId: event.externalWebhookId,
+    eventName: event.eventName,
+    externalTaskId: event.externalTaskId,
+    processingStatus: event.processingStatus,
+    retryCount: event.retryCount,
+    lastErrorCode: event.lastErrorCode,
+    signatureVerified: event.signatureVerified,
+    receivedAt: event.receivedAt,
+    processedAt: event.processedAt,
+    createdAt: event.createdAt,
+    updatedAt: event.updatedAt
+  };
+}
+
+export async function listClickUpProviderEvents(input: {
+  workspaceId: string;
+  status?: "pending" | "processed" | "failed";
+  limit?: number;
+}) {
+  const events = await prisma.providerEventInbox.findMany({
+    where: {
+      workspaceId: input.workspaceId,
+      provider: "clickup",
+      ...(input.status ? { processingStatus: input.status } : {})
+    },
+    orderBy: { receivedAt: "desc" },
+    take: Math.min(input.limit ?? 50, 100)
+  });
+  return events.map(safeProviderEvent);
+}
+
 export async function reconcileClickUpWebhooksForWorkspace(
   workspaceId: string,
   req?: { protocol?: string; get(name: string): string | undefined }
@@ -461,6 +510,10 @@ export async function processClickUpProviderEvent(inboxId: string) {
   });
   const payload = inbox.payload as ClickUpWebhookPayload;
 
+  if (inbox.processingStatus === "processed") {
+    return { status: "already_processed", inboxId: inbox.id };
+  }
+
   try {
     let taskId: string | null = null;
     let externalId = payload.task_id ?? null;
@@ -582,19 +635,81 @@ export async function processClickUpProviderEvent(inboxId: string) {
       where: { id: inbox.id },
       data: {
         processingStatus: "processed",
-        processedAt: new Date()
+        processedAt: new Date(),
+        lastErrorCode: null
       }
     });
+    return { status: "processed", inboxId: inbox.id };
   } catch (error) {
+    const errorCode = error instanceof IntegrationError ? error.code : "sync_failed";
     await prisma.providerEventInbox.update({
       where: { id: inbox.id },
       data: {
         processingStatus: "failed",
-        retryCount: { increment: 1 }
+        retryCount: { increment: 1 },
+        lastErrorCode: errorCode
       }
     });
     throw error;
   }
+}
+
+export async function retryFailedClickUpProviderEvents(input: {
+  workspaceId: string;
+  eventIds?: string[];
+  limit?: number;
+}) {
+  const events = await prisma.providerEventInbox.findMany({
+    where: {
+      workspaceId: input.workspaceId,
+      provider: "clickup",
+      processingStatus: "failed",
+      ...(input.eventIds && input.eventIds.length > 0 ? { id: { in: input.eventIds } } : {})
+    },
+    orderBy: { receivedAt: "asc" },
+    take: Math.min(input.limit ?? 25, 100)
+  });
+
+  let processedCount = 0;
+  let failedCount = 0;
+  const results = [];
+
+  for (const event of events) {
+    await prisma.providerEventInbox.update({
+      where: { id: event.id },
+      data: { processingStatus: "pending" }
+    });
+
+    try {
+      const result = await processClickUpProviderEvent(event.id);
+      processedCount += result.status === "processed" || result.status === "already_processed" ? 1 : 0;
+      results.push({ id: event.id, status: result.status });
+    } catch {
+      failedCount += 1;
+      results.push({ id: event.id, status: "failed" });
+    }
+  }
+
+  await createEvent({
+    type: "clickup_provider_events_retried",
+    workspaceId: input.workspaceId,
+    source: "clickup",
+    payload: {
+      provider: "clickup",
+      attemptedCount: events.length,
+      processedCount,
+      failedCount
+    }
+  });
+
+  return {
+    provider: "clickup",
+    workspaceId: input.workspaceId,
+    attemptedCount: events.length,
+    processedCount,
+    failedCount,
+    results
+  };
 }
 
 export async function createCompanyCoreNoteInClickUp(input: {

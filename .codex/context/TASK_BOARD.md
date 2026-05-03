@@ -97,3 +97,4 @@ Paperclip application-side adapter work tracked in
 - CCV1-041 Template Agent Governance Sync.
 - CCV1-042 ClickUp Full API Bridge Completion.
 - CCV1-043 ClickUp Task Comment Bridge.
+- CCV1-044 ClickUp Provider Event Retry And Health.

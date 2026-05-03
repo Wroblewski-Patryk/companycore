@@ -38,7 +38,9 @@ const capabilities = [
   "integration-settings:clickup:read",
   "integration-settings:clickup:write",
   "integration-settings:clickup:discover",
-  "integration-settings:clickup:webhooks:write"
+  "integration-settings:clickup:webhooks:write",
+  "integration-settings:clickup:events:read",
+  "integration-settings:clickup:events:retry"
 ] as const;
 
 const adapterManifest = {
@@ -131,7 +133,9 @@ const adapterManifest = {
       { method: "POST", path: "/v1/integration-settings/clickup/discover", capability: "integration-settings:clickup:discover" },
       { method: "GET", path: "/v1/integration-settings/clickup/webhooks", capability: "integration-settings:clickup:read" },
       { method: "POST", path: "/v1/integration-settings/clickup/webhooks/reconcile", capability: "integration-settings:clickup:webhooks:write" },
-      { method: "DELETE", path: "/v1/integration-settings/clickup/webhooks/:id", capability: "integration-settings:clickup:webhooks:write" }
+      { method: "DELETE", path: "/v1/integration-settings/clickup/webhooks/:id", capability: "integration-settings:clickup:webhooks:write" },
+      { method: "GET", path: "/v1/integration-settings/clickup/events", capability: "integration-settings:clickup:events:read" },
+      { method: "POST", path: "/v1/integration-settings/clickup/events/retry-failed", capability: "integration-settings:clickup:events:retry" }
     ]
   },
   writeRules: [

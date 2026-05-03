@@ -152,6 +152,7 @@ The ClickUp adapter should establish the pattern for future integrations:
 - webhook registration service
 - webhook receiver with raw-body signature verification
 - provider event inbox with idempotency keys
+- provider event replay for failed inbox rows
 - safe provider error mapper
 - idempotent persistence using `(workspace_id, source, external_id)`
 - explicit import policy for existing records before writes run
@@ -199,6 +200,13 @@ with ClickUp's remote webhook list, refresh health, reactivate inactive
 webhooks when possible, replace missing remote registrations, and keep stale
 local registrations from no-longer-selected Lists inactive until an owner
 deletes them.
+
+ClickUp retries delivery, but CompanyCore must also own downstream processing
+recovery. If a signed webhook is stored but task/comment processing fails, the
+provider event inbox must retain safe failure metadata and expose an owner-only
+replay path. Replay must run through the same idempotent mapper as live
+webhooks so recovered events refresh CompanyCore state and notify agents
+without requiring direct database edits.
 
 Webhook processing should be event-first and bridge-friendly. Status changes,
 for example `taskStatusUpdated`, must update the CompanyCore task state and

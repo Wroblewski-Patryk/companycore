@@ -595,6 +595,79 @@ the CompanyCore source of truth while keeping ClickUp and CompanyCore aligned.
 ### Priority
 P0
 
+## CCV1-044 ClickUp Provider Event Retry And Health
+
+### Header
+- ID: CCV1-044
+- Title: ClickUp provider event retry and health
+- Task Type: feature
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder
+- Depends on: CCV1-036C, CCV1-036D, CCV1-043
+- Priority: P0
+- Iteration: v1-044
+- Operation Mode: BUILDER
+
+### Description
+Harden ClickUp live sync so failed webhook processing can be inspected and
+replayed through the API instead of requiring direct database repair.
+
+### Goal
+Keep CompanyCore reliably up to date with ClickUp by making failed provider
+events visible, safely retryable, and idempotent.
+
+### Scope
+- `prisma/schema.prisma`
+- `prisma/migrations/202605034_clickup_event_retry_observability/migration.sql`
+- `src/integrations/clickup/clickup.webhooks.ts`
+- `src/modules/integration-settings/integration-settings.routes.ts`
+- `src/modules/connection/connection.routes.ts`
+- `src/tests/api.test.ts`
+- `docs/API.md`
+- `docs/architecture/system-architecture.md`
+- `.codex/context/PROJECT_STATE.md`
+- `.codex/context/TASK_BOARD.md`
+- `docs/planning/mvp-next-commits.md`
+
+### Implementation Plan
+- Check current official ClickUp webhook health/retry documentation.
+- Add provider event inbox `last_error_code` persistence.
+- Expose safe ClickUp inbox metadata through protected API.
+- Add owner-only failed-event replay using the same idempotent processor as
+  live webhook ingestion.
+- Add regression coverage for failed event listing and successful retry.
+- Update architecture, API, planning, and context docs.
+
+### Acceptance Criteria
+- [x] Failed ClickUp webhook processing records a stable last error code.
+- [x] Protected API can list safe ClickUp provider event metadata by status.
+- [x] Owner users can replay failed ClickUp provider events without raw DB
+  access.
+- [x] Successful replay updates CompanyCore data and clears `lastErrorCode`.
+- [x] Local integration tests pass with the new migration.
+
+### Definition of Done
+- [x] Raw webhook payloads are not returned by health/list endpoints.
+- [x] Retry uses the existing idempotent mapper and workspace scope.
+- [x] Service clients can read inbox health; retry remains owner-only.
+- [x] `npm test` passes against disposable PostgreSQL.
+
+### Result Report
+- Task summary: Added ClickUp provider event inbox health and retry/replay.
+- Files changed: Prisma schema/migration, ClickUp webhook service,
+  integration settings routes, connection manifest, regression tests, and docs.
+- How tested: Ran `npm test` with `DATABASE_URL` pointed at disposable
+  PostgreSQL on `localhost:55432`; migration deploy applied
+  `202605034_clickup_event_retry_observability` and the API flow passed.
+- What is incomplete: Production deploy and smoke are still required for this
+  runtime change.
+- Next steps: Deploy to Coolify and smoke health plus protected inbox event
+  metadata.
+
+### Priority
+P0
+
 ## CCV1-035 ClickUp First-Run Import Policy And Launch Audit
 
 ### Header

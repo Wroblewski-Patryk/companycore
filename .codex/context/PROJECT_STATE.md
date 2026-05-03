@@ -97,12 +97,12 @@ Last updated: 2026-05-03
   and deployment smoke evidence are aligned.
 
 ## Autonomous Iteration State
-- Current iteration: CCV1-043 ClickUp Task Comment Bridge.
+- Current iteration: CCV1-044 ClickUp Provider Event Retry And Health.
 - Current operation mode: BUILDER
-- Last completed iteration: CCV1-043 ClickUp Task Comment Bridge.
-- Last completed task: extended the ClickUp bridge so task comments flow into
-  CompanyCore notes from ClickUp webhooks and CompanyCore notes on
-  ClickUp-sourced tasks create ClickUp task comments before local persistence.
+- Last completed iteration: CCV1-044 ClickUp Provider Event Retry And Health.
+- Last completed task: added safe ClickUp provider event inbox health,
+  last-error metadata, and owner-triggered retry/replay for failed webhook
+  processing rows.
 - Next required mode: BUILDER for Paperclip application-side CompanyCore
   adapter unless priority changes.
 
@@ -451,6 +451,15 @@ Last updated: 2026-05-03
   public `/health` and `/v1/health` returned `200`, and Jarvis's CompanyCore
   API key verified protected reads for `/v1/connection`, `/v1/notes`, and
   `/v1/agent-events`.
+- 2026-05-03: Completed CCV1-044 locally by adding retry observability for the
+  ClickUp provider event inbox. Failed webhook processing rows now record
+  `last_error_code`, `GET /v1/integration-settings/clickup/events` returns safe
+  inbox metadata without raw provider payloads, and owner users can call
+  `POST /v1/integration-settings/clickup/events/retry-failed` to replay failed
+  rows through the same idempotent task/comment processor. Regression coverage
+  creates a failed inbox row, lists it, retries it, verifies the ClickUp task is
+  recovered, and confirms `lastErrorCode` is cleared. `npm test` passed against
+  disposable PostgreSQL on `localhost:55432`.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

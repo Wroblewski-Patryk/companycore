@@ -227,6 +227,8 @@ POST /v1/integration-settings/clickup/discover
 GET /v1/integration-settings/clickup/webhooks
 POST /v1/integration-settings/clickup/webhooks/reconcile
 DELETE /v1/integration-settings/clickup/webhooks/:id
+GET /v1/integration-settings/clickup/events
+POST /v1/integration-settings/clickup/events/retry-failed
 ```
 
 ClickUp configuration payload:
@@ -304,6 +306,28 @@ no longer exist in ClickUp, and marks registrations for no-longer-selected
 Lists inactive. Owner users can delete a single registration through
 `DELETE /v1/integration-settings/clickup/webhooks/:id`, which first deletes the
 remote ClickUp webhook and then removes the local encrypted registration.
+
+Provider event inbox health is exposed without returning raw webhook payloads:
+
+```http
+GET /v1/integration-settings/clickup/events?status=failed
+POST /v1/integration-settings/clickup/events/retry-failed
+```
+
+`GET /clickup/events` returns safe metadata such as event name, external task
+ID, processing status, retry count, last error code, and timestamps. Owner users
+can replay failed events with:
+
+```json
+{
+  "eventIds": ["provider-event-uuid"],
+  "limit": 25
+}
+```
+
+Replay reprocesses failed inbox rows through the same ClickUp task/comment
+mapper, clears `lastErrorCode` on success, and leaves still-failing rows in
+`failed` state with an incremented retry count.
 
 Safe discovery response:
 

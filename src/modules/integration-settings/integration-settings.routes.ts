@@ -4,8 +4,10 @@ import { prisma } from "../../db/prisma";
 import { ClickUpClient } from "../../integrations/clickup/clickup.client";
 import {
   deleteClickUpWebhookRegistration,
+  listClickUpProviderEvents,
   listClickUpWebhookRegistrations,
-  reconcileClickUpWebhooksForWorkspace
+  reconcileClickUpWebhooksForWorkspace,
+  retryFailedClickUpProviderEvents
 } from "../../integrations/clickup/clickup.webhooks";
 import { IntegrationError } from "../../integrations/errors";
 import { getClickUpSettingsForWorkspace, toJsonInput } from "../../integrations/integration-settings.service";
@@ -36,6 +38,13 @@ const discoverClickUpSchema = z.object({
   token: z.string().min(1).optional(),
   teamId: z.string().min(1).optional(),
   useStoredToken: z.boolean().optional()
+}).strict();
+
+const providerEventStatusSchema = z.enum(["pending", "processed", "failed"]);
+
+const retryProviderEventsSchema = z.object({
+  eventIds: z.array(z.string().uuid()).optional(),
+  limit: z.number().int().min(1).max(100).optional()
 }).strict();
 
 export const integrationSettingsRouter = Router();
@@ -151,6 +160,31 @@ integrationSettingsRouter.delete("/clickup/webhooks/:id", asyncHandler(async (re
     }
     throw error;
   }
+}));
+
+integrationSettingsRouter.get("/clickup/events", asyncHandler(async (req, res) => {
+  const status = typeof req.query.status === "string"
+    ? providerEventStatusSchema.parse(req.query.status)
+    : undefined;
+  const events = await listClickUpProviderEvents({
+    workspaceId: req.auth!.workspaceId,
+    status
+  });
+  res.json({ data: events });
+}));
+
+integrationSettingsRouter.post("/clickup/events/retry-failed", asyncHandler(async (req, res) => {
+  if (req.auth!.authType !== "user") {
+    return res.status(403).json({ error: "forbidden" });
+  }
+
+  const input = retryProviderEventsSchema.parse(req.body ?? {});
+  const result = await retryFailedClickUpProviderEvents({
+    workspaceId: req.auth!.workspaceId,
+    eventIds: input.eventIds,
+    limit: input.limit
+  });
+  res.json({ data: result });
 }));
 
 integrationSettingsRouter.get("/:provider", asyncHandler(async (req, res) => {
