@@ -89,6 +89,9 @@ Use `docs/` as the canonical home for CompanyCore documentation.
   - `governance/subagent-delegation-policy.md`
   - `governance/code-quality-guardrails.md`
   - `governance/template-usage.md`
+  - `governance/existing-project-adoption-playbook.md`
+  - `governance/agent-readiness-checklist.md`
+  - `governance/template-adoption-decision-log.md` (optional for existing repos)
   - `governance/agent-setup-blueprint.md`
   - `governance/world-class-product-engineering-standard.md`
   - `governance/autonomous-engineering-loop.md`

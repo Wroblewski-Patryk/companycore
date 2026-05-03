@@ -116,6 +116,7 @@ Use this checklist when initializing a new repository from this template.
 ## 8) First Execution Cycle
 
 - Pick one `NOW` task that maps to a `READY` task on the board.
+- Run `docs/governance/agent-readiness-checklist.md`; track or fix every gap before autonomous implementation begins.
 - Plan the change.
 - Implement the smallest useful slice.
 - Run relevant validation.
@@ -136,3 +137,7 @@ Project is ready when:
 - Definition of Done, integration checklist, AI testing protocol, no-temporary
   solutions rule, and deployment gate are active
 - the plan -> execute -> test -> review -> deploy-aware loop is operational
+
+## Existing Project Variant
+
+When this template is applied to an existing repository, use `docs/governance/existing-project-adoption-playbook.md` before this bootstrap checklist. Existing project truth wins over template assumptions; unresolved gaps become tasks rather than silent instructions.

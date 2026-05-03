@@ -1,4 +1,4 @@
-﻿# Skills Index
+# Skills Index
 
 Project-local skills can be stored in this folder.
 
@@ -12,3 +12,4 @@ Project-local skills can be stored in this folder.
 - risky operations with strict order
 - feature-specific conventions
 - documenting and reapplying execution learnings
+- `adopt_template_into_existing_project/` guides safe migration of an existing repository onto this agent workflow.

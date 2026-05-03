@@ -45,3 +45,9 @@ This repository uses local, manual bootstrap artifacts.
   `docs/governance/repository-structure-policy.md`.
 - Treat the function coverage ledger as optional until the project has enough
   module surface area that ad-hoc "test everything" loops stop being useful.
+
+## Existing Repository Adoption
+
+For an established project, use `docs/governance/existing-project-adoption-playbook.md` instead of treating the template as a clean-room bootstrap. Preserve current project truth, install the minimum agent context first, and turn mismatches into tracked tasks.
+
+Run `docs/governance/agent-readiness-checklist.md` before allowing autonomous implementation loops.
