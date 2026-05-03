@@ -341,6 +341,14 @@ Last updated: 2026-05-03
   `200`; unauthenticated `/v1/connection` returned `401 missing_api_key`; and
   the owner console served the new ClickUp `Import mode` selector with
   `Inspect only`.
+- 2026-05-03: Approved ClickUp webhooks as the next continuous update strategy
+  instead of scheduled-only sync. Official ClickUp docs were reviewed for
+  Create/Get/Update/Delete Webhook endpoints, user-token ownership, webhook
+  health behavior, `X-Signature` HMAC SHA-256 verification, and task webhook
+  payloads including `taskStatusUpdated`. Added
+  `docs/planning/clickup-webhook-trigger-plan.md` and queued CCV1-036A through
+  CCV1-036F to implement webhook schema/security, registration, receiver,
+  task processing, agent event bridge, and production smoke.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

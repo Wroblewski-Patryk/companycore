@@ -23,12 +23,16 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] CCV1-034D Storage And Knowledge Roots
 - [x] CCV1-034E Automation Scope Registry
 - [x] CCV1-035 ClickUp First-Run Import Policy And Launch Audit
+- [x] CCV1-036 ClickUp Webhook Trigger Architecture Plan
 
 ## NEXT
 
-- [ ] Decide scheduled ClickUp sync versus webhook ingestion after the first
-      production pull succeeds, including rate-limit and signature
-      requirements.
+- [ ] CCV1-036A Webhook Schema And Security Foundation
+- [ ] CCV1-036B ClickUp Webhook Registration
+- [ ] CCV1-036C ClickUp Webhook Receiver And Inbox
+- [ ] CCV1-036D Task Event Processor
+- [ ] CCV1-036E Agent Event Bridge
+- [ ] CCV1-036F Production Webhook Smoke
 - [ ] Implement Paperclip application-side adapter code that reads
       `COMPANYCORE_BASE_URL` and `COMPANYCORE_API_KEY`.
 
@@ -45,7 +49,13 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] 9. CCV1-034D Storage And Knowledge Roots
 - [x] 10. CCV1-034E Automation Scope Registry
 - [x] 11. CCV1-035 ClickUp First-Run Import Policy And Launch Audit
-- [ ] 12. Continuous ClickUp update strategy decision
+- [x] 12. CCV1-036 ClickUp Webhook Trigger Architecture Plan
+- [ ] 13. CCV1-036A Webhook Schema And Security Foundation
+- [ ] 14. CCV1-036B ClickUp Webhook Registration
+- [ ] 15. CCV1-036C ClickUp Webhook Receiver And Inbox
+- [ ] 16. CCV1-036D Task Event Processor
+- [ ] 17. CCV1-036E Agent Event Bridge
+- [ ] 18. CCV1-036F Production Webhook Smoke
 
 
 ## GROUP QUEUE

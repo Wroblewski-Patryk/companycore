@@ -360,6 +360,92 @@ data availability, and regression tests are aligned.
 ### Priority
 P0
 
+## CCV1-036 ClickUp Webhook Trigger Architecture Plan
+
+### Header
+- ID: CCV1-036
+- Title: ClickUp webhook trigger architecture plan
+- Task Type: architecture
+- Current Stage: planning
+- Status: DONE
+- Owner: Product Docs
+- Depends on: CCV1-035
+- Priority: P0
+- Iteration: v1-036
+- Operation Mode: ARCHITECT
+
+### Description
+Plan the real-time ClickUp trigger layer so CompanyCore can listen to ClickUp
+changes after the owner enables the integration and can notify Paperclip,
+Jarvis, Aviary, and future modules through a provider-neutral CompanyCore event
+bridge.
+
+### Goal
+Replace the open continuous-sync decision with an approved webhook-first
+architecture based on current ClickUp documentation and split the work into
+small executable implementation slices.
+
+### Scope
+- `docs/architecture/system-architecture.md`
+- `docs/INTEGRATIONS.md`
+- `docs/planning/clickup-webhook-trigger-plan.md`
+- `docs/planning/mvp-next-commits.md`
+- `.codex/context/PROJECT_STATE.md`
+- `.codex/context/TASK_BOARD.md`
+- this task contract
+
+### Implementation Plan
+1. Review official ClickUp webhook documentation before planning runtime
+   behavior.
+2. Record ClickUp-specific assumptions for registration, user-token ownership,
+   health, task payloads, and `X-Signature` HMAC verification.
+3. Define the CompanyCore webhook architecture: registration service, raw-body
+   receiver, provider inbox, idempotent processor, and agent outbox.
+4. Define how `taskStatusUpdated` becomes a Paperclip/Jarvis/Aviary-visible
+   CompanyCore event.
+5. Split implementation into CCV1-036A through CCV1-036F.
+6. Update canonical queue files so webhook work is actionable immediately after
+   first import.
+
+### Acceptance Criteria
+- [x] Official ClickUp webhook docs are reflected in the plan.
+- [x] Plan requires raw-body `X-Signature` HMAC SHA-256 verification.
+- [x] Plan accounts for webhooks being tied to the creating ClickUp user token.
+- [x] Plan includes webhook registration, health/reconciliation, receiver,
+  inbox, processing, and retry/idempotency behavior.
+- [x] Plan defines status-change propagation to Paperclip, Jarvis, Aviary, and
+  future bridges.
+- [x] Planning queue contains concrete implementation slices.
+
+### Definition of Done
+- [x] Architecture source of truth updated.
+- [x] Integration docs updated.
+- [x] Planning docs and task board synchronized.
+- [x] No runtime code was changed before the architecture slice was approved.
+- [x] Provider docs were checked and named in task evidence.
+
+### Result Report
+- Task summary: Approved a webhook-first continuous update model for ClickUp
+  and documented the model as a reusable provider bridge architecture:
+  ClickUp signed webhook -> CompanyCore verified inbox -> idempotent processor
+  -> task update/internal event -> agent event bridge for Paperclip, Jarvis,
+  Aviary, and future modules.
+- Files changed: `docs/architecture/system-architecture.md`,
+  `docs/INTEGRATIONS.md`, `docs/planning/clickup-webhook-trigger-plan.md`,
+  `docs/planning/mvp-next-commits.md`,
+  `.codex/context/PROJECT_STATE.md`, `.codex/context/TASK_BOARD.md`, and this
+  task contract.
+- How tested: Reviewed official ClickUp docs for Webhooks, Webhook Signature,
+  Create Webhook, Get Webhooks, Update Webhook, Webhook Health, and task
+  webhook payloads; ran `git diff --check` and `npm run build`.
+- What is incomplete: Runtime webhook tables, receiver, registration, task
+  processor, and agent event APIs are intentionally queued as CCV1-036A through
+  CCV1-036F.
+- Next steps: Start CCV1-036A Webhook Schema And Security Foundation.
+
+### Priority
+P0
+
 ## CCV1-034B ClickUp Structure Persistence
 
 ### Header

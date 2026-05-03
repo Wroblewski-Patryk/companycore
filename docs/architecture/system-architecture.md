@@ -149,10 +149,13 @@ The ClickUp adapter should establish the pattern for future integrations:
 - provider documentation review before mapping or API implementation
 - workspace settings reader
 - sync service
+- webhook registration service
+- webhook receiver with raw-body signature verification
+- provider event inbox with idempotency keys
 - safe provider error mapper
 - idempotent persistence using `(workspace_id, source, external_id)`
 - explicit import policy for existing records before writes run
-- event emission and observable sync results
+- event emission, outbound agent signals, and observable sync/webhook results
 
 Provider adapters must be designed from current vendor documentation and
 record the relevant endpoint, hierarchy, pagination, rate-limit, webhook,
@@ -168,6 +171,31 @@ workspace-visible import policy. The approved ClickUp modes are `merge`,
 provider cleanup must be scoped to provider-owned records only, for example
 `source = clickup` tasks under selected ClickUp Lists, and must never delete
 native/manual CompanyCore records.
+
+After first import, continuous updates should use ClickUp webhooks as the
+primary trigger path instead of relying only on scheduled pulls. The approved
+webhook flow is:
+
+```text
+Owner enables ClickUp integration -> CompanyCore creates scoped ClickUp webhook
+  -> ClickUp POSTs signed event -> CompanyCore verifies signature from raw body
+  -> provider event inbox deduplicates -> task delta is reconciled
+  -> CompanyCore event/outbox notifies Paperclip, Jarvis, Aviary, or future agents
+```
+
+ClickUp webhook registrations are tied to the user token that created them, so
+CompanyCore must track webhook health and provide an owner reactivation path
+when the ClickUp user loses access or the webhook becomes inactive. Webhook
+secrets returned by ClickUp must be encrypted as workspace integration secret
+material. Incoming webhook requests must be rejected before parsing business
+logic when the `X-Signature` HMAC SHA-256 check fails.
+
+Webhook processing should be event-first and bridge-friendly. Status changes,
+for example `taskStatusUpdated`, must update the CompanyCore task state and
+also emit a durable internal event that downstream agents can consume. Paperclip
+can use status changes as work triggers, while Jarvis and Aviary can consume the
+same event stream for context refreshes, decisions, notifications, or future
+automation modules.
 
 n8n remains optional orchestration for workflows better kept outside the
 backend. It is not the required primary ClickUp path in v1.

@@ -149,9 +149,91 @@ Official ClickUp docs that affected this contract:
 - Rate limits are per token and must be handled as provider backpressure.
 - ClickUp webhooks use an `X-Signature` HMAC signature that must be verified
   before processing webhook events.
+- ClickUp webhook registrations are created with the user's token and stop
+  triggering when the creating user loses access to the relevant hierarchy.
+- ClickUp webhook health depends on CompanyCore returning successful HTTP
+  responses quickly; inactive webhooks must be reactivated through the webhook
+  update endpoint.
 
-Future write-back, webhook ingestion, and broad sync must include explicit
-tests for these mapping rules before release.
+Future write-back and broad sync must include explicit tests for these mapping
+rules before release. Webhook ingestion is now the approved next integration
+slice.
+
+## ClickUp Webhook Trigger Plan
+
+ClickUp webhook ingestion is the canonical real-time trigger model for
+CompanyCore. The implementation must follow the current ClickUp docs:
+
+- Register webhooks with `POST /api/v2/team/{team_id}/webhook`.
+- Store the returned webhook ID and secret in workspace-scoped encrypted
+  integration data.
+- Use selected List IDs as the default webhook location scope. Use a wildcard
+  event subscription only during controlled testing; production should begin
+  with task events such as `taskCreated`, `taskUpdated`, `taskDeleted`, and
+  `taskStatusUpdated`.
+- Verify every incoming webhook using the `X-Signature` header and HMAC
+  SHA-256 over the exact raw request body before trusting any payload fields.
+- Treat `taskStatusUpdated` as a first-class business trigger because it can
+  tell Paperclip, Jarvis, Aviary, or future agents that a record crossed a
+  workflow boundary.
+- Track webhook health and support reactivation because ClickUp webhooks are
+  tied to the user token that created them.
+
+Runtime layers:
+
+- `webhook registration service`: lists existing ClickUp webhooks for the
+  configured Workspace, creates missing selected-List webhooks, updates stale
+  event/endpoint scopes, and disables old CompanyCore-owned webhooks safely.
+- `webhook receiver`: public route under the API domain, raw-body capture,
+  `X-Signature` verification, stable error responses, and quick `2xx`
+  acknowledgement after durable inbox write.
+- `provider event inbox`: database table for raw safe webhook metadata,
+  webhook ID, event name, task ID, history item IDs, signature status, received
+  timestamp, processing status, retry count, and idempotency key.
+- `event processor`: maps ClickUp webhook payloads into CompanyCore task
+  changes, fetches the full task from ClickUp when the payload is only a delta,
+  and emits internal events.
+- `agent event bridge`: durable outbox or event API surface that lets
+  Paperclip, Jarvis, Aviary, and future modules consume CompanyCore events
+  without each agent implementing ClickUp-specific webhook logic.
+
+Idempotency:
+
+- Prefer ClickUp `history_items[].id` plus `webhook_id` and event name as the
+  idempotency key when present.
+- Fall back to `webhook_id:event:task_id:received_payload_hash` only when
+  history item IDs are absent.
+- Reprocessing the same webhook must not duplicate tasks, task events, agent
+  signals, or automation runs.
+
+Agent bridge behavior:
+
+- `taskStatusUpdated` should update the local task status, emit
+  `task_status_updated_from_clickup`, and enqueue an agent-visible event with
+  before/after status, task ID, external ClickUp task ID, list/table scope, and
+  actor metadata when available.
+- Paperclip can subscribe to status-change events to start or continue
+  workflow work.
+- Jarvis can use the same event stream to refresh context and answer with
+  current task state.
+- Aviary can use the same event stream for notification or orchestration
+  surfaces.
+- Agents should read CompanyCore events/outbox through CompanyCore APIs; they
+  should not receive raw ClickUp tokens or verify ClickUp signatures
+  themselves.
+
+Delivery slices:
+
+1. Add schema for webhook registrations, provider webhook inbox, and agent
+   event outbox.
+2. Add raw-body webhook receiver and signature verification tests.
+3. Add ClickUp webhook registration/reconciliation service and owner API.
+4. Add task event processor for `taskCreated`, `taskUpdated`, `taskDeleted`,
+   and `taskStatusUpdated`.
+5. Add agent event bridge endpoints and Paperclip/Jarvis/Aviary consumption
+   contract.
+6. Deploy behind the existing API domain, create webhooks for selected Lists,
+   and run a real ClickUp status-change smoke.
 
 ## Adapter Contract
 
