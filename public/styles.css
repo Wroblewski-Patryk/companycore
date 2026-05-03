@@ -441,7 +441,8 @@ h4 {
 }
 
 .task-filter-bar,
-.pipeline-filter-bar {
+.pipeline-filter-bar,
+.area-filter-bar {
   display: grid;
   grid-template-columns: minmax(220px, 1.4fr) repeat(3, minmax(150px, 0.75fr));
   gap: 12px;
@@ -457,8 +458,14 @@ h4 {
   grid-template-columns: minmax(220px, 1.4fr) repeat(2, minmax(150px, 0.75fr));
 }
 
+.area-filter-bar {
+  grid-template-columns: minmax(220px, 1.5fr) minmax(160px, 0.8fr);
+  margin-top: 16px;
+}
+
 .task-filter-bar label,
-.pipeline-filter-bar label {
+.pipeline-filter-bar label,
+.area-filter-bar label {
   margin: 0;
   color: var(--muted);
   font-size: 12px;
@@ -468,7 +475,9 @@ h4 {
 .task-filter-bar input,
 .task-filter-bar select,
 .pipeline-filter-bar input,
-.pipeline-filter-bar select {
+.pipeline-filter-bar select,
+.area-filter-bar input,
+.area-filter-bar select {
   margin-top: 6px;
 }
 
@@ -609,7 +618,8 @@ h4 {
   gap: 2px;
 }
 
-.pipeline-record-row .record-type {
+.pipeline-record-row .record-type,
+.compact-row .record-type {
   color: var(--accent);
   font-size: 11px;
   font-weight: 900;
@@ -976,6 +986,14 @@ button.compact,
   margin-top: 16px;
 }
 
+.area-workbench {
+  margin: 16px 0;
+}
+
+.area-workbench .section-title {
+  margin-bottom: 10px;
+}
+
 .compact-list {
   display: grid;
   gap: 9px;
@@ -1244,6 +1262,7 @@ button.compact,
   .integration-grid,
   .task-filter-bar,
   .pipeline-filter-bar,
+  .area-filter-bar,
   .module-launch-grid {
     grid-template-columns: 1fr;
   }

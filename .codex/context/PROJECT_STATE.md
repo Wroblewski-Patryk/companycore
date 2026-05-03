@@ -112,12 +112,12 @@ Last updated: 2026-05-04
   pattern.
 
 ## Autonomous Iteration State
-- Current iteration: V2WEB-012 Pipeline Workbench Filters.
+- Current iteration: V2WEB-013 Operating Area Workbench Filters.
 - Current operation mode: BUILDER
-- Last completed iteration: V2WEB-012 Pipeline Workbench Filters.
-- Last completed task: added pipeline search, record-type, and status filters
-  with a unified feed using existing `clients`, `pipeline-stages`, `deals`, and
-  `interactions` tables.
+- Last completed iteration: V2WEB-013 Operating Area Workbench Filters.
+- Last completed task: added selected-area search and content-type filtering
+  with a unified `/areas` workbench over existing tables, Drive items,
+  provider mappings, and record previews.
 - Next required mode: BUILDER for the next v2 web console iteration unless an
   architecture decision blocks the queue first.
 
@@ -725,6 +725,10 @@ Last updated: 2026-05-04
   workbench. The view now has a unified record feed over implemented clients,
   pipeline stages, deals, and interactions, with search, record-type filtering,
   status filtering, filtered counts, and a filter-specific empty state.
+- 2026-05-04: Completed V2WEB-013 by turning the selected-area detail in
+  `/areas` into a searchable workbench. The view now combines mapped tables,
+  Drive items, provider mappings, and table record previews into one filtered
+  feed while preserving assignment selectors for relationship correction.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

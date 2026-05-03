@@ -3,7 +3,7 @@
 ## Ready
 
 No additional ready P0/P1 web console implementation task is queued after
-V2WEB-012.
+V2WEB-013.
 
 ## Blocked
 
@@ -144,3 +144,4 @@ V2WEB-012.
 - V2WEB-010 Relationship Review Center.
 - V2WEB-011 Task Workbench Filters.
 - V2WEB-012 Pipeline Workbench Filters.
+- V2WEB-013 Operating Area Workbench Filters.

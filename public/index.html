@@ -342,6 +342,29 @@
                 </div>
                 <div class="area-stats" id="areaStats"></div>
               </div>
+              <section class="area-filter-bar" aria-label="Selected area filters">
+                <label>
+                  Search area
+                  <input id="areaSearch" type="search" autocomplete="off" placeholder="Table, Drive folder, mapping, record..." />
+                </label>
+                <label>
+                  Content type
+                  <select id="areaTypeFilter">
+                    <option value="">All content</option>
+                    <option value="table">Tables</option>
+                    <option value="drive">Google Drive</option>
+                    <option value="mapping">Provider mappings</option>
+                    <option value="record">Records</option>
+                  </select>
+                </label>
+              </section>
+              <section class="area-workbench">
+                <div class="section-title">
+                  <h4>Area workbench</h4>
+                  <p id="areaWorkbenchSummary">Select an area to review its linked content.</p>
+                </div>
+                <div class="compact-list" id="areaWorkbenchList"></div>
+              </section>
               <div class="area-columns">
                 <section>
                   <h4>Tables</h4>

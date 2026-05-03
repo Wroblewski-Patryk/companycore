@@ -32,6 +32,10 @@ const state = {
   },
   databaseTables: new Map(),
   selectedAreaKey: "",
+  areaFilters: {
+    search: "",
+    type: ""
+  },
   tasks: [],
   taskFilters: {
     search: "",
@@ -110,6 +114,10 @@ const operatingAreasNav = document.querySelector("#operatingAreasNav");
 const areaTitle = document.querySelector("#areaTitle");
 const areaDescription = document.querySelector("#areaDescription");
 const areaStats = document.querySelector("#areaStats");
+const areaSearch = document.querySelector("#areaSearch");
+const areaTypeFilter = document.querySelector("#areaTypeFilter");
+const areaWorkbenchSummary = document.querySelector("#areaWorkbenchSummary");
+const areaWorkbenchList = document.querySelector("#areaWorkbenchList");
 const areaTables = document.querySelector("#areaTables");
 const areaFiles = document.querySelector("#areaFiles");
 const areaMappings = document.querySelector("#areaMappings");
@@ -1295,6 +1303,10 @@ function renderOperatingMap() {
       ? "Refresh the workspace connection to load CompanyCore areas."
       : "Sign in to load the company operating model.";
     areaStats.innerHTML = "";
+    areaSearch.value = state.areaFilters.search;
+    areaTypeFilter.value = state.areaFilters.type;
+    areaWorkbenchSummary.textContent = "No operating area is available yet.";
+    areaWorkbenchList.innerHTML = "";
     areaTables.innerHTML = "";
     areaFiles.innerHTML = "";
     areaMappings.innerHTML = "";
@@ -1377,6 +1389,14 @@ function renderOperatingMap() {
   `, "No external provider mappings in this area yet.");
 
   const previews = tables.flatMap((table) => recordsForTable(table).slice(0, 3).map((record) => ({ table, record }))).slice(0, 10);
+  const workbenchItems = areaWorkbenchItems(area, definition, tables, files, mappings, previews);
+  const filteredWorkbenchItems = filteredAreaWorkbenchItems(workbenchItems);
+  areaSearch.value = state.areaFilters.search;
+  areaTypeFilter.value = state.areaFilters.type;
+  areaWorkbenchSummary.textContent = `${filteredWorkbenchItems.length} of ${workbenchItems.length} selected-area item${workbenchItems.length === 1 ? "" : "s"} match the current view.`;
+  renderCompactList(areaWorkbenchList, filteredWorkbenchItems.slice(0, 16), (item) => item.html, workbenchItems.length === 0
+    ? "No linked content is available for this operating area yet."
+    : "No selected-area items match the current filters.");
   renderCompactList(areaRecords, previews, ({ table, record }) => `
     <strong>${escapeHtml(record.title || record.name || record.summary || record.email || record.id)}</strong>
     <span>${escapeHtml(table.name)} · ${escapeHtml(record.status || record.source || "companycore")}</span>
@@ -1387,6 +1407,78 @@ function renderOperatingMap() {
   renderIntegrationTaxonomy();
   renderRelationshipCenter();
   bindScopeEditors();
+}
+
+function areaWorkbenchItems(area, definition, tables, files, mappings, previews) {
+  return [
+    ...tables.map((table) => areaWorkbenchItem("table", "Table", table.name, `${table.tableName} - /v1/${table.apiSlug} - ${countForTable(table)} records`, [
+      definition.label,
+      table.name,
+      table.tableName,
+      table.apiSlug
+    ])),
+    ...files.map((file) => {
+      const meta = `${file.isFolder ? "Folder" : file.mimeType} - ${file.scanStatus || "unknown"} - ${formatDate(file.modifiedTime)}`;
+      const editor = file.isFolder ? scopeEditorHtml({
+        id: file.id,
+        selectedAreaId: file.operatingAreaId || area.id,
+        type: "drive",
+        label: "Assign folder"
+      }) : "";
+      return areaWorkbenchItem("drive", "Drive", file.name, meta, [
+        definition.label,
+        file.name,
+        file.mimeType,
+        file.scanStatus
+      ], editor);
+    }),
+    ...mappings.map((mapping) => {
+      const editor = mapping.provider === "clickup" && ["space", "folder", "list"].includes(mapping.entityType) ? scopeEditorHtml({
+        id: mapping.id,
+        selectedAreaId: mapping.areaId || area.id,
+        type: "mapping",
+        label: "Assign mapping"
+      }) : "";
+      return areaWorkbenchItem("mapping", "Mapping", mapping.name || mapping.externalId, `${providerLabel(mapping.provider)} - ${mapping.entityType}`, [
+        definition.label,
+        mapping.name,
+        mapping.externalId,
+        mapping.provider,
+        mapping.entityType
+      ], editor);
+    }),
+    ...previews.map(({ table, record }) => areaWorkbenchItem("record", "Record", record.title || record.name || record.summary || record.email || record.id, `${table.name} - ${record.status || record.source || "companycore"}`, [
+      definition.label,
+      table.name,
+      record.title,
+      record.name,
+      record.summary,
+      record.email,
+      record.status,
+      record.source
+    ]))
+  ];
+}
+
+function areaWorkbenchItem(type, label, title, meta, searchableParts, editor = "") {
+  const safeTitle = title || "-";
+  const safeMeta = meta || "companycore";
+  return {
+    type,
+    searchable: [label, safeTitle, safeMeta, ...searchableParts].filter(Boolean).join(" ").toLowerCase(),
+    html: `
+      <span class="record-type">${escapeHtml(label)}</span>
+      <strong>${escapeHtml(safeTitle)}</strong>
+      <span>${escapeHtml(safeMeta)}</span>
+      ${editor}
+    `
+  };
+}
+
+function filteredAreaWorkbenchItems(items) {
+  const search = state.areaFilters.search.trim().toLowerCase();
+  return items.filter((item) => (!search || item.searchable.includes(search))
+    && (!state.areaFilters.type || item.type === state.areaFilters.type));
 }
 
 function renderCompactList(container, items, renderItem, emptyText) {
@@ -2032,6 +2124,8 @@ logoutButton.addEventListener("click", () => {
   };
   state.databaseTables = new Map();
   state.selectedAreaKey = "";
+  state.areaFilters.search = "";
+  state.areaFilters.type = "";
   state.tasks = [];
   state.pipelineFilters.search = "";
   state.pipelineFilters.type = "";
@@ -2091,6 +2185,16 @@ pipelineTypeFilter.addEventListener("change", () => {
 pipelineStatusFilter.addEventListener("change", () => {
   state.pipelineFilters.status = pipelineStatusFilter.value;
   renderPipeline();
+});
+
+areaSearch.addEventListener("input", () => {
+  state.areaFilters.search = areaSearch.value;
+  renderOperatingMap();
+});
+
+areaTypeFilter.addEventListener("change", () => {
+  state.areaFilters.type = areaTypeFilter.value;
+  renderOperatingMap();
 });
 
 loginForm.addEventListener("submit", async (event) => {

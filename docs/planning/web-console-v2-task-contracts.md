@@ -1,5 +1,59 @@
 # Web Console V2 Task Contracts
 
+## V2WEB-013 Operating Area Workbench Filters
+
+- Task Type: design/frontend
+- Current Stage: done
+- Deliverable For This Stage: searchable selected-area workbench feed backed by
+  implemented operating model data.
+- Goal: Make `/areas` easier to use as the place where owners browse one
+  business area and correct provider or Drive relationships without hunting
+  through separate columns.
+- Scope:
+  - `public/index.html`
+  - `public/app.js`
+  - `public/styles.css`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+- Implementation Plan:
+  - Add search and content-type controls to the selected area detail.
+  - Normalize existing area tables, Drive files, provider mappings, and table
+    record previews into one local area workbench feed.
+  - Preserve existing columns and relationship assignment selectors.
+  - Reuse current scope editor endpoints for Drive folders and provider
+    mappings inside the workbench feed.
+  - Validate syntax, build, tests, local route rendering, and production smoke.
+- Acceptance Criteria:
+  - `/areas` supports search across visible selected-area content.
+  - Content-type filtering updates the selected-area workbench without reloading.
+  - Summary reflects filtered count versus total selected-area workbench items.
+  - Empty state explains when filters hide all selected-area items.
+  - Existing area columns and assignment selectors still render.
+- Definition of Done:
+  - `node --check public/app.js`, `git diff --check`, `npm run build`, and
+    `npm test` pass.
+  - Browser smoke verifies area search, type filtering, empty filtered state,
+    and existing assignment selectors on desktop.
+  - Project state, task board, and next-commits docs are updated.
+- Result Report:
+  - Added selected-area search and content-type filters to `/areas`.
+  - Added a unified area workbench feed over existing mapped tables, Drive
+    items, provider mappings, and table record previews.
+  - Reused current Drive and provider mapping scope editors inside the
+    workbench feed so relationship correction remains available from the
+    selected business area.
+  - Updated selected-area summary to show filtered count versus total
+    workbench items.
+  - Added a filter-specific empty state when no selected-area item matches the
+    current controls.
+  - `node --check public/app.js`, `git diff --check`, `npm run build`, and
+    `npm test` passed.
+  - Playwright smoke verified area search, mapping type filtering, filtered
+    empty state, Drive assignment selector, and provider mapping selector on
+    desktop.
+
 ## V2WEB-012 Pipeline Workbench Filters
 
 - Task Type: design/frontend
