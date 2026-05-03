@@ -32,6 +32,7 @@ unavailable. Manual deploy and rollback paths are proven.
 | Jarvis authenticated connector | Bearer-authenticated production connector smoke | `200`, `connected=true`, `auth_type=bridge` |
 | Jarvis CompanyCore sync | Bearer-authenticated production sync trigger | `200`, `status=started`, CompanyCore chunks indexed |
 | Clean sync hygiene | Production maintenance after cleanup | `219` unchanged tasks skipped, `0` duplicate ClickUp tasks, no new duplicate sync events |
+| Final v1 runtime rollover | Backend image `rnqqkhl3o3dut4qv56mlxly2_backend:9116026` | public/protected smoke passed; maintenance skipped 219 unchanged tasks |
 
 Jarvis's public connector endpoint returned `401` without an Authorization
 header. This is expected for a protected user-facing endpoint. A follow-up
@@ -60,6 +61,8 @@ test records.
     CompanyCore.
 - Restart/redeploy evidence exists:
   - CompanyCore backend manual rollover preserved DB and enabled the scheduler.
+  - Final v1 runtime rollover runs backend container
+    `backend-rnqqkhl3o3dut4qv56mlxly2-manual-9116026`.
   - Paperclip service recreate preserved DB/volume and enabled the adapter.
 - Error and secret handling:
   - Provider errors are mapped safely in CompanyCore.

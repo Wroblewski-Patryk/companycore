@@ -4,6 +4,77 @@ These task contracts turn the v1 audit into executable work. Each task must be
 completed as its own small iteration and must update `.codex/context/TASK_BOARD.md`,
 `.codex/context/PROJECT_STATE.md`, and relevant docs when status changes.
 
+## CCV1-054 Final V1 Runtime Rollover Smoke
+
+### Header
+- ID: CCV1-054
+- Title: Final v1 runtime rollover smoke
+- Task Type: release
+- Current Stage: post-release
+- Status: DONE
+- Owner: Ops/Release
+- Depends on: CCV1-053
+- Priority: P1
+- Iteration: v1-054
+- Operation Mode: BUILDER
+
+### Goal
+Make production CompanyCore run the final v1 runtime commit after the clean
+sync, release boundary, and source handoff work.
+
+### Scope
+- CompanyCore production backend image and container.
+- Production public and protected smoke checks.
+- ClickUp maintenance idempotency smoke.
+- Canonical release docs and planning/context files.
+
+### Implementation Plan
+- Build a production Docker image from final v1 runtime commit `9116026`.
+- Start the new backend container on the existing Coolify network using the
+  current backend runtime environment and labels.
+- Verify migrations, seed, scheduler startup, and direct container health.
+- Stop the previous backend container only after the new container passes
+  direct health.
+- Run public web/API smoke, protected connection smoke, and ClickUp
+  maintenance `inspect_only` smoke.
+- Record release evidence and rollback notes.
+
+### Acceptance Criteria
+- [x] Production backend image exists for `9116026`.
+- [x] New backend starts with no pending migrations and scheduler enabled.
+- [x] Previous backend is stopped after new backend health passes.
+- [x] Production Postgres remains running and healthy.
+- [x] Public `/health`, `/v1/health`, web root, and API metadata checks pass.
+- [x] Protected `/v1/connection` returns `200`.
+- [x] ClickUp maintenance `inspect_only` returns 219 items, 0 created,
+  0 updated, and 219 skipped.
+
+### Definition of Done
+- [x] Docker image build from `9116026` passes.
+- [x] Production smoke passes.
+- [x] Task board, project state, planning queue, task contract, release
+  readiness, and post-deploy smoke docs are updated.
+
+### Result Report
+- Task summary: Rolled production CompanyCore to the final v1 `main` commit and
+  verified runtime health plus ClickUp maintenance idempotency.
+- Files changed: `.codex/context/PROJECT_STATE.md`,
+  `.codex/context/TASK_BOARD.md`, `docs/planning/mvp-next-commits.md`,
+  `docs/planning/companycore-v1-task-contracts.md`,
+  `docs/operations/v1-release-readiness.md`, and
+  `docs/operations/post-deploy-smoke.md`.
+- How tested: Built image `rnqqkhl3o3dut4qv56mlxly2_backend:9116026`; direct
+  container health returned `200`; public web/API smoke returned `200`;
+  protected `/v1/connection` returned `200`; ClickUp maintenance
+  `inspect_only` returned 219 items, 0 created, 0 updated, 219 skipped, and
+  0 failed retries.
+- What is incomplete: GitHub-to-Coolify auto-deploy webhook administration
+  remains blocked by missing webhook-management tooling. OpenJarvis/Paperclip
+  upstream source merge execution remains an optional external repository
+  handoff.
+- Next steps: Choose v2 product scope or complete external source/release
+  automation handoffs.
+
 ## CCV1-053 V1 Source Handoff Package
 
 ### Header

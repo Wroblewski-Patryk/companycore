@@ -99,13 +99,14 @@ Last updated: 2026-05-03
   and deployment smoke evidence are aligned.
 
 ## Autonomous Iteration State
-- Current iteration: CCV1-053 V1 Source Handoff Package.
+- Current iteration: CCV1-054 Final V1 Runtime Rollover Smoke.
 - Current operation mode: BUILDER
-- Last completed iteration: CCV1-053 V1 Source Handoff Package.
-- Last completed task: created a reproducible source handoff package for the
-  deployed OpenJarvis CompanyCore connector hygiene and Paperclip CompanyCore
-  adapter commits, including files, validation commands, production smoke, and
-  rollback notes.
+- Last completed iteration: CCV1-054 Final V1 Runtime Rollover Smoke.
+- Last completed task: manually rolled production CompanyCore from the final
+  v1 runtime commit `9116026` into backend image
+  `rnqqkhl3o3dut4qv56mlxly2_backend:9116026`, preserved the production
+  Postgres container/volume, and reran public, protected, and ClickUp
+  maintenance smoke checks.
 - Next required mode: BUILDER when a new approved v2 or handoff task is moved
   into the active queue.
 
@@ -571,6 +572,14 @@ Last updated: 2026-05-03
   files, expected tests, production smoke checks, and rollback approach. The
   docs index was refreshed to describe the achieved v1 runtime rather than the
   early foundation state.
+- 2026-05-03: Completed CCV1-054 by rebuilding and running the production
+  CompanyCore backend from final v1 runtime commit `9116026`. The new
+  container `backend-rnqqkhl3o3dut4qv56mlxly2-manual-9116026` started
+  successfully, reported no pending migrations, ran seed, enabled the ClickUp
+  maintenance scheduler, and replaced the previous `manual-ae2c3bf` backend
+  while keeping Postgres healthy. Public `/health`, `/v1/health`, web root,
+  API metadata, protected `/v1/connection`, and ClickUp maintenance
+  `inspect_only` smoke all passed.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

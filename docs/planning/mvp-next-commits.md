@@ -47,6 +47,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] CCV1-051 Clean Sync Data Hygiene
 - [x] CCV1-052 V1 Launch Boundary And Source Handoff
 - [x] CCV1-053 V1 Source Handoff Package
+- [x] CCV1-054 Final V1 Runtime Rollover Smoke
 
 ## NEXT
 
@@ -94,6 +95,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] 29. CCV1-051 Clean Sync Data Hygiene
 - [x] 30. CCV1-052 V1 Launch Boundary And Source Handoff
 - [x] 31. CCV1-053 V1 Source Handoff Package
+- [x] 32. CCV1-054 Final V1 Runtime Rollover Smoke
 
 
 ## GROUP QUEUE

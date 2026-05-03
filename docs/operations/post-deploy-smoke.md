@@ -521,3 +521,30 @@ Use this file to record the minimum checks after each deploy.
     runtime blocker.
   - OpenJarvis and Paperclip source handoff is tracked separately from
     CompanyCore runtime readiness.
+
+## Final V1 Runtime Rollover
+
+- Timestamp: 2026-05-03
+- Environment: production VPS Docker backend
+- Commit: `9116026c5584414acaee4d44764bc83a1f62d8cb`
+- Image: `rnqqkhl3o3dut4qv56mlxly2_backend:9116026`
+- Running container:
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-9116026`
+- Previous backend stopped:
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-ae2c3bf`
+- Data safety:
+  - Production Postgres container remained running and healthy.
+  - No pending migrations were reported.
+  - Seed completed successfully.
+  - ClickUp maintenance scheduler enabled every 15 minutes.
+- Public smoke:
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `200`.
+  - `GET https://api.companycore.luckysparrow.ch/v1/health` returned `200`.
+  - `GET https://companycore.luckysparrow.ch/` returned `200`.
+  - `GET https://api.companycore.luckysparrow.ch/` returned `200` with
+    CompanyCore v1 API metadata.
+  - Unauthenticated `GET /v1/connection` returned `401`.
+- Protected smoke:
+  - Jarvis service-key `GET /v1/connection` returned `200`.
+  - ClickUp maintenance with `importMode=inspect_only` returned 219 items,
+    0 created, 0 updated, 0 deleted, 219 skipped, and 0 failed retries.
