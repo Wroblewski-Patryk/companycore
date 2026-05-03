@@ -38,6 +38,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] CCV1-042 ClickUp Full API Bridge Completion
 - [x] CCV1-043 ClickUp Task Comment Bridge
 - [x] CCV1-044 ClickUp Provider Event Retry And Health
+- [x] CCV1-045 ClickUp Maintenance Freshness Run
 
 ## NEXT
 
@@ -68,6 +69,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] 20. CCV1-042 ClickUp Full API Bridge Completion
 - [x] 21. CCV1-043 ClickUp Task Comment Bridge
 - [x] 22. CCV1-044 ClickUp Provider Event Retry And Health
+- [x] 23. CCV1-045 ClickUp Maintenance Freshness Run
 
 
 ## GROUP QUEUE

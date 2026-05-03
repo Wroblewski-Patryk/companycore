@@ -668,6 +668,77 @@ events visible, safely retryable, and idempotent.
 ### Priority
 P0
 
+## CCV1-045 ClickUp Maintenance Freshness Run
+
+### Header
+- ID: CCV1-045
+- Title: ClickUp maintenance freshness run
+- Task Type: feature
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder
+- Depends on: CCV1-035, CCV1-036B, CCV1-044
+- Priority: P0
+- Iteration: v1-045
+- Operation Mode: BUILDER
+
+### Description
+Add the canonical non-destructive maintenance operation that keeps CompanyCore
+fresh when webhooks are delayed, missed, or partially failed.
+
+### Goal
+Provide one authenticated API command that reconciles ClickUp webhook health,
+retries failed provider events, and performs a safe pull fallback from ClickUp.
+
+### Scope
+- `src/integrations/clickup/clickup.webhooks.ts`
+- `src/modules/integration-settings/integration-settings.routes.ts`
+- `src/modules/connection/connection.routes.ts`
+- `src/tests/api.test.ts`
+- `docs/API.md`
+- `docs/architecture/system-architecture.md`
+- `.codex/context/PROJECT_STATE.md`
+- `.codex/context/TASK_BOARD.md`
+- `docs/planning/mvp-next-commits.md`
+
+### Implementation Plan
+- Add a ClickUp maintenance service that runs webhook reconciliation,
+  failed-event retry, and native task sync.
+- Expose `POST /v1/integration-settings/clickup/maintenance/run`.
+- Allow non-destructive modes only: `merge`, `skip_existing`, `inspect_only`.
+- Add adapter manifest capability for maintenance.
+- Cover service-key invocation in integration tests.
+- Update API and architecture source of truth.
+
+### Acceptance Criteria
+- [x] Maintenance run reconciles selected-list webhooks.
+- [x] Maintenance run retries failed ClickUp provider events.
+- [x] Maintenance run performs a non-destructive pull fallback from ClickUp.
+- [x] Service API keys can invoke the maintenance endpoint.
+- [x] Destructive `replace_selected_lists` is not accepted by maintenance.
+- [x] Local integration tests pass.
+
+### Definition of Done
+- [x] Maintenance uses workspace-scoped ClickUp settings and encrypted token
+  reads.
+- [x] Maintenance emits an observable completion event.
+- [x] Maintenance returns webhook, retry, sync, and inbox-health summary data.
+- [x] API and architecture docs describe the freshness role.
+
+### Result Report
+- Task summary: Added ClickUp maintenance run for always-fresh fallback sync.
+- Files changed: ClickUp service, integration settings route, connection
+  manifest, regression tests, architecture/API/planning/context docs.
+- How tested: Ran `npm test` with `DATABASE_URL` pointed at disposable
+  PostgreSQL on `localhost:55432`.
+- What is incomplete: Production deploy and smoke are still required for this
+  runtime change.
+- Next steps: Deploy to production, smoke health, and verify the endpoint with
+  Jarvis's CompanyCore API key.
+
+### Priority
+P0
+
 ## CCV1-035 ClickUp First-Run Import Policy And Launch Audit
 
 ### Header

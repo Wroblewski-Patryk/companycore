@@ -97,12 +97,13 @@ Last updated: 2026-05-03
   and deployment smoke evidence are aligned.
 
 ## Autonomous Iteration State
-- Current iteration: CCV1-044 ClickUp Provider Event Retry And Health.
+- Current iteration: CCV1-045 ClickUp Maintenance Freshness Run.
 - Current operation mode: BUILDER
-- Last completed iteration: CCV1-044 ClickUp Provider Event Retry And Health.
-- Last completed task: added safe ClickUp provider event inbox health,
-  last-error metadata, and owner-triggered retry/replay for failed webhook
-  processing rows.
+- Last completed iteration: CCV1-045 ClickUp Maintenance Freshness Run.
+- Last completed task: added the canonical ClickUp maintenance run that
+  reconciles webhook health, retries failed provider events, and performs a
+  non-destructive pull fallback to keep CompanyCore fresh even if webhooks are
+  delayed or missed.
 - Next required mode: BUILDER for Paperclip application-side CompanyCore
   adapter unless priority changes.
 
@@ -469,6 +470,16 @@ Last updated: 2026-05-03
   API key verified `/v1/connection`,
   `/v1/integration-settings/clickup/events`, and
   `/v1/integration-settings/clickup/events?status=failed` with safe metadata.
+- 2026-05-03: Completed CCV1-045 locally by adding
+  `POST /v1/integration-settings/clickup/maintenance/run`. The endpoint is
+  available to authenticated workspace callers, runs webhook reconciliation,
+  failed-event replay, and a non-destructive ClickUp task pull fallback using
+  `merge` by default. It allows `merge`, `skip_existing`, and `inspect_only`,
+  but intentionally excludes `replace_selected_lists` from always-on
+  maintenance. Regression coverage calls the endpoint with a service API key,
+  recreates a missing selected-list webhook, syncs a fallback ClickUp task, and
+  verifies no failed inbox rows remain. `npm test` passed against disposable
+  PostgreSQL on `localhost:55432`.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

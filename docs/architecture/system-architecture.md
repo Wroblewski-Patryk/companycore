@@ -208,6 +208,13 @@ replay path. Replay must run through the same idempotent mapper as live
 webhooks so recovered events refresh CompanyCore state and notify agents
 without requiring direct database edits.
 
+Always-fresh behavior should not depend on webhooks alone. CompanyCore exposes
+a non-destructive ClickUp maintenance run that reconciles webhook health,
+retries failed provider events, and performs a `merge` pull fallback from
+ClickUp. Agents or operators can invoke this through the API to close gaps from
+missed webhook deliveries, temporary provider failures, or backend restarts
+while preserving CompanyCore's immediate write-back path for local changes.
+
 Webhook processing should be event-first and bridge-friendly. Status changes,
 for example `taskStatusUpdated`, must update the CompanyCore task state and
 also emit a durable internal event that downstream agents can consume. Paperclip

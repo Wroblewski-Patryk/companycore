@@ -1249,6 +1249,92 @@ test("CompanyCore v1 protected API flow", async () => {
   });
   assert.equal(retriedTask?.title, "Retried provider event task");
 
+  globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
+    const url = new URL(String(input));
+    if (url.pathname === "/api/v2/team/team-1/webhook" && !init?.method) {
+      return new Response(JSON.stringify({
+        webhooks: [
+          {
+            id: "webhook-list-1",
+            events: ["taskStatusUpdated", "taskUpdated"],
+            list_id: "list-1",
+            health: { status: "active" }
+          }
+        ]
+      }), { status: 200 });
+    }
+
+    if (url.pathname === "/api/v2/team/team-1/webhook" && init?.method === "POST") {
+      const body = JSON.parse(String(init.body ?? "{}")) as { list_id?: string };
+      const listId = body.list_id ?? "workspace";
+      return new Response(JSON.stringify({
+        webhook: {
+          id: `webhook-maintenance-${listId}`,
+          events: ["taskStatusUpdated", "taskUpdated"],
+          list_id: listId,
+          secret: `maintenance-secret-${listId}`,
+          health: { status: "active" }
+        }
+      }), { status: 200 });
+    }
+
+    if (url.pathname === "/api/v2/team/team-1/task") {
+      return new Response(JSON.stringify({
+        tasks: [
+          {
+            id: "clickup-task-maintenance",
+            name: "Maintenance fallback task",
+            markdown_description: "Recovered by maintenance pull fallback",
+            status: { status: "in progress", type: "custom" },
+            priority: { priority: "high" },
+            list: { id: "list-1" }
+          }
+        ],
+        last_page: true
+      }), { status: 200 });
+    }
+
+    return new Response(JSON.stringify({ err: "Not found" }), { status: 404 });
+  }) as typeof fetch;
+
+  try {
+    const maintenanceRun = await request("/v1/integration-settings/clickup/maintenance/run", {
+      method: "POST",
+      headers: { "X-API-Key": serviceKey },
+      body: JSON.stringify({
+        importMode: "merge"
+      })
+    });
+    assert.equal(maintenanceRun.status, 200);
+    const maintenanceBody = maintenanceRun.body as {
+      data: {
+        webhookReconcile: { createdCount: number; existingCount: number };
+        retry: { attemptedCount: number };
+        sync: { itemCount: number; createdCount: number };
+        inboxHealth: { failedAfter: number };
+      };
+    };
+    assert.equal(maintenanceBody.data.webhookReconcile.createdCount, 1);
+    assert.equal(maintenanceBody.data.webhookReconcile.existingCount, 1);
+    assert.equal(maintenanceBody.data.retry.attemptedCount, 0);
+    assert.equal(maintenanceBody.data.sync.itemCount, 1);
+    assert.equal(maintenanceBody.data.sync.createdCount, 1);
+    assert.equal(maintenanceBody.data.inboxHealth.failedAfter, 0);
+  } finally {
+    globalThis.fetch = originalFetchBeforeDiscovery;
+  }
+
+  const maintenanceTask = await prisma.task.findUnique({
+    where: {
+      workspaceId_source_externalId: {
+        workspaceId: ownerA.workspace.id,
+        source: "clickup",
+        externalId: "clickup-task-maintenance"
+      }
+    }
+  });
+  assert.equal(maintenanceTask?.title, "Maintenance fallback task");
+
   const serviceCannotDiscoverClickUp = await request("/v1/integration-settings/clickup/discover", {
     method: "POST",
     headers: { "X-API-Key": serviceKey },
@@ -1486,7 +1572,7 @@ test("CompanyCore v1 protected API flow", async () => {
     assert.equal(replaceBody.data.itemCount, 1);
     assert.equal(replaceBody.data.createdCount, 1);
     assert.equal(replaceBody.data.updatedCount, 0);
-    assert.equal(replaceBody.data.deletedCount, 4);
+    assert.equal(replaceBody.data.deletedCount, 5);
   } finally {
     globalThis.fetch = originalFetch;
   }

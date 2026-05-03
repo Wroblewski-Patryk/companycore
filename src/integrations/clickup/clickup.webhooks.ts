@@ -8,7 +8,7 @@ import { getClickUpSettingsForWorkspace } from "../integration-settings.service"
 import { IntegrationError } from "../errors";
 import { ClickUpClient, type ClickUpTask } from "./clickup.client";
 import { mapClickUpTaskToCompanyCoreTask, safeClickUpTaskPayload } from "./clickup.mapper";
-import { findOrCreateClickUpTaskList } from "./clickup.sync";
+import { clickUpImportModes, findOrCreateClickUpTaskList, syncClickUpTasksForWorkspaceWithOptions, type ClickUpImportMode } from "./clickup.sync";
 import { verifyClickUpWebhookSignature } from "./webhook-signature";
 
 export const clickUpWebhookEvents = [
@@ -710,6 +710,95 @@ export async function retryFailedClickUpProviderEvents(input: {
     failedCount,
     results
   };
+}
+
+export async function runClickUpMaintenanceForWorkspace(input: {
+  workspaceId: string;
+  req?: { protocol?: string; get(name: string): string | undefined };
+  importMode?: Extract<ClickUpImportMode, "merge" | "skip_existing" | "inspect_only">;
+}) {
+  const importMode = input.importMode ?? "merge";
+  if (!clickUpImportModes.includes(importMode)) {
+    throw new IntegrationError("sync_failed", 500, "Unsupported ClickUp maintenance import mode.");
+  }
+
+  const [failedBefore, pendingBefore] = await Promise.all([
+    prisma.providerEventInbox.count({
+      where: {
+        workspaceId: input.workspaceId,
+        provider: "clickup",
+        processingStatus: "failed"
+      }
+    }),
+    prisma.providerEventInbox.count({
+      where: {
+        workspaceId: input.workspaceId,
+        provider: "clickup",
+        processingStatus: "pending"
+      }
+    })
+  ]);
+
+  const webhookReconcile = await reconcileClickUpWebhooksForWorkspace(input.workspaceId, input.req);
+  const retry = await retryFailedClickUpProviderEvents({
+    workspaceId: input.workspaceId,
+    limit: 100
+  });
+  const sync = await syncClickUpTasksForWorkspaceWithOptions(input.workspaceId, { importMode });
+
+  const [failedAfter, pendingAfter] = await Promise.all([
+    prisma.providerEventInbox.count({
+      where: {
+        workspaceId: input.workspaceId,
+        provider: "clickup",
+        processingStatus: "failed"
+      }
+    }),
+    prisma.providerEventInbox.count({
+      where: {
+        workspaceId: input.workspaceId,
+        provider: "clickup",
+        processingStatus: "pending"
+      }
+    })
+  ]);
+
+  const result = {
+    provider: "clickup",
+    workspaceId: input.workspaceId,
+    importMode,
+    webhookReconcile,
+    retry,
+    sync,
+    inboxHealth: {
+      failedBefore,
+      failedAfter,
+      pendingBefore,
+      pendingAfter
+    }
+  };
+
+  await createEvent({
+    type: "clickup_maintenance_completed",
+    workspaceId: input.workspaceId,
+    source: "clickup",
+    payload: toJson({
+      provider: "clickup",
+      importMode,
+      webhookCreatedCount: webhookReconcile.createdCount,
+      webhookReactivatedCount: webhookReconcile.reactivatedCount,
+      webhookReplacedCount: webhookReconcile.replacedCount,
+      retryAttemptedCount: retry.attemptedCount,
+      retryProcessedCount: retry.processedCount,
+      syncItemCount: sync.itemCount,
+      syncCreatedCount: sync.createdCount,
+      syncUpdatedCount: sync.updatedCount,
+      failedAfter,
+      pendingAfter
+    })
+  });
+
+  return result;
 }
 
 export async function createCompanyCoreNoteInClickUp(input: {

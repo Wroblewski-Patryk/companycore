@@ -229,6 +229,7 @@ POST /v1/integration-settings/clickup/webhooks/reconcile
 DELETE /v1/integration-settings/clickup/webhooks/:id
 GET /v1/integration-settings/clickup/events
 POST /v1/integration-settings/clickup/events/retry-failed
+POST /v1/integration-settings/clickup/maintenance/run
 ```
 
 ClickUp configuration payload:
@@ -328,6 +329,26 @@ can replay failed events with:
 Replay reprocesses failed inbox rows through the same ClickUp task/comment
 mapper, clears `lastErrorCode` on success, and leaves still-failing rows in
 `failed` state with an incremented retry count.
+
+`POST /clickup/maintenance/run` is the canonical continuous-sync fallback for
+agents or operators. It performs, in order:
+
+- webhook registration reconciliation and health refresh
+- failed provider-event replay
+- non-destructive ClickUp task pull using `merge` by default
+
+The endpoint accepts a limited import mode override:
+
+```json
+{
+  "importMode": "merge"
+}
+```
+
+Allowed maintenance modes are `merge`, `skip_existing`, and `inspect_only`.
+`replace_selected_lists` is intentionally excluded from maintenance because it
+is a destructive first-run/import-repair policy, not an always-on freshness
+operation.
 
 Safe discovery response:
 

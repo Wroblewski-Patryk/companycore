@@ -7,6 +7,7 @@ import {
   listClickUpProviderEvents,
   listClickUpWebhookRegistrations,
   reconcileClickUpWebhooksForWorkspace,
+  runClickUpMaintenanceForWorkspace,
   retryFailedClickUpProviderEvents
 } from "../../integrations/clickup/clickup.webhooks";
 import { IntegrationError } from "../../integrations/errors";
@@ -45,6 +46,10 @@ const providerEventStatusSchema = z.enum(["pending", "processed", "failed"]);
 const retryProviderEventsSchema = z.object({
   eventIds: z.array(z.string().uuid()).optional(),
   limit: z.number().int().min(1).max(100).optional()
+}).strict();
+
+const clickUpMaintenanceSchema = z.object({
+  importMode: z.enum(["merge", "skip_existing", "inspect_only"]).optional()
 }).strict();
 
 export const integrationSettingsRouter = Router();
@@ -185,6 +190,24 @@ integrationSettingsRouter.post("/clickup/events/retry-failed", asyncHandler(asyn
     limit: input.limit
   });
   res.json({ data: result });
+}));
+
+integrationSettingsRouter.post("/clickup/maintenance/run", asyncHandler(async (req, res) => {
+  const input = clickUpMaintenanceSchema.parse(req.body ?? {});
+
+  try {
+    const result = await runClickUpMaintenanceForWorkspace({
+      workspaceId: req.auth!.workspaceId,
+      req,
+      importMode: input.importMode
+    });
+    return res.json({ data: result });
+  } catch (error) {
+    if (error instanceof IntegrationError) {
+      return res.status(error.status).json({ error: error.code });
+    }
+    throw error;
+  }
 }));
 
 integrationSettingsRouter.get("/:provider", asyncHandler(async (req, res) => {
