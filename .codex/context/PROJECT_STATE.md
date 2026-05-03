@@ -398,6 +398,15 @@ Last updated: 2026-05-03
   publish provider-neutral agent events for Paperclip/Jarvis/Aviary, and write
   supported CompanyCore edits for ClickUp-sourced tasks back to ClickUp.
   `npm test` passed against disposable PostgreSQL on `localhost:55432`.
+- 2026-05-03: Deployed the ClickUp live sync bridge to production with Coolify
+  manual deploy `e12x9rc7i8071qfnrzh6u1hh` at commit
+  `75df028f9dc3cab59f026fd7d2c5fef430e6d5ea`; the temporary deploy token was
+  deleted. Production applied migration
+  `202605032_clickup_webhook_foundation`, registered 21 active ClickUp List
+  webhooks, accepted a signed production webhook smoke for a real ClickUp task,
+  processed the provider inbox row, and exposed a pending
+  `task_status_updated_from_clickup` agent event readable by Jarvis's
+  CompanyCore API key.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

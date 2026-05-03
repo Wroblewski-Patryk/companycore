@@ -360,3 +360,49 @@ Use this file to record the minimum checks after each deploy.
   - Continuous ClickUp updates are still not enabled; the queued follow-up is
     the scheduled pull versus webhook ingestion decision after the first real
     production pull succeeds.
+
+## ClickUp Live Sync Bridge Deployment Evidence
+
+- Timestamp: 2026-05-03
+- Environment: Coolify production, Root Team, `companycore`
+- Commit: `75df028f9dc3cab59f026fd7d2c5fef430e6d5ea`
+- Deployment:
+  - Pushed `main` to GitHub.
+  - Auto-deploy did not immediately replace the running image, so a temporary
+    Coolify API token was created for manual deploy
+    `e12x9rc7i8071qfnrzh6u1hh` and then deleted.
+  - Coolify deployment status finished successfully.
+  - Backend image became
+    `rnqqkhl3o3dut4qv56mlxly2_backend:75df028f9dc3cab59f026fd7d2c5fef430e6d5ea`.
+- Migration evidence:
+  - Backend logs applied `202605032_clickup_webhook_foundation`.
+  - `_prisma_migrations` shows
+    `202605032_clickup_webhook_foundation` finished at
+    `2026-05-03 03:08:02.719036+00`.
+- Public checks:
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `200`.
+  - Unsigned `POST /v1/webhooks/clickup` returned `401 missing_signature`.
+- ClickUp webhook registration smoke:
+  - Owner-authenticated `POST /v1/integration-settings/clickup/webhooks/reconcile`
+    registered `21` active ClickUp List webhooks.
+  - The registered endpoint URL is
+    `https://api.companycore.luckysparrow.ch/v1/webhooks/clickup`.
+  - Returned webhook secrets are encrypted in the database and were not copied
+    into docs or logs.
+- Signed webhook processing smoke:
+  - A production signed webhook smoke used the stored encrypted webhook secret
+    to sign a `taskStatusUpdated` payload for a real ClickUp task and sent it
+    through the public endpoint.
+  - `POST /v1/webhooks/clickup` returned `202 accepted`.
+  - The provider inbox row has `processingStatus = processed`,
+    `eventName = taskStatusUpdated`, and `signatureVerified = true`.
+  - `agent_event_outbox` contains a pending
+    `task_status_updated_from_clickup` event.
+  - Jarvis's CompanyCore API key can read `/v1/agent-events` (`1` pending),
+    `/v1/integration-settings/clickup/webhooks` (`21` registrations), and
+    `/v1/tasks` (`224` tasks).
+- Residual risk:
+  - This smoke proves the deployed receiver, signature verification, inbox,
+    ClickUp full-task fetch, task upsert path, and agent outbox. The first
+    naturally provider-initiated ClickUp webhook should still be observed after
+    the owner next changes a real task in ClickUp.
