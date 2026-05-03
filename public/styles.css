@@ -610,6 +610,12 @@ a[aria-disabled="true"] {
   gap: 12px;
 }
 
+.taxonomy-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .area-card {
   min-height: 126px;
   cursor: pointer;
@@ -639,6 +645,37 @@ a[aria-disabled="true"] {
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface-subtle);
+}
+
+.taxonomy-card {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  min-height: 180px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-subtle);
+}
+
+.taxonomy-card strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.taxonomy-card span:not(.status-pill) {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.taxonomy-card ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .detail-group h3 {
@@ -880,7 +917,8 @@ a[aria-disabled="true"] {
 
   .command-grid,
   .area-grid,
-  .area-detail-grid {
+  .area-detail-grid,
+  .taxonomy-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -909,7 +947,8 @@ a[aria-disabled="true"] {
   .command-grid,
   .settings-grid,
   .area-grid,
-  .area-detail-grid {
+  .area-detail-grid,
+  .taxonomy-grid {
     grid-template-columns: 1fr;
   }
 

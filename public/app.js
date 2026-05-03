@@ -102,6 +102,8 @@ const signalPanel = document.querySelector("#signalPanel");
 const webhookSummary = document.querySelector("#webhookSummary");
 const webhookPanel = document.querySelector("#webhookPanel");
 const googleDriveSummary = document.querySelector("#googleDriveSummary");
+const integrationTaxonomySummary = document.querySelector("#integrationTaxonomySummary");
+const integrationTaxonomyGrid = document.querySelector("#integrationTaxonomyGrid");
 
 const capabilitySummary = document.querySelector("#capabilitySummary");
 const capabilityList = document.querySelector("#capabilityList");
@@ -478,12 +480,75 @@ function renderAll() {
   renderProviderHealth();
   renderOperationalSignals();
   renderWebhookCoverage();
+  renderIntegrationTaxonomy();
   renderTasks();
   renderAreas();
   renderTaskModule();
   renderPipeline();
   renderCapabilities();
   renderTree();
+}
+
+function renderIntegrationTaxonomy() {
+  integrationTaxonomyGrid.innerHTML = "";
+  const areas = state.operatingModel?.areas || [];
+  const areaById = new Map(areas.map((area) => [area.id, area.name]));
+  const mappings = state.operatingModel?.externalMappings || [];
+  const storageLocations = state.operatingModel?.storageLocations || [];
+  const knowledgeRoots = state.operatingModel?.knowledgeRoots || [];
+  const automations = state.operatingModel?.automationDefinitions || [];
+
+  const groups = [
+    {
+      title: "Tasks",
+      provider: "ClickUp",
+      status: state.clickup.active ? "Active" : state.clickup.configured ? "Saved" : "Not configured",
+      tone: state.clickup.active ? "ok" : state.clickup.configured ? "warn" : "neutral",
+      items: [
+        `${(state.clickup.config.listIds || []).length} selected Lists`,
+        `${mappings.filter((mapping) => mapping.provider === "clickup").length} provider mappings`,
+        `${(state.operatingModel?.externalFields || []).filter((field) => field.provider === "clickup").length} Custom Fields`
+      ]
+    },
+    {
+      title: "Knowledge and storage",
+      provider: "Google Drive",
+      status: state.googleDrive.active ? "Active" : state.googleDrive.configured ? "Saved" : "Not configured",
+      tone: state.googleDrive.active ? "ok" : state.googleDrive.configured ? "warn" : "neutral",
+      items: [
+        `${storageLocations.filter((item) => item.provider === "google_drive").length} storage locations`,
+        `${knowledgeRoots.filter((item) => item.provider === "google_drive").length} knowledge roots`,
+        state.googleDrive.config.rootFolderId ? `Root ${state.googleDrive.config.rootFolderId}` : "No root folder configured"
+      ]
+    },
+    {
+      title: "Automations",
+      provider: "CompanyCore",
+      status: automations.length > 0 ? "Configured" : "No definitions",
+      tone: automations.length > 0 ? "ok" : "neutral",
+      items: automations.length > 0
+        ? automations.slice(0, 3).map((automation) => `${automation.name} - ${areaById.get(automation.areaId) || "Workspace"}`)
+        : ["Automation definitions API is ready."]
+    }
+  ];
+
+  integrationTaxonomySummary.textContent = `${groups.length} integration categories organized by data type.`;
+
+  for (const group of groups) {
+    const card = document.createElement("article");
+    card.className = "taxonomy-card";
+    const header = document.createElement("div");
+    appendText(header, "strong", group.title);
+    appendText(header, "span", group.provider);
+    card.append(header);
+    card.append(createStatusPill(group.status, group.tone));
+    const list = document.createElement("ul");
+    for (const item of group.items) {
+      appendText(list, "li", item);
+    }
+    card.append(list);
+    integrationTaxonomyGrid.append(card);
+  }
 }
 
 function renderConnectionState() {

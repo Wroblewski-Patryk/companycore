@@ -23,13 +23,6 @@
 
 ## Backlog
 
-- CCV1-049 Settings Integration Taxonomy
-  - Stage: planning
-  - Owner: Frontend Builder
-  - Priority: P1
-  - Scope: split settings into Account, API, and Integrations grouped by data
-    type, provider, and operating area.
-
 - CCV1-050 Tasks And Adapter Operations View
   - Stage: planning
   - Owner: Frontend Builder
@@ -126,3 +119,4 @@
 - CCV1-046 GUI App Shell And Navigation.
 - CCV1-047 Dashboard Command Center.
 - CCV1-048 Operating Areas Explorer.
+- CCV1-049 Settings Integration Taxonomy.
