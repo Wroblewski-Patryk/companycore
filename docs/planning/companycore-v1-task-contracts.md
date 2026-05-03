@@ -64,11 +64,21 @@ automation to call the maintenance endpoint.
   `.codex/context/PROJECT_STATE.md`, `.codex/context/TASK_BOARD.md`,
   `docs/planning/mvp-next-commits.md`, and this task contract.
 - How tested: Ran `npm run build` and `npm test` with `DATABASE_URL` pointing
-  at local PostgreSQL on `localhost:55432`.
-- What is incomplete: Production deploy and smoke evidence will be recorded in
-  a release doc update after deployment.
-- Next steps: commit, push, deploy, and verify scheduler startup in production
-  logs.
+  at local PostgreSQL on `localhost:55432`. Production smoke verified public
+  `/health`, `/v1/health`, Jarvis-key `/v1/connection`, and maintenance
+  `inspect_only`.
+- What is incomplete: Nothing for this scheduler slice.
+- Next steps: Implement the Paperclip application-side adapter so it consumes
+  CompanyCore agent events and writes through CompanyCore APIs.
+
+### Release Evidence
+- Commit deployed:
+  `419dbafb11f1558a185ddd428e67073c3a89f0f6`.
+- Production image:
+  `rnqqkhl3o3dut4qv56mlxly2_backend:419dbafb11f1558a185ddd428e67073c3a89f0f6`.
+- Startup log: `clickup maintenance scheduler enabled every 15 minutes`.
+- Maintenance smoke: 21 webhook registrations refreshed, 219 ClickUp tasks
+  inspected, and 0 failed provider inbox rows remained.
 
 ## CCV1-036A Webhook Schema And Security Foundation
 

@@ -494,6 +494,15 @@ Last updated: 2026-05-03
   `COMPANYCORE_PUBLIC_API_BASE_URL` is configured, clamps cadence to at least 5
   minutes, and always uses `merge` so scheduled freshness never performs a
   destructive import repair.
+- 2026-05-03: Deployed CCV1-046 to production by manually rolling over the
+  backend container because Coolify's unrelated deployment queue remained full.
+  The deployed image is
+  `rnqqkhl3o3dut4qv56mlxly2_backend:419dbafb11f1558a185ddd428e67073c3a89f0f6`.
+  Startup logs confirmed `clickup maintenance scheduler enabled every 15
+  minutes`. Public `/health`, `/v1/health`, Jarvis-key `/v1/connection`, and
+  maintenance `inspect_only` smoke passed; the smoke refreshed 21 webhook
+  registrations, inspected 219 ClickUp tasks, and left 0 failed provider inbox
+  rows.
 
 ## Working Agreements
 - Keep task board and project state synchronized.
