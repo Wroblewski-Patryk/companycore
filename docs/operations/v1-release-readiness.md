@@ -34,9 +34,12 @@ header. This is expected for a protected user-facing endpoint. A follow-up
 authenticated smoke with Jarvis's production bearer auth returned `200`,
 reported `companycore.connected=true`, triggered a CompanyCore sync, and
 confirmed chat answers are using CompanyCore records. The remaining Jarvis
-follow-up is answer precision: when smoke records and durable business records
-both match a broad Paperclip prompt, Jarvis can choose a smoke agent as the
-example agent even though the CompanyCore connection and chat context are live.
+follow-up was answer precision: when smoke records and durable business records
+both matched a broad Paperclip prompt, Jarvis could choose a smoke agent as the
+example agent even though the CompanyCore connection and chat context were
+live. The precision follow-up was completed by filtering smoke records out of
+normal CompanyCore chat context unless the prompt explicitly asks for smoke or
+test records.
 
 ## Definition Of Done Review
 
@@ -77,9 +80,6 @@ example agent even though the CompanyCore connection and chat context are live.
 
 - GitHub auto-deploy webhook remains blocked by repository settings access.
   Manual deploy is the approved fallback until credentials are available.
-- Jarvis answer precision should be hardened so broad CompanyCore prompts
-  prefer durable business records over adapter smoke records when both are
-  relevant.
 - Paperclip adapter is deployed as a production image patch from the current
   production source to avoid upgrading unrelated upstream Paperclip changes.
   The patch is now carried in `integrations/paperclip/companycore-adapter.patch`
@@ -98,6 +98,5 @@ example agent even though the CompanyCore connection and chat context are live.
 
 ## Next Work
 
-The next valuable v1-hardening slice is Jarvis CompanyCore answer precision so
-chat responses consistently prefer durable business records over adapter smoke
-records.
+No active P0/P1 v1 runtime hardening task remains ready. The next known
+non-runtime blocker is GitHub-to-Coolify auto-deploy webhook administration.

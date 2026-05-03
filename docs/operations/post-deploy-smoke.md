@@ -450,7 +450,13 @@ Use this file to record the minimum checks after each deploy.
     records for the Paperclip onboarding project.
   - The answer included the CompanyCore project and the two durable project
     tasks after the relevance update.
-- Residual precision note:
-  - A broad prompt can still pick an adapter smoke agent when multiple agent
-    records match Paperclip. This is tracked as a P1 Jarvis answer precision
-    hardening item, not a CompanyCore connectivity blocker.
+- Precision follow-up:
+  - Jarvis initially picked an adapter smoke agent for a broad Paperclip
+    prompt. The CompanyCore context injector now excludes smoke/test records
+    from normal business prompts unless the user explicitly asks for smoke or
+    test records.
+  - After redeploy, the same chat smoke included project
+    `Paperclip AI onboarding to CompanyCore`, tasks
+    `Reuse the same CompanyCore adapter path in Paperclip` and
+    `Teach Jarvis to summarize CompanyCore records`, and agent
+    `Jarvis production chat adapter`.

@@ -182,12 +182,12 @@ The answer should mention:
 - decision `Use CompanyCore API as the agent source of truth`
 - task `Teach Jarvis to summarize CompanyCore records`
 - task `Reuse the same CompanyCore adapter path in Paperclip`
-- a CompanyCore agent record relevant to the prompt
+- agent `Jarvis production chat adapter`
 
-If the answer chooses an adapter smoke agent instead of
-`Jarvis production chat adapter`, the connector and chat context are still
-working, but Jarvis answer precision needs hardening so durable business
-records win over smoke records for broad prompts.
+The CompanyCore context injector filters smoke/test records from ordinary
+business prompts unless the user explicitly asks about smoke or tests. If smoke
+records dominate this answer again, treat it as a Jarvis answer precision
+regression.
 
 Do not mark the task done until this chat smoke passes.
 

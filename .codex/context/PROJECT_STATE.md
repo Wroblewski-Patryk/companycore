@@ -86,9 +86,8 @@ Last updated: 2026-05-03
   Postgres volume.
 
 ## Current Focus
-- Main active objective: v1 runtime release candidate is live; continue
-  hardening Jarvis CompanyCore answer precision and managed downstream adapter
-  source paths.
+- Main active objective: v1 runtime release candidate is live; no active
+  P0/P1 runtime hardening task remains ready.
 - Top blockers: GitHub repository webhook setup needs an authenticated GitHub
   session or token with webhook administration permissions.
 - Success criteria for this phase: canonical docs, workspace/auth model,
@@ -97,17 +96,16 @@ Last updated: 2026-05-03
   and deployment smoke evidence are aligned.
 
 ## Autonomous Iteration State
-- Current iteration: CCV1-049 Authenticated Jarvis Smoke And Managed Paperclip
-  Source Path.
+- Current iteration: CCV1-050 Jarvis CompanyCore Answer Precision Hardening.
 - Current operation mode: BUILDER
-- Last completed iteration: CCV1-049 Authenticated Jarvis Smoke And Managed
-  Paperclip Source Path.
-- Last completed task: verified Jarvis's protected production CompanyCore
-  connector path, deployed a relevance improvement for CompanyCore chat
-  context, and stored the Paperclip adapter patch/runbook in a managed
-  CompanyCore path.
-- Next required mode: BUILDER for Jarvis CompanyCore answer precision
-  hardening unless priority changes.
+- Last completed iteration: CCV1-050 Jarvis CompanyCore Answer Precision
+  Hardening.
+- Last completed task: filtered smoke/test records out of ordinary Jarvis
+  CompanyCore chat context, redeployed Jarvis, and verified the Paperclip
+  onboarding smoke returns the durable project, two durable tasks, and
+  `Jarvis production chat adapter`.
+- Next required mode: ARCHITECT for the next planned v1/v2 scope decision
+  unless priority changes.
 
 ## Recent Progress
 - 2026-05-02: Created Company Core backend foundation, Prisma schema, Docker
@@ -536,6 +534,15 @@ Last updated: 2026-05-03
   Paperclip adapter as `integrations/paperclip/companycore-adapter.patch` and
   documented apply/validation/smoke/rollback in
   `docs/operations/paperclip-companycore-adapter-runbook.md`.
+- 2026-05-03: Completed CCV1-050 by hardening Jarvis CompanyCore answer
+  precision. The OpenJarvis CompanyCore context injector now filters
+  smoke/test records out of ordinary business prompts unless the prompt asks
+  for smoke or test data. Targeted OpenJarvis tests passed (`5 passed`), the
+  production Jarvis container was rebuilt and restarted, and the authenticated
+  chat smoke returned project `Paperclip AI onboarding to CompanyCore`, tasks
+  `Reuse the same CompanyCore adapter path in Paperclip` and
+  `Teach Jarvis to summarize CompanyCore records`, and agent
+  `Jarvis production chat adapter`.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

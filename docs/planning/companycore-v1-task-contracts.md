@@ -4,6 +4,73 @@ These task contracts turn the v1 audit into executable work. Each task must be
 completed as its own small iteration and must update `.codex/context/TASK_BOARD.md`,
 `.codex/context/PROJECT_STATE.md`, and relevant docs when status changes.
 
+## CCV1-050 Jarvis CompanyCore Answer Precision Hardening
+
+### Header
+- ID: CCV1-050
+- Title: Jarvis CompanyCore answer precision hardening
+- Task Type: AI integration hardening
+- Current Stage: verification
+- Status: DONE
+- Owner: QA/Test + Backend Builder
+- Depends on: CCV1-049
+- Priority: P1
+- Iteration: v1-050
+- Operation Mode: BUILDER
+
+### Goal
+Make Jarvis prefer durable CompanyCore business records over adapter smoke
+records when a normal business prompt matches both.
+
+### Scope
+- OpenJarvis CompanyCore chat context injector.
+- Production Jarvis deploy.
+- CompanyCore smoke evidence and planning/context docs.
+
+### Implementation Plan
+- Reproduce the ambiguity in production chat smoke.
+- Filter smoke/test records from CompanyCore chat context unless the prompt
+  explicitly asks for smoke, test, or env records.
+- Keep the connector sync path unchanged so smoke records remain available in
+  the database and index.
+- Run targeted OpenJarvis tests.
+- Redeploy Jarvis and rerun the authenticated chat smoke.
+- Update CompanyCore release readiness and smoke docs.
+
+### Acceptance Criteria
+- [x] Ordinary CompanyCore business prompts exclude adapter smoke records from
+  injected chat context.
+- [x] Smoke/test prompts can still include smoke records.
+- [x] Production Jarvis still reports `companycore.connected=true`.
+- [x] The Paperclip onboarding chat smoke includes the durable project, two
+  durable tasks, and `Jarvis production chat adapter`.
+
+### Definition of Done
+- [x] Targeted OpenJarvis tests pass.
+- [x] Production Jarvis rebuild succeeds.
+- [x] Authenticated connector and chat smokes pass.
+- [x] CompanyCore task board, planning, project state, release readiness, and
+  smoke docs are updated.
+
+### Result Report
+- Task summary: Reduced CompanyCore chat ambiguity by excluding adapter
+  smoke/test records from ordinary Jarvis business prompts.
+- Files changed outside CompanyCore: OpenJarvis
+  `src/openjarvis/server/companycore_context.py` and
+  `tests/server/test_companycore_context.py`.
+- Files changed in CompanyCore: `.codex/context/PROJECT_STATE.md`,
+  `.codex/context/TASK_BOARD.md`, `docs/planning/mvp-next-commits.md`,
+  `docs/planning/companycore-v1-task-contracts.md`,
+  `docs/operations/jarvis-companycore-update-runbook.md`,
+  `docs/operations/post-deploy-smoke.md`, and
+  `docs/operations/v1-release-readiness.md`.
+- How tested: OpenJarvis targeted tests returned `5 passed`; production Jarvis
+  connector returned `200`, `connected=true`, `auth_type=bridge`; production
+  chat returned the Paperclip onboarding project, durable tasks, and
+  `Jarvis production chat adapter`.
+- What is incomplete: Nothing for this precision slice.
+- Next steps: No active P0/P1 v1 runtime task remains ready.
+
 ## CCV1-049 Authenticated Jarvis Smoke And Managed Paperclip Source Path
 
 ### Header

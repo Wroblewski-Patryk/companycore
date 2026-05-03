@@ -2,7 +2,7 @@
 
 ## Ready
 
-No active P0 runtime task is ready after CCV1-049.
+No active P0/P1 runtime task is ready after CCV1-050.
 
 ## Blocked
 
@@ -17,12 +17,8 @@ No active P0 runtime task is ready after CCV1-049.
 
 ## Backlog
 
-- Jarvis CompanyCore answer precision hardening
-  - Stage: analysis
-  - Owner: QA/Test + Backend Builder
-  - Priority: P1
-  - Scope: reduce ambiguity when Jarvis answers from CompanyCore records that
-    include both durable business records and adapter smoke records.
+No active backlog item beyond future v2 product expansion and the blocked
+GitHub auto-deploy webhook administration task.
 
 ## Done
 
@@ -100,3 +96,4 @@ No active P0 runtime task is ready after CCV1-049.
 - CCV1-047 Paperclip Application-Side CompanyCore Adapter.
 - CCV1-048 V1 Closure Audit.
 - CCV1-049 Authenticated Jarvis Smoke And Managed Paperclip Source Path.
+- CCV1-050 Jarvis CompanyCore Answer Precision Hardening.

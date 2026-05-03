@@ -43,10 +43,11 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] CCV1-047 Paperclip Application-Side CompanyCore Adapter
 - [x] CCV1-048 V1 Closure Audit
 - [x] CCV1-049 Authenticated Jarvis Smoke And Managed Paperclip Source Path
+- [x] CCV1-050 Jarvis CompanyCore Answer Precision Hardening
 
 ## NEXT
 
-- [ ] Jarvis CompanyCore answer precision hardening.
+- [ ] No active P0/P1 v1 runtime task is ready.
 
 ## PIPELINE
 
@@ -77,6 +78,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] 25. CCV1-047 Paperclip Application-Side CompanyCore Adapter
 - [x] 26. CCV1-048 V1 Closure Audit
 - [x] 27. CCV1-049 Authenticated Jarvis Smoke And Managed Paperclip Source Path
+- [x] 28. CCV1-050 Jarvis CompanyCore Answer Precision Hardening
 
 
 ## GROUP QUEUE
