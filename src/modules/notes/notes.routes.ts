@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../../db/prisma";
 import { createCompanyCoreNoteInClickUp } from "../../integrations/clickup/clickup.webhooks";
 import { IntegrationError } from "../../integrations/errors";
+import { createOrUpdateGoogleDriveFileForNote } from "../../integrations/google-drive/google-drive.sync";
 import { asyncHandler } from "../../middleware/async-handler";
 import { createEvent } from "../events/event.service";
 
@@ -15,6 +16,10 @@ const createNoteSchema = z.object({
   externalId: z.string().optional(),
   source: z.string().optional()
 });
+
+const updateNoteSchema = z.object({
+  content: z.string().min(1)
+}).strict();
 
 export const notesRouter = Router();
 
@@ -103,4 +108,68 @@ notesRouter.post("/", asyncHandler(async (req, res) => {
     }
   });
   res.status(201).json({ data: note });
+}));
+
+notesRouter.patch("/:id", asyncHandler(async (req, res) => {
+  const input = updateNoteSchema.parse(req.body);
+  const workspaceId = req.auth!.workspaceId;
+  const existing = await prisma.note.findFirst({
+    where: {
+      id: String(req.params.id),
+      workspaceId
+    }
+  });
+
+  if (!existing) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  if (existing.source === "google_drive" && existing.externalId) {
+    try {
+      await createOrUpdateGoogleDriveFileForNote({
+        workspaceId,
+        noteId: existing.id,
+        externalId: existing.externalId,
+        content: input.content
+      });
+    } catch (error) {
+      if (error instanceof IntegrationError) {
+        await createEvent({
+          type: "google_drive_note_writeback_failed",
+          workspaceId,
+          source: "google_drive",
+          payload: {
+            provider: "google_drive",
+            noteId: existing.id,
+            externalId: existing.externalId,
+            errorCode: error.code
+          }
+        });
+        return res.status(error.status).json({ error: error.code });
+      }
+      throw error;
+    }
+  }
+
+  const note = await prisma.note.update({
+    where: {
+      id: existing.id,
+      workspaceId
+    },
+    data: input
+  });
+
+  await createEvent({
+    type: "note_updated",
+    workspaceId,
+    source: note.source,
+    projectId: note.projectId,
+    taskId: note.taskId,
+    payload: {
+      noteId: note.id,
+      externalId: note.externalId
+    }
+  });
+
+  res.json({ data: note });
 }));

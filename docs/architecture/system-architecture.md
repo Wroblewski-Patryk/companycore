@@ -13,8 +13,8 @@ source of truth, and the HTTP API is the supported integration access layer.
 - Mobile: none in v1; v2 mobile should follow the web product experience.
 - Jobs or workers: none in the current runtime; native integration sync may be
   exposed through authenticated API commands first.
-- External services: PostgreSQL, ClickUp API, optional n8n orchestration, future
-  Paperclip/Jarvis/future GUI API clients.
+- External services: PostgreSQL, ClickUp API, Google Drive API, optional n8n
+  orchestration, future Paperclip/Jarvis/future GUI API clients.
 
 ## Source Of Truth Rules
 
@@ -152,6 +152,7 @@ The ClickUp adapter should establish the pattern for future integrations:
 - webhook registration service
 - webhook receiver with raw-body signature verification
 - provider event inbox with idempotency keys
+- provider event replay for failed inbox rows
 - safe provider error mapper
 - idempotent persistence using `(workspace_id, source, external_id)`
 - explicit import policy for existing records before writes run
@@ -200,6 +201,13 @@ webhooks when possible, replace missing remote registrations, and keep stale
 local registrations from no-longer-selected Lists inactive until an owner
 deletes them.
 
+ClickUp retries delivery, but CompanyCore must also own downstream processing
+recovery. If a signed webhook is stored but task/comment processing fails, the
+provider event inbox must retain safe failure metadata and expose an owner-only
+replay path. Replay must run through the same idempotent mapper as live
+webhooks so recovered events refresh CompanyCore state and notify agents
+without requiring direct database edits.
+
 Webhook processing should be event-first and bridge-friendly. Status changes,
 for example `taskStatusUpdated`, must update the CompanyCore task state and
 also emit a durable internal event that downstream agents can consume. Paperclip
@@ -215,6 +223,16 @@ create a ClickUp task comment first and then store the returned comment ID.
 
 n8n remains optional orchestration for workflows better kept outside the
 backend. It is not the required primary ClickUp path in v1.
+
+Google Drive is the second native provider adapter and uses the same
+workspace-owned settings, provider client, sync service, safe error mapper, and
+provider inbox pattern. Its first approved runtime slice is knowledge/storage
+sync: Drive text files and Google Docs in a configured folder map to
+CompanyCore notes, CompanyCore notes can be exported to Drive, and updates to
+Drive-sourced notes write content back to the corresponding Drive file. Google
+Drive Changes notifications are stored as verified provider inbox signals and
+processed through Drive API sync because notification callbacks do not carry
+full file content.
 
 ## Security Boundaries
 

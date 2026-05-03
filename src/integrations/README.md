@@ -1,8 +1,9 @@
 # Integrations
 
 Integration modules live here when CompanyCore calls external services
-directly. ClickUp is the first native v1 adapter and should establish the
-reusable pattern for future integrations.
+directly. ClickUp is the first native v1 adapter and establishes the reusable
+pattern for future integrations. Google Drive follows the same pattern for the
+first notes/storage bridge.
 
 Required adapter layers:
 
@@ -19,4 +20,5 @@ responses, or embedded in events.
 
 External records must be idempotent by `(workspace_id, source, external_id)`.
 For ClickUp tasks, use `source = clickup` and the ClickUp task ID as
-`external_id`.
+`external_id`. For Google Drive notes, use `source = google_drive` and the
+Drive file ID as `external_id`.

@@ -56,6 +56,57 @@ Company Core is responsible for:
 n8n may still be used for optional orchestration when a workflow is better kept
 outside the backend, but n8n is not the required primary ClickUp path in v1.
 
+## Google Drive To Company Core
+
+Google Drive now follows the same native adapter contract as ClickUp for the
+first knowledge/storage slice:
+
+```text
+Google Drive API -> CompanyCore Google Drive adapter -> CompanyCore DB -> event
+CompanyCore note update -> CompanyCore Google Drive adapter -> Google Drive file
+```
+
+Implemented now:
+
+- workspace-owned `google_drive` integration settings with encrypted OAuth
+  bearer token storage and safe redacted reads
+- `POST /v1/integration-settings/google-drive/sync/notes` to import Drive text
+  files and Google Docs from a configured folder into CompanyCore notes
+- optional export of local CompanyCore notes to Drive text files during sync
+- `PATCH /v1/notes/:id` write-back for notes sourced from Google Drive
+- Google Drive Changes notification channel registration through
+  `POST /v1/integration-settings/google-drive/webhooks/reconcile`
+- public `POST /v1/webhooks/google-drive` receiver that verifies
+  `X-Goog-Channel-Token` before writing provider inbox rows and processing
+  verified `change` notifications through the notes sync service
+
+The first Drive slice intentionally maps durable knowledge content to notes,
+not tasks. ClickUp remains the task/workflow provider. Drive files are keyed by
+`(workspace_id, source = google_drive, external_id = file id)`.
+
+Official Google Drive docs checked for this contract:
+
+- Drive API file create/update/list behavior:
+  `https://developers.google.com/drive/api/reference/rest/v3/files/create`
+- Drive file creation and management guide:
+  `https://developers.google.com/drive/api/guides/create-file`
+- Drive push notifications and Changes channels:
+  `https://developers.google.com/workspace/drive/api/guides/push`
+- Drive `changes.watch` and channel request shape:
+  `https://developers.google.com/drive/api/reference/rest/v3/changes/watch`
+
+Provider notes:
+
+- Google Drive push notifications do not carry full file content. CompanyCore
+  stores a verified provider inbox signal and uses the same notes sync service
+  to query Drive for current file state.
+- Google Drive channel verification uses the configured channel token. Raw
+  OAuth tokens and channel tokens are never returned in API responses.
+- OAuth refresh-token rotation and a full owner consent UI are not in this
+  repository slice yet; production operators must provide a valid Drive token
+  through the protected integration settings API until that owner setup flow is
+  planned.
+
 Implemented first native slice:
 
 ```http

@@ -38,7 +38,13 @@ const capabilities = [
   "integration-settings:clickup:read",
   "integration-settings:clickup:write",
   "integration-settings:clickup:discover",
-  "integration-settings:clickup:webhooks:write"
+  "integration-settings:clickup:webhooks:write",
+  "integration-settings:clickup:events:read",
+  "integration-settings:clickup:events:retry",
+  "integration-settings:google-drive:read",
+  "integration-settings:google-drive:write",
+  "integration-settings:google-drive:notes:sync",
+  "integration-settings:google-drive:webhooks:write"
 ] as const;
 
 const adapterManifest = {
@@ -108,7 +114,8 @@ const adapterManifest = {
     ],
     notes: [
       { method: "GET", path: "/v1/notes", capability: "notes:read" },
-      { method: "POST", path: "/v1/notes", capability: "notes:write" }
+      { method: "POST", path: "/v1/notes", capability: "notes:write" },
+      { method: "PATCH", path: "/v1/notes/:id", capability: "notes:write" }
     ],
     decisions: [
       { method: "GET", path: "/v1/decisions", capability: "decisions:read" },
@@ -131,7 +138,14 @@ const adapterManifest = {
       { method: "POST", path: "/v1/integration-settings/clickup/discover", capability: "integration-settings:clickup:discover" },
       { method: "GET", path: "/v1/integration-settings/clickup/webhooks", capability: "integration-settings:clickup:read" },
       { method: "POST", path: "/v1/integration-settings/clickup/webhooks/reconcile", capability: "integration-settings:clickup:webhooks:write" },
-      { method: "DELETE", path: "/v1/integration-settings/clickup/webhooks/:id", capability: "integration-settings:clickup:webhooks:write" }
+      { method: "DELETE", path: "/v1/integration-settings/clickup/webhooks/:id", capability: "integration-settings:clickup:webhooks:write" },
+      { method: "GET", path: "/v1/integration-settings/clickup/events", capability: "integration-settings:clickup:events:read" },
+      { method: "POST", path: "/v1/integration-settings/clickup/events/retry-failed", capability: "integration-settings:clickup:events:retry" },
+      { method: "GET", path: "/v1/integration-settings/google-drive", capability: "integration-settings:google-drive:read" },
+      { method: "PUT", path: "/v1/integration-settings/google-drive", capability: "integration-settings:google-drive:write" },
+      { method: "POST", path: "/v1/integration-settings/google-drive/sync/notes", capability: "integration-settings:google-drive:notes:sync" },
+      { method: "GET", path: "/v1/integration-settings/google-drive/webhooks", capability: "integration-settings:google-drive:read" },
+      { method: "POST", path: "/v1/integration-settings/google-drive/webhooks/reconcile", capability: "integration-settings:google-drive:webhooks:write" }
     ]
   },
   writeRules: [
@@ -163,6 +177,21 @@ connectionRouter.get("/", asyncHandler(async (req, res) => {
       workspaceId_provider: {
         workspaceId: workspace.id,
         provider: "clickup"
+      }
+    },
+    select: {
+      active: true,
+      secretCiphertext: true,
+      config: true,
+      updatedAt: true
+    }
+  });
+
+  const googleDrive = await prisma.integrationSetting.findUnique({
+    where: {
+      workspaceId_provider: {
+        workspaceId: workspace.id,
+        provider: "google_drive"
       }
     },
     select: {
@@ -234,6 +263,12 @@ connectionRouter.get("/", asyncHandler(async (req, res) => {
           active: Boolean(clickUp?.active),
           config: clickUp?.config ?? {},
           updatedAt: clickUp?.updatedAt ?? null
+        },
+        google_drive: {
+          configured: Boolean(googleDrive?.secretCiphertext),
+          active: Boolean(googleDrive?.active),
+          config: googleDrive?.config ?? {},
+          updatedAt: googleDrive?.updatedAt ?? null
         }
       }
     }

@@ -8,9 +8,12 @@ Owner registration -> workspace -> workspace settings -> ClickUp API
   -> CompanyCore integration adapter -> PostgreSQL -> event
 ```
 
-Design for scale, implement for v1. Do not add a GUI, Google Drive sync,
-Obsidian sync, billing, advanced RBAC, invitations, a workflow engine, or a full
-CRM UI during this plan.
+Design for scale, implement for v1. This original MVP plan did not include a
+GUI, Google Drive sync, Obsidian sync, billing, advanced RBAC, invitations, a
+workflow engine, or a full CRM UI. Later user-directed iterations added a
+minimal owner console and the first Google Drive notes bridge; current active
+scope is governed by `.codex/context/PROJECT_STATE.md`,
+`.codex/context/TASK_BOARD.md`, and `docs/planning/mvp-next-commits.md`.
 
 ## Principles
 
