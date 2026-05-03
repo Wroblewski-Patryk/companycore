@@ -286,3 +286,22 @@ Use this file to record the minimum checks after each deploy.
   - Continuous ClickUp updates are not enabled yet. CCV1-034 must decide
     scheduled pull sync versus webhook ingestion after the first production
     ClickUp pull succeeds.
+
+## Web/API Domain Split Deployment Evidence
+
+- Timestamp: 2026-05-03
+- Environment: Coolify production, Root Team, `companycore`
+- Deployment:
+  - Manual redeploy `k13xfp6hyot611v1w9n3qlzi`.
+  - Coolify imported commit `514d1913cc35c053d1ae9e5ce6f6541a09b7d366`.
+- Public checks:
+  - `GET https://companycore.luckysparrow.ch/` returned `200` and served the
+    `CompanyCore Integrations` / `ClickUp connection` owner console.
+  - `GET https://companycore.luckysparrow.ch/app.js` returned `200`.
+  - The served `app.js` contains `API_ORIGIN` pointing browser API calls from
+    the web domain to `https://api.companycore.luckysparrow.ch`.
+  - `GET https://api.companycore.luckysparrow.ch/` returned `200` with API
+    metadata JSON containing the web and API URLs.
+  - `GET https://api.companycore.luckysparrow.ch/app.js` returned `401`, so
+    API domain is no longer the public asset surface.
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `200`.
