@@ -2,12 +2,12 @@
 
 ## Ready
 
-- V2GD-005 Docs And Sheets Read/Create/Edit
+- V2GD-006 Drive Changes Freshness
   - Stage: planning
   - Owner: Backend Builder
   - Priority: P1
-  - Goal: add API routes for Docs/Sheets create/read/edit and post-write local
-    metadata/content refresh.
+  - Goal: reconcile external Google Drive edits through Drive changes and
+    refresh local metadata/content snapshots without duplicates.
 
 ## Blocked
 
@@ -41,7 +41,8 @@
 
 ## Backlog
 
-- V2GD-006 Drive Changes Freshness.
+- Future v2 OAuth browser consent UI and token refresh hardening after core
+  server-side API slices are complete.
 - Future v2 dashboard surfaces that show ClickUp Lists, Drive folders/files,
   storage locations, knowledge roots, automations, and CompanyCore tables as
   one company operating area.
@@ -139,3 +140,4 @@
 - V2GD-002 Google Drive Persistence Foundation.
 - V2GD-003 Google Drive Provider Client And OAuth Settings.
 - V2GD-004 Folder Discovery And File Import.
+- V2GD-005 Docs And Sheets Read/Create/Edit.

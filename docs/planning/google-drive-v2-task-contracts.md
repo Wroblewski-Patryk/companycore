@@ -162,7 +162,7 @@ It follows the repository task contract and must stay synchronized with
 ## V2GD-005 Docs And Sheets Read/Create/Edit
 
 - Task Type: backend/integration
-- Current Stage: ready
+- Current Stage: done
 - Deliverable For This Stage: API routes for Docs/Sheets create/read/edit and
   post-write local refresh.
 - Goal: Let CompanyCore create, read, and edit Google Docs/Sheets while keeping
@@ -185,12 +185,21 @@ It follows the repository task contract and must stay synchronized with
 - Definition of Done:
   - Build/tests pass and docs are updated.
 - Result Report:
-  - Pending.
+  - Added `/v1/google-drive/files` and
+    `/v1/google-drive/files/:id/content`.
+  - Added Google Docs create/update routes with provider write before local
+    refresh.
+  - Added Google Sheets create/update values routes with provider write before
+    local refresh.
+  - Added content extraction snapshots for Docs text and Sheets values.
+  - Added safe file/content events for creation, updates, and refreshes.
+  - Added tests proving Docs/Sheets provider calls, snapshot refresh, and agent
+    file listing behavior.
 
 ## V2GD-006 Drive Changes Freshness
 
 - Task Type: backend/integration
-- Current Stage: planning
+- Current Stage: ready
 - Deliverable For This Stage: Drive changes reconciliation and future webhook
   channel plan.
 - Goal: Keep CompanyCore file metadata and content snapshots fresh after

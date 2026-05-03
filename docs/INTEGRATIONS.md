@@ -143,6 +143,15 @@ Implemented foundation:
   `replace_selected_folders`, or `inspect_only`.
 - Google Drive import emits `google_drive_import_succeeded` events with safe
   counts and selected folder IDs.
+- `/v1/google-drive/files` lists imported Drive files with their latest content
+  snapshot for Jarvis, Paperclip, Aviary, and future GUI clients.
+- `/v1/google-drive/files/:id/content` refreshes a local content snapshot from
+  Google Docs or Sheets through CompanyCore.
+- `/v1/google-drive/docs` and `/v1/google-drive/sheets` create Google Docs and
+  Sheets, persist metadata, extract searchable content, and emit safe events.
+- `/v1/google-drive/docs/:id` and `/v1/google-drive/sheets/:id/values` write to
+  Google first, then refresh CompanyCore metadata/content snapshots only after
+  the provider write succeeds.
 
 Implemented first native slice:
 

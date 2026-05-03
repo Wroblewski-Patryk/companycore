@@ -920,6 +920,192 @@ test("CompanyCore v1 protected API flow", async () => {
   });
   assert.ok(googleDriveEvents.length >= 1);
 
+  const originalFetchBeforeGoogleDriveContent = globalThis.fetch;
+  const googleDriveCalls: Array<{ path: string; method: string; body?: unknown }> = [];
+  globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
+    const url = new URL(String(input));
+    googleDriveCalls.push({
+      path: url.pathname,
+      method: init?.method ?? "GET",
+      body: init?.body ? JSON.parse(String(init.body)) : undefined
+    });
+
+    if (url.pathname === "/drive/v3/files" && init?.method === "POST") {
+      return new Response(JSON.stringify({
+        id: "created-doc-1",
+        name: "Jarvis doc",
+        mimeType: "application/vnd.google-apps.document",
+        parents: ["drive-folder-root"],
+        headRevisionId: "doc-created-rev-1",
+        webViewLink: "https://docs.google.com/document/d/created-doc-1"
+      }), { status: 200 });
+    }
+
+    if (url.pathname === "/docs.googleapis.com/never") {
+      return new Response("{}", { status: 404 });
+    }
+
+    if (url.pathname === "/v1/documents/created-doc-1:batchUpdate") {
+      return new Response(JSON.stringify({ documentId: "created-doc-1" }), { status: 200 });
+    }
+
+    if (url.pathname === "/drive/v3/files/created-doc-1") {
+      return new Response(JSON.stringify({
+        id: "created-doc-1",
+        name: "Jarvis doc",
+        mimeType: "application/vnd.google-apps.document",
+        parents: ["drive-folder-root"],
+        headRevisionId: "doc-created-rev-2",
+        webViewLink: "https://docs.google.com/document/d/created-doc-1"
+      }), { status: 200 });
+    }
+
+    if (url.pathname === "/v1/documents/created-doc-1") {
+      return new Response(JSON.stringify({
+        body: {
+          content: [{
+            paragraph: {
+              elements: [{
+                textRun: {
+                  content: "Jarvis can read this Google Doc.\n"
+                }
+              }]
+            }
+          }]
+        }
+      }), { status: 200 });
+    }
+
+    if (url.pathname === "/v1/documents/drive-doc-1") {
+      return new Response(JSON.stringify({
+        body: {
+          content: [{
+            paragraph: {
+              elements: [{
+                textRun: {
+                  content: "Imported document refreshed for search.\n"
+                }
+              }]
+            }
+          }]
+        }
+      }), { status: 200 });
+    }
+
+    if (url.pathname === "/v4/spreadsheets" && init?.method === "POST") {
+      return new Response(JSON.stringify({
+        spreadsheetId: "created-sheet-1",
+        spreadsheetUrl: "https://docs.google.com/spreadsheets/d/created-sheet-1"
+      }), { status: 200 });
+    }
+
+    if (url.pathname === "/drive/v3/files/created-sheet-1") {
+      return new Response(JSON.stringify({
+        id: "created-sheet-1",
+        name: "Jarvis sheet",
+        mimeType: "application/vnd.google-apps.spreadsheet",
+        parents: ["drive-folder-root"],
+        headRevisionId: "sheet-created-rev-1",
+        webViewLink: "https://docs.google.com/spreadsheets/d/created-sheet-1"
+      }), { status: 200 });
+    }
+
+    if (url.pathname === "/v4/spreadsheets/created-sheet-1/values/A1%3AZ100" && init?.method === "PUT") {
+      return new Response(JSON.stringify({ updatedRange: "A1:B2" }), { status: 200 });
+    }
+
+    if (url.pathname === "/v4/spreadsheets/created-sheet-1/values/A1%3AZ100") {
+      return new Response(JSON.stringify({
+        range: "A1:Z100",
+        values: [["Name", "Value"], ["Jarvis", "ready"]]
+      }), { status: 200 });
+    }
+
+    if (url.pathname === "/v4/spreadsheets/created-sheet-1/values/A1%3AB2") {
+      return new Response(JSON.stringify({
+        range: "A1:B2",
+        values: [["Name", "Value"], ["Jarvis", "updated"]]
+      }), { status: 200 });
+    }
+
+    return new Response(JSON.stringify({ error: "not mocked", path: url.pathname }), { status: 404 });
+  }) as typeof fetch;
+
+  let createdDocId = "";
+  let createdSheetId = "";
+  try {
+    const createdDoc = await request("/v1/google-drive/docs", {
+      method: "POST",
+      headers: authA,
+      body: JSON.stringify({
+        name: "Jarvis doc",
+        parentId: "drive-folder-root",
+        initialText: "Jarvis can read this Google Doc.\n"
+      })
+    });
+    assert.equal(createdDoc.status, 201);
+    const createdDocBody = createdDoc.body as { data: { file: { id: string; externalId: string }; snapshot: { summary: string } } };
+    createdDocId = createdDocBody.data.file.id;
+    assert.equal(createdDocBody.data.file.externalId, "created-doc-1");
+    assert.ok(createdDocBody.data.snapshot.summary.includes("Jarvis can read"));
+
+    const refreshedImportedDoc = await request(`/v1/google-drive/files/${importedDriveDoc?.id}/content`, {
+      headers: authA
+    });
+    assert.equal(refreshedImportedDoc.status, 200);
+    assert.ok((refreshedImportedDoc.body as { data: { extractedText: string } }).data.extractedText.includes("refreshed for search"));
+
+    const updatedDoc = await request(`/v1/google-drive/docs/${createdDocId}`, {
+      method: "PATCH",
+      headers: authA,
+      body: JSON.stringify({
+        requests: [{ insertText: { location: { index: 1 }, text: "Updated " } }]
+      })
+    });
+    assert.equal(updatedDoc.status, 200);
+
+    const createdSheet = await request("/v1/google-drive/sheets", {
+      method: "POST",
+      headers: authA,
+      body: JSON.stringify({
+        title: "Jarvis sheet",
+        range: "A1:Z100",
+        values: [["Name", "Value"], ["Jarvis", "ready"]]
+      })
+    });
+    assert.equal(createdSheet.status, 201);
+    const createdSheetBody = createdSheet.body as { data: { file: { id: string; externalId: string }; snapshot: { extractedText: string } } };
+    createdSheetId = createdSheetBody.data.file.id;
+    assert.equal(createdSheetBody.data.file.externalId, "created-sheet-1");
+    assert.ok(createdSheetBody.data.snapshot.extractedText.includes("Jarvis | ready"));
+
+    const updatedSheet = await request(`/v1/google-drive/sheets/${createdSheetId}/values`, {
+      method: "PUT",
+      headers: authA,
+      body: JSON.stringify({
+        range: "A1:B2",
+        values: [["Name", "Value"], ["Jarvis", "updated"]]
+      })
+    });
+    assert.equal(updatedSheet.status, 200);
+    assert.ok((updatedSheet.body as { data: { snapshot: { extractedText: string } } }).data.snapshot.extractedText.includes("Jarvis | updated"));
+  } finally {
+    globalThis.fetch = originalFetchBeforeGoogleDriveContent;
+  }
+
+  assert.ok(googleDriveCalls.some((call) => call.path === "/v1/documents/created-doc-1:batchUpdate" && call.method === "POST"));
+  assert.ok(googleDriveCalls.some((call) => call.path === "/v4/spreadsheets/created-sheet-1/values/A1%3AZ100" && call.method === "PUT"));
+  const contentSnapshotCount = await prisma.googleDriveContentSnapshot.count({
+    where: { workspaceId: ownerA.workspace.id }
+  });
+  assert.ok(contentSnapshotCount >= 3);
+
+  const listedDriveFiles = await request("/v1/google-drive/files", { headers: authA });
+  assert.equal(listedDriveFiles.status, 200);
+  assert.ok((listedDriveFiles.body as { data: Array<{ externalId: string; contentSnapshots: unknown[] }> }).data.some((file) => (
+    file.externalId === "created-doc-1" && file.contentSnapshots.length === 1
+  )));
+
   const updatedSettingsWithoutToken = await request("/integration-settings/clickup", {
     method: "PUT",
     headers: authA,

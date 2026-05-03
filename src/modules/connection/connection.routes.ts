@@ -44,7 +44,10 @@ const capabilities = [
   "integration-settings:clickup:maintenance:run",
   "integration-settings:google-drive:read",
   "integration-settings:google-drive:write",
-  "integration-settings:google-drive:import"
+  "integration-settings:google-drive:import",
+  "google-drive:files:read",
+  "google-drive:docs:write",
+  "google-drive:sheets:write"
 ] as const;
 
 const adapterManifest = {
@@ -144,6 +147,14 @@ const adapterManifest = {
       { method: "GET", path: "/v1/integration-settings/google_drive", capability: "integration-settings:google-drive:read" },
       { method: "PUT", path: "/v1/integration-settings/google_drive", capability: "integration-settings:google-drive:write" },
       { method: "POST", path: "/v1/integration-settings/google_drive/import", capability: "integration-settings:google-drive:import" }
+    ],
+    googleDrive: [
+      { method: "GET", path: "/v1/google-drive/files", capability: "google-drive:files:read" },
+      { method: "GET", path: "/v1/google-drive/files/:id/content", capability: "google-drive:files:read" },
+      { method: "POST", path: "/v1/google-drive/docs", capability: "google-drive:docs:write" },
+      { method: "PATCH", path: "/v1/google-drive/docs/:id", capability: "google-drive:docs:write" },
+      { method: "POST", path: "/v1/google-drive/sheets", capability: "google-drive:sheets:write" },
+      { method: "PUT", path: "/v1/google-drive/sheets/:id/values", capability: "google-drive:sheets:write" }
     ]
   },
   writeRules: [
