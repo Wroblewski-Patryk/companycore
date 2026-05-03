@@ -4,6 +4,71 @@ These task contracts turn the v1 audit into executable work. Each task must be
 completed as its own small iteration and must update `.codex/context/TASK_BOARD.md`,
 `.codex/context/PROJECT_STATE.md`, and relevant docs when status changes.
 
+## CCV1-053 V1 Source Handoff Package
+
+### Header
+- ID: CCV1-053
+- Title: V1 source handoff package
+- Task Type: release handoff
+- Current Stage: release
+- Status: DONE
+- Owner: Ops/Release + Product Docs
+- Depends on: CCV1-052
+- Priority: P2
+- Iteration: v1-053
+- Operation Mode: BUILDER
+
+### Goal
+Make the deployed OpenJarvis and Paperclip CompanyCore integration changes
+reproducible from managed source repositories.
+
+### Scope
+- OpenJarvis CompanyCore connector hygiene commit metadata.
+- Paperclip CompanyCore adapter commit metadata.
+- Validation and production smoke commands for both external apps.
+- CompanyCore docs index and canonical planning/context files.
+
+### Implementation Plan
+- Inspect the local OpenJarvis and Paperclip integration commits.
+- Record affected files, runtime behavior, validation commands, and handoff
+  rules.
+- Keep upstream push/PR execution out of this task because both external
+  repositories require explicit ownership decisions and OpenJarvis has
+  unrelated local changes.
+- Update CompanyCore docs index and canonical queue files.
+- Run docs validation and CompanyCore build/test gate.
+
+### Acceptance Criteria
+- [x] OpenJarvis handoff records commit, files, behavior, validation, and
+  source-merge rule.
+- [x] Paperclip handoff records commit, files, behavior, validation, patch
+  apply command, and source-merge rule.
+- [x] Production smoke checklist exists for repeating the handoff validation.
+- [x] No external repository is pushed from a dirty or ambiguous checkout.
+- [x] CompanyCore canonical docs and planning queue are synchronized.
+
+### Definition of Done
+- [x] `git diff --check` passes.
+- [x] `npm run build` passes.
+- [x] `npm test` passes against local PostgreSQL.
+- [x] Task board, project state, planning queue, docs index, and task contract
+  are updated.
+
+### Result Report
+- Task summary: Added a v1 source handoff package for OpenJarvis and Paperclip
+  so the deployed CompanyCore integration behavior can be reproduced in managed
+  upstream source flows.
+- Files changed: `docs/operations/v1-source-handoff-package.md`,
+  `docs/README.md`, `.codex/context/PROJECT_STATE.md`,
+  `.codex/context/TASK_BOARD.md`, `docs/planning/mvp-next-commits.md`, and
+  this task contract.
+- How tested: `git diff --check`; `npm run build`; `npm test` with
+  `DATABASE_URL` pointing at local PostgreSQL on `localhost:55432`.
+- What is incomplete: OpenJarvis and Paperclip upstream merge execution remains
+  optional and requires an explicit repository ownership decision.
+- Next steps: Choose v2 scope, execute source merge handoff, or complete
+  GitHub-to-Coolify auto-deploy administration when tooling is available.
+
 ## CCV1-052 V1 Launch Boundary And Source Handoff
 
 ### Header

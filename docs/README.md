@@ -11,15 +11,17 @@ would drift across tools.
 Company Core v1 provides:
 
 - PostgreSQL data model with Prisma.
-- Express API protected by `X-API-Key`.
-- Minimal flows for projects, goals, targets, tasks, clients, deals, notes, and
-  events.
-- Native ClickUp integration planned as the first backend integration adapter,
-  with the existing ClickUp sync endpoint kept for compatible external payloads.
+- Express API protected by owner auth and workspace service API keys.
+- Workspace-scoped flows for projects, goals, targets, tasks, clients, deals,
+  notes, decisions, agents, interactions, events, and operating-model records.
+- Native ClickUp import, signed webhook ingestion, scheduled maintenance,
+  write-back, comments, views, custom fields, and retry observability.
+- OpenJarvis read integration through the CompanyCore connector.
+- Paperclip agent-event consumption through the CompanyCore adapter.
 - Docker Compose runtime for local and Coolify-style deployment.
 
-It deliberately does not provide a GUI, Google Drive sync, Obsidian sync,
-advanced auth, analytics, background workers, or full business automation.
+It deliberately keeps broad company dashboarding, Google Drive sync, Obsidian
+sync, advanced analytics, and full business automation as v2+ scope.
 
 ## Documentation Index
 
@@ -103,6 +105,7 @@ Use `docs/` as the canonical home for CompanyCore documentation.
   - `operations/clickup-production-bootstrap.md`
   - `operations/jarvis-companycore-update-runbook.md`
   - `operations/paperclip-companycore-adapter-runbook.md`
+  - `operations/v1-source-handoff-package.md`
   - `operations/v1-release-readiness.md`
 - Security:
   - `security/security-baseline.md`

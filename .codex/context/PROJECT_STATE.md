@@ -99,12 +99,13 @@ Last updated: 2026-05-03
   and deployment smoke evidence are aligned.
 
 ## Autonomous Iteration State
-- Current iteration: CCV1-052 V1 Launch Boundary And Source Handoff.
-- Current operation mode: ARCHITECT
-- Last completed iteration: CCV1-052 V1 Launch Boundary And Source Handoff.
-- Last completed task: recorded the v1 launch boundary, separated runtime
-  readiness from external auto-deploy administration, and documented the
-  OpenJarvis/Paperclip source handoff status.
+- Current iteration: CCV1-053 V1 Source Handoff Package.
+- Current operation mode: BUILDER
+- Last completed iteration: CCV1-053 V1 Source Handoff Package.
+- Last completed task: created a reproducible source handoff package for the
+  deployed OpenJarvis CompanyCore connector hygiene and Paperclip CompanyCore
+  adapter commits, including files, validation commands, production smoke, and
+  rollback notes.
 - Next required mode: BUILDER when a new approved v2 or handoff task is moved
   into the active queue.
 
@@ -564,6 +565,12 @@ Last updated: 2026-05-03
   a v1 runtime blocker; OpenJarvis has a local unpushed connector hygiene
   commit and Paperclip has a local unpushed adapter commit plus a managed
   CompanyCore patch/runbook for durable handoff.
+- 2026-05-03: Completed CCV1-053 by adding
+  `docs/operations/v1-source-handoff-package.md`. The package records the
+  OpenJarvis `5a426370` and Paperclip `4cfa476f` source commits, affected
+  files, expected tests, production smoke checks, and rollback approach. The
+  docs index was refreshed to describe the achieved v1 runtime rather than the
+  early foundation state.
 
 ## Working Agreements
 - Keep task board and project state synchronized.
@@ -614,6 +621,7 @@ Last updated: 2026-05-03
 - `docs/operations/rollback-and-recovery.md`
 - `docs/operations/service-reliability-and-observability.md`
 - `docs/operations/paperclip-companycore-adapter-runbook.md`
+- `docs/operations/v1-source-handoff-package.md`
 - `docs/operations/v1-release-readiness.md`
 - `docs/security/secure-development-lifecycle.md`
 - `docs/security/security-baseline.md`
