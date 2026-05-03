@@ -43,12 +43,40 @@ function mountProtectedRoutes(router: Router) {
   router.use("/events", eventsRouter);
 }
 
+function isApiHost(host = "") {
+  return host.split(":")[0] === "api.companycore.luckysparrow.ch";
+}
+
 export function createApp() {
   const app = express();
+  const staticFiles = express.static(path.join(process.cwd(), "public"));
 
   app.use(cors());
   app.use(express.json({ limit: "1mb" }));
-  app.use(express.static(path.join(process.cwd(), "public")));
+  app.get("/", (req, res, next) => {
+    if (!isApiHost(req.headers.host)) {
+      next();
+      return;
+    }
+
+    res.json({
+      data: {
+        service: "companycore",
+        web: "https://companycore.luckysparrow.ch",
+        api: "https://api.companycore.luckysparrow.ch",
+        health: "/health",
+        version: "v1"
+      }
+    });
+  });
+  app.use((req, res, next) => {
+    if (isApiHost(req.headers.host)) {
+      next();
+      return;
+    }
+
+    staticFiles(req, res, next);
+  });
 
   app.use("/health", healthRouter);
   app.use("/v1/health", healthRouter);

@@ -13,6 +13,16 @@ Last updated: 2026-05-02
 - 2026-05-03: v1 includes a minimal owner-only web console for production
   ClickUp connection setup. A broader company operations dashboard and mobile
   app are v2 scope; mobile should follow the web product shape.
+- 2026-05-03: CompanyCore should evolve toward a ClickUp-shaped operating
+  model: `Workspace -> Operating Area -> Operating Folder -> Operating Table
+  -> Record`, mapped to ClickUp `Team/Workspace -> Space -> Folder -> List ->
+  Task`. Business tables must be assigned to one of 12 approved operating
+  areas, while users, memberships, API keys, integration settings, provider
+  mappings, and platform metadata remain system tables.
+- 2026-05-03: Provider API work must check current official provider
+  documentation before mapping or implementation. For ClickUp this includes
+  hierarchy terminology, Custom Fields, Views, rate limits, pagination,
+  webhook signatures, and permissions.
 - 2026-05-02: PostgreSQL is the source of truth.
 - 2026-05-02: API is the only supported access layer.
 - 2026-05-02: CompanyCore owns the first native integration adapter:
@@ -62,9 +72,8 @@ Last updated: 2026-05-02
   `INTEGRATION_SECRET_KEY`, optional `PORT`; local seed may use `SEED_OWNER_EMAIL`,
   `SEED_OWNER_PASSWORD`, and `SEED_WORKSPACE_NAME`; ClickUp tokens must be
   stored as workspace integration settings, not hardcoded process globals.
-- Public URLs / ports: backend on `3000`; deployed domains to document and
-  verify are `companycore.luckysparrow.ch` and
-  `api.companycore.luckysparrow.ch`.
+- Public URLs / ports: backend on `3000`; `companycore.luckysparrow.ch` is the
+  web UI domain and `api.companycore.luckysparrow.ch` is the API domain.
 - Backup / restore expectation: Postgres volume backups required before
   production use.
 - Rollback trigger and method: redeploy previous image/commit and preserve
@@ -83,13 +92,14 @@ Last updated: 2026-05-02
 
 ## Autonomous Iteration State
 - Current iteration: CCV1-026 adapter smoke script.
+- Current iteration: CCV1-034 ClickUp-shaped operating model architecture.
 - Current operation mode: BUILDER
-- Last completed iteration: CCV1-026 adapter smoke script.
-- Last completed task: added `npm run adapter:smoke` so a production workspace
-  service key can verify the full Paperclip/Jarvis onboarding path before the
-  adapters are wired.
-- Next required mode: BUILDER for adapter production smoke once credentials are
-  available.
+- Last completed iteration: CCV1-034 ClickUp-shaped operating model architecture.
+- Last completed task: documented the ClickUp-shaped operating registry target,
+  audited the current schema gap, and queued registry, provider mapping, table
+  API, storage/knowledge, and automation follow-up tasks.
+- Next required mode: TESTER for CCV1-035 unless the selected task number
+  changes.
 
 ## Recent Progress
 - 2026-05-02: Created Company Core backend foundation, Prisma schema, Docker
@@ -284,6 +294,14 @@ Last updated: 2026-05-02
   A real ClickUp token was not available in-session, so first token discovery,
   settings save, and native pull sync remain an operator action through the
   deployed owner console.
+- 2026-05-03: Completed CCV1-034 by auditing the current schema and code
+  against the desired ClickUp-shaped operating model. Current code correctly
+  enforces workspace ownership for v1 records and supports ClickUp discovery,
+  but it does not yet persist CompanyCore equivalents for ClickUp Spaces,
+  Folders, Lists as a general table registry, Views, Custom Fields, storage
+  roots, knowledge roots, or automation scopes. Added the architecture and
+  planning contract for the 12-area operating model and queued CCV1-034A
+  through CCV1-034E.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

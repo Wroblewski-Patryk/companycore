@@ -11,6 +11,10 @@ const state = {
   }
 };
 
+const API_ORIGIN = window.location.hostname === "companycore.luckysparrow.ch"
+  ? "https://api.companycore.luckysparrow.ch"
+  : window.location.origin;
+
 const loginForm = document.querySelector("#loginForm");
 const clickupPanel = document.querySelector("#clickupPanel");
 const checkTokenButton = document.querySelector("#checkTokenButton");
@@ -104,7 +108,7 @@ function parseApiError(body, fallback) {
 }
 
 async function api(path, options = {}) {
-  const response = await fetch(path, {
+  const response = await fetch(`${API_ORIGIN}${path}`, {
     ...options,
     headers: {
       ...authHeaders(),
@@ -328,7 +332,7 @@ loginForm.addEventListener("submit", async (event) => {
   setBusy(true);
 
   try {
-    const response = await fetch("/auth/login", {
+    const response = await fetch(`${API_ORIGIN}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

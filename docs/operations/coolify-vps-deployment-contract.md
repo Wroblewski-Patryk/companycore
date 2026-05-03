@@ -1,16 +1,17 @@
 # Coolify VPS Deployment Contract
 
-CompanyCore v1 deploys as a backend-only Docker Compose application on a
-Coolify-compatible VPS. The deployment must preserve PostgreSQL data and expose
-only the backend API publicly.
+CompanyCore v1 deploys as a single backend Docker Compose application on a
+Coolify-compatible VPS. The same backend serves a minimal owner web console on
+the web domain and the JSON API on the API domain. The deployment must preserve
+PostgreSQL data.
 
 ## Deployment Target
 
 - VPS provider: LuckySparrow-managed VPS.
 - Platform: Coolify.
 - Public domains:
-  - `companycore.luckysparrow.ch`
-  - `api.companycore.luckysparrow.ch`
+  - Web UI: `companycore.luckysparrow.ch`
+  - API: `api.companycore.luckysparrow.ch`
 - Public service: `backend` on container port `3000`.
 - Public web surface: minimal owner console served by `backend` at `/`.
 - Private services: `postgres`.
@@ -33,7 +34,8 @@ only the backend API publicly.
 - Coolify Compose path: `docker-compose.coolify.yml`.
 - Env example file: `.env.example`.
 - Health/readiness endpoint: `GET /health`.
-- Owner console: `GET /`.
+- Owner console: `GET https://companycore.luckysparrow.ch/`.
+- API metadata: `GET https://api.companycore.luckysparrow.ch/`.
 - Migration entrypoint:
   - Runtime startup runs `npm run prisma:migrate:deploy`.
   - Local development may use `npm run prisma:migrate:dev`.
@@ -86,6 +88,8 @@ Required checks before deploy:
 Required smoke checks after deploy:
 
 - `GET https://api.companycore.luckysparrow.ch/health`
+- `GET https://companycore.luckysparrow.ch/`
+- `GET https://api.companycore.luckysparrow.ch/`
 - owner registration/login or approved first-owner bootstrap
 - protected workspace-scoped project/task call
 - denied unauthenticated or cross-workspace request

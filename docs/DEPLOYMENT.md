@@ -48,7 +48,7 @@ and `docker-compose.coolify.yml` as the compose file.
 
 Public domains:
 
-- Project domain: `https://companycore.luckysparrow.ch`
+- Web domain: `https://companycore.luckysparrow.ch`
 - API domain: `https://api.companycore.luckysparrow.ch`
 
 Required environment values:
@@ -60,8 +60,9 @@ Required environment values:
 - `INTEGRATION_SECRET_KEY`
 
 Map domains to the `backend` service on container port `3000`.
-The backend serves the minimal owner console from `/` and API routes from
-`/v1/*` plus existing compatibility aliases.
+The backend serves the minimal owner console from `/` on the web domain. The
+owner console calls the API domain for `/auth/*`, `/v1/*`, and compatibility
+API aliases. The API domain root returns API metadata instead of the web UI.
 
 Keep Postgres storage persistent through Coolify volume configuration.
 
@@ -83,6 +84,7 @@ Migration release checklist:
 
 ```bash
 curl https://api.companycore.luckysparrow.ch/health
+curl https://companycore.luckysparrow.ch/
 curl https://api.companycore.luckysparrow.ch/
 curl -H "X-API-Key: <workspace-api-key>" https://api.companycore.luckysparrow.ch/projects
 curl -H "Authorization: Bearer <owner-token>" https://api.companycore.luckysparrow.ch/integration-settings/clickup
@@ -93,7 +95,8 @@ curl -H "Authorization: Bearer <owner-token>" https://api.companycore.luckysparr
 Expected smoke evidence:
 
 - `/health` returns healthy status.
-- `/` returns the owner console assets.
+- `https://companycore.luckysparrow.ch/` returns the owner console assets.
+- `https://api.companycore.luckysparrow.ch/` returns API metadata.
 - Protected API rejects missing auth and accepts owner token or workspace API
   key.
 - Owner console can log in, check a ClickUp token, select a ClickUp Workspace,
