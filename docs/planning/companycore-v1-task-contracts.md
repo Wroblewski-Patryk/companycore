@@ -510,10 +510,10 @@ Fields, and manage ClickUp webhook registrations with health reconciliation.
 - How tested: Ran `npm test` with `DATABASE_URL` pointed at disposable
   PostgreSQL on `localhost:55432`; the test suite performed build, migrate
   deploy, and API flow checks.
-- What is incomplete: Production deploy and smoke are still required for the
-  runtime change.
-- Next steps: Deploy the runtime change to Coolify, smoke health and protected
-  CompanyCore/ClickUp bridge status, then continue the Paperclip adapter.
+- What is incomplete: No known incomplete item in the CompanyCore-side ClickUp
+  API bridge slice.
+- Next steps: Continue the Paperclip application-side adapter so it consumes
+  CompanyCore agent events and writes through CompanyCore.
 
 ### Priority
 P0

@@ -426,6 +426,16 @@ Last updated: 2026-05-03
   registrations, and reconciles webhook health by comparing local
   registrations with ClickUp's remote webhook list. `npm test` passed against
   disposable PostgreSQL on `localhost:55432`.
+- 2026-05-03: Deployed CCV1-042 to production with Coolify deployment
+  `ff9gg7qsboy073lxpesyusth` at commit
+  `c555c4dc3aa45438fd06a81be27e11f050f67693`. The backend image now runs
+  `rnqqkhl3o3dut4qv56mlxly2_backend:c555c4dc3aa45438fd06a81be27e11f050f67693`,
+  migration deploy reported no pending migrations, and public `/health` plus
+  `/v1/health` returned `200`. Jarvis's CompanyCore API key verified protected
+  reads for `/v1/connection`, `/v1/tasks` with 224 records,
+  `/v1/integration-settings/clickup/webhooks` with 21 registrations, and
+  `/v1/agent-events`; the adapter manifest exposes the new Custom Field and
+  webhook-delete capabilities.
 
 ## Working Agreements
 - Keep task board and project state synchronized.
