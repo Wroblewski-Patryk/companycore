@@ -2,7 +2,8 @@
 
 ## Ready
 
-No active P0/P1 Google Drive implementation task remains ready after V2GD-006.
+No active P0/P1 Google Drive or web console implementation task remains ready
+after V2WEB-001.
 
 ## Blocked
 
@@ -140,3 +141,4 @@ No active P0/P1 Google Drive implementation task remains ready after V2GD-006.
 - V2GD-007 Google Drive Deploy Smoke Hardening.
 - V2GD-008 Google Drive OAuth Runtime Hardening.
 - V2GD-009 Google Drive Production Rollover Smoke.
+- V2WEB-001 Operating Map And Google Drive Console.

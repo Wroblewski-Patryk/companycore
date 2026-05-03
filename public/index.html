@@ -15,6 +15,7 @@
       <nav class="nav">
         <a href="/dashboard" data-link data-private>Dashboard</a>
         <a href="/settings" data-link data-private>Settings</a>
+        <a href="/settings/drive" data-link data-private>Drive</a>
         <a href="/settings/api" data-link data-private>API</a>
         <a href="/auth/login" data-link data-public>Sign in</a>
         <button type="button" class="link-button" id="logoutButton" data-private>Sign out</button>
@@ -122,15 +123,60 @@
             <strong>Ready</strong>
             <p>Jarvis, Paperclip, and Aviary read CompanyCore through the API domain.</p>
           </article>
+          <article class="panel summary-card">
+            <span class="summary-kicker">Google Drive</span>
+            <strong id="googleDriveStatusLabel">Not configured</strong>
+            <p id="googleDriveStatusHint">Connect Google Drive to import folders and files.</p>
+          </article>
         </section>
+
+        <section class="panel operating-panel">
+          <div class="section-title">
+            <h2>Company operating map</h2>
+            <p>Review the 12 company areas, their CompanyCore tables, provider mappings, Drive files, and live database counts.</p>
+          </div>
+          <div class="operating-layout">
+            <aside class="area-rail" id="operatingAreasNav" aria-label="Company areas"></aside>
+            <div class="area-detail">
+              <div class="area-heading">
+                <div>
+                  <h3 id="areaTitle">Select an area</h3>
+                  <p id="areaDescription">Sign in to load the company operating model.</p>
+                </div>
+                <div class="area-stats" id="areaStats"></div>
+              </div>
+              <div class="area-columns">
+                <section>
+                  <h4>Tables</h4>
+                  <div class="compact-list" id="areaTables"></div>
+                </section>
+                <section>
+                  <h4>Google Drive</h4>
+                  <div class="compact-list" id="areaFiles"></div>
+                </section>
+                <section>
+                  <h4>Provider mappings</h4>
+                  <div class="compact-list" id="areaMappings"></div>
+                </section>
+              </div>
+              <section class="database-preview">
+                <h4>Database preview</h4>
+                <div class="compact-list" id="areaRecords"></div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section class="dashboard-grid dense-grid" id="dataCounters"></section>
 
         <section class="panel next-panel">
           <div class="section-title">
             <h2>Next action</h2>
-            <p>Connect or review ClickUp settings, then run the first sync.</p>
+            <p>Connect or review ClickUp and Google Drive, then refresh the operating map.</p>
           </div>
           <div class="actions">
             <a class="button-link" href="/settings" data-link>Open settings</a>
+            <a class="button-link secondary" href="/settings/drive" data-link>Connect Drive</a>
             <a class="button-link secondary" href="/settings/api" data-link>View API</a>
           </div>
         </section>
@@ -235,6 +281,94 @@
             <button type="button" class="secondary" id="saveButton">Save connection</button>
             <button type="button" id="syncButton">Save and sync</button>
           </div>
+        </section>
+      </section>
+
+      <section class="view" data-view="/settings/drive">
+        <div class="page-title">
+          <div>
+            <p class="label">Private settings</p>
+            <h1>Google Drive</h1>
+            <p>Connect Drive, import selected folders, and reconcile external changes into CompanyCore.</p>
+          </div>
+        </div>
+
+        <section class="panel form" id="googleDrivePanel" aria-disabled="true">
+          <div class="section-title row-title">
+            <div>
+              <h2>Drive setup</h2>
+              <p id="googleDriveWorkspaceLabel">Sign in to load Google Drive settings.</p>
+            </div>
+            <label class="switch">
+              <input id="googleDriveActive" name="googleDriveActive" type="checkbox" checked>
+              <span>Active</span>
+            </label>
+          </div>
+
+          <div class="step">
+            <label>
+              Redirect URI
+              <input id="googleDriveRedirectUri" name="googleDriveRedirectUri" type="url" readonly>
+            </label>
+            <label>
+              Folder IDs to import
+              <input id="googleDriveFolderIds" name="googleDriveFolderIds" type="text" autocomplete="off" placeholder="Folder IDs separated by commas">
+            </label>
+            <div class="actions">
+              <button type="button" class="secondary" id="googleDriveAuthUrlButton">Create OAuth URL</button>
+              <a class="button-link secondary" id="googleDriveAuthLink" href="#" target="_blank" rel="noreferrer" hidden>Open Google consent</a>
+            </div>
+          </div>
+
+          <div class="step">
+            <label>
+              Authorization code
+              <input id="googleDriveCode" name="googleDriveCode" type="password" autocomplete="off" placeholder="Paste the code returned by Google">
+            </label>
+            <div class="actions">
+              <button type="button" id="googleDriveExchangeButton">Save OAuth connection</button>
+              <button type="button" class="secondary" id="googleDriveImportButton">Import folders</button>
+              <button type="button" class="secondary" id="googleDriveReconcileButton">Reconcile changes</button>
+            </div>
+          </div>
+
+          <label>
+            Import mode
+            <select id="googleDriveImportMode">
+              <option value="merge">Merge and update</option>
+              <option value="skip_existing">Only add new</option>
+              <option value="replace_selected_folders">Replace selected folders</option>
+              <option value="inspect_only">Inspect only</option>
+            </select>
+          </label>
+
+          <section class="table-panel nested-flat">
+            <div class="section-title row-title">
+              <div>
+                <h2>Imported Drive files</h2>
+                <p id="googleDriveFilesSummary">No Drive files loaded yet.</p>
+              </div>
+              <button type="button" class="secondary" id="refreshDriveFilesButton">Refresh files</button>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Kind</th>
+                    <th>Area</th>
+                    <th>Scan</th>
+                    <th>Modified</th>
+                  </tr>
+                </thead>
+                <tbody id="googleDriveFilesBody">
+                  <tr>
+                    <td colspan="5">No Drive files loaded yet.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
         </section>
       </section>
 

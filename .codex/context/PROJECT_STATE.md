@@ -645,6 +645,15 @@ Last updated: 2026-05-03
   metadata, and the protected Google Drive smoke passed through the Jarvis
   workspace service API key with Google Drive currently unconfigured and
   `importedFileCount=0`.
+- 2026-05-03: Completed V2WEB-001 by turning the owner web console into a
+  visible CompanyCore database and integration observability surface. The
+  dashboard now shows the operator's 12 company areas in folder order, maps
+  each area to CompanyCore tables, provider mappings, Drive files, and record
+  previews, and exposes database counters. `/settings/drive` now supports
+  Google Drive OAuth URL generation, authorization-code exchange, selected
+  folder import, changes reconciliation, file refresh, and imported-file
+  review. Desktop and mobile Playwright smoke screenshots passed; `node --check
+  public/app.js`, `git diff --check`, `npm run build`, and `npm test` passed.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

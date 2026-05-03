@@ -60,6 +60,7 @@ const webAppRoutes = [
   "/auth/register",
   "/dashboard",
   "/settings",
+  "/settings/drive",
   "/settings/api"
 ];
 

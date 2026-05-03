@@ -1,4 +1,4 @@
-const privateRoutes = new Set(["/dashboard", "/settings", "/settings/api"]);
+const privateRoutes = new Set(["/dashboard", "/settings", "/settings/drive", "/settings/api"]);
 const publicRoutes = new Set(["/", "/auth/login", "/auth/register"]);
 
 const state = {
@@ -15,8 +15,41 @@ const state = {
     spaces: [],
     selectedListIds: new Set()
   },
+  googleDrive: {
+    configured: false,
+    active: false,
+    config: {},
+    files: []
+  },
+  operatingModel: {
+    areas: [],
+    externalMappings: [],
+    externalFields: [],
+    storageLocations: [],
+    knowledgeRoots: [],
+    automationDefinitions: []
+  },
+  databaseTables: new Map(),
+  selectedAreaKey: "",
   tasks: []
 };
+
+const COMPANY_AREAS = [
+  { number: "01", label: "Strategia", key: "strategy-governance", description: "Goals, targets, decisions, and the strategic source of truth." },
+  { number: "02", label: "Produkt", key: "projects-delivery", description: "Projects, delivery containers, product work, and shipped outcomes." },
+  { number: "03", label: "Sprzedaż", key: "sales-crm", description: "Clients, pipeline stages, deals, and sales interactions." },
+  { number: "04", label: "Operacje", key: "operations-administration", description: "Operational administration and unclassified execution structure." },
+  { number: "05", label: "Relacje", key: "tasks-workflow", description: "Workflows, task lists, ClickUp Lists, and active execution records." },
+  { number: "06", label: "Kadry", key: "people-roles", description: "People, roles, responsibilities, and future HR records." },
+  { number: "07", label: "Finanse", key: "finance-billing", description: "Finance, billing, payments, and future financial tables." },
+  { number: "08", label: "Zasoby", key: "assets-storage", description: "Google Drive folders, files, storage locations, and document assets." },
+  { number: "09", label: "Technologia", key: "automations-integrations", description: "Integrations, webhooks, provider mappings, sync jobs, and automations." },
+  { number: "10", label: "Prawo", key: "knowledge-decisions", description: "Knowledge roots, notes, decisions, policies, and durable written context." },
+  { number: "11", label: "Innowacje", key: "marketing-growth", description: "Growth, experiments, campaigns, and future innovation records." },
+  { number: "12", label: "Zarządzanie", key: "ai-agents-observability", description: "Jarvis, Paperclip, Aviary, agent events, logs, and observability." }
+];
+
+const COMPANY_AREA_ORDER = new Map(COMPANY_AREAS.map((area, index) => [area.key, index]));
 
 const API_ORIGIN = window.location.hostname === "companycore.luckysparrow.ch"
   ? "https://api.companycore.luckysparrow.ch"
@@ -45,8 +78,19 @@ const clickupWorkspaceLabel = document.querySelector("#clickupWorkspaceLabel");
 const workspaceNameLabel = document.querySelector("#workspaceNameLabel");
 const clickupStatusLabel = document.querySelector("#clickupStatusLabel");
 const clickupStatusHint = document.querySelector("#clickupStatusHint");
+const googleDriveStatusLabel = document.querySelector("#googleDriveStatusLabel");
+const googleDriveStatusHint = document.querySelector("#googleDriveStatusHint");
 const capabilitySummary = document.querySelector("#capabilitySummary");
 const capabilityList = document.querySelector("#capabilityList");
+const operatingAreasNav = document.querySelector("#operatingAreasNav");
+const areaTitle = document.querySelector("#areaTitle");
+const areaDescription = document.querySelector("#areaDescription");
+const areaStats = document.querySelector("#areaStats");
+const areaTables = document.querySelector("#areaTables");
+const areaFiles = document.querySelector("#areaFiles");
+const areaMappings = document.querySelector("#areaMappings");
+const areaRecords = document.querySelector("#areaRecords");
+const dataCounters = document.querySelector("#dataCounters");
 const listTree = document.querySelector("#listTree");
 const listToolbar = document.querySelector("#listToolbar");
 const listSummary = document.querySelector("#listSummary");
@@ -55,6 +99,16 @@ const resultMessage = document.querySelector("#resultMessage");
 const metrics = document.querySelector("#metrics");
 const tasksSummary = document.querySelector("#tasksSummary");
 const tasksTableBody = document.querySelector("#tasksTableBody");
+const googleDrivePanel = document.querySelector("#googleDrivePanel");
+const googleDriveWorkspaceLabel = document.querySelector("#googleDriveWorkspaceLabel");
+const googleDriveAuthUrlButton = document.querySelector("#googleDriveAuthUrlButton");
+const googleDriveAuthLink = document.querySelector("#googleDriveAuthLink");
+const googleDriveExchangeButton = document.querySelector("#googleDriveExchangeButton");
+const googleDriveImportButton = document.querySelector("#googleDriveImportButton");
+const googleDriveReconcileButton = document.querySelector("#googleDriveReconcileButton");
+const refreshDriveFilesButton = document.querySelector("#refreshDriveFilesButton");
+const googleDriveFilesSummary = document.querySelector("#googleDriveFilesSummary");
+const googleDriveFilesBody = document.querySelector("#googleDriveFilesBody");
 
 const fields = {
   email: document.querySelector("#email"),
@@ -65,7 +119,12 @@ const fields = {
   workspaceName: document.querySelector("#workspaceName"),
   active: document.querySelector("#active"),
   token: document.querySelector("#token"),
-  importMode: document.querySelector("#importMode")
+  importMode: document.querySelector("#importMode"),
+  googleDriveActive: document.querySelector("#googleDriveActive"),
+  googleDriveRedirectUri: document.querySelector("#googleDriveRedirectUri"),
+  googleDriveFolderIds: document.querySelector("#googleDriveFolderIds"),
+  googleDriveCode: document.querySelector("#googleDriveCode"),
+  googleDriveImportMode: document.querySelector("#googleDriveImportMode")
 };
 
 function normalizedPath(pathname = window.location.pathname) {
@@ -130,6 +189,7 @@ function renderRoute() {
   document.body.dataset.route = path;
   renderConnectionState();
   setClickUpEnabled(isSignedIn());
+  setGoogleDriveEnabled(isSignedIn());
 }
 
 function setBusy(isBusy) {
@@ -140,7 +200,9 @@ function setBusy(isBusy) {
     link.setAttribute("aria-disabled", String(isBusy));
   });
   setClickUpEnabled(isSignedIn() && !isBusy);
+  setGoogleDriveEnabled(isSignedIn() && !isBusy);
   refreshTasksButton.disabled = !isSignedIn() || isBusy;
+  refreshDriveFilesButton.disabled = !isSignedIn() || isBusy;
 }
 
 function setClickUpEnabled(isEnabled) {
@@ -156,6 +218,17 @@ function setClickUpEnabled(isEnabled) {
   const canSave = isEnabled && state.clickup.selectedListIds.size > 0 && Boolean(workspaceSelect.value);
   saveButton.disabled = !canSave;
   syncButton.disabled = !canSave;
+}
+
+function setGoogleDriveEnabled(isEnabled) {
+  googleDrivePanel.querySelectorAll("input, button, select").forEach((control) => {
+    control.disabled = !isEnabled;
+  });
+  fields.googleDriveRedirectUri.disabled = true;
+  googleDriveAuthLink.hidden = !googleDriveAuthLink.href || googleDriveAuthLink.getAttribute("href") === "#";
+  googleDriveImportButton.disabled = !isEnabled || !state.googleDrive.configured;
+  googleDriveReconcileButton.disabled = !isEnabled || !state.googleDrive.configured;
+  refreshDriveFilesButton.disabled = !isEnabled;
 }
 
 function showResult(message, tone = "success", sync = null) {
@@ -197,6 +270,57 @@ function formatDate(value) {
   }).format(new Date(value));
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function parseIdList(value) {
+  return String(value || "")
+    .split(/[,\n]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function areaDefinitionFor(area) {
+  return COMPANY_AREAS.find((item) => item.key === area?.key)
+    || COMPANY_AREAS.find((item) => item.number === String(area?.position).padStart(2, "0"))
+    || { number: String(area?.position || 0).padStart(2, "0"), label: area?.name || "Area", key: area?.key, description: area?.description || "" };
+}
+
+function areaLabel(area) {
+  const definition = areaDefinitionFor(area);
+  return `${definition.number}. ${definition.label}`;
+}
+
+function selectedArea() {
+  return state.operatingModel.areas.find((area) => area.key === state.selectedAreaKey)
+    || state.operatingModel.areas[0]
+    || null;
+}
+
+function recordsForTable(table) {
+  return state.databaseTables.get(table.apiSlug)?.records || [];
+}
+
+function countForTable(table) {
+  return recordsForTable(table).length;
+}
+
+function providerLabel(provider) {
+  if (provider === "google_drive") {
+    return "Google Drive";
+  }
+  if (provider === "clickup") {
+    return "ClickUp";
+  }
+  return provider || "CompanyCore";
+}
+
 function renderTasks() {
   tasksTableBody.innerHTML = "";
   const tasks = state.tasks;
@@ -226,6 +350,166 @@ function renderTasks() {
   }
 }
 
+function renderDataCounters() {
+  dataCounters.innerHTML = "";
+  const counters = [
+    ["Areas", state.operatingModel.areas.length],
+    ["Tables", state.operatingModel.areas.flatMap((area) => area.tables || []).length],
+    ["Records", [...state.databaseTables.values()].reduce((sum, item) => sum + item.records.length, 0)],
+    ["Drive files", state.googleDrive.files.length],
+    ["Mappings", state.operatingModel.externalMappings.length],
+    ["Automations", state.operatingModel.automationDefinitions.length]
+  ];
+
+  for (const [label, value] of counters) {
+    const card = document.createElement("article");
+    card.className = "panel summary-card mini-card";
+    card.innerHTML = `
+      <span class="summary-kicker">${escapeHtml(label)}</span>
+      <strong>${value}</strong>
+    `;
+    dataCounters.append(card);
+  }
+}
+
+function renderOperatingMap() {
+  operatingAreasNav.innerHTML = "";
+  const areas = [...state.operatingModel.areas].sort((left, right) => (
+    (COMPANY_AREA_ORDER.get(left.key) ?? left.position ?? 99)
+    - (COMPANY_AREA_ORDER.get(right.key) ?? right.position ?? 99)
+  ));
+
+  if (areas.length === 0) {
+    areaTitle.textContent = "No operating model loaded";
+    areaDescription.textContent = isSignedIn()
+      ? "Refresh the workspace connection to load CompanyCore areas."
+      : "Sign in to load the company operating model.";
+    areaStats.innerHTML = "";
+    areaTables.innerHTML = "";
+    areaFiles.innerHTML = "";
+    areaMappings.innerHTML = "";
+    areaRecords.innerHTML = "";
+    renderDataCounters();
+    return;
+  }
+
+  if (!state.selectedAreaKey || !areas.some((area) => area.key === state.selectedAreaKey)) {
+    state.selectedAreaKey = areas[0].key;
+  }
+
+  for (const area of areas) {
+    const button = document.createElement("button");
+    const definition = areaDefinitionFor(area);
+    button.type = "button";
+    button.className = `area-button${area.key === state.selectedAreaKey ? " is-active" : ""}`;
+    button.innerHTML = `
+      <span class="folder-icon" aria-hidden="true"></span>
+      <span>${escapeHtml(definition.number)}. ${escapeHtml(definition.label)}</span>
+    `;
+    button.addEventListener("click", () => {
+      state.selectedAreaKey = area.key;
+      renderOperatingMap();
+    });
+    operatingAreasNav.append(button);
+  }
+
+  const area = selectedArea();
+  const definition = areaDefinitionFor(area);
+  const tables = area.tables || [];
+  const tableIds = new Set(tables.map((table) => table.id));
+  const files = state.googleDrive.files.filter((file) => (
+    file.operatingAreaId === area.id
+    || file.operatingTableId && tableIds.has(file.operatingTableId)
+    || definition.key === "assets-storage" && !file.operatingAreaId
+  ));
+  const mappings = state.operatingModel.externalMappings.filter((mapping) => (
+    mapping.areaId === area.id
+    || mapping.tableId && tableIds.has(mapping.tableId)
+  ));
+  const recordCount = tables.reduce((sum, table) => sum + countForTable(table), 0);
+
+  areaTitle.textContent = `${definition.number}. ${definition.label}`;
+  areaDescription.textContent = definition.description || area.description || area.name;
+  areaStats.innerHTML = `
+    <span>${tables.length} tables</span>
+    <span>${recordCount} records</span>
+    <span>${files.length} Drive files</span>
+  `;
+
+  renderCompactList(areaTables, tables, (table) => `
+    <strong>${escapeHtml(table.name)}</strong>
+    <span>${escapeHtml(table.tableName)} · /v1/${escapeHtml(table.apiSlug)} · ${countForTable(table)} records</span>
+  `, "No CompanyCore tables mapped to this area yet.");
+
+  renderCompactList(areaFiles, files.slice(0, 8), (file) => `
+    <strong>${escapeHtml(file.name)}</strong>
+    <span>${file.isFolder ? "Folder" : escapeHtml(file.mimeType)} · ${escapeHtml(file.scanStatus)} · ${formatDate(file.modifiedTime)}</span>
+  `, state.googleDrive.configured ? "No imported Drive files mapped here yet." : "Google Drive is not connected yet.");
+
+  renderCompactList(areaMappings, mappings.slice(0, 8), (mapping) => `
+    <strong>${escapeHtml(mapping.name || mapping.externalId)}</strong>
+    <span>${escapeHtml(providerLabel(mapping.provider))} · ${escapeHtml(mapping.entityType)}</span>
+  `, "No external provider mappings in this area yet.");
+
+  const previews = tables.flatMap((table) => recordsForTable(table).slice(0, 3).map((record) => ({ table, record }))).slice(0, 10);
+  renderCompactList(areaRecords, previews, ({ table, record }) => `
+    <strong>${escapeHtml(record.title || record.name || record.summary || record.email || record.id)}</strong>
+    <span>${escapeHtml(table.name)} · ${escapeHtml(record.status || record.source || "companycore")}</span>
+  `, "No records in this area's mapped tables yet.");
+
+  renderDataCounters();
+}
+
+function renderCompactList(container, items, renderItem, emptyText) {
+  container.innerHTML = "";
+  if (items.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "empty-note";
+    empty.textContent = emptyText;
+    container.append(empty);
+    return;
+  }
+
+  for (const item of items) {
+    const row = document.createElement("div");
+    row.className = "compact-row";
+    row.innerHTML = renderItem(item);
+    container.append(row);
+  }
+}
+
+function renderGoogleDriveFiles() {
+  googleDriveFilesBody.innerHTML = "";
+  const files = state.googleDrive.files;
+
+  if (files.length === 0) {
+    googleDriveFilesSummary.textContent = state.googleDrive.configured
+      ? "No Drive files imported yet."
+      : "Google Drive is not connected yet.";
+    const row = document.createElement("tr");
+    row.innerHTML = '<td colspan="5">No Drive files loaded yet.</td>';
+    googleDriveFilesBody.append(row);
+    return;
+  }
+
+  const folderCount = files.filter((file) => file.isFolder).length;
+  googleDriveFilesSummary.textContent = `${files.length} Drive item${files.length === 1 ? "" : "s"} loaded, including ${folderCount} folder${folderCount === 1 ? "" : "s"}.`;
+  const areasById = new Map(state.operatingModel.areas.map((area) => [area.id, area]));
+
+  for (const file of files.slice(0, 80)) {
+    const row = document.createElement("tr");
+    const area = areasById.get(file.operatingAreaId);
+    row.innerHTML = `
+      <td>${escapeHtml(file.name)}</td>
+      <td>${file.isFolder ? "Folder" : escapeHtml(file.mimeType)}</td>
+      <td>${area ? escapeHtml(areaLabel(area)) : "-"}</td>
+      <td>${escapeHtml(file.scanStatus)}</td>
+      <td>${formatDate(file.modifiedTime)}</td>
+    `;
+    googleDriveFilesBody.append(row);
+  }
+}
+
 async function loadTasks() {
   if (!isSignedIn()) {
     state.tasks = [];
@@ -235,7 +519,60 @@ async function loadTasks() {
 
   const response = await api("/v1/tasks");
   state.tasks = response.data || [];
+  state.databaseTables.set("tasks", { records: state.tasks });
   renderTasks();
+  renderOperatingMap();
+}
+
+async function loadOperatingModel() {
+  if (!isSignedIn()) {
+    state.operatingModel = {
+      areas: [],
+      externalMappings: [],
+      externalFields: [],
+      storageLocations: [],
+      knowledgeRoots: [],
+      automationDefinitions: []
+    };
+    state.databaseTables = new Map();
+    renderOperatingMap();
+    return;
+  }
+
+  const response = await api("/v1/operating-model");
+  state.operatingModel = response.data || state.operatingModel;
+  await loadDatabaseSnapshot();
+  renderOperatingMap();
+}
+
+async function loadDatabaseSnapshot() {
+  const tables = state.operatingModel.areas.flatMap((area) => area.tables || []);
+  const next = new Map(state.databaseTables);
+
+  await Promise.all(tables.map(async (table) => {
+    try {
+      const response = await api(`/v1/${table.apiSlug}`);
+      next.set(table.apiSlug, { records: response.data || [] });
+    } catch {
+      next.set(table.apiSlug, { records: [] });
+    }
+  }));
+
+  state.databaseTables = next;
+}
+
+async function loadGoogleDriveFiles() {
+  if (!isSignedIn()) {
+    state.googleDrive.files = [];
+    renderGoogleDriveFiles();
+    renderOperatingMap();
+    return;
+  }
+
+  const response = await api("/v1/google-drive/files");
+  state.googleDrive.files = response.data || [];
+  renderGoogleDriveFiles();
+  renderOperatingMap();
 }
 
 function friendlyError(error) {
@@ -248,6 +585,8 @@ function friendlyError(error) {
     integration_secret_required: "Paste a ClickUp token first, or use a saved connection.",
     integration_not_configured: "ClickUp is not configured for this workspace yet.",
     integration_unavailable: "ClickUp did not respond successfully. Try again shortly.",
+    google_drive_not_configured: "Google Drive is not configured for this workspace yet.",
+    google_drive_oauth_required: "Google Drive needs an OAuth refresh token before it can import files.",
     validation_error: "Some fields are missing or invalid.",
     forbidden: "This action requires the owner login."
   };
@@ -320,6 +659,20 @@ function renderConnectionState() {
     clickupStatusHint.textContent = "Connect ClickUp in settings.";
   }
 
+  if (state.googleDrive.configured) {
+    googleDriveStatusLabel.textContent = state.googleDrive.active ? "Active" : "Saved, inactive";
+    googleDriveStatusHint.textContent = `${state.googleDrive.files.length} Drive item${state.googleDrive.files.length === 1 ? "" : "s"} imported.`;
+    googleDriveWorkspaceLabel.textContent = connected
+      ? `${state.workspace.name} workspace · Google Drive ${state.googleDrive.active ? "active" : "inactive"}`
+      : "Sign in to load Google Drive settings.";
+  } else {
+    googleDriveStatusLabel.textContent = "Not configured";
+    googleDriveStatusHint.textContent = "Connect Google Drive to import folders and files.";
+    googleDriveWorkspaceLabel.textContent = connected
+      ? `${state.workspace.name} workspace · Google Drive not configured`
+      : "Sign in to load Google Drive settings.";
+  }
+
   if (state.capabilities.length > 0) {
     capabilitySummary.textContent = `${state.capabilities.length} capabilities available for this workspace.`;
     capabilityList.innerHTML = "";
@@ -342,23 +695,38 @@ function setConnected(connection) {
   state.clickup.configured = connection.data.integrations.clickup.configured;
   state.clickup.active = Boolean(connection.data.integrations.clickup.active);
   state.clickup.config = connection.data.integrations.clickup.config || {};
+  state.googleDrive.configured = connection.data.integrations.googleDrive.configured;
+  state.googleDrive.active = Boolean(connection.data.integrations.googleDrive.active);
+  state.googleDrive.config = connection.data.integrations.googleDrive.config || {};
   fields.active.checked = connection.data.integrations.clickup.active ?? !state.clickup.configured;
   fields.importMode.value = state.clickup.config.importMode || "merge";
+  fields.googleDriveActive.checked = connection.data.integrations.googleDrive.active ?? !state.googleDrive.configured;
+  fields.googleDriveImportMode.value = state.googleDrive.config.importMode || "merge";
+  fields.googleDriveFolderIds.value = (state.googleDrive.config.selectedFolderIds || state.googleDrive.config.rootFolderIds || []).join(", ");
+  fields.googleDriveRedirectUri.value = `${window.location.origin}/settings/drive`;
   state.clickup.selectedListIds = new Set(state.clickup.config.listIds || []);
+  state.operatingModel.areas = connection.data.operatingModel.areas || [];
 
   if (state.clickup.configured) {
     showResult("ClickUp settings are saved. Open Settings to refresh the saved structure.");
   }
 
   renderConnectionState();
+  renderGoogleDriveFiles();
+  renderOperatingMap();
   renderTree();
   setClickUpEnabled(true);
+  setGoogleDriveEnabled(true);
 }
 
 async function loadConnection() {
   const connection = await api("/v1/connection");
   setConnected(connection);
-  await loadTasks();
+  await Promise.all([
+    loadOperatingModel(),
+    loadGoogleDriveFiles(),
+    loadTasks()
+  ]);
 }
 
 function renderWorkspaces(workspaces, selectedId = "") {
@@ -616,8 +984,24 @@ logoutButton.addEventListener("click", () => {
   state.clickup.workspaces = [];
   state.clickup.spaces = [];
   state.clickup.selectedListIds = new Set();
+  state.googleDrive.configured = false;
+  state.googleDrive.active = false;
+  state.googleDrive.config = {};
+  state.googleDrive.files = [];
+  state.operatingModel = {
+    areas: [],
+    externalMappings: [],
+    externalFields: [],
+    storageLocations: [],
+    knowledgeRoots: [],
+    automationDefinitions: []
+  };
+  state.databaseTables = new Map();
+  state.selectedAreaKey = "";
   state.tasks = [];
   renderTasks();
+  renderGoogleDriveFiles();
+  renderOperatingMap();
   resultPanel.hidden = true;
   navigate("/auth/login", { replace: true });
 });
@@ -776,6 +1160,110 @@ syncButton.addEventListener("click", async () => {
   }
 });
 
+fields.googleDriveActive.addEventListener("change", () => {
+  setGoogleDriveEnabled(isSignedIn());
+});
+
+googleDriveAuthUrlButton.addEventListener("click", async () => {
+  setBusy(true);
+  try {
+    const response = await api("/v1/integration-settings/google_drive/oauth/authorize-url", {
+      method: "POST",
+      body: JSON.stringify({
+        redirectUri: fields.googleDriveRedirectUri.value,
+        state: state.workspace?.id || "companycore"
+      })
+    });
+    googleDriveAuthLink.href = response.data.authorizationUrl;
+    googleDriveAuthLink.hidden = false;
+    showResult("Google Drive OAuth URL created. Open Google consent, then paste the authorization code here.");
+  } catch (error) {
+    showResult(friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+});
+
+googleDriveExchangeButton.addEventListener("click", async () => {
+  setBusy(true);
+  try {
+    const code = fields.googleDriveCode.value.trim();
+    if (!code) {
+      throw new Error("Paste the Google authorization code first.");
+    }
+    const folderIds = parseIdList(fields.googleDriveFolderIds.value);
+    await api("/v1/integration-settings/google_drive/oauth/exchange", {
+      method: "POST",
+      body: JSON.stringify({
+        code,
+        redirectUri: fields.googleDriveRedirectUri.value,
+        active: fields.googleDriveActive.checked,
+        config: {
+          selectedFolderIds: folderIds,
+          rootFolderIds: folderIds,
+          importMode: fields.googleDriveImportMode.value || "merge",
+          syncMode: "two_way"
+        }
+      })
+    });
+    fields.googleDriveCode.value = "";
+    await loadConnection();
+    showResult("Google Drive OAuth connection saved. Import folders to fill CompanyCore with Drive metadata.");
+  } catch (error) {
+    showResult(friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+});
+
+googleDriveImportButton.addEventListener("click", async () => {
+  setBusy(true);
+  try {
+    const folderIds = parseIdList(fields.googleDriveFolderIds.value);
+    const result = await api("/v1/integration-settings/google_drive/import", {
+      method: "POST",
+      body: JSON.stringify({
+        folderIds: folderIds.length > 0 ? folderIds : undefined,
+        importMode: fields.googleDriveImportMode.value || "merge"
+      })
+    });
+    await loadConnection();
+    showResult("Google Drive import finished.", "success", result.data);
+  } catch (error) {
+    showResult(friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+});
+
+googleDriveReconcileButton.addEventListener("click", async () => {
+  setBusy(true);
+  try {
+    const result = await api("/v1/integration-settings/google_drive/changes/reconcile", {
+      method: "POST",
+      body: JSON.stringify({})
+    });
+    await loadConnection();
+    showResult("Google Drive changes reconciled.", "success", result.data);
+  } catch (error) {
+    showResult(friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+});
+
+refreshDriveFilesButton.addEventListener("click", async () => {
+  setBusy(true);
+  try {
+    await loadGoogleDriveFiles();
+    showResult("Google Drive files refreshed.");
+  } catch (error) {
+    showResult(friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+});
+
 renderRoute();
 
 if (state.ownerToken) {
@@ -789,4 +1277,7 @@ if (state.ownerToken) {
   });
 } else {
   setClickUpEnabled(false);
+  setGoogleDriveEnabled(false);
+  renderOperatingMap();
+  renderGoogleDriveFiles();
 }
