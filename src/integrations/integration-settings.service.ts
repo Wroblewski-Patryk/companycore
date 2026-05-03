@@ -11,6 +11,7 @@ export type ClickUpIntegrationConfig = {
   folderIds?: string[];
   listIds?: string[];
   syncMode?: "pull";
+  importMode?: "merge" | "skip_existing" | "replace_selected_lists" | "inspect_only";
 };
 
 export async function getIntegrationSettingForWorkspace(

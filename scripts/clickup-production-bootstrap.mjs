@@ -14,12 +14,24 @@ if (missing.length > 0) {
 }
 
 const baseUrl = process.env.COMPANYCORE_BASE_URL.replace(/\/+$/, "");
+const supportedImportModes = new Set([
+  "merge",
+  "skip_existing",
+  "replace_selected_lists",
+  "inspect_only"
+]);
+const importMode = process.env.CLICKUP_IMPORT_MODE || "merge";
 const listIds = process.env.CLICKUP_LIST_IDS.split(",")
   .map((value) => value.trim())
   .filter(Boolean);
 
 if (listIds.length === 0) {
   console.error("CLICKUP_LIST_IDS must contain at least one ClickUp list ID.");
+  process.exit(1);
+}
+
+if (!supportedImportModes.has(importMode)) {
+  console.error("CLICKUP_IMPORT_MODE must be one of: merge, skip_existing, replace_selected_lists, inspect_only.");
   process.exit(1);
 }
 
@@ -63,7 +75,8 @@ const settings = await request("/v1/integration-settings/clickup", {
     config: {
       teamId: process.env.CLICKUP_TEAM_ID,
       listIds,
-      syncMode: "pull"
+      syncMode: "pull",
+      importMode
     },
     active: true
   })
@@ -78,15 +91,19 @@ console.log("Running native ClickUp pull sync...");
 
 const sync = await request("/v1/tasks/sync/clickup/native", {
   method: "POST",
-  body: "{}"
+  body: JSON.stringify({ importMode })
 });
 
 console.log("ClickUp sync complete.");
 console.log(JSON.stringify({
   provider: sync.data.provider,
   workspaceId: sync.data.workspaceId,
+  importMode: sync.data.importMode,
   itemCount: sync.data.itemCount,
   createdCount: sync.data.createdCount,
   updatedCount: sync.data.updatedCount,
-  skippedCount: sync.data.skippedCount
+  skippedCount: sync.data.skippedCount,
+  deletedCount: sync.data.deletedCount,
+  wouldCreateCount: sync.data.wouldCreateCount,
+  wouldUpdateCount: sync.data.wouldUpdateCount
 }, null, 2));

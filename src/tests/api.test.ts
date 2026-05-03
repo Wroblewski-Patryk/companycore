@@ -584,7 +584,8 @@ test("CompanyCore v1 protected API flow", async () => {
       config: {
         teamId: "team-1",
         listIds: ["list-1"],
-        syncMode: "pull"
+        syncMode: "pull",
+        importMode: "merge"
       }
     })
   });
@@ -855,11 +856,26 @@ test("CompanyCore v1 protected API flow", async () => {
   try {
     const sync = await request("/tasks/sync/clickup/native", {
       method: "POST",
-      headers: authA
+      headers: authA,
+      body: JSON.stringify({
+        importMode: "merge"
+      })
     });
     assert.equal(sync.status, 200);
-    assert.equal((sync.body as { data: { itemCount: number; createdCount: number } }).data.itemCount, 1);
-    assert.equal((sync.body as { data: { itemCount: number; createdCount: number } }).data.createdCount, 1);
+    const syncBody = sync.body as {
+      data: {
+        importMode: string;
+        itemCount: number;
+        createdCount: number;
+        updatedCount: number;
+        deletedCount: number;
+      };
+    };
+    assert.equal(syncBody.data.importMode, "merge");
+    assert.equal(syncBody.data.itemCount, 1);
+    assert.equal(syncBody.data.createdCount, 1);
+    assert.equal(syncBody.data.updatedCount, 0);
+    assert.equal(syncBody.data.deletedCount, 0);
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -878,6 +894,203 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(importedTask?.priority, "high");
   assert.equal(importedTask?.taskList?.externalId, "list-1");
   assert.equal(importedTask?.taskList?.name, "Jarvis");
+
+  globalThis.fetch = (async () => new Response(JSON.stringify({
+    tasks: [
+      {
+        id: "clickup-task-1",
+        name: "Should not overwrite in skip mode",
+        markdown_description: "Existing task should remain unchanged",
+        status: { status: "complete", type: "closed" },
+        priority: { priority: "urgent" },
+        list: { id: "list-1" }
+      },
+      {
+        id: "clickup-task-2",
+        name: "Only new ClickUp task",
+        markdown_description: "Created by skip_existing mode",
+        status: { status: "to do", type: "open" },
+        priority: { priority: "normal" },
+        list: { id: "list-1" }
+      }
+    ],
+    last_page: true
+  }), { status: 200 })) as typeof fetch;
+
+  try {
+    const skipExistingSync = await request("/tasks/sync/clickup/native", {
+      method: "POST",
+      headers: authA,
+      body: JSON.stringify({
+        importMode: "skip_existing"
+      })
+    });
+    assert.equal(skipExistingSync.status, 200);
+    const skipExistingBody = skipExistingSync.body as {
+      data: { importMode: string; itemCount: number; createdCount: number; updatedCount: number; skippedCount: number };
+    };
+    assert.equal(skipExistingBody.data.importMode, "skip_existing");
+    assert.equal(skipExistingBody.data.itemCount, 2);
+    assert.equal(skipExistingBody.data.createdCount, 1);
+    assert.equal(skipExistingBody.data.updatedCount, 0);
+    assert.equal(skipExistingBody.data.skippedCount, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+
+  const unchangedImportedTask = await prisma.task.findUnique({
+    where: {
+      workspaceId_source_externalId: {
+        workspaceId: ownerA.workspace.id,
+        source: "clickup",
+        externalId: "clickup-task-1"
+      }
+    }
+  });
+  assert.equal(unchangedImportedTask?.title, "Imported ClickUp task");
+  assert.equal(unchangedImportedTask?.priority, "high");
+
+  const secondImportedTask = await prisma.task.findUnique({
+    where: {
+      workspaceId_source_externalId: {
+        workspaceId: ownerA.workspace.id,
+        source: "clickup",
+        externalId: "clickup-task-2"
+      }
+    }
+  });
+  assert.equal(secondImportedTask?.title, "Only new ClickUp task");
+  assert.equal(secondImportedTask?.priority, "normal");
+
+  globalThis.fetch = (async () => new Response(JSON.stringify({
+    tasks: [
+      {
+        id: "clickup-task-2",
+        name: "Would update but inspect only",
+        markdown_description: "No write should happen",
+        status: { status: "complete", type: "closed" },
+        priority: { priority: "urgent" },
+        list: { id: "list-1" }
+      },
+      {
+        id: "clickup-task-3",
+        name: "Would create but inspect only",
+        markdown_description: "No write should happen",
+        status: { status: "to do", type: "open" },
+        priority: { priority: "low" },
+        list: { id: "list-1" }
+      }
+    ],
+    last_page: true
+  }), { status: 200 })) as typeof fetch;
+
+  try {
+    const inspectOnlySync = await request("/tasks/sync/clickup/native", {
+      method: "POST",
+      headers: authA,
+      body: JSON.stringify({
+        importMode: "inspect_only"
+      })
+    });
+    assert.equal(inspectOnlySync.status, 200);
+    const inspectOnlyBody = inspectOnlySync.body as {
+      data: {
+        importMode: string;
+        itemCount: number;
+        createdCount: number;
+        updatedCount: number;
+        skippedCount: number;
+        deletedCount: number;
+        wouldCreateCount: number;
+        wouldUpdateCount: number;
+      };
+    };
+    assert.equal(inspectOnlyBody.data.importMode, "inspect_only");
+    assert.equal(inspectOnlyBody.data.itemCount, 2);
+    assert.equal(inspectOnlyBody.data.createdCount, 0);
+    assert.equal(inspectOnlyBody.data.updatedCount, 0);
+    assert.equal(inspectOnlyBody.data.skippedCount, 2);
+    assert.equal(inspectOnlyBody.data.deletedCount, 0);
+    assert.equal(inspectOnlyBody.data.wouldCreateCount, 1);
+    assert.equal(inspectOnlyBody.data.wouldUpdateCount, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+
+  const inspectedOnlyTask = await prisma.task.findUnique({
+    where: {
+      workspaceId_source_externalId: {
+        workspaceId: ownerA.workspace.id,
+        source: "clickup",
+        externalId: "clickup-task-3"
+      }
+    }
+  });
+  assert.equal(inspectedOnlyTask, null);
+
+  globalThis.fetch = (async () => new Response(JSON.stringify({
+    tasks: [
+      {
+        id: "clickup-task-1",
+        name: "Fresh replacement ClickUp task",
+        markdown_description: "Recreated by replace_selected_lists mode",
+        status: { status: "to do", type: "open" },
+        priority: { priority: "urgent" },
+        list: { id: "list-1" }
+      }
+    ],
+    last_page: true
+  }), { status: 200 })) as typeof fetch;
+
+  try {
+    const replaceSync = await request("/tasks/sync/clickup/native", {
+      method: "POST",
+      headers: authA,
+      body: JSON.stringify({
+        importMode: "replace_selected_lists"
+      })
+    });
+    assert.equal(replaceSync.status, 200);
+    const replaceBody = replaceSync.body as {
+      data: { importMode: string; itemCount: number; createdCount: number; updatedCount: number; deletedCount: number };
+    };
+    assert.equal(replaceBody.data.importMode, "replace_selected_lists");
+    assert.equal(replaceBody.data.itemCount, 1);
+    assert.equal(replaceBody.data.createdCount, 1);
+    assert.equal(replaceBody.data.updatedCount, 0);
+    assert.equal(replaceBody.data.deletedCount, 2);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+
+  const replacedTask = await prisma.task.findUnique({
+    where: {
+      workspaceId_source_externalId: {
+        workspaceId: ownerA.workspace.id,
+        source: "clickup",
+        externalId: "clickup-task-1"
+      }
+    }
+  });
+  assert.equal(replacedTask?.title, "Fresh replacement ClickUp task");
+  assert.equal(replacedTask?.priority, "urgent");
+
+  const removedClickUpTask = await prisma.task.findUnique({
+    where: {
+      workspaceId_source_externalId: {
+        workspaceId: ownerA.workspace.id,
+        source: "clickup",
+        externalId: "clickup-task-2"
+      }
+    }
+  });
+  assert.equal(removedClickUpTask, null);
+
+  const manualTaskAfterReplace = await prisma.task.findUnique({
+    where: { id: taskId }
+  });
+  assert.equal(manualTaskAfterReplace?.title, "Workspace A task");
+
   const eventsB = await request("/events", { headers: authB });
   assert.equal(events.status, 200);
   assert.equal(eventsB.status, 200);

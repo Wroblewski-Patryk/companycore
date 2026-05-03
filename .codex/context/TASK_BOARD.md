@@ -81,3 +81,4 @@ Paperclip application-side adapter work tracked in
 - CCV1-034C Registry-Backed Table API Contract.
 - CCV1-034D Storage and Knowledge Roots.
 - CCV1-034E Automation Scope Registry.
+- CCV1-035 ClickUp first-run import policy and launch audit.

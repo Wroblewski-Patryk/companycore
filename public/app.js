@@ -56,7 +56,8 @@ const fields = {
   registerPassword: document.querySelector("#registerPassword"),
   workspaceName: document.querySelector("#workspaceName"),
   active: document.querySelector("#active"),
-  token: document.querySelector("#token")
+  token: document.querySelector("#token"),
+  importMode: document.querySelector("#importMode")
 };
 
 function normalizedPath(pathname = window.location.pathname) {
@@ -158,7 +159,10 @@ function showResult(message, tone = "success", sync = null) {
     ["Items", sync.itemCount],
     ["Created", sync.createdCount],
     ["Updated", sync.updatedCount],
-    ["Skipped", sync.skippedCount]
+    ["Skipped", sync.skippedCount],
+    ["Deleted", sync.deletedCount],
+    ["Would create", sync.wouldCreateCount],
+    ["Would update", sync.wouldUpdateCount]
   ];
 
   for (const [label, value] of items) {
@@ -273,6 +277,7 @@ function setConnected(connection) {
   state.clickup.active = Boolean(connection.data.integrations.clickup.active);
   state.clickup.config = connection.data.integrations.clickup.config || {};
   fields.active.checked = connection.data.integrations.clickup.active ?? !state.clickup.configured;
+  fields.importMode.value = state.clickup.config.importMode || "merge";
   state.clickup.selectedListIds = new Set(state.clickup.config.listIds || []);
 
   if (state.clickup.configured) {
@@ -440,7 +445,8 @@ function selectedConfig() {
     spaceIds: [...new Set(selectedLists.map((list) => list.spaceId))],
     folderIds: [...new Set(selectedLists.map((list) => list.folderId).filter(Boolean))],
     listIds: selectedLists.map((list) => list.id),
-    syncMode: "pull"
+    syncMode: "pull",
+    importMode: fields.importMode.value || "merge"
   };
 }
 
@@ -613,7 +619,9 @@ syncButton.addEventListener("click", async () => {
     await saveSettings();
     const sync = await api("/v1/tasks/sync/clickup/native", {
       method: "POST",
-      body: "{}"
+      body: JSON.stringify({
+        importMode: fields.importMode.value || "merge"
+      })
     });
     await loadConnection();
     showResult("ClickUp connection saved and sync completed.", "success", sync.data);

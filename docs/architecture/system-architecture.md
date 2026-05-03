@@ -151,6 +151,7 @@ The ClickUp adapter should establish the pattern for future integrations:
 - sync service
 - safe provider error mapper
 - idempotent persistence using `(workspace_id, source, external_id)`
+- explicit import policy for existing records before writes run
 - event emission and observable sync results
 
 Provider adapters must be designed from current vendor documentation and
@@ -160,6 +161,13 @@ mapping must preserve the `Team/Workspace -> Space -> Folder -> List -> Task`
 hierarchy, Custom Field metadata and values, View parent scope, per-token rate
 limits, and webhook HMAC signature requirements before enabling write-back or
 continuous sync.
+
+For first-run and manually repeated imports, the adapter must support a
+workspace-visible import policy. The approved ClickUp modes are `merge`,
+`skip_existing`, `replace_selected_lists`, and `inspect_only`. Destructive
+provider cleanup must be scoped to provider-owned records only, for example
+`source = clickup` tasks under selected ClickUp Lists, and must never delete
+native/manual CompanyCore records.
 
 n8n remains optional orchestration for workflows better kept outside the
 backend. It is not the required primary ClickUp path in v1.

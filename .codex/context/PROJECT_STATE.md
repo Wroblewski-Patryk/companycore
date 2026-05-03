@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-05-02
+Last updated: 2026-05-03
 
 ## Product Snapshot
 - Name: LuckySparrow Company Core
@@ -23,6 +23,11 @@ Last updated: 2026-05-02
   documentation before mapping or implementation. For ClickUp this includes
   hierarchy terminology, Custom Fields, Views, rate limits, pagination,
   webhook signatures, and permissions.
+- 2026-05-03: ClickUp imports must expose an explicit existing-record policy
+  before writing. Approved v1 modes are `merge`, `skip_existing`,
+  `replace_selected_lists`, and `inspect_only`; destructive cleanup is limited
+  to `source = clickup` records in the selected ClickUp List scope and must not
+  delete native/manual CompanyCore records.
 - 2026-05-02: PostgreSQL is the source of truth.
 - 2026-05-02: API is the only supported access layer.
 - 2026-05-02: CompanyCore owns the first native integration adapter:
@@ -80,10 +85,10 @@ Last updated: 2026-05-02
   Postgres volume.
 
 ## Current Focus
-- Main active objective: complete protected production smoke and prepare the
-  next v1 database/API coverage slice.
-- Top blockers: production owner/API key plus ClickUp settings are needed for
-  protected smoke; GitHub repository webhook setup needs an authenticated
+- Main active objective: complete the first real ClickUp owner import in
+  production, then decide continuous sync strategy.
+- Top blockers: a real ClickUp token/list selection is needed for first
+  production import; GitHub repository webhook setup needs an authenticated
   GitHub session or token with webhook administration permissions.
 - Success criteria for this phase: canonical docs, workspace/auth model,
   task board, planning queue, deployment domains, migration strategy, event
@@ -91,13 +96,13 @@ Last updated: 2026-05-02
   and deployment smoke evidence are aligned.
 
 ## Autonomous Iteration State
-- Current iteration: CCV1-034B2/034C/034D/034E registry completion.
+- Current iteration: CCV1-035 ClickUp first-run import policy and launch audit.
 - Current operation mode: BUILDER
-- Last completed iteration: CCV1-034B2/034C/034D/034E registry completion.
-- Last completed task: added dedicated operating model APIs, ClickUp Custom
-  Field and View metadata persistence, workspace-scoped storage and knowledge
-  root creation, and automation definition creation with fail-closed scope
-  validation.
+- Last completed iteration: CCV1-035 ClickUp first-run import policy and
+  launch audit.
+- Last completed task: added explicit ClickUp import modes for merge,
+  skip-existing, replace-selected-lists, and inspect-only; wired the modes
+  through owner console, API, production bootstrap, docs, and regression tests.
 - Next required mode: BUILDER for continuous ClickUp update strategy unless
   priority changes.
 
@@ -319,6 +324,14 @@ Last updated: 2026-05-02
   definitions. Scope writes validate `areaId`, `folderId`, and `tableId`
   inside the active workspace and fail closed for foreign IDs. `npm test`
   passed against disposable PostgreSQL on `localhost:55432`.
+- 2026-05-03: Completed CCV1-035 by hardening the first-run ClickUp import
+  path. Native sync now supports `merge`, `skip_existing`,
+  `replace_selected_lists`, and `inspect_only`; the owner console and
+  production bootstrap expose the same policy; sync responses include
+  `deletedCount`, `wouldCreateCount`, and `wouldUpdateCount`; and regression
+  tests prove priorities/list placement, skip-existing behavior, inspect-only
+  no-write behavior, and replace-selected-list deletion limited to ClickUp-owned
+  tasks.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

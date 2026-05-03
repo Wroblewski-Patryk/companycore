@@ -236,7 +236,8 @@ ClickUp configuration payload:
     "spaceIds": ["clickup-space-id"],
     "folderIds": ["clickup-folder-id"],
     "listIds": ["clickup-list-id"],
-    "syncMode": "pull"
+    "syncMode": "pull",
+    "importMode": "merge"
   },
   "active": true
 }
@@ -251,7 +252,8 @@ Safe responses include only metadata and non-secret config:
     "workspaceId": "uuid",
     "config": {
       "listIds": ["clickup-list-id"],
-      "syncMode": "pull"
+      "syncMode": "pull",
+      "importMode": "merge"
     },
     "active": true,
     "secretConfigured": true
@@ -642,7 +644,29 @@ external_id)`.
 `POST /tasks/sync/clickup/native` triggers the native pull-only ClickUp adapter
 for the authenticated workspace. It reads `teamId` and `listIds` from
 `/integration-settings/clickup`, calls ClickUp using the encrypted workspace
-token, upserts tasks, and emits sync events.
+token, applies the selected import mode, and emits sync events. The request
+body may override the saved import mode for a single run:
+
+```json
+{
+  "importMode": "merge"
+}
+```
+
+Supported import modes:
+
+- `merge`: default safe mode. Existing native CompanyCore records are left
+  untouched. ClickUp records are upserted by `(workspace_id, source,
+  external_id)`, so existing ClickUp tasks are updated and new ClickUp tasks are
+  added.
+- `skip_existing`: existing ClickUp tasks are left unchanged and only new
+  ClickUp tasks are added.
+- `replace_selected_lists`: after ClickUp fetch succeeds, existing
+  `source = clickup` tasks under the selected ClickUp Lists are deleted and the
+  fetched records are inserted fresh. Native/manual CompanyCore tasks are not
+  deleted.
+- `inspect_only`: fetches ClickUp and reports what would be created or updated
+  without writing or deleting any task records.
 
 Imported ClickUp task fields currently mapped:
 
@@ -665,10 +689,14 @@ Safe native sync response:
   "data": {
     "provider": "clickup",
     "workspaceId": "uuid",
+    "importMode": "merge",
     "itemCount": 12,
     "createdCount": 4,
     "updatedCount": 8,
-    "skippedCount": 0
+    "skippedCount": 0,
+    "deletedCount": 0,
+    "wouldCreateCount": 0,
+    "wouldUpdateCount": 0
   }
 }
 ```

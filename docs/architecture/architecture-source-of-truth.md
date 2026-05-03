@@ -93,6 +93,10 @@ The approved v1 direction is:
 - first-party business tables should be assigned to one of 12 approved
   operating areas, while users, memberships, API keys, integration settings,
   provider mappings, and platform metadata remain system tables
+- provider imports must expose an explicit existing-record policy before
+  writing; ClickUp supports `merge`, `skip_existing`,
+  `replace_selected_lists`, and `inspect_only`, with deletes limited to
+  provider-owned records in the selected scope
 - n8n remains optional orchestration, not the required primary ClickUp path
 - schema changes should move from `prisma db push` to controlled migrations
 - tests and smoke checks must prove workspace scoping and integration sync

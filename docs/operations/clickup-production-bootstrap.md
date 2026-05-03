@@ -20,11 +20,26 @@ Set these only for the bootstrap command:
 - `CLICKUP_API_TOKEN`: ClickUp token from the owner's ClickUp account
 - `CLICKUP_TEAM_ID`: ClickUp team/workspace ID to sync from
 - `CLICKUP_LIST_IDS`: comma-separated ClickUp list IDs
+- `CLICKUP_IMPORT_MODE`: optional import policy; defaults to `merge`
 
 Do not store raw ClickUp tokens in source control, docs, logs, or chat
 transcripts. If the values are entered through Coolify, treat them as temporary
 operator secrets for the bootstrap run unless a separate scheduled job is
 approved.
+
+## Import Mode
+
+Choose the import mode before the first real pull:
+
+- `merge`: default safe mode. Leave native CompanyCore records untouched, update
+  existing ClickUp tasks, and add new ClickUp tasks.
+- `skip_existing`: leave existing ClickUp tasks untouched and add only new
+  ClickUp tasks.
+- `replace_selected_lists`: after ClickUp fetch succeeds, delete only existing
+  `source = clickup` tasks under the selected Lists and then insert the fetched
+  ClickUp tasks fresh. Native/manual CompanyCore tasks are preserved.
+- `inspect_only`: call ClickUp and report what would be created or updated
+  without writing or deleting task records.
 
 ## Command
 
@@ -49,10 +64,14 @@ Successful output confirms the workspace name and prints:
 - `createdCount`
 - `updatedCount`
 - `skippedCount`
+- `deletedCount`
+- `wouldCreateCount`
+- `wouldUpdateCount`
 
-After sync, Jarvis can read the imported ClickUp tasks through CompanyCore once
-the Jarvis CompanyCore connector is deployed and configured with its own
-CompanyCore service key.
+After sync, Jarvis can read the imported ClickUp tasks through CompanyCore when
+the Jarvis CompanyCore connector performs its own read/sync with its dedicated
+CompanyCore service key. `inspect_only` intentionally leaves Jarvis-visible
+task data unchanged.
 
 ## Current Limitations
 

@@ -185,6 +185,16 @@
             <div class="tree" id="listTree" aria-live="polite"></div>
           </div>
 
+          <label>
+            Import mode
+            <select id="importMode">
+              <option value="merge">Merge and update</option>
+              <option value="skip_existing">Only add new</option>
+              <option value="replace_selected_lists">Replace selected ClickUp Lists</option>
+              <option value="inspect_only">Inspect only</option>
+            </select>
+          </label>
+
           <div class="actions">
             <button type="button" class="secondary" id="saveButton">Save connection</button>
             <button type="button" id="syncButton">Save and sync</button>

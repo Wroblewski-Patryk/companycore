@@ -17,7 +17,8 @@ const clickUpConfigSchema = z.object({
   spaceIds: z.array(z.string().min(1)).optional(),
   folderIds: z.array(z.string().min(1)).optional(),
   listIds: z.array(z.string().min(1)).optional(),
-  syncMode: z.literal("pull").optional()
+  syncMode: z.literal("pull").optional(),
+  importMode: z.enum(["merge", "skip_existing", "replace_selected_lists", "inspect_only"]).optional()
 }).strict();
 
 const upsertIntegrationSettingSchema = z.object({

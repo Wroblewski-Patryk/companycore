@@ -22,6 +22,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] CCV1-034C Registry-Backed Table API Contract
 - [x] CCV1-034D Storage And Knowledge Roots
 - [x] CCV1-034E Automation Scope Registry
+- [x] CCV1-035 ClickUp First-Run Import Policy And Launch Audit
 
 ## NEXT
 
@@ -43,7 +44,8 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] 8. CCV1-034B2 ClickUp Views And Custom Fields Persistence
 - [x] 9. CCV1-034D Storage And Knowledge Roots
 - [x] 10. CCV1-034E Automation Scope Registry
-- [ ] 11. Continuous ClickUp update strategy decision
+- [x] 11. CCV1-035 ClickUp First-Run Import Policy And Launch Audit
+- [ ] 12. Continuous ClickUp update strategy decision
 
 
 ## GROUP QUEUE

@@ -10,10 +10,27 @@ import { findClickUpListTable } from "../../operating-model/clickup-structure";
 type SyncResult = {
   provider: "clickup";
   workspaceId: string;
+  importMode: ClickUpImportMode;
   itemCount: number;
   createdCount: number;
   updatedCount: number;
   skippedCount: number;
+  deletedCount: number;
+  wouldCreateCount: number;
+  wouldUpdateCount: number;
+};
+
+export const clickUpImportModes = [
+  "merge",
+  "skip_existing",
+  "replace_selected_lists",
+  "inspect_only"
+] as const;
+
+export type ClickUpImportMode = typeof clickUpImportModes[number];
+
+export type ClickUpSyncOptions = {
+  importMode?: ClickUpImportMode;
 };
 
 async function findOrCreateClickUpTaskList(workspaceId: string, listId?: string | null) {
@@ -48,6 +65,13 @@ async function findOrCreateClickUpTaskList(workspaceId: string, listId?: string 
 }
 
 export async function syncClickUpTasksForWorkspace(workspaceId: string): Promise<SyncResult> {
+  return syncClickUpTasksForWorkspaceWithOptions(workspaceId);
+}
+
+export async function syncClickUpTasksForWorkspaceWithOptions(
+  workspaceId: string,
+  options: ClickUpSyncOptions = {}
+): Promise<SyncResult> {
   const correlationId = randomUUID();
   const settings = await getClickUpSettingsForWorkspace(workspaceId);
 
@@ -61,6 +85,7 @@ export async function syncClickUpTasksForWorkspace(workspaceId: string): Promise
 
   const listIds = settings.config.listIds ?? [];
   const teamId = settings.config.teamId;
+  const importMode = options.importMode ?? settings.config.importMode ?? "merge";
 
   if (!teamId || listIds.length === 0) {
     throw new IntegrationError(
@@ -79,6 +104,7 @@ export async function syncClickUpTasksForWorkspace(workspaceId: string): Promise
       workspaceId,
       correlationId,
       operation: "sync_tasks",
+      importMode,
       listCount: listIds.length
     }
   });
@@ -89,6 +115,33 @@ export async function syncClickUpTasksForWorkspace(workspaceId: string): Promise
     let createdCount = 0;
     let updatedCount = 0;
     let skippedCount = 0;
+    let deletedCount = 0;
+    let wouldCreateCount = 0;
+    let wouldUpdateCount = 0;
+
+    if (importMode === "replace_selected_lists") {
+      const selectedTaskLists = await prisma.taskList.findMany({
+        where: {
+          workspaceId,
+          source: "clickup",
+          externalId: { in: listIds }
+        },
+        select: { id: true }
+      });
+
+      if (selectedTaskLists.length > 0) {
+        const deleteResult = await prisma.task.deleteMany({
+          where: {
+            workspaceId,
+            source: "clickup",
+            taskListId: {
+              in: selectedTaskLists.map((taskList) => taskList.id)
+            }
+          }
+        });
+        deletedCount = deleteResult.count;
+      }
+    }
 
     for (const clickUpTask of clickUpTasks) {
       if (!clickUpTask.id || !clickUpTask.name) {
@@ -96,11 +149,6 @@ export async function syncClickUpTasksForWorkspace(workspaceId: string): Promise
         continue;
       }
 
-      const data = mapClickUpTaskToCompanyCoreTask(clickUpTask, workspaceId);
-      const taskList = await findOrCreateClickUpTaskList(workspaceId, clickUpTask.list?.id);
-      if (taskList) {
-        data.taskListId = taskList.id;
-      }
       const existing = await prisma.task.findUnique({
         where: {
           workspaceId_source_externalId: {
@@ -110,6 +158,27 @@ export async function syncClickUpTasksForWorkspace(workspaceId: string): Promise
           }
         }
       });
+
+      if (importMode === "inspect_only") {
+        if (existing) {
+          wouldUpdateCount += 1;
+        } else {
+          wouldCreateCount += 1;
+        }
+        skippedCount += 1;
+        continue;
+      }
+
+      if (existing && importMode === "skip_existing") {
+        skippedCount += 1;
+        continue;
+      }
+
+      const data = mapClickUpTaskToCompanyCoreTask(clickUpTask, workspaceId);
+      const taskList = await findOrCreateClickUpTaskList(workspaceId, clickUpTask.list?.id);
+      if (taskList) {
+        data.taskListId = taskList.id;
+      }
 
       const task = await prisma.task.upsert({
         where: {
@@ -155,20 +224,28 @@ export async function syncClickUpTasksForWorkspace(workspaceId: string): Promise
         workspaceId,
         correlationId,
         operation: "sync_tasks",
+        importMode,
         itemCount: clickUpTasks.length,
         createdCount,
         updatedCount,
-        skippedCount
+        skippedCount,
+        deletedCount,
+        wouldCreateCount,
+        wouldUpdateCount
       }
     });
 
     return {
       provider: "clickup",
       workspaceId,
+      importMode,
       itemCount: clickUpTasks.length,
       createdCount,
       updatedCount,
-      skippedCount
+      skippedCount,
+      deletedCount,
+      wouldCreateCount,
+      wouldUpdateCount
     };
   } catch (error) {
     const code = error instanceof IntegrationError ? error.code : "sync_failed";
@@ -182,6 +259,7 @@ export async function syncClickUpTasksForWorkspace(workspaceId: string): Promise
         workspaceId,
         correlationId,
         operation: "sync_tasks",
+        importMode,
         errorCode: code
       }
     });

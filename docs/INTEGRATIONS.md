@@ -70,6 +70,18 @@ Production operators can configure the workspace token and trigger the first
 pull through `npm run clickup:bootstrap`; see
 `docs/operations/clickup-production-bootstrap.md`.
 
+The task import policy is explicit per workspace and per sync run:
+
+- `merge` is the default. Native CompanyCore records stay untouched; ClickUp
+  tasks are upserted by `(workspace_id, source = clickup, external_id)`.
+- `skip_existing` leaves existing ClickUp tasks unchanged and adds only new
+  ClickUp tasks.
+- `replace_selected_lists` deletes only existing `source = clickup` tasks under
+  the selected ClickUp Lists after a successful provider fetch, then inserts
+  the fetched tasks fresh. Native/manual CompanyCore tasks are not deleted.
+- `inspect_only` performs a no-write provider fetch and reports the number of
+  tasks that would be created or updated.
+
 The owner web console discovers available ClickUp Workspaces and Lists before
 settings are saved:
 
@@ -120,6 +132,9 @@ Implemented now:
 - ClickUp Workspace and List Views are persisted as view container mappings.
 - Native ClickUp task sync preserves task priority and attaches imported tasks
   to a matching `task_lists` row by ClickUp List ID.
+- Native ClickUp task sync reports `deletedCount`, `wouldCreateCount`, and
+  `wouldUpdateCount` so first-run decisions are auditable before data is
+  changed.
 
 Official ClickUp docs that affected this contract:
 
@@ -172,8 +187,10 @@ different ClickUp accounts with overlapping IDs.
 
 Native sync should emit or record the following safe signals:
 
-- `sync_started`: provider, workspace ID, requested scope, correlation ID
-- `sync_succeeded`: provider, workspace ID, item counts, created/updated counts
+- `sync_started`: provider, workspace ID, requested scope, import mode,
+  correlation ID
+- `sync_succeeded`: provider, workspace ID, import mode, item counts,
+  created/updated/skipped/deleted counts, and inspect-only would-write counts
 - `sync_failed`: provider, workspace ID, safe error code, correlation ID
 - `task_synced_from_clickup`: per meaningful task upsert, linked to the task
 

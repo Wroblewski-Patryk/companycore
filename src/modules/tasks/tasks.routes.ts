@@ -3,7 +3,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../../db/prisma";
 import { IntegrationError } from "../../integrations/errors";
-import { syncClickUpTasksForWorkspace } from "../../integrations/clickup/clickup.sync";
+import { clickUpImportModes, syncClickUpTasksForWorkspaceWithOptions } from "../../integrations/clickup/clickup.sync";
 import { asyncHandler } from "../../middleware/async-handler";
 import { createEvent } from "../events/event.service";
 
@@ -38,6 +38,10 @@ const clickUpSyncSchema = z.object({
   taskListId: z.string().uuid().optional(),
   raw: z.record(z.unknown()).optional()
 });
+
+const nativeClickUpSyncSchema = z.object({
+  importMode: z.enum(clickUpImportModes).optional()
+}).strict();
 
 export const tasksRouter = Router();
 
@@ -165,7 +169,8 @@ tasksRouter.post("/sync/clickup", asyncHandler(async (req, res) => {
 
 tasksRouter.post("/sync/clickup/native", asyncHandler(async (req, res) => {
   try {
-    const result = await syncClickUpTasksForWorkspace(req.auth!.workspaceId);
+    const input = nativeClickUpSyncSchema.parse(req.body ?? {});
+    const result = await syncClickUpTasksForWorkspaceWithOptions(req.auth!.workspaceId, input);
     return res.json({ data: result });
   } catch (error) {
     if (error instanceof IntegrationError) {

@@ -244,6 +244,122 @@ provider mappings, storage roots, knowledge roots, and automation scopes.
 ### Priority
 P0
 
+## CCV1-035 ClickUp First-Run Import Policy And Launch Audit
+
+### Header
+- ID: CCV1-035
+- Title: ClickUp first-run import policy and launch audit
+- Task Type: feature
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder
+- Depends on: CCV1-034A, CCV1-034B, CCV1-034C, CCV1-034D, CCV1-034E
+- Priority: P0
+- Iteration: v1-035
+- Operation Mode: BUILDER
+
+### Description
+Before the owner enters a real ClickUp API token, make the first-run import
+behavior explicit and testable so CompanyCore can safely decide what happens
+when task records already exist.
+
+### Goal
+Provide an end-to-end ClickUp launch path where token setup, selected Lists,
+task priority/list mapping, import policy, production bootstrap, Jarvis-facing
+data availability, and regression tests are aligned.
+
+### Scope
+- `src/integrations/clickup/clickup.sync.ts`
+- `src/integrations/integration-settings.service.ts`
+- `src/modules/integration-settings/integration-settings.routes.ts`
+- `src/modules/tasks/tasks.routes.ts`
+- `public/index.html`
+- `public/app.js`
+- `scripts/clickup-production-bootstrap.mjs`
+- `.env.example`
+- `src/tests/api.test.ts`
+- `docs/API.md`
+- `docs/INTEGRATIONS.md`
+- `docs/architecture/system-architecture.md`
+- `docs/architecture/architecture-source-of-truth.md`
+- `docs/operations/clickup-production-bootstrap.md`
+- `.codex/context/PROJECT_STATE.md`
+- `.codex/context/TASK_BOARD.md`
+- `docs/planning/mvp-next-commits.md`
+- this task contract
+
+### Implementation Plan
+1. Audit the existing ClickUp sync path from saved token/config through native
+   sync and Jarvis-readable CompanyCore tables.
+2. Add explicit import modes for merge, skip-existing, replace-selected-lists,
+   and inspect-only.
+3. Wire the import mode through settings validation, native sync request body,
+   owner console, production bootstrap script, and safe sync response counts.
+4. Add regression tests for priority/list mapping and all existing-record
+   policies, including proof that replace-selected-lists preserves native
+   CompanyCore tasks.
+5. Update architecture, API, integration, operations, task board, project
+   state, and planning docs.
+6. Run local quality gates and commit the final scoped change.
+
+### Acceptance Criteria
+- [x] Owner setup can save a ClickUp token, team/list IDs, and import mode.
+- [x] Native sync defaults to `merge` and can be overridden per run.
+- [x] `merge` updates existing ClickUp tasks and adds new ClickUp tasks without
+  touching native/manual CompanyCore tasks.
+- [x] `skip_existing` leaves existing ClickUp tasks unchanged and adds only new
+  ClickUp tasks.
+- [x] `replace_selected_lists` deletes only `source = clickup` tasks under the
+  selected ClickUp Lists after a successful provider fetch.
+- [x] `inspect_only` fetches and reports would-create/would-update counts
+  without writing or deleting tasks.
+- [x] Imported ClickUp tasks preserve priority and land in the matching
+  CompanyCore task list.
+- [x] Production bootstrap exposes the same import policy and never prints raw
+  secrets.
+- [x] Architecture and API docs document the policy.
+- [x] `npm run build`, `npx prisma validate`, `git diff --check`, and
+  `npm test` pass.
+
+### Definition of Done
+- [x] Scope stayed inside the approved ClickUp first-run launch path.
+- [x] Existing architecture mechanisms were reused instead of adding a
+  parallel import system.
+- [x] No temporary bypass, fake data path, or mock-only behavior was shipped.
+- [x] Destructive behavior is fail-closed and provider-scoped.
+- [x] Documentation and canonical project state are updated.
+- [x] Validation evidence is recorded.
+
+### Result Report
+- Task summary: Added explicit ClickUp import policies for `merge`,
+  `skip_existing`, `replace_selected_lists`, and `inspect_only`; wired them
+  through workspace settings, native sync API, owner console, production
+  bootstrap, architecture/API/integration docs, and regression tests.
+- Files changed: `.env.example`, `public/app.js`, `public/index.html`,
+  `scripts/clickup-production-bootstrap.mjs`,
+  `src/integrations/clickup/clickup.sync.ts`,
+  `src/integrations/integration-settings.service.ts`,
+  `src/modules/integration-settings/integration-settings.routes.ts`,
+  `src/modules/tasks/tasks.routes.ts`, `src/tests/api.test.ts`,
+  `docs/API.md`, `docs/INTEGRATIONS.md`,
+  `docs/architecture/system-architecture.md`,
+  `docs/architecture/architecture-source-of-truth.md`,
+  `docs/operations/clickup-production-bootstrap.md`,
+  `.codex/context/PROJECT_STATE.md`, `.codex/context/TASK_BOARD.md`,
+  `docs/planning/mvp-next-commits.md`, and this task contract.
+- How tested: Ran `npm run build`, `npx prisma validate` with local
+  `DATABASE_URL`, `git diff --check`, and `npm test` against disposable
+  PostgreSQL on `localhost:55432`.
+- What is incomplete: Real ClickUp production token discovery/sync remains an
+  operator action. Continuous automatic updates still require the queued
+  scheduled-sync versus webhook-ingestion decision.
+- Next steps: Deploy this commit, enter the real ClickUp token in the owner
+  console, run `inspect_only` or `merge`, then decide continuous ClickUp update
+  strategy after the first production pull succeeds.
+
+### Priority
+P0
+
 ## CCV1-034B ClickUp Structure Persistence
 
 ### Header
