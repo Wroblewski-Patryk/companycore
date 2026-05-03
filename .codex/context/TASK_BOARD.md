@@ -3,7 +3,7 @@
 ## Ready
 
 No additional ready P0/P1 web console implementation task is queued after
-V2WEB-014.
+V2WEB-015.
 
 ## Blocked
 
@@ -146,3 +146,4 @@ V2WEB-014.
 - V2WEB-012 Pipeline Workbench Filters.
 - V2WEB-013 Operating Area Workbench Filters.
 - V2WEB-014 Integration Matrix Filters.
+- V2WEB-015 Google Drive Files Workbench Filters.

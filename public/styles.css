@@ -443,7 +443,8 @@ h4 {
 .task-filter-bar,
 .pipeline-filter-bar,
 .area-filter-bar,
-.integration-filter-bar {
+.integration-filter-bar,
+.drive-filter-bar {
   display: grid;
   grid-template-columns: minmax(220px, 1.4fr) repeat(3, minmax(150px, 0.75fr));
   gap: 12px;
@@ -468,7 +469,8 @@ h4 {
 .task-filter-bar label,
 .pipeline-filter-bar label,
 .area-filter-bar label,
-.integration-filter-bar label {
+.integration-filter-bar label,
+.drive-filter-bar label {
   margin: 0;
   color: var(--muted);
   font-size: 12px;
@@ -482,7 +484,9 @@ h4 {
 .area-filter-bar input,
 .area-filter-bar select,
 .integration-filter-bar input,
-.integration-filter-bar select {
+.integration-filter-bar select,
+.drive-filter-bar input,
+.drive-filter-bar select {
   margin-top: 6px;
 }
 
@@ -567,6 +571,10 @@ h4 {
 }
 
 .integration-filter-bar {
+  margin: 0 0 16px;
+}
+
+.drive-filter-bar {
   margin: 0 0 16px;
 }
 
@@ -1273,6 +1281,7 @@ button.compact,
   .pipeline-filter-bar,
   .area-filter-bar,
   .integration-filter-bar,
+  .drive-filter-bar,
   .module-launch-grid {
     grid-template-columns: 1fr;
   }

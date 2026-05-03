@@ -1,5 +1,60 @@
 # Web Console V2 Task Contracts
 
+## V2WEB-015 Google Drive Files Workbench Filters
+
+- Task Type: design/frontend
+- Current Stage: done
+- Deliverable For This Stage: searchable imported Drive file table backed by
+  implemented Google Drive metadata.
+- Goal: Make `/settings/drive` usable after importing many folders and files by
+  adding local filters without changing Google Drive backend contracts.
+- Scope:
+  - `public/index.html`
+  - `public/app.js`
+  - `public/styles.css`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+- Implementation Plan:
+  - Add search, kind, operating-area, and scan-status controls above the
+    imported Drive files table.
+  - Filter existing `/v1/google-drive/files` data client-side.
+  - Keep Drive folder assignment selectors in the filtered table rows.
+  - Update summary and empty states to distinguish no imported files from no
+    filter matches.
+  - Validate syntax, build, tests, local route rendering, and production smoke.
+- Acceptance Criteria:
+  - `/settings/drive` supports search across file name, kind, area, scan
+    status, and modified date.
+  - Kind, operating-area, and scan-status filters update the table without
+    reloading.
+  - Summary reflects filtered count versus total imported Drive items.
+  - Empty state explains when filters hide all imported Drive items.
+  - Existing folder assignment selectors still render in filtered rows.
+- Definition of Done:
+  - `node --check public/app.js`, `git diff --check`, `npm run build`, and
+    `npm test` pass.
+  - Browser smoke verifies search, kind filtering, scan filtering, filtered
+    empty state, and folder assignment selectors on desktop.
+  - Project state, task board, and next-commits docs are updated.
+- Result Report:
+  - Added Drive file search plus kind, operating-area, and scan-status filters
+    to `/settings/drive`.
+  - Filtered existing `/v1/google-drive/files` data client-side without
+    changing backend contracts.
+  - Updated Drive file summary to show filtered count versus total imported
+    Drive items.
+  - Added a filter-specific empty state when no imported Drive item matches the
+    current controls.
+  - Preserved folder assignment selectors in filtered table rows.
+  - Corrected the Google Drive panel `aria-disabled` state so signed-in filter
+    controls are accessible and browser-testable.
+  - `node --check public/app.js`, `git diff --check`, `npm run build`, and
+    `npm test` passed.
+  - Playwright smoke verified Drive search, folder filtering, scan filtering,
+    filtered empty state, and folder assignment selectors on desktop.
+
 ## V2WEB-014 Integration Matrix Filters
 
 - Task Type: design/frontend

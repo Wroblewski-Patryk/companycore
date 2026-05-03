@@ -51,6 +51,12 @@ const state = {
   integrationFilters: {
     search: "",
     type: ""
+  },
+  driveFilters: {
+    search: "",
+    kind: "",
+    area: "",
+    scan: ""
   }
 };
 
@@ -181,6 +187,10 @@ const googleDriveExchangeButton = document.querySelector("#googleDriveExchangeBu
 const googleDriveImportButton = document.querySelector("#googleDriveImportButton");
 const googleDriveReconcileButton = document.querySelector("#googleDriveReconcileButton");
 const refreshDriveFilesButton = document.querySelector("#refreshDriveFilesButton");
+const driveSearch = document.querySelector("#driveSearch");
+const driveKindFilter = document.querySelector("#driveKindFilter");
+const driveAreaFilter = document.querySelector("#driveAreaFilter");
+const driveScanFilter = document.querySelector("#driveScanFilter");
 const googleDriveFilesSummary = document.querySelector("#googleDriveFilesSummary");
 const googleDriveFilesBody = document.querySelector("#googleDriveFilesBody");
 
@@ -336,6 +346,7 @@ function setClickUpEnabled(isEnabled) {
 }
 
 function setGoogleDriveEnabled(isEnabled) {
+  googleDrivePanel.setAttribute("aria-disabled", String(!isEnabled));
   googleDrivePanel.querySelectorAll("input, button, select").forEach((control) => {
     control.disabled = !isEnabled;
   });
@@ -344,6 +355,10 @@ function setGoogleDriveEnabled(isEnabled) {
   googleDriveImportButton.disabled = !isEnabled || !state.googleDrive.configured;
   googleDriveReconcileButton.disabled = !isEnabled || !state.googleDrive.configured;
   refreshDriveFilesButton.disabled = !isEnabled;
+  driveSearch.disabled = !isEnabled;
+  driveKindFilter.disabled = !isEnabled;
+  driveAreaFilter.disabled = !isEnabled;
+  driveScanFilter.disabled = !isEnabled;
 }
 
 function showResult(message, tone = "success", sync = null) {
@@ -1575,6 +1590,8 @@ function renderCompactList(container, items, renderItem, emptyText) {
 function renderGoogleDriveFiles() {
   googleDriveFilesBody.innerHTML = "";
   const files = state.googleDrive.files;
+  const areasById = new Map(state.operatingModel.areas.map((area) => [area.id, area]));
+  syncDriveFilters(files, areasById);
 
   if (files.length === 0) {
     googleDriveFilesSummary.textContent = state.googleDrive.configured
@@ -1589,10 +1606,19 @@ function renderGoogleDriveFiles() {
   }
 
   const folderCount = files.filter((file) => file.isFolder).length;
-  googleDriveFilesSummary.textContent = `${files.length} Drive item${files.length === 1 ? "" : "s"} loaded, including ${folderCount} folder${folderCount === 1 ? "" : "s"}.`;
-  const areasById = new Map(state.operatingModel.areas.map((area) => [area.id, area]));
+  const filteredFiles = filteredDriveFiles(files, areasById);
+  googleDriveFilesSummary.textContent = `${filteredFiles.length} of ${files.length} Drive item${files.length === 1 ? "" : "s"} shown, including ${folderCount} folder${folderCount === 1 ? "" : "s"} imported.`;
 
-  for (const file of files.slice(0, 80)) {
+  if (filteredFiles.length === 0) {
+    const row = document.createElement("tr");
+    row.innerHTML = '<td colspan="5">No imported Drive files match the current filters.</td>';
+    googleDriveFilesBody.append(row);
+    renderIntegrationTaxonomy();
+    renderRelationshipCenter();
+    return;
+  }
+
+  for (const file of filteredFiles.slice(0, 80)) {
     const row = document.createElement("tr");
     const area = areasById.get(file.operatingAreaId);
     row.innerHTML = `
@@ -1614,6 +1640,65 @@ function renderGoogleDriveFiles() {
   renderIntegrationTaxonomy();
   renderRelationshipCenter();
   bindScopeEditors();
+}
+
+function syncDriveFilters(files, areasById) {
+  driveSearch.value = state.driveFilters.search;
+  driveKindFilter.value = state.driveFilters.kind;
+
+  const availableAreaIds = [...new Set(files.map((file) => file.operatingAreaId).filter(Boolean).map(String))];
+  const nextArea = availableAreaIds.includes(state.driveFilters.area) ? state.driveFilters.area : "";
+  driveAreaFilter.innerHTML = "";
+  const areaPlaceholder = document.createElement("option");
+  areaPlaceholder.value = "";
+  areaPlaceholder.textContent = "All areas";
+  driveAreaFilter.append(areaPlaceholder);
+  for (const areaId of availableAreaIds.sort((left, right) => areaLabel(areasById.get(left) || { name: left }).localeCompare(areaLabel(areasById.get(right) || { name: right })))) {
+    const option = document.createElement("option");
+    option.value = areaId;
+    option.textContent = areaLabel(areasById.get(areaId) || { name: areaId });
+    driveAreaFilter.append(option);
+  }
+  driveAreaFilter.value = nextArea;
+  state.driveFilters.area = nextArea;
+
+  const scanStates = [...new Set(files.map((file) => file.scanStatus).filter(Boolean).map(String))]
+    .sort((left, right) => left.localeCompare(right));
+  const nextScan = scanStates.includes(state.driveFilters.scan) ? state.driveFilters.scan : "";
+  driveScanFilter.innerHTML = "";
+  const scanPlaceholder = document.createElement("option");
+  scanPlaceholder.value = "";
+  scanPlaceholder.textContent = "All scan states";
+  driveScanFilter.append(scanPlaceholder);
+  for (const scan of scanStates) {
+    const option = document.createElement("option");
+    option.value = scan;
+    option.textContent = scan;
+    driveScanFilter.append(option);
+  }
+  driveScanFilter.value = nextScan;
+  state.driveFilters.scan = nextScan;
+}
+
+function filteredDriveFiles(files, areasById) {
+  const search = state.driveFilters.search.trim().toLowerCase();
+  return files.filter((file) => {
+    const kind = file.isFolder ? "folder" : "file";
+    const area = areasById.get(file.operatingAreaId);
+    const haystack = [
+      file.name,
+      kind,
+      file.mimeType,
+      file.scanStatus,
+      formatDate(file.modifiedTime),
+      area ? areaLabel(area) : "Unassigned"
+    ].filter(Boolean).join(" ").toLowerCase();
+
+    return (!search || haystack.includes(search))
+      && (!state.driveFilters.kind || kind === state.driveFilters.kind)
+      && (!state.driveFilters.area || file.operatingAreaId === state.driveFilters.area)
+      && (!state.driveFilters.scan || file.scanStatus === state.driveFilters.scan);
+  });
 }
 
 function bindScopeEditors() {
@@ -2205,6 +2290,10 @@ logoutButton.addEventListener("click", () => {
   state.pipelineFilters.status = "";
   state.integrationFilters.search = "";
   state.integrationFilters.type = "";
+  state.driveFilters.search = "";
+  state.driveFilters.kind = "";
+  state.driveFilters.area = "";
+  state.driveFilters.scan = "";
   renderTasks();
   renderGoogleDriveFiles();
   renderOperatingMap();
@@ -2280,6 +2369,26 @@ integrationSearch.addEventListener("input", () => {
 integrationTypeFilter.addEventListener("change", () => {
   state.integrationFilters.type = integrationTypeFilter.value;
   renderIntegrationTaxonomy();
+});
+
+driveSearch.addEventListener("input", () => {
+  state.driveFilters.search = driveSearch.value;
+  renderGoogleDriveFiles();
+});
+
+driveKindFilter.addEventListener("change", () => {
+  state.driveFilters.kind = driveKindFilter.value;
+  renderGoogleDriveFiles();
+});
+
+driveAreaFilter.addEventListener("change", () => {
+  state.driveFilters.area = driveAreaFilter.value;
+  renderGoogleDriveFiles();
+});
+
+driveScanFilter.addEventListener("change", () => {
+  state.driveFilters.scan = driveScanFilter.value;
+  renderGoogleDriveFiles();
 });
 
 loginForm.addEventListener("submit", async (event) => {

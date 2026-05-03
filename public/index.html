@@ -728,6 +728,32 @@
               </div>
               <button type="button" class="secondary" id="refreshDriveFilesButton">Refresh files</button>
             </div>
+            <section class="drive-filter-bar" aria-label="Google Drive file filters">
+              <label>
+                Search files
+                <input id="driveSearch" type="search" autocomplete="off" placeholder="Folder, file, area, scan status..." />
+              </label>
+              <label>
+                Kind
+                <select id="driveKindFilter">
+                  <option value="">All kinds</option>
+                  <option value="folder">Folders</option>
+                  <option value="file">Files</option>
+                </select>
+              </label>
+              <label>
+                Area
+                <select id="driveAreaFilter">
+                  <option value="">All areas</option>
+                </select>
+              </label>
+              <label>
+                Scan
+                <select id="driveScanFilter">
+                  <option value="">All scan states</option>
+                </select>
+              </label>
+            </section>
             <div class="table-wrap">
               <table class="data-table">
                 <thead>
