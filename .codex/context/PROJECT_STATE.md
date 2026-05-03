@@ -112,13 +112,13 @@ Last updated: 2026-05-03
   pattern.
 
 ## Autonomous Iteration State
-- Current iteration: V2WEB-004 Dedicated Operating Areas View.
-- Current operation mode: BUILDER
-- Last completed iteration: V2WEB-003 Main Branch Web Console Shell Reconciliation.
-- Last completed task: added a dedicated `/areas` owner-console route for the
-  existing operating map and manual mapping controls, while keeping dashboard
-  as the summary and module navigation surface.
-- Next required mode: TESTER for the fifth v2 web console iteration unless an
+- Current iteration: V2WEB-005 Dedicated Tasks Adapter View.
+- Current operation mode: TESTER
+- Last completed iteration: V2WEB-004 Dedicated Operating Areas View.
+- Last completed task: added a dedicated `/tasks-adapter` owner-console route
+  for implemented task records from `/v1/tasks`, preserved legacy protected API
+  `/tasks`, and kept dashboard as the summary and module navigation surface.
+- Next required mode: BUILDER for the next v2 web console iteration unless an
   architecture decision blocks the queue first.
 
 ## Recent Progress
@@ -681,6 +681,13 @@ Last updated: 2026-05-03
   enabling Drive/Docs/Sheets APIs, OAuth consent, OAuth client credentials,
   redirect URI setup, production env vars, folder ID selection, consent, import,
   refresh, reconcile, and troubleshooting.
+- 2026-05-03: Completed V2WEB-005 by adding a dedicated `/tasks-adapter`
+  owner-console route for the implemented `/v1/tasks` records. The dashboard
+  now links into the Tasks & adapters module instead of owning the task table,
+  the route shows total, ClickUp, open, and due-soon task stats, and task table
+  cells render provider-controlled values as text instead of HTML. The slice
+  intentionally avoided `/tasks` as a web route because `/tasks` is still a
+  protected legacy API path covered by integration tests.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

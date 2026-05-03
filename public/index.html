@@ -30,6 +30,7 @@
         <nav class="side-nav" aria-label="Workspace navigation">
           <a href="/dashboard" data-link data-nav="/dashboard">Dashboard</a>
           <a href="/areas" data-link data-nav="/areas">Operating areas</a>
+          <a href="/tasks-adapter" data-link data-nav="/tasks-adapter">Tasks & adapters</a>
           <a href="/settings" data-link data-nav="/settings">ClickUp adapter</a>
           <a href="/settings/drive" data-link data-nav="/settings/drive">Google Drive</a>
           <a href="/settings/api" data-link data-nav="/settings/api">API settings</a>
@@ -171,6 +172,10 @@
               <strong>12 company areas</strong>
               <span>Browse Strategy, Product, Sales, Operations, Relationships, and the rest of the operating model.</span>
             </a>
+            <a class="module-link" href="/tasks-adapter" data-link>
+              <strong>Tasks & adapters</strong>
+              <span>Review synced CompanyCore and ClickUp tasks with list ownership, status, priority, and due dates.</span>
+            </a>
             <a class="module-link" href="/settings/drive" data-link>
               <strong>Drive folders</strong>
               <span>Connect or refresh imported folders before assigning them to areas.</span>
@@ -191,19 +196,39 @@
           </div>
           <div class="actions">
             <a class="button-link" href="/areas" data-link>Open areas</a>
+            <a class="button-link" href="/tasks-adapter" data-link>Open tasks</a>
             <a class="button-link" href="/settings" data-link>Open settings</a>
             <a class="button-link secondary" href="/settings/drive" data-link>Connect Drive</a>
             <a class="button-link secondary" href="/settings/api" data-link>View API</a>
           </div>
         </section>
+      </section>
+
+      <section class="view" data-view="/tasks-adapter">
+        <div class="page-title">
+          <div>
+            <p class="label">Adapter data</p>
+            <h1>Tasks & adapters</h1>
+            <p>Review task records imported from ClickUp and CompanyCore-owned execution lists.</p>
+          </div>
+          <div class="status-card">
+            <span class="dot ok"></span>
+            <span>Live task records</span>
+          </div>
+        </div>
+
+        <section class="dashboard-grid dense-grid task-stats" id="taskStats"></section>
 
         <section class="panel table-panel">
           <div class="section-title row-title">
             <div>
-              <h2>Tasks</h2>
+              <h2>Task records</h2>
               <p id="tasksSummary">Sign in to load tasks.</p>
             </div>
-            <button type="button" class="secondary" id="refreshTasksButton">Refresh</button>
+            <div class="actions">
+              <a class="button-link secondary compact" href="/settings" data-link>ClickUp settings</a>
+              <button type="button" class="secondary compact" id="refreshTasksButton">Refresh</button>
+            </div>
           </div>
           <div class="table-wrap">
             <table class="data-table">

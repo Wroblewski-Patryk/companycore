@@ -1,4 +1,4 @@
-const privateRoutes = new Set(["/dashboard", "/areas", "/settings", "/settings/drive", "/settings/api"]);
+const privateRoutes = new Set(["/dashboard", "/areas", "/tasks-adapter", "/settings", "/settings/drive", "/settings/api"]);
 const publicRoutes = new Set(["/", "/auth/login", "/auth/register"]);
 
 const state = {
@@ -106,6 +106,7 @@ const listSummary = document.querySelector("#listSummary");
 const resultPanel = document.querySelector("#resultPanel");
 const resultMessage = document.querySelector("#resultMessage");
 const metrics = document.querySelector("#metrics");
+const taskStats = document.querySelector("#taskStats");
 const tasksSummary = document.querySelector("#tasksSummary");
 const tasksTableBody = document.querySelector("#tasksTableBody");
 const googleDrivePanel = document.querySelector("#googleDrivePanel");
@@ -139,6 +140,7 @@ const fields = {
 const routeLabels = {
   "/dashboard": "Dashboard",
   "/areas": "Operating areas",
+  "/tasks-adapter": "Tasks & adapters",
   "/settings": "ClickUp adapter",
   "/settings/drive": "Google Drive",
   "/settings/api": "API settings"
@@ -396,31 +398,66 @@ function scopeEditorHtml({ id, selectedAreaId, type, label = "Area" }) {
 
 function renderTasks() {
   tasksTableBody.innerHTML = "";
+  taskStats.innerHTML = "";
   const tasks = state.tasks;
+  const clickUpCount = tasks.filter((task) => task.source === "clickup").length;
+  const openTasks = tasks.filter((task) => !["closed", "complete", "completed", "done"].includes(String(task.status || "").toLowerCase())).length;
+  const nextWeek = new Date();
+  nextWeek.setDate(nextWeek.getDate() + 7);
+  const dueSoon = tasks.filter((task) => {
+    if (!task.dueDate) {
+      return false;
+    }
+    const dueDate = new Date(task.dueDate);
+    return !Number.isNaN(dueDate.getTime()) && dueDate <= nextWeek;
+  }).length;
+
+  renderTaskStat("Total tasks", tasks.length);
+  renderTaskStat("ClickUp", clickUpCount);
+  renderTaskStat("Open", openTasks);
+  renderTaskStat("Due soon", dueSoon);
 
   if (tasks.length === 0) {
     tasksSummary.textContent = "No tasks found in this workspace yet.";
     const row = document.createElement("tr");
-    row.innerHTML = '<td colspan="6">No tasks found yet.</td>';
+    const cell = document.createElement("td");
+    cell.colSpan = 6;
+    cell.textContent = "No tasks found yet.";
+    row.append(cell);
     tasksTableBody.append(row);
     return;
   }
 
-  const clickUpCount = tasks.filter((task) => task.source === "clickup").length;
   tasksSummary.textContent = `${tasks.length} task${tasks.length === 1 ? "" : "s"} loaded, including ${clickUpCount} from ClickUp.`;
 
   for (const task of tasks.slice(0, 50)) {
     const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${task.title}</td>
-      <td>${task.status}</td>
-      <td>${task.priority || "-"}</td>
-      <td>${task.taskList?.name || "-"}</td>
-      <td>${task.source || "companycore"}</td>
-      <td>${formatDate(task.dueDate)}</td>
-    `;
+    appendTaskCell(row, task.title);
+    appendTaskCell(row, task.status);
+    appendTaskCell(row, task.priority || "-");
+    appendTaskCell(row, task.taskList?.name || "-");
+    appendTaskCell(row, task.source || "companycore");
+    appendTaskCell(row, formatDate(task.dueDate));
     tasksTableBody.append(row);
   }
+}
+
+function renderTaskStat(label, value) {
+  const card = document.createElement("article");
+  card.className = "panel summary-card mini-card";
+  const kicker = document.createElement("span");
+  kicker.className = "summary-kicker";
+  kicker.textContent = label;
+  const strong = document.createElement("strong");
+  strong.textContent = String(value);
+  card.append(kicker, strong);
+  taskStats.append(card);
+}
+
+function appendTaskCell(row, value) {
+  const cell = document.createElement("td");
+  cell.textContent = value || "-";
+  row.append(cell);
 }
 
 function renderDataCounters() {

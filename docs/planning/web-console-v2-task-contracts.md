@@ -1,5 +1,61 @@
 # Web Console V2 Task Contracts
 
+## V2WEB-005 Dedicated Tasks Adapter View
+
+- Task Type: design/frontend
+- Current Stage: done
+- Deliverable For This Stage: dedicated `/tasks-adapter` owner-console route that
+  reuses the implemented `/v1/tasks` data path and keeps dashboard as a
+  summary/navigation surface.
+- Goal: Move task and ClickUp adapter data toward the target module
+  architecture without inventing new backend contracts.
+- Scope:
+  - `public/index.html`
+  - `public/app.js`
+  - `public/styles.css`
+  - `src/app.ts`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+- Implementation Plan:
+  - Add `/tasks-adapter` to authenticated web routes and signed-in navigation.
+  - Move the existing implemented task table out of dashboard into the new
+    route.
+  - Add compact task summary cards for total, ClickUp, open, and due-soon
+    records.
+  - Keep links back to ClickUp settings so adapter configuration remains
+    discoverable.
+  - Validate syntax, build, tests, local route rendering, and production smoke.
+- Acceptance Criteria:
+  - Signed-in navigation includes `Tasks & adapters`.
+  - `/tasks-adapter` renders the implemented task records from `/v1/tasks`.
+  - Dashboard links to `/tasks-adapter` but no longer owns the task table
+    surface.
+  - Direct refresh of `/tasks-adapter` returns the SPA shell.
+  - Legacy API `/tasks` remains protected API-compatible.
+  - Task table rendering does not inject provider-controlled fields as HTML.
+- Definition of Done:
+  - `node --check public/app.js`, `git diff --check`, `npm run build`, and
+    `npm test` pass.
+  - Browser smoke verifies `/tasks-adapter` and `/dashboard` render on
+    desktop.
+  - Project state, task board, and next-commits docs are updated.
+- Result Report:
+  - Added `/tasks-adapter` to the authenticated frontend route list and Express
+    web app route allowlist.
+  - Moved the implemented task table out of the dashboard into a dedicated
+    Tasks & adapters view.
+  - Added total, ClickUp, open, and due-soon task stat cards.
+  - Preserved legacy protected API `/tasks` by avoiding a web route collision;
+    the GUI reads the implemented `/v1/tasks` endpoint.
+  - Replaced provider-controlled task table HTML injection with text-node cell
+    rendering.
+  - `node --check public/app.js`, `git diff --check`, `npm run build`, and
+    `npm test` passed.
+  - Playwright smoke verified desktop `/tasks-adapter` route rendering,
+    active navigation, task rows, summary stats, and dashboard module links.
+
 ## V2WEB-004 Dedicated Operating Areas View
 
 - Task Type: design/frontend
