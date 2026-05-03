@@ -108,14 +108,14 @@ Last updated: 2026-05-03
   implemented through the native integration pattern.
 
 ## Autonomous Iteration State
-- Current iteration: V2GD-003 Google Drive Provider Client And OAuth Settings.
+- Current iteration: V2GD-004 Folder Discovery And File Import.
 - Current operation mode: BUILDER
 - Last completed iteration: CCV1-060 V1 Operator Handoff.
 - Last completed task: added a concise v1 operator handoff that consolidates
   accepted runtime scope, production endpoints, current runtime image,
   smoke/data evidence, rollback pointer, residual non-runtime blockers, and
   next decision choices.
-- Next required mode: ARCHITECT for V2GD-004 Folder Discovery And File Import.
+- Next required mode: TESTER for V2GD-005 Docs And Sheets Read/Create/Edit.
 
 ## Recent Progress
 - 2026-05-02: Created Company Core backend foundation, Prisma schema, Docker

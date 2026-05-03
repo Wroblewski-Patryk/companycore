@@ -43,7 +43,8 @@ const capabilities = [
   "integration-settings:clickup:events:retry",
   "integration-settings:clickup:maintenance:run",
   "integration-settings:google-drive:read",
-  "integration-settings:google-drive:write"
+  "integration-settings:google-drive:write",
+  "integration-settings:google-drive:import"
 ] as const;
 
 const adapterManifest = {
@@ -141,7 +142,8 @@ const adapterManifest = {
       { method: "POST", path: "/v1/integration-settings/clickup/events/retry-failed", capability: "integration-settings:clickup:events:retry" },
       { method: "POST", path: "/v1/integration-settings/clickup/maintenance/run", capability: "integration-settings:clickup:maintenance:run" },
       { method: "GET", path: "/v1/integration-settings/google_drive", capability: "integration-settings:google-drive:read" },
-      { method: "PUT", path: "/v1/integration-settings/google_drive", capability: "integration-settings:google-drive:write" }
+      { method: "PUT", path: "/v1/integration-settings/google_drive", capability: "integration-settings:google-drive:write" },
+      { method: "POST", path: "/v1/integration-settings/google_drive/import", capability: "integration-settings:google-drive:import" }
     ]
   },
   writeRules: [

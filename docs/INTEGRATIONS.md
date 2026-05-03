@@ -138,6 +138,11 @@ Implemented foundation:
 - `src/integrations/google-drive/google-drive.client.ts` contains the safe
   client boundary for Drive file listing, Drive file creation, Drive changes,
   Docs get/batchUpdate, and Sheets create/read/write methods.
+- `POST /v1/integration-settings/google_drive/import` imports selected Drive
+  folder children into `google_drive_files` using `merge`, `skip_existing`,
+  `replace_selected_folders`, or `inspect_only`.
+- Google Drive import emits `google_drive_import_succeeded` events with safe
+  counts and selected folder IDs.
 
 Implemented first native slice:
 

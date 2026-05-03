@@ -127,7 +127,7 @@ It follows the repository task contract and must stay synchronized with
 ## V2GD-004 Folder Discovery And File Import
 
 - Task Type: backend/integration
-- Current Stage: ready
+- Current Stage: done
 - Deliverable For This Stage: selected folder discovery/import endpoint with
   explicit import policy.
 - Goal: Import selected Drive folder/file structure into CompanyCore storage
@@ -150,12 +150,19 @@ It follows the repository task contract and must stay synchronized with
 - Definition of Done:
   - Build/tests pass, docs updated, no token leakage.
 - Result Report:
-  - Pending.
+  - Added `POST /v1/integration-settings/google_drive/import`.
+  - Added selected-folder file discovery through Drive `files.list`.
+  - Added `merge`, `skip_existing`, `replace_selected_folders`, and
+    `inspect_only` import behavior.
+  - Added idempotent persistence into `google_drive_files`.
+  - Added `google_drive_import_succeeded` events with safe counts.
+  - Added tests for inspect-only, initial merge, repeated merge, and imported
+    file metadata refresh.
 
 ## V2GD-005 Docs And Sheets Read/Create/Edit
 
 - Task Type: backend/integration
-- Current Stage: planning
+- Current Stage: ready
 - Deliverable For This Stage: API routes for Docs/Sheets create/read/edit and
   post-write local refresh.
 - Goal: Let CompanyCore create, read, and edit Google Docs/Sheets while keeping

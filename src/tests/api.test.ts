@@ -815,6 +815,111 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(loadedGoogleDriveSettings?.oauth.accessToken, "google-access-token");
   assert.equal(loadedGoogleDriveSettings?.config.rootFolderIds?.[0], "drive-folder-root");
 
+  const originalFetchBeforeGoogleDriveImport = globalThis.fetch;
+  let googleDriveListCallCount = 0;
+  globalThis.fetch = (async (input: string | URL | Request) => {
+    const url = new URL(String(input));
+    assert.equal(url.origin, "https://www.googleapis.com");
+    assert.equal(url.pathname, "/drive/v3/files");
+    assert.equal(url.searchParams.get("supportsAllDrives"), "true");
+    assert.equal(url.searchParams.get("spaces"), "drive");
+    googleDriveListCallCount += 1;
+    return new Response(JSON.stringify({
+      files: [
+        {
+          id: "drive-doc-1",
+          name: googleDriveListCallCount > 1 ? "Imported Drive doc updated" : "Imported Drive doc",
+          mimeType: "application/vnd.google-apps.document",
+          parents: ["drive-folder-root"],
+          webViewLink: "https://docs.google.com/document/d/drive-doc-1",
+          headRevisionId: `rev-${googleDriveListCallCount}`,
+          modifiedTime: "2026-05-03T10:00:00.000Z"
+        },
+        {
+          id: "drive-sheet-1",
+          name: "Imported Drive sheet",
+          mimeType: "application/vnd.google-apps.spreadsheet",
+          parents: ["drive-folder-root"],
+          webViewLink: "https://docs.google.com/spreadsheets/d/drive-sheet-1",
+          headRevisionId: "sheet-rev-1",
+          modifiedTime: "2026-05-03T10:05:00.000Z"
+        }
+      ]
+    }), { status: 200 });
+  }) as typeof fetch;
+
+  try {
+    const inspectDriveImport = await request("/v1/integration-settings/google_drive/import", {
+      method: "POST",
+      headers: authA,
+      body: JSON.stringify({
+        importMode: "inspect_only"
+      })
+    });
+    assert.equal(inspectDriveImport.status, 200);
+    const inspectDriveImportBody = inspectDriveImport.body as {
+      data: { itemCount: number; createdCount: number; skippedCount: number; wouldCreateCount: number };
+    };
+    assert.equal(inspectDriveImportBody.data.itemCount, 2);
+    assert.equal(inspectDriveImportBody.data.createdCount, 0);
+    assert.equal(inspectDriveImportBody.data.skippedCount, 2);
+    assert.equal(inspectDriveImportBody.data.wouldCreateCount, 2);
+    assert.equal(await prisma.googleDriveFile.count({ where: { workspaceId: ownerA.workspace.id } }), 1);
+
+    const mergeDriveImport = await request("/v1/integration-settings/google_drive/import", {
+      method: "POST",
+      headers: authA,
+      body: JSON.stringify({
+        importMode: "merge"
+      })
+    });
+    assert.equal(mergeDriveImport.status, 200);
+    const mergeDriveImportBody = mergeDriveImport.body as {
+      data: { itemCount: number; createdCount: number; updatedCount: number; skippedCount: number };
+    };
+    assert.equal(mergeDriveImportBody.data.itemCount, 2);
+    assert.equal(mergeDriveImportBody.data.createdCount, 2);
+    assert.equal(mergeDriveImportBody.data.updatedCount, 0);
+    assert.equal(mergeDriveImportBody.data.skippedCount, 0);
+
+    const repeatDriveImport = await request("/v1/integration-settings/google_drive/import", {
+      method: "POST",
+      headers: authA,
+      body: JSON.stringify({
+        importMode: "merge"
+      })
+    });
+    assert.equal(repeatDriveImport.status, 200);
+    const repeatDriveImportBody = repeatDriveImport.body as {
+      data: { createdCount: number; updatedCount: number; wouldUpdateCount: number };
+    };
+    assert.equal(repeatDriveImportBody.data.createdCount, 0);
+    assert.equal(repeatDriveImportBody.data.updatedCount, 2);
+    assert.equal(repeatDriveImportBody.data.wouldUpdateCount, 2);
+  } finally {
+    globalThis.fetch = originalFetchBeforeGoogleDriveImport;
+  }
+
+  const importedDriveDoc = await prisma.googleDriveFile.findUnique({
+    where: {
+      workspaceId_provider_externalId: {
+        workspaceId: ownerA.workspace.id,
+        provider: "google_drive",
+        externalId: "drive-doc-1"
+      }
+    }
+  });
+  assert.equal(importedDriveDoc?.name, "Imported Drive doc updated");
+  assert.equal(importedDriveDoc?.parentExternalId, "drive-folder-root");
+  assert.equal(importedDriveDoc?.syncStatus, "synced");
+  const googleDriveEvents = await prisma.event.findMany({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      type: "google_drive_import_succeeded"
+    }
+  });
+  assert.ok(googleDriveEvents.length >= 1);
+
   const updatedSettingsWithoutToken = await request("/integration-settings/clickup", {
     method: "PUT",
     headers: authA,
