@@ -587,10 +587,10 @@ the CompanyCore source of truth while keeping ClickUp and CompanyCore aligned.
 - How tested: Ran `npm test` with `DATABASE_URL` pointed at disposable
   PostgreSQL on `localhost:55432`; migration deploy applied
   `202605033_clickup_note_external_identity` and the API flow passed.
-- What is incomplete: Production deploy and smoke are still required for this
-  runtime change.
-- Next steps: Deploy the runtime change to Coolify, smoke health, and verify
-  protected note/comment capability indirectly through the CompanyCore API.
+- What is incomplete: No known incomplete item in the CompanyCore-side ClickUp
+  task comment bridge slice.
+- Next steps: Continue the Paperclip application-side adapter so it consumes
+  CompanyCore agent events and writes through CompanyCore.
 
 ### Priority
 P0

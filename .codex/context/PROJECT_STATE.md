@@ -443,6 +443,14 @@ Last updated: 2026-05-03
   returned ClickUp comment ID. Added a unique note external identity migration
   for `(workspace_id, source, external_id)`. `npm test` passed against
   disposable PostgreSQL on `localhost:55432`.
+- 2026-05-03: Deployed CCV1-043 to production with Coolify deployment
+  `q10fr3oviut7kkoxdkdfu0f6` at commit
+  `28fc77b88722c5798ab630d0ef9d93e4a0f3dc84`. The backend image now runs
+  `rnqqkhl3o3dut4qv56mlxly2_backend:28fc77b88722c5798ab630d0ef9d93e4a0f3dc84`,
+  migration `202605033_clickup_note_external_identity` applied successfully,
+  public `/health` and `/v1/health` returned `200`, and Jarvis's CompanyCore
+  API key verified protected reads for `/v1/connection`, `/v1/notes`, and
+  `/v1/agent-events`.
 
 ## Working Agreements
 - Keep task board and project state synchronized.
