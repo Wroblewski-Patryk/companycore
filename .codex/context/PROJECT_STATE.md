@@ -112,11 +112,11 @@ Last updated: 2026-05-03
   pattern.
 
 ## Autonomous Iteration State
-- Current iteration: V2WEB-009 Account Settings View.
+- Current iteration: V2WEB-010 Relationship Review Center.
 - Current operation mode: BUILDER
-- Last completed iteration: V2WEB-008 Dashboard Command Center.
-- Last completed task: added `/settings/account` for owner/workspace context
-  and settings readiness links from implemented connection data.
+- Last completed iteration: V2WEB-009 Account Settings View.
+- Last completed task: added `/relationships` for provider and Drive area
+  assignment review using existing scope update endpoints.
 - Next required mode: BUILDER for the next v2 web console iteration unless an
   architecture decision blocks the queue first.
 
@@ -710,6 +710,12 @@ Last updated: 2026-05-03
   for session, ClickUp, Drive, API capabilities, operating areas, and
   integrations. Direct route refresh now preserves owner user data from
   `/v1/connection`.
+- 2026-05-04: Completed V2WEB-010 by adding `/relationships` as a dedicated
+  review center for operating-area relationships. The view shows unassigned
+  provider mappings and Drive folders in one queue, lists all implemented
+  provider and Drive folder assignments, and reuses the existing scope update
+  endpoints/selectors so relationship correction is no longer buried inside a
+  selected area detail.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

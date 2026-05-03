@@ -1,5 +1,57 @@
 # Web Console V2 Task Contracts
 
+## V2WEB-010 Relationship Review Center
+
+- Task Type: design/frontend
+- Current Stage: done
+- Deliverable For This Stage: dedicated `/relationships` owner-console view
+  for reviewing and correcting implemented provider and Drive area
+  assignments.
+- Goal: Make relationship correction a first-class workflow so owners can
+  quickly move ClickUp mappings and Drive folders into the right operating
+  area.
+- Scope:
+  - `public/index.html`
+  - `public/app.js`
+  - `public/styles.css`
+  - `src/app.ts`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+- Implementation Plan:
+  - Add `/relationships` to authenticated frontend and Express web routes.
+  - Add signed-in navigation and dashboard links for relationship review.
+  - Render a review queue for unmapped provider mappings and unassigned Drive
+    folders.
+  - Render all implemented provider and Drive relationships with existing area
+    selectors.
+  - Reuse existing scope update endpoints and validation.
+- Acceptance Criteria:
+  - Signed-in navigation includes `Relationships`.
+  - `/relationships` shows a review queue when mappings or Drive folders need
+    assignment.
+  - Owners can use the existing area selectors from this route.
+  - Empty states are clear when everything is mapped.
+  - Existing `/areas` mapping controls still render.
+- Definition of Done:
+  - `node --check public/app.js`, `git diff --check`, `npm run build`, and
+    `npm test` pass.
+  - Browser smoke verifies `/relationships`, queue rows, assignment selectors,
+    and dashboard links on desktop.
+  - Project state, task board, and next-commits docs are updated.
+- Result Report:
+  - Added `/relationships` to authenticated frontend and Express web routes.
+  - Added sidebar, dashboard module, and next-action links to the relationship
+    review center.
+  - Added a review queue for unassigned provider mappings and Drive folders.
+  - Added provider mapping and Drive folder lists that reuse the existing area
+    selectors and scope update endpoints.
+  - `node --check public/app.js`, `git diff --check`, `npm run build`, and
+    `npm test` passed.
+  - Playwright smoke verified `/relationships`, queue rows, provider rows,
+    Drive rows, assignment selectors, active navigation, and dashboard links.
+
 ## V2WEB-009 Account Settings View
 
 - Task Type: design/frontend

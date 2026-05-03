@@ -30,6 +30,7 @@
         <nav class="side-nav" aria-label="Workspace navigation">
           <a href="/dashboard" data-link data-nav="/dashboard">Dashboard</a>
           <a href="/areas" data-link data-nav="/areas">Operating areas</a>
+          <a href="/relationships" data-link data-nav="/relationships">Relationships</a>
           <a href="/tasks-adapter" data-link data-nav="/tasks-adapter">Tasks & adapters</a>
           <a href="/pipeline" data-link data-nav="/pipeline">Pipeline</a>
           <a href="/settings/account" data-link data-nav="/settings/account">Account</a>
@@ -176,6 +177,10 @@
               <strong>12 company areas</strong>
               <span id="moduleAreasMeta">Browse Strategy, Product, Sales, Operations, Relationships, and the rest of the operating model.</span>
             </a>
+            <a class="module-link" href="/relationships" data-link>
+              <strong>Relationships</strong>
+              <span id="moduleRelationshipsMeta">Review unmapped provider and Drive relationships in one queue.</span>
+            </a>
             <a class="module-link" href="/tasks-adapter" data-link>
               <strong>Tasks & adapters</strong>
               <span id="moduleTasksMeta">Review synced CompanyCore and ClickUp tasks with list ownership, status, priority, and due dates.</span>
@@ -219,6 +224,7 @@
           </div>
           <div class="actions">
             <a class="button-link" href="/areas" data-link>Open areas</a>
+            <a class="button-link" href="/relationships" data-link>Review relationships</a>
             <a class="button-link" href="/tasks-adapter" data-link>Open tasks</a>
             <a class="button-link" href="/pipeline" data-link>Open pipeline</a>
             <a class="button-link" href="/settings/integrations" data-link>Open integrations</a>
@@ -332,6 +338,48 @@
               </section>
             </div>
           </div>
+        </section>
+      </section>
+
+      <section class="view" data-view="/relationships">
+        <div class="page-title">
+          <div>
+            <p class="label">Operating model</p>
+            <h1>Relationships</h1>
+            <p id="relationshipSummary">Sign in to load relationship data.</p>
+          </div>
+          <div class="status-card">
+            <span class="dot ok"></span>
+            <span>Mapping controls</span>
+          </div>
+        </div>
+
+        <section class="panel relationship-panel">
+          <div class="section-title row-title">
+            <div>
+              <h2>Review queue</h2>
+              <p>Provider mappings and Drive folders that need an operating area.</p>
+            </div>
+            <a class="button-link secondary compact" href="/areas" data-link>Open area map</a>
+          </div>
+          <div class="relationship-queue" id="relationshipQueue"></div>
+        </section>
+
+        <section class="relationship-grid">
+          <article class="panel relationship-panel">
+            <div class="section-title">
+              <h2>Provider mappings</h2>
+              <p>ClickUp Spaces, Folders, and Lists currently known by CompanyCore.</p>
+            </div>
+            <div class="compact-list" id="relationshipProviderList"></div>
+          </article>
+          <article class="panel relationship-panel">
+            <div class="section-title">
+              <h2>Drive folders</h2>
+              <p>Imported Google Drive folders that can be assigned to operating areas.</p>
+            </div>
+            <div class="compact-list" id="relationshipDriveList"></div>
+          </article>
         </section>
       </section>
 

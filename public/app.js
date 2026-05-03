@@ -1,4 +1,4 @@
-const privateRoutes = new Set(["/dashboard", "/areas", "/tasks-adapter", "/pipeline", "/settings", "/settings/account", "/settings/integrations", "/settings/drive", "/settings/api"]);
+const privateRoutes = new Set(["/dashboard", "/areas", "/relationships", "/tasks-adapter", "/pipeline", "/settings", "/settings/account", "/settings/integrations", "/settings/drive", "/settings/api"]);
 const publicRoutes = new Set(["/", "/auth/login", "/auth/register"]);
 
 const state = {
@@ -104,6 +104,7 @@ const attentionSummary = document.querySelector("#attentionSummary");
 const attentionList = document.querySelector("#attentionList");
 const nextActionText = document.querySelector("#nextActionText");
 const moduleAreasMeta = document.querySelector("#moduleAreasMeta");
+const moduleRelationshipsMeta = document.querySelector("#moduleRelationshipsMeta");
 const moduleTasksMeta = document.querySelector("#moduleTasksMeta");
 const modulePipelineMeta = document.querySelector("#modulePipelineMeta");
 const moduleDriveMeta = document.querySelector("#moduleDriveMeta");
@@ -121,6 +122,10 @@ const pipelineStagesList = document.querySelector("#pipelineStagesList");
 const pipelineDealsList = document.querySelector("#pipelineDealsList");
 const pipelineClientsList = document.querySelector("#pipelineClientsList");
 const pipelineInteractionsList = document.querySelector("#pipelineInteractionsList");
+const relationshipSummary = document.querySelector("#relationshipSummary");
+const relationshipQueue = document.querySelector("#relationshipQueue");
+const relationshipProviderList = document.querySelector("#relationshipProviderList");
+const relationshipDriveList = document.querySelector("#relationshipDriveList");
 const listTree = document.querySelector("#listTree");
 const listToolbar = document.querySelector("#listToolbar");
 const listSummary = document.querySelector("#listSummary");
@@ -164,6 +169,7 @@ const fields = {
 const routeLabels = {
   "/dashboard": "Dashboard",
   "/areas": "Operating areas",
+  "/relationships": "Relationships",
   "/tasks-adapter": "Tasks & adapters",
   "/pipeline": "Pipeline",
   "/settings/account": "Account",
@@ -523,6 +529,7 @@ function renderDashboardCommandCenter() {
   const implementedGroups = 4;
 
   moduleAreasMeta.textContent = `${areas || 0} areas, ${tables || 0} tables, ${mappings || 0} provider mappings.`;
+  moduleRelationshipsMeta.textContent = `${signals.unmappedProviderMappings.length + signals.unassignedDriveFolders.length} relationship${signals.unmappedProviderMappings.length + signals.unassignedDriveFolders.length === 1 ? "" : "s"} need review.`;
   moduleTasksMeta.textContent = `${state.tasks.length} tasks, ${signals.openTasks.length} open, ${signals.dueSoonTasks.length} due soon.`;
   modulePipelineMeta.textContent = `${signals.pipelineRecords} CRM/pipeline records across clients, stages, deals, and interactions.`;
   moduleDriveMeta.textContent = state.googleDrive.configured
@@ -582,7 +589,7 @@ function dashboardAttentionItems(signals) {
     items.push({
       title: "Review provider mappings",
       detail: `${signals.unmappedProviderMappings.length} provider mapping${signals.unmappedProviderMappings.length === 1 ? "" : "s"} still need an operating area.`,
-      href: "/areas",
+      href: "/relationships",
       action: "Correct areas"
     });
   }
@@ -591,7 +598,7 @@ function dashboardAttentionItems(signals) {
     items.push({
       title: "Assign Drive folders",
       detail: `${signals.unassignedDriveFolders.length} Drive folder${signals.unassignedDriveFolders.length === 1 ? "" : "s"} can be assigned to the right company area.`,
-      href: "/settings/drive",
+      href: "/relationships",
       action: "Review folders"
     });
   }
@@ -696,6 +703,107 @@ function renderAccountSettings() {
     });
     accountReadiness.append(link);
   }
+}
+
+function mappingAreaId(mapping) {
+  return mapping.areaId || mapping.operatingAreaId || "";
+}
+
+function areaNameById(areaId) {
+  const area = state.operatingModel.areas.find((item) => item.id === areaId);
+  return area ? areaLabel(area) : "Unassigned";
+}
+
+function renderRelationshipCenter() {
+  relationshipQueue.innerHTML = "";
+  relationshipProviderList.innerHTML = "";
+  relationshipDriveList.innerHTML = "";
+
+  const mappings = state.operatingModel.externalMappings || [];
+  const driveFolders = state.googleDrive.files.filter((file) => file.isFolder);
+  const unmappedMappings = mappings.filter((mapping) => !mappingAreaId(mapping));
+  const unassignedFolders = driveFolders.filter((file) => !file.operatingAreaId);
+  const queueCount = unmappedMappings.length + unassignedFolders.length;
+
+  relationshipSummary.textContent = isSignedIn()
+    ? `${mappings.length} provider mapping${mappings.length === 1 ? "" : "s"} and ${driveFolders.length} Drive folder${driveFolders.length === 1 ? "" : "s"} loaded. ${queueCount} relationship${queueCount === 1 ? "" : "s"} need review.`
+    : "Sign in to load relationship data.";
+
+  const queueItems = [
+    ...unmappedMappings.map((mapping) => ({ type: "mapping", item: mapping })),
+    ...unassignedFolders.map((file) => ({ type: "drive", item: file }))
+  ];
+
+  if (queueItems.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "empty-note";
+    empty.textContent = isSignedIn()
+      ? "No unmapped provider or Drive relationships need review."
+      : "Sign in to load relationship review items.";
+    relationshipQueue.append(empty);
+  } else {
+    for (const queueItem of queueItems.slice(0, 12)) {
+      relationshipQueue.append(relationshipQueueRow(queueItem));
+    }
+  }
+
+  renderCompactList(relationshipProviderList, mappings.slice(0, 80), (mapping) => `
+    <strong>${escapeHtml(mapping.name || mapping.externalId || mapping.id)}</strong>
+    <span>${escapeHtml(providerLabel(mapping.provider))} · ${escapeHtml(mapping.entityType)} · ${escapeHtml(areaNameById(mappingAreaId(mapping)))}</span>
+    ${mapping.provider === "clickup" && ["space", "folder", "list"].includes(mapping.entityType) ? scopeEditorHtml({
+      id: mapping.id,
+      selectedAreaId: mappingAreaId(mapping) || state.operatingModel.areas[0]?.id,
+      type: "mapping",
+      label: "Assign area"
+    }) : ""}
+  `, "No provider mappings loaded yet.");
+
+  renderCompactList(relationshipDriveList, driveFolders.slice(0, 80), (file) => `
+    <strong>${escapeHtml(file.name)}</strong>
+    <span>Google Drive · Folder · ${escapeHtml(areaNameById(file.operatingAreaId))}</span>
+    ${scopeEditorHtml({
+      id: file.id,
+      selectedAreaId: file.operatingAreaId || state.operatingModel.areas[0]?.id,
+      type: "drive",
+      label: "Assign area"
+    })}
+  `, state.googleDrive.configured ? "No imported Drive folders loaded yet." : "Google Drive is not connected yet.");
+}
+
+function relationshipQueueRow(queueItem) {
+  const row = document.createElement("article");
+  row.className = "relationship-row";
+  const copy = document.createElement("div");
+  const title = document.createElement("strong");
+  const detail = document.createElement("span");
+  const editor = document.createElement("div");
+  editor.className = "relationship-editor";
+
+  if (queueItem.type === "mapping") {
+    const mapping = queueItem.item;
+    title.textContent = mapping.name || mapping.externalId || mapping.id;
+    detail.textContent = `${providerLabel(mapping.provider)} · ${mapping.entityType}`;
+    editor.innerHTML = scopeEditorHtml({
+      id: mapping.id,
+      selectedAreaId: state.operatingModel.areas[0]?.id,
+      type: "mapping",
+      label: "Assign area"
+    });
+  } else {
+    const file = queueItem.item;
+    title.textContent = file.name;
+    detail.textContent = "Google Drive · Folder";
+    editor.innerHTML = scopeEditorHtml({
+      id: file.id,
+      selectedAreaId: state.operatingModel.areas[0]?.id,
+      type: "drive",
+      label: "Assign area"
+    });
+  }
+
+  copy.append(title, detail);
+  row.append(copy, editor);
+  return row;
 }
 
 function renderPipeline() {
@@ -981,6 +1089,7 @@ function renderOperatingMap() {
     renderDataCounters();
     renderPipeline();
     renderIntegrationTaxonomy();
+    renderRelationshipCenter();
     return;
   }
 
@@ -1063,6 +1172,7 @@ function renderOperatingMap() {
   renderDataCounters();
   renderPipeline();
   renderIntegrationTaxonomy();
+  renderRelationshipCenter();
   bindScopeEditors();
 }
 
@@ -1096,6 +1206,7 @@ function renderGoogleDriveFiles() {
     row.innerHTML = '<td colspan="5">No Drive files loaded yet.</td>';
     googleDriveFilesBody.append(row);
     renderIntegrationTaxonomy();
+    renderRelationshipCenter();
     return;
   }
 
@@ -1123,6 +1234,7 @@ function renderGoogleDriveFiles() {
     googleDriveFilesBody.append(row);
   }
   renderIntegrationTaxonomy();
+  renderRelationshipCenter();
   bindScopeEditors();
 }
 
@@ -1175,6 +1287,7 @@ async function loadOperatingModel() {
     state.databaseTables = new Map();
     renderOperatingMap();
     renderIntegrationTaxonomy();
+    renderRelationshipCenter();
     return;
   }
 
@@ -1183,6 +1296,7 @@ async function loadOperatingModel() {
   await loadDatabaseSnapshot();
   renderOperatingMap();
   renderIntegrationTaxonomy();
+  renderRelationshipCenter();
 }
 
 async function loadDatabaseSnapshot() {
@@ -1206,6 +1320,7 @@ async function loadGoogleDriveFiles() {
     state.googleDrive.files = [];
     renderGoogleDriveFiles();
     renderOperatingMap();
+    renderRelationshipCenter();
     return;
   }
 
@@ -1213,6 +1328,7 @@ async function loadGoogleDriveFiles() {
   state.googleDrive.files = response.data || [];
   renderGoogleDriveFiles();
   renderOperatingMap();
+  renderRelationshipCenter();
 }
 
 async function updateExternalMappingScope(mappingId, areaId) {
@@ -1709,6 +1825,7 @@ logoutButton.addEventListener("click", () => {
   renderOperatingMap();
   renderPipeline();
   renderIntegrationTaxonomy();
+  renderRelationshipCenter();
   resultPanel.hidden = true;
   navigate("/auth/login", { replace: true });
 });
@@ -1989,4 +2106,5 @@ if (state.ownerToken) {
   renderGoogleDriveFiles();
   renderPipeline();
   renderIntegrationTaxonomy();
+  renderRelationshipCenter();
 }
