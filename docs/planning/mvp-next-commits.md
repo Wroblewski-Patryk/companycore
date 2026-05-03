@@ -13,21 +13,21 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] CCV1-028 Deploy Jarvis application-side CompanyCore Data Source and chat context
 - [x] CCV1-031 ClickUp Discovery Backend
 - [x] CCV1-032 Guided Owner Console
-- [ ] CCV1-033 Production deploy and smoke for guided ClickUp owner console
+- [x] CCV1-033 Production deploy and smoke for guided ClickUp owner console
 
 ## NEXT
 
-- [ ] Implement Paperclip application-side adapter code that reads
-      `COMPANYCORE_BASE_URL` and `COMPANYCORE_API_KEY`.
 - [ ] CCV1-034 Decide scheduled ClickUp sync versus webhook ingestion after the
       first production pull succeeds, including rate-limit and signature
       requirements.
+- [ ] Implement Paperclip application-side adapter code that reads
+      `COMPANYCORE_BASE_URL` and `COMPANYCORE_API_KEY`.
 
 ## PIPELINE
 
 - [x] 1. CCV1-031 ClickUp Discovery Backend
 - [x] 2. CCV1-032 Guided Owner Console
-- [ ] 3. CCV1-033 Production deploy and smoke for guided ClickUp owner console
+- [x] 3. CCV1-033 Production deploy and smoke for guided ClickUp owner console
 - [ ] 4. CCV1-034 Continuous ClickUp update strategy decision
 
 

@@ -4,6 +4,82 @@ These task contracts turn the v1 audit into executable work. Each task must be
 completed as its own small iteration and must update `.codex/context/TASK_BOARD.md`,
 `.codex/context/PROJECT_STATE.md`, and relevant docs when status changes.
 
+## CCV1-033 Production Deploy And Smoke For Guided ClickUp Owner Console
+
+### Header
+- ID: CCV1-033
+- Title: Production deploy and smoke for guided ClickUp owner console
+- Task Type: release
+- Current Stage: verification
+- Status: DONE
+- Owner: Ops/Release
+- Depends on: CCV1-031, CCV1-032
+- Priority: P0
+- Iteration: v1-033
+- Operation Mode: BUILDER
+
+### Goal
+Deploy the guided ClickUp owner console and discovery backend to production so
+the owner can open the site, log in, and connect ClickUp from the browser.
+
+### Scope
+- Coolify application `companycore`
+- `docs/operations/post-deploy-smoke.md`
+- `.codex/context/PROJECT_STATE.md`
+- `.codex/context/TASK_BOARD.md`
+- `docs/planning/mvp-next-commits.md`
+- this task contract
+
+### Acceptance Criteria
+- [x] Coolify deploy imports the commit that contains the guided owner console.
+- [x] Production backend container runs the new commit image.
+- [x] `GET /health` returns `200`.
+- [x] `GET /` serves the ClickUp owner console.
+- [x] `GET /app.js` and `GET /styles.css` return `200`.
+- [x] Owner login endpoint succeeds with the seeded owner account.
+- [x] Protected adapter endpoint still denies unauthenticated access.
+- [x] Residual real ClickUp-token smoke is documented.
+
+### Validation Evidence
+- Deployment: Coolify manual redeploy `i12v0znlzq4twrl509iuqwmo`.
+- Commit deployed: `b46a96071f2c5a6b8c17bc725940ba60122f658f`.
+- Container evidence:
+  `rnqqkhl3o3dut4qv56mlxly2_backend:b46a96071f2c5a6b8c17bc725940ba60122f658f`
+  was `Up`.
+- Public checks:
+  `GET https://api.companycore.luckysparrow.ch/health`,
+  `GET https://api.companycore.luckysparrow.ch/`,
+  `GET https://api.companycore.luckysparrow.ch/app.js`, and
+  `GET https://api.companycore.luckysparrow.ch/styles.css` returned `200`;
+  unauthenticated `GET /v1/connection` returned `401`.
+- Auth smoke: `POST /auth/login` with the seeded owner account returned `200`.
+
+### Definition of Done
+- [x] Code and docs for the release are committed.
+- [x] Production deploy completed successfully.
+- [x] Production smoke evidence is recorded.
+- [x] No temporary Coolify deploy token remains from this run.
+- [x] No raw production secret is recorded in docs.
+- [x] `DEFINITION_OF_DONE.md` and `INTEGRATION_CHECKLIST.md` were checked
+  before status changed to `DONE`.
+
+### Result Report
+- Task summary: Deployed the guided ClickUp owner console to production and
+  verified that the owner can reach the UI and authenticate.
+- Files changed: `docs/operations/post-deploy-smoke.md`,
+  `.codex/context/PROJECT_STATE.md`, `.codex/context/TASK_BOARD.md`,
+  `docs/planning/mvp-next-commits.md`, and this task contract.
+- How tested: Coolify deployment evidence, public HTTP checks, protected-route
+  negative check, and owner login smoke.
+- What is incomplete: real ClickUp token discovery, settings save, and native
+  pull sync require the owner's ClickUp token and should be run from the
+  deployed console.
+- Next steps: run the first owner ClickUp connection, then decide CCV1-034
+  continuous update strategy.
+
+### Priority
+P0
+
 ## CCV1-032 Guided Owner Console
 
 ### Header

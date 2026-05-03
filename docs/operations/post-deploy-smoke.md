@@ -256,3 +256,33 @@ Use this file to record the minimum checks after each deploy.
 - Residual risks:
   - Production still needs redeploy from the fixed commit and protected smoke
     with real owner/API-key and ClickUp workspace settings.
+
+## Guided ClickUp Owner Console Deployment Evidence
+
+- Timestamp: 2026-05-03
+- Environment: Coolify production, Root Team, `companycore`
+- Deployment:
+  - Manual redeploy `i12v0znlzq4twrl509iuqwmo`.
+  - Coolify imported commit `b46a96071f2c5a6b8c17bc725940ba60122f658f`.
+  - Backend container image tag is
+    `rnqqkhl3o3dut4qv56mlxly2_backend:b46a96071f2c5a6b8c17bc725940ba60122f658f`.
+  - A temporary Coolify deploy API token was created for the redeploy and
+    deleted after the API call.
+- Public checks:
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `200`.
+  - `GET https://api.companycore.luckysparrow.ch/` returned `200` and served
+    the `CompanyCore Integrations` / `ClickUp connection` owner console.
+  - `GET https://api.companycore.luckysparrow.ch/app.js` returned `200`.
+  - `GET https://api.companycore.luckysparrow.ch/styles.css` returned `200`.
+  - `GET https://api.companycore.luckysparrow.ch/v1/connection` without auth
+    returned `401`, which is the expected protected-route negative path.
+  - `POST https://api.companycore.luckysparrow.ch/auth/login` with the seeded
+    owner account returned `200`.
+- Residual risks:
+  - A real ClickUp token was not available in this session, so the first
+    provider discovery, Workspace/List selection, settings save, and native
+    pull sync still need to be performed by the owner through the deployed
+    console.
+  - Continuous ClickUp updates are not enabled yet. CCV1-034 must decide
+    scheduled pull sync versus webhook ingestion after the first production
+    ClickUp pull succeeds.

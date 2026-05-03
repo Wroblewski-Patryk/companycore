@@ -275,6 +275,15 @@ Last updated: 2026-05-02
   error mapping, stored-token rediscovery, manifest capabilities, guided web
   console Workspace/List selection, and tests covering discovery, rate limits,
   stored-token rediscovery, protected route denial, and native sync.
+- 2026-05-03: Completed CCV1-033 by manually redeploying CompanyCore in
+  Coolify/VPS. Deployment `i12v0znlzq4twrl509iuqwmo` imported commit
+  `b46a96071f2c5a6b8c17bc725940ba60122f658f`; the backend container now runs
+  image tag `b46a96071f2c5a6b8c17bc725940ba60122f658f`. Public smoke confirmed
+  `GET /health`, `/`, `/app.js`, and `/styles.css` return `200`,
+  unauthenticated `/v1/connection` returns `401`, and owner login succeeds.
+  A real ClickUp token was not available in-session, so first token discovery,
+  settings save, and native pull sync remain an operator action through the
+  deployed owner console.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

@@ -2,13 +2,9 @@
 
 ## Ready
 
-- CCV1-033 Production deploy and smoke for guided ClickUp owner console
-  - Stage: release
-  - Owner: Ops/Release
-  - Priority: P0
-  - Scope: deploy the guided owner console and ClickUp discovery backend, then
-    verify owner login, token check, ClickUp Workspace/List selection, settings
-    save, native sync, and agent API readback in production.
+- No active ready task. Refill from `docs/planning/mvp-next-commits.md` after
+  the first real ClickUp token run confirms whether CCV1-034 should be
+  scheduled pull sync or webhook ingestion.
 
 ## Blocked
 
@@ -77,3 +73,4 @@
 - CCV1-028 Jarvis application-side CompanyCore Data Source deployment.
 - CCV1-031 ClickUp Discovery Backend.
 - CCV1-032 Guided Owner Console.
+- CCV1-033 Production deploy and smoke for guided ClickUp owner console.
