@@ -6,6 +6,7 @@ const state = {
   workspace: null,
   user: null,
   capabilities: [],
+  mobileMenuOpen: false,
   clickup: {
     configured: false,
     active: false,
@@ -58,10 +59,13 @@ const API_ORIGIN = window.location.hostname === "companycore.luckysparrow.ch"
 const views = [...document.querySelectorAll("[data-view]")];
 const privateControls = [...document.querySelectorAll("[data-private]")];
 const publicControls = [...document.querySelectorAll("[data-public]")];
+const publicShell = document.querySelector("[data-public-shell]");
 const links = [...document.querySelectorAll("[data-link]")];
+const navLinks = [...document.querySelectorAll("[data-nav]")];
 const loginForm = document.querySelector("#loginForm");
 const registerForm = document.querySelector("#registerForm");
 const logoutButton = document.querySelector("#logoutButton");
+const mobileMenuButton = document.querySelector("#mobileMenuButton");
 const clickupPanel = document.querySelector("#clickupPanel");
 const checkTokenButton = document.querySelector("#checkTokenButton");
 const refreshButton = document.querySelector("#refreshButton");
@@ -74,6 +78,11 @@ const clearListsButton = document.querySelector("#clearListsButton");
 const workspaceSelect = document.querySelector("#workspaceSelect");
 const connectionStatus = document.querySelector("#connectionStatus");
 const workspaceLabel = document.querySelector("#workspaceLabel");
+const routeTitle = document.querySelector("#routeTitle");
+const workspaceEyebrow = document.querySelector("#workspaceEyebrow");
+const sidebarWorkspaceName = document.querySelector("#sidebarWorkspaceName");
+const sidebarStatusDot = document.querySelector("#sidebarStatusDot");
+const sidebarStatusText = document.querySelector("#sidebarStatusText");
 const clickupWorkspaceLabel = document.querySelector("#clickupWorkspaceLabel");
 const workspaceNameLabel = document.querySelector("#workspaceNameLabel");
 const clickupStatusLabel = document.querySelector("#clickupStatusLabel");
@@ -127,6 +136,13 @@ const fields = {
   googleDriveImportMode: document.querySelector("#googleDriveImportMode")
 };
 
+const routeLabels = {
+  "/dashboard": "Dashboard",
+  "/settings": "ClickUp adapter",
+  "/settings/drive": "Google Drive",
+  "/settings/api": "API settings"
+};
+
 function normalizedPath(pathname = window.location.pathname) {
   const trimmed = pathname.replace(/\/+$/, "");
   return trimmed || "/";
@@ -144,22 +160,38 @@ function authHeaders() {
 }
 
 function updateChrome() {
+  const signedIn = isSignedIn();
+  document.body.classList.toggle("is-signed-in", signedIn);
+  document.body.classList.toggle("mobile-nav-open", state.mobileMenuOpen && signedIn);
   privateControls.forEach((element) => {
-    element.hidden = !isSignedIn();
+    element.hidden = !signedIn;
   });
   publicControls.forEach((element) => {
-    element.hidden = isSignedIn();
+    element.hidden = signedIn;
   });
+  if (publicShell) {
+    publicShell.hidden = signedIn;
+  }
+  if (mobileMenuButton) {
+    mobileMenuButton.setAttribute("aria-expanded", String(state.mobileMenuOpen && signedIn));
+  }
 }
 
-function navigate(path, { replace = false } = {}) {
+function navigate(path, { replace = false, hash = "" } = {}) {
   const nextPath = normalizedPath(path);
+  const nextUrl = `${nextPath}${hash}`;
   if (replace) {
-    window.history.replaceState({}, "", nextPath);
+    window.history.replaceState({}, "", nextUrl);
   } else {
-    window.history.pushState({}, "", nextPath);
+    window.history.pushState({}, "", nextUrl);
   }
+  state.mobileMenuOpen = false;
   renderRoute();
+  if (hash) {
+    window.requestAnimationFrame(() => {
+      document.querySelector(hash)?.scrollIntoView({ block: "start" });
+    });
+  }
 }
 
 function renderRoute() {
@@ -186,6 +218,18 @@ function renderRoute() {
     view.hidden = view.dataset.view !== path;
   });
 
+  navLinks.forEach((link) => {
+    const target = link.dataset.nav;
+    link.classList.toggle("active", target === path);
+  });
+  if (routeTitle) {
+    routeTitle.textContent = routeLabels[path] || "CompanyCore";
+  }
+  if (workspaceEyebrow) {
+    workspaceEyebrow.textContent = state.workspace
+      ? `${state.workspace.name} workspace`
+      : "Private workspace";
+  }
   document.body.dataset.route = path;
   renderConnectionState();
   setClickUpEnabled(isSignedIn());
@@ -755,6 +799,18 @@ function renderConnectionState() {
   connectionStatus.innerHTML = connected
     ? '<span class="dot ok"></span><span>Connected</span>'
     : '<span class="dot muted"></span><span>Not connected</span>';
+  if (sidebarStatusDot) {
+    sidebarStatusDot.className = connected ? "dot ok" : "dot muted";
+  }
+  if (sidebarStatusText) {
+    sidebarStatusText.textContent = connected ? "Connected" : "Not connected";
+  }
+  if (sidebarWorkspaceName) {
+    sidebarWorkspaceName.textContent = connected ? state.workspace.name : "Workspace";
+  }
+  if (workspaceEyebrow) {
+    workspaceEyebrow.textContent = connected ? `${state.workspace.name} workspace` : "Private workspace";
+  }
 
   workspaceLabel.textContent = connected
     ? `${state.workspace.name} workspace`
@@ -1079,11 +1135,18 @@ links.forEach((link) => {
       return;
     }
     event.preventDefault();
-    navigate(url.pathname);
+    navigate(url.pathname, { hash: url.hash });
   });
 });
 
 window.addEventListener("popstate", renderRoute);
+
+if (mobileMenuButton) {
+  mobileMenuButton.addEventListener("click", () => {
+    state.mobileMenuOpen = !state.mobileMenuOpen;
+    updateChrome();
+  });
+}
 
 logoutButton.addEventListener("click", () => {
   sessionStorage.removeItem("companycoreOwnerToken");

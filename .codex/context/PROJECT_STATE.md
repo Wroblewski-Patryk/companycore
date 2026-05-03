@@ -100,7 +100,7 @@ Last updated: 2026-05-03
 ## Current Focus
 - Main active objective: refine the v2 web console as the operator-facing
   control surface for company-area mapping across ClickUp, Google Drive, and
-  CompanyCore tables.
+  CompanyCore tables, while keeping deployable work consolidated on `main`.
 - Top blockers: GitHub-to-Coolify auto-deploy webhook administration remains
   blocked by missing callable webhook-management tooling in the current
   session. GitHub repository visibility shows admin permission, but the
@@ -113,12 +113,13 @@ Last updated: 2026-05-03
   pattern.
 
 ## Autonomous Iteration State
-- Current iteration: V2WEB-002 Manual Provider Scope Mapping.
+- Current iteration: V2WEB-003 Main Branch Web Console Shell Reconciliation.
 - Current operation mode: BUILDER
-- Last completed iteration: V2WEB-001 Operating Map And Google Drive Console.
-- Last completed task: added editable dashboard mapping controls plus backend
-  scope update endpoints for ClickUp provider mappings and Google Drive
-  folders.
+- Last completed iteration: V2WEB-002 Manual Provider Scope Mapping.
+- Last completed task: reconciled the web console shell on `main` so the
+  deploy branch keeps the current operating map, manual scope mapping, Drive
+  console, ClickUp settings, and API settings behind one scalable signed-in
+  navigation surface.
 - Next required mode: ARCHITECT when a new approved v2 web console or
   integration mapping task is moved into the active queue.
 
@@ -677,6 +678,11 @@ Last updated: 2026-05-03
   `operating-model:mappings:write` and `google-drive:files:scope:write`.
   `node --check public/app.js`, `git diff --check`, `npm run build`, and
   `npm test` passed locally.
+- 2026-05-03: Added `docs/operations/google-drive-owner-setup.md` so operators
+  have a click-by-click Google Cloud and CompanyCore owner UI runbook for
+  enabling Drive/Docs/Sheets APIs, OAuth consent, OAuth client credentials,
+  redirect URI setup, production env vars, folder ID selection, consent, import,
+  refresh, reconcile, and troubleshooting.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

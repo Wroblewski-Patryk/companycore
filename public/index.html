@@ -7,20 +7,51 @@
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
-    <header class="topbar">
+    <header class="public-topbar" data-public-shell>
       <a class="brand" href="/" data-link>
         <span class="brand-mark">CC</span>
         <span>CompanyCore</span>
       </a>
       <nav class="nav">
-        <a href="/dashboard" data-link data-private>Dashboard</a>
-        <a href="/settings" data-link data-private>Settings</a>
-        <a href="/settings/drive" data-link data-private>Drive</a>
-        <a href="/settings/api" data-link data-private>API</a>
         <a href="/auth/login" data-link data-public>Sign in</a>
-        <button type="button" class="link-button" id="logoutButton" data-private>Sign out</button>
+        <a href="/auth/register" data-link data-public>Create account</a>
       </nav>
     </header>
+
+    <div class="app-shell">
+      <aside class="sidebar" data-private>
+        <a class="brand sidebar-brand" href="/dashboard" data-link>
+          <span class="brand-mark">CC</span>
+          <span>
+            CompanyCore
+            <small id="sidebarWorkspaceName">Workspace</small>
+          </span>
+        </a>
+        <nav class="side-nav" aria-label="Workspace navigation">
+          <a href="/dashboard" data-link data-nav="/dashboard">Dashboard</a>
+          <a href="/dashboard#operating-map" data-link>Operating map</a>
+          <a href="/settings" data-link data-nav="/settings">ClickUp adapter</a>
+          <a href="/settings/drive" data-link data-nav="/settings/drive">Google Drive</a>
+          <a href="/settings/api" data-link data-nav="/settings/api">API settings</a>
+        </nav>
+        <div class="sidebar-status">
+          <span class="dot muted" id="sidebarStatusDot"></span>
+          <span id="sidebarStatusText">Not connected</span>
+        </div>
+      </aside>
+
+      <div class="workspace-frame">
+        <header class="workspace-topbar" data-private>
+          <button type="button" class="secondary mobile-menu-button" id="mobileMenuButton" aria-expanded="false">Menu</button>
+          <div>
+            <p class="label" id="workspaceEyebrow">Private workspace</p>
+            <h1 id="routeTitle">Dashboard</h1>
+          </div>
+          <div class="topbar-actions">
+            <a class="button-link secondary compact" href="/settings/api" data-link>API</a>
+            <button type="button" class="link-button compact" id="logoutButton">Sign out</button>
+          </div>
+        </header>
 
     <main class="shell">
       <section class="view hero" data-view="/">
@@ -130,7 +161,7 @@
           </article>
         </section>
 
-        <section class="panel operating-panel">
+        <section class="panel operating-panel" id="operating-map">
           <div class="section-title">
             <h2>Company operating map</h2>
             <p>Review the 12 company areas, their CompanyCore tables, provider mappings, Drive files, and live database counts.</p>
@@ -411,6 +442,8 @@
         <dl class="metrics" id="metrics"></dl>
       </section>
     </main>
+      </div>
+    </div>
 
     <script src="/app.js" defer></script>
   </body>

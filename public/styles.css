@@ -29,7 +29,7 @@ body {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-.topbar {
+.public-topbar {
   position: sticky;
   top: 0;
   z-index: 10;
@@ -42,6 +42,125 @@ body {
   border-bottom: 1px solid var(--border);
   background: rgba(246, 247, 249, 0.94);
   backdrop-filter: blur(12px);
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.is-signed-in .app-shell {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  display: grid;
+  align-content: start;
+  gap: 22px;
+  height: 100vh;
+  padding: 22px 18px;
+  border-right: 1px solid var(--border);
+  background: #ffffff;
+}
+
+.sidebar-brand {
+  align-items: flex-start;
+  padding: 4px 2px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-brand small {
+  display: block;
+  max-width: 190px;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.side-nav {
+  display: grid;
+  gap: 6px;
+}
+
+.side-nav a {
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #344054;
+  font-size: 14px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.side-nav a:hover,
+.side-nav a.active {
+  background: var(--soft);
+  color: var(--accent);
+}
+
+.sidebar-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.workspace-frame {
+  min-width: 0;
+}
+
+.workspace-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 84px;
+  padding: 16px 28px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(246, 247, 249, 0.94);
+  backdrop-filter: blur(12px);
+}
+
+.workspace-topbar h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.workspace-topbar .label {
+  margin-bottom: 5px;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.compact {
+  min-height: 38px;
+  padding: 9px 12px;
+  font-size: 14px;
+}
+
+.mobile-menu-button {
+  display: none;
 }
 
 .brand,
@@ -375,6 +494,14 @@ a[aria-disabled="true"] {
   opacity: 0.58;
 }
 
+.button-link.compact,
+button.compact,
+.link-button.compact {
+  min-height: 38px;
+  padding: 9px 12px;
+  font-size: 14px;
+}
+
 .secondary,
 .button-link.secondary {
   background: var(--soft);
@@ -426,6 +553,7 @@ a[aria-disabled="true"] {
 .operating-panel {
   padding: 24px;
   margin-bottom: 20px;
+  scroll-margin-top: 104px;
 }
 
 .operating-layout {
@@ -749,10 +877,45 @@ a[aria-disabled="true"] {
 }
 
 @media (max-width: 860px) {
-  .topbar {
+  .public-topbar {
     position: static;
     display: grid;
     padding: 14px 16px;
+  }
+
+  .is-signed-in .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 30;
+    width: min(300px, calc(100vw - 40px));
+    transform: translateX(-105%);
+    box-shadow: var(--shadow);
+    transition: transform 160ms ease;
+  }
+
+  .mobile-nav-open .sidebar {
+    transform: translateX(0);
+  }
+
+  .workspace-topbar {
+    position: static;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    padding: 14px 16px;
+  }
+
+  .topbar-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+
+  .mobile-menu-button {
+    display: inline-flex;
   }
 
   .nav {
