@@ -29,7 +29,7 @@
         </a>
         <nav class="side-nav" aria-label="Workspace navigation">
           <a href="/dashboard" data-link data-nav="/dashboard">Dashboard</a>
-          <a href="/dashboard#operating-map" data-link>Operating map</a>
+          <a href="/areas" data-link data-nav="/areas">Operating areas</a>
           <a href="/settings" data-link data-nav="/settings">ClickUp adapter</a>
           <a href="/settings/drive" data-link data-nav="/settings/drive">Google Drive</a>
           <a href="/settings/api" data-link data-nav="/settings/api">API settings</a>
@@ -161,40 +161,24 @@
           </article>
         </section>
 
-        <section class="panel operating-panel" id="operating-map">
+        <section class="panel module-launch">
           <div class="section-title">
-            <h2>Company operating map</h2>
-            <p>Review the 12 company areas, their CompanyCore tables, provider mappings, Drive files, and live database counts.</p>
+            <h2>Operating areas</h2>
+            <p>Open the 12-area company map to review tables, Drive folders, provider mappings, and manual relationship corrections.</p>
           </div>
-          <div class="operating-layout">
-            <aside class="area-rail" id="operatingAreasNav" aria-label="Company areas"></aside>
-            <div class="area-detail">
-              <div class="area-heading">
-                <div>
-                  <h3 id="areaTitle">Select an area</h3>
-                  <p id="areaDescription">Sign in to load the company operating model.</p>
-                </div>
-                <div class="area-stats" id="areaStats"></div>
-              </div>
-              <div class="area-columns">
-                <section>
-                  <h4>Tables</h4>
-                  <div class="compact-list" id="areaTables"></div>
-                </section>
-                <section>
-                  <h4>Google Drive</h4>
-                  <div class="compact-list" id="areaFiles"></div>
-                </section>
-                <section>
-                  <h4>Provider mappings</h4>
-                  <div class="compact-list" id="areaMappings"></div>
-                </section>
-              </div>
-              <section class="database-preview">
-                <h4>Database preview</h4>
-                <div class="compact-list" id="areaRecords"></div>
-              </section>
-            </div>
+          <div class="module-launch-grid">
+            <a class="module-link" href="/areas" data-link>
+              <strong>12 company areas</strong>
+              <span>Browse Strategy, Product, Sales, Operations, Relationships, and the rest of the operating model.</span>
+            </a>
+            <a class="module-link" href="/settings/drive" data-link>
+              <strong>Drive folders</strong>
+              <span>Connect or refresh imported folders before assigning them to areas.</span>
+            </a>
+            <a class="module-link" href="/settings" data-link>
+              <strong>ClickUp Lists</strong>
+              <span>Refresh provider structure and keep task lists aligned with the right department.</span>
+            </a>
           </div>
         </section>
 
@@ -206,6 +190,7 @@
             <p>Connect or review ClickUp and Google Drive, then refresh the operating map.</p>
           </div>
           <div class="actions">
+            <a class="button-link" href="/areas" data-link>Open areas</a>
             <a class="button-link" href="/settings" data-link>Open settings</a>
             <a class="button-link secondary" href="/settings/drive" data-link>Connect Drive</a>
             <a class="button-link secondary" href="/settings/api" data-link>View API</a>
@@ -238,6 +223,63 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" data-view="/areas">
+        <div class="page-title">
+          <div>
+            <p class="label">Operating model</p>
+            <h1>Operating areas</h1>
+            <p>Review and correct where provider data belongs across the 12 company departments.</p>
+          </div>
+          <div class="status-card">
+            <span class="dot ok"></span>
+            <span>Live mapping</span>
+          </div>
+        </div>
+
+        <section class="panel operating-panel" id="operating-map">
+          <div class="section-title row-title">
+            <div>
+              <h2>Company operating map</h2>
+              <p>Review the 12 company areas, their CompanyCore tables, provider mappings, Drive files, and live database counts.</p>
+            </div>
+            <div class="actions">
+              <a class="button-link secondary compact" href="/settings" data-link>ClickUp</a>
+              <a class="button-link secondary compact" href="/settings/drive" data-link>Drive</a>
+            </div>
+          </div>
+          <div class="operating-layout">
+            <aside class="area-rail" id="operatingAreasNav" aria-label="Company areas"></aside>
+            <div class="area-detail">
+              <div class="area-heading">
+                <div>
+                  <h3 id="areaTitle">Select an area</h3>
+                  <p id="areaDescription">Sign in to load the company operating model.</p>
+                </div>
+                <div class="area-stats" id="areaStats"></div>
+              </div>
+              <div class="area-columns">
+                <section>
+                  <h4>Tables</h4>
+                  <div class="compact-list" id="areaTables"></div>
+                </section>
+                <section>
+                  <h4>Google Drive</h4>
+                  <div class="compact-list" id="areaFiles"></div>
+                </section>
+                <section>
+                  <h4>Provider mappings</h4>
+                  <div class="compact-list" id="areaMappings"></div>
+                </section>
+              </div>
+              <section class="database-preview">
+                <h4>Database preview</h4>
+                <div class="compact-list" id="areaRecords"></div>
+              </section>
+            </div>
           </div>
         </section>
       </section>

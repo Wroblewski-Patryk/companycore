@@ -5,6 +5,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NOW
 
+- [x] V2WEB-004 Dedicated Operating Areas View
 - [x] V2WEB-002 Manual Provider Scope Mapping
 - [x] V2WEB-001 Operating Map And Google Drive Console
 - [x] V2GD-001 Google Drive Architecture And Queue
@@ -68,8 +69,9 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NEXT
 
-- [ ] No active P0/P1 Google Drive or web console implementation task remains
-      ready after V2WEB-002.
+- [ ] Continue v2 web console module extraction after `/areas`: task adapter,
+      integration taxonomy, and pipeline surfaces should each become
+      route-level slices only when their data path is already implemented.
 - [x] Source handoff package: document the OpenJarvis
       `5a426370` connector hygiene commit and the Paperclip `4cfa476f`
       adapter commit for managed upstream handoff.
@@ -79,13 +81,15 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [ ] Blocked source merge execution: push or upstream the Paperclip
       `4cfa476f` adapter commit after write access or a fork/PR route is
       available.
-- [ ] Optional release automation: complete GitHub-to-Coolify auto-deploy
-      webhook administration when webhook-management tooling or credentials are
-      available.
+- [x] Optional release automation: confirm GitHub-to-Coolify auto-deploy path
+      without GitHub Actions; Coolify auto deploy was enabled, received the
+      pushed `63348d6` commit, and succeeded after reloading the compose file.
 
 ## PIPELINE
 
 - [x] 49. V2WEB-002 Manual Provider Scope Mapping
+- [x] 50. V2WEB-003 Main Branch Web Console Shell Reconciliation
+- [x] 51. V2WEB-004 Dedicated Operating Areas View
 - [x] 48. V2WEB-001 Operating Map And Google Drive Console
 - [x] 39. V2GD-001 Google Drive Architecture And Queue
 - [x] 40. V2GD-002 Google Drive Persistence Foundation

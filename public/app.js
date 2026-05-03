@@ -1,4 +1,4 @@
-const privateRoutes = new Set(["/dashboard", "/settings", "/settings/drive", "/settings/api"]);
+const privateRoutes = new Set(["/dashboard", "/areas", "/settings", "/settings/drive", "/settings/api"]);
 const publicRoutes = new Set(["/", "/auth/login", "/auth/register"]);
 
 const state = {
@@ -138,6 +138,7 @@ const fields = {
 
 const routeLabels = {
   "/dashboard": "Dashboard",
+  "/areas": "Operating areas",
   "/settings": "ClickUp adapter",
   "/settings/drive": "Google Drive",
   "/settings/api": "API settings"

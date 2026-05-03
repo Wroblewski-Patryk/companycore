@@ -59,6 +59,7 @@ const webAppRoutes = [
   "/auth/login",
   "/auth/register",
   "/dashboard",
+  "/areas",
   "/settings",
   "/settings/drive",
   "/settings/api"

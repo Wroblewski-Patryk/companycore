@@ -3,20 +3,10 @@
 ## Ready
 
 No active P0/P1 Google Drive or web console implementation task remains ready
-after V2WEB-003.
+after V2WEB-004.
 
 ## Blocked
 
-- CCV1-020 GitHub webhook auto-deploy completion
-  - Stage: release
-  - Owner: Ops/Release
-  - Priority: P2
-  - Blocked by: GitHub webhook administration is not available through the
-    current tools. The GitHub app can see `Wroblewski-Patryk/companycore` with
-    admin permissions, but the exposed connector actions do not include
-    repository webhook list/create/update/delete. The local `gh` CLI is not
-    installed. Coolify services are healthy and manual rollover remains the
-    approved release path.
 - CCV1-057B Paperclip upstream branch push
   - Stage: release
   - Owner: Ops/Release
@@ -144,3 +134,5 @@ after V2WEB-003.
 - V2WEB-001 Operating Map And Google Drive Console.
 - V2WEB-002 Manual Provider Scope Mapping.
 - V2WEB-003 Main Branch Web Console Shell Reconciliation.
+- CCV1-020 GitHub webhook auto-deploy completion.
+- V2WEB-004 Dedicated Operating Areas View.

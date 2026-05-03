@@ -315,6 +315,7 @@ h4 {
 .compact-title p,
 .page-title p,
 .summary-card p,
+.module-link span,
 .form-note {
   color: var(--muted);
   line-height: 1.6;
@@ -370,6 +371,7 @@ h4 {
 }
 
 .summary-card,
+.module-launch,
 .next-panel,
 .api-panel,
 .table-panel {
@@ -391,6 +393,42 @@ h4 {
   margin-bottom: 10px;
   font-size: 22px;
   line-height: 1.2;
+}
+
+.module-launch {
+  margin-bottom: 20px;
+}
+
+.module-launch-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.module-link {
+  display: grid;
+  gap: 8px;
+  min-height: 124px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fbfcfe;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.module-link:hover {
+  border-color: #b9c8e2;
+  background: var(--soft);
+}
+
+.module-link strong {
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.module-link span {
+  font-size: 14px;
 }
 
 .mini-card {
@@ -934,7 +972,8 @@ button.compact,
   }
 
   .dashboard-grid,
-  .settings-grid {
+  .settings-grid,
+  .module-launch-grid {
     grid-template-columns: 1fr;
   }
 
@@ -971,6 +1010,7 @@ button.compact,
   .form,
   .result,
   .summary-card,
+  .module-launch,
   .next-panel,
   .api-panel {
     padding: 20px;

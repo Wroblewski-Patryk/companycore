@@ -101,11 +101,10 @@ Last updated: 2026-05-03
 - Main active objective: refine the v2 web console as the operator-facing
   control surface for company-area mapping across ClickUp, Google Drive, and
   CompanyCore tables, while keeping deployable work consolidated on `main`.
-- Top blockers: GitHub-to-Coolify auto-deploy webhook administration remains
-  blocked by missing callable webhook-management tooling in the current
-  session. GitHub repository visibility shows admin permission, but the
-  available GitHub connector surface does not expose webhook create/list/update
-  actions and the local `gh` CLI is unavailable.
+- Top blockers: no active P0/P1 v2 web console blocker after the dedicated
+  operating-areas route. GitHub-to-Coolify deploy no longer requires GitHub
+  Actions for CompanyCore; Coolify Auto Deploy is enabled on `main`, received
+  commit `63348d6`, and succeeded after the compose file was reloaded.
 - Success criteria for this phase: Google Drive folder/file metadata,
   searchable content snapshots, Docs/Sheets create/read/edit flows, Drive
   freshness, agent API access, operating-area dashboard mapping, and manual
@@ -113,15 +112,14 @@ Last updated: 2026-05-03
   pattern.
 
 ## Autonomous Iteration State
-- Current iteration: V2WEB-003 Main Branch Web Console Shell Reconciliation.
+- Current iteration: V2WEB-004 Dedicated Operating Areas View.
 - Current operation mode: BUILDER
-- Last completed iteration: V2WEB-002 Manual Provider Scope Mapping.
-- Last completed task: reconciled the web console shell on `main` so the
-  deploy branch keeps the current operating map, manual scope mapping, Drive
-  console, ClickUp settings, and API settings behind one scalable signed-in
-  navigation surface.
-- Next required mode: ARCHITECT when a new approved v2 web console or
-  integration mapping task is moved into the active queue.
+- Last completed iteration: V2WEB-003 Main Branch Web Console Shell Reconciliation.
+- Last completed task: added a dedicated `/areas` owner-console route for the
+  existing operating map and manual mapping controls, while keeping dashboard
+  as the summary and module navigation surface.
+- Next required mode: TESTER for the fifth v2 web console iteration unless an
+  architecture decision blocks the queue first.
 
 ## Recent Progress
 - 2026-05-02: Created Company Core backend foundation, Prisma schema, Docker

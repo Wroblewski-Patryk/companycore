@@ -1,5 +1,62 @@
 # Web Console V2 Task Contracts
 
+## V2WEB-004 Dedicated Operating Areas View
+
+- Task Type: design/frontend
+- Current Stage: done
+- Deliverable For This Stage: dedicated `/areas` owner-console route that
+  reuses the existing operating-map data and manual mapping controls without
+  changing backend contracts.
+- Goal: Move the 12-area company operating map toward the target information
+  architecture by giving operating areas their own module view while keeping
+  the dashboard focused on summary and navigation.
+- Scope:
+  - `public/index.html`
+  - `public/app.js`
+  - `public/styles.css`
+  - `src/app.ts`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+- Implementation Plan:
+  - Add `/areas` to the authenticated web route allowlist and signed-in
+    navigation.
+  - Move the existing operating-map panel into a dedicated `/areas` view,
+    preserving all DOM IDs used by current render and mapping logic.
+  - Replace the dashboard embedded map with a concise module launch panel that
+    links to the new route.
+  - Validate JavaScript syntax, build, integration tests, and desktop/mobile
+    route rendering.
+- Acceptance Criteria:
+  - Signed-in navigation includes `Operating areas` as its own route.
+  - `/areas` renders the existing 12-area operating map and manual mapping
+    controls.
+  - Dashboard remains a summary surface with a clear link to `/areas`.
+  - Existing `/settings`, `/settings/drive`, and `/settings/api` routes still
+    render.
+- Definition of Done:
+  - `node --check public/app.js`, `git diff --check`, `npm run build`, and
+    `npm test` pass.
+  - Browser smoke verifies `/dashboard` and `/areas` render on desktop and
+    mobile.
+  - Project state, task board, and next-commits docs are updated.
+- Result Report:
+  - Added `/areas` to the authenticated frontend route list and Express web
+    app route allowlist.
+  - Moved the existing operating map into a dedicated Operating Areas view
+    without changing backend contracts or duplicating mapping logic.
+  - Replaced the dashboard embedded map with a module launch panel linking to
+    Operating Areas, ClickUp settings, and Google Drive.
+  - Preserved the existing manual provider/Drive area selectors because the
+    original operating-map DOM IDs remain single-owner in the new route.
+  - Verified direct `/areas` refresh returns `index.html` instead of falling
+    through to protected API auth.
+  - `node --check public/app.js`, `git diff --check`, `npm run build`, and
+    `npm test` passed.
+  - Playwright smoke verified desktop `/areas`, desktop `/dashboard`, and
+    mobile sidebar behavior.
+
 ## V2WEB-002 Manual Provider Scope Mapping
 
 - Task Type: frontend/backend-integration
