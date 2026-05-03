@@ -460,3 +460,33 @@ Use this file to record the minimum checks after each deploy.
     `Reuse the same CompanyCore adapter path in Paperclip` and
     `Teach Jarvis to summarize CompanyCore records`, and agent
     `Jarvis production chat adapter`.
+
+## CompanyCore Clean Sync Data Hygiene
+
+- Timestamp: 2026-05-03
+- Backup:
+  - CompanyCore Postgres dump:
+    `/home/codex/backups/companycore-cleanup-20260503/companycore-before-cleanup.sql`
+  - Jarvis knowledge SQLite copy:
+    `/home/codex/backups/companycore-cleanup-20260503/jarvis-knowledge-before-cleanup.db`
+  - Jarvis sync-state SQLite copy:
+    `/home/codex/backups/companycore-cleanup-20260503/jarvis-sync-state-before-cleanup.db`
+- Audit finding:
+  - CompanyCore had 219 ClickUp tasks and 0 duplicate ClickUp task
+    `external_id` values.
+  - Repeated ClickUp maintenance pulls had created redundant
+    `task_synced_from_clickup` audit events.
+  - Jarvis had indexed CompanyCore events as ordinary knowledge chunks, which
+    made the knowledge database look noisy even though task records were not
+    duplicated.
+- Runtime fix:
+  - CompanyCore ClickUp sync now skips unchanged task pulls and does not emit a
+    new `task_synced_from_clickup` event for unchanged records.
+  - OpenJarvis CompanyCore connector now indexes CompanyCore events only when
+    `COMPANYCORE_SYNC_EVENTS` is explicitly enabled.
+- Cleanup result:
+  - Smoke/test records were removed from CompanyCore production data.
+  - Redundant ClickUp task sync events were pruned, preserving one latest sync
+    event per ClickUp task.
+  - Jarvis CompanyCore knowledge chunks were cleared and rebuilt from clean
+    business records.

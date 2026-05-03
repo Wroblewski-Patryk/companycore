@@ -86,8 +86,8 @@ Last updated: 2026-05-03
   Postgres volume.
 
 ## Current Focus
-- Main active objective: v1 runtime release candidate is live; no active
-  P0/P1 runtime hardening task remains ready.
+- Main active objective: v1 runtime release candidate is live with clean sync
+  data hygiene; no active P0/P1 runtime hardening task remains ready.
 - Top blockers: GitHub repository webhook setup needs an authenticated GitHub
   session or token with webhook administration permissions.
 - Success criteria for this phase: canonical docs, workspace/auth model,
@@ -96,14 +96,14 @@ Last updated: 2026-05-03
   and deployment smoke evidence are aligned.
 
 ## Autonomous Iteration State
-- Current iteration: CCV1-050 Jarvis CompanyCore Answer Precision Hardening.
+- Current iteration: CCV1-051 Clean Sync Data Hygiene.
 - Current operation mode: BUILDER
-- Last completed iteration: CCV1-050 Jarvis CompanyCore Answer Precision
-  Hardening.
-- Last completed task: filtered smoke/test records out of ordinary Jarvis
-  CompanyCore chat context, redeployed Jarvis, and verified the Paperclip
-  onboarding smoke returns the durable project, two durable tasks, and
-  `Jarvis production chat adapter`.
+- Last completed iteration: CCV1-051 Clean Sync Data Hygiene.
+- Last completed task: verified ClickUp task records are not duplicated,
+  changed ClickUp sync to skip unchanged task pulls without emitting duplicate
+  `task_synced_from_clickup` events, changed Jarvis CompanyCore connector
+  event indexing to opt-in, backed up production stores, and cleaned production
+  smoke/sync noise while preserving real ClickUp tasks.
 - Next required mode: ARCHITECT for the next planned v1/v2 scope decision
   unless priority changes.
 
@@ -543,6 +543,14 @@ Last updated: 2026-05-03
   `Reuse the same CompanyCore adapter path in Paperclip` and
   `Teach Jarvis to summarize CompanyCore records`, and agent
   `Jarvis production chat adapter`.
+- 2026-05-03: Completed CCV1-051 by auditing and cleaning sync data hygiene.
+  Production CompanyCore had 219 ClickUp tasks and 0 duplicate task external
+  IDs, but repeated syncs had produced redundant `task_synced_from_clickup`
+  events and smoke/test records. ClickUp sync now skips unchanged task pulls
+  without emitting duplicate task sync events. OpenJarvis CompanyCore connector
+  no longer indexes CompanyCore events by default; event indexing is opt-in via
+  `COMPANYCORE_SYNC_EVENTS`. Production backups were created under
+  `/home/codex/backups/companycore-cleanup-20260503` before cleanup.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

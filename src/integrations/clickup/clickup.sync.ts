@@ -64,6 +64,42 @@ export async function findOrCreateClickUpTaskList(workspaceId: string, listId?: 
   });
 }
 
+function normalizeDateValue(value: Date | string | null | undefined) {
+  if (!value) {
+    return null;
+  }
+  return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
+}
+
+function hasClickUpTaskDataChanges(
+  existing: {
+    title: string;
+    description: string | null;
+    status: string;
+    priority: string | null;
+    dueDate: Date | null;
+    taskListId: string | null;
+  },
+  next: {
+    title?: string;
+    description?: string | null;
+    status?: string;
+    priority?: string | null;
+    dueDate?: Date | string | null;
+    taskListId?: string | null;
+  }
+) {
+  return (
+    (next.title !== undefined && existing.title !== next.title) ||
+    (next.description !== undefined && existing.description !== next.description) ||
+    (next.status !== undefined && existing.status !== next.status) ||
+    (next.priority !== undefined && existing.priority !== next.priority) ||
+    (next.taskListId !== undefined && existing.taskListId !== next.taskListId) ||
+    (next.dueDate !== undefined &&
+      normalizeDateValue(existing.dueDate) !== normalizeDateValue(next.dueDate))
+  );
+}
+
 export async function syncClickUpTasksForWorkspace(workspaceId: string): Promise<SyncResult> {
   return syncClickUpTasksForWorkspaceWithOptions(workspaceId);
 }
@@ -178,6 +214,12 @@ export async function syncClickUpTasksForWorkspaceWithOptions(
       const taskList = await findOrCreateClickUpTaskList(workspaceId, clickUpTask.list?.id);
       if (taskList) {
         data.taskListId = taskList.id;
+      }
+
+      const shouldWrite = !existing || hasClickUpTaskDataChanges(existing, data);
+      if (existing && !shouldWrite) {
+        skippedCount += 1;
+        continue;
       }
 
       const task = await prisma.task.upsert({

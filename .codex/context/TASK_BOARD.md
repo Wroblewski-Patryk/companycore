@@ -2,7 +2,7 @@
 
 ## Ready
 
-No active P0/P1 runtime task is ready after CCV1-050.
+No active P0/P1 runtime task is ready after CCV1-051.
 
 ## Blocked
 
@@ -97,3 +97,4 @@ GitHub auto-deploy webhook administration task.
 - CCV1-048 V1 Closure Audit.
 - CCV1-049 Authenticated Jarvis Smoke And Managed Paperclip Source Path.
 - CCV1-050 Jarvis CompanyCore Answer Precision Hardening.
+- CCV1-051 Clean Sync Data Hygiene.

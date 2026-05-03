@@ -4,6 +4,75 @@ These task contracts turn the v1 audit into executable work. Each task must be
 completed as its own small iteration and must update `.codex/context/TASK_BOARD.md`,
 `.codex/context/PROJECT_STATE.md`, and relevant docs when status changes.
 
+## CCV1-051 Clean Sync Data Hygiene
+
+### Header
+- ID: CCV1-051
+- Title: Clean sync data hygiene
+- Task Type: runtime hardening
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder + QA/Test + Ops/Release
+- Depends on: CCV1-050
+- Priority: P0
+- Iteration: v1-051
+- Operation Mode: BUILDER
+
+### Goal
+Keep CompanyCore and Jarvis clean after repeated ClickUp and CompanyCore
+connector syncs.
+
+### Scope
+- ClickUp task sync event emission.
+- OpenJarvis CompanyCore connector event indexing behavior.
+- Production cleanup of smoke/test records and redundant sync events.
+- Jarvis CompanyCore knowledge index rebuild.
+
+### Implementation Plan
+- Audit production CompanyCore and Jarvis storage for duplicated records and
+  sync noise.
+- Verify ClickUp task records are idempotent by external ID.
+- Change ClickUp sync so unchanged task pulls are skipped and do not emit
+  duplicate `task_synced_from_clickup` events.
+- Change Jarvis CompanyCore connector so event indexing is opt-in through
+  `COMPANYCORE_SYNC_EVENTS`.
+- Back up production CompanyCore and Jarvis stores.
+- Remove smoke/test records and redundant ClickUp sync events from production.
+- Clear and rebuild Jarvis CompanyCore knowledge chunks from clean business
+  records.
+
+### Acceptance Criteria
+- [x] Production audit confirms no duplicate ClickUp tasks by external ID.
+- [x] Repeated unchanged ClickUp pull does not emit another task sync event.
+- [x] Jarvis CompanyCore connector does not index CompanyCore events by
+  default.
+- [x] Production backups exist before cleanup.
+- [x] Production cleanup preserves real ClickUp task records.
+- [x] Jarvis CompanyCore index is rebuilt from clean records.
+
+### Definition of Done
+- [x] CompanyCore tests pass.
+- [x] OpenJarvis CompanyCore connector tests pass.
+- [x] Production smoke verifies CompanyCore health and Jarvis connector health.
+- [x] Task board, project state, planning queue, and task contract updated.
+
+### Result Report
+- Task summary: Hardened sync idempotency and cleaned production data noise
+  caused by repeated ClickUp sync events and smoke records.
+- Files changed in CompanyCore: `src/integrations/clickup/clickup.sync.ts`,
+  `src/tests/api.test.ts`, `.codex/context/PROJECT_STATE.md`,
+  `.codex/context/TASK_BOARD.md`, `docs/planning/mvp-next-commits.md`, and this
+  task contract.
+- Files changed outside CompanyCore: OpenJarvis
+  `src/openjarvis/connectors/companycore.py` and
+  `tests/connectors/test_companycore.py`.
+- How tested: CompanyCore `npm test`; OpenJarvis targeted CompanyCore tests;
+  production SQL audit; production Jarvis connector smoke.
+- What is incomplete: GitHub-to-Coolify auto-deploy webhook administration
+  remains blocked by repository settings access.
+- Next steps: Continue with v2 scope decisions or auto-deploy administration
+  when credentials are available.
+
 ## CCV1-050 Jarvis CompanyCore Answer Precision Hardening
 
 ### Header

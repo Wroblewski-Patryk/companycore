@@ -1383,9 +1383,43 @@ test("CompanyCore v1 protected API flow", async () => {
     assert.equal(syncBody.data.createdCount, 1);
     assert.equal(syncBody.data.updatedCount, 0);
     assert.equal(syncBody.data.deletedCount, 0);
+
+    const secondSync = await request("/tasks/sync/clickup/native", {
+      method: "POST",
+      headers: authA,
+      body: JSON.stringify({
+        importMode: "merge"
+      })
+    });
+    assert.equal(secondSync.status, 200);
+    const secondSyncBody = secondSync.body as {
+      data: {
+        itemCount: number;
+        createdCount: number;
+        updatedCount: number;
+        skippedCount: number;
+      };
+    };
+    assert.equal(secondSyncBody.data.itemCount, 1);
+    assert.equal(secondSyncBody.data.createdCount, 0);
+    assert.equal(secondSyncBody.data.updatedCount, 0);
+    assert.equal(secondSyncBody.data.skippedCount, 1);
   } finally {
     globalThis.fetch = originalFetch;
   }
+
+  const clickUpSyncEvents = await prisma.event.findMany({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      source: "clickup",
+      type: "task_synced_from_clickup",
+      payload: {
+        path: ["externalId"],
+        equals: "clickup-task-1"
+      }
+    }
+  });
+  assert.equal(clickUpSyncEvents.length, 1);
 
   const events = await request("/events", { headers: authA });
   const listedTasksAfterImport = await request("/v1/tasks", { headers: authA });
