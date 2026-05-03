@@ -11,6 +11,8 @@ let server: ReturnType<ReturnType<typeof createApp>["listen"]>;
 
 async function resetDatabase() {
   await prisma.event.deleteMany();
+  await prisma.googleDriveContentSnapshot.deleteMany();
+  await prisma.googleDriveFile.deleteMany();
   await prisma.providerEventInbox.deleteMany();
   await prisma.agentEventOutbox.deleteMany();
   await prisma.externalWebhookRegistration.deleteMany();
@@ -255,6 +257,142 @@ test("CompanyCore v1 protected API flow", async () => {
     && route.path === "/v1/operating-model"
     && route.capability === "operating-model:read"
   )));
+  const assetsArea = await prisma.operatingArea.findUnique({
+    where: {
+      workspaceId_key: {
+        workspaceId: ownerA.workspace.id,
+        key: "assets-storage"
+      }
+    }
+  });
+  assert.ok(assetsArea);
+  const driveStorageLocation = await prisma.storageLocation.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      areaId: assetsArea.id,
+      provider: "google_drive",
+      name: "Drive root",
+      locator: { folderId: "drive-folder-root" }
+    }
+  });
+  const firstDriveFile = await prisma.googleDriveFile.upsert({
+    where: {
+      workspaceId_provider_externalId: {
+        workspaceId: ownerA.workspace.id,
+        provider: "google_drive",
+        externalId: "drive-file-1"
+      }
+    },
+    create: {
+      workspaceId: ownerA.workspace.id,
+      externalId: "drive-file-1",
+      name: "Original Drive file",
+      mimeType: "application/vnd.google-apps.document",
+      parentExternalId: "drive-folder-root",
+      webViewLink: "https://docs.google.com/document/d/drive-file-1",
+      headRevisionId: "rev-1",
+      storageLocationId: driveStorageLocation.id,
+      rawMetadata: { source: "test-import" },
+      syncStatus: "synced"
+    },
+    update: {
+      name: "Original Drive file"
+    }
+  });
+  const updatedDriveFile = await prisma.googleDriveFile.upsert({
+    where: {
+      workspaceId_provider_externalId: {
+        workspaceId: ownerA.workspace.id,
+        provider: "google_drive",
+        externalId: "drive-file-1"
+      }
+    },
+    create: {
+      workspaceId: ownerA.workspace.id,
+      externalId: "drive-file-1",
+      name: "Duplicate should not be created",
+      mimeType: "application/vnd.google-apps.document"
+    },
+    update: {
+      name: "Updated Drive file",
+      headRevisionId: "rev-2"
+    }
+  });
+  assert.equal(updatedDriveFile.id, firstDriveFile.id);
+  assert.equal(updatedDriveFile.name, "Updated Drive file");
+  const driveFileCount = await prisma.googleDriveFile.count({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      provider: "google_drive",
+      externalId: "drive-file-1"
+    }
+  });
+  assert.equal(driveFileCount, 1);
+
+  await prisma.googleDriveFile.create({
+    data: {
+      workspaceId: ownerB.workspace.id,
+      externalId: "drive-file-1",
+      name: "Workspace B Drive file",
+      mimeType: "application/vnd.google-apps.document"
+    }
+  });
+  const allWorkspaceCopies = await prisma.googleDriveFile.count({
+    where: {
+      provider: "google_drive",
+      externalId: "drive-file-1"
+    }
+  });
+  assert.equal(allWorkspaceCopies, 2);
+
+  const firstSnapshot = await prisma.googleDriveContentSnapshot.upsert({
+    where: {
+      googleDriveFileId_sourceRevisionId: {
+        googleDriveFileId: firstDriveFile.id,
+        sourceRevisionId: "rev-2"
+      }
+    },
+    create: {
+      workspaceId: ownerA.workspace.id,
+      googleDriveFileId: firstDriveFile.id,
+      sourceRevisionId: "rev-2",
+      contentKind: "google_doc",
+      extractedText: "Original extracted document text",
+      summary: "Original summary",
+      metadata: { extractor: "test" }
+    },
+    update: {
+      summary: "Original summary"
+    }
+  });
+  const updatedSnapshot = await prisma.googleDriveContentSnapshot.upsert({
+    where: {
+      googleDriveFileId_sourceRevisionId: {
+        googleDriveFileId: firstDriveFile.id,
+        sourceRevisionId: "rev-2"
+      }
+    },
+    create: {
+      workspaceId: ownerA.workspace.id,
+      googleDriveFileId: firstDriveFile.id,
+      sourceRevisionId: "rev-2",
+      contentKind: "google_doc",
+      summary: "Duplicate should not be created"
+    },
+    update: {
+      summary: "Refreshed summary"
+    }
+  });
+  assert.equal(updatedSnapshot.id, firstSnapshot.id);
+  assert.equal(updatedSnapshot.summary, "Refreshed summary");
+  const snapshotCount = await prisma.googleDriveContentSnapshot.count({
+    where: {
+      googleDriveFileId: firstDriveFile.id,
+      sourceRevisionId: "rev-2"
+    }
+  });
+  assert.equal(snapshotCount, 1);
+
   assert.ok(connectionBody.data.adapterManifest.routes.tasks.some((route) => (
     route.method === "POST"
     && route.path === "/v1/tasks"

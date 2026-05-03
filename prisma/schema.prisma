@@ -75,6 +75,8 @@ model Workspace {
   storageLocations             StorageLocation[]
   knowledgeRoots               KnowledgeRoot[]
   automationDefinitions        AutomationDefinition[]
+  googleDriveFiles             GoogleDriveFile[]
+  googleDriveContentSnapshots  GoogleDriveContentSnapshot[]
   externalWebhookRegistrations ExternalWebhookRegistration[]
   providerEventInbox           ProviderEventInbox[]
   agentEventOutbox             AgentEventOutbox[]
@@ -97,6 +99,7 @@ model OperatingArea {
   externalContainerMappings ExternalContainerMapping[]
   storageLocations          StorageLocation[]
   knowledgeRoots            KnowledgeRoot[]
+  googleDriveFiles          GoogleDriveFile[]
   automationDefinitions     AutomationDefinition[]
   createdAt                 DateTime                   @default(now()) @map("created_at")
   updatedAt                 DateTime                   @updatedAt @map("updated_at")
@@ -121,6 +124,7 @@ model OperatingFolder {
   externalContainerMappings ExternalContainerMapping[]
   storageLocations          StorageLocation[]
   knowledgeRoots            KnowledgeRoot[]
+  googleDriveFiles          GoogleDriveFile[]
   automationDefinitions     AutomationDefinition[]
   createdAt                 DateTime                   @default(now()) @map("created_at")
   updatedAt                 DateTime                   @updatedAt @map("updated_at")
@@ -150,6 +154,7 @@ model OperatingTable {
   externalFieldMappings     ExternalFieldMapping[]
   storageLocations          StorageLocation[]
   knowledgeRoots            KnowledgeRoot[]
+  googleDriveFiles          GoogleDriveFile[]
   automationDefinitions     AutomationDefinition[]
   createdAt                 DateTime                   @default(now()) @map("created_at")
   updatedAt                 DateTime                   @updatedAt @map("updated_at")
@@ -206,40 +211,42 @@ model ExternalFieldMapping {
 }
 
 model StorageLocation {
-  id          String           @id @default(uuid()) @db.Uuid
-  workspaceId String           @map("workspace_id") @db.Uuid
-  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  areaId      String?          @map("area_id") @db.Uuid
-  area        OperatingArea?   @relation(fields: [areaId], references: [id], onDelete: SetNull)
-  folderId    String?          @map("folder_id") @db.Uuid
-  folder      OperatingFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
-  tableId     String?          @map("table_id") @db.Uuid
-  table       OperatingTable?  @relation(fields: [tableId], references: [id], onDelete: SetNull)
-  provider    String
-  name        String
-  locator     Json
-  createdAt   DateTime         @default(now()) @map("created_at")
-  updatedAt   DateTime         @updatedAt @map("updated_at")
+  id               String            @id @default(uuid()) @db.Uuid
+  workspaceId      String            @map("workspace_id") @db.Uuid
+  workspace        Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  areaId           String?           @map("area_id") @db.Uuid
+  area             OperatingArea?    @relation(fields: [areaId], references: [id], onDelete: SetNull)
+  folderId         String?           @map("folder_id") @db.Uuid
+  folder           OperatingFolder?  @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  tableId          String?           @map("table_id") @db.Uuid
+  table            OperatingTable?   @relation(fields: [tableId], references: [id], onDelete: SetNull)
+  provider         String
+  name             String
+  locator          Json
+  googleDriveFiles GoogleDriveFile[]
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
 
   @@index([workspaceId, provider])
   @@map("storage_locations")
 }
 
 model KnowledgeRoot {
-  id          String           @id @default(uuid()) @db.Uuid
-  workspaceId String           @map("workspace_id") @db.Uuid
-  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  areaId      String?          @map("area_id") @db.Uuid
-  area        OperatingArea?   @relation(fields: [areaId], references: [id], onDelete: SetNull)
-  folderId    String?          @map("folder_id") @db.Uuid
-  folder      OperatingFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
-  tableId     String?          @map("table_id") @db.Uuid
-  table       OperatingTable?  @relation(fields: [tableId], references: [id], onDelete: SetNull)
-  provider    String
-  name        String
-  locator     Json
-  createdAt   DateTime         @default(now()) @map("created_at")
-  updatedAt   DateTime         @updatedAt @map("updated_at")
+  id               String            @id @default(uuid()) @db.Uuid
+  workspaceId      String            @map("workspace_id") @db.Uuid
+  workspace        Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  areaId           String?           @map("area_id") @db.Uuid
+  area             OperatingArea?    @relation(fields: [areaId], references: [id], onDelete: SetNull)
+  folderId         String?           @map("folder_id") @db.Uuid
+  folder           OperatingFolder?  @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  tableId          String?           @map("table_id") @db.Uuid
+  table            OperatingTable?   @relation(fields: [tableId], references: [id], onDelete: SetNull)
+  provider         String
+  name             String
+  locator          Json
+  googleDriveFiles GoogleDriveFile[]
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
 
   @@index([workspaceId, provider])
   @@map("knowledge_roots")
@@ -267,6 +274,79 @@ model AutomationDefinition {
 
   @@index([workspaceId, provider])
   @@map("automation_definitions")
+}
+
+model GoogleDriveFile {
+  id                String                       @id @default(uuid()) @db.Uuid
+  workspaceId       String                       @map("workspace_id") @db.Uuid
+  workspace         Workspace                    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  provider          String                       @default("google_drive")
+  externalId        String                       @map("external_id")
+  name              String
+  mimeType          String                       @map("mime_type")
+  driveId           String?                      @map("drive_id")
+  parentExternalId  String?                      @map("parent_external_id")
+  isFolder          Boolean                      @default(false) @map("is_folder")
+  trashed           Boolean                      @default(false)
+  webViewLink       String?                      @map("web_view_link")
+  webContentLink    String?                      @map("web_content_link")
+  iconLink          String?                      @map("icon_link")
+  thumbnailLink     String?                      @map("thumbnail_link")
+  size              String?
+  headRevisionId    String?                      @map("head_revision_id")
+  md5Checksum       String?                      @map("md5_checksum")
+  modifiedTime      DateTime?                    @map("modified_time")
+  operatingAreaId   String?                      @map("operating_area_id") @db.Uuid
+  operatingArea     OperatingArea?               @relation(fields: [operatingAreaId], references: [id], onDelete: SetNull)
+  operatingFolderId String?                      @map("operating_folder_id") @db.Uuid
+  operatingFolder   OperatingFolder?             @relation(fields: [operatingFolderId], references: [id], onDelete: SetNull)
+  operatingTableId  String?                      @map("operating_table_id") @db.Uuid
+  operatingTable    OperatingTable?              @relation(fields: [operatingTableId], references: [id], onDelete: SetNull)
+  storageLocationId String?                      @map("storage_location_id") @db.Uuid
+  storageLocation   StorageLocation?             @relation(fields: [storageLocationId], references: [id], onDelete: SetNull)
+  knowledgeRootId   String?                      @map("knowledge_root_id") @db.Uuid
+  knowledgeRoot     KnowledgeRoot?               @relation(fields: [knowledgeRootId], references: [id], onDelete: SetNull)
+  syncStatus        String                       @default("pending") @map("sync_status")
+  scanStatus        String                       @default("not_scanned") @map("scan_status")
+  lastSyncedAt      DateTime?                    @map("last_synced_at")
+  lastScannedAt     DateTime?                    @map("last_scanned_at")
+  rawMetadata       Json                         @default("{}") @map("raw_metadata")
+  contentSnapshots  GoogleDriveContentSnapshot[]
+  createdAt         DateTime                     @default(now()) @map("created_at")
+  updatedAt         DateTime                     @updatedAt @map("updated_at")
+
+  @@unique([workspaceId, provider, externalId])
+  @@index([workspaceId, parentExternalId])
+  @@index([workspaceId, isFolder])
+  @@index([workspaceId, operatingAreaId])
+  @@index([workspaceId, operatingFolderId])
+  @@index([workspaceId, operatingTableId])
+  @@index([workspaceId, storageLocationId])
+  @@index([workspaceId, knowledgeRootId])
+  @@map("google_drive_files")
+}
+
+model GoogleDriveContentSnapshot {
+  id                String          @id @default(uuid()) @db.Uuid
+  workspaceId       String          @map("workspace_id") @db.Uuid
+  workspace         Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  googleDriveFileId String          @map("google_drive_file_id") @db.Uuid
+  googleDriveFile   GoogleDriveFile @relation(fields: [googleDriveFileId], references: [id], onDelete: Cascade)
+  sourceRevisionId  String          @map("source_revision_id")
+  contentKind       String          @map("content_kind")
+  extractedText     String?         @map("extracted_text")
+  structuredPreview Json?           @map("structured_preview")
+  summary           String?
+  scanStatus        String          @default("completed") @map("scan_status")
+  errorCode         String?         @map("error_code")
+  metadata          Json            @default("{}")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+
+  @@unique([googleDriveFileId, sourceRevisionId])
+  @@index([workspaceId, contentKind])
+  @@index([workspaceId, scanStatus])
+  @@map("google_drive_content_snapshots")
 }
 
 model ExternalWebhookRegistration {

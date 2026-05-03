@@ -6,6 +6,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 ## NOW
 
 - [x] V2GD-001 Google Drive Architecture And Queue
+- [x] V2GD-002 Google Drive Persistence Foundation
 - [x] CCV1-009P Protected production smoke for adapter CRUD
 - [x] CCV1-027 Paperclip and Jarvis production env wiring
 - [x] CCV1-029 ClickUp production bootstrap slot
@@ -58,7 +59,6 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NEXT
 
-- [ ] V2GD-002 Google Drive Persistence Foundation
 - [ ] V2GD-003 Google Drive Provider Client And OAuth Settings
 - [ ] V2GD-004 Folder Discovery And File Import
 - [ ] V2GD-005 Docs And Sheets Read/Create/Edit
@@ -79,7 +79,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 ## PIPELINE
 
 - [x] 39. V2GD-001 Google Drive Architecture And Queue
-- [ ] 40. V2GD-002 Google Drive Persistence Foundation
+- [x] 40. V2GD-002 Google Drive Persistence Foundation
 - [ ] 41. V2GD-003 Google Drive Provider Client And OAuth Settings
 - [ ] 42. V2GD-004 Folder Discovery And File Import
 - [ ] 43. V2GD-005 Docs And Sheets Read/Create/Edit

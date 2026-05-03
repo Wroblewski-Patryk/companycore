@@ -26,9 +26,8 @@ integration fields such as `external_id` and `source` where relevant.
 - `api_keys`: workspace-scoped service credentials for agents and automations.
 - `integration_settings`: workspace-scoped provider configuration and protected
   secret material, starting with ClickUp.
-- future `google_drive_files`: workspace-scoped Google Drive folder/file
-  metadata.
-- future `google_drive_content_snapshots`: extracted searchable text, summary,
+- `google_drive_files`: workspace-scoped Google Drive folder/file metadata.
+- `google_drive_content_snapshots`: extracted searchable text, summary,
   preview, and scan state for Drive files.
 
 ## Operating Registry
@@ -340,7 +339,7 @@ The live-sync direction is:
 Google Drive v2 adds file and content records without changing PostgreSQL as
 the CompanyCore source of truth for operational state.
 
-Planned tables:
+Implemented tables:
 
 - `google_drive_files`
   - `workspace_id`

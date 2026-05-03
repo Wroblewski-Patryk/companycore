@@ -2,12 +2,12 @@
 
 ## Ready
 
-- V2GD-002 Google Drive Persistence Foundation
+- V2GD-003 Google Drive Provider Client And OAuth Settings
   - Stage: planning
-  - Owner: DB/Migrations + Backend Builder
+  - Owner: Backend Builder
   - Priority: P1
-  - Goal: add workspace-scoped Drive folder/file and content snapshot
-    persistence with idempotent import behavior.
+  - Goal: add workspace-owned Google Drive provider settings and a safe client
+    boundary for Drive, Docs, and Sheets APIs.
 
 ## Blocked
 
@@ -41,7 +41,6 @@
 
 ## Backlog
 
-- V2GD-003 Google Drive Provider Client And OAuth Settings.
 - V2GD-004 Folder Discovery And File Import.
 - V2GD-005 Docs And Sheets Read/Create/Edit.
 - V2GD-006 Drive Changes Freshness.
@@ -139,3 +138,4 @@
 - CCV1-059 GitHub Auto-Deploy Capability Audit.
 - CCV1-060 V1 Operator Handoff.
 - V2GD-001 Google Drive Architecture And Queue.
+- V2GD-002 Google Drive Persistence Foundation.

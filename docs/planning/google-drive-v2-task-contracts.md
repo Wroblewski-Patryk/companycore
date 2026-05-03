@@ -50,7 +50,7 @@ It follows the repository task contract and must stay synchronized with
 ## V2GD-002 Google Drive Persistence Foundation
 
 - Task Type: database/backend
-- Current Stage: planning
+- Current Stage: done
 - Deliverable For This Stage: Prisma migration and tests for workspace-scoped
   Drive folder/file/content persistence.
 - Goal: Add durable Google Drive metadata and content snapshot tables that keep
@@ -79,12 +79,18 @@ It follows the repository task contract and must stay synchronized with
   - `git diff --check` passes.
   - Database docs are updated.
 - Result Report:
-  - Pending.
+  - Added `google_drive_files` and `google_drive_content_snapshots`.
+  - Added idempotency constraints for Drive file metadata and file/revision
+    content snapshots.
+  - Added workspace/scope indexes for folder traversal and future dashboard
+    filtering.
+  - Added tests proving same-workspace upsert idempotency, cross-workspace
+    external ID separation, and snapshot refresh without duplicates.
 
 ## V2GD-003 Google Drive Provider Client And OAuth Settings
 
 - Task Type: backend/integration
-- Current Stage: planning
+- Current Stage: ready
 - Deliverable For This Stage: workspace-owned Google Drive settings, encrypted
   OAuth token storage contract, and safe provider client.
 - Goal: Allow an owner to connect Google Drive through OAuth-backed workspace
