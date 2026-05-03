@@ -6,6 +6,7 @@ const capabilities = [
   "connection:read",
   "operating-model:read",
   "operating-model:write",
+  "operating-model:mappings:write",
   "projects:read",
   "projects:write",
   "goals:read",
@@ -48,6 +49,7 @@ const capabilities = [
   "integration-settings:google-drive:changes:reconcile",
   "integration-settings:google-drive:oauth",
   "google-drive:files:read",
+  "google-drive:files:scope:write",
   "google-drive:docs:write",
   "google-drive:sheets:write"
 ] as const;
@@ -67,6 +69,7 @@ const adapterManifest = {
       { method: "GET", path: "/v1/operating-model", capability: "operating-model:read" },
       { method: "GET", path: "/v1/operating-model/tables", capability: "operating-model:read" },
       { method: "GET", path: "/v1/operating-model/external-mappings", capability: "operating-model:read" },
+      { method: "PATCH", path: "/v1/operating-model/external-mappings/:id/scope", capability: "operating-model:mappings:write" },
       { method: "GET", path: "/v1/operating-model/external-fields", capability: "operating-model:read" },
       { method: "GET", path: "/v1/operating-model/storage-locations", capability: "operating-model:read" },
       { method: "POST", path: "/v1/operating-model/storage-locations", capability: "operating-model:write" },
@@ -156,6 +159,7 @@ const adapterManifest = {
     googleDrive: [
       { method: "GET", path: "/v1/google-drive/files", capability: "google-drive:files:read" },
       { method: "GET", path: "/v1/google-drive/files/:id/content", capability: "google-drive:files:read" },
+      { method: "PATCH", path: "/v1/google-drive/files/:id/scope", capability: "google-drive:files:scope:write" },
       { method: "POST", path: "/v1/google-drive/docs", capability: "google-drive:docs:write" },
       { method: "PATCH", path: "/v1/google-drive/docs/:id", capability: "google-drive:docs:write" },
       { method: "POST", path: "/v1/google-drive/sheets", capability: "google-drive:sheets:write" },

@@ -575,6 +575,29 @@ a[aria-disabled="true"] {
   line-height: 1.4;
 }
 
+.scope-editor {
+  display: grid;
+  gap: 5px;
+  margin-top: 9px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.scope-editor span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.scope-editor select {
+  min-height: 34px;
+  padding: 6px 8px;
+  border-radius: 7px;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
 .dense-grid {
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }

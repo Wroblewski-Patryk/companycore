@@ -42,6 +42,26 @@ async function upsertContainerMapping(input: {
   tableId?: string | null;
   raw?: Prisma.InputJsonValue;
 }) {
+  const existing = await prisma.externalContainerMapping.findUnique({
+    where: {
+      workspaceId_provider_entityType_externalId: {
+        workspaceId: input.workspaceId,
+        provider: "clickup",
+        entityType: input.entityType,
+        externalId: input.externalId
+      }
+    }
+  });
+  const existingRaw = existing?.raw && typeof existing.raw === "object" && !Array.isArray(existing.raw)
+    ? existing.raw as Record<string, unknown>
+    : {};
+  const manualAreaId = typeof existingRaw.manualAreaId === "string" ? existingRaw.manualAreaId : null;
+  const nextAreaId = manualAreaId ?? input.areaId;
+  const nextRaw = {
+    ...(input.raw && typeof input.raw === "object" && !Array.isArray(input.raw) ? input.raw as Record<string, unknown> : {}),
+    ...(manualAreaId ? { manualAreaId } : {})
+  };
+
   await prisma.externalContainerMapping.upsert({
     where: {
       workspaceId_provider_entityType_externalId: {
@@ -53,10 +73,10 @@ async function upsertContainerMapping(input: {
     },
     update: {
       name: input.name,
-      areaId: input.areaId,
+      areaId: nextAreaId,
       folderId: input.folderId,
       tableId: input.tableId,
-      raw: input.raw
+      raw: nextRaw as Prisma.InputJsonValue
     },
     create: {
       workspaceId: input.workspaceId,
@@ -64,10 +84,10 @@ async function upsertContainerMapping(input: {
       entityType: input.entityType,
       externalId: input.externalId,
       name: input.name,
-      areaId: input.areaId,
+      areaId: nextAreaId,
       folderId: input.folderId,
       tableId: input.tableId,
-      raw: input.raw
+      raw: nextRaw as Prisma.InputJsonValue
     }
   });
 }
@@ -138,6 +158,33 @@ async function upsertClickUpListTable(input: {
   spaceName?: string;
   folderName?: string | null;
 }) {
+  const existingTable = await prisma.operatingTable.findUnique({
+    where: {
+      workspaceId_source_externalId: {
+        workspaceId: input.workspaceId,
+        source: "clickup",
+        externalId: input.list.id
+      }
+    },
+    select: {
+      syncPolicy: true
+    }
+  });
+  const existingPolicy = existingTable?.syncPolicy && typeof existingTable.syncPolicy === "object" && !Array.isArray(existingTable.syncPolicy)
+    ? existingTable.syncPolicy as Record<string, unknown>
+    : {};
+  const manualAreaId = typeof existingPolicy.manualAreaId === "string" ? existingPolicy.manualAreaId : null;
+  const nextAreaId = manualAreaId ?? input.areaId;
+  const syncPolicy = {
+    provider: "clickup",
+    entityType: "list",
+    externalId: input.list.id,
+    sourceNames: {
+      space: input.spaceName ?? null,
+      folder: input.folderName ?? null
+    },
+    ...(manualAreaId ? { manualAreaId } : {})
+  };
   const baseSlug = slugify(input.list.name) || input.list.id;
   const table = await prisma.operatingTable.upsert({
     where: {
@@ -148,25 +195,17 @@ async function upsertClickUpListTable(input: {
       }
     },
     update: {
-      areaId: input.areaId,
+      areaId: nextAreaId,
       folderId: input.folderId,
       tableName: `clickup_list_${input.list.id}`,
       apiSlug: `clickup-${baseSlug}-${input.list.id}`,
       name: input.list.name,
       description: "ClickUp List mapped as an operating table",
-      syncPolicy: {
-        provider: "clickup",
-        entityType: "list",
-        externalId: input.list.id,
-        sourceNames: {
-          space: input.spaceName ?? null,
-          folder: input.folderName ?? null
-        }
-      }
+      syncPolicy
     },
     create: {
       workspaceId: input.workspaceId,
-      areaId: input.areaId,
+      areaId: nextAreaId,
       folderId: input.folderId,
       tableName: `clickup_list_${input.list.id}`,
       apiSlug: `clickup-${baseSlug}-${input.list.id}`,
@@ -174,15 +213,7 @@ async function upsertClickUpListTable(input: {
       description: "ClickUp List mapped as an operating table",
       source: "clickup",
       externalId: input.list.id,
-      syncPolicy: {
-        provider: "clickup",
-        entityType: "list",
-        externalId: input.list.id,
-        sourceNames: {
-          space: input.spaceName ?? null,
-          folder: input.folderName ?? null
-        }
-      }
+      syncPolicy
     }
   });
 
@@ -191,7 +222,7 @@ async function upsertClickUpListTable(input: {
     entityType: "list",
     externalId: input.list.id,
     name: input.list.name,
-    areaId: input.areaId,
+    areaId: nextAreaId,
     folderId: input.folderId,
     tableId: table.id,
     raw: {
@@ -211,6 +242,21 @@ async function upsertClickUpFolder(input: {
   folder: ClickUpFolderSummary;
   spaceName?: string;
 }) {
+  const existingFolderMapping = await prisma.externalContainerMapping.findUnique({
+    where: {
+      workspaceId_provider_entityType_externalId: {
+        workspaceId: input.workspaceId,
+        provider: "clickup",
+        entityType: "folder",
+        externalId: input.folder.id
+      }
+    }
+  });
+  const existingRaw = existingFolderMapping?.raw && typeof existingFolderMapping.raw === "object" && !Array.isArray(existingFolderMapping.raw)
+    ? existingFolderMapping.raw as Record<string, unknown>
+    : {};
+  const manualAreaId = typeof existingRaw.manualAreaId === "string" ? existingRaw.manualAreaId : null;
+  const nextAreaId = manualAreaId ?? input.areaId;
   const folder = await prisma.operatingFolder.upsert({
     where: {
       workspaceId_source_externalId: {
@@ -220,14 +266,14 @@ async function upsertClickUpFolder(input: {
       }
     },
     update: {
-      areaId: input.areaId,
+      areaId: nextAreaId,
       key: `clickup-folder-${input.folder.id}`,
       name: input.folder.name,
       description: "ClickUp Folder mapped as an operating folder"
     },
     create: {
       workspaceId: input.workspaceId,
-      areaId: input.areaId,
+      areaId: nextAreaId,
       key: `clickup-folder-${input.folder.id}`,
       name: input.folder.name,
       description: "ClickUp Folder mapped as an operating folder",
@@ -241,7 +287,7 @@ async function upsertClickUpFolder(input: {
     entityType: "folder",
     externalId: input.folder.id,
     name: input.folder.name,
-    areaId: input.areaId,
+    areaId: nextAreaId,
     folderId: folder.id,
     raw: {
       id: input.folder.id,

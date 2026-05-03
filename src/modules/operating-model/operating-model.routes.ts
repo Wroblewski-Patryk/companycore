@@ -12,6 +12,11 @@ const scopedResourceSchema = z.object({
   tableId: uuidSchema.optional()
 }).strict();
 
+const externalMappingScopeSchema = z.object({
+  areaId: uuidSchema,
+  applyToChildren: z.boolean().optional()
+}).strict();
+
 const storageLocationSchema = scopedResourceSchema.extend({
   provider: z.string().min(1),
   name: z.string().min(1),
@@ -134,6 +139,110 @@ operatingModelRouter.get("/external-mappings", asyncHandler(async (req, res) => 
   });
 
   res.json({ data: mappings });
+}));
+
+operatingModelRouter.patch("/external-mappings/:id/scope", asyncHandler(async (req, res) => {
+  const input = externalMappingScopeSchema.parse(req.body);
+  const workspaceId = req.auth!.workspaceId;
+  const mappingId = uuidSchema.parse(req.params.id);
+
+  const area = await prisma.operatingArea.findFirst({
+    where: { id: input.areaId, workspaceId },
+    select: { id: true }
+  });
+  if (!area) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  const mapping = await prisma.externalContainerMapping.findFirst({
+    where: { id: mappingId, workspaceId }
+  });
+  if (!mapping) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  const raw = mapping.raw && typeof mapping.raw === "object" && !Array.isArray(mapping.raw)
+    ? mapping.raw as Record<string, unknown>
+    : {};
+
+  const updated = await prisma.externalContainerMapping.update({
+    where: { id: mapping.id },
+    data: {
+      areaId: area.id,
+      raw: {
+        ...raw,
+        manualAreaId: area.id
+      } as Prisma.InputJsonValue
+    }
+  });
+
+  if (mapping.provider === "clickup" && mapping.entityType === "list" && mapping.tableId) {
+    const table = await prisma.operatingTable.findFirst({
+      where: { id: mapping.tableId, workspaceId }
+    });
+    const policy = table?.syncPolicy && typeof table.syncPolicy === "object" && !Array.isArray(table.syncPolicy)
+      ? table.syncPolicy as Record<string, unknown>
+      : {};
+    await prisma.operatingTable.updateMany({
+      where: { id: mapping.tableId, workspaceId },
+      data: {
+        areaId: area.id,
+        syncPolicy: {
+          ...policy,
+          manualAreaId: area.id
+        } as Prisma.InputJsonValue
+      }
+    });
+  }
+
+  if (mapping.provider === "clickup" && mapping.entityType === "folder" && mapping.folderId) {
+    await prisma.operatingFolder.updateMany({
+      where: { id: mapping.folderId, workspaceId },
+      data: { areaId: area.id }
+    });
+
+    if (input.applyToChildren ?? true) {
+      const childTables = await prisma.operatingTable.findMany({
+        where: { workspaceId, folderId: mapping.folderId, source: "clickup" },
+        select: { id: true, syncPolicy: true }
+      });
+      for (const table of childTables) {
+        const policy = table.syncPolicy && typeof table.syncPolicy === "object" && !Array.isArray(table.syncPolicy)
+          ? table.syncPolicy as Record<string, unknown>
+          : {};
+        await prisma.operatingTable.update({
+          where: { id: table.id },
+          data: {
+            areaId: area.id,
+            syncPolicy: {
+              ...policy,
+              manualAreaId: area.id
+            } as Prisma.InputJsonValue
+          }
+        });
+      }
+      await prisma.externalContainerMapping.updateMany({
+        where: {
+          workspaceId,
+          provider: "clickup",
+          entityType: "list",
+          tableId: { in: childTables.map((table) => table.id) }
+        },
+        data: { areaId: area.id }
+      });
+    }
+  }
+
+  const refreshed = await prisma.externalContainerMapping.findUnique({
+    where: { id: updated.id },
+    include: {
+      area: true,
+      folder: true,
+      table: true
+    }
+  });
+
+  res.json({ data: refreshed });
 }));
 
 operatingModelRouter.get("/external-fields", asyncHandler(async (req, res) => {

@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { z } from "zod";
 import { IntegrationError } from "../../integrations/errors";
+import { prisma } from "../../db/prisma";
+import { toJsonInput } from "../../integrations/integration-settings.service";
 import {
   createGoogleDoc,
   createGoogleSheet,
@@ -33,6 +35,13 @@ const updateSheetValuesSchema = z.object({
   values: z.array(z.array(z.unknown()))
 }).strict();
 
+const uuidSchema = z.string().uuid();
+
+const updateDriveScopeSchema = z.object({
+  areaId: uuidSchema,
+  applyToChildren: z.boolean().optional()
+}).strict();
+
 export const googleDriveRouter = Router();
 
 googleDriveRouter.get("/files", asyncHandler(async (req, res) => {
@@ -54,6 +63,123 @@ googleDriveRouter.get("/files/:id/content", asyncHandler(async (req, res) => {
     }
     throw error;
   }
+}));
+
+googleDriveRouter.patch("/files/:id/scope", asyncHandler(async (req, res) => {
+  const input = updateDriveScopeSchema.parse(req.body);
+  const workspaceId = req.auth!.workspaceId;
+  const fileId = uuidSchema.parse(req.params.id);
+
+  const area = await prisma.operatingArea.findFirst({
+    where: { id: input.areaId, workspaceId },
+    select: { id: true }
+  });
+  if (!area) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  const file = await prisma.googleDriveFile.findFirst({
+    where: { id: fileId, workspaceId, provider: "google_drive" }
+  });
+  if (!file) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  const externalIdsToUpdate = new Set([file.externalId]);
+  if ((input.applyToChildren ?? true) && file.isFolder) {
+    let parents = [file.externalId];
+    while (parents.length > 0) {
+      const children = await prisma.googleDriveFile.findMany({
+        where: {
+          workspaceId,
+          provider: "google_drive",
+          parentExternalId: { in: parents }
+        },
+        select: {
+          externalId: true
+        }
+      });
+      const nextParents: string[] = [];
+      for (const child of children) {
+        if (!externalIdsToUpdate.has(child.externalId)) {
+          externalIdsToUpdate.add(child.externalId);
+          nextParents.push(child.externalId);
+        }
+      }
+      parents = nextParents;
+    }
+  }
+
+  await prisma.googleDriveFile.updateMany({
+    where: {
+      workspaceId,
+      provider: "google_drive",
+      externalId: { in: [...externalIdsToUpdate] }
+    },
+    data: {
+      operatingAreaId: area.id
+    }
+  });
+
+  if (file.isFolder) {
+    const settings = await prisma.integrationSetting.findUnique({
+      where: {
+        workspaceId_provider: {
+          workspaceId,
+          provider: "google_drive"
+        }
+      }
+    });
+    if (settings) {
+      const config = settings.config && typeof settings.config === "object" && !Array.isArray(settings.config)
+        ? settings.config as Record<string, unknown>
+        : {};
+      const existingMappings = Array.isArray(config.operatingScopeMappings)
+        ? config.operatingScopeMappings.filter((mapping) => (
+          mapping
+          && typeof mapping === "object"
+          && !Array.isArray(mapping)
+          && (mapping as Record<string, unknown>).folderId !== file.externalId
+        )) as Record<string, unknown>[]
+        : [];
+      await prisma.integrationSetting.update({
+        where: {
+          workspaceId_provider: {
+            workspaceId,
+            provider: "google_drive"
+          }
+        },
+        data: {
+          config: toJsonInput({
+            ...config,
+            operatingScopeMappings: [
+              ...existingMappings,
+              {
+                folderId: file.externalId,
+                operatingAreaId: area.id
+              }
+            ]
+          })
+        }
+      });
+    }
+  }
+
+  const files = await prisma.googleDriveFile.findMany({
+    where: {
+      workspaceId,
+      provider: "google_drive",
+      externalId: { in: [...externalIdsToUpdate] }
+    },
+    orderBy: [{ isFolder: "desc" }, { name: "asc" }]
+  });
+
+  res.json({
+    data: {
+      updatedCount: files.length,
+      files
+    }
+  });
 }));
 
 googleDriveRouter.post("/docs", asyncHandler(async (req, res) => {

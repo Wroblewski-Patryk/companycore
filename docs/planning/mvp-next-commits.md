@@ -5,6 +5,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NOW
 
+- [x] V2WEB-002 Manual Provider Scope Mapping
 - [x] V2WEB-001 Operating Map And Google Drive Console
 - [x] V2GD-001 Google Drive Architecture And Queue
 - [x] V2GD-002 Google Drive Persistence Foundation
@@ -68,7 +69,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 ## NEXT
 
 - [ ] No active P0/P1 Google Drive or web console implementation task remains
-      ready after V2WEB-001.
+      ready after V2WEB-002.
 - [x] Source handoff package: document the OpenJarvis
       `5a426370` connector hygiene commit and the Paperclip `4cfa476f`
       adapter commit for managed upstream handoff.
@@ -84,6 +85,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## PIPELINE
 
+- [x] 49. V2WEB-002 Manual Provider Scope Mapping
 - [x] 48. V2WEB-001 Operating Map And Google Drive Console
 - [x] 39. V2GD-001 Google Drive Architecture And Queue
 - [x] 40. V2GD-002 Google Drive Persistence Foundation

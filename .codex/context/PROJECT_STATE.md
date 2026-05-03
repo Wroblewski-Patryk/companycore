@@ -31,6 +31,10 @@ Last updated: 2026-05-03
   encrypted refresh-token material, paginated Drive file discovery, Docs/Sheets
   read/edit/create APIs, Drive Changes freshness, and CompanyCore API access
   for Jarvis, Paperclip, Aviary, and future GUI clients.
+- 2026-05-03: Provider-to-operating-area mappings must be operator-editable in
+  the owner console. Automatic classification is only the first pass; manual
+  ClickUp List/Folder/Space and Google Drive folder assignments are persisted
+  and must be preserved by future synchronization.
 - 2026-05-03: ClickUp imports must expose an explicit existing-record policy
   before writing. Approved v1 modes are `merge`, `skip_existing`,
   `replace_selected_lists`, and `inspect_only`; destructive cleanup is limited
@@ -94,9 +98,9 @@ Last updated: 2026-05-03
   Postgres volume.
 
 ## Current Focus
-- Main active objective: implement the approved Google Drive v2 integration as
-  a native CompanyCore adapter, starting with architecture alignment and then
-  Drive folder/file/content persistence.
+- Main active objective: refine the v2 web console as the operator-facing
+  control surface for company-area mapping across ClickUp, Google Drive, and
+  CompanyCore tables.
 - Top blockers: GitHub-to-Coolify auto-deploy webhook administration remains
   blocked by missing callable webhook-management tooling in the current
   session. GitHub repository visibility shows admin permission, but the
@@ -104,19 +108,19 @@ Last updated: 2026-05-03
   actions and the local `gh` CLI is unavailable.
 - Success criteria for this phase: Google Drive folder/file metadata,
   searchable content snapshots, Docs/Sheets create/read/edit flows, Drive
-  freshness, agent API access, and operating-area dashboard mapping are
-  implemented through the native integration pattern.
+  freshness, agent API access, operating-area dashboard mapping, and manual
+  provider scope correction are implemented through the native integration
+  pattern.
 
 ## Autonomous Iteration State
-- Current iteration: V2GD-008 Google Drive OAuth Runtime Hardening.
+- Current iteration: V2WEB-002 Manual Provider Scope Mapping.
 - Current operation mode: BUILDER
-- Last completed iteration: CCV1-060 V1 Operator Handoff.
-- Last completed task: added a concise v1 operator handoff that consolidates
-  accepted runtime scope, production endpoints, current runtime image,
-  smoke/data evidence, rollback pointer, residual non-runtime blockers, and
-  next decision choices.
-- Next required mode: BUILDER when a new approved Google Drive hardening,
-  OAuth UI, deploy, or dashboard task is moved into the active queue.
+- Last completed iteration: V2WEB-001 Operating Map And Google Drive Console.
+- Last completed task: added editable dashboard mapping controls plus backend
+  scope update endpoints for ClickUp provider mappings and Google Drive
+  folders.
+- Next required mode: ARCHITECT when a new approved v2 web console or
+  integration mapping task is moved into the active queue.
 
 ## Recent Progress
 - 2026-05-02: Created Company Core backend foundation, Prisma schema, Docker
@@ -663,6 +667,16 @@ Last updated: 2026-05-03
   returned workspace `LuckySparrow`, 12 operating areas, 47 capabilities,
   Google Drive unconfigured, and 0 imported Drive files. Postgres remained
   healthy and no migrations were pending.
+- 2026-05-03: Completed V2WEB-002 locally by adding manual provider scope
+  mapping. Owners can move ClickUp provider mappings between operating areas
+  from the dashboard; linked ClickUp operating tables move with List mappings,
+  and manual overrides are preserved in future ClickUp structure refreshes.
+  Owners can also move Google Drive folders between operating areas; existing
+  descendants move with the folder and the folder-to-area rule is persisted for
+  future imports. The adapter manifest now exposes
+  `operating-model:mappings:write` and `google-drive:files:scope:write`.
+  `node --check public/app.js`, `git diff --check`, `npm run build`, and
+  `npm test` passed locally.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

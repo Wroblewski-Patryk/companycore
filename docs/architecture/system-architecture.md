@@ -106,6 +106,13 @@ addressable through one consistent scope:
 - external provider mappings, starting with ClickUp Space, Folder, List, View,
   Custom Field, and Task identifiers
 
+Provider scope assignment is operator-correctable. Automatic classification is
+allowed to choose the first operating area for an imported provider container,
+but the owner console must let an operator move provider containers to another
+area without direct database access. Manual assignments become integration
+state, not cosmetic UI state, and provider refresh/import code must preserve
+them.
+
 The registry layer should be explicit instead of inferred from table names. A
 future schema slice should add records such as `operating_areas`,
 `operating_folders`, `operating_tables`, `external_container_mappings`,
@@ -289,6 +296,12 @@ must be encrypted through the existing integration settings mechanism. The
 non-secret configuration should include selected root folder IDs, shared drive
 IDs when used, import/sync policy, current Drive changes page token, and
 operating scope mappings.
+
+Google Drive folder-to-operating-area corrections are stored as operating scope
+mappings in the workspace Google Drive integration configuration. When a folder
+is manually moved to another operating area, existing imported descendants
+should move with it and future imports under that folder should keep the manual
+area.
 
 The Google Drive adapter should deliver in vertical slices:
 

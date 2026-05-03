@@ -321,6 +321,34 @@ function providerLabel(provider) {
   return provider || "CompanyCore";
 }
 
+function sortedOperatingAreas() {
+  return [...state.operatingModel.areas].sort((left, right) => (
+    (COMPANY_AREA_ORDER.get(left.key) ?? left.position ?? 99)
+    - (COMPANY_AREA_ORDER.get(right.key) ?? right.position ?? 99)
+  ));
+}
+
+function areaOptionsHtml(selectedAreaId) {
+  return sortedOperatingAreas().map((area) => `
+    <option value="${escapeHtml(area.id)}"${area.id === selectedAreaId ? " selected" : ""}>${escapeHtml(areaLabel(area))}</option>
+  `).join("");
+}
+
+function scopeEditorHtml({ id, selectedAreaId, type, label = "Area" }) {
+  if (state.operatingModel.areas.length === 0) {
+    return "";
+  }
+
+  return `
+    <label class="scope-editor">
+      <span>${escapeHtml(label)}</span>
+      <select data-${type}-scope="${escapeHtml(id)}" aria-label="${escapeHtml(label)}">
+        ${areaOptionsHtml(selectedAreaId)}
+      </select>
+    </label>
+  `;
+}
+
 function renderTasks() {
   tasksTableBody.innerHTML = "";
   const tasks = state.tasks;
@@ -374,10 +402,7 @@ function renderDataCounters() {
 
 function renderOperatingMap() {
   operatingAreasNav.innerHTML = "";
-  const areas = [...state.operatingModel.areas].sort((left, right) => (
-    (COMPANY_AREA_ORDER.get(left.key) ?? left.position ?? 99)
-    - (COMPANY_AREA_ORDER.get(right.key) ?? right.position ?? 99)
-  ));
+  const areas = sortedOperatingAreas();
 
   if (areas.length === 0) {
     areaTitle.textContent = "No operating model loaded";
@@ -444,11 +469,23 @@ function renderOperatingMap() {
   renderCompactList(areaFiles, files.slice(0, 8), (file) => `
     <strong>${escapeHtml(file.name)}</strong>
     <span>${file.isFolder ? "Folder" : escapeHtml(file.mimeType)} · ${escapeHtml(file.scanStatus)} · ${formatDate(file.modifiedTime)}</span>
+    ${file.isFolder ? scopeEditorHtml({
+      id: file.id,
+      selectedAreaId: file.operatingAreaId || area.id,
+      type: "drive",
+      label: "Assign folder"
+    }) : ""}
   `, state.googleDrive.configured ? "No imported Drive files mapped here yet." : "Google Drive is not connected yet.");
 
   renderCompactList(areaMappings, mappings.slice(0, 8), (mapping) => `
     <strong>${escapeHtml(mapping.name || mapping.externalId)}</strong>
     <span>${escapeHtml(providerLabel(mapping.provider))} · ${escapeHtml(mapping.entityType)}</span>
+    ${mapping.provider === "clickup" && ["space", "folder", "list"].includes(mapping.entityType) ? scopeEditorHtml({
+      id: mapping.id,
+      selectedAreaId: mapping.areaId || area.id,
+      type: "mapping",
+      label: "Assign mapping"
+    }) : ""}
   `, "No external provider mappings in this area yet.");
 
   const previews = tables.flatMap((table) => recordsForTable(table).slice(0, 3).map((record) => ({ table, record }))).slice(0, 10);
@@ -458,6 +495,7 @@ function renderOperatingMap() {
   `, "No records in this area's mapped tables yet.");
 
   renderDataCounters();
+  bindScopeEditors();
 }
 
 function renderCompactList(container, items, renderItem, emptyText) {
@@ -502,12 +540,42 @@ function renderGoogleDriveFiles() {
     row.innerHTML = `
       <td>${escapeHtml(file.name)}</td>
       <td>${file.isFolder ? "Folder" : escapeHtml(file.mimeType)}</td>
-      <td>${area ? escapeHtml(areaLabel(area)) : "-"}</td>
+      <td>${file.isFolder
+        ? scopeEditorHtml({
+          id: file.id,
+          selectedAreaId: file.operatingAreaId || state.operatingModel.areas[0]?.id,
+          type: "drive",
+          label: "Drive area"
+        })
+        : area ? escapeHtml(areaLabel(area)) : "-"}</td>
       <td>${escapeHtml(file.scanStatus)}</td>
       <td>${formatDate(file.modifiedTime)}</td>
     `;
     googleDriveFilesBody.append(row);
   }
+  bindScopeEditors();
+}
+
+function bindScopeEditors() {
+  document.querySelectorAll("[data-mapping-scope]").forEach((select) => {
+    if (select.dataset.scopeBound === "true") {
+      return;
+    }
+    select.dataset.scopeBound = "true";
+    select.addEventListener("change", async (event) => {
+      await updateExternalMappingScope(event.currentTarget.dataset.mappingScope, event.currentTarget.value);
+    });
+  });
+
+  document.querySelectorAll("[data-drive-scope]").forEach((select) => {
+    if (select.dataset.scopeBound === "true") {
+      return;
+    }
+    select.dataset.scopeBound = "true";
+    select.addEventListener("change", async (event) => {
+      await updateGoogleDriveFileScope(event.currentTarget.dataset.driveScope, event.currentTarget.value);
+    });
+  });
 }
 
 async function loadTasks() {
@@ -573,6 +641,51 @@ async function loadGoogleDriveFiles() {
   state.googleDrive.files = response.data || [];
   renderGoogleDriveFiles();
   renderOperatingMap();
+}
+
+async function updateExternalMappingScope(mappingId, areaId) {
+  if (!mappingId || !areaId) {
+    return;
+  }
+
+  setBusy(true);
+  try {
+    await api(`/v1/operating-model/external-mappings/${mappingId}/scope`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ areaId, applyToChildren: true })
+    });
+    await loadOperatingModel();
+    renderGoogleDriveFiles();
+    showResult("Provider mapping moved to the selected company area.");
+  } catch (error) {
+    showResult(friendlyError(error), "error");
+    await loadOperatingModel();
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function updateGoogleDriveFileScope(fileId, areaId) {
+  if (!fileId || !areaId) {
+    return;
+  }
+
+  setBusy(true);
+  try {
+    const response = await api(`/v1/google-drive/files/${fileId}/scope`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ areaId, applyToChildren: true })
+    });
+    await Promise.all([loadOperatingModel(), loadGoogleDriveFiles()]);
+    showResult(`${response.data?.updatedCount || 1} Drive item${response.data?.updatedCount === 1 ? "" : "s"} moved to the selected company area.`);
+  } catch (error) {
+    showResult(friendlyError(error), "error");
+    await loadGoogleDriveFiles();
+  } finally {
+    setBusy(false);
+  }
 }
 
 function friendlyError(error) {

@@ -1,5 +1,64 @@
 # Web Console V2 Task Contracts
 
+## V2WEB-002 Manual Provider Scope Mapping
+
+- Task Type: frontend/backend-integration
+- Current Stage: done
+- Deliverable For This Stage: editable provider-to-operating-area mapping in
+  the owner web console, with API support for ClickUp mappings and Google Drive
+  folders.
+- Goal: Let the operator correct automatic integration mapping so ClickUp
+  Lists/Folders/Spaces and Google Drive parent folders can be assigned to the
+  right company area after import.
+- Scope:
+  - `public/app.js`
+  - `public/styles.css`
+  - `src/modules/operating-model/operating-model.routes.ts`
+  - `src/modules/google-drive/google-drive.routes.ts`
+  - `src/modules/connection/connection.routes.ts`
+  - `src/operating-model/clickup-structure.ts`
+  - `src/tests/api.test.ts`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+- Implementation Plan:
+  - Add owner API endpoints for updating an external provider mapping scope and
+    a Google Drive file/folder scope.
+  - Preserve manual ClickUp area overrides during future structure refreshes.
+  - Persist Google Drive folder-to-area mappings in integration settings so
+    future imports keep the selected area.
+  - Add compact area selectors in the dashboard provider mapping and Drive
+    folder lists.
+  - Cover the new manifest capabilities, ClickUp mapping scope update, and
+    Drive folder descendant update in integration tests.
+- Acceptance Criteria:
+  - An owner can move a ClickUp List mapping to another operating area.
+  - The linked ClickUp operating table moves with the mapping.
+  - Future ClickUp structure refreshes preserve the manual area override.
+  - An owner can move a Google Drive folder to another operating area.
+  - Existing Drive descendants move with the folder and the folder mapping is
+    persisted for future imports.
+  - Jarvis/Paperclip can discover the new write capabilities through
+    `/v1/connection`.
+- Definition of Done:
+  - `node --check public/app.js`, `git diff --check`, `npm run build`, and
+    `npm test` pass.
+  - Dashboard controls use the existing operating-map design system.
+  - Project state, task board, and next-commits docs are updated.
+- Result Report:
+  - Added `PATCH /v1/operating-model/external-mappings/:id/scope`.
+  - Added `PATCH /v1/google-drive/files/:id/scope`.
+  - Added adapter manifest capabilities for provider mapping writes and Drive
+    file scope writes.
+  - Added dashboard selectors for ClickUp provider mappings and Google Drive
+    folders.
+  - ClickUp manual area overrides are stored in mapping raw data and table
+    sync policy, then preserved during structure refreshes.
+  - Google Drive folder area choices update descendants and persist an
+    `operatingScopeMappings` entry for future imports.
+  - `node --check public/app.js`, `git diff --check`, `npm run build`, and
+    `npm test` passed.
+
 ## V2WEB-001 Operating Map And Google Drive Console
 
 - Task Type: frontend/backend-routing

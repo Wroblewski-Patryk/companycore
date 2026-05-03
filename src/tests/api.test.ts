@@ -226,6 +226,7 @@ test("CompanyCore v1 protected API flow", async () => {
           agentLogs: Array<{ method: string; path: string; capability: string }>;
           interactions: Array<{ method: string; path: string; capability: string }>;
           integrationSettings: Array<{ method: string; path: string; capability: string }>;
+          googleDrive: Array<{ method: string; path: string; capability: string }>;
         };
         writeRules: string[];
       };
@@ -253,6 +254,8 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(connectionBody.data.operatingModel.systemTables.includes("users"));
   assert.ok(connectionBody.data.capabilities.includes("connection:read"));
   assert.ok(connectionBody.data.capabilities.includes("operating-model:read"));
+  assert.ok(connectionBody.data.capabilities.includes("operating-model:mappings:write"));
+  assert.ok(connectionBody.data.capabilities.includes("google-drive:files:scope:write"));
   assert.ok(connectionBody.data.capabilities.includes("tasks:write"));
   assert.equal(connectionBody.data.adapterManifest.basePath, "/v1");
   assert.equal(connectionBody.data.adapterManifest.auth.serviceHeader, "X-API-Key");
@@ -260,6 +263,16 @@ test("CompanyCore v1 protected API flow", async () => {
     route.method === "GET"
     && route.path === "/v1/operating-model"
     && route.capability === "operating-model:read"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.operatingModel.some((route) => (
+    route.method === "PATCH"
+    && route.path === "/v1/operating-model/external-mappings/:id/scope"
+    && route.capability === "operating-model:mappings:write"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.googleDrive.some((route) => (
+    route.method === "PATCH"
+    && route.path === "/v1/google-drive/files/:id/scope"
+    && route.capability === "google-drive:files:scope:write"
   )));
   const assetsArea = await prisma.operatingArea.findUnique({
     where: {
@@ -270,6 +283,15 @@ test("CompanyCore v1 protected API flow", async () => {
     }
   });
   assert.ok(assetsArea);
+  const financeArea = await prisma.operatingArea.findUnique({
+    where: {
+      workspaceId_key: {
+        workspaceId: ownerA.workspace.id,
+        key: "finance-billing"
+      }
+    }
+  });
+  assert.ok(financeArea);
   const driveStorageLocation = await prisma.storageLocation.create({
     data: {
       workspaceId: ownerA.workspace.id,
@@ -277,6 +299,19 @@ test("CompanyCore v1 protected API flow", async () => {
       provider: "google_drive",
       name: "Drive root",
       locator: { folderId: "drive-folder-root" }
+    }
+  });
+  const driveRootFolder = await prisma.googleDriveFile.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      externalId: "drive-folder-root",
+      name: "Drive root folder",
+      mimeType: "application/vnd.google-apps.folder",
+      isFolder: true,
+      storageLocationId: driveStorageLocation.id,
+      operatingAreaId: assetsArea.id,
+      rawMetadata: { source: "test-import" },
+      syncStatus: "synced"
     }
   });
   const firstDriveFile = await prisma.googleDriveFile.upsert({
@@ -396,6 +431,48 @@ test("CompanyCore v1 protected API flow", async () => {
     }
   });
   assert.equal(snapshotCount, 1);
+
+  await prisma.integrationSetting.upsert({
+    where: {
+      workspaceId_provider: {
+        workspaceId: ownerA.workspace.id,
+        provider: "google_drive"
+      }
+    },
+    create: {
+      workspaceId: ownerA.workspace.id,
+      provider: "google_drive",
+      secretCiphertext: "test-ciphertext",
+      config: {}
+    },
+    update: {
+      config: {}
+    }
+  });
+  const driveScopeUpdate = await request(`/v1/google-drive/files/${driveRootFolder.id}/scope`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({ areaId: financeArea.id })
+  });
+  assert.equal(driveScopeUpdate.status, 200);
+  assert.equal((driveScopeUpdate.body as { data: { updatedCount: number } }).data.updatedCount, 2);
+  const scopedDriveRoot = await prisma.googleDriveFile.findUnique({ where: { id: driveRootFolder.id } });
+  const scopedDriveChild = await prisma.googleDriveFile.findUnique({ where: { id: firstDriveFile.id } });
+  assert.equal(scopedDriveRoot?.operatingAreaId, financeArea.id);
+  assert.equal(scopedDriveChild?.operatingAreaId, financeArea.id);
+  const scopedDriveSettings = await prisma.integrationSetting.findUnique({
+    where: {
+      workspaceId_provider: {
+        workspaceId: ownerA.workspace.id,
+        provider: "google_drive"
+      }
+    }
+  });
+  const scopedDriveConfig = scopedDriveSettings?.config as { operatingScopeMappings?: Array<{ folderId: string; operatingAreaId: string }> };
+  assert.ok(scopedDriveConfig.operatingScopeMappings?.some((mapping) => (
+    mapping.folderId === "drive-folder-root"
+    && mapping.operatingAreaId === financeArea.id
+  )));
 
   assert.ok(connectionBody.data.adapterManifest.routes.tasks.some((route) => (
     route.method === "POST"
@@ -889,7 +966,7 @@ test("CompanyCore v1 protected API flow", async () => {
     assert.equal(inspectDriveImportBody.data.createdCount, 0);
     assert.equal(inspectDriveImportBody.data.skippedCount, 2);
     assert.equal(inspectDriveImportBody.data.wouldCreateCount, 2);
-    assert.equal(await prisma.googleDriveFile.count({ where: { workspaceId: ownerA.workspace.id } }), 1);
+    assert.equal(await prisma.googleDriveFile.count({ where: { workspaceId: ownerA.workspace.id } }), 2);
 
     const mergeDriveImport = await request("/v1/integration-settings/google_drive/import", {
       method: "POST",
@@ -1616,6 +1693,47 @@ test("CompanyCore v1 protected API flow", async () => {
     });
     assert.equal(mappedView?.name, "Jarvis Board");
     assert.equal(mappedView?.tableId, mappedList?.id);
+
+    const mappedListContainer = await prisma.externalContainerMapping.findUnique({
+      where: {
+        workspaceId_provider_entityType_externalId: {
+          workspaceId: ownerA.workspace.id,
+          provider: "clickup",
+          entityType: "list",
+          externalId: "list-1"
+        }
+      }
+    });
+    assert.ok(mappedListContainer);
+    const listScopeUpdate = await request(`/v1/operating-model/external-mappings/${mappedListContainer.id}/scope`, {
+      method: "PATCH",
+      headers: authA,
+      body: JSON.stringify({ areaId: financeArea.id })
+    });
+    assert.equal(listScopeUpdate.status, 200);
+    const scopedListContainer = await prisma.externalContainerMapping.findUnique({
+      where: {
+        workspaceId_provider_entityType_externalId: {
+          workspaceId: ownerA.workspace.id,
+          provider: "clickup",
+          entityType: "list",
+          externalId: "list-1"
+        }
+      }
+    });
+    const scopedListTable = await prisma.operatingTable.findUnique({
+      where: {
+        workspaceId_source_externalId: {
+          workspaceId: ownerA.workspace.id,
+          source: "clickup",
+          externalId: "list-1"
+        }
+      }
+    });
+    assert.equal(scopedListContainer?.areaId, financeArea.id);
+    assert.equal((scopedListContainer?.raw as { manualAreaId?: string } | null)?.manualAreaId, financeArea.id);
+    assert.equal(scopedListTable?.areaId, financeArea.id);
+    assert.equal((scopedListTable?.syncPolicy as { manualAreaId?: string } | null)?.manualAreaId, financeArea.id);
 
     const storedDiscovery = await request("/v1/integration-settings/clickup/discover", {
       method: "POST",
