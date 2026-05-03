@@ -364,6 +364,12 @@ Last updated: 2026-05-03
   immediately verify whether ClickUp import created records. `/v1/tasks` now
   includes safe task list metadata, and the Dashboard renders title, status,
   priority, list, source, and due date with a manual refresh action.
+- 2026-05-03: Fixed ClickUp settings save after real owner testing showed
+  `internal_server_error` and `ClickUp is not configured for this workspace
+  yet`. Root cause was the integration settings route building a Prisma upsert
+  `create` payload with `encryptSecret(undefined)` when updating an existing
+  setting without re-pasting the ClickUp token. The route now uses explicit
+  update/create paths and preserves the encrypted secret on config-only saves.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

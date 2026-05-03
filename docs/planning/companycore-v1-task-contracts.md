@@ -594,6 +594,78 @@ due date.
 ### Priority
 P0
 
+## CCV1-039 ClickUp Config-Only Save Fix
+
+### Header
+- ID: CCV1-039
+- Title: ClickUp config-only save fix
+- Task Type: bugfix
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder
+- Depends on: CCV1-035, CCV1-037
+- Priority: P0
+- Iteration: v1-039
+- Operation Mode: BUILDER
+
+### Description
+Real owner testing showed `ClickUp is not configured for this workspace yet`
+and `internal_server_error` after selecting ClickUp lists and attempting to save
+or sync.
+
+### Goal
+Allow owners to update ClickUp configuration without re-pasting the token when
+a workspace setting already exists, while preserving the encrypted ClickUp
+secret.
+
+### Scope
+- `src/modules/integration-settings/integration-settings.routes.ts`
+- `src/tests/api.test.ts`
+- `.codex/context/PROJECT_STATE.md`
+- `.codex/context/TASK_BOARD.md`
+- `docs/planning/mvp-next-commits.md`
+- this task contract
+
+### Implementation Plan
+1. Inspect production logs for the failing ClickUp save path.
+2. Replace Prisma `upsert` data construction that encrypts an undefined token
+   with explicit existing-update versus new-create paths.
+3. Add a regression test for updating ClickUp config without token while
+   preserving `secretConfigured`.
+4. Run integration tests and diff checks.
+
+### Acceptance Criteria
+- [x] Existing ClickUp integration settings can be updated without sending a
+  token.
+- [x] Config-only save preserves the encrypted token and `secretConfigured`.
+- [x] New ClickUp integration settings still require a token.
+- [x] Internal server error no longer occurs from `encryptSecret(undefined)`.
+- [x] `npm test` passes.
+
+### Definition of Done
+- [x] Existing secret-storage mechanism is reused.
+- [x] No plaintext token logging or response leakage is added.
+- [x] Regression test covers the failed production path.
+- [x] Canonical state and planning docs are updated.
+
+### Result Report
+- Task summary: Fixed ClickUp settings updates so config-only saves use an
+  explicit update path that preserves existing encrypted token material instead
+  of constructing a Prisma upsert create payload with `encryptSecret(undefined)`.
+- Files changed:
+  `src/modules/integration-settings/integration-settings.routes.ts`,
+  `src/tests/api.test.ts`, `.codex/context/PROJECT_STATE.md`,
+  `.codex/context/TASK_BOARD.md`, `docs/planning/mvp-next-commits.md`, and this
+  task contract.
+- How tested: Ran `npm test` against disposable PostgreSQL and
+  `git diff --check`.
+- What is incomplete: Needs production deploy and owner retry in browser.
+- Next steps: Deploy, hard-refresh the settings console, save ClickUp
+  connection, then run sync/import and check Dashboard Tasks.
+
+### Priority
+P0
+
 ## CCV1-034B ClickUp Structure Persistence
 
 ### Header

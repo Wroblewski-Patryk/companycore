@@ -593,6 +593,33 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal((settings.body as { data: { secretConfigured: boolean; token?: string } }).data.secretConfigured, true);
   assert.equal((settings.body as { data: { token?: string } }).data.token, undefined);
 
+  const updatedSettingsWithoutToken = await request("/integration-settings/clickup", {
+    method: "PUT",
+    headers: authA,
+    body: JSON.stringify({
+      config: {
+        teamId: "team-1",
+        listIds: ["list-1", "list-folderless"],
+        syncMode: "pull",
+        importMode: "inspect_only"
+      },
+      active: true
+    })
+  });
+  assert.equal(updatedSettingsWithoutToken.status, 200);
+  assert.equal(
+    (updatedSettingsWithoutToken.body as { data: { secretConfigured: boolean; config: { listIds: string[]; importMode: string } } }).data.secretConfigured,
+    true
+  );
+  assert.deepEqual(
+    (updatedSettingsWithoutToken.body as { data: { config: { listIds: string[] } } }).data.config.listIds,
+    ["list-1", "list-folderless"]
+  );
+  assert.equal(
+    (updatedSettingsWithoutToken.body as { data: { config: { importMode: string } } }).data.config.importMode,
+    "inspect_only"
+  );
+
   const originalFetchBeforeDiscovery = globalThis.fetch;
   globalThis.fetch = (async () => new Response(JSON.stringify({ err: "Unauthorized" }), { status: 401 })) as typeof fetch;
 

@@ -142,26 +142,29 @@ integrationSettingsRouter.put("/:provider", asyncHandler(async (req, res) => {
     return res.status(400).json({ error: "integration_secret_required" });
   }
 
-  const setting = await prisma.integrationSetting.upsert({
-    where: {
-      workspaceId_provider: {
-        workspaceId: req.auth!.workspaceId,
-        provider
+  const setting = existing
+    ? await prisma.integrationSetting.update({
+      where: {
+        workspaceId_provider: {
+          workspaceId: req.auth!.workspaceId,
+          provider
+        }
+      },
+      data: {
+        secretCiphertext: input.token ? encryptSecret(input.token) : existing.secretCiphertext,
+        config: input.config ? toJsonInput(input.config) : existing.config ?? {},
+        active: input.active ?? existing.active
       }
-    },
-    update: {
-      secretCiphertext: input.token ? encryptSecret(input.token) : existing?.secretCiphertext,
-      config: input.config ? toJsonInput(input.config) : existing?.config ?? {},
-      active: input.active ?? existing?.active ?? true
-    },
-    create: {
-      workspaceId: req.auth!.workspaceId,
-      provider,
-      secretCiphertext: encryptSecret(input.token!),
-      config: toJsonInput(input.config ?? {}),
-      active: input.active ?? true
-    }
-  });
+    })
+    : await prisma.integrationSetting.create({
+      data: {
+        workspaceId: req.auth!.workspaceId,
+        provider,
+        secretCiphertext: encryptSecret(input.token!),
+        config: toJsonInput(input.config ?? {}),
+        active: input.active ?? true
+      }
+    });
 
   res.json({ data: safeIntegrationSetting(setting) });
 }));

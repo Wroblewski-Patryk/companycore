@@ -26,6 +26,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] CCV1-036 ClickUp Webhook Trigger Architecture Plan
 - [x] CCV1-037 ClickUp List Selection UX Fix
 - [x] CCV1-038 Dashboard Task Table
+- [x] CCV1-039 ClickUp Config-Only Save Fix
 
 ## NEXT
 
