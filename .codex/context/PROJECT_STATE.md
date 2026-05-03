@@ -112,12 +112,11 @@ Last updated: 2026-05-03
   pattern.
 
 ## Autonomous Iteration State
-- Current iteration: V2WEB-006 Settings Integration Taxonomy View.
+- Current iteration: V2WEB-007 Dedicated Pipeline View.
 - Current operation mode: BUILDER
-- Last completed iteration: V2WEB-005 Dedicated Tasks Adapter View.
-- Last completed task: added `/settings/integrations` as an implemented-data
-  taxonomy for tasks, Drive, pipeline/CRM, API capabilities, and operating-area
-  mapping counts.
+- Last completed iteration: V2WEB-006 Settings Integration Taxonomy View.
+- Last completed task: added `/pipeline` as a read-only module surface for
+  implemented clients, pipeline stages, deals, and interactions snapshots.
 - Next required mode: BUILDER for the next v2 web console iteration unless an
   architecture decision blocks the queue first.
 
@@ -695,6 +694,12 @@ Last updated: 2026-05-03
   and Drive files by operating area. Dashboard and sidebar links point to this
   route, and every action opens an existing implemented surface rather than a
   placeholder.
+- 2026-05-03: Completed V2WEB-007 by adding `/pipeline` as the first dedicated
+  pipeline module. The view reads existing CompanyCore snapshots for clients,
+  pipeline stages, deals, and interactions, shows summary cards, renders compact
+  record lists with empty states, and is linked from the sidebar, dashboard, and
+  integration taxonomy. No new backend behavior or placeholder write flow was
+  introduced.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

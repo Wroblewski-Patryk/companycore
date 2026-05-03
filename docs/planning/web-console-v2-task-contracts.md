@@ -1,5 +1,58 @@
 # Web Console V2 Task Contracts
 
+## V2WEB-007 Dedicated Pipeline View
+
+- Task Type: design/frontend
+- Current Stage: done
+- Deliverable For This Stage: dedicated `/pipeline` owner-console route that
+  reuses implemented CompanyCore CRM/pipeline tables.
+- Goal: Add the first pipeline module surface using existing clients,
+  pipeline stages, deals, and interactions data without adding new backend
+  behavior.
+- Scope:
+  - `public/index.html`
+  - `public/app.js`
+  - `public/styles.css`
+  - `src/app.ts`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+- Implementation Plan:
+  - Add `/pipeline` to authenticated web routes and signed-in navigation.
+  - Render CRM/pipeline summary cards from existing database snapshots.
+  - Render compact lists for stages, deals, clients, and interactions.
+  - Link dashboard and integration taxonomy to the implemented pipeline view.
+  - Validate syntax, build, tests, local route rendering, and production smoke.
+- Acceptance Criteria:
+  - Signed-in navigation includes `Pipeline`.
+  - `/pipeline` renders existing implemented CRM/pipeline records.
+  - Empty states are clear when no CRM/pipeline records exist.
+  - No placeholder provider integration or unimplemented pipeline write flow is
+    introduced.
+  - Existing `/settings/integrations`, `/tasks-adapter`, `/areas`, and
+    settings routes still render.
+- Definition of Done:
+  - `node --check public/app.js`, `git diff --check`, `npm run build`, and
+    `npm test` pass.
+  - Browser smoke verifies `/pipeline`, summary cards, record lists, and
+    dashboard links on desktop.
+  - Project state, task board, and next-commits docs are updated.
+- Result Report:
+  - Added `/pipeline` to the authenticated frontend route list, signed-in
+    navigation, dashboard links, integration taxonomy links, and Express web
+    app route allowlist.
+  - Added pipeline summary cards for clients, stages, deals, and interactions
+    using existing CompanyCore table snapshots.
+  - Added compact lists for implemented pipeline stages, deals, clients, and
+    interactions with clear empty states.
+  - Introduced no new backend contracts, provider integrations, or unimplemented
+    write flows.
+  - `node --check public/app.js`, `git diff --check`, `npm run build`, and
+    `npm test` passed.
+  - Playwright smoke verified desktop `/pipeline`, summary cards, record lists,
+    active navigation, and dashboard links.
+
 ## V2WEB-006 Settings Integration Taxonomy View
 
 - Task Type: design/frontend

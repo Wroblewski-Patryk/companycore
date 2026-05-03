@@ -31,6 +31,7 @@
           <a href="/dashboard" data-link data-nav="/dashboard">Dashboard</a>
           <a href="/areas" data-link data-nav="/areas">Operating areas</a>
           <a href="/tasks-adapter" data-link data-nav="/tasks-adapter">Tasks & adapters</a>
+          <a href="/pipeline" data-link data-nav="/pipeline">Pipeline</a>
           <a href="/settings/integrations" data-link data-nav="/settings/integrations">Integrations</a>
           <a href="/settings" data-link data-nav="/settings">ClickUp adapter</a>
           <a href="/settings/drive" data-link data-nav="/settings/drive">Google Drive</a>
@@ -177,6 +178,10 @@
               <strong>Tasks & adapters</strong>
               <span>Review synced CompanyCore and ClickUp tasks with list ownership, status, priority, and due dates.</span>
             </a>
+            <a class="module-link" href="/pipeline" data-link>
+              <strong>Pipeline</strong>
+              <span>Review clients, stages, deals, and sales interactions from implemented CompanyCore tables.</span>
+            </a>
             <a class="module-link" href="/settings/drive" data-link>
               <strong>Drive folders</strong>
               <span>Connect or refresh imported folders before assigning them to areas.</span>
@@ -202,6 +207,7 @@
           <div class="actions">
             <a class="button-link" href="/areas" data-link>Open areas</a>
             <a class="button-link" href="/tasks-adapter" data-link>Open tasks</a>
+            <a class="button-link" href="/pipeline" data-link>Open pipeline</a>
             <a class="button-link" href="/settings/integrations" data-link>Open integrations</a>
             <a class="button-link" href="/settings" data-link>Open settings</a>
             <a class="button-link secondary" href="/settings/drive" data-link>Connect Drive</a>
@@ -312,6 +318,53 @@
               </section>
             </div>
           </div>
+        </section>
+      </section>
+
+      <section class="view" data-view="/pipeline">
+        <div class="page-title">
+          <div>
+            <p class="label">CRM</p>
+            <h1>Pipeline</h1>
+            <p id="pipelineSummary">Sign in to load pipeline data.</p>
+          </div>
+          <div class="status-card">
+            <span class="dot ok"></span>
+            <span>Implemented tables</span>
+          </div>
+        </div>
+
+        <section class="dashboard-grid dense-grid pipeline-stats" id="pipelineStats"></section>
+
+        <section class="pipeline-layout">
+          <article class="panel pipeline-panel">
+            <div class="section-title">
+              <h2>Stages</h2>
+              <p>Pipeline stages currently stored in CompanyCore.</p>
+            </div>
+            <div class="compact-list" id="pipelineStagesList"></div>
+          </article>
+          <article class="panel pipeline-panel">
+            <div class="section-title">
+              <h2>Deals</h2>
+              <p>Active deal records and their status/source context.</p>
+            </div>
+            <div class="compact-list" id="pipelineDealsList"></div>
+          </article>
+          <article class="panel pipeline-panel">
+            <div class="section-title">
+              <h2>Clients</h2>
+              <p>Client records available to CRM and sales workflows.</p>
+            </div>
+            <div class="compact-list" id="pipelineClientsList"></div>
+          </article>
+          <article class="panel pipeline-panel">
+            <div class="section-title">
+              <h2>Interactions</h2>
+              <p>Recent sales or client interactions stored in CompanyCore.</p>
+            </div>
+            <div class="compact-list" id="pipelineInteractionsList"></div>
+          </article>
         </section>
       </section>
 

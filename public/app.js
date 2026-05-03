@@ -1,4 +1,4 @@
-const privateRoutes = new Set(["/dashboard", "/areas", "/tasks-adapter", "/settings", "/settings/integrations", "/settings/drive", "/settings/api"]);
+const privateRoutes = new Set(["/dashboard", "/areas", "/tasks-adapter", "/pipeline", "/settings", "/settings/integrations", "/settings/drive", "/settings/api"]);
 const publicRoutes = new Set(["/", "/auth/login", "/auth/register"]);
 
 const state = {
@@ -100,6 +100,12 @@ const areaFiles = document.querySelector("#areaFiles");
 const areaMappings = document.querySelector("#areaMappings");
 const areaRecords = document.querySelector("#areaRecords");
 const dataCounters = document.querySelector("#dataCounters");
+const pipelineSummary = document.querySelector("#pipelineSummary");
+const pipelineStats = document.querySelector("#pipelineStats");
+const pipelineStagesList = document.querySelector("#pipelineStagesList");
+const pipelineDealsList = document.querySelector("#pipelineDealsList");
+const pipelineClientsList = document.querySelector("#pipelineClientsList");
+const pipelineInteractionsList = document.querySelector("#pipelineInteractionsList");
 const listTree = document.querySelector("#listTree");
 const listToolbar = document.querySelector("#listToolbar");
 const listSummary = document.querySelector("#listSummary");
@@ -144,6 +150,7 @@ const routeLabels = {
   "/dashboard": "Dashboard",
   "/areas": "Operating areas",
   "/tasks-adapter": "Tasks & adapters",
+  "/pipeline": "Pipeline",
   "/settings/integrations": "Integrations",
   "/settings": "ClickUp adapter",
   "/settings/drive": "Google Drive",
@@ -466,6 +473,81 @@ function appendTaskCell(row, value) {
   row.append(cell);
 }
 
+function renderPipeline() {
+  pipelineStats.innerHTML = "";
+  const clients = recordsForSlug("clients");
+  const stages = recordsForSlug("pipeline-stages");
+  const deals = recordsForSlug("deals");
+  const interactions = recordsForSlug("interactions");
+  const total = clients.length + stages.length + deals.length + interactions.length;
+
+  pipelineSummary.textContent = isSignedIn()
+    ? `${total} CRM/pipeline record${total === 1 ? "" : "s"} loaded from implemented CompanyCore tables.`
+    : "Sign in to load pipeline data.";
+
+  renderPipelineStat("Clients", clients.length);
+  renderPipelineStat("Stages", stages.length);
+  renderPipelineStat("Deals", deals.length);
+  renderPipelineStat("Interactions", interactions.length);
+
+  renderPipelineList(pipelineStagesList, stages, "No pipeline stages found yet.", (stage) => ({
+    title: stage.name || stage.title || stage.id,
+    meta: [stage.status, stage.source || "companycore"].filter(Boolean).join(" · ") || "companycore"
+  }));
+  renderPipelineList(pipelineDealsList, deals, "No deals found yet.", (deal) => ({
+    title: deal.title || deal.name || deal.summary || deal.id,
+    meta: [deal.status, deal.source || "companycore", formatDate(deal.updatedAt || deal.createdAt)].filter(Boolean).join(" · ")
+  }));
+  renderPipelineList(pipelineClientsList, clients, "No clients found yet.", (client) => ({
+    title: client.name || client.email || client.id,
+    meta: [client.email, client.status, client.source || "companycore"].filter(Boolean).join(" · ")
+  }));
+  renderPipelineList(pipelineInteractionsList, interactions, "No interactions found yet.", (interaction) => ({
+    title: interaction.summary || interaction.title || interaction.type || interaction.id,
+    meta: [interaction.channel || interaction.type, interaction.source || "companycore", formatDate(interaction.occurredAt || interaction.createdAt)].filter(Boolean).join(" · ")
+  }));
+}
+
+function recordsForSlug(slug) {
+  return state.databaseTables.get(slug)?.records || [];
+}
+
+function renderPipelineStat(label, value) {
+  const card = document.createElement("article");
+  card.className = "panel summary-card mini-card";
+  const kicker = document.createElement("span");
+  kicker.className = "summary-kicker";
+  kicker.textContent = label;
+  const strong = document.createElement("strong");
+  strong.textContent = String(value);
+  card.append(kicker, strong);
+  pipelineStats.append(card);
+}
+
+function renderPipelineList(container, items, emptyText, getContent) {
+  container.innerHTML = "";
+
+  if (items.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "empty-note";
+    empty.textContent = emptyText;
+    container.append(empty);
+    return;
+  }
+
+  for (const item of items.slice(0, 8)) {
+    const content = getContent(item);
+    const row = document.createElement("div");
+    row.className = "compact-row";
+    const strong = document.createElement("strong");
+    strong.textContent = content.title || item.id || "-";
+    const span = document.createElement("span");
+    span.textContent = content.meta || "companycore";
+    row.append(strong, span);
+    container.append(row);
+  }
+}
+
 function renderIntegrationTaxonomy() {
   integrationGroups.innerHTML = "";
   integrationAreaMatrix.innerHTML = "";
@@ -502,8 +584,8 @@ function renderIntegrationTaxonomy() {
       status: "Implemented API",
       metric: `${pipelineRecords} record${pipelineRecords === 1 ? "" : "s"}`,
       detail: "Clients, pipeline stages, deals, and interactions are available through CompanyCore tables.",
-      primaryHref: "/areas",
-      primaryLabel: "Review tables",
+      primaryHref: "/pipeline",
+      primaryLabel: "Open pipeline",
       secondaryHref: "/settings/api",
       secondaryLabel: "API routes"
     },
@@ -670,6 +752,7 @@ function renderOperatingMap() {
     areaMappings.innerHTML = "";
     areaRecords.innerHTML = "";
     renderDataCounters();
+    renderPipeline();
     renderIntegrationTaxonomy();
     return;
   }
@@ -751,6 +834,7 @@ function renderOperatingMap() {
   `, "No records in this area's mapped tables yet.");
 
   renderDataCounters();
+  renderPipeline();
   renderIntegrationTaxonomy();
   bindScopeEditors();
 }
@@ -1395,6 +1479,7 @@ logoutButton.addEventListener("click", () => {
   renderTasks();
   renderGoogleDriveFiles();
   renderOperatingMap();
+  renderPipeline();
   renderIntegrationTaxonomy();
   resultPanel.hidden = true;
   navigate("/auth/login", { replace: true });
@@ -1674,5 +1759,6 @@ if (state.ownerToken) {
   setGoogleDriveEnabled(false);
   renderOperatingMap();
   renderGoogleDriveFiles();
+  renderPipeline();
   renderIntegrationTaxonomy();
 }
