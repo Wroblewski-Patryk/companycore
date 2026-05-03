@@ -127,6 +127,18 @@ Initial import policy mirrors the ClickUp discipline:
 - `inspect_only`: fetch and report would-create/would-update counts without
   writing.
 
+Implemented foundation:
+
+- `PUT /v1/integration-settings/google_drive` stores encrypted OAuth material
+  and non-secret Drive configuration.
+- `GET /v1/integration-settings/google_drive` returns safe setting metadata
+  with `secretConfigured`, never OAuth tokens.
+- `GET /v1/connection` exposes safe Google Drive configuration state to
+  Jarvis, Paperclip, Aviary, and future adapters.
+- `src/integrations/google-drive/google-drive.client.ts` contains the safe
+  client boundary for Drive file listing, Drive file creation, Drive changes,
+  Docs get/batchUpdate, and Sheets create/read/write methods.
+
 Implemented first native slice:
 
 ```http

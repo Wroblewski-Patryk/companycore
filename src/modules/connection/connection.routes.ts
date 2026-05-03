@@ -41,7 +41,9 @@ const capabilities = [
   "integration-settings:clickup:webhooks:write",
   "integration-settings:clickup:events:read",
   "integration-settings:clickup:events:retry",
-  "integration-settings:clickup:maintenance:run"
+  "integration-settings:clickup:maintenance:run",
+  "integration-settings:google-drive:read",
+  "integration-settings:google-drive:write"
 ] as const;
 
 const adapterManifest = {
@@ -137,7 +139,9 @@ const adapterManifest = {
       { method: "DELETE", path: "/v1/integration-settings/clickup/webhooks/:id", capability: "integration-settings:clickup:webhooks:write" },
       { method: "GET", path: "/v1/integration-settings/clickup/events", capability: "integration-settings:clickup:events:read" },
       { method: "POST", path: "/v1/integration-settings/clickup/events/retry-failed", capability: "integration-settings:clickup:events:retry" },
-      { method: "POST", path: "/v1/integration-settings/clickup/maintenance/run", capability: "integration-settings:clickup:maintenance:run" }
+      { method: "POST", path: "/v1/integration-settings/clickup/maintenance/run", capability: "integration-settings:clickup:maintenance:run" },
+      { method: "GET", path: "/v1/integration-settings/google_drive", capability: "integration-settings:google-drive:read" },
+      { method: "PUT", path: "/v1/integration-settings/google_drive", capability: "integration-settings:google-drive:write" }
     ]
   },
   writeRules: [
@@ -169,6 +173,20 @@ connectionRouter.get("/", asyncHandler(async (req, res) => {
       workspaceId_provider: {
         workspaceId: workspace.id,
         provider: "clickup"
+      }
+    },
+    select: {
+      active: true,
+      secretCiphertext: true,
+      config: true,
+      updatedAt: true
+    }
+  });
+  const googleDrive = await prisma.integrationSetting.findUnique({
+    where: {
+      workspaceId_provider: {
+        workspaceId: workspace.id,
+        provider: "google_drive"
       }
     },
     select: {
@@ -240,6 +258,12 @@ connectionRouter.get("/", asyncHandler(async (req, res) => {
           active: Boolean(clickUp?.active),
           config: clickUp?.config ?? {},
           updatedAt: clickUp?.updatedAt ?? null
+        },
+        googleDrive: {
+          configured: Boolean(googleDrive?.secretCiphertext),
+          active: Boolean(googleDrive?.active),
+          config: googleDrive?.config ?? {},
+          updatedAt: googleDrive?.updatedAt ?? null
         }
       }
     }

@@ -4,6 +4,7 @@ import test, { after, before } from "node:test";
 import { createApp } from "../app";
 import { prisma } from "../db/prisma";
 import { signClickUpWebhookBody, verifyClickUpWebhookSignature } from "../integrations/clickup/webhook-signature";
+import { getGoogleDriveSettingsForWorkspace } from "../integrations/integration-settings.service";
 
 const realFetch = globalThis.fetch.bind(globalThis);
 let baseUrl = "";
@@ -228,7 +229,10 @@ test("CompanyCore v1 protected API flow", async () => {
         };
         writeRules: string[];
       };
-      integrations: { clickup: { configured: boolean; active: boolean; config: unknown } };
+      integrations: {
+        clickup: { configured: boolean; active: boolean; config: unknown };
+        googleDrive: { configured: boolean; active: boolean; config: unknown };
+      };
     };
   };
   assert.equal(connectionBody.data.service, "companycore");
@@ -425,6 +429,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(connectionBody.data.adapterManifest.routes.integrationSettings[0].path, "/v1/integration-settings/clickup");
   assert.ok(connectionBody.data.adapterManifest.writeRules.includes("Do not send workspaceId in write payloads."));
   assert.equal(connectionBody.data.integrations.clickup.configured, false);
+  assert.equal(connectionBody.data.integrations.googleDrive.configured, false);
 
   const projectListB = await request("/v1/projects", { headers: authB });
   assert.equal(projectListB.status, 200);
@@ -766,6 +771,49 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(settings.status, 200);
   assert.equal((settings.body as { data: { secretConfigured: boolean; token?: string } }).data.secretConfigured, true);
   assert.equal((settings.body as { data: { token?: string } }).data.token, undefined);
+
+  const googleDriveSettings = await request("/integration-settings/google_drive", {
+    method: "PUT",
+    headers: authA,
+    body: JSON.stringify({
+      oauth: {
+        refreshToken: "google-refresh-token",
+        accessToken: "google-access-token",
+        expiresAt: "2026-05-03T12:00:00.000Z",
+        scope: "https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/spreadsheets"
+      },
+      config: {
+        rootFolderIds: ["drive-folder-root"],
+        selectedFolderIds: ["drive-folder-root"],
+        sharedDriveIds: ["shared-drive-1"],
+        syncMode: "two_way",
+        importMode: "merge",
+        changesPageToken: "changes-token-1"
+      }
+    })
+  });
+  assert.equal(googleDriveSettings.status, 200);
+  const googleDriveSettingsBody = googleDriveSettings.body as {
+    data: {
+      provider: string;
+      config: { rootFolderIds: string[]; syncMode: string; importMode: string };
+      secretConfigured: boolean;
+      oauth?: unknown;
+      token?: unknown;
+    };
+  };
+  assert.equal(googleDriveSettingsBody.data.provider, "google_drive");
+  assert.equal(googleDriveSettingsBody.data.secretConfigured, true);
+  assert.deepEqual(googleDriveSettingsBody.data.config.rootFolderIds, ["drive-folder-root"]);
+  assert.equal(googleDriveSettingsBody.data.config.syncMode, "two_way");
+  assert.equal(googleDriveSettingsBody.data.config.importMode, "merge");
+  assert.equal(googleDriveSettingsBody.data.oauth, undefined);
+  assert.equal(googleDriveSettingsBody.data.token, undefined);
+
+  const loadedGoogleDriveSettings = await getGoogleDriveSettingsForWorkspace(ownerA.workspace.id);
+  assert.equal(loadedGoogleDriveSettings?.oauth.refreshToken, "google-refresh-token");
+  assert.equal(loadedGoogleDriveSettings?.oauth.accessToken, "google-access-token");
+  assert.equal(loadedGoogleDriveSettings?.config.rootFolderIds?.[0], "drive-folder-root");
 
   const updatedSettingsWithoutToken = await request("/integration-settings/clickup", {
     method: "PUT",

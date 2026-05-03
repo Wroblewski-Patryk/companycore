@@ -90,7 +90,7 @@ It follows the repository task contract and must stay synchronized with
 ## V2GD-003 Google Drive Provider Client And OAuth Settings
 
 - Task Type: backend/integration
-- Current Stage: ready
+- Current Stage: done
 - Deliverable For This Stage: workspace-owned Google Drive settings, encrypted
   OAuth token storage contract, and safe provider client.
 - Goal: Allow an owner to connect Google Drive through OAuth-backed workspace
@@ -113,12 +113,21 @@ It follows the repository task contract and must stay synchronized with
 - Definition of Done:
   - Build/tests pass and integration docs are updated.
 - Result Report:
-  - Pending.
+  - Added `google_drive` as a supported integration provider.
+  - Added encrypted OAuth secret storage and typed non-secret Drive
+    configuration for selected folders, shared drives, sync mode, import mode,
+    Drive changes token, and operating scope mappings.
+  - Added a safe Google Drive/Docs/Sheets client boundary with provider error
+    mapping.
+  - Added connection manifest/config status entries so agents can discover
+    Google Drive capability without seeing OAuth material.
+  - Added tests proving settings redaction and backend-only OAuth decrypt
+    access.
 
 ## V2GD-004 Folder Discovery And File Import
 
 - Task Type: backend/integration
-- Current Stage: planning
+- Current Stage: ready
 - Deliverable For This Stage: selected folder discovery/import endpoint with
   explicit import policy.
 - Goal: Import selected Drive folder/file structure into CompanyCore storage

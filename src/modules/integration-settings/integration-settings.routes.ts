@@ -17,7 +17,7 @@ import { asyncHandler } from "../../middleware/async-handler";
 import { persistClickUpStructure } from "../../operating-model/clickup-structure";
 
 const providerSchema = z.object({
-  provider: z.literal("clickup")
+  provider: z.enum(["clickup", "google_drive"])
 });
 
 const clickUpConfigSchema = z.object({
@@ -32,6 +32,37 @@ const clickUpConfigSchema = z.object({
 const upsertIntegrationSettingSchema = z.object({
   token: z.string().min(1).optional(),
   config: clickUpConfigSchema.optional(),
+  active: z.boolean().optional()
+}).strict();
+
+const googleDriveConfigSchema = z.object({
+  rootFolderIds: z.array(z.string().min(1)).optional(),
+  sharedDriveIds: z.array(z.string().min(1)).optional(),
+  selectedFolderIds: z.array(z.string().min(1)).optional(),
+  syncMode: z.enum(["pull", "two_way"]).optional(),
+  importMode: z.enum(["merge", "skip_existing", "replace_selected_folders", "inspect_only"]).optional(),
+  changesPageToken: z.string().min(1).optional(),
+  operatingScopeMappings: z.array(z.object({
+    folderId: z.string().min(1),
+    operatingAreaId: z.string().uuid().optional(),
+    operatingFolderId: z.string().uuid().optional(),
+    operatingTableId: z.string().uuid().optional(),
+    storageLocationId: z.string().uuid().optional(),
+    knowledgeRootId: z.string().uuid().optional()
+  }).strict()).optional()
+}).strict();
+
+const googleDriveOAuthSchema = z.object({
+  refreshToken: z.string().min(1),
+  accessToken: z.string().min(1).optional(),
+  expiresAt: z.string().min(1).optional(),
+  tokenType: z.string().min(1).optional(),
+  scope: z.string().min(1).optional()
+}).strict();
+
+const upsertGoogleDriveSettingSchema = z.object({
+  oauth: googleDriveOAuthSchema.optional(),
+  config: googleDriveConfigSchema.optional(),
   active: z.boolean().optional()
 }).strict();
 
@@ -230,7 +261,6 @@ integrationSettingsRouter.get("/:provider", asyncHandler(async (req, res) => {
 
 integrationSettingsRouter.put("/:provider", asyncHandler(async (req, res) => {
   const { provider } = providerSchema.parse(req.params);
-  const input = upsertIntegrationSettingSchema.parse(req.body);
   const existing = await prisma.integrationSetting.findUnique({
     where: {
       workspaceId_provider: {
@@ -240,7 +270,43 @@ integrationSettingsRouter.put("/:provider", asyncHandler(async (req, res) => {
     }
   });
 
-  if (!existing && !input.token) {
+  if (provider === "clickup") {
+    const input = upsertIntegrationSettingSchema.parse(req.body);
+
+    if (!existing && !input.token) {
+      return res.status(400).json({ error: "integration_secret_required" });
+    }
+
+    const setting = existing
+      ? await prisma.integrationSetting.update({
+        where: {
+          workspaceId_provider: {
+            workspaceId: req.auth!.workspaceId,
+            provider
+          }
+        },
+        data: {
+          secretCiphertext: input.token ? encryptSecret(input.token) : existing.secretCiphertext,
+          config: input.config ? toJsonInput(input.config) : existing.config ?? {},
+          active: input.active ?? existing.active
+        }
+      })
+      : await prisma.integrationSetting.create({
+        data: {
+          workspaceId: req.auth!.workspaceId,
+          provider,
+          secretCiphertext: encryptSecret(input.token!),
+          config: toJsonInput(input.config ?? {}),
+          active: input.active ?? true
+        }
+      });
+
+    return res.json({ data: safeIntegrationSetting(setting) });
+  }
+
+  const input = upsertGoogleDriveSettingSchema.parse(req.body);
+
+  if (!existing && !input.oauth) {
     return res.status(400).json({ error: "integration_secret_required" });
   }
 
@@ -253,7 +319,7 @@ integrationSettingsRouter.put("/:provider", asyncHandler(async (req, res) => {
         }
       },
       data: {
-        secretCiphertext: input.token ? encryptSecret(input.token) : existing.secretCiphertext,
+        secretCiphertext: input.oauth ? encryptSecret(JSON.stringify(input.oauth)) : existing.secretCiphertext,
         config: input.config ? toJsonInput(input.config) : existing.config ?? {},
         active: input.active ?? existing.active
       }
@@ -262,7 +328,7 @@ integrationSettingsRouter.put("/:provider", asyncHandler(async (req, res) => {
       data: {
         workspaceId: req.auth!.workspaceId,
         provider,
-        secretCiphertext: encryptSecret(input.token!),
+        secretCiphertext: encryptSecret(JSON.stringify(input.oauth!)),
         config: toJsonInput(input.config ?? {}),
         active: input.active ?? true
       }

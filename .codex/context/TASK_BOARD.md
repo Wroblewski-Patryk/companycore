@@ -2,12 +2,12 @@
 
 ## Ready
 
-- V2GD-003 Google Drive Provider Client And OAuth Settings
+- V2GD-004 Folder Discovery And File Import
   - Stage: planning
   - Owner: Backend Builder
   - Priority: P1
-  - Goal: add workspace-owned Google Drive provider settings and a safe client
-    boundary for Drive, Docs, and Sheets APIs.
+  - Goal: import selected Google Drive folder/file structure into CompanyCore
+    storage and knowledge records with no duplicates.
 
 ## Blocked
 
@@ -41,7 +41,6 @@
 
 ## Backlog
 
-- V2GD-004 Folder Discovery And File Import.
 - V2GD-005 Docs And Sheets Read/Create/Edit.
 - V2GD-006 Drive Changes Freshness.
 - Future v2 dashboard surfaces that show ClickUp Lists, Drive folders/files,
@@ -139,3 +138,4 @@
 - CCV1-060 V1 Operator Handoff.
 - V2GD-001 Google Drive Architecture And Queue.
 - V2GD-002 Google Drive Persistence Foundation.
+- V2GD-003 Google Drive Provider Client And OAuth Settings.
