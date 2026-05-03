@@ -321,8 +321,8 @@ Acceptance Criteria:
 ### CCV1-048 Operating Areas Explorer
 
 - Task Type: feature
-- Current Stage: planning
-- Status: READY
+- Current Stage: verification
+- Status: DONE
 - Owner: Frontend Builder
 - Priority: P1
 

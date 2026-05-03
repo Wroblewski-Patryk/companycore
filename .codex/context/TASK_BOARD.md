@@ -10,13 +10,6 @@
     `COMPANYCORE_API_KEY`, consumes CompanyCore agent events, and writes
     relevant records back through CompanyCore instead of direct provider paths.
 
-- CCV1-048 Operating Areas Explorer
-  - Stage: planning
-  - Owner: Frontend Builder
-  - Priority: P1
-  - Scope: add the 12-area operating model explorer and read-first mapping
-    health view backed by `/v1/operating-model*`.
-
 ## Blocked
 
 - CCV1-020 GitHub webhook auto-deploy completion
@@ -132,3 +125,4 @@
 - CCV1-045 Google Drive Bidirectional Notes Bridge.
 - CCV1-046 GUI App Shell And Navigation.
 - CCV1-047 Dashboard Command Center.
+- CCV1-048 Operating Areas Explorer.

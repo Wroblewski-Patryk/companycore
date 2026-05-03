@@ -36,6 +36,7 @@ const state = {
   agentEvents: [],
   clickupWebhooks: [],
   googleDriveWebhooks: [],
+  selectedAreaId: null,
   pipelineStages: [],
   deals: [],
   clients: []
@@ -122,6 +123,9 @@ const clickupEventPanel = document.querySelector("#clickupEventPanel");
 
 const areasSummary = document.querySelector("#areasSummary");
 const areaGrid = document.querySelector("#areaGrid");
+const areaDetailTitle = document.querySelector("#areaDetailTitle");
+const areaDetailSummary = document.querySelector("#areaDetailSummary");
+const areaDetailGrid = document.querySelector("#areaDetailGrid");
 const mappingHealthSummary = document.querySelector("#mappingHealthSummary");
 const mappingTableBody = document.querySelector("#mappingTableBody");
 const pipelineSummary = document.querySelector("#pipelineSummary");
@@ -705,6 +709,10 @@ function renderAreas() {
   const model = state.operatingModel;
   const areas = model?.areas || [];
   const mappings = model?.externalMappings || [];
+  const fields = model?.externalFields || [];
+  const storageLocations = model?.storageLocations || [];
+  const knowledgeRoots = model?.knowledgeRoots || [];
+  const automationDefinitions = model?.automationDefinitions || [];
   const tables = areas.flatMap((area) => area.tables || []);
   const areaById = new Map(areas.map((area) => [area.id, area]));
   const tableById = new Map(tables.map((table) => [table.id, table]));
@@ -714,6 +722,9 @@ function renderAreas() {
       ? "No operating areas loaded yet."
       : "Sign in to load the operating model.";
     mappingHealthSummary.textContent = "No provider mappings loaded yet.";
+    areaDetailTitle.textContent = "Area detail";
+    areaDetailSummary.textContent = "Select an operating area to inspect its records.";
+    areaDetailGrid.innerHTML = "";
     const row = document.createElement("tr");
     const cell = document.createElement("td");
     cell.colSpan = 5;
@@ -725,14 +736,54 @@ function renderAreas() {
 
   areasSummary.textContent = `${areas.length} operating areas, ${tables.length} operating tables, ${mappings.length} provider mappings.`;
 
+  if (!state.selectedAreaId || !areas.some((area) => area.id === state.selectedAreaId)) {
+    state.selectedAreaId = areas[0]?.id || null;
+  }
+
   for (const area of areas) {
     const areaMappings = mappings.filter((mapping) => mapping.areaId === area.id);
     const card = document.createElement("article");
     card.className = "area-card";
+    card.classList.toggle("active", area.id === state.selectedAreaId);
+    card.tabIndex = 0;
+    card.addEventListener("click", () => {
+      state.selectedAreaId = area.id;
+      renderAreas();
+    });
+    card.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        state.selectedAreaId = area.id;
+        renderAreas();
+      }
+    });
     appendText(card, "span", String(area.position).padStart(2, "0"), "area-index");
     appendText(card, "strong", area.name);
     appendText(card, "p", `${(area.tables || []).length} tables, ${(area.folders || []).length} folders, ${areaMappings.length} mappings`);
     areaGrid.append(card);
+  }
+
+  const selectedArea = areas.find((area) => area.id === state.selectedAreaId);
+  areaDetailGrid.innerHTML = "";
+  if (selectedArea) {
+    const selectedTables = selectedArea.tables || [];
+    const selectedFolders = selectedArea.folders || [];
+    const selectedMappings = mappings.filter((mapping) => mapping.areaId === selectedArea.id);
+    const selectedFields = fields.filter((field) => selectedTables.some((table) => table.id === field.tableId));
+    const selectedStorage = storageLocations.filter((item) => item.areaId === selectedArea.id);
+    const selectedKnowledge = knowledgeRoots.filter((item) => item.areaId === selectedArea.id);
+    const selectedAutomations = automationDefinitions.filter((item) => item.areaId === selectedArea.id);
+
+    areaDetailTitle.textContent = selectedArea.name;
+    areaDetailSummary.textContent = `${selectedTables.length} tables, ${selectedFolders.length} folders, ${selectedMappings.length} mappings, ${selectedFields.length} external fields.`;
+
+    renderAreaDetailGroup("Tables", selectedTables.map((table) => `${table.name} (${table.apiSlug})`));
+    renderAreaDetailGroup("Folders", selectedFolders.map((folder) => `${folder.name} - ${folder.source || "companycore"}`));
+    renderAreaDetailGroup("Provider mappings", selectedMappings.map((mapping) => `${mapping.provider} ${mapping.entityType}: ${mapping.name || mapping.externalId}`));
+    renderAreaDetailGroup("External fields", selectedFields.map((field) => `${field.provider}: ${field.name}`));
+    renderAreaDetailGroup("Storage", selectedStorage.map((item) => `${item.provider}: ${item.name}`));
+    renderAreaDetailGroup("Knowledge roots", selectedKnowledge.map((item) => `${item.provider}: ${item.name}`));
+    renderAreaDetailGroup("Automations", selectedAutomations.map((item) => `${item.name} (${item.triggerType})`));
   }
 
   if (mappings.length === 0) {
@@ -765,6 +816,22 @@ function renderAreas() {
     }
     mappingTableBody.append(row);
   }
+}
+
+function renderAreaDetailGroup(title, items) {
+  const group = document.createElement("article");
+  group.className = "detail-group";
+  appendText(group, "h3", title);
+  if (items.length === 0) {
+    appendText(group, "p", "No records in this group.", "empty-copy");
+  } else {
+    const list = document.createElement("ul");
+    for (const item of items.slice(0, 12)) {
+      appendText(list, "li", item);
+    }
+    group.append(list);
+  }
+  areaDetailGrid.append(group);
 }
 
 function filteredTasks() {
@@ -1103,6 +1170,7 @@ function resetPrivateState() {
   state.agentEvents = [];
   state.clickupWebhooks = [];
   state.googleDriveWebhooks = [];
+  state.selectedAreaId = null;
   state.pipelineStages = [];
   state.deals = [];
   state.clients = [];
