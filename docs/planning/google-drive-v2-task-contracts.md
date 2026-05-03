@@ -199,7 +199,7 @@ It follows the repository task contract and must stay synchronized with
 ## V2GD-006 Drive Changes Freshness
 
 - Task Type: backend/integration
-- Current Stage: ready
+- Current Stage: done
 - Deliverable For This Stage: Drive changes reconciliation and future webhook
   channel plan.
 - Goal: Keep CompanyCore file metadata and content snapshots fresh after
@@ -222,4 +222,13 @@ It follows the repository task contract and must stay synchronized with
 - Definition of Done:
   - Build/tests pass, docs updated, smoke plan created.
 - Result Report:
-  - Pending.
+  - Added Drive changes reconciliation through
+    `/v1/integration-settings/google_drive/changes/reconcile`.
+  - Added provider event inbox records for Drive changes.
+  - Added agent outbox events for changed and removed Drive files.
+  - Added metadata/content refresh for changed Docs/Sheets.
+  - Added safe removed-file handling by marking provider-owned rows as
+    `trashed`/`removed` instead of deleting native data.
+  - Added changes page token advancement in Google Drive integration config.
+  - Added tests for changed file refresh, removed file marking, inbox rows,
+    agent outbox rows, and page-token update.

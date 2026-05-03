@@ -2,6 +2,7 @@ import { prisma } from "../../db/prisma";
 import { IntegrationError } from "../errors";
 import { getGoogleDriveSettingsForWorkspace, toJsonInput, type GoogleDriveIntegrationConfig } from "../integration-settings.service";
 import { GoogleDriveClient, type GoogleDriveFileMetadata } from "./google-drive.client";
+import { refreshGoogleDriveFileContent, upsertGoogleDriveFileFromMetadata } from "./google-drive.content";
 
 export type GoogleDriveImportMode = "merge" | "skip_existing" | "replace_selected_folders" | "inspect_only";
 
@@ -16,6 +17,16 @@ export type GoogleDriveImportResult = {
   deletedCount: number;
   wouldCreateCount: number;
   wouldUpdateCount: number;
+};
+
+export type GoogleDriveChangesResult = {
+  provider: "google_drive";
+  processedCount: number;
+  refreshedCount: number;
+  removedCount: number;
+  skippedCount: number;
+  nextPageToken?: string;
+  newStartPageToken?: string;
 };
 
 export async function importGoogleDriveFoldersForWorkspace(input: {
@@ -262,6 +273,194 @@ async function emitGoogleDriveImportEvent(workspaceId: string, result: GoogleDri
       type: "google_drive_import_succeeded",
       source: "google_drive",
       payload: toJsonInput(result)
+    }
+  });
+}
+
+export async function reconcileGoogleDriveChangesForWorkspace(input: {
+  workspaceId: string;
+  pageToken?: string;
+  driveId?: string;
+}) {
+  const settings = await getGoogleDriveSettingsForWorkspace(input.workspaceId);
+
+  if (!settings) {
+    throw new IntegrationError(
+      "integration_not_configured",
+      404,
+      "Google Drive is not configured for this workspace."
+    );
+  }
+
+  if (!settings.oauth.accessToken) {
+    throw new IntegrationError(
+      "integration_invalid_token",
+      401,
+      "Google Drive access token is required before changes can be reconciled."
+    );
+  }
+
+  const pageToken = input.pageToken ?? settings.config.changesPageToken;
+  if (!pageToken) {
+    throw new IntegrationError(
+      "sync_failed",
+      422,
+      "Google Drive changes page token is required before reconciliation can run."
+    );
+  }
+
+  const client = new GoogleDriveClient(settings.oauth.accessToken);
+  const response = await client.listChanges({
+    pageToken,
+    driveId: input.driveId
+  });
+
+  let processedCount = 0;
+  let refreshedCount = 0;
+  let removedCount = 0;
+  let skippedCount = 0;
+
+  for (const change of response.changes ?? []) {
+    const externalId = change.fileId ?? change.file?.id;
+    if (!externalId) {
+      skippedCount += 1;
+      continue;
+    }
+
+    await recordGoogleDriveChangeInbox(input.workspaceId, change);
+    processedCount += 1;
+
+    if (change.removed) {
+      const removed = await prisma.googleDriveFile.updateMany({
+        where: {
+          workspaceId: input.workspaceId,
+          provider: "google_drive",
+          externalId
+        },
+        data: {
+          trashed: true,
+          syncStatus: "removed",
+          lastSyncedAt: new Date()
+        }
+      });
+      removedCount += removed.count;
+      await enqueueGoogleDriveAgentEvent(input.workspaceId, "google_drive_file_removed", {
+        externalId
+      });
+      continue;
+    }
+
+    if (!change.file) {
+      skippedCount += 1;
+      continue;
+    }
+
+    const file = await upsertGoogleDriveFileFromMetadata(input.workspaceId, change.file);
+    if (!file.isFolder) {
+      await refreshGoogleDriveFileContent({
+        workspaceId: input.workspaceId,
+        file,
+        client
+      });
+      refreshedCount += 1;
+    }
+    await enqueueGoogleDriveAgentEvent(input.workspaceId, "google_drive_file_changed", {
+      fileId: file.id,
+      externalId: file.externalId,
+      name: file.name,
+      mimeType: file.mimeType
+    });
+  }
+
+  if (response.newStartPageToken) {
+    await prisma.integrationSetting.update({
+      where: {
+        workspaceId_provider: {
+          workspaceId: input.workspaceId,
+          provider: "google_drive"
+        }
+      },
+      data: {
+        config: toJsonInput({
+          ...settings.config,
+          changesPageToken: response.newStartPageToken
+        })
+      }
+    });
+  }
+
+  const result: GoogleDriveChangesResult = {
+    provider: "google_drive",
+    processedCount,
+    refreshedCount,
+    removedCount,
+    skippedCount,
+    nextPageToken: response.nextPageToken,
+    newStartPageToken: response.newStartPageToken
+  };
+
+  await prisma.event.create({
+    data: {
+      workspaceId: input.workspaceId,
+      type: "google_drive_changes_reconciled",
+      source: "google_drive",
+      payload: toJsonInput(result)
+    }
+  });
+
+  return result;
+}
+
+async function recordGoogleDriveChangeInbox(workspaceId: string, change: {
+  fileId?: string;
+  removed?: boolean;
+  file?: GoogleDriveFileMetadata;
+}) {
+  const externalId = change.fileId ?? change.file?.id ?? "unknown";
+  const idempotencyKey = [
+    "google_drive_change",
+    externalId,
+    change.removed ? "removed" : "changed",
+    change.file?.headRevisionId ?? "no-revision"
+  ].join(":");
+
+  await prisma.providerEventInbox.upsert({
+    where: {
+      workspaceId_provider_idempotencyKey: {
+        workspaceId,
+        provider: "google_drive",
+        idempotencyKey
+      }
+    },
+    create: {
+      workspaceId,
+      provider: "google_drive",
+      externalWebhookId: "drive_changes",
+      eventName: change.removed ? "file_removed" : "file_changed",
+      idempotencyKey,
+      payloadHash: idempotencyKey,
+      payload: toJsonInput(change),
+      signatureVerified: true,
+      processingStatus: "processed",
+      processedAt: new Date()
+    },
+    update: {
+      processingStatus: "processed",
+      processedAt: new Date()
+    }
+  });
+}
+
+async function enqueueGoogleDriveAgentEvent(workspaceId: string, eventType: string, payload: Record<string, unknown>) {
+  await prisma.agentEventOutbox.create({
+    data: {
+      workspaceId,
+      eventType,
+      scope: toJsonInput({ provider: "google_drive" }),
+      payload: toJsonInput({
+        provider: "google_drive",
+        ...payload
+      })
     }
   });
 }

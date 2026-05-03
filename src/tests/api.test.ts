@@ -1106,6 +1106,118 @@ test("CompanyCore v1 protected API flow", async () => {
     file.externalId === "created-doc-1" && file.contentSnapshots.length === 1
   )));
 
+  const originalFetchBeforeGoogleDriveChanges = globalThis.fetch;
+  globalThis.fetch = (async (input: string | URL | Request) => {
+    const url = new URL(String(input));
+
+    if (url.pathname === "/drive/v3/changes") {
+      assert.equal(url.searchParams.get("pageToken"), "changes-token-1");
+      return new Response(JSON.stringify({
+        changes: [
+          {
+            fileId: "drive-doc-1",
+            file: {
+              id: "drive-doc-1",
+              name: "Imported Drive doc changed externally",
+              mimeType: "application/vnd.google-apps.document",
+              parents: ["drive-folder-root"],
+              headRevisionId: "drive-doc-rev-change",
+              webViewLink: "https://docs.google.com/document/d/drive-doc-1"
+            }
+          },
+          {
+            fileId: "drive-sheet-1",
+            removed: true
+          }
+        ],
+        newStartPageToken: "changes-token-2"
+      }), { status: 200 });
+    }
+
+    if (url.pathname === "/v1/documents/drive-doc-1") {
+      return new Response(JSON.stringify({
+        body: {
+          content: [{
+            paragraph: {
+              elements: [{
+                textRun: {
+                  content: "External Drive change refreshed into CompanyCore.\n"
+                }
+              }]
+            }
+          }]
+        }
+      }), { status: 200 });
+    }
+
+    return new Response(JSON.stringify({ error: "not mocked", path: url.pathname }), { status: 404 });
+  }) as typeof fetch;
+
+  try {
+    const reconciledDriveChanges = await request("/v1/integration-settings/google_drive/changes/reconcile", {
+      method: "POST",
+      headers: authA
+    });
+    assert.equal(reconciledDriveChanges.status, 200);
+    const reconciledDriveChangesBody = reconciledDriveChanges.body as {
+      data: { processedCount: number; refreshedCount: number; removedCount: number; newStartPageToken: string };
+    };
+    assert.equal(reconciledDriveChangesBody.data.processedCount, 2);
+    assert.equal(reconciledDriveChangesBody.data.refreshedCount, 1);
+    assert.equal(reconciledDriveChangesBody.data.removedCount, 1);
+    assert.equal(reconciledDriveChangesBody.data.newStartPageToken, "changes-token-2");
+  } finally {
+    globalThis.fetch = originalFetchBeforeGoogleDriveChanges;
+  }
+
+  const changedDriveDoc = await prisma.googleDriveFile.findUnique({
+    where: {
+      workspaceId_provider_externalId: {
+        workspaceId: ownerA.workspace.id,
+        provider: "google_drive",
+        externalId: "drive-doc-1"
+      }
+    }
+  });
+  assert.equal(changedDriveDoc?.name, "Imported Drive doc changed externally");
+  assert.equal(changedDriveDoc?.headRevisionId, "drive-doc-rev-change");
+
+  const removedDriveSheet = await prisma.googleDriveFile.findUnique({
+    where: {
+      workspaceId_provider_externalId: {
+        workspaceId: ownerA.workspace.id,
+        provider: "google_drive",
+        externalId: "drive-sheet-1"
+      }
+    }
+  });
+  assert.equal(removedDriveSheet?.trashed, true);
+  assert.equal(removedDriveSheet?.syncStatus, "removed");
+
+  const updatedGoogleDriveSetting = await prisma.integrationSetting.findUniqueOrThrow({
+    where: {
+      workspaceId_provider: {
+        workspaceId: ownerA.workspace.id,
+        provider: "google_drive"
+      }
+    }
+  });
+  assert.equal((updatedGoogleDriveSetting.config as { changesPageToken?: string }).changesPageToken, "changes-token-2");
+  const driveInboxCount = await prisma.providerEventInbox.count({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      provider: "google_drive"
+    }
+  });
+  assert.equal(driveInboxCount, 2);
+  const driveAgentEvents = await prisma.agentEventOutbox.findMany({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      eventType: { in: ["google_drive_file_changed", "google_drive_file_removed"] }
+    }
+  });
+  assert.equal(driveAgentEvents.length, 2);
+
   const updatedSettingsWithoutToken = await request("/integration-settings/clickup", {
     method: "PUT",
     headers: authA,

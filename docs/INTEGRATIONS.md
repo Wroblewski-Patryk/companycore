@@ -152,6 +152,11 @@ Implemented foundation:
 - `/v1/google-drive/docs/:id` and `/v1/google-drive/sheets/:id/values` write to
   Google first, then refresh CompanyCore metadata/content snapshots only after
   the provider write succeeds.
+- `POST /v1/integration-settings/google_drive/changes/reconcile` consumes
+  Drive `changes.list`, records provider deliveries in the provider event
+  inbox, refreshes changed file metadata/content snapshots, marks removed files
+  safely, updates the stored changes page token, and emits provider-neutral
+  agent outbox events.
 
 Implemented first native slice:
 

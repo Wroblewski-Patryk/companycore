@@ -2,12 +2,7 @@
 
 ## Ready
 
-- V2GD-006 Drive Changes Freshness
-  - Stage: planning
-  - Owner: Backend Builder
-  - Priority: P1
-  - Goal: reconcile external Google Drive edits through Drive changes and
-    refresh local metadata/content snapshots without duplicates.
+No active P0/P1 Google Drive implementation task remains ready after V2GD-006.
 
 ## Blocked
 
@@ -141,3 +136,4 @@
 - V2GD-003 Google Drive Provider Client And OAuth Settings.
 - V2GD-004 Folder Discovery And File Import.
 - V2GD-005 Docs And Sheets Read/Create/Edit.
+- V2GD-006 Drive Changes Freshness.

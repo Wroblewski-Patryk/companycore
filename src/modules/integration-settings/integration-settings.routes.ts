@@ -11,7 +11,7 @@ import {
   retryFailedClickUpProviderEvents
 } from "../../integrations/clickup/clickup.webhooks";
 import { IntegrationError } from "../../integrations/errors";
-import { importGoogleDriveFoldersForWorkspace } from "../../integrations/google-drive/google-drive.sync";
+import { importGoogleDriveFoldersForWorkspace, reconcileGoogleDriveChangesForWorkspace } from "../../integrations/google-drive/google-drive.sync";
 import { getClickUpSettingsForWorkspace, toJsonInput } from "../../integrations/integration-settings.service";
 import { encryptSecret } from "../../integrations/secrets";
 import { asyncHandler } from "../../middleware/async-handler";
@@ -88,6 +88,11 @@ const googleDriveImportSchema = z.object({
   folderIds: z.array(z.string().min(1)).optional(),
   importMode: z.enum(["merge", "skip_existing", "replace_selected_folders", "inspect_only"]).optional(),
   maxPagesPerFolder: z.number().int().min(1).max(50).optional()
+}).strict();
+
+const googleDriveChangesSchema = z.object({
+  pageToken: z.string().min(1).optional(),
+  driveId: z.string().min(1).optional()
 }).strict();
 
 export const integrationSettingsRouter = Router();
@@ -257,6 +262,24 @@ integrationSettingsRouter.post("/google_drive/import", asyncHandler(async (req, 
       folderIds: input.folderIds,
       importMode: input.importMode,
       maxPagesPerFolder: input.maxPagesPerFolder
+    });
+    return res.json({ data: result });
+  } catch (error) {
+    if (error instanceof IntegrationError) {
+      return res.status(error.status).json({ error: error.code });
+    }
+    throw error;
+  }
+}));
+
+integrationSettingsRouter.post("/google_drive/changes/reconcile", asyncHandler(async (req, res) => {
+  const input = googleDriveChangesSchema.parse(req.body ?? {});
+
+  try {
+    const result = await reconcileGoogleDriveChangesForWorkspace({
+      workspaceId: req.auth!.workspaceId,
+      pageToken: input.pageToken,
+      driveId: input.driveId
     });
     return res.json({ data: result });
   } catch (error) {
