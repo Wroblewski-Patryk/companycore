@@ -44,6 +44,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] CCV1-048 Operating Areas Explorer
 - [x] CCV1-049 Settings Integration Taxonomy
 - [x] CCV1-050 Tasks And Adapter Operations View
+- [x] CCV1-051 Pipeline Module
 
 ## NEXT
 
@@ -80,7 +81,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] 26. CCV1-048 Operating Areas Explorer
 - [x] 27. CCV1-049 Settings Integration Taxonomy
 - [x] 28. CCV1-050 Tasks And Adapter Operations View
-- [ ] 29. CCV1-051 Pipeline Module
+- [x] 29. CCV1-051 Pipeline Module
 - [ ] 30. CCV1-052 Relationship Mapping Reassignment API And UI
 
 

@@ -23,13 +23,6 @@
 
 ## Backlog
 
-- CCV1-051 Pipeline Module
-  - Stage: planning
-  - Owner: Frontend Builder
-  - Priority: P2
-  - Scope: add `/pipeline` using existing stages, deals, clients,
-    interactions, and notes.
-
 - CCV1-052 Relationship Mapping Reassignment API And UI
   - Stage: planning
   - Owner: Backend Builder + Frontend Builder
@@ -114,3 +107,4 @@
 - CCV1-048 Operating Areas Explorer.
 - CCV1-049 Settings Integration Taxonomy.
 - CCV1-050 Tasks And Adapter Operations View.
+- CCV1-051 Pipeline Module.

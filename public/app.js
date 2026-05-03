@@ -39,7 +39,8 @@ const state = {
   selectedAreaId: null,
   pipelineStages: [],
   deals: [],
-  clients: []
+  clients: [],
+  interactions: []
 };
 
 const API_ORIGIN = window.location.hostname === "companycore.luckysparrow.ch"
@@ -136,6 +137,13 @@ const mappingHealthSummary = document.querySelector("#mappingHealthSummary");
 const mappingTableBody = document.querySelector("#mappingTableBody");
 const pipelineSummary = document.querySelector("#pipelineSummary");
 const pipelineBoard = document.querySelector("#pipelineBoard");
+const pipelineDealCount = document.querySelector("#pipelineDealCount");
+const pipelineDealHint = document.querySelector("#pipelineDealHint");
+const pipelineOpenValue = document.querySelector("#pipelineOpenValue");
+const pipelineClientCount = document.querySelector("#pipelineClientCount");
+const pipelineInteractionCount = document.querySelector("#pipelineInteractionCount");
+const interactionSummary = document.querySelector("#interactionSummary");
+const interactionPanel = document.querySelector("#interactionPanel");
 
 const fields = {
   email: document.querySelector("#email"),
@@ -440,6 +448,7 @@ async function loadWorkspaceData() {
     pipelineStages,
     deals,
     clients,
+    interactions,
     googleDrive
   ] = await Promise.all([
     maybeApi("/v1/tasks", { data: [] }),
@@ -453,6 +462,7 @@ async function loadWorkspaceData() {
     maybeApi("/v1/pipeline-stages", { data: [] }),
     maybeApi("/v1/deals", { data: [] }),
     maybeApi("/v1/clients", { data: [] }),
+    maybeApi("/v1/interactions", { data: [] }),
     maybeApi("/v1/integration-settings/google_drive", null)
   ]);
 
@@ -467,6 +477,7 @@ async function loadWorkspaceData() {
   state.pipelineStages = pipelineStages?.data || [];
   state.deals = deals?.data || [];
   state.clients = clients?.data || [];
+  state.interactions = interactions?.data || [];
 
   if (googleDrive?.data) {
     state.googleDrive.configured = true;
@@ -997,10 +1008,19 @@ function renderTaskModule() {
 
 function renderPipeline() {
   pipelineBoard.innerHTML = "";
+  interactionPanel.innerHTML = "";
   const stages = state.pipelineStages.length > 0
     ? state.pipelineStages
     : [{ id: "unassigned", name: "Unassigned", position: 999 }];
   const clientById = new Map(state.clients.map((client) => [client.id, client]));
+  const openDeals = state.deals.filter((deal) => deal.status === "open");
+  const openValue = openDeals.reduce((sum, deal) => sum + Number(deal.value || 0), 0);
+
+  pipelineDealCount.textContent = String(state.deals.length);
+  pipelineDealHint.textContent = `${openDeals.length} open, ${state.deals.filter((deal) => deal.status === "won").length} won.`;
+  pipelineOpenValue.textContent = `${openValue.toLocaleString(undefined, { maximumFractionDigits: 0 })} PLN`;
+  pipelineClientCount.textContent = String(state.clients.length);
+  pipelineInteractionCount.textContent = String(state.interactions.length);
 
   pipelineSummary.textContent = `${state.deals.length} deal${state.deals.length === 1 ? "" : "s"} across ${state.pipelineStages.length} configured stage${state.pipelineStages.length === 1 ? "" : "s"}.`;
 
@@ -1029,6 +1049,20 @@ function renderPipeline() {
       appendText(column, "span", "No deals in this stage.", "empty-copy");
     }
     pipelineBoard.append(column);
+  }
+
+  interactionSummary.textContent = state.interactions.length > 0
+    ? `${state.interactions.length} interactions loaded.`
+    : "No interactions found yet.";
+  for (const interaction of state.interactions.slice(0, 10)) {
+    const item = document.createElement("div");
+    item.className = "stack-item";
+    appendText(item, "strong", interaction.type || "Interaction");
+    appendText(item, "span", `${clientById.get(interaction.clientId)?.name || "No client"} - ${interaction.summary || "No summary"} - ${formatDate(interaction.occurredAt, true)}`);
+    interactionPanel.append(item);
+  }
+  if (state.interactions.length === 0) {
+    appendText(interactionPanel, "p", "No interactions loaded.", "empty-copy");
   }
 }
 
@@ -1276,6 +1310,7 @@ function resetPrivateState() {
   state.pipelineStages = [];
   state.deals = [];
   state.clients = [];
+  state.interactions = [];
 }
 
 links.forEach((link) => {
@@ -1352,14 +1387,16 @@ refreshTaskModuleButton.addEventListener("click", async () => {
 refreshPipelineButton.addEventListener("click", async () => {
   setBusy(true);
   try {
-    const [stages, deals, clients] = await Promise.all([
+    const [stages, deals, clients, interactions] = await Promise.all([
       api("/v1/pipeline-stages"),
       api("/v1/deals"),
-      api("/v1/clients")
+      api("/v1/clients"),
+      api("/v1/interactions")
     ]);
     state.pipelineStages = stages.data || [];
     state.deals = deals.data || [];
     state.clients = clients.data || [];
+    state.interactions = interactions.data || [];
     renderAll();
     showResult("Pipeline refreshed.");
   } catch (error) {

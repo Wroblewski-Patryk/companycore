@@ -370,6 +370,28 @@
           </section>
 
           <section class="view" data-view="/pipeline">
+            <section class="command-grid">
+              <article class="panel summary-card">
+                <span class="summary-kicker">Deals</span>
+                <strong id="pipelineDealCount">-</strong>
+                <p id="pipelineDealHint">Current opportunities.</p>
+              </article>
+              <article class="panel summary-card">
+                <span class="summary-kicker">Open value</span>
+                <strong id="pipelineOpenValue">-</strong>
+                <p>Open deal value across stages.</p>
+              </article>
+              <article class="panel summary-card">
+                <span class="summary-kicker">Clients</span>
+                <strong id="pipelineClientCount">-</strong>
+                <p>CRM records linked to deals and interactions.</p>
+              </article>
+              <article class="panel summary-card">
+                <span class="summary-kicker">Interactions</span>
+                <strong id="pipelineInteractionCount">-</strong>
+                <p>Recent CRM activity.</p>
+              </article>
+            </section>
             <section class="panel">
               <div class="section-title row-title">
                 <div>
@@ -379,6 +401,13 @@
                 <button type="button" class="secondary compact" id="refreshPipelineButton">Refresh</button>
               </div>
               <div class="pipeline-board" id="pipelineBoard"></div>
+            </section>
+            <section class="panel">
+              <div class="section-title">
+                <h2>Recent interactions</h2>
+                <p id="interactionSummary">CRM activity from the current workspace.</p>
+              </div>
+              <div class="stack-list" id="interactionPanel"></div>
             </section>
           </section>
 
