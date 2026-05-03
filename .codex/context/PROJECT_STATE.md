@@ -370,6 +370,12 @@ Last updated: 2026-05-03
   `create` payload with `encryptSecret(undefined)` when updating an existing
   setting without re-pasting the ClickUp token. The route now uses explicit
   update/create paths and preserves the encrypted secret on config-only saves.
+- 2026-05-03: Production ClickUp setting inspection showed the owner-selected
+  ClickUp lists and encrypted token were saved, but the integration was
+  inactive (`active=false`), causing native sync to return
+  `integration_not_configured`. Updated the owner console so `Save and sync`
+  forces the ClickUp setting active before syncing and the Active checkbox
+  refreshes button state immediately.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

@@ -666,6 +666,73 @@ secret.
 ### Priority
 P0
 
+## CCV1-040 ClickUp Save-And-Sync Activation Fix
+
+### Header
+- ID: CCV1-040
+- Title: ClickUp save-and-sync activation fix
+- Task Type: bugfix
+- Current Stage: verification
+- Status: DONE
+- Owner: Frontend Builder
+- Depends on: CCV1-039
+- Priority: P0
+- Iteration: v1-040
+- Operation Mode: BUILDER
+
+### Description
+Production inspection showed the owner-selected ClickUp lists and encrypted
+token were saved, but the integration setting was inactive, so native sync
+returned `integration_not_configured`.
+
+### Goal
+Make the owner console's `Save and sync` action activate the ClickUp connection
+before triggering native sync, while preserving the ability to save an inactive
+connection through the plain `Save connection` action.
+
+### Scope
+- `public/app.js`
+- `.codex/context/PROJECT_STATE.md`
+- `.codex/context/TASK_BOARD.md`
+- `docs/planning/mvp-next-commits.md`
+- this task contract
+
+### Implementation Plan
+1. Inspect production ClickUp setting metadata without exposing token material.
+2. Confirm whether token, selected lists, and active state are present.
+3. Update `Save and sync` to force `active=true`.
+4. Keep `Save connection` respecting the Active checkbox.
+5. Recompute button state when Active changes.
+6. Run build and diff checks.
+
+### Acceptance Criteria
+- [x] `Save and sync` activates ClickUp settings before sync.
+- [x] Plain `Save connection` can still save an inactive connection.
+- [x] Active checkbox changes update button state.
+- [x] No token material is logged or returned.
+- [x] `npm run build` passes.
+
+### Definition of Done
+- [x] Existing owner console flow is reused.
+- [x] No backend bypass or direct token handling is added.
+- [x] Production finding is recorded in project state.
+- [x] Validation passes.
+
+### Result Report
+- Task summary: Fixed owner console behavior so `Save and sync` forces the
+  ClickUp setting active before native sync, preventing an inactive saved
+  setting from returning `integration_not_configured`.
+- Files changed: `public/app.js`, `.codex/context/PROJECT_STATE.md`,
+  `.codex/context/TASK_BOARD.md`, `docs/planning/mvp-next-commits.md`, and this
+  task contract.
+- How tested: Ran `npm run build` and `git diff --check`.
+- What is incomplete: Needs production deploy and owner retry.
+- Next steps: Deploy, hard-refresh the console, click `Save and sync`, then
+  check Dashboard Tasks.
+
+### Priority
+P0
+
 ## CCV1-034B ClickUp Structure Persistence
 
 ### Header

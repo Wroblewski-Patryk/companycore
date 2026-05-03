@@ -27,6 +27,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] CCV1-037 ClickUp List Selection UX Fix
 - [x] CCV1-038 Dashboard Task Table
 - [x] CCV1-039 ClickUp Config-Only Save Fix
+- [x] CCV1-040 ClickUp Save-And-Sync Activation Fix
 
 ## NEXT
 

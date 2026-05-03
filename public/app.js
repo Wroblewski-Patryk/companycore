@@ -556,15 +556,19 @@ function selectedConfig() {
   };
 }
 
-async function saveSettings() {
+async function saveSettings({ forceActive = false } = {}) {
   const config = selectedConfig();
   if (!config.teamId || config.listIds.length === 0) {
     throw new Error("Select a ClickUp Workspace and at least one List.");
   }
 
+  if (forceActive) {
+    fields.active.checked = true;
+  }
+
   const payload = {
     config,
-    active: fields.active.checked
+    active: forceActive ? true : fields.active.checked
   };
 
   const rawToken = fields.token.value.trim();
@@ -579,7 +583,7 @@ async function saveSettings() {
 
   fields.token.value = "";
   state.clickup.configured = true;
-  state.clickup.active = fields.active.checked;
+  state.clickup.active = payload.active;
   state.clickup.config = config;
 }
 
@@ -709,6 +713,10 @@ clearListsButton.addEventListener("click", () => {
   clearSelectedLists();
 });
 
+fields.active.addEventListener("change", () => {
+  setClickUpEnabled(isSignedIn());
+});
+
 refreshButton.addEventListener("click", async () => {
   setBusy(true);
   try {
@@ -751,7 +759,7 @@ syncButton.addEventListener("click", async () => {
   setBusy(true);
 
   try {
-    await saveSettings();
+    await saveSettings({ forceActive: true });
     const sync = await api("/v1/tasks/sync/clickup/native", {
       method: "POST",
       body: JSON.stringify({

@@ -121,3 +121,4 @@ Paperclip application-side adapter work tracked in
 - CCV1-037 ClickUp list selection UX fix.
 - CCV1-038 Dashboard task table.
 - CCV1-039 ClickUp config-only save fix.
+- CCV1-040 ClickUp save-and-sync activation fix.
