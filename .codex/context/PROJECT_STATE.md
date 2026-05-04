@@ -112,15 +112,21 @@ Last updated: 2026-05-04
   pattern.
 
 ## Autonomous Iteration State
-- Current iteration: V2WEB-016 API Workbench Filters.
+- Current iteration: select the next smallest v2 web console polish slice from
+  implemented data surfaces.
 - Current operation mode: BUILDER
-- Last completed iteration: V2WEB-016 API Workbench Filters.
-- Last completed task: added a searchable `/settings/api` route workbench
-  using the existing adapter manifest from `/v1/connection`.
+- Last completed iteration: V2WEB-017 ClickUp List Tree Filters.
+- Last completed task: added searchable and selected-state filters to the
+  ClickUp List tree in `/settings`, preserving selection/save behavior and
+  fixing the ClickUp panel `aria-disabled` enabled state.
 - Next required mode: BUILDER for the next v2 web console iteration unless an
   architecture decision blocks the queue first.
 
 ## Recent Progress
+- 2026-05-04: Completed V2WEB-017 by adding ClickUp List tree search and
+  all/selected/unselected filters in `/settings`, preserving saved List
+  selections, adding filtered empty-state copy, and fixing the ClickUp panel
+  enabled accessibility state.
 - 2026-05-02: Created Company Core backend foundation, Prisma schema, Docker
   runtime, API key auth, minimal endpoints, ClickUp sync, event logging, and
   docs.

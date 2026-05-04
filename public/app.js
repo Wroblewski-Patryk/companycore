@@ -15,7 +15,11 @@ const state = {
     workspaces: [],
     selectedWorkspace: null,
     spaces: [],
-    selectedListIds: new Set()
+    selectedListIds: new Set(),
+    listFilters: {
+      search: "",
+      selection: ""
+    }
   },
   googleDrive: {
     configured: false,
@@ -176,6 +180,9 @@ const relationshipDriveList = document.querySelector("#relationshipDriveList");
 const listTree = document.querySelector("#listTree");
 const listToolbar = document.querySelector("#listToolbar");
 const listSummary = document.querySelector("#listSummary");
+const listFilterBar = document.querySelector("#listFilterBar");
+const listSearch = document.querySelector("#listSearch");
+const listSelectionFilter = document.querySelector("#listSelectionFilter");
 const resultPanel = document.querySelector("#resultPanel");
 const resultMessage = document.querySelector("#resultMessage");
 const metrics = document.querySelector("#metrics");
@@ -340,6 +347,7 @@ function setBusy(isBusy) {
 }
 
 function setClickUpEnabled(isEnabled) {
+  clickupPanel.setAttribute("aria-disabled", String(!isEnabled));
   clickupPanel.querySelectorAll("input, button, select").forEach((control) => {
     control.disabled = !isEnabled;
   });
@@ -347,6 +355,8 @@ function setClickUpEnabled(isEnabled) {
   loadListsButton.disabled = !isEnabled || !workspaceSelect.value;
   refreshButton.disabled = !isEnabled || !state.clickup.configured;
   const loadedListCount = allLists().length;
+  listSearch.disabled = !isEnabled || loadedListCount === 0;
+  listSelectionFilter.disabled = !isEnabled || loadedListCount === 0;
   selectAllListsButton.disabled = !isEnabled || loadedListCount === 0;
   clearListsButton.disabled = !isEnabled || state.clickup.selectedListIds.size === 0;
   const canSave = isEnabled && state.clickup.selectedListIds.size > 0 && Boolean(workspaceSelect.value);
@@ -2176,11 +2186,57 @@ function allLists() {
   return lists;
 }
 
+function resetListFilters() {
+  state.clickup.listFilters.search = "";
+  state.clickup.listFilters.selection = "";
+  listSearch.value = "";
+  listSelectionFilter.value = "";
+}
+
+function listMatchesFilters(list) {
+  const search = state.clickup.listFilters.search.trim().toLowerCase();
+  const selection = state.clickup.listFilters.selection;
+  const isSelected = state.clickup.selectedListIds.has(list.id);
+
+  if (selection === "selected" && !isSelected) {
+    return false;
+  }
+
+  if (selection === "unselected" && isSelected) {
+    return false;
+  }
+
+  if (!search) {
+    return true;
+  }
+
+  return [list.name, list.spaceName, list.folderName]
+    .filter(Boolean)
+    .some((value) => value.toLowerCase().includes(search));
+}
+
+function filteredListCount() {
+  return allLists().filter(listMatchesFilters).length;
+}
+
+function listWithContext(list, space, folder = null) {
+  return {
+    ...list,
+    spaceId: space.id,
+    spaceName: space.name,
+    folderId: folder?.id || null,
+    folderName: folder?.name || null
+  };
+}
+
 function renderTree() {
   listTree.innerHTML = "";
   const spaces = state.clickup.spaces;
   const loadedLists = allLists();
   listToolbar.hidden = loadedLists.length === 0;
+  listFilterBar.hidden = loadedLists.length === 0;
+  listSearch.value = state.clickup.listFilters.search;
+  listSelectionFilter.value = state.clickup.listFilters.selection;
 
   if (spaces.length === 0) {
     listSummary.textContent = state.clickup.configured
@@ -2194,6 +2250,7 @@ function renderTree() {
     listSummary.textContent = "This ClickUp Workspace loaded, but no Lists were returned for the token. Check whether the selected Workspace has Spaces/Lists available to this user.";
   }
 
+  let renderedSections = 0;
   for (const space of spaces) {
     const section = document.createElement("section");
     section.className = "tree-section";
@@ -2202,13 +2259,23 @@ function renderTree() {
     heading.textContent = space.name;
     section.append(heading);
 
-    appendListGroup(section, "Folderless Lists", space.lists || []);
+    appendListGroup(section, "Folderless Lists", (space.lists || []).map((list) => listWithContext(list, space)));
 
     for (const folder of space.folders || []) {
-      appendListGroup(section, folder.name, folder.lists || []);
+      appendListGroup(section, folder.name, (folder.lists || []).map((list) => listWithContext(list, space, folder)));
     }
 
-    listTree.append(section);
+    if (section.querySelector(".tree-group")) {
+      listTree.append(section);
+      renderedSections += 1;
+    }
+  }
+
+  if (loadedLists.length > 0 && renderedSections === 0) {
+    const empty = document.createElement("p");
+    empty.className = "tree-empty-note";
+    empty.textContent = "No ClickUp Lists match the current filters.";
+    listTree.append(empty);
   }
 
   if (loadedLists.length > 0) {
@@ -2218,7 +2285,9 @@ function renderTree() {
 }
 
 function appendListGroup(parent, title, lists) {
-  if (lists.length === 0) {
+  const visibleLists = lists.filter(listMatchesFilters);
+
+  if (visibleLists.length === 0) {
     return;
   }
 
@@ -2228,7 +2297,7 @@ function appendListGroup(parent, title, lists) {
   heading.textContent = title;
   group.append(heading);
 
-  for (const list of lists) {
+  for (const list of visibleLists) {
     const item = document.createElement("label");
     item.className = "check-row";
     item.innerHTML = `
@@ -2243,7 +2312,7 @@ function appendListGroup(parent, title, lists) {
       } else {
         state.clickup.selectedListIds.delete(list.id);
       }
-      updateListSummary();
+      renderTree();
       setClickUpEnabled(isSignedIn());
     });
     group.append(item);
@@ -2255,16 +2324,20 @@ function appendListGroup(parent, title, lists) {
 function updateListSummary() {
   const count = state.clickup.selectedListIds.size;
   const loadedCount = allLists().length;
+  const visibleCount = filteredListCount();
   listToolbar.hidden = loadedCount === 0;
+  listFilterBar.hidden = loadedCount === 0;
 
   if (loadedCount === 0) {
     listSummary.textContent = "No ClickUp Lists loaded yet.";
     return;
   }
 
+  const listLabel = loadedCount === 1 ? "List" : "Lists";
+  const visibility = `${visibleCount} of ${loadedCount} ${listLabel} shown.`;
   listSummary.textContent = count === 0
-    ? `${loadedCount} List${loadedCount === 1 ? "" : "s"} loaded. Select at least one List to sync.`
-    : `${count} of ${loadedCount} List${loadedCount === 1 ? "" : "s"} selected for sync.`;
+    ? `${visibility} Select at least one List to sync.`
+    : `${visibility} ${count} selected for sync.`;
 }
 
 function selectAllLoadedLists() {
@@ -2370,6 +2443,7 @@ logoutButton.addEventListener("click", () => {
   state.clickup.workspaces = [];
   state.clickup.spaces = [];
   state.clickup.selectedListIds = new Set();
+  resetListFilters();
   state.googleDrive.configured = false;
   state.googleDrive.active = false;
   state.googleDrive.config = {};
@@ -2584,6 +2658,16 @@ clearListsButton.addEventListener("click", () => {
   clearSelectedLists();
 });
 
+listSearch.addEventListener("input", () => {
+  state.clickup.listFilters.search = listSearch.value;
+  renderTree();
+});
+
+listSelectionFilter.addEventListener("change", () => {
+  state.clickup.listFilters.selection = listSelectionFilter.value;
+  renderTree();
+});
+
 fields.active.addEventListener("change", () => {
   setClickUpEnabled(isSignedIn());
 });
@@ -2603,12 +2687,15 @@ refreshButton.addEventListener("click", async () => {
 workspaceSelect.addEventListener("change", async () => {
   if (!workspaceSelect.value) {
     state.clickup.spaces = [];
+    state.clickup.selectedListIds = new Set();
+    resetListFilters();
     renderTree();
     return;
   }
 
   state.clickup.spaces = [];
   state.clickup.selectedListIds = new Set();
+  resetListFilters();
   renderTree();
   showResult("Workspace selected. Click Load Lists to fetch ClickUp Lists.");
 });

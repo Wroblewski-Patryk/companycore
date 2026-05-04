@@ -560,6 +560,20 @@
               <h3>Lists to sync</h3>
               <p id="listSummary">Choose a ClickUp Workspace to load Lists.</p>
             </div>
+            <section class="clickup-list-filter-bar" id="listFilterBar" aria-label="ClickUp List filters" hidden>
+              <label>
+                Search Lists
+                <input id="listSearch" type="search" autocomplete="off" placeholder="Space, folder, list..." />
+              </label>
+              <label>
+                Selection
+                <select id="listSelectionFilter">
+                  <option value="">All Lists</option>
+                  <option value="selected">Selected</option>
+                  <option value="unselected">Unselected</option>
+                </select>
+              </label>
+            </section>
             <div class="list-toolbar" id="listToolbar" hidden>
               <button type="button" class="secondary" id="selectAllListsButton">Select all</button>
               <button type="button" class="secondary" id="clearListsButton">Clear all</button>

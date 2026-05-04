@@ -445,7 +445,8 @@ h4 {
 .area-filter-bar,
 .integration-filter-bar,
 .drive-filter-bar,
-.api-filter-bar {
+.api-filter-bar,
+.clickup-list-filter-bar {
   display: grid;
   grid-template-columns: minmax(220px, 1.4fr) repeat(3, minmax(150px, 0.75fr));
   gap: 12px;
@@ -463,7 +464,8 @@ h4 {
 
 .area-filter-bar,
 .integration-filter-bar,
-.api-filter-bar {
+.api-filter-bar,
+.clickup-list-filter-bar {
   grid-template-columns: minmax(220px, 1.5fr) minmax(160px, 0.8fr);
   margin-top: 16px;
 }
@@ -473,7 +475,8 @@ h4 {
 .area-filter-bar label,
 .integration-filter-bar label,
 .drive-filter-bar label,
-.api-filter-bar label {
+.api-filter-bar label,
+.clickup-list-filter-bar label {
   margin: 0;
   color: var(--muted);
   font-size: 12px;
@@ -491,7 +494,9 @@ h4 {
 .drive-filter-bar input,
 .drive-filter-bar select,
 .api-filter-bar input,
-.api-filter-bar select {
+.api-filter-bar select,
+.clickup-list-filter-bar input,
+.clickup-list-filter-bar select {
   margin-top: 6px;
 }
 
@@ -585,6 +590,10 @@ h4 {
 
 .api-filter-bar {
   margin: 0 0 16px;
+}
+
+.clickup-list-filter-bar {
+  margin: 0 0 12px;
 }
 
 .integration-area-list {
@@ -1104,6 +1113,12 @@ button.compact,
   font-size: 14px;
 }
 
+.tree-empty-note {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 0;
+}
+
 .tree-section {
   padding: 14px;
   border: 1px solid var(--border);
@@ -1301,6 +1316,7 @@ button.compact,
   .integration-filter-bar,
   .drive-filter-bar,
   .api-filter-bar,
+  .clickup-list-filter-bar,
   .module-launch-grid {
     grid-template-columns: 1fr;
   }

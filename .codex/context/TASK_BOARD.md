@@ -2,8 +2,13 @@
 
 ## Ready
 
-No additional ready P0/P1 web console implementation task is queued after
-V2WEB-016.
+No additional ready P0/P1 web console implementation task is queued. Continue
+v2 web console polish by selecting the next smallest route-level slice that is
+already backed by implemented data.
+
+## In Progress
+
+No active task.
 
 ## Blocked
 
@@ -148,3 +153,4 @@ V2WEB-016.
 - V2WEB-014 Integration Matrix Filters.
 - V2WEB-015 Google Drive Files Workbench Filters.
 - V2WEB-016 API Workbench Filters.
+- V2WEB-017 ClickUp List Tree Filters.

@@ -1,5 +1,55 @@
 # Web Console V2 Task Contracts
 
+## V2WEB-017 ClickUp List Tree Filters
+
+- Task Type: design/frontend
+- Current Stage: done
+- Deliverable For This Stage: searchable ClickUp List selection tree backed by
+  implemented ClickUp discovery data.
+- Goal: Make `/settings` usable when a ClickUp Workspace has many Spaces,
+  Folders, and Lists by adding local list-selection filters without changing
+  ClickUp backend contracts.
+- Scope:
+  - `public/index.html`
+  - `public/app.js`
+  - `public/styles.css`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+- Implementation Plan:
+  - Add search and selected-state controls above the ClickUp List tree.
+  - Filter existing discovered ClickUp Lists client-side by Space, Folder, and
+    List name.
+  - Preserve existing checkbox selection, select all, clear all, save, and sync
+    behavior.
+  - Update list summary and empty states to distinguish no loaded Lists from no
+    filter matches.
+  - Validate syntax, build, tests, local route rendering, and production smoke.
+- Acceptance Criteria:
+  - `/settings` supports search across ClickUp Space, Folder, and List names.
+  - Selected-state filtering shows all, selected, or unselected Lists without
+    reloading.
+  - Summary reflects filtered count versus loaded count and selected count.
+  - Empty state explains when filters hide all loaded Lists.
+  - Existing list checkbox selection and save/sync enablement still work.
+- Definition of Done:
+  - `node --check public/app.js`, `git diff --check`, `npm run build`, and
+    `npm test` pass.
+  - Browser smoke verifies list search, selected filtering, filtered empty
+    state, checkbox persistence, and save enablement on desktop.
+  - Project state, task board, and next-commits docs are updated.
+- Result Report:
+  - Added a searchable ClickUp List filter bar in `/settings` with search
+    across Space, Folder, and List names plus all/selected/unselected filters.
+  - Preserved existing selected List IDs, select-all, clear, save, and sync
+    enablement while updating the summary to show visible versus loaded Lists.
+  - Fixed the ClickUp setup panel enabled state so `aria-disabled` matches the
+    active controls for browser automation and assistive technology.
+  - Validation passed: `node --check public/app.js`, `git diff --check`,
+    `npm run build`, `npm test`, and local Playwright ClickUp list filter
+    smoke.
+
 ## V2WEB-016 API Workbench Filters
 
 - Task Type: design/frontend
