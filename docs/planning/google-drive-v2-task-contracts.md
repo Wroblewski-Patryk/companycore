@@ -4,6 +4,48 @@ This file is the execution queue for the approved Google Drive v2 integration.
 It follows the repository task contract and must stay synchronized with
 `.codex/context/TASK_BOARD.md` and `docs/planning/mvp-next-commits.md`.
 
+## V2GD-011 Drive Setup Operator Instructions
+
+- Task Type: frontend/documentation
+- Current Stage: done
+- Status: DONE
+- Owner: Frontend Builder
+- Priority: P2
+- Iteration: current autonomous Drive follow-up
+- Operation Mode: BUILDER
+- Deliverable For This Stage: short owner-facing Google Drive API connection
+  instructions in the existing `/settings/drive` setup panel.
+- Process Self-Audit:
+  - All seven autonomous loop steps are represented.
+  - Exactly one small task is selected.
+  - The task reuses the approved Google Drive setup surface.
+- Goal: Help owners connect Google Drive APIs from the same UI surface that
+  creates the OAuth URL and imports Drive folders.
+- Scope:
+  - `public/index.html`
+  - `public/styles.css`
+  - `docs/planning/google-drive-v2-task-contracts.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+- Implementation Plan:
+  1. Add concise setup instructions above the Drive OAuth fields.
+  2. Style the instructions using the existing panel language and spacing.
+  3. Validate static markup, build, and rendered `/settings/drive` visibility.
+- Acceptance Criteria:
+  - `/settings/drive` explains enabling Google Drive, Docs, and Sheets APIs.
+  - `/settings/drive` tells owners to configure the OAuth redirect URI and
+    backend OAuth env vars before consent/import.
+  - The instruction remains readable on desktop and mobile widths.
+- Definition of Done:
+  - `npm run build`, `git diff --check`, and rendered UI smoke pass or blockers
+    are recorded.
+  - No new Drive setup system, workaround, or duplicate configuration path is
+    introduced.
+- Result Report:
+  - Added a compact setup checklist to the existing Google Drive setup panel.
+  - Added lightweight checklist styles that wrap long environment variable
+    names safely.
+
 ## V2GD-010 Drive Hierarchy Preview And Descriptions
 
 - Task Type: feature

@@ -721,6 +721,16 @@
             </label>
           </div>
 
+          <aside class="setup-guide" aria-label="Google Drive API connection steps">
+            <strong>How to connect Google Drive APIs</strong>
+            <ol>
+              <li>In Google Cloud, enable Google Drive API, Google Docs API, and Google Sheets API for the project.</li>
+              <li>Create an OAuth Web application client and add the Redirect URI below exactly as an authorized redirect URI.</li>
+              <li>Set <code>GOOGLE_OAUTH_CLIENT_ID</code> and <code>GOOGLE_OAUTH_CLIENT_SECRET</code> in the backend environment, then redeploy if they changed.</li>
+              <li>Paste the Drive folder IDs, create the OAuth URL, approve Google consent, paste the returned code, save the connection, then import folders.</li>
+            </ol>
+          </aside>
+
           <div class="step">
             <label>
               Redirect URI

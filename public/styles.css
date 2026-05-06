@@ -978,6 +978,38 @@ button.compact,
   font-size: 14px;
 }
 
+.setup-guide {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 22px;
+  padding: 14px 16px;
+  border: 1px solid #c9d7ee;
+  border-radius: 8px;
+  background: #f8fbff;
+  color: #344054;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.setup-guide strong {
+  color: var(--text);
+  font-size: 15px;
+}
+
+.setup-guide ol {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 22px;
+}
+
+.setup-guide code {
+  color: #1f4fa3;
+  font-size: 13px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
 .switch {
   display: inline-flex;
   grid-template-columns: auto auto;
