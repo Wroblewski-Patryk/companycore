@@ -91,7 +91,8 @@ System tables remain outside the 12 business areas:
 Registry tables:
 
 - `operating_areas`: one row per approved area per workspace, with a stable
-  area key.
+  area key and `is_system` metadata that protects CompanyCore catalog areas
+  from owner/agent deletion.
 - `operating_folders`: workspace and area-owned grouping layer equivalent to a
   ClickUp Folder.
 - `operating_tables`: registry rows for each business table or custom table,
@@ -133,6 +134,12 @@ The remaining approved areas are created even when they do not yet have
 first-party tables, so future finance, people, marketing, operations, storage,
 and automation records can attach to stable area keys without reshaping the
 workspace contract.
+
+Catalog operating areas, including `00. Glowny` / `main-general`, are
+system-owned. User-created operating areas use `is_system = false`. Deleting a
+user-created area must reassign linked folders, tables, provider mappings,
+storage locations, knowledge roots, automation definitions, and Google Drive
+file scope to a selected target area before the area row is removed.
 
 ## Migration Policy
 

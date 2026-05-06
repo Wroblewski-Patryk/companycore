@@ -2,12 +2,7 @@
 
 ## Ready
 
-- V2WEB-021 User-Created Area Deletion Guardrails
-  - Stage: planning
-  - Owner: Backend/Frontend Builder
-  - Priority: P1
-  - Scope: define system/user-created area metadata, protect `00. Glowny`, and
-    expose deletion only for user-created areas after safe reassignment rules.
+No active ready task.
 
 ## In Progress
 
@@ -45,6 +40,13 @@ No active task.
 
 ## Done
 
+- V2WEB-021 User-Created Area Deletion Guardrails.
+- AGCRUD-006 Agent CompanyCore API Playbook.
+- AGCRUD-005 Provider/System Lifecycle Manifest.
+- AGCRUD-004 Registry Resource Lifecycle API.
+- AGCRUD-003 Business Archive/Delete Policy And Slice.
+- AGCRUD-002 Business Read/Update API Completion.
+- AGCRUD-001 Agent CRUD Capability Matrix.
 - Initialize `companycore` from `!template`.
 - Add Express/TypeScript/Prisma backend foundation.
 - Add PostgreSQL schema for CompanyCore v1 entities.

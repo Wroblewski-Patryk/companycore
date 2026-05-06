@@ -18,17 +18,36 @@ const externalMappingScopeSchema = z.object({
   applyToChildren: z.boolean().optional()
 }).strict();
 
+const operatingAreaSchema = z.object({
+  key: z.string().min(1).optional(),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  position: z.coerce.number().int().optional()
+}).strict();
+
+const updateOperatingAreaSchema = operatingAreaSchema.partial().omit({
+  key: true
+});
+
+const deleteOperatingAreaSchema = z.object({
+  reassignToAreaId: uuidSchema
+}).strict();
+
 const storageLocationSchema = scopedResourceSchema.extend({
   provider: z.string().min(1),
   name: z.string().min(1),
   locator: z.record(z.unknown())
 }).strict();
 
+const updateStorageLocationSchema = storageLocationSchema.partial();
+
 const knowledgeRootSchema = scopedResourceSchema.extend({
   provider: z.string().min(1),
   name: z.string().min(1),
   locator: z.record(z.unknown())
 }).strict();
+
+const updateKnowledgeRootSchema = knowledgeRootSchema.partial();
 
 const automationDefinitionSchema = scopedResourceSchema.extend({
   provider: z.string().min(1).optional(),
@@ -38,7 +57,45 @@ const automationDefinitionSchema = scopedResourceSchema.extend({
   config: z.record(z.unknown()).optional()
 }).strict();
 
+const updateAutomationDefinitionSchema = automationDefinitionSchema.partial();
+
+const operatingFolderSchema = z.object({
+  areaId: uuidSchema,
+  key: z.string().min(1).optional(),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  source: z.string().min(1).optional(),
+  externalId: z.string().min(1).optional()
+}).strict();
+
+const updateOperatingFolderSchema = operatingFolderSchema.partial().omit({
+  source: true,
+  externalId: true
+});
+
 export const operatingModelRouter = Router();
+
+function slugifyKey(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    || "folder";
+}
+
+async function uniqueAreaKey(workspaceId: string, base: string) {
+  const root = slugifyKey(base);
+  let key = root;
+  let suffix = 2;
+
+  while (await prisma.operatingArea.findFirst({ where: { workspaceId, key }, select: { id: true } })) {
+    key = `${root}-${suffix}`;
+    suffix += 1;
+  }
+
+  return key;
+}
 
 async function assertScope(workspaceId: string, input: {
   areaId?: string;
@@ -132,6 +189,230 @@ operatingModelRouter.get("/tables", asyncHandler(async (req, res) => {
   });
 
   res.json({ data: tables });
+}));
+
+operatingModelRouter.get("/areas", asyncHandler(async (req, res) => {
+  await ensureOperatingModelForWorkspace(prisma, req.auth!.workspaceId);
+  const areas = await prisma.operatingArea.findMany({
+    where: { workspaceId: req.auth!.workspaceId },
+    orderBy: { position: "asc" },
+    include: {
+      folders: { orderBy: { name: "asc" } },
+      tables: { orderBy: { apiSlug: "asc" } }
+    }
+  });
+
+  res.json({ data: areas });
+}));
+
+operatingModelRouter.post("/areas", asyncHandler(async (req, res) => {
+  const input = operatingAreaSchema.parse(req.body);
+  const workspaceId = req.auth!.workspaceId;
+  const key = input.key
+    ? await uniqueAreaKey(workspaceId, input.key)
+    : await uniqueAreaKey(workspaceId, input.name);
+  const maxPosition = await prisma.operatingArea.aggregate({
+    where: { workspaceId },
+    _max: { position: true }
+  });
+
+  const area = await prisma.operatingArea.create({
+    data: {
+      workspaceId,
+      key,
+      name: input.name,
+      description: input.description,
+      position: input.position ?? ((maxPosition._max.position ?? 12) + 1),
+      isSystem: false
+    }
+  });
+
+  res.status(201).json({ data: area });
+}));
+
+operatingModelRouter.patch("/areas/:id", asyncHandler(async (req, res) => {
+  const input = updateOperatingAreaSchema.parse(req.body);
+  const workspaceId = req.auth!.workspaceId;
+  const existing = await prisma.operatingArea.findFirst({
+    where: { id: String(req.params.id), workspaceId }
+  });
+
+  if (!existing) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  if (existing.isSystem) {
+    return res.status(403).json({ error: "system_area_protected" });
+  }
+
+  const area = await prisma.operatingArea.update({
+    where: { id: existing.id },
+    data: input
+  });
+
+  res.json({ data: area });
+}));
+
+operatingModelRouter.delete("/areas/:id", asyncHandler(async (req, res) => {
+  const input = deleteOperatingAreaSchema.parse(req.body);
+  const workspaceId = req.auth!.workspaceId;
+  const existing = await prisma.operatingArea.findFirst({
+    where: { id: String(req.params.id), workspaceId }
+  });
+
+  if (!existing) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  if (existing.isSystem || existing.key === "main-general") {
+    return res.status(403).json({ error: "system_area_protected" });
+  }
+
+  if (input.reassignToAreaId === existing.id) {
+    return res.status(409).json({ error: "conflict" });
+  }
+
+  const target = await prisma.operatingArea.findFirst({
+    where: { id: input.reassignToAreaId, workspaceId },
+    select: { id: true }
+  });
+
+  if (!target) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  await prisma.$transaction([
+    prisma.operatingFolder.updateMany({
+      where: { workspaceId, areaId: existing.id },
+      data: { areaId: target.id }
+    }),
+    prisma.operatingTable.updateMany({
+      where: { workspaceId, areaId: existing.id },
+      data: { areaId: target.id }
+    }),
+    prisma.externalContainerMapping.updateMany({
+      where: { workspaceId, areaId: existing.id },
+      data: { areaId: target.id }
+    }),
+    prisma.storageLocation.updateMany({
+      where: { workspaceId, areaId: existing.id },
+      data: { areaId: target.id }
+    }),
+    prisma.knowledgeRoot.updateMany({
+      where: { workspaceId, areaId: existing.id },
+      data: { areaId: target.id }
+    }),
+    prisma.automationDefinition.updateMany({
+      where: { workspaceId, areaId: existing.id },
+      data: { areaId: target.id }
+    }),
+    prisma.googleDriveFile.updateMany({
+      where: { workspaceId, operatingAreaId: existing.id },
+      data: { operatingAreaId: target.id }
+    }),
+    prisma.operatingArea.delete({
+      where: { id: existing.id }
+    })
+  ]);
+
+  res.json({
+    data: {
+      id: existing.id,
+      deleted: true,
+      reassignedToAreaId: target.id
+    }
+  });
+}));
+
+operatingModelRouter.get("/folders", asyncHandler(async (req, res) => {
+  const folders = await prisma.operatingFolder.findMany({
+    where: { workspaceId: req.auth!.workspaceId },
+    orderBy: [{ name: "asc" }],
+    include: { area: true }
+  });
+
+  res.json({ data: folders });
+}));
+
+operatingModelRouter.get("/folders/:id", asyncHandler(async (req, res) => {
+  const folder = await prisma.operatingFolder.findFirst({
+    where: { id: String(req.params.id), workspaceId: req.auth!.workspaceId },
+    include: { area: true }
+  });
+
+  if (!folder) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  res.json({ data: folder });
+}));
+
+operatingModelRouter.post("/folders", asyncHandler(async (req, res) => {
+  const input = operatingFolderSchema.parse(req.body);
+  const workspaceId = req.auth!.workspaceId;
+
+  if (!(await assertScope(workspaceId, { areaId: input.areaId }))) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  const folder = await prisma.operatingFolder.create({
+    data: {
+      workspaceId,
+      areaId: input.areaId,
+      key: input.key ?? slugifyKey(input.name),
+      name: input.name,
+      description: input.description,
+      source: input.source,
+      externalId: input.externalId
+    }
+  });
+
+  res.status(201).json({ data: folder });
+}));
+
+operatingModelRouter.patch("/folders/:id", asyncHandler(async (req, res) => {
+  const input = updateOperatingFolderSchema.parse(req.body);
+  const workspaceId = req.auth!.workspaceId;
+
+  if (!(await assertScope(workspaceId, { areaId: input.areaId }))) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  const existing = await prisma.operatingFolder.findFirst({
+    where: { id: String(req.params.id), workspaceId }
+  });
+
+  if (!existing) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  const folder = await prisma.operatingFolder.update({
+    where: { id: existing.id },
+    data: input
+  });
+
+  res.json({ data: folder });
+}));
+
+operatingModelRouter.delete("/folders/:id", asyncHandler(async (req, res) => {
+  const workspaceId = req.auth!.workspaceId;
+  const existing = await prisma.operatingFolder.findFirst({
+    where: { id: String(req.params.id), workspaceId }
+  });
+
+  if (!existing) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  const dependentCount = await prisma.operatingTable.count({
+    where: { workspaceId, folderId: existing.id }
+  });
+  if (dependentCount > 0) {
+    return res.status(409).json({ error: "conflict" });
+  }
+
+  await prisma.operatingFolder.delete({ where: { id: existing.id } });
+  res.json({ data: { id: existing.id, deleted: true } });
 }));
 
 operatingModelRouter.get("/external-mappings", asyncHandler(async (req, res) => {
@@ -266,6 +547,18 @@ operatingModelRouter.get("/storage-locations", asyncHandler(async (req, res) => 
   res.json({ data: locations });
 }));
 
+operatingModelRouter.get("/storage-locations/:id", asyncHandler(async (req, res) => {
+  const location = await prisma.storageLocation.findFirst({
+    where: { id: String(req.params.id), workspaceId: req.auth!.workspaceId }
+  });
+
+  if (!location) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  res.json({ data: location });
+}));
+
 operatingModelRouter.post("/storage-locations", asyncHandler(async (req, res) => {
   const input = storageLocationSchema.parse(req.body);
   const workspaceId = req.auth!.workspaceId;
@@ -289,6 +582,47 @@ operatingModelRouter.post("/storage-locations", asyncHandler(async (req, res) =>
   res.status(201).json({ data: location });
 }));
 
+operatingModelRouter.patch("/storage-locations/:id", asyncHandler(async (req, res) => {
+  const input = updateStorageLocationSchema.parse(req.body);
+  const workspaceId = req.auth!.workspaceId;
+
+  if (!(await assertScope(workspaceId, input))) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  const existing = await prisma.storageLocation.findFirst({
+    where: { id: String(req.params.id), workspaceId }
+  });
+
+  if (!existing) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  const location = await prisma.storageLocation.update({
+    where: { id: existing.id },
+    data: {
+      ...input,
+      locator: input.locator as Prisma.InputJsonValue | undefined
+    }
+  });
+
+  res.json({ data: location });
+}));
+
+operatingModelRouter.delete("/storage-locations/:id", asyncHandler(async (req, res) => {
+  const workspaceId = req.auth!.workspaceId;
+  const existing = await prisma.storageLocation.findFirst({
+    where: { id: String(req.params.id), workspaceId }
+  });
+
+  if (!existing) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  await prisma.storageLocation.delete({ where: { id: existing.id } });
+  res.json({ data: { id: existing.id, deleted: true } });
+}));
+
 operatingModelRouter.get("/knowledge-roots", asyncHandler(async (req, res) => {
   const roots = await prisma.knowledgeRoot.findMany({
     where: { workspaceId: req.auth!.workspaceId },
@@ -296,6 +630,18 @@ operatingModelRouter.get("/knowledge-roots", asyncHandler(async (req, res) => {
   });
 
   res.json({ data: roots });
+}));
+
+operatingModelRouter.get("/knowledge-roots/:id", asyncHandler(async (req, res) => {
+  const root = await prisma.knowledgeRoot.findFirst({
+    where: { id: String(req.params.id), workspaceId: req.auth!.workspaceId }
+  });
+
+  if (!root) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  res.json({ data: root });
 }));
 
 operatingModelRouter.post("/knowledge-roots", asyncHandler(async (req, res) => {
@@ -321,6 +667,47 @@ operatingModelRouter.post("/knowledge-roots", asyncHandler(async (req, res) => {
   res.status(201).json({ data: root });
 }));
 
+operatingModelRouter.patch("/knowledge-roots/:id", asyncHandler(async (req, res) => {
+  const input = updateKnowledgeRootSchema.parse(req.body);
+  const workspaceId = req.auth!.workspaceId;
+
+  if (!(await assertScope(workspaceId, input))) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  const existing = await prisma.knowledgeRoot.findFirst({
+    where: { id: String(req.params.id), workspaceId }
+  });
+
+  if (!existing) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  const root = await prisma.knowledgeRoot.update({
+    where: { id: existing.id },
+    data: {
+      ...input,
+      locator: input.locator as Prisma.InputJsonValue | undefined
+    }
+  });
+
+  res.json({ data: root });
+}));
+
+operatingModelRouter.delete("/knowledge-roots/:id", asyncHandler(async (req, res) => {
+  const workspaceId = req.auth!.workspaceId;
+  const existing = await prisma.knowledgeRoot.findFirst({
+    where: { id: String(req.params.id), workspaceId }
+  });
+
+  if (!existing) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  await prisma.knowledgeRoot.delete({ where: { id: existing.id } });
+  res.json({ data: { id: existing.id, deleted: true } });
+}));
+
 operatingModelRouter.get("/automation-definitions", asyncHandler(async (req, res) => {
   const automations = await prisma.automationDefinition.findMany({
     where: { workspaceId: req.auth!.workspaceId },
@@ -328,6 +715,18 @@ operatingModelRouter.get("/automation-definitions", asyncHandler(async (req, res
   });
 
   res.json({ data: automations });
+}));
+
+operatingModelRouter.get("/automation-definitions/:id", asyncHandler(async (req, res) => {
+  const automation = await prisma.automationDefinition.findFirst({
+    where: { id: String(req.params.id), workspaceId: req.auth!.workspaceId }
+  });
+
+  if (!automation) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  res.json({ data: automation });
 }));
 
 operatingModelRouter.post("/automation-definitions", asyncHandler(async (req, res) => {
@@ -353,4 +752,45 @@ operatingModelRouter.post("/automation-definitions", asyncHandler(async (req, re
   });
 
   res.status(201).json({ data: automation });
+}));
+
+operatingModelRouter.patch("/automation-definitions/:id", asyncHandler(async (req, res) => {
+  const input = updateAutomationDefinitionSchema.parse(req.body);
+  const workspaceId = req.auth!.workspaceId;
+
+  if (!(await assertScope(workspaceId, input))) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  const existing = await prisma.automationDefinition.findFirst({
+    where: { id: String(req.params.id), workspaceId }
+  });
+
+  if (!existing) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  const automation = await prisma.automationDefinition.update({
+    where: { id: existing.id },
+    data: {
+      ...input,
+      config: input.config as Prisma.InputJsonValue | undefined
+    }
+  });
+
+  res.json({ data: automation });
+}));
+
+operatingModelRouter.delete("/automation-definitions/:id", asyncHandler(async (req, res) => {
+  const workspaceId = req.auth!.workspaceId;
+  const existing = await prisma.automationDefinition.findFirst({
+    where: { id: String(req.params.id), workspaceId }
+  });
+
+  if (!existing) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  await prisma.automationDefinition.delete({ where: { id: existing.id } });
+  res.json({ data: { id: existing.id, deleted: true } });
 }));

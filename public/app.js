@@ -145,6 +145,8 @@ const operatingAreasNav = document.querySelector("#operatingAreasNav");
 const areaTitle = document.querySelector("#areaTitle");
 const areaDescription = document.querySelector("#areaDescription");
 const areaStats = document.querySelector("#areaStats");
+const areaActions = document.querySelector("#areaActions");
+const createAreaButton = document.querySelector("#createAreaButton");
 const areaSearch = document.querySelector("#areaSearch");
 const areaTypeFilter = document.querySelector("#areaTypeFilter");
 const areaWorkbenchSummary = document.querySelector("#areaWorkbenchSummary");
@@ -702,6 +704,13 @@ function renderTasks() {
     tasksTableBody.append(row);
   }
   renderIntegrationTaxonomy();
+}
+
+function defaultReassignArea(currentArea) {
+  return sortedOperatingAreas().find((area) => area.key === "main-general" && area.id !== currentArea?.id)
+    || sortedOperatingAreas().find((area) => area.isSystem && area.id !== currentArea?.id)
+    || sortedOperatingAreas().find((area) => area.id !== currentArea?.id)
+    || null;
 }
 
 function syncTaskFilters() {
@@ -1612,6 +1621,7 @@ function renderOperatingMap() {
       ? "Refresh the workspace connection to load CompanyCore areas."
       : "Sign in to load the company operating model.";
     areaStats.innerHTML = "";
+    areaActions.innerHTML = "";
     areaSearch.value = state.areaFilters.search;
     areaTypeFilter.value = state.areaFilters.type;
     areaWorkbenchSummary.textContent = "No operating area is available yet.";
@@ -1668,7 +1678,26 @@ function renderOperatingMap() {
     <span>${tables.length} tables</span>
     <span>${recordCount} records</span>
     <span>${files.length} Drive files</span>
+    <span>${area.isSystem ? "System area" : "User-created"}</span>
   `;
+  areaActions.innerHTML = "";
+  if (area.isSystem) {
+    const note = document.createElement("span");
+    note.className = "area-action-note";
+    note.textContent = area.key === "main-general"
+      ? "Protected fallback area"
+      : "Protected catalog area";
+    areaActions.append(note);
+  } else {
+    const reassignArea = defaultReassignArea(area);
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "compact danger";
+    deleteButton.textContent = "Delete area";
+    deleteButton.disabled = !reassignArea;
+    deleteButton.addEventListener("click", () => deleteSelectedArea(area, reassignArea));
+    areaActions.append(deleteButton);
+  }
 
   renderCompactList(areaTables, tables, (table) => `
     <strong>${escapeHtml(table.name)}</strong>
@@ -2073,7 +2102,9 @@ function friendlyError(error) {
     google_drive_not_configured: "Google Drive is not configured for this workspace yet.",
     google_drive_oauth_required: "Google Drive needs an OAuth refresh token before it can import files.",
     validation_error: "Some fields are missing or invalid.",
-    forbidden: "This action requires the owner login."
+    forbidden: "This action requires the owner login.",
+    system_area_protected: "System operating areas are protected.",
+    conflict: "This change conflicts with linked records. Reassign or clear dependencies first."
   };
   return copy[message] || message;
 }
@@ -2186,6 +2217,57 @@ function renderConnectionState() {
   }
 
   renderApiWorkbench();
+}
+
+async function createOperatingArea() {
+  const name = window.prompt("New operating area name");
+  if (!name?.trim()) {
+    return;
+  }
+
+  setBusy(true);
+  try {
+    const response = await api("/v1/operating-model/areas", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: name.trim() })
+    });
+    state.selectedAreaKey = response.data?.key || state.selectedAreaKey;
+    await loadOperatingModel();
+    showResult("Operating area created.");
+  } catch (error) {
+    showResult(friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function deleteSelectedArea(area, reassignArea) {
+  if (!area || area.isSystem || !reassignArea) {
+    return;
+  }
+
+  const confirmed = window.confirm(`Delete "${areaLabel(area)}" and move linked content to "${areaLabel(reassignArea)}"?`);
+  if (!confirmed) {
+    return;
+  }
+
+  setBusy(true);
+  try {
+    await api(`/v1/operating-model/areas/${area.id}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reassignToAreaId: reassignArea.id })
+    });
+    state.selectedAreaKey = reassignArea.key;
+    await Promise.all([loadOperatingModel(), loadGoogleDriveFiles()]);
+    showResult("Operating area deleted and linked content reassigned.");
+  } catch (error) {
+    showResult(friendlyError(error), "error");
+    await loadOperatingModel();
+  } finally {
+    setBusy(false);
+  }
 }
 
 function renderApiWorkbench() {
@@ -2630,6 +2712,10 @@ if (mobileMenuButton) {
     state.mobileMenuOpen = !state.mobileMenuOpen;
     updateChrome();
   });
+}
+
+if (createAreaButton) {
+  createAreaButton.addEventListener("click", createOperatingArea);
 }
 
 moduleSearch.addEventListener("focus", () => {

@@ -90,6 +90,28 @@ tasksRouter.get("/", asyncHandler(async (req, res) => {
   res.json({ data: tasks });
 }));
 
+tasksRouter.get("/:id", asyncHandler(async (req, res) => {
+  const task = await prisma.task.findFirst({
+    where: { id: String(req.params.id), workspaceId: req.auth!.workspaceId },
+    include: {
+      taskList: {
+        select: {
+          id: true,
+          name: true,
+          externalId: true,
+          source: true
+        }
+      }
+    }
+  });
+
+  if (!task) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  res.json({ data: task });
+}));
+
 tasksRouter.post("/", asyncHandler(async (req, res) => {
   const input = createTaskSchema.parse(req.body);
   if (!await visibleTaskRelations(req.auth!.workspaceId, input)) {

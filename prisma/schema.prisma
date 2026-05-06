@@ -94,6 +94,7 @@ model OperatingArea {
   name                      String
   description               String?
   position                  Int                        @default(0)
+  isSystem                  Boolean                    @default(false) @map("is_system")
   folders                   OperatingFolder[]
   tables                    OperatingTable[]
   externalContainerMappings ExternalContainerMapping[]
@@ -504,6 +505,7 @@ model TaskList {
   project     Project?   @relation(fields: [projectId], references: [id], onDelete: SetNull)
   name        String
   description String?
+  status      String     @default("active")
   externalId  String?    @map("external_id")
   source      String?    @default("companycore")
   tasks       Task[]
@@ -567,6 +569,7 @@ model PipelineStage {
   workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   name        String
   position    Int        @default(0)
+  status      String     @default("active")
   externalId  String?    @map("external_id")
   source      String?    @default("companycore")
   deals       Deal[]
@@ -605,6 +608,7 @@ model Interaction {
   client      Client?    @relation(fields: [clientId], references: [id], onDelete: SetNull)
   type        String
   summary     String?
+  status      String     @default("active")
   occurredAt  DateTime   @default(now()) @map("occurred_at")
   externalId  String?    @map("external_id")
   source      String?    @default("companycore")
@@ -627,6 +631,7 @@ model Note {
   client      Client?    @relation(fields: [clientId], references: [id], onDelete: SetNull)
   dealId      String?    @map("deal_id") @db.Uuid
   deal        Deal?      @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  status      String     @default("active")
   externalId  String?    @map("external_id")
   source      String?    @default("companycore")
   createdAt   DateTime   @default(now()) @map("created_at")
@@ -645,6 +650,7 @@ model Decision {
   title       String
   rationale   String?
   outcome     String?
+  status      String     @default("active")
   externalId  String?    @map("external_id")
   source      String?    @default("companycore")
   createdAt   DateTime   @default(now()) @map("created_at")

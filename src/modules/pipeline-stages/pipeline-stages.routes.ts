@@ -7,6 +7,7 @@ import { createEvent } from "../events/event.service";
 const createPipelineStageSchema = z.object({
   name: z.string().min(1),
   position: z.coerce.number().int().optional(),
+  status: z.string().min(1).optional(),
   externalId: z.string().min(1).optional(),
   source: z.string().min(1).optional()
 }).strict();
@@ -28,6 +29,18 @@ pipelineStagesRouter.get("/", asyncHandler(async (req, res) => {
   });
 
   res.json({ data: stages });
+}));
+
+pipelineStagesRouter.get("/:id", asyncHandler(async (req, res) => {
+  const stage = await prisma.pipelineStage.findFirst({
+    where: { id: String(req.params.id), workspaceId: req.auth!.workspaceId }
+  });
+
+  if (!stage) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  res.json({ data: stage });
 }));
 
 pipelineStagesRouter.post("/", asyncHandler(async (req, res) => {
@@ -76,6 +89,30 @@ pipelineStagesRouter.patch("/:id", asyncHandler(async (req, res) => {
       pipelineStageId: stage.id,
       changed: Object.keys(input)
     }
+  });
+
+  res.json({ data: stage });
+}));
+
+pipelineStagesRouter.delete("/:id", asyncHandler(async (req, res) => {
+  const existing = await prisma.pipelineStage.findFirst({
+    where: { id: String(req.params.id), workspaceId: req.auth!.workspaceId }
+  });
+
+  if (!existing) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  const stage = await prisma.pipelineStage.update({
+    where: { id: existing.id },
+    data: { status: "archived" }
+  });
+
+  await createEvent({
+    type: "pipeline_stage_archived",
+    workspaceId: req.auth!.workspaceId,
+    source: stage.source,
+    payload: { pipelineStageId: stage.id }
   });
 
   res.json({ data: stage });

@@ -5,6 +5,13 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NOW
 
+- [x] AGCRUD-002 Business Read/Update API Completion:
+      add missing single-record read and update routes for first-party
+      business APIs, keep workspace guardrails, update the adapter manifest,
+      and cover the behavior in integration tests.
+- [x] AGCRUD-003 Business Archive/Delete Policy And Slice:
+      document safe archive/delete semantics for business records, then
+      implement one guarded deletion/archive slice.
 - [x] V2WEB-020 Main Operating Area Foundation
 - [x] V2WEB-019 Relationship Review Filters
 - [x] V2WEB-018 Global Module Switcher
@@ -85,7 +92,15 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NEXT
 
-- [ ] V2WEB-021 User-Created Area Deletion Guardrails:
+- [x] AGCRUD-004 Registry Resource Lifecycle API:
+      complete scoped lifecycle APIs for storage locations, knowledge roots,
+      automation definitions, and operating folders.
+- [x] AGCRUD-005 Provider/System Lifecycle Manifest:
+      expose provider and system lifecycle actions to agents without raw
+      system-table CRUD.
+- [x] AGCRUD-006 Agent CompanyCore API Playbook:
+      publish the agent read/write onboarding guide and smoke flow.
+- [x] V2WEB-021 User-Created Area Deletion Guardrails:
       define system/user-created area metadata, protect `00. Glowny`, and only
       then expose safe delete controls for user-created areas.
 - [ ] Continue v2 web console polish after main operating area foundation:
@@ -107,8 +122,13 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## PIPELINE
 
+- [x] 69. AGCRUD-002 Business Read/Update API Completion
+- [x] 70. AGCRUD-003 Business Archive/Delete Policy And Slice
+- [x] 71. AGCRUD-004 Registry Resource Lifecycle API
+- [x] 72. AGCRUD-005 Provider/System Lifecycle Manifest
+- [x] 73. AGCRUD-006 Agent CompanyCore API Playbook
 - [x] 67. V2WEB-020 Main Operating Area Foundation
-- [ ] 68. V2WEB-021 User-Created Area Deletion Guardrails
+- [x] 68. V2WEB-021 User-Created Area Deletion Guardrails
 - [x] 66. V2WEB-019 Relationship Review Filters
 - [x] 65. V2WEB-018 Global Module Switcher
 - [x] 49. V2WEB-002 Manual Provider Scope Mapping

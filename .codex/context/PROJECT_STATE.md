@@ -1,15 +1,20 @@
 # PROJECT_STATE
 
-Last updated: 2026-05-04
+Last updated: 2026-05-06
 
 ## Product Snapshot
 - Name: LuckySparrow Company Core
 - Goal: Central backend for company projects, goals, tasks, CRM, notes,
   decisions, agents, and system events.
 - Commercial model: Internal operational infrastructure.
-- Current phase: v2 Google Drive integration planning and implementation.
+- Current phase: v2 agent CRUD API planning and implementation.
 
 ## Product Decisions (Confirmed)
+- 2026-05-06: Agent-facing "CRUD for every table" means full
+  workspace-scoped CRUD for business records where safe, and controlled
+  lifecycle/action APIs for system, auth, secret, provider inbox, webhook,
+  event, and audit tables. Agents must use `/v1/connection` capability
+  discovery and the HTTP API; they must not write directly to PostgreSQL.
 - 2026-05-04: The operating model includes a non-user fallback area
   `00. Glowny` (`main-general`) that cannot be treated as a normal removable
   company department. Imported ClickUp/Drive/company elements that cannot be
@@ -104,30 +109,69 @@ Last updated: 2026-05-04
   Postgres volume.
 
 ## Current Focus
-- Main active objective: refine the v2 web console as the operator-facing
-  control surface for company-area mapping across ClickUp, Google Drive, and
-  CompanyCore tables, while keeping deployable work consolidated on `main`.
+- Main active objective: no active P0/P1 implementation task after completing
+  the agent-facing CRUD rollout and user-created area deletion guardrails.
 - Top blockers: no active P0/P1 v2 web console blocker after the dedicated
   operating-areas route. GitHub-to-Coolify deploy no longer requires GitHub
   Actions for CompanyCore; Coolify Auto Deploy is enabled on `main`, received
   commit `63348d6`, and succeeded after the compose file was reloaded.
-- Success criteria for this phase: Google Drive folder/file metadata,
-  searchable content snapshots, Docs/Sheets create/read/edit flows, Drive
-  freshness, agent API access, operating-area dashboard mapping, and manual
-  provider scope correction are implemented through the native integration
-  pattern.
+- Success criteria for this phase: completed. System areas are protected,
+  user-created areas can be created and deleted through guarded APIs, and
+  deletion reassigns linked content before removing the area row.
 
 ## Autonomous Iteration State
-- Current iteration: V2WEB-021 User-Created Area Deletion Guardrails planning.
+- Current iteration: none active.
 - Current operation mode: BUILDER
-- Last completed iteration: V2WEB-020 Main Operating Area Foundation.
-- Last completed task: added `00. Glowny` / `main-general` as the fallback
-  operating area for unclassified imports and ensured existing workspaces get
-  it on connection/operating-model reads.
+- Last completed iteration: V2WEB-021 User-Created Area Deletion Guardrails.
+- Last completed task: added operating-area system metadata, protected catalog
+  areas including `00. Glowny`, added user-created area create/update/delete
+  APIs, exposed owner-console create/delete controls, and validated
+  reassignment behavior.
 - Next required mode: BUILDER for the next v2 web console iteration unless an
   architecture decision blocks the queue first.
 
 ## Recent Progress
+- 2026-05-06: Completed V2WEB-021 by adding `operating_areas.is_system`,
+  marking catalog areas as system-owned through migration and bootstrap,
+  exposing guarded `/v1/operating-model/areas` create/update/delete routes,
+  blocking mutation of system areas including `main-general`, and reassigning
+  folders, tables, provider mappings, storage locations, knowledge roots,
+  automation definitions, and Drive file scope before deleting user-created
+  areas. The owner console now shows protected/system status, can create a new
+  area, and shows delete only for user-created areas with reassignment to
+  `00. Glowny`.
+- 2026-05-06: Completed AGCRUD-006 by adding
+  `docs/operations/agent-companycore-api-playbook.md`, covering startup
+  handshake, capability discovery, common read/write flows, soft archive
+  behavior, provider/system lifecycle actions, safe error handling, and a local
+  smoke sequence for a dedicated service key.
+- 2026-05-06: Completed AGCRUD-005 by expanding `/v1/connection` with
+  `agent-events:read` and `agent-events:ack`, adding the agent event routes to
+  the adapter manifest, and documenting that provider/system tables use
+  lifecycle actions such as retry, reconcile, refresh, scope, and ack instead
+  of raw CRUD.
+- 2026-05-06: Completed AGCRUD-004 by adding operating-model lifecycle routes
+  for folders, storage locations, knowledge roots, and automation definitions;
+  folder deletion is guarded when child tables exist, while registry leaf
+  resources can be read, updated, and deleted through workspace-scoped APIs.
+- 2026-05-06: Completed AGCRUD-003 by adding soft archive semantics for
+  business deletes. `DELETE` routes now preserve rows and set lifecycle status
+  to `archived` or `retired`, with a migration adding `status` to task lists,
+  pipeline stages, interactions, notes, and decisions.
+- 2026-05-06: Completed AGCRUD-002 by adding `GET /:id` and `PATCH /:id`
+  coverage for projects, goals, targets, clients, deals, interactions, notes,
+  decisions, and agents; adding `GET /:id` coverage for task lists, tasks,
+  pipeline stages, and agent logs; expanding `/v1/connection` route discovery;
+  and extending integration tests for same-workspace read/update and denied
+  cross-workspace updates. Validation used `npm run build`, `git diff --check`,
+  and `npm test` against a temporary disposable Postgres container on port
+  `55432`.
+- 2026-05-06: Completed AGCRUD-001 planning by adding
+  `docs/planning/agent-crud-api-rollout-plan.md`, documenting the agent CRUD
+  policy in `docs/API.md`, and activating AGCRUD-002 through AGCRUD-006 in the
+  canonical planning queue. The plan keeps full CRUD focused on business
+  records and uses controlled lifecycle actions for system/provider/security
+  tables.
 - 2026-05-04: Completed V2WEB-020 by adding the `00. Glowny` fallback area to
   the operating model catalog, making unclassified imports land in
   `main-general`, auto-ensuring the area for existing workspaces, and updating

@@ -8,6 +8,7 @@ const createTaskListSchema = z.object({
   projectId: z.string().uuid().optional(),
   name: z.string().min(1),
   description: z.string().optional(),
+  status: z.string().min(1).optional(),
   externalId: z.string().min(1).optional(),
   source: z.string().min(1).optional()
 }).strict();
@@ -38,6 +39,18 @@ taskListsRouter.get("/", asyncHandler(async (req, res) => {
   });
 
   res.json({ data: taskLists });
+}));
+
+taskListsRouter.get("/:id", asyncHandler(async (req, res) => {
+  const taskList = await prisma.taskList.findFirst({
+    where: { id: String(req.params.id), workspaceId: req.auth!.workspaceId }
+  });
+
+  if (!taskList) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  res.json({ data: taskList });
 }));
 
 taskListsRouter.post("/", asyncHandler(async (req, res) => {
@@ -98,6 +111,31 @@ taskListsRouter.patch("/:id", asyncHandler(async (req, res) => {
       taskListId: taskList.id,
       changed: Object.keys(input)
     }
+  });
+
+  res.json({ data: taskList });
+}));
+
+taskListsRouter.delete("/:id", asyncHandler(async (req, res) => {
+  const existing = await prisma.taskList.findFirst({
+    where: { id: String(req.params.id), workspaceId: req.auth!.workspaceId }
+  });
+
+  if (!existing) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  const taskList = await prisma.taskList.update({
+    where: { id: existing.id },
+    data: { status: "archived" }
+  });
+
+  await createEvent({
+    type: "task_list_archived",
+    workspaceId: req.auth!.workspaceId,
+    projectId: taskList.projectId,
+    source: taskList.source,
+    payload: { taskListId: taskList.id }
   });
 
   res.json({ data: taskList });

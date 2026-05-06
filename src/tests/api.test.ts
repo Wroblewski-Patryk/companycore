@@ -209,7 +209,9 @@ test("CompanyCore v1 protected API flow", async () => {
       operatingModel: {
         hierarchy: string;
         areas: Array<{
+          id: string;
           key: string;
+          isSystem: boolean;
           tables: Array<{ tableName: string; apiSlug: string; source: string; externalId: string | null }>;
         }>;
         systemTables: string[];
@@ -219,13 +221,21 @@ test("CompanyCore v1 protected API flow", async () => {
         basePath: string;
         auth: { serviceHeader: string };
         routes: {
+          projects: Array<{ method: string; path: string; capability: string }>;
+          goals: Array<{ method: string; path: string; capability: string }>;
+          targets: Array<{ method: string; path: string; capability: string }>;
           tasks: Array<{ method: string; path: string; capability: string }>;
           operatingModel: Array<{ method: string; path: string; capability: string }>;
           taskLists: Array<{ method: string; path: string; capability: string }>;
+          clients: Array<{ method: string; path: string; capability: string }>;
           pipelineStages: Array<{ method: string; path: string; capability: string }>;
+          deals: Array<{ method: string; path: string; capability: string }>;
           agents: Array<{ method: string; path: string; capability: string }>;
           agentLogs: Array<{ method: string; path: string; capability: string }>;
+          agentEvents: Array<{ method: string; path: string; capability: string }>;
           interactions: Array<{ method: string; path: string; capability: string }>;
+          notes: Array<{ method: string; path: string; capability: string }>;
+          decisions: Array<{ method: string; path: string; capability: string }>;
           integrationSettings: Array<{ method: string; path: string; capability: string }>;
           googleDrive: Array<{ method: string; path: string; capability: string }>;
         };
@@ -249,6 +259,7 @@ test("CompanyCore v1 protected API flow", async () => {
   );
   assert.equal(connectionBody.data.operatingModel.areas.length, 13);
   assert.equal(connectionBody.data.operatingModel.areas[0]?.key, "main-general");
+  assert.equal(connectionBody.data.operatingModel.areas[0]?.isSystem, true);
   const strategyArea = connectionBody.data.operatingModel.areas.find((area) => area.key === "strategy-governance");
   assert.ok(strategyArea);
   assert.ok(strategyArea.tables.some((table) => table.apiSlug === "goals" && table.tableName === "goals"));
@@ -270,6 +281,11 @@ test("CompanyCore v1 protected API flow", async () => {
     route.method === "PATCH"
     && route.path === "/v1/operating-model/external-mappings/:id/scope"
     && route.capability === "operating-model:mappings:write"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.operatingModel.some((route) => (
+    route.method === "DELETE"
+    && route.path === "/v1/operating-model/areas/:id"
+    && route.capability === "operating-model:write"
   )));
   assert.ok(connectionBody.data.adapterManifest.routes.googleDrive.some((route) => (
     route.method === "PATCH"
@@ -481,6 +497,21 @@ test("CompanyCore v1 protected API flow", async () => {
     && route.path === "/v1/tasks"
     && route.capability === "tasks:write"
   )));
+  assert.ok(connectionBody.data.adapterManifest.routes.projects.some((route) => (
+    route.method === "GET"
+    && route.path === "/v1/projects/:id"
+    && route.capability === "projects:read"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.goals.some((route) => (
+    route.method === "PATCH"
+    && route.path === "/v1/goals/:id"
+    && route.capability === "goals:write"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.projects.some((route) => (
+    route.method === "DELETE"
+    && route.path === "/v1/projects/:id"
+    && route.capability === "projects:write"
+  )));
   assert.ok(connectionBody.data.adapterManifest.routes.taskLists.some((route) => (
     route.method === "PATCH"
     && route.path === "/v1/task-lists/:id"
@@ -494,6 +525,16 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(connectionBody.data.adapterManifest.routes.agentLogs.some((route) => (
     route.method === "POST"
     && route.path === "/v1/agent-logs"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.agentLogs.some((route) => (
+    route.method === "GET"
+    && route.path === "/v1/agent-logs/:id"
+    && route.capability === "agent-logs:read"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.agentEvents.some((route) => (
+    route.method === "POST"
+    && route.path === "/v1/agent-events/:id/ack"
+    && route.capability === "agent-events:ack"
   )));
   assert.ok(connectionBody.data.adapterManifest.routes.agents.some((route) => (
     route.method === "POST"
@@ -516,6 +557,20 @@ test("CompanyCore v1 protected API flow", async () => {
 
   const projectAId = (serviceProject.body as { data: { id: string } }).data.id;
 
+  const readProject = await request(`/v1/projects/${projectAId}`, { headers: authA });
+  assert.equal(readProject.status, 200);
+  assert.equal((readProject.body as { data: { id: string; name: string } }).data.name, "Service project");
+
+  const updatedProject = await request(`/v1/projects/${projectAId}`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({
+      description: "Updated through agent CRUD"
+    })
+  });
+  assert.equal(updatedProject.status, 200);
+  assert.equal((updatedProject.body as { data: { description: string } }).data.description, "Updated through agent CRUD");
+
   const taskList = await request("/v1/task-lists", {
     method: "POST",
     headers: authA,
@@ -526,6 +581,10 @@ test("CompanyCore v1 protected API flow", async () => {
   });
   assert.equal(taskList.status, 201);
   const taskListId = (taskList.body as { data: { id: string } }).data.id;
+
+  const readTaskList = await request(`/v1/task-lists/${taskListId}`, { headers: authA });
+  assert.equal(readTaskList.status, 200);
+  assert.equal((readTaskList.body as { data: { id: string } }).data.id, taskListId);
 
   const updatedTaskList = await request(`/v1/task-lists/${taskListId}`, {
     method: "PATCH",
@@ -560,6 +619,63 @@ test("CompanyCore v1 protected API flow", async () => {
   });
   assert.equal(foreignGoal.status, 404);
 
+  const goal = await request("/v1/goals", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      projectId: projectAId,
+      title: "Agent-readable goal"
+    })
+  });
+  assert.equal(goal.status, 201);
+  const goalId = (goal.body as { data: { id: string } }).data.id;
+
+  const readGoal = await request(`/v1/goals/${goalId}`, { headers: authA });
+  assert.equal(readGoal.status, 200);
+  assert.equal((readGoal.body as { data: { title: string } }).data.title, "Agent-readable goal");
+
+  const updatedGoal = await request(`/v1/goals/${goalId}`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({
+      status: "active-reviewed"
+    })
+  });
+  assert.equal(updatedGoal.status, 200);
+
+  const target = await request("/v1/targets", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      goalId,
+      title: "Agent-readable target",
+      metric: "records",
+      targetValue: 3
+    })
+  });
+  assert.equal(target.status, 201);
+  const targetId = (target.body as { data: { id: string } }).data.id;
+
+  const readTarget = await request(`/v1/targets/${targetId}`, { headers: authA });
+  assert.equal(readTarget.status, 200);
+  const updatedTarget = await request(`/v1/targets/${targetId}`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({
+      currentValue: 1
+    })
+  });
+  assert.equal(updatedTarget.status, 200);
+
+  const foreignTargetUpdate = await request(`/v1/targets/${targetId}`, {
+    method: "PATCH",
+    headers: authB,
+    body: JSON.stringify({
+      currentValue: 2
+    })
+  });
+  assert.equal(foreignTargetUpdate.status, 404);
+
   const serviceCannotCreateKeys = await request("/v1/api-keys", {
     method: "POST",
     headers: { "X-API-Key": serviceKey },
@@ -582,16 +698,47 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(operatingModel.status, 200);
   const operatingModelBody = operatingModel.body as {
     data: {
-      areas: Array<{ key: string; tables: Array<{ apiSlug: string }> }>;
+      areas: Array<{ id: string; key: string; isSystem: boolean; tables: Array<{ apiSlug: string }> }>;
     };
   };
   assert.equal(operatingModelBody.data.areas.length, 13);
   assert.equal(operatingModelBody.data.areas[0]?.key, "main-general");
+  assert.equal(operatingModelBody.data.areas[0]?.isSystem, true);
   assert.ok(operatingModelBody.data.areas.some((area) => (
     area.key === "strategy-governance"
     && area.tables.some((table) => table.apiSlug === "goals")
     && area.tables.some((table) => table.apiSlug === "targets")
   )));
+
+  const protectedAreaDelete = await request(`/v1/operating-model/areas/${operatingModelBody.data.areas[0]?.id}`, {
+    method: "DELETE",
+    headers: authA,
+    body: JSON.stringify({
+      reassignToAreaId: strategyArea.id
+    })
+  });
+  assert.equal(protectedAreaDelete.status, 403);
+
+  const customArea = await request("/v1/operating-model/areas", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      name: "Agent scratch area",
+      description: "Temporary user-created area"
+    })
+  });
+  assert.equal(customArea.status, 201);
+  const customAreaBody = customArea.body as { data: { id: string; key: string; isSystem: boolean } };
+  assert.equal(customAreaBody.data.isSystem, false);
+
+  const updatedCustomArea = await request(`/v1/operating-model/areas/${customAreaBody.data.id}`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({
+      name: "Agent reviewed scratch area"
+    })
+  });
+  assert.equal(updatedCustomArea.status, 200);
 
   const goalsTable = await prisma.operatingTable.findUniqueOrThrow({
     where: {
@@ -601,6 +748,63 @@ test("CompanyCore v1 protected API flow", async () => {
       }
     }
   });
+
+  const agentFolder = await request("/v1/operating-model/folders", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      areaId: goalsTable.areaId,
+      name: "Agent memory"
+    })
+  });
+  assert.equal(agentFolder.status, 201);
+  const agentFolderId = (agentFolder.body as { data: { id: string } }).data.id;
+
+  const readAgentFolder = await request(`/v1/operating-model/folders/${agentFolderId}`, { headers: authA });
+  assert.equal(readAgentFolder.status, 200);
+
+  const updatedAgentFolder = await request(`/v1/operating-model/folders/${agentFolderId}`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({
+      description: "Agent-readable operating folder"
+    })
+  });
+  assert.equal(updatedAgentFolder.status, 200);
+
+  const deletedAgentFolder = await request(`/v1/operating-model/folders/${agentFolderId}`, {
+    method: "DELETE",
+    headers: authA
+  });
+  assert.equal(deletedAgentFolder.status, 200);
+
+  const customAreaFolder = await request("/v1/operating-model/folders", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      areaId: customAreaBody.data.id,
+      name: "Scratch folder"
+    })
+  });
+  assert.equal(customAreaFolder.status, 201);
+  const customAreaFolderId = (customAreaFolder.body as { data: { id: string } }).data.id;
+
+  const deletedCustomArea = await request(`/v1/operating-model/areas/${customAreaBody.data.id}`, {
+    method: "DELETE",
+    headers: authA,
+    body: JSON.stringify({
+      reassignToAreaId: goalsTable.areaId
+    })
+  });
+  assert.equal(deletedCustomArea.status, 200);
+  const reassignedFolder = await prisma.operatingFolder.findUniqueOrThrow({
+    where: { id: customAreaFolderId }
+  });
+  assert.equal(reassignedFolder.areaId, goalsTable.areaId);
+  const removedCustomArea = await prisma.operatingArea.findUnique({
+    where: { id: customAreaBody.data.id }
+  });
+  assert.equal(removedCustomArea, null);
 
   const knowledgeRoot = await request("/v1/operating-model/knowledge-roots", {
     method: "POST",
@@ -615,6 +819,19 @@ test("CompanyCore v1 protected API flow", async () => {
     })
   });
   assert.equal(knowledgeRoot.status, 201);
+  const knowledgeRootId = (knowledgeRoot.body as { data: { id: string } }).data.id;
+
+  const readKnowledgeRoot = await request(`/v1/operating-model/knowledge-roots/${knowledgeRootId}`, { headers: authA });
+  assert.equal(readKnowledgeRoot.status, 200);
+
+  const updatedKnowledgeRoot = await request(`/v1/operating-model/knowledge-roots/${knowledgeRootId}`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({
+      name: "Reviewed goals vault"
+    })
+  });
+  assert.equal(updatedKnowledgeRoot.status, 200);
 
   const storageLocation = await request("/v1/operating-model/storage-locations", {
     method: "POST",
@@ -629,6 +846,19 @@ test("CompanyCore v1 protected API flow", async () => {
     })
   });
   assert.equal(storageLocation.status, 201);
+  const storageLocationId = (storageLocation.body as { data: { id: string } }).data.id;
+
+  const readStorageLocation = await request(`/v1/operating-model/storage-locations/${storageLocationId}`, { headers: authA });
+  assert.equal(readStorageLocation.status, 200);
+
+  const updatedStorageLocation = await request(`/v1/operating-model/storage-locations/${storageLocationId}`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({
+      name: "Reviewed goals folder"
+    })
+  });
+  assert.equal(updatedStorageLocation.status, 200);
 
   const automationDefinition = await request("/v1/operating-model/automation-definitions", {
     method: "POST",
@@ -644,6 +874,19 @@ test("CompanyCore v1 protected API flow", async () => {
     })
   });
   assert.equal(automationDefinition.status, 201);
+  const automationDefinitionId = (automationDefinition.body as { data: { id: string } }).data.id;
+
+  const readAutomationDefinition = await request(`/v1/operating-model/automation-definitions/${automationDefinitionId}`, { headers: authA });
+  assert.equal(readAutomationDefinition.status, 200);
+
+  const updatedAutomationDefinition = await request(`/v1/operating-model/automation-definitions/${automationDefinitionId}`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({
+      enabled: false
+    })
+  });
+  assert.equal(updatedAutomationDefinition.status, 200);
 
   const foreignStorageLocation = await request("/v1/operating-model/storage-locations", {
     method: "POST",
@@ -659,6 +902,33 @@ test("CompanyCore v1 protected API flow", async () => {
   });
   assert.equal(foreignStorageLocation.status, 404);
 
+  const foreignAutomationUpdate = await request(`/v1/operating-model/automation-definitions/${automationDefinitionId}`, {
+    method: "PATCH",
+    headers: authB,
+    body: JSON.stringify({
+      enabled: true
+    })
+  });
+  assert.equal(foreignAutomationUpdate.status, 404);
+
+  const deletedAutomationDefinition = await request(`/v1/operating-model/automation-definitions/${automationDefinitionId}`, {
+    method: "DELETE",
+    headers: authA
+  });
+  assert.equal(deletedAutomationDefinition.status, 200);
+
+  const deletedStorageLocation = await request(`/v1/operating-model/storage-locations/${storageLocationId}`, {
+    method: "DELETE",
+    headers: authA
+  });
+  assert.equal(deletedStorageLocation.status, 200);
+
+  const deletedKnowledgeRoot = await request(`/v1/operating-model/knowledge-roots/${knowledgeRootId}`, {
+    method: "DELETE",
+    headers: authA
+  });
+  assert.equal(deletedKnowledgeRoot.status, 200);
+
   const task = await request("/tasks", {
     method: "POST",
     headers: authA,
@@ -669,6 +939,10 @@ test("CompanyCore v1 protected API flow", async () => {
   });
   assert.equal(task.status, 201);
   const taskId = (task.body as { data: { id: string } }).data.id;
+
+  const readTask = await request(`/v1/tasks/${taskId}`, { headers: authA });
+  assert.equal(readTask.status, 200);
+  assert.equal((readTask.body as { data: { id: string } }).data.id, taskId);
 
   const updatedTask = await request(`/tasks/${taskId}`, {
     method: "PATCH",
@@ -697,6 +971,19 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(client.status, 201);
   const clientId = (client.body as { data: { id: string } }).data.id;
 
+  const readClient = await request(`/v1/clients/${clientId}`, { headers: authA });
+  assert.equal(readClient.status, 200);
+  assert.equal((readClient.body as { data: { email: string } }).data.email, "client-a@example.com");
+
+  const updatedClient = await request(`/v1/clients/${clientId}`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({
+      status: "qualified"
+    })
+  });
+  assert.equal(updatedClient.status, 200);
+
   const pipelineStage = await request("/v1/pipeline-stages", {
     method: "POST",
     headers: authA,
@@ -707,6 +994,9 @@ test("CompanyCore v1 protected API flow", async () => {
   });
   assert.equal(pipelineStage.status, 201);
   const pipelineStageId = (pipelineStage.body as { data: { id: string } }).data.id;
+
+  const readPipelineStage = await request(`/v1/pipeline-stages/${pipelineStageId}`, { headers: authA });
+  assert.equal(readPipelineStage.status, 200);
 
   const updatedPipelineStage = await request(`/v1/pipeline-stages/${pipelineStageId}`, {
     method: "PATCH",
@@ -728,6 +1018,28 @@ test("CompanyCore v1 protected API flow", async () => {
     })
   });
   assert.equal(deal.status, 201);
+  const dealId = (deal.body as { data: { id: string } }).data.id;
+
+  const readDeal = await request(`/v1/deals/${dealId}`, { headers: authA });
+  assert.equal(readDeal.status, 200);
+
+  const updatedDeal = await request(`/v1/deals/${dealId}`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({
+      status: "won"
+    })
+  });
+  assert.equal(updatedDeal.status, 200);
+
+  const foreignDealUpdate = await request(`/v1/deals/${dealId}`, {
+    method: "PATCH",
+    headers: authB,
+    body: JSON.stringify({
+      title: "Should not update another workspace deal"
+    })
+  });
+  assert.equal(foreignDealUpdate.status, 404);
 
   const interaction = await request("/v1/interactions", {
     method: "POST",
@@ -740,6 +1052,19 @@ test("CompanyCore v1 protected API flow", async () => {
     })
   });
   assert.equal(interaction.status, 201);
+  const interactionId = (interaction.body as { data: { id: string } }).data.id;
+
+  const readInteraction = await request(`/v1/interactions/${interactionId}`, { headers: authA });
+  assert.equal(readInteraction.status, 200);
+
+  const updatedInteraction = await request(`/v1/interactions/${interactionId}`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({
+      summary: "Paperclip captured and enriched a reply"
+    })
+  });
+  assert.equal(updatedInteraction.status, 200);
 
   const foreignInteraction = await request("/v1/interactions", {
     method: "POST",
@@ -762,6 +1087,19 @@ test("CompanyCore v1 protected API flow", async () => {
     })
   });
   assert.equal(note.status, 201);
+  const noteId = (note.body as { data: { id: string } }).data.id;
+
+  const readNote = await request(`/v1/notes/${noteId}`, { headers: authA });
+  assert.equal(readNote.status, 200);
+
+  const updatedNote = await request(`/v1/notes/${noteId}`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({
+      content: "Workspace A scoped note updated by agent API"
+    })
+  });
+  assert.equal(updatedNote.status, 200);
 
   const foreignNote = await request("/v1/notes", {
     method: "POST",
@@ -799,6 +1137,19 @@ test("CompanyCore v1 protected API flow", async () => {
     })
   });
   assert.equal(decision.status, 201);
+  const decisionId = (decision.body as { data: { id: string } }).data.id;
+
+  const readDecision = await request(`/v1/decisions/${decisionId}`, { headers: authA });
+  assert.equal(readDecision.status, 200);
+
+  const updatedDecision = await request(`/v1/decisions/${decisionId}`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({
+      outcome: "approved-reviewed"
+    })
+  });
+  assert.equal(updatedDecision.status, 200);
 
   const agent = await request("/v1/agents", {
     method: "POST",
@@ -812,6 +1163,18 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(agent.status, 201);
   const agentId = (agent.body as { data: { id: string } }).data.id;
 
+  const readAgent = await request(`/v1/agents/${agentId}`, { headers: authA });
+  assert.equal(readAgent.status, 200);
+
+  const updatedAgent = await request(`/v1/agents/${agentId}`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({
+      status: "paused"
+    })
+  });
+  assert.equal(updatedAgent.status, 200);
+
   const agentLog = await request("/v1/agent-logs", {
     method: "POST",
     headers: authA,
@@ -823,6 +1186,10 @@ test("CompanyCore v1 protected API flow", async () => {
     })
   });
   assert.equal(agentLog.status, 201);
+  const agentLogId = (agentLog.body as { data: { id: string } }).data.id;
+
+  const readAgentLog = await request(`/v1/agent-logs/${agentLogId}`, { headers: authA });
+  assert.equal(readAgentLog.status, 200);
 
   const foreignAgentLog = await request("/v1/agent-logs", {
     method: "POST",
@@ -833,6 +1200,89 @@ test("CompanyCore v1 protected API flow", async () => {
     })
   });
   assert.equal(foreignAgentLog.status, 404);
+
+  const archivedInteraction = await request(`/v1/interactions/${interactionId}`, {
+    method: "DELETE",
+    headers: authA
+  });
+  assert.equal(archivedInteraction.status, 200);
+  assert.equal((archivedInteraction.body as { data: { status: string } }).data.status, "archived");
+
+  const archivedNote = await request(`/v1/notes/${noteId}`, {
+    method: "DELETE",
+    headers: authA
+  });
+  assert.equal(archivedNote.status, 200);
+  assert.equal((archivedNote.body as { data: { status: string } }).data.status, "archived");
+
+  const archivedDecision = await request(`/v1/decisions/${decisionId}`, {
+    method: "DELETE",
+    headers: authA
+  });
+  assert.equal(archivedDecision.status, 200);
+  assert.equal((archivedDecision.body as { data: { status: string } }).data.status, "archived");
+
+  const retiredAgent = await request(`/v1/agents/${agentId}`, {
+    method: "DELETE",
+    headers: authA
+  });
+  assert.equal(retiredAgent.status, 200);
+  assert.equal((retiredAgent.body as { data: { status: string } }).data.status, "retired");
+
+  const archivedDeal = await request(`/v1/deals/${dealId}`, {
+    method: "DELETE",
+    headers: authA
+  });
+  assert.equal(archivedDeal.status, 200);
+  assert.equal((archivedDeal.body as { data: { status: string } }).data.status, "archived");
+
+  const archivedClient = await request(`/v1/clients/${clientId}`, {
+    method: "DELETE",
+    headers: authA
+  });
+  assert.equal(archivedClient.status, 200);
+  assert.equal((archivedClient.body as { data: { status: string } }).data.status, "archived");
+
+  const archivedPipelineStage = await request(`/v1/pipeline-stages/${pipelineStageId}`, {
+    method: "DELETE",
+    headers: authA
+  });
+  assert.equal(archivedPipelineStage.status, 200);
+  assert.equal((archivedPipelineStage.body as { data: { status: string } }).data.status, "archived");
+
+  const archivedTaskList = await request(`/v1/task-lists/${taskListId}`, {
+    method: "DELETE",
+    headers: authA
+  });
+  assert.equal(archivedTaskList.status, 200);
+  assert.equal((archivedTaskList.body as { data: { status: string } }).data.status, "archived");
+
+  const archivedTarget = await request(`/v1/targets/${targetId}`, {
+    method: "DELETE",
+    headers: authA
+  });
+  assert.equal(archivedTarget.status, 200);
+  assert.equal((archivedTarget.body as { data: { status: string } }).data.status, "archived");
+
+  const archivedGoal = await request(`/v1/goals/${goalId}`, {
+    method: "DELETE",
+    headers: authA
+  });
+  assert.equal(archivedGoal.status, 200);
+  assert.equal((archivedGoal.body as { data: { status: string } }).data.status, "archived");
+
+  const archivedProject = await request(`/v1/projects/${projectAId}`, {
+    method: "DELETE",
+    headers: authA
+  });
+  assert.equal(archivedProject.status, 200);
+  assert.equal((archivedProject.body as { data: { status: string } }).data.status, "archived");
+
+  const foreignProjectArchive = await request(`/v1/projects/${projectAId}`, {
+    method: "DELETE",
+    headers: authB
+  });
+  assert.equal(foreignProjectArchive.status, 404);
 
   const decisionsB = await request("/v1/decisions", { headers: authB });
   const agentsB = await request("/v1/agents", { headers: authB });

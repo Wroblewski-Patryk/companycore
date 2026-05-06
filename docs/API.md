@@ -529,6 +529,47 @@ The `adapterManifest` is the machine-readable v1 onboarding surface for
 Paperclip, Jarvis, Jarvan, Aviary, n8n, and similar clients. It lists canonical
 paths, methods, expected capabilities, and write rules without exposing secrets.
 
+## Agent CRUD Rollout Policy
+
+The active rollout plan for teaching agents to read and write CompanyCore data
+is `docs/planning/agent-crud-api-rollout-plan.md`.
+
+Agent-facing access must follow these rules:
+
+- business records should converge on list, single-record read, create, update,
+  and safe archive/delete routes
+- system, auth, secret, provider inbox, webhook, event, and audit tables must
+  expose controlled domain actions instead of raw CRUD
+- agents must discover available operations through `GET /v1/connection`
+  before attempting writes
+- service clients must never send `workspaceId`; the API derives workspace
+  ownership from auth
+- raw API keys, passwords, provider tokens, webhook secrets, and raw provider
+  failures must never be returned
+- destructive behavior must be guarded by relation checks, workspace checks,
+  and provider ownership checks
+
+Business `DELETE` routes are soft lifecycle operations. They preserve database
+history and relation integrity by setting the record status to `archived`, or
+to `retired` for agents. They do not hard-delete rows.
+
+Provider and system lifecycle routes are intentionally action-shaped. Agents
+may use advertised routes such as event `ack`, provider-event `retry`,
+webhook `reconcile`, Drive file `scope`, Drive changes `reconcile`, and
+Docs/Sheets write actions. Agents must not infer or call raw CRUD routes for
+system tables such as API keys, integration settings, provider inbox rows,
+webhook registrations, event rows, users, workspaces, or memberships.
+
+Current table policy summary:
+
+| Area | Tables | Agent access target |
+| --- | --- | --- |
+| Business records | `projects`, `goals`, `targets`, `task_lists`, `tasks`, `clients`, `pipeline_stages`, `deals`, `interactions`, `notes`, `decisions`, `agents` | Full workspace-scoped read/create/update plus safe archive/delete where allowed. |
+| Agent observability | `agent_logs`, `agent_event_outbox`, `events` | Append/read or read/ack lifecycle; no broad raw delete. |
+| Operating registry | `operating_areas`, `operating_folders`, `operating_tables`, `storage_locations`, `knowledge_roots`, `automation_definitions` | Scoped lifecycle APIs, with protected fallback/system records. |
+| Provider registry | `external_container_mappings`, `external_field_mappings`, `google_drive_files`, `google_drive_content_snapshots`, `external_webhook_registrations`, `provider_event_inbox` | Provider-backed read, scope, refresh, retry, reconcile, and delete-through-provider actions. |
+| Security and tenancy | `users`, `workspaces`, `workspace_memberships`, `api_keys`, `integration_settings` | Auth, owner account, API key, and provider settings actions only; no agent raw CRUD. |
+
 ## Operating Model
 
 Adapters can read the workspace operating model and register scoped storage,
@@ -536,20 +577,78 @@ knowledge, and automation metadata through protected routes.
 
 ```http
 GET /v1/operating-model
+GET /v1/operating-model/areas
+POST /v1/operating-model/areas
+PATCH /v1/operating-model/areas/:id
+DELETE /v1/operating-model/areas/:id
 GET /v1/operating-model/tables
+GET /v1/operating-model/folders
+GET /v1/operating-model/folders/:id
+POST /v1/operating-model/folders
+PATCH /v1/operating-model/folders/:id
+DELETE /v1/operating-model/folders/:id
 GET /v1/operating-model/external-mappings
 GET /v1/operating-model/external-fields
 GET /v1/operating-model/storage-locations
+GET /v1/operating-model/storage-locations/:id
 POST /v1/operating-model/storage-locations
+PATCH /v1/operating-model/storage-locations/:id
+DELETE /v1/operating-model/storage-locations/:id
 GET /v1/operating-model/knowledge-roots
+GET /v1/operating-model/knowledge-roots/:id
 POST /v1/operating-model/knowledge-roots
+PATCH /v1/operating-model/knowledge-roots/:id
+DELETE /v1/operating-model/knowledge-roots/:id
 GET /v1/operating-model/automation-definitions
+GET /v1/operating-model/automation-definitions/:id
 POST /v1/operating-model/automation-definitions
+PATCH /v1/operating-model/automation-definitions/:id
+DELETE /v1/operating-model/automation-definitions/:id
 ```
 
 Write payloads derive `workspaceId` from auth. Optional `areaId`, `folderId`,
 and `tableId` must belong to the active workspace and to each other; otherwise
 the API returns `not_found`.
+
+Operating area payload:
+
+```json
+{
+  "name": "Customer onboarding",
+  "description": "User-created area for a focused operating slice"
+}
+```
+
+CompanyCore catalog areas are returned with `isSystem: true`. System areas,
+including the protected fallback `00. Glowny` / `main-general`, cannot be
+renamed or deleted through the API. User-created areas have `isSystem: false`
+and can be deleted only with explicit reassignment:
+
+```json
+{
+  "reassignToAreaId": "uuid"
+}
+```
+
+Deleting a user-created area reassigns its operating folders, operating tables,
+provider mappings, storage locations, knowledge roots, automation definitions,
+and Google Drive file scope to the selected target area before removing the
+area row.
+
+Operating folder payload:
+
+```json
+{
+  "areaId": "uuid",
+  "name": "Agent memory",
+  "description": "Folder for agent-readable operating context"
+}
+```
+
+Folder deletion is guarded. If a folder owns operating tables, the API returns
+`conflict` instead of deleting it. Storage locations, knowledge roots, and
+automation definitions can be deleted directly because related provider/file
+records use nullable references and keep their own history.
 
 Storage location payload:
 
@@ -595,9 +694,15 @@ Automation definition payload:
 
 ```http
 GET /v1/projects
+GET /v1/projects/:id
 POST /v1/projects
+PATCH /v1/projects/:id
+DELETE /v1/projects/:id
 GET /projects
+GET /projects/:id
 POST /projects
+PATCH /projects/:id
+DELETE /projects/:id
 ```
 
 ```json
@@ -611,7 +716,10 @@ POST /projects
 
 ```http
 GET /goals
+GET /goals/:id
 POST /goals
+PATCH /goals/:id
+DELETE /goals/:id
 ```
 
 ```json
@@ -625,7 +733,10 @@ POST /goals
 
 ```http
 GET /targets
+GET /targets/:id
 POST /targets
+PATCH /targets/:id
+DELETE /targets/:id
 ```
 
 ```json
@@ -641,11 +752,15 @@ POST /targets
 
 ```http
 GET /v1/task-lists
+GET /v1/task-lists/:id
 POST /v1/task-lists
 PATCH /v1/task-lists/:id
+DELETE /v1/task-lists/:id
 GET /task-lists
+GET /task-lists/:id
 POST /task-lists
 PATCH /task-lists/:id
+DELETE /task-lists/:id
 ```
 
 ```json
@@ -665,6 +780,7 @@ delete task lists yet.
 
 ```http
 GET /v1/tasks
+GET /v1/tasks/:id
 POST /v1/tasks
 PATCH /v1/tasks/:id
 DELETE /v1/tasks/:id
@@ -672,6 +788,7 @@ POST /v1/tasks/:id/clickup/custom-fields/:fieldId
 POST /v1/tasks/sync/clickup
 POST /v1/tasks/sync/clickup/native
 GET /tasks
+GET /tasks/:id
 POST /tasks
 PATCH /tasks/:id
 DELETE /tasks/:id
@@ -790,7 +907,10 @@ Safe native sync response:
 
 ```http
 GET /clients
+GET /clients/:id
 POST /clients
+PATCH /clients/:id
+DELETE /clients/:id
 ```
 
 ```json
@@ -805,11 +925,15 @@ POST /clients
 
 ```http
 GET /v1/pipeline-stages
+GET /v1/pipeline-stages/:id
 POST /v1/pipeline-stages
 PATCH /v1/pipeline-stages/:id
+DELETE /v1/pipeline-stages/:id
 GET /pipeline-stages
+GET /pipeline-stages/:id
 POST /pipeline-stages
 PATCH /pipeline-stages/:id
+DELETE /pipeline-stages/:id
 ```
 
 ```json
@@ -827,7 +951,10 @@ list/create/update and intentionally does not delete stages yet.
 
 ```http
 GET /deals
+GET /deals/:id
 POST /deals
+PATCH /deals/:id
+DELETE /deals/:id
 ```
 
 ```json
@@ -843,9 +970,15 @@ POST /deals
 
 ```http
 GET /v1/interactions
+GET /v1/interactions/:id
 POST /v1/interactions
+PATCH /v1/interactions/:id
+DELETE /v1/interactions/:id
 GET /interactions
+GET /interactions/:id
 POST /interactions
+PATCH /interactions/:id
+DELETE /interactions/:id
 ```
 
 ```json
@@ -865,9 +998,15 @@ provided, it must belong to the active workspace.
 
 ```http
 GET /v1/notes
+GET /v1/notes/:id
 POST /v1/notes
+PATCH /v1/notes/:id
+DELETE /v1/notes/:id
 GET /notes
+GET /notes/:id
 POST /notes
+PATCH /notes/:id
+DELETE /notes/:id
 ```
 
 ```json
@@ -886,9 +1025,15 @@ the local note is not created and the API returns a safe integration error.
 
 ```http
 GET /v1/decisions
+GET /v1/decisions/:id
 POST /v1/decisions
+PATCH /v1/decisions/:id
+DELETE /v1/decisions/:id
 GET /decisions
+GET /decisions/:id
 POST /decisions
+PATCH /decisions/:id
+DELETE /decisions/:id
 ```
 
 ```json
@@ -904,9 +1049,15 @@ POST /decisions
 
 ```http
 GET /v1/agents
+GET /v1/agents/:id
 POST /v1/agents
+PATCH /v1/agents/:id
+DELETE /v1/agents/:id
 GET /agents
+GET /agents/:id
 POST /agents
+PATCH /agents/:id
+DELETE /agents/:id
 ```
 
 ```json
@@ -925,8 +1076,10 @@ agent logs.
 
 ```http
 GET /v1/agent-logs
+GET /v1/agent-logs/:id
 POST /v1/agent-logs
 GET /agent-logs
+GET /agent-logs/:id
 POST /agent-logs
 ```
 
@@ -985,10 +1138,14 @@ GET /events
 Generated v1 events:
 
 - `project_created`
+- `project_updated`
+- `project_archived`
 - `task_created`
 - `task_updated`
+- `task_archived`
 - `task_list_created`
 - `task_list_updated`
+- `task_list_archived`
 - `task_synced_from_clickup`
 - `clickup_taskCreated`
 - `clickup_taskUpdated`
@@ -1001,15 +1158,32 @@ Generated v1 events:
 - `clickup_webhook_deleted`
 - `clickup_comment_create_failed`
 - `goal_created`
+- `goal_updated`
+- `goal_archived`
 - `target_created`
+- `target_updated`
+- `target_archived`
 - `client_created`
+- `client_updated`
+- `client_archived`
 - `pipeline_stage_created`
 - `pipeline_stage_updated`
+- `pipeline_stage_archived`
 - `deal_created`
+- `deal_updated`
+- `deal_archived`
 - `interaction_created`
+- `interaction_updated`
+- `interaction_archived`
 - `note_created`
+- `note_updated`
+- `note_archived`
 - `decision_created`
+- `decision_updated`
+- `decision_archived`
 - `agent_created`
+- `agent_updated`
+- `agent_retired`
 - `sync_started`
 - `sync_succeeded`
 - `sync_failed`

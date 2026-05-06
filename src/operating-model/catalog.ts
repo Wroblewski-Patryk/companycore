@@ -178,13 +178,15 @@ export async function ensureOperatingModelForWorkspace(
       },
       update: {
         name: area.name,
-        position: area.position
+        position: area.position,
+        isSystem: true
       },
       create: {
         workspaceId,
         key: area.key,
         name: area.name,
-        position: area.position
+        position: area.position,
+        isSystem: true
       },
       select: { id: true }
     });

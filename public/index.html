@@ -332,10 +332,11 @@
               <h2>Company operating map</h2>
               <p>Review the main area, 12 company departments, their CompanyCore tables, provider mappings, Drive files, and live database counts.</p>
             </div>
-            <div class="actions">
-              <a class="button-link secondary compact" href="/settings" data-link>ClickUp</a>
-              <a class="button-link secondary compact" href="/settings/drive" data-link>Drive</a>
-            </div>
+              <div class="actions">
+                <button id="createAreaButton" class="compact" type="button">New area</button>
+                <a class="button-link secondary compact" href="/settings" data-link>ClickUp</a>
+                <a class="button-link secondary compact" href="/settings/drive" data-link>Drive</a>
+              </div>
           </div>
           <div class="operating-layout">
             <aside class="area-rail" id="operatingAreasNav" aria-label="Company areas"></aside>
@@ -344,9 +345,12 @@
                 <div>
                   <h3 id="areaTitle">Select an area</h3>
                   <p id="areaDescription">Sign in to load the company operating model.</p>
+                  </div>
+                  <div>
+                    <div class="area-stats" id="areaStats"></div>
+                    <div class="area-actions" id="areaActions"></div>
+                  </div>
                 </div>
-                <div class="area-stats" id="areaStats"></div>
-              </div>
               <section class="area-filter-bar" aria-label="Selected area filters">
                 <label>
                   Search area

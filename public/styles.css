@@ -1116,6 +1116,30 @@ button.compact,
   font-weight: 900;
 }
 
+.area-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.area-action-note {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+button.danger {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+button.danger:hover {
+  border-color: #fca5a5;
+  background: #fee2e2;
+}
+
 .area-columns {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

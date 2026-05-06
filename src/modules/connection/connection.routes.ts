@@ -36,6 +36,8 @@ const capabilities = [
   "agents:write",
   "agent-logs:read",
   "agent-logs:write",
+  "agent-events:read",
+  "agent-events:ack",
   "events:read",
   "integration-settings:clickup:read",
   "integration-settings:clickup:write",
@@ -68,36 +70,66 @@ const adapterManifest = {
     operatingModel: [
       { method: "GET", path: "/v1/connection", capability: "operating-model:read" },
       { method: "GET", path: "/v1/operating-model", capability: "operating-model:read" },
+      { method: "GET", path: "/v1/operating-model/areas", capability: "operating-model:read" },
+      { method: "POST", path: "/v1/operating-model/areas", capability: "operating-model:write" },
+      { method: "PATCH", path: "/v1/operating-model/areas/:id", capability: "operating-model:write" },
+      { method: "DELETE", path: "/v1/operating-model/areas/:id", capability: "operating-model:write" },
       { method: "GET", path: "/v1/operating-model/tables", capability: "operating-model:read" },
+      { method: "GET", path: "/v1/operating-model/folders", capability: "operating-model:read" },
+      { method: "GET", path: "/v1/operating-model/folders/:id", capability: "operating-model:read" },
+      { method: "POST", path: "/v1/operating-model/folders", capability: "operating-model:write" },
+      { method: "PATCH", path: "/v1/operating-model/folders/:id", capability: "operating-model:write" },
+      { method: "DELETE", path: "/v1/operating-model/folders/:id", capability: "operating-model:write" },
       { method: "GET", path: "/v1/operating-model/external-mappings", capability: "operating-model:read" },
       { method: "PATCH", path: "/v1/operating-model/external-mappings/:id/scope", capability: "operating-model:mappings:write" },
       { method: "GET", path: "/v1/operating-model/external-fields", capability: "operating-model:read" },
       { method: "GET", path: "/v1/operating-model/storage-locations", capability: "operating-model:read" },
+      { method: "GET", path: "/v1/operating-model/storage-locations/:id", capability: "operating-model:read" },
       { method: "POST", path: "/v1/operating-model/storage-locations", capability: "operating-model:write" },
+      { method: "PATCH", path: "/v1/operating-model/storage-locations/:id", capability: "operating-model:write" },
+      { method: "DELETE", path: "/v1/operating-model/storage-locations/:id", capability: "operating-model:write" },
       { method: "GET", path: "/v1/operating-model/knowledge-roots", capability: "operating-model:read" },
+      { method: "GET", path: "/v1/operating-model/knowledge-roots/:id", capability: "operating-model:read" },
       { method: "POST", path: "/v1/operating-model/knowledge-roots", capability: "operating-model:write" },
+      { method: "PATCH", path: "/v1/operating-model/knowledge-roots/:id", capability: "operating-model:write" },
+      { method: "DELETE", path: "/v1/operating-model/knowledge-roots/:id", capability: "operating-model:write" },
       { method: "GET", path: "/v1/operating-model/automation-definitions", capability: "operating-model:read" },
-      { method: "POST", path: "/v1/operating-model/automation-definitions", capability: "operating-model:write" }
+      { method: "GET", path: "/v1/operating-model/automation-definitions/:id", capability: "operating-model:read" },
+      { method: "POST", path: "/v1/operating-model/automation-definitions", capability: "operating-model:write" },
+      { method: "PATCH", path: "/v1/operating-model/automation-definitions/:id", capability: "operating-model:write" },
+      { method: "DELETE", path: "/v1/operating-model/automation-definitions/:id", capability: "operating-model:write" }
     ],
     projects: [
       { method: "GET", path: "/v1/projects", capability: "projects:read" },
-      { method: "POST", path: "/v1/projects", capability: "projects:write" }
+      { method: "GET", path: "/v1/projects/:id", capability: "projects:read" },
+      { method: "POST", path: "/v1/projects", capability: "projects:write" },
+      { method: "PATCH", path: "/v1/projects/:id", capability: "projects:write" },
+      { method: "DELETE", path: "/v1/projects/:id", capability: "projects:write" }
     ],
     goals: [
       { method: "GET", path: "/v1/goals", capability: "goals:read" },
-      { method: "POST", path: "/v1/goals", capability: "goals:write" }
+      { method: "GET", path: "/v1/goals/:id", capability: "goals:read" },
+      { method: "POST", path: "/v1/goals", capability: "goals:write" },
+      { method: "PATCH", path: "/v1/goals/:id", capability: "goals:write" },
+      { method: "DELETE", path: "/v1/goals/:id", capability: "goals:write" }
     ],
     targets: [
       { method: "GET", path: "/v1/targets", capability: "targets:read" },
-      { method: "POST", path: "/v1/targets", capability: "targets:write" }
+      { method: "GET", path: "/v1/targets/:id", capability: "targets:read" },
+      { method: "POST", path: "/v1/targets", capability: "targets:write" },
+      { method: "PATCH", path: "/v1/targets/:id", capability: "targets:write" },
+      { method: "DELETE", path: "/v1/targets/:id", capability: "targets:write" }
     ],
     taskLists: [
       { method: "GET", path: "/v1/task-lists", capability: "task-lists:read" },
+      { method: "GET", path: "/v1/task-lists/:id", capability: "task-lists:read" },
       { method: "POST", path: "/v1/task-lists", capability: "task-lists:write" },
-      { method: "PATCH", path: "/v1/task-lists/:id", capability: "task-lists:write" }
+      { method: "PATCH", path: "/v1/task-lists/:id", capability: "task-lists:write" },
+      { method: "DELETE", path: "/v1/task-lists/:id", capability: "task-lists:write" }
     ],
     tasks: [
       { method: "GET", path: "/v1/tasks", capability: "tasks:read" },
+      { method: "GET", path: "/v1/tasks/:id", capability: "tasks:read" },
       { method: "POST", path: "/v1/tasks", capability: "tasks:write" },
       { method: "PATCH", path: "/v1/tasks/:id", capability: "tasks:write" },
       { method: "DELETE", path: "/v1/tasks/:id", capability: "tasks:write" },
@@ -106,36 +138,61 @@ const adapterManifest = {
     ],
     clients: [
       { method: "GET", path: "/v1/clients", capability: "clients:read" },
-      { method: "POST", path: "/v1/clients", capability: "clients:write" }
+      { method: "GET", path: "/v1/clients/:id", capability: "clients:read" },
+      { method: "POST", path: "/v1/clients", capability: "clients:write" },
+      { method: "PATCH", path: "/v1/clients/:id", capability: "clients:write" },
+      { method: "DELETE", path: "/v1/clients/:id", capability: "clients:write" }
     ],
     pipelineStages: [
       { method: "GET", path: "/v1/pipeline-stages", capability: "pipeline-stages:read" },
+      { method: "GET", path: "/v1/pipeline-stages/:id", capability: "pipeline-stages:read" },
       { method: "POST", path: "/v1/pipeline-stages", capability: "pipeline-stages:write" },
-      { method: "PATCH", path: "/v1/pipeline-stages/:id", capability: "pipeline-stages:write" }
+      { method: "PATCH", path: "/v1/pipeline-stages/:id", capability: "pipeline-stages:write" },
+      { method: "DELETE", path: "/v1/pipeline-stages/:id", capability: "pipeline-stages:write" }
     ],
     deals: [
       { method: "GET", path: "/v1/deals", capability: "deals:read" },
-      { method: "POST", path: "/v1/deals", capability: "deals:write" }
+      { method: "GET", path: "/v1/deals/:id", capability: "deals:read" },
+      { method: "POST", path: "/v1/deals", capability: "deals:write" },
+      { method: "PATCH", path: "/v1/deals/:id", capability: "deals:write" },
+      { method: "DELETE", path: "/v1/deals/:id", capability: "deals:write" }
     ],
     interactions: [
       { method: "GET", path: "/v1/interactions", capability: "interactions:read" },
-      { method: "POST", path: "/v1/interactions", capability: "interactions:write" }
+      { method: "GET", path: "/v1/interactions/:id", capability: "interactions:read" },
+      { method: "POST", path: "/v1/interactions", capability: "interactions:write" },
+      { method: "PATCH", path: "/v1/interactions/:id", capability: "interactions:write" },
+      { method: "DELETE", path: "/v1/interactions/:id", capability: "interactions:write" }
     ],
     notes: [
       { method: "GET", path: "/v1/notes", capability: "notes:read" },
-      { method: "POST", path: "/v1/notes", capability: "notes:write" }
+      { method: "GET", path: "/v1/notes/:id", capability: "notes:read" },
+      { method: "POST", path: "/v1/notes", capability: "notes:write" },
+      { method: "PATCH", path: "/v1/notes/:id", capability: "notes:write" },
+      { method: "DELETE", path: "/v1/notes/:id", capability: "notes:write" }
     ],
     decisions: [
       { method: "GET", path: "/v1/decisions", capability: "decisions:read" },
-      { method: "POST", path: "/v1/decisions", capability: "decisions:write" }
+      { method: "GET", path: "/v1/decisions/:id", capability: "decisions:read" },
+      { method: "POST", path: "/v1/decisions", capability: "decisions:write" },
+      { method: "PATCH", path: "/v1/decisions/:id", capability: "decisions:write" },
+      { method: "DELETE", path: "/v1/decisions/:id", capability: "decisions:write" }
     ],
     agents: [
       { method: "GET", path: "/v1/agents", capability: "agents:read" },
-      { method: "POST", path: "/v1/agents", capability: "agents:write" }
+      { method: "GET", path: "/v1/agents/:id", capability: "agents:read" },
+      { method: "POST", path: "/v1/agents", capability: "agents:write" },
+      { method: "PATCH", path: "/v1/agents/:id", capability: "agents:write" },
+      { method: "DELETE", path: "/v1/agents/:id", capability: "agents:write" }
     ],
     agentLogs: [
       { method: "GET", path: "/v1/agent-logs", capability: "agent-logs:read" },
+      { method: "GET", path: "/v1/agent-logs/:id", capability: "agent-logs:read" },
       { method: "POST", path: "/v1/agent-logs", capability: "agent-logs:write" }
+    ],
+    agentEvents: [
+      { method: "GET", path: "/v1/agent-events", capability: "agent-events:read" },
+      { method: "POST", path: "/v1/agent-events/:id/ack", capability: "agent-events:ack" }
     ],
     events: [
       { method: "GET", path: "/v1/events", capability: "events:read" }
@@ -170,6 +227,8 @@ const adapterManifest = {
   writeRules: [
     "Do not send workspaceId in write payloads.",
     "Use CompanyCore IDs returned by this API when linking records.",
+    "Treat DELETE routes for business records as archive/deactivate lifecycle operations, not physical deletion.",
+    "Use provider lifecycle routes such as retry, reconcile, refresh, scope, and ack instead of raw provider table writes.",
     "Store raw API keys only in the adapter secret store.",
     "Treat 401, 403, and 422 responses as fail-closed startup errors."
   ]
@@ -230,6 +289,7 @@ connectionRouter.get("/", asyncHandler(async (req, res) => {
       key: true,
       name: true,
       position: true,
+      isSystem: true,
       tables: {
         orderBy: { apiSlug: "asc" },
         select: {
