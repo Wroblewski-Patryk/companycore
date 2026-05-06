@@ -2,7 +2,35 @@
 
 ## Ready
 
-No active ready task.
+- AGRUN-002 Service Key Scope Enforcement
+  - Stage: planning
+  - Owner: Backend Builder
+  - Priority: P0
+  - Goal: enforce `api_keys.scopes` per route capability so service agents can
+    be least-privilege instead of broad by default.
+- AGRUN-003 Machine-Readable Agent Contract
+  - Stage: planning
+  - Owner: Backend Builder
+  - Priority: P1
+  - Goal: extend the agent-facing contract beyond route names so agents can
+    learn payloads, required capabilities, and safe errors from CompanyCore.
+- AGRUN-004 Reusable Agent Training Smoke
+  - Stage: planning
+  - Owner: QA/Test
+  - Priority: P1
+  - Goal: add a repeatable, secret-safe local and production smoke flow for
+    teaching agents CompanyCore read/write behavior.
+- AGRUN-005 Scoped Agent Key Owner UI
+  - Stage: planning
+  - Owner: Frontend Builder
+  - Priority: P1
+  - Goal: let owners create, rotate, and deactivate scoped agent service keys
+    from the web console.
+- AGRUN-006 Agent Event Ack Positive Smoke
+  - Stage: planning
+  - Owner: QA/Test
+  - Priority: P1
+  - Goal: prove a real pending agent event can be read and acknowledged safely.
 
 ## In Progress
 
@@ -10,6 +38,18 @@ No active task.
 
 ## Blocked
 
+- AGRUN-007 Google Drive Owner Consent And First Import
+  - Stage: planning
+  - Owner: Ops/Release
+  - Priority: P1
+  - Blocked by: real Google OAuth credentials and owner consent/import action
+    are required before target-environment evidence can be produced.
+- AGRUN-010 Upstream Agent Source Merge Execution
+  - Stage: planning
+  - Owner: Ops/Release
+  - Priority: P2
+  - Blocked by: external GitHub write access or an approved fork/PR route for
+    Paperclip and OpenJarvis source handoff.
 - CCV1-057B Paperclip upstream branch push
   - Stage: release
   - Owner: Ops/Release
@@ -30,6 +70,8 @@ No active task.
 
 ## Backlog
 
+- AGRUN-008 Route-Level Business Editing Surfaces.
+- AGRUN-009 Deploy Automation Reliability.
 - Future v2 OAuth browser consent UI and token refresh hardening after core
   server-side API slices are complete.
 - Future v2 dashboard surfaces that show ClickUp Lists, Drive folders/files,
@@ -40,6 +82,7 @@ No active task.
 
 ## Done
 
+- AGRUN-001 Agent Runtime Gap Plan.
 - V2WEB-021 User-Created Area Deletion Guardrails.
 - AGCRUD-006 Agent CompanyCore API Playbook.
 - AGCRUD-005 Provider/System Lifecycle Manifest.

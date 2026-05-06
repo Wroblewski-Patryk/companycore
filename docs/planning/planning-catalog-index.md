@@ -25,11 +25,14 @@ Canonical queue sources should still remain:
 - `superseded`
   historical or replaced by newer canonical planning artifacts
 
-## Suggested Table
+## Active Catalog
 
 | Planning file | Classification | Canonical ownership | Notes |
 | --- | --- | --- | --- |
-| `docs/planning/example-wave.md` | queued | `NOW-01..NOW-03` | Short explanation |
+| `docs/planning/agent-runtime-gap-closure-plan.md` | queued | `AGRUN-002..AGRUN-010` | Current post-CRUD agent runtime hardening and onboarding queue. |
+| `docs/planning/agent-crud-api-rollout-plan.md` | implemented | `AGCRUD-001..AGCRUD-006` | Completed and deployed agent CRUD rollout. |
+| `docs/planning/web-console-v2-task-contracts.md` | implemented | `V2WEB-001..V2WEB-021` | Historical completed web-console slices; deeper editing is re-queued through AGRUN-008. |
+| `docs/planning/google-drive-v2-task-contracts.md` | implemented | `V2GD-001..V2GD-009` | Server-side Google Drive v2 delivered; real owner consent/import proof is re-queued through AGRUN-007. |
 
 ## Rules
 

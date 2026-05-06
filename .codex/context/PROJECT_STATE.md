@@ -7,7 +7,7 @@ Last updated: 2026-05-06
 - Goal: Central backend for company projects, goals, tasks, CRM, notes,
   decisions, agents, and system events.
 - Commercial model: Internal operational infrastructure.
-- Current phase: v2 agent CRUD API planning and implementation.
+- Current phase: v2 agent runtime hardening and onboarding.
 
 ## Product Decisions (Confirmed)
 - 2026-05-06: Agent-facing "CRUD for every table" means full
@@ -109,28 +109,38 @@ Last updated: 2026-05-06
   Postgres volume.
 
 ## Current Focus
-- Main active objective: no active P0/P1 implementation task after completing
-  the agent-facing CRUD rollout and user-created area deletion guardrails.
-- Top blockers: no active P0/P1 v2 web console blocker after the dedicated
-  operating-areas route. GitHub-to-Coolify deploy no longer requires GitHub
-  Actions for CompanyCore; Coolify Auto Deploy is enabled on `main`, received
-  commit `63348d6`, and succeeded after the compose file was reloaded.
-- Success criteria for this phase: completed. System areas are protected,
-  user-created areas can be created and deleted through guarded APIs, and
-  deletion reassigns linked content before removing the area row.
+- Main active objective: close the post-CRUD agent runtime gaps so service
+  agents can use CompanyCore through least-privilege keys, machine-readable
+  contracts, repeatable training smoke, and verified event acknowledgement.
+- Top blockers: real Google OAuth credentials and owner consent are required
+  for the first Drive import proof; upstream Paperclip/OpenJarvis source merge
+  execution is blocked by external GitHub write access or an approved fork/PR
+  route.
+- Success criteria for this phase: service-key scopes are enforced per route,
+  `/v1/connection` remains the machine-readable contract for agents, scoped
+  keys can be managed by the owner, agent training smoke is repeatable, and a
+  pending agent event can be acknowledged in local and production smoke.
 
 ## Autonomous Iteration State
-- Current iteration: none active.
+- Current iteration: AGRUN-002 Service Key Scope Enforcement is the next
+  executable task.
 - Current operation mode: BUILDER
-- Last completed iteration: V2WEB-021 User-Created Area Deletion Guardrails.
-- Last completed task: added operating-area system metadata, protected catalog
-  areas including `00. Glowny`, added user-created area create/update/delete
-  APIs, exposed owner-console create/delete controls, and validated
-  reassignment behavior.
-- Next required mode: BUILDER for the next v2 web console iteration unless an
-  architecture decision blocks the queue first.
+- Last completed iteration: AGRUN-001 Agent Runtime Gap Plan.
+- Last completed task: added the agent runtime coverage ledger, planned the
+  post-CRUD execution wave, and activated AGRUN-002 through AGRUN-006 in the
+  canonical queue.
+- Next required mode: BUILDER for AGRUN-002.
 
 ## Recent Progress
+- 2026-05-06: Completed AGRUN-001 by adding
+  `docs/operations/agent-runtime-coverage-ledger.csv` and
+  `docs/planning/agent-runtime-gap-closure-plan.md`. The plan identifies the
+  active post-CRUD gaps: service-key scope enforcement, machine-readable agent
+  contract metadata, reusable agent training smoke, scoped key owner UI,
+  positive agent-event ack smoke, Google Drive owner consent/import evidence,
+  deeper route-level editing surfaces, deploy automation reliability, and
+  blocked Paperclip/OpenJarvis upstream source merges. AGRUN-002 through
+  AGRUN-006 are now the executable P0/P1 queue.
 - 2026-05-06: Completed V2WEB-021 by adding `operating_areas.is_system`,
   marking catalog areas as system-owned through migration and bootstrap,
   exposing guarded `/v1/operating-model/areas` create/update/delete routes,

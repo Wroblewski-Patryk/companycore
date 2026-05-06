@@ -5,6 +5,19 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NOW
 
+- [ ] AGRUN-002 Service Key Scope Enforcement:
+      enforce `api_keys.scopes` per route capability, keep owner bearer-token
+      access intact, preserve existing production agent compatibility through
+      an explicit broad-scope decision or migration, and test denied/allowed
+      scoped-key behavior.
+- [ ] AGRUN-003 Machine-Readable Agent Contract:
+      extend the `/v1/connection` agent contract with route payload/error
+      metadata so agents can learn supported writes without guessing from prose
+      docs.
+- [ ] AGRUN-004 Reusable Agent Training Smoke:
+      add a secret-safe script and package command that proves connection,
+      create/read/update/archive, agent-log write, and fail-closed behavior
+      locally and in production.
 - [x] AGCRUD-002 Business Read/Update API Completion:
       add missing single-record read and update routes for first-party
       business APIs, keep workspace guardrails, update the adapter manifest,
@@ -92,6 +105,23 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NEXT
 
+- [ ] AGRUN-005 Scoped Agent Key Owner UI:
+      expose scoped agent key creation, copy-once raw key display, rotation or
+      deactivation, and capability presets in `/settings/api`.
+- [ ] AGRUN-006 Agent Event Ack Positive Smoke:
+      create a controlled pending agent event, read it through a target service
+      key, acknowledge it, verify it no longer appears as pending, and record
+      production smoke evidence.
+- [ ] AGRUN-007 Google Drive Owner Consent And First Import:
+      blocked until real OAuth credentials and owner consent are available;
+      then connect Drive, import a selected folder, and prove agent file
+      readback through CompanyCore.
+- [ ] AGRUN-008 Route-Level Business Editing Surfaces:
+      continue web-console editing one implemented route at a time after the
+      P0/P1 agent safety tasks are done.
+- [ ] AGRUN-009 Deploy Automation Reliability:
+      audit whether current Coolify auto-deploy reliably updates production or
+      document a one-command approved rollover path.
 - [x] AGCRUD-004 Registry Resource Lifecycle API:
       complete scoped lifecycle APIs for storage locations, knowledge roots,
       automation definitions, and operating folders.
@@ -122,6 +152,15 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## PIPELINE
 
+- [ ] 74. AGRUN-002 Service Key Scope Enforcement
+- [ ] 75. AGRUN-003 Machine-Readable Agent Contract
+- [ ] 76. AGRUN-004 Reusable Agent Training Smoke
+- [ ] 77. AGRUN-005 Scoped Agent Key Owner UI
+- [ ] 78. AGRUN-006 Agent Event Ack Positive Smoke
+- [ ] 79. AGRUN-007 Google Drive Owner Consent And First Import
+- [ ] 80. AGRUN-008 Route-Level Business Editing Surfaces
+- [ ] 81. AGRUN-009 Deploy Automation Reliability
+- [ ] 82. AGRUN-010 Upstream Agent Source Merge Execution
 - [x] 69. AGCRUD-002 Business Read/Update API Completion
 - [x] 70. AGCRUD-003 Business Archive/Delete Policy And Slice
 - [x] 71. AGCRUD-004 Registry Resource Lifecycle API
