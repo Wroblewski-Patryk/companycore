@@ -5,13 +5,13 @@ Document the first safe rollback path before the first production deploy.
 ## Current V1 Rollback Pointer
 
 - Current production backend container:
-  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-8b604d8`.
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-7f0e090`.
 - Current production backend image:
-  `rnqqkhl3o3dut4qv56mlxly2_backend:8b604d8e56f24c24f5f095815f8d52c6a84887dd`.
+  `rnqqkhl3o3dut4qv56mlxly2_backend:7f0e09078f6b9f54db641328ea3d75830c2d2b3d`.
 - Previous verified rollback container retained on the VPS:
-  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-2f3139b-previous-8b604d8`.
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-8b604d8-previous-7f0e090`.
 - Previous verified rollback image retained on the VPS:
-  `rnqqkhl3o3dut4qv56mlxly2_backend:2f3139bebc366a5541facd4180e46a5c82ee434d`.
+  `rnqqkhl3o3dut4qv56mlxly2_backend:8b604d8e56f24c24f5f095815f8d52c6a84887dd`.
 - Production Postgres container/volume must be preserved during rollback.
 
 ## Rollback Triggers

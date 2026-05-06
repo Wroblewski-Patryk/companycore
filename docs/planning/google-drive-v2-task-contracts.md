@@ -71,6 +71,9 @@ It follows the repository task contract and must stay synchronized with
     latest snapshot summary, preview, edit, and Google open actions.
   - Verified `npm run build`, `node --check public/app.js`,
     `git diff --check`, and `npm test` against a disposable Postgres database.
+  - Deployed commit `7f0e09078f6b9f54db641328ea3d75830c2d2b3d` to production
+    with manual VPS backend rollover. Public and protected Google Drive smokes
+    passed with Drive still unconfigured until owner OAuth consent/import.
 
 ## V2GD-001 Google Drive Architecture And Queue
 

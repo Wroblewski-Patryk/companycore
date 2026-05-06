@@ -144,6 +144,16 @@ Last updated: 2026-05-07
   Google open links. Validation passed: `npm run prisma:generate`,
   `node --check public/app.js`, `git diff --check`, `npm run build`, and
   `npm test` against disposable Postgres on port `55450`.
+- 2026-05-07: Deployed V2GD-010 to production with manual VPS backend
+  rollover after GitHub push did not immediately update the running image. The
+  running backend container is
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-7f0e090`, image
+  `rnqqkhl3o3dut4qv56mlxly2_backend:7f0e09078f6b9f54db641328ea3d75830c2d2b3d`.
+  Production Postgres stayed healthy and migration
+  `202605071_drive_descriptions` applied during canary startup. Public health,
+  `/v1/health`, web `/settings/drive`, API root, unauthenticated Drive denial,
+  and protected Jarvis-key `google-drive:smoke` passed. Google Drive remains
+  unconfigured until the owner completes real OAuth consent and first import.
 - 2026-05-06: Implemented AGRUN-002, AGRUN-003, AGRUN-004, and local
   AGRUN-006 coverage. Service API keys now enforce route capabilities from a
   shared adapter manifest, while empty scopes, `*`, `companycore:*`, and

@@ -763,3 +763,44 @@ Use this file to record the minimum checks after each deploy.
 - Cleanup:
   - Temporary scoped key was deleted.
   - Temporary VPS release and smoke scripts under `/tmp` were removed.
+
+## Google Drive Hierarchy Preview Production Smoke
+
+- Timestamp: 2026-05-07
+- Environment: production VPS Docker backend
+- Commit: `7f0e09078f6b9f54db641328ea3d75830c2d2b3d`
+- Image:
+  `rnqqkhl3o3dut4qv56mlxly2_backend:7f0e09078f6b9f54db641328ea3d75830c2d2b3d`
+- Running container:
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-7f0e090`
+- Replaced container:
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-8b604d8`, retained stopped as
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-8b604d8-previous-7f0e090`.
+- Data safety:
+  - Production Postgres container
+    `postgres-rnqqkhl3o3dut4qv56mlxly2-004822197627` remained running and
+    healthy.
+  - Canary startup applied migration `202605071_drive_descriptions`.
+  - Final backend startup reported no pending migrations and seed completed.
+- Public smoke:
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `200` with
+    build commit `7f0e09078f6b9f54db641328ea3d75830c2d2b3d`.
+  - `GET https://api.companycore.luckysparrow.ch/v1/health` returned `200`
+    with the same build commit.
+  - `GET https://api.companycore.luckysparrow.ch/` returned `200`.
+  - `GET https://companycore.luckysparrow.ch/settings/drive` returned `200`
+    and served the owner console shell containing the Google Drive surface.
+  - Unauthenticated `GET /v1/google-drive/files` returned `401`.
+- Protected smoke:
+  - Jarvis production CompanyCore key passed `npm run google-drive:smoke`
+    from the deployed backend container.
+  - The smoke verified Google Drive capabilities including
+    `google-drive:files:write`, `GET /v1/google-drive/files`, and current
+    Drive state: `googleDriveConfigured=false`, `googleDriveActive=false`,
+    `importedFileCount=0`.
+- Cleanup:
+  - Removed temporary VPS source archive, source directory, env file, label
+    file, and rollout/smoke scripts under `/tmp`.
+- Residual risks:
+  - Real Drive folders/files will appear only after owner OAuth consent and
+    first import. That remains tracked as AGRUN-007.
