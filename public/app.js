@@ -534,22 +534,40 @@ function showResult(message, tone = "success", sync = null) {
   metrics.innerHTML = "";
 
   if (!sync) {
+    metrics.classList.remove("detail-metrics");
     return;
   }
 
-  const items = [
-    ["Items", sync.itemCount],
-    ["Created", sync.createdCount],
-    ["Updated", sync.updatedCount],
-    ["Skipped", sync.skippedCount],
-    ["Deleted", sync.deletedCount],
-    ["Would create", sync.wouldCreateCount],
-    ["Would update", sync.wouldUpdateCount]
-  ];
+  metrics.classList.toggle("detail-metrics", !("itemCount" in sync || "createdCount" in sync));
+  const items = "itemCount" in sync || "createdCount" in sync
+    ? [
+      ["Items", sync.itemCount],
+      ["Created", sync.createdCount],
+      ["Updated", sync.updatedCount],
+      ["Skipped", sync.skippedCount],
+      ["Deleted", sync.deletedCount],
+      ["Would create", sync.wouldCreateCount],
+      ["Would update", sync.wouldUpdateCount]
+    ]
+    : Object.entries(sync)
+      .filter(([, value]) => value !== null && value !== undefined && value !== "")
+      .map(([key, value]) => [key, typeof value === "string" ? value : JSON.stringify(value)]);
 
   for (const [label, value] of items) {
     const item = document.createElement("div");
-    item.innerHTML = `<dt>${label}</dt><dd>${value ?? 0}</dd>`;
+    const term = document.createElement("dt");
+    term.textContent = label;
+    const detail = document.createElement("dd");
+    if (label === "thumbnail") {
+      const image = document.createElement("img");
+      image.className = "preview-thumbnail";
+      image.alt = "Drive thumbnail";
+      image.src = String(value);
+      detail.append(image);
+    } else {
+      detail.textContent = String(value ?? 0);
+    }
+    item.append(term, detail);
     metrics.append(item);
   }
 }
@@ -1848,7 +1866,7 @@ function renderGoogleDriveFiles() {
       ? "No Drive files imported yet."
       : "Google Drive is not connected yet.";
     const row = document.createElement("tr");
-    row.innerHTML = '<td colspan="5">No Drive files loaded yet.</td>';
+    row.innerHTML = '<td colspan="6">No Drive files loaded yet.</td>';
     googleDriveFilesBody.append(row);
     renderIntegrationTaxonomy();
     renderRelationshipCenter();
@@ -1856,24 +1874,32 @@ function renderGoogleDriveFiles() {
   }
 
   const folderCount = files.filter((file) => file.isFolder).length;
-  const filteredFiles = filteredDriveFiles(files, areasById);
+  const hierarchyRows = driveHierarchyRows(files);
+  const filteredFiles = hierarchyRows.filter(({ file }) => driveFileMatchesFilters(file, areasById));
   googleDriveFilesSummary.textContent = `${filteredFiles.length} of ${files.length} Drive item${files.length === 1 ? "" : "s"} shown, including ${folderCount} folder${folderCount === 1 ? "" : "s"} imported.`;
 
   if (filteredFiles.length === 0) {
     const row = document.createElement("tr");
-    row.innerHTML = '<td colspan="5">No imported Drive files match the current filters.</td>';
+    row.innerHTML = '<td colspan="6">No imported Drive files match the current filters.</td>';
     googleDriveFilesBody.append(row);
     renderIntegrationTaxonomy();
     renderRelationshipCenter();
     return;
   }
 
-  for (const file of filteredFiles.slice(0, 80)) {
+  for (const { file, depth } of filteredFiles.slice(0, 120)) {
     const row = document.createElement("tr");
     const area = areasById.get(file.operatingAreaId);
+    const latestSnapshot = latestDriveSnapshot(file);
+    const description = file.description || latestSnapshot?.summary || "";
     row.innerHTML = `
-      <td>${escapeHtml(file.name)}</td>
-      <td>${file.isFolder ? "Folder" : escapeHtml(file.mimeType)}</td>
+      <td>
+        <div class="drive-name" style="--drive-depth:${depth}">
+          <strong>${escapeHtml(file.name)}</strong>
+          <small>${escapeHtml(description || "No description saved yet.")}</small>
+        </div>
+      </td>
+      <td>${escapeHtml(driveKindLabel(file))}</td>
       <td>${file.isFolder
         ? scopeEditorHtml({
           id: file.id,
@@ -1884,12 +1910,83 @@ function renderGoogleDriveFiles() {
         : area ? escapeHtml(areaLabel(area)) : "-"}</td>
       <td>${escapeHtml(file.scanStatus)}</td>
       <td>${formatDate(file.modifiedTime)}</td>
+      <td>
+        <div class="row-actions">
+          <button type="button" class="secondary compact" data-drive-preview="${escapeHtml(file.id)}">Preview</button>
+          <button type="button" class="secondary compact" data-drive-description="${escapeHtml(file.id)}">Describe</button>
+          ${file.webViewLink ? `<a class="button-link secondary compact" href="${escapeHtml(file.webViewLink)}" target="_blank" rel="noreferrer">Open</a>` : ""}
+        </div>
+      </td>
     `;
     googleDriveFilesBody.append(row);
   }
   renderIntegrationTaxonomy();
   renderRelationshipCenter();
   bindScopeEditors();
+  bindDriveFileActions();
+}
+
+function latestDriveSnapshot(file) {
+  return Array.isArray(file.contentSnapshots) ? file.contentSnapshots[0] : null;
+}
+
+function driveKindLabel(file) {
+  if (file.isFolder) {
+    return "Folder";
+  }
+  if (file.mimeType === "application/vnd.google-apps.document") {
+    return "Google Doc";
+  }
+  if (file.mimeType === "application/vnd.google-apps.spreadsheet") {
+    return "Google Sheet";
+  }
+  if (String(file.mimeType || "").startsWith("image/")) {
+    return "Image";
+  }
+  if (String(file.name || "").toLowerCase().endsWith(".drawio") || String(file.mimeType || "").includes("jgraph")) {
+    return "draw.io";
+  }
+  return file.mimeType || "File";
+}
+
+function driveHierarchyRows(files) {
+  const byParent = new Map();
+  const byExternalId = new Map(files.map((file) => [file.externalId, file]));
+  for (const file of files) {
+    const parentId = file.parentExternalId || "";
+    const siblings = byParent.get(parentId) || [];
+    siblings.push(file);
+    byParent.set(parentId, siblings);
+  }
+  for (const siblings of byParent.values()) {
+    siblings.sort((left, right) => {
+      if (left.isFolder !== right.isFolder) {
+        return left.isFolder ? -1 : 1;
+      }
+      return String(left.name || "").localeCompare(String(right.name || ""));
+    });
+  }
+
+  const roots = files.filter((file) => !file.parentExternalId || !byExternalId.has(file.parentExternalId));
+  const rows = [];
+  const visited = new Set();
+  const visit = (file, depth) => {
+    if (!file || visited.has(file.id)) {
+      return;
+    }
+    visited.add(file.id);
+    rows.push({ file, depth });
+    for (const child of byParent.get(file.externalId) || []) {
+      visit(child, depth + 1);
+    }
+  };
+  for (const root of roots.sort((left, right) => String(left.name || "").localeCompare(String(right.name || "")))) {
+    visit(root, 0);
+  }
+  for (const file of files) {
+    visit(file, 0);
+  }
+  return rows;
 }
 
 function syncDriveFilters(files, areasById) {
@@ -1930,25 +2027,27 @@ function syncDriveFilters(files, areasById) {
   state.driveFilters.scan = nextScan;
 }
 
-function filteredDriveFiles(files, areasById) {
+function driveFileMatchesFilters(file, areasById) {
   const search = state.driveFilters.search.trim().toLowerCase();
-  return files.filter((file) => {
-    const kind = file.isFolder ? "folder" : "file";
-    const area = areasById.get(file.operatingAreaId);
-    const haystack = [
-      file.name,
-      kind,
-      file.mimeType,
-      file.scanStatus,
-      formatDate(file.modifiedTime),
-      area ? areaLabel(area) : "Unassigned"
-    ].filter(Boolean).join(" ").toLowerCase();
+  const kind = file.isFolder ? "folder" : "file";
+  const area = areasById.get(file.operatingAreaId);
+  const latestSnapshot = latestDriveSnapshot(file);
+  const haystack = [
+    file.name,
+    file.description,
+    latestSnapshot?.summary,
+    driveKindLabel(file),
+    kind,
+    file.mimeType,
+    file.scanStatus,
+    formatDate(file.modifiedTime),
+    area ? areaLabel(area) : "Unassigned"
+  ].filter(Boolean).join(" ").toLowerCase();
 
-    return (!search || haystack.includes(search))
-      && (!state.driveFilters.kind || kind === state.driveFilters.kind)
-      && (!state.driveFilters.area || file.operatingAreaId === state.driveFilters.area)
-      && (!state.driveFilters.scan || file.scanStatus === state.driveFilters.scan);
-  });
+  return (!search || haystack.includes(search))
+    && (!state.driveFilters.kind || kind === state.driveFilters.kind)
+    && (!state.driveFilters.area || file.operatingAreaId === state.driveFilters.area)
+    && (!state.driveFilters.scan || file.scanStatus === state.driveFilters.scan);
 }
 
 function bindScopeEditors() {
@@ -2081,6 +2180,78 @@ async function updateGoogleDriveFileScope(fileId, areaId) {
     });
     await Promise.all([loadOperatingModel(), loadGoogleDriveFiles()]);
     showResult(`${response.data?.updatedCount || 1} Drive item${response.data?.updatedCount === 1 ? "" : "s"} moved to the selected company area.`);
+  } catch (error) {
+    showResult(friendlyError(error), "error");
+    await loadGoogleDriveFiles();
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function previewGoogleDriveFile(fileId) {
+  const file = state.googleDrive.files.find((item) => item.id === fileId);
+  if (!file) {
+    return;
+  }
+
+  setBusy(true);
+  try {
+    let snapshot = latestDriveSnapshot(file);
+    if (!file.isFolder) {
+      const response = await api(`/v1/google-drive/files/${fileId}/content`);
+      snapshot = response.data;
+      file.contentSnapshots = snapshot ? [snapshot] : [];
+      file.scanStatus = snapshot?.scanStatus || file.scanStatus;
+    }
+
+    const preview = {
+      name: file.name,
+      kind: driveKindLabel(file),
+      description: file.description || null,
+      summary: snapshot?.summary || null,
+      contentKind: snapshot?.contentKind || null,
+      textPreview: snapshot?.extractedText ? String(snapshot.extractedText).slice(0, 1200) : null,
+      thumbnail: file.thumbnailLink || null,
+      webViewLink: file.webViewLink || null,
+      mimeType: file.mimeType,
+      parentExternalId: file.parentExternalId || null,
+      scanStatus: snapshot?.scanStatus || file.scanStatus
+    };
+    renderGoogleDriveFiles();
+    showResult("Drive preview loaded.", "success", preview);
+  } catch (error) {
+    showResult(friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function editGoogleDriveFileDescription(fileId) {
+  const file = state.googleDrive.files.find((item) => item.id === fileId);
+  if (!file) {
+    return;
+  }
+
+  const nextDescription = window.prompt("Describe what this Drive item contains for agents and operators.", file.description || "");
+  if (nextDescription === null) {
+    return;
+  }
+
+  setBusy(true);
+  try {
+    const response = await api(`/v1/google-drive/files/${fileId}/description`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ description: nextDescription })
+    });
+    const index = state.googleDrive.files.findIndex((item) => item.id === fileId);
+    if (index >= 0) {
+      state.googleDrive.files[index] = response.data;
+    }
+    renderGoogleDriveFiles();
+    renderOperatingMap();
+    renderRelationshipCenter();
+    showResult("Drive description saved.");
   } catch (error) {
     showResult(friendlyError(error), "error");
     await loadGoogleDriveFiles();
@@ -2711,6 +2882,28 @@ if (mobileMenuButton) {
   mobileMenuButton.addEventListener("click", () => {
     state.mobileMenuOpen = !state.mobileMenuOpen;
     updateChrome();
+  });
+}
+
+function bindDriveFileActions() {
+  document.querySelectorAll("[data-drive-preview]").forEach((button) => {
+    if (button.dataset.previewBound === "true") {
+      return;
+    }
+    button.dataset.previewBound = "true";
+    button.addEventListener("click", async (event) => {
+      await previewGoogleDriveFile(event.currentTarget.dataset.drivePreview);
+    });
+  });
+
+  document.querySelectorAll("[data-drive-description]").forEach((button) => {
+    if (button.dataset.descriptionBound === "true") {
+      return;
+    }
+    button.dataset.descriptionBound = "true";
+    button.addEventListener("click", async (event) => {
+      await editGoogleDriveFileDescription(event.currentTarget.dataset.driveDescription);
+    });
   });
 }
 

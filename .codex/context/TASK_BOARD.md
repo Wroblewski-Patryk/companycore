@@ -165,6 +165,7 @@ No active task.
 - V2GD-007 Google Drive Deploy Smoke Hardening.
 - V2GD-008 Google Drive OAuth Runtime Hardening.
 - V2GD-009 Google Drive Production Rollover Smoke.
+- V2GD-010 Drive Hierarchy Preview And Descriptions.
 - V2WEB-001 Operating Map And Google Drive Console.
 - V2WEB-002 Manual Provider Scope Mapping.
 - V2WEB-003 Main Branch Web Console Shell Reconciliation.

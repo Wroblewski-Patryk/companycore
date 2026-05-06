@@ -42,6 +42,10 @@ const updateDriveScopeSchema = z.object({
   applyToChildren: z.boolean().optional()
 }).strict();
 
+const updateDriveDescriptionSchema = z.object({
+  description: z.string().max(2000).nullable()
+}).strict();
+
 export const googleDriveRouter = Router();
 
 googleDriveRouter.get("/files", asyncHandler(async (req, res) => {
@@ -180,6 +184,34 @@ googleDriveRouter.patch("/files/:id/scope", asyncHandler(async (req, res) => {
       files
     }
   });
+}));
+
+googleDriveRouter.patch("/files/:id/description", asyncHandler(async (req, res) => {
+  const input = updateDriveDescriptionSchema.parse(req.body);
+  const workspaceId = req.auth!.workspaceId;
+  const fileId = uuidSchema.parse(req.params.id);
+
+  const file = await prisma.googleDriveFile.findFirst({
+    where: { id: fileId, workspaceId, provider: "google_drive" }
+  });
+  if (!file) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  const updated = await prisma.googleDriveFile.update({
+    where: { id: file.id },
+    data: {
+      description: input.description?.trim() || null
+    },
+    include: {
+      contentSnapshots: {
+        orderBy: { updatedAt: "desc" },
+        take: 1
+      }
+    }
+  });
+
+  res.json({ data: updated });
 }));
 
 googleDriveRouter.post("/docs", asyncHandler(async (req, res) => {

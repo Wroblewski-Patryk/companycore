@@ -139,14 +139,17 @@ Implemented foundation:
   client boundary for Drive file listing, Drive file creation, Drive changes,
   Docs get/batchUpdate, and Sheets create/read/write methods.
 - `POST /v1/integration-settings/google_drive/import` imports selected Drive
-  folder children into `google_drive_files` using `merge`, `skip_existing`,
-  `replace_selected_folders`, or `inspect_only`.
+  root folders plus nested folder/file hierarchy into `google_drive_files`
+  using `merge`, `skip_existing`, `replace_selected_folders`, or
+  `inspect_only`.
 - Google Drive import emits `google_drive_import_succeeded` events with safe
   counts and selected folder IDs.
 - `/v1/google-drive/files` lists imported Drive files with their latest content
   snapshot for Jarvis, Paperclip, Aviary, and future GUI clients.
 - `/v1/google-drive/files/:id/content` refreshes a local content snapshot from
   Google Docs or Sheets through CompanyCore.
+- `/v1/google-drive/files/:id/description` updates the CompanyCore-owned
+  description note that tells agents and operators what a Drive item contains.
 - `/v1/google-drive/docs` and `/v1/google-drive/sheets` create Google Docs and
   Sheets, persist metadata, extract searchable content, and emit safe events.
 - `/v1/google-drive/docs/:id` and `/v1/google-drive/sheets/:id/values` write to

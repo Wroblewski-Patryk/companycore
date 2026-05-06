@@ -353,6 +353,8 @@ Implemented tables:
   - `provider`, fixed to `google_drive`
   - `external_id`, the Drive file or folder ID
   - `name`
+  - `description`, the CompanyCore-owned operator/agent note describing what
+    the item contains
   - `mime_type`
   - `drive_id`
   - `parent_external_id`
@@ -371,7 +373,7 @@ Implemented tables:
   - `content_kind`, for example `google_doc`, `google_sheet`, `pdf`, or
     `binary_metadata_only`
   - extracted text or structured preview
-  - summary/description for search and agent context
+  - extracted summary for search and agent context
   - scan status, error code, and timestamps
 
 Uniqueness must be enforced by `(workspace_id, provider, external_id)` for file

@@ -284,6 +284,7 @@ model GoogleDriveFile {
   provider          String                       @default("google_drive")
   externalId        String                       @map("external_id")
   name              String
+  description       String?
   mimeType          String                       @map("mime_type")
   driveId           String?                      @map("drive_id")
   parentExternalId  String?                      @map("parent_external_id")

@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-05-06
+Last updated: 2026-05-07
 
 ## Product Snapshot
 - Name: LuckySparrow Company Core
@@ -133,6 +133,17 @@ Last updated: 2026-05-06
 - Next required mode: TESTER for production smoke and release evidence.
 
 ## Recent Progress
+- 2026-05-07: Completed V2GD-010 Drive Hierarchy Preview And Descriptions.
+  Google Drive imports now index selected root folders plus nested folders and
+  files, preserving `parentExternalId` hierarchy for agents and the owner GUI.
+  Drive file records gained an editable CompanyCore `description` field and
+  `PATCH /v1/google-drive/files/:id/description` with workspace and capability
+  enforcement. `/settings/drive` now renders imported items as an indented
+  hierarchy with latest summary/description context, preview actions for
+  Docs/Sheets/images/draw.io or binary metadata, description editing, and
+  Google open links. Validation passed: `npm run prisma:generate`,
+  `node --check public/app.js`, `git diff --check`, `npm run build`, and
+  `npm test` against disposable Postgres on port `55450`.
 - 2026-05-06: Implemented AGRUN-002, AGRUN-003, AGRUN-004, and local
   AGRUN-006 coverage. Service API keys now enforce route capabilities from a
   shared adapter manifest, while empty scopes, `*`, `companycore:*`, and

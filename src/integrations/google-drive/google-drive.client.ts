@@ -7,6 +7,7 @@ const sheetsBaseUrl = "https://sheets.googleapis.com/v4";
 export type GoogleDriveFileMetadata = {
   id: string;
   name: string;
+  description?: string;
   mimeType: string;
   driveId?: string;
   parents?: string[];
@@ -55,7 +56,7 @@ export class GoogleDriveClient {
     url.searchParams.set("fields", input.fields ?? [
       "nextPageToken",
       "incompleteSearch",
-      "files(id,name,mimeType,driveId,parents,trashed,webViewLink,webContentLink,iconLink,thumbnailLink,size,headRevisionId,md5Checksum,modifiedTime)"
+      "files(id,name,description,mimeType,driveId,parents,trashed,webViewLink,webContentLink,iconLink,thumbnailLink,size,headRevisionId,md5Checksum,modifiedTime)"
     ].join(","));
 
     if (input.query) {
@@ -81,7 +82,7 @@ export class GoogleDriveClient {
   async getFile(fileId: string) {
     const url = new URL(`${driveBaseUrl}/files/${encodeURIComponent(fileId)}`);
     url.searchParams.set("supportsAllDrives", "true");
-    url.searchParams.set("fields", "id,name,mimeType,driveId,parents,trashed,webViewLink,webContentLink,iconLink,thumbnailLink,size,headRevisionId,md5Checksum,modifiedTime");
+    url.searchParams.set("fields", "id,name,description,mimeType,driveId,parents,trashed,webViewLink,webContentLink,iconLink,thumbnailLink,size,headRevisionId,md5Checksum,modifiedTime");
     return this.request<GoogleDriveFileMetadata>(url);
   }
 

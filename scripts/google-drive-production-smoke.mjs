@@ -31,6 +31,7 @@ const requiredCapabilities = [
   "integration-settings:google-drive:import",
   "integration-settings:google-drive:changes:reconcile",
   "google-drive:files:read",
+  "google-drive:files:write",
   "google-drive:docs:write",
   "google-drive:sheets:write"
 ];

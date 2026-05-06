@@ -53,6 +53,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] V2GD-007 Google Drive Deploy Smoke Hardening
 - [x] V2GD-008 Google Drive OAuth Runtime Hardening
 - [x] V2GD-009 Google Drive Production Rollover Smoke
+- [x] V2GD-010 Drive Hierarchy Preview And Descriptions
 - [x] CCV1-009P Protected production smoke for adapter CRUD
 - [x] CCV1-027 Paperclip and Jarvis production env wiring
 - [x] CCV1-029 ClickUp production bootstrap slot
@@ -196,6 +197,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] 45. V2GD-007 Google Drive Deploy Smoke Hardening
 - [x] 46. V2GD-008 Google Drive OAuth Runtime Hardening
 - [x] 47. V2GD-009 Google Drive Production Rollover Smoke
+- [x] 47a. V2GD-010 Drive Hierarchy Preview And Descriptions
 - [x] 1. CCV1-031 ClickUp Discovery Backend
 - [x] 2. CCV1-032 Guided Owner Console
 - [x] 3. CCV1-033 Production deploy and smoke for guided ClickUp owner console

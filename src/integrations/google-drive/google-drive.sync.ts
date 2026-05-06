@@ -179,8 +179,31 @@ async function fetchSelectedFolderFiles(input: {
 }) {
   const files: GoogleDriveFileMetadata[] = [];
   const seen = new Set<string>();
+  const foldersToScan = [...input.folderIds];
+  const scannedFolders = new Set<string>();
 
   for (const folderId of input.folderIds) {
+    try {
+      const folder = await input.client.getFile(folderId);
+      if (folder.id && !seen.has(folder.id)) {
+        seen.add(folder.id);
+        files.push(folder);
+      }
+    } catch (error) {
+      if (error instanceof IntegrationError) {
+        throw error;
+      }
+      throw error;
+    }
+  }
+
+  while (foldersToScan.length > 0) {
+    const folderId = foldersToScan.shift()!;
+    if (scannedFolders.has(folderId)) {
+      continue;
+    }
+    scannedFolders.add(folderId);
+
     let pageToken: string | undefined;
     for (let page = 0; page < (input.maxPagesPerFolder ?? 10); page += 1) {
       const response = await input.client.listFiles({
@@ -194,6 +217,9 @@ async function fetchSelectedFolderFiles(input: {
         }
         seen.add(file.id);
         files.push(file);
+        if (file.mimeType === "application/vnd.google-apps.folder") {
+          foldersToScan.push(file.id);
+        }
       }
 
       if (!response.nextPageToken) {
@@ -214,7 +240,8 @@ function toGoogleDriveFileCreate(
   return {
     ...toGoogleDriveFileUpdate(file, config),
     workspaceId,
-    externalId: file.id
+    externalId: file.id,
+    description: file.description
   };
 }
 

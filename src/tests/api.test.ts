@@ -357,6 +357,11 @@ test("CompanyCore v1 protected API flow", async () => {
     && route.path === "/v1/google-drive/files/:id/scope"
     && route.capability === "google-drive:files:scope:write"
   )));
+  assert.ok(connectionBody.data.adapterManifest.routes.googleDrive.some((route) => (
+    route.method === "PATCH"
+    && route.path === "/v1/google-drive/files/:id/description"
+    && route.capability === "google-drive:files:write"
+  )));
   const assetsArea = await prisma.operatingArea.findUnique({
     where: {
       workspaceId_key: {
@@ -543,6 +548,28 @@ test("CompanyCore v1 protected API flow", async () => {
   const scopedDriveChild = await prisma.googleDriveFile.findUnique({ where: { id: firstDriveFile.id } });
   assert.equal(scopedDriveRoot?.operatingAreaId, financeArea.id);
   assert.equal(scopedDriveChild?.operatingAreaId, financeArea.id);
+  const driveDescriptionUpdate = await request(`/v1/google-drive/files/${driveRootFolder.id}/description`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({ description: "Owner note: contract draft with onboarding context." })
+  });
+  assert.equal(driveDescriptionUpdate.status, 200);
+  assert.equal(
+    (driveDescriptionUpdate.body as { data: { description: string } }).data.description,
+    "Owner note: contract draft with onboarding context."
+  );
+  const scopedDriveDescriptionDenied = await request(`/v1/google-drive/files/${driveRootFolder.id}/description`, {
+    method: "PATCH",
+    headers: scopedAuth,
+    body: JSON.stringify({ description: "read-only key cannot write Drive descriptions" })
+  });
+  assert.equal(scopedDriveDescriptionDenied.status, 403);
+  const crossWorkspaceDriveDescription = await request(`/v1/google-drive/files/${driveRootFolder.id}/description`, {
+    method: "PATCH",
+    headers: authB,
+    body: JSON.stringify({ description: "Workspace B cannot edit Workspace A files" })
+  });
+  assert.equal(crossWorkspaceDriveDescription.status, 404);
   const scopedDriveSettings = await prisma.integrationSetting.findUnique({
     where: {
       workspaceId_provider: {
@@ -1449,12 +1476,36 @@ test("CompanyCore v1 protected API flow", async () => {
   globalThis.fetch = (async (input: string | URL | Request) => {
     const url = new URL(String(input));
     assert.equal(url.origin, "https://www.googleapis.com");
-    assert.equal(url.pathname, "/drive/v3/files");
+    assert.ok(url.pathname === "/drive/v3/files" || url.pathname === "/drive/v3/files/drive-folder-root");
     assert.equal(url.searchParams.get("supportsAllDrives"), "true");
+
+    if (url.pathname === "/drive/v3/files/drive-folder-root") {
+      return new Response(JSON.stringify({
+        id: "drive-folder-root",
+        name: "Drive root folder",
+        mimeType: "application/vnd.google-apps.folder",
+        description: "Root folder description from Drive",
+        headRevisionId: "folder-rev-1",
+        modifiedTime: "2026-05-03T09:55:00.000Z"
+      }), { status: 200 });
+    }
+
     assert.equal(url.searchParams.get("spaces"), "drive");
     googleDriveListCallCount += 1;
-    return new Response(JSON.stringify({
-      files: [
+    const query = url.searchParams.get("q") || "";
+    const files = query.includes("'drive-nested-folder' in parents")
+      ? [
+        {
+          id: "drive-nested-doc-1",
+          name: "Nested Drive doc",
+          mimeType: "application/vnd.google-apps.document",
+          parents: ["drive-nested-folder"],
+          webViewLink: "https://docs.google.com/document/d/drive-nested-doc-1",
+          headRevisionId: "nested-rev-1",
+          modifiedTime: "2026-05-03T10:10:00.000Z"
+        }
+      ]
+      : [
         {
           id: "drive-doc-1",
           name: googleDriveListCallCount > 1 ? "Imported Drive doc updated" : "Imported Drive doc",
@@ -1472,9 +1523,17 @@ test("CompanyCore v1 protected API flow", async () => {
           webViewLink: "https://docs.google.com/spreadsheets/d/drive-sheet-1",
           headRevisionId: "sheet-rev-1",
           modifiedTime: "2026-05-03T10:05:00.000Z"
+        },
+        {
+          id: "drive-nested-folder",
+          name: "Nested Drive folder",
+          mimeType: "application/vnd.google-apps.folder",
+          parents: ["drive-folder-root"],
+          headRevisionId: "nested-folder-rev-1",
+          modifiedTime: "2026-05-03T10:06:00.000Z"
         }
-      ]
-    }), { status: 200 });
+      ];
+    return new Response(JSON.stringify({ files }), { status: 200 });
   }) as typeof fetch;
 
   try {
@@ -1489,10 +1548,10 @@ test("CompanyCore v1 protected API flow", async () => {
     const inspectDriveImportBody = inspectDriveImport.body as {
       data: { itemCount: number; createdCount: number; skippedCount: number; wouldCreateCount: number };
     };
-    assert.equal(inspectDriveImportBody.data.itemCount, 2);
+    assert.equal(inspectDriveImportBody.data.itemCount, 5);
     assert.equal(inspectDriveImportBody.data.createdCount, 0);
-    assert.equal(inspectDriveImportBody.data.skippedCount, 2);
-    assert.equal(inspectDriveImportBody.data.wouldCreateCount, 2);
+    assert.equal(inspectDriveImportBody.data.skippedCount, 5);
+    assert.equal(inspectDriveImportBody.data.wouldCreateCount, 4);
     assert.equal(await prisma.googleDriveFile.count({ where: { workspaceId: ownerA.workspace.id } }), 2);
 
     const mergeDriveImport = await request("/v1/integration-settings/google_drive/import", {
@@ -1506,9 +1565,9 @@ test("CompanyCore v1 protected API flow", async () => {
     const mergeDriveImportBody = mergeDriveImport.body as {
       data: { itemCount: number; createdCount: number; updatedCount: number; skippedCount: number };
     };
-    assert.equal(mergeDriveImportBody.data.itemCount, 2);
-    assert.equal(mergeDriveImportBody.data.createdCount, 2);
-    assert.equal(mergeDriveImportBody.data.updatedCount, 0);
+    assert.equal(mergeDriveImportBody.data.itemCount, 5);
+    assert.equal(mergeDriveImportBody.data.createdCount, 4);
+    assert.equal(mergeDriveImportBody.data.updatedCount, 1);
     assert.equal(mergeDriveImportBody.data.skippedCount, 0);
 
     const repeatDriveImport = await request("/v1/integration-settings/google_drive/import", {
@@ -1523,8 +1582,8 @@ test("CompanyCore v1 protected API flow", async () => {
       data: { createdCount: number; updatedCount: number; wouldUpdateCount: number };
     };
     assert.equal(repeatDriveImportBody.data.createdCount, 0);
-    assert.equal(repeatDriveImportBody.data.updatedCount, 2);
-    assert.equal(repeatDriveImportBody.data.wouldUpdateCount, 2);
+    assert.equal(repeatDriveImportBody.data.updatedCount, 5);
+    assert.equal(repeatDriveImportBody.data.wouldUpdateCount, 5);
   } finally {
     globalThis.fetch = originalFetchBeforeGoogleDriveImport;
   }
@@ -1541,6 +1600,26 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(importedDriveDoc?.name, "Imported Drive doc updated");
   assert.equal(importedDriveDoc?.parentExternalId, "drive-folder-root");
   assert.equal(importedDriveDoc?.syncStatus, "synced");
+  const importedNestedDriveDoc = await prisma.googleDriveFile.findUnique({
+    where: {
+      workspaceId_provider_externalId: {
+        workspaceId: ownerA.workspace.id,
+        provider: "google_drive",
+        externalId: "drive-nested-doc-1"
+      }
+    }
+  });
+  assert.equal(importedNestedDriveDoc?.parentExternalId, "drive-nested-folder");
+  const importedDriveRoot = await prisma.googleDriveFile.findUnique({
+    where: {
+      workspaceId_provider_externalId: {
+        workspaceId: ownerA.workspace.id,
+        provider: "google_drive",
+        externalId: "drive-folder-root"
+      }
+    }
+  });
+  assert.equal(importedDriveRoot?.description, "Owner note: contract draft with onboarding context.");
   const googleDriveEvents = await prisma.event.findMany({
     where: {
       workspaceId: ownerA.workspace.id,
@@ -1906,6 +1985,15 @@ test("CompanyCore v1 protected API flow", async () => {
       return new Response(JSON.stringify({ files: [] }), { status: 200 });
     }
 
+    if (url.pathname === "/drive/v3/files/drive-folder-root") {
+      assert.equal(init?.headers ? (init.headers as Record<string, string>).Authorization : undefined, "Bearer refreshed-google-access-token");
+      return new Response(JSON.stringify({
+        id: "drive-folder-root",
+        name: "Drive root folder",
+        mimeType: "application/vnd.google-apps.folder"
+      }), { status: 200 });
+    }
+
     return new Response(JSON.stringify({ error: "not mocked", path: url.pathname }), { status: 404 });
   }) as typeof fetch;
 
@@ -1918,7 +2006,7 @@ test("CompanyCore v1 protected API flow", async () => {
       })
     });
     assert.equal(importWithRefresh.status, 200);
-    assert.equal((importWithRefresh.body as { data: { itemCount: number } }).data.itemCount, 0);
+    assert.equal((importWithRefresh.body as { data: { itemCount: number } }).data.itemCount, 1);
   } finally {
     globalThis.fetch = originalFetchBeforeGoogleDriveRefresh;
   }

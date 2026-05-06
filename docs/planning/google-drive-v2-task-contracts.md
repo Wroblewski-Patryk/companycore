@@ -4,6 +4,74 @@ This file is the execution queue for the approved Google Drive v2 integration.
 It follows the repository task contract and must stay synchronized with
 `.codex/context/TASK_BOARD.md` and `docs/planning/mvp-next-commits.md`.
 
+## V2GD-010 Drive Hierarchy Preview And Descriptions
+
+- Task Type: feature
+- Current Stage: done
+- Status: DONE
+- Owner: Backend Builder / Frontend Builder
+- Priority: P1
+- Iteration: current autonomous Drive follow-up
+- Operation Mode: BUILDER
+- Deliverable For This Stage: recursive Drive folder indexing, editable
+  CompanyCore Drive descriptions, agent-visible API contract, and owner GUI
+  preview controls.
+- Process Self-Audit:
+  - All seven autonomous loop steps are planned.
+  - Exactly one priority task is selected.
+  - The task reuses the approved Google Drive adapter and operating model.
+- Goal: Let Jarvis, Paperclip, Aviary, and owners inspect imported Drive
+  folder/file hierarchy, store a short description of what each item contains,
+  and request on-demand content preview through CompanyCore instead of raw
+  Google tokens.
+- Scope:
+  - `prisma/schema.prisma`
+  - `prisma/migrations/*`
+  - `src/integrations/google-drive/*`
+  - `src/modules/google-drive/google-drive.routes.ts`
+  - `src/auth/capabilities.ts`
+  - `public/index.html`
+  - `public/app.js`
+  - `public/styles.css`
+  - `src/tests/api.test.ts`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+- Implementation Plan:
+  1. Add an editable Drive record description field without exposing OAuth
+     material.
+  2. Make selected-folder import include selected root folders and nested
+     folders/files so hierarchy is queryable from `parentExternalId`.
+  3. Add a guarded API route for updating Drive file descriptions.
+  4. Render imported Drive files as an indented hierarchy with preview and
+     description edit controls in `/settings/drive`.
+  5. Validate build, migration, API behavior, and rendered UI smoke.
+- Acceptance Criteria:
+  - Imported selected folders include their nested hierarchy, not only direct
+    children.
+  - `GET /v1/google-drive/files` returns descriptions and latest snapshots for
+    agents.
+  - `PATCH /v1/google-drive/files/:id/description` updates only workspace-owned
+    Drive rows and is capability-protected.
+  - `/settings/drive` shows hierarchy depth, latest description/summary, and
+    on-demand preview for Docs, Sheets, images, draw.io/binary metadata.
+- Definition of Done:
+  - `npm run build`, `git diff --check`, and relevant tests pass or blockers
+    are recorded.
+  - Documentation and context are updated.
+  - No temporary Drive bypass, raw token exposure, or duplicate document system
+    is introduced.
+- Result Report:
+  - Added editable `google_drive_files.description` persistence.
+  - Added recursive selected-folder import that stores selected root folders,
+    nested folders, and nested files while preserving parent hierarchy.
+  - Added `PATCH /v1/google-drive/files/:id/description` with workspace
+    ownership and capability enforcement.
+  - Added `/settings/drive` hierarchy rendering with per-item description,
+    latest snapshot summary, preview, edit, and Google open actions.
+  - Verified `npm run build`, `node --check public/app.js`,
+    `git diff --check`, and `npm test` against a disposable Postgres database.
+
 ## V2GD-001 Google Drive Architecture And Queue
 
 - Task Type: architecture/planning

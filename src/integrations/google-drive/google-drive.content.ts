@@ -287,7 +287,8 @@ function toGoogleDriveFileCreate(workspaceId: string, file: GoogleDriveFileMetad
   return {
     ...toGoogleDriveFileUpdate(file),
     workspaceId,
-    externalId: file.id
+    externalId: file.id,
+    description: file.description
   };
 }
 

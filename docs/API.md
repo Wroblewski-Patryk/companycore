@@ -582,10 +582,11 @@ to `retired` for agents. They do not hard-delete rows.
 
 Provider and system lifecycle routes are intentionally action-shaped. Agents
 may use advertised routes such as event `ack`, provider-event `retry`,
-webhook `reconcile`, Drive file `scope`, Drive changes `reconcile`, and
-Docs/Sheets write actions. Agents must not infer or call raw CRUD routes for
-system tables such as API keys, integration settings, provider inbox rows,
-webhook registrations, event rows, users, workspaces, or memberships.
+webhook `reconcile`, Drive file `scope`, Drive file `description`, Drive
+changes `reconcile`, and Docs/Sheets write actions. Agents must not infer or
+call raw CRUD routes for system tables such as API keys, integration settings,
+provider inbox rows, webhook registrations, event rows, users, workspaces, or
+memberships.
 
 Current table policy summary:
 
