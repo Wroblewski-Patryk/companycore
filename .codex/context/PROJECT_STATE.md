@@ -144,6 +144,11 @@ Last updated: 2026-05-06
   Validation passed: `npm run build`, `node --check
   scripts/agent-training-smoke.mjs`, `git diff --check`, and `npm test`
   against a disposable Postgres container on port `55448`.
+- 2026-05-06: During production smoke for AGRUN agent training, the Docker
+  runtime image failed to find `scripts/agent-training-smoke.mjs` because the
+  runtime stage copied `public`, `dist`, and `prisma` but not `scripts`.
+  Updated the Dockerfile to copy `scripts` into the runtime image before
+  redeploying.
 - 2026-05-06: Completed AGRUN-001 by adding
   `docs/operations/agent-runtime-coverage-ledger.csv` and
   `docs/planning/agent-runtime-gap-closure-plan.md`. The plan identifies the
