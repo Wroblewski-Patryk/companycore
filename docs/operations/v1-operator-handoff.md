@@ -1,6 +1,6 @@
 # CompanyCore V1 Operator Handoff
 
-Last updated: 2026-05-03
+Last updated: 2026-05-06
 
 ## Verdict
 
@@ -40,12 +40,12 @@ CompanyCore as the company operational source of truth.
 ## Current Runtime
 
 - CompanyCore backend container:
-  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-9116026`
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-bf59b2f`
 - CompanyCore backend image:
-  `rnqqkhl3o3dut4qv56mlxly2_backend:9116026`
+  `rnqqkhl3o3dut4qv56mlxly2_backend:bf59b2f80d9a837e05694cbb3f6417b8a7bf83c2`
 - CompanyCore source evidence:
-  - Runtime image built from v1 runtime commit `9116026`.
-  - Documentation/source-of-truth `main` is at or after `3b428b2`.
+  - Runtime image built from agent CRUD API commit `bf59b2f`.
+  - Documentation/source-of-truth `main` is at or after `bf59b2f`.
 - Database:
   - Production Postgres container remains running and healthy.
   - Production Postgres volume must be preserved on deploy and rollback.
@@ -64,6 +64,10 @@ CompanyCore as the company operational source of truth.
 - Jarvis CompanyCore connector returned `connected=true`, `auth_type=bridge`,
   and 259 CompanyCore chunks.
 - CompanyCore Paperclip agent-event queue had 0 pending events.
+- Agent CRUD production smoke returned 51 capabilities, verified
+  `/v1/connection` manifest routes, created/deleted a user-created operating
+  area, created/read/updated/archived a note, and confirmed Paperclip
+  agent-event reads.
 
 ## Data State
 

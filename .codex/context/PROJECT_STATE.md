@@ -810,6 +810,19 @@ Last updated: 2026-05-06
   `/v1/connection`. API route rows now show method, path, group, and
   capability context with search, method filtering, filtered counts, and a
   filter-specific empty state while preserving capability badges.
+- 2026-05-06: Deployed the Agent CRUD API rollout to production with manual
+  VPS backend rollover. The running backend container is
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-bf59b2f`, image
+  `rnqqkhl3o3dut4qv56mlxly2_backend:bf59b2f80d9a837e05694cbb3f6417b8a7bf83c2`.
+  Production Postgres stayed healthy, `prisma migrate deploy` applied
+  `202605061_agent_crud_archive_status` and
+  `202605062_operating_area_system_guardrails`, and public health/web/API
+  smokes passed. Protected Jarvis-key smoke verified `/v1/connection` with 51
+  capabilities, agent-events read/ack capabilities, manifest CRUD routes,
+  user-created operating-area create/delete with reassignment, note
+  create/read/update/archive, and Paperclip agent-event readback. Temporary
+  VPS rollout scripts were removed, and the previous backend container remains
+  stopped for rollback reference.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

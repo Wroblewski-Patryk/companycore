@@ -674,3 +674,50 @@ Use this file to record the minimum checks after each deploy.
 - Residual risks:
   - Full browser owner workflow on production still depends on owner login and
     entering real Google Drive OAuth credentials.
+
+## Agent CRUD API Production Smoke
+
+- Timestamp: 2026-05-06
+- Environment: production VPS Docker backend
+- Commit: `bf59b2f80d9a837e05694cbb3f6417b8a7bf83c2`
+- Image:
+  `rnqqkhl3o3dut4qv56mlxly2_backend:bf59b2f80d9a837e05694cbb3f6417b8a7bf83c2`
+- Running container:
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-bf59b2f`
+- Replaced container:
+  `backend-rnqqkhl3o3dut4qv56mlxly2-004822203171`, which was running
+  `rnqqkhl3o3dut4qv56mlxly2_backend:44324845137a7343b31adc7995e2fd8e01938143`.
+- Data safety:
+  - Production Postgres container
+    `postgres-rnqqkhl3o3dut4qv56mlxly2-004822197627` remained running and
+    healthy.
+  - `prisma migrate deploy` applied
+    `202605061_agent_crud_archive_status` and
+    `202605062_operating_area_system_guardrails`.
+  - Seed completed successfully.
+- Public smoke:
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `200` with
+    build commit `bf59b2f80d9a837e05694cbb3f6417b8a7bf83c2`.
+  - `GET https://api.companycore.luckysparrow.ch/v1/health` returned `200`
+    with the same build commit.
+  - `GET https://api.companycore.luckysparrow.ch/` returned API metadata.
+  - `GET https://companycore.luckysparrow.ch/` returned the owner console.
+  - `GET https://companycore.luckysparrow.ch/settings/drive` returned the
+    owner console shell.
+- Protected smoke:
+  - Jarvis workspace service API key `GET /v1/connection` returned workspace
+    `LuckySparrow`, 51 capabilities, `agent-events:read`, and
+    `agent-events:ack`.
+  - The adapter manifest included the deployed agent CRUD routes, including
+    `/v1/notes/:id`, `/v1/operating-model/areas/:id`, and
+    `/v1/agent-events/:id/ack`.
+  - Created and deleted a user-created operating area with reassignment to
+    `main-general`.
+  - Created, read, updated, and archived a deployment-smoke note.
+  - `GET /v1/agent-events?targetAgent=paperclip` returned `200` with an
+    empty Paperclip event queue.
+- Cleanup:
+  - Removed temporary VPS release and smoke scripts under `/tmp`.
+  - The previous backend container was retained stopped as
+    `backend-rnqqkhl3o3dut4qv56mlxly2-004822203171-previous-bf59b2f` for
+    rollback reference.
