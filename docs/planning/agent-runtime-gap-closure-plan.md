@@ -93,10 +93,10 @@ Turn loose post-CRUD gaps into a prioritized, testable implementation queue.
 ## AGRUN-002 Service Key Scope Enforcement
 
 - Task Type: security/backend
-- Current Stage: release
+- Current Stage: done
 - Deliverable For This Stage: route-level capability enforcement for service
   API keys.
-- Status: REVIEW
+- Status: DONE
 - Owner: Backend Builder
 - Priority: P0
 - Coverage Ledger Rows: AGRUN-COV-001
@@ -158,15 +158,17 @@ cover the target route capability, while preserving owner bearer-token access.
 - Local tests cover a scoped notes-read key that can read notes but cannot
   write notes or ack agent events, while owner bearer-token writes remain
   unaffected.
-- Release evidence is pending production deployment and smoke.
+- Production release evidence passed on 2026-05-06. A temporary scoped service
+  key with `connection:read` and `notes:read` could read notes, while
+  `POST /v1/notes` returned `403`.
 
 ## AGRUN-003 Machine-Readable Agent Contract
 
 - Task Type: backend/docs
-- Current Stage: release
+- Current Stage: done
 - Deliverable For This Stage: agent-readable route contract that includes
   capabilities, payload expectations, and safe error metadata.
-- Status: REVIEW
+- Status: DONE
 - Owner: Backend Builder
 - Priority: P1
 - Coverage Ledger Rows: AGRUN-COV-002
@@ -213,15 +215,17 @@ payloads from prose docs.
 - `/v1/connection` now includes `schemaVersion`, schema hints for agent, note,
   decision, agent-log, and agent-event ack payloads, plus safe error metadata.
 - Local tests assert manifest schema/error metadata.
-- Release evidence is pending production deployment and smoke.
+- Production release evidence passed on 2026-05-06. Jarvis and Paperclip
+  `/v1/connection` responses exposed manifest `schemaVersion = 2026-05-06` and
+  note schema metadata.
 
 ## AGRUN-004 Reusable Agent Training Smoke
 
 - Task Type: backend/ops
-- Current Stage: release
+- Current Stage: done
 - Deliverable For This Stage: reusable local and production-safe smoke script
   for teaching agents read/write behavior.
-- Status: REVIEW
+- Status: DONE
 - Owner: QA/Test
 - Priority: P1
 - Coverage Ledger Rows: AGRUN-COV-003
@@ -269,15 +273,16 @@ CompanyCore memory through the deployed API.
 - The script verifies capabilities, schema metadata, agent creation, note
   create/read/update/archive, and agent-log write behavior without printing raw
   keys.
-- Release evidence is pending production deployment and smoke.
+- Production release evidence passed on 2026-05-06. Jarvis and Paperclip
+  production keys both passed `npm run agent:training-smoke`.
 
 ## AGRUN-005 Scoped Agent Key Owner UI
 
 - Task Type: security/frontend
-- Current Stage: release
+- Current Stage: planning
 - Deliverable For This Stage: owner-console flow for creating, rotating, and
   deactivating scoped agent keys.
-- Status: REVIEW
+- Status: READY
 - Owner: Frontend Builder
 - Priority: P1
 - Coverage Ledger Rows: AGRUN-COV-004
@@ -322,18 +327,15 @@ Make safe agent credential management usable without manual API calls.
 
 ### Result Report
 
-- Local tests now create controlled agent outbox events, read them through
-  `/v1/agent-events`, acknowledge one through
-  `POST /v1/agent-events/:id/ack`, and verify it becomes `delivered`.
-- Production positive ack smoke is pending.
+- Pending implementation.
 
 ## AGRUN-006 Agent Event Ack Positive Smoke
 
 - Task Type: backend/verification
-- Current Stage: planning
+- Current Stage: done
 - Deliverable For This Stage: tested positive ack path for agent event
   consumers.
-- Status: READY
+- Status: DONE
 - Owner: QA/Test
 - Priority: P1
 - Coverage Ledger Rows: AGRUN-COV-005
@@ -376,7 +378,12 @@ only read an empty event queue.
 
 ### Result Report
 
-- Pending implementation.
+- Local tests now create controlled agent outbox events, read them through
+  `/v1/agent-events`, acknowledge one through
+  `POST /v1/agent-events/:id/ack`, and verify it becomes `delivered`.
+- Production positive ack smoke passed on 2026-05-06. A controlled
+  Paperclip-targeted event was read through `GET /v1/agent-events`, acknowledged
+  through `POST /v1/agent-events/:id/ack`, and no longer appeared as pending.
 
 ## AGRUN-007 Google Drive Owner Consent And First Import
 

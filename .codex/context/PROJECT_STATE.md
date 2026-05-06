@@ -149,6 +149,16 @@ Last updated: 2026-05-06
   runtime stage copied `public`, `dist`, and `prisma` but not `scripts`.
   Updated the Dockerfile to copy `scripts` into the runtime image before
   redeploying.
+- 2026-05-06: Deployed AGRUN-002, AGRUN-003, AGRUN-004, and AGRUN-006 runtime
+  hardening to production. The running backend container is
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-8b604d8`, image
+  `rnqqkhl3o3dut4qv56mlxly2_backend:8b604d8e56f24c24f5f095815f8d52c6a84887dd`.
+  Public health and web/API smokes passed. Jarvis and Paperclip production
+  CompanyCore keys both passed `npm run agent:training-smoke`; `/v1/connection`
+  exposed 51 effective capabilities, `scopeMode = broad`,
+  `schemaVersion = 2026-05-06`, and schema metadata. A temporary scoped key was
+  denied `POST /v1/notes` with `403`, and Paperclip read plus acknowledged a
+  controlled pending agent event through the public API.
 - 2026-05-06: Completed AGRUN-001 by adding
   `docs/operations/agent-runtime-coverage-ledger.csv` and
   `docs/planning/agent-runtime-gap-closure-plan.md`. The plan identifies the

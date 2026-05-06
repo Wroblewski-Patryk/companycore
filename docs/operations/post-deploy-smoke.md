@@ -721,3 +721,45 @@ Use this file to record the minimum checks after each deploy.
   - The previous backend container was retained stopped as
     `backend-rnqqkhl3o3dut4qv56mlxly2-004822203171-previous-bf59b2f` for
     rollback reference.
+
+## Agent Runtime Hardening Production Smoke
+
+- Timestamp: 2026-05-06
+- Environment: production VPS Docker backend
+- Commit: `8b604d8e56f24c24f5f095815f8d52c6a84887dd`
+- Image:
+  `rnqqkhl3o3dut4qv56mlxly2_backend:8b604d8e56f24c24f5f095815f8d52c6a84887dd`
+- Running container:
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-8b604d8`
+- Replaced container:
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-2f3139b`, retained stopped as
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-2f3139b-previous-8b604d8`.
+- Data safety:
+  - Production Postgres container
+    `postgres-rnqqkhl3o3dut4qv56mlxly2-004822197627` remained running and
+    healthy.
+  - `prisma migrate deploy` reported no pending migrations.
+  - Seed completed successfully.
+- Public smoke:
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `200` with
+    build commit `8b604d8e56f24c24f5f095815f8d52c6a84887dd`.
+  - `GET https://api.companycore.luckysparrow.ch/v1/health` returned `200`.
+  - `GET https://api.companycore.luckysparrow.ch/` returned API metadata.
+  - `GET https://companycore.luckysparrow.ch/` returned the owner console.
+- Protected agent smoke:
+  - Jarvis production CompanyCore key passed `npm run agent:training-smoke`
+    from the production backend image.
+  - Paperclip production CompanyCore key passed `npm run agent:training-smoke`
+    from the production backend image.
+  - Both Jarvis and Paperclip `/v1/connection` responses reported
+    `scopeMode = broad`, 51 effective capabilities, manifest
+    `schemaVersion = 2026-05-06`, and note create schema metadata.
+  - A temporary scoped service key with `connection:read` and `notes:read`
+    could read notes, while `POST /v1/notes` returned `403`.
+  - A controlled Paperclip-targeted agent event
+    `48783287-2dff-4c01-ab14-2bb497500667` was visible through
+    `GET /v1/agent-events?targetAgent=paperclip`, acknowledged through
+    `POST /v1/agent-events/:id/ack`, and no longer appeared as pending.
+- Cleanup:
+  - Temporary scoped key was deleted.
+  - Temporary VPS release and smoke scripts under `/tmp` were removed.
