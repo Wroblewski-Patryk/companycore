@@ -57,8 +57,8 @@ body {
   position: sticky;
   top: 0;
   display: grid;
-  align-content: start;
-  gap: 22px;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 18px;
   height: 100vh;
   padding: 22px 18px;
   border-right: 1px solid var(--border);
@@ -85,15 +85,36 @@ body {
 
 .side-nav {
   display: grid;
+  align-content: start;
+  gap: 16px;
+  min-height: 0;
+  padding-right: 2px;
+  overflow: auto;
+}
+
+.side-nav-section {
+  display: grid;
   gap: 6px;
+}
+
+.side-nav-section p {
+  margin: 0 0 2px;
+  padding: 0 12px;
+  color: #7b8494;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
 }
 
 .side-nav a {
   display: flex;
   align-items: center;
+  gap: 10px;
   min-height: 42px;
   padding: 10px 12px;
   border-radius: 8px;
+  border: 1px solid transparent;
   color: #344054;
   font-size: 14px;
   font-weight: 900;
@@ -102,8 +123,13 @@ body {
 
 .side-nav a:hover,
 .side-nav a.active {
+  border-color: #d5e0f1;
   background: var(--soft);
   color: var(--accent);
+}
+
+.side-nav a.active {
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .sidebar-status {
@@ -114,6 +140,7 @@ body {
   padding: 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
+  background: #fbfcfe;
   color: var(--muted);
   font-size: 13px;
   font-weight: 900;

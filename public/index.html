@@ -28,17 +28,29 @@
           </span>
         </a>
         <nav class="side-nav" aria-label="Workspace navigation">
-          <a href="/dashboard" data-link data-nav="/dashboard">Dashboard</a>
-          <a href="/data" data-link data-nav="/data">Data</a>
-          <a href="/areas" data-link data-nav="/areas">Operating areas</a>
-          <a href="/relationships" data-link data-nav="/relationships">Relationships</a>
-          <a href="/tasks-adapter" data-link data-nav="/tasks-adapter">Tasks & adapters</a>
-          <a href="/pipeline" data-link data-nav="/pipeline">Pipeline</a>
-          <a href="/settings/account" data-link data-nav="/settings/account">Account</a>
-          <a href="/settings/integrations" data-link data-nav="/settings/integrations">Integrations</a>
-          <a href="/settings" data-link data-nav="/settings">ClickUp adapter</a>
-          <a href="/settings/drive" data-link data-nav="/settings/drive">Google Drive</a>
-          <a href="/settings/api" data-link data-nav="/settings/api">API settings</a>
+          <section class="side-nav-section" aria-label="Command">
+            <p>Command</p>
+            <a href="/dashboard" data-link data-nav="/dashboard">Dashboard</a>
+          </section>
+          <section class="side-nav-section" aria-label="Operate">
+            <p>Operate</p>
+            <a href="/areas" data-link data-nav="/areas">Operating areas</a>
+            <a href="/relationships" data-link data-nav="/relationships">Relationships</a>
+            <a href="/data" data-link data-nav="/data">Data</a>
+            <a href="/tasks-adapter" data-link data-nav="/tasks-adapter">Tasks & adapters</a>
+            <a href="/pipeline" data-link data-nav="/pipeline">Pipeline</a>
+          </section>
+          <section class="side-nav-section" aria-label="Integrations">
+            <p>Integrations</p>
+            <a href="/settings/integrations" data-link data-nav="/settings/integrations">Integration map</a>
+            <a href="/settings" data-link data-nav="/settings">ClickUp adapter</a>
+            <a href="/settings/drive" data-link data-nav="/settings/drive">Google Drive</a>
+            <a href="/settings/api" data-link data-nav="/settings/api">API settings</a>
+          </section>
+          <section class="side-nav-section" aria-label="Workspace">
+            <p>Workspace</p>
+            <a href="/settings/account" data-link data-nav="/settings/account">Account</a>
+          </section>
         </nav>
         <div class="sidebar-status">
           <span class="dot muted" id="sidebarStatusDot"></span>

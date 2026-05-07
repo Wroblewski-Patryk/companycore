@@ -1,5 +1,55 @@
 # Web Console V2 Task Contracts
 
+## V2WEB-033 App Shell Navigation Polish
+
+- Task Type: design/frontend
+- Current Stage: done
+- Deliverable For This Stage: owner console navigation is grouped into
+  command, operate, integration, and workspace lanes without changing route
+  behavior.
+- Goal: Make the application shell feel like a usable operating center across
+  all screens by reducing sidebar scanning cost and making active navigation
+  state clearer.
+- Scope:
+  - `public/index.html`
+  - `public/styles.css`
+  - `docs/ux/design-memory.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+- Implementation Plan:
+  - Group existing sidebar routes into semantic sections while preserving all
+    hrefs and `data-nav` attributes.
+  - Improve active, hover, and scroll behavior through shared sidebar styles.
+  - Keep mobile drawer behavior compatible with the existing menu button.
+  - Validate syntax, build, tests, and desktop/mobile navigation rendering.
+- Acceptance Criteria:
+  - Sidebar links are grouped by operational purpose.
+  - Existing route navigation and active-route highlighting still work.
+  - Sidebar can scroll independently when viewport height is constrained.
+  - Mobile drawer remains usable with no horizontal overflow.
+- Definition of Done:
+  - `node --check public/app.js`, `npm run build`, `git diff --check`, and
+    `npm test` pass.
+  - Local Playwright smoke verifies `/dashboard` shell rendering on desktop and
+    mobile with no console errors or horizontal overflow.
+- Result Report:
+  - Grouped sidebar navigation into Command, Operate, Integrations, and
+    Workspace sections.
+  - Added reusable sidebar-section styling, clearer active route affordance,
+    hover border, and independent sidebar scrolling.
+  - Preserved all route URLs, `data-link`, and `data-nav` attributes.
+  - Validation passed: `node --check public/app.js`, `npm run build`,
+    `git diff --check`, and `npm test` against disposable Postgres database
+    `companycore_test` on port `55471`.
+  - Local `/dashboard` Playwright shell smoke passed on desktop `1440x960` and
+    mobile `390x844`: four sidebar groups rendered, active dashboard route was
+    preserved, there were no console errors, and no horizontal overflow.
+    Browser plugin validation was attempted first but remained blocked because
+    its Node REPL requires Node `>=22.22.0` while this workstation exposes Node
+    `22.13.0`.
+
 ## V2WEB-032 Dashboard Command Layout Polish
 
 - Task Type: design/frontend

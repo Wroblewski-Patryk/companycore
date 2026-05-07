@@ -152,3 +152,17 @@ of rediscovering them.
 - Evidence: V2WEB-032 moved dashboard attention items beside the operational
   cockpit on desktop, stacked them cleanly on mobile, and preserved existing
   dynamic state wiring.
+
+### 2026-05-07 - Semantic Sidebar Sections
+- Type: reusable_pattern
+- Context: The owner console has enough modules that a flat sidebar becomes
+  slower to scan than the underlying operating model.
+- Decision: Group shell navigation by job family, not implementation order:
+  command, operate, integrations, and workspace. Keep route URLs and active
+  state contracts stable while improving labels and visual grouping.
+- Reuse when: A navigation rail mixes daily work surfaces, provider setup,
+  system settings, and account controls.
+- Avoid when: A flow has fewer than five destinations or a wizard needs a
+  strict linear stepper instead of persistent navigation.
+- Evidence: V2WEB-033 grouped the CompanyCore sidebar while preserving every
+  existing `href`, `data-link`, and `data-nav` route contract.
