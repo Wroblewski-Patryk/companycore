@@ -121,3 +121,19 @@ of rediscovering them.
 - Evidence: V2GD-012 added Google Drive folder discovery and selection in
   `/settings/drive`, passed authenticated desktop/mobile Playwright smoke, and
   retained manual folder IDs as a fallback for restricted Google accounts.
+
+### 2026-05-07 - Shared Capability Labels
+- Type: domain_language_pattern
+- Context: Some modules are shared infrastructure that can be used by several
+  departments, even when the first visible records come from one department.
+- Decision: Label shared capabilities by their reusable operating purpose first
+  and describe department-specific records as current usage or consumers. Do
+  not group shared workflow primitives under CRM just because CRM deals use
+  them.
+- Reuse when: A page combines shared configuration with records from a current
+  department, such as pipelines used by CRM now and other departments later.
+- Avoid when: A module is truly owned by one department and should be optimized
+  for that team's language.
+- Evidence: V2WEB-031 moved pipeline copy and navigation grouping from
+  CRM-owned language to shared workflow language while keeping CRM usage
+  records visible.

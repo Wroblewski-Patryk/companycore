@@ -15,7 +15,8 @@ integration fields such as `external_id` and `source` where relevant.
 - `task_lists`: task grouping layer, optionally linked to projects.
 - `tasks`: operational tasks linked to projects, goals, targets, or task lists.
 - `clients`: CRM contacts or companies.
-- `pipeline_stages`: sales pipeline stages.
+- `pipeline_stages`: shared workflow/status stages that CRM and other
+  departments can use.
 - `deals`: sales opportunities linked to clients and pipeline stages.
 - `interactions`: CRM interactions linked to clients.
 - `notes`: notes linked to projects, tasks, clients, or deals.
@@ -68,8 +69,8 @@ The approved business areas are fixed catalog values owned by CompanyCore:
 | --- | --- |
 | Strategy and governance | `goals`, `targets`, future governance policies |
 | Projects and delivery | `projects`, future milestones/releases |
-| Tasks and workflow | `task_lists`, `tasks`, future statuses/checklists |
-| Sales and CRM | `clients`, `deals`, `pipeline_stages`, `interactions` |
+| Tasks and workflow | `task_lists`, `tasks`, `pipeline_stages`, future statuses/checklists |
+| Sales and CRM | `clients`, `deals`, `interactions` |
 | Marketing and growth | future campaigns, experiments, channels |
 | Finance and billing | future invoices, expenses, subscriptions |
 | People and roles | future teammates, responsibilities, role maps |
@@ -125,8 +126,8 @@ Implemented first-party table assignments:
 | --- | --- |
 | Strategy and governance | `goals`, `targets` |
 | Projects and delivery | `projects` |
-| Tasks and workflow | `task_lists`, `tasks` |
-| Sales and CRM | `clients`, `pipeline_stages`, `deals`, `interactions` |
+| Tasks and workflow | `task_lists`, `tasks`, `pipeline_stages` |
+| Sales and CRM | `clients`, `deals`, `interactions` |
 | Knowledge and decisions | `notes`, `decisions` |
 | AI agents and observability | `agents`, `agent_logs`, `events` |
 

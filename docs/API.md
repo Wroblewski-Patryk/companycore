@@ -983,7 +983,8 @@ DELETE /pipeline-stages/:id
 }
 ```
 
-Pipeline stages are workspace-scoped CRM configuration records. v1 supports
+Pipeline stages are workspace-scoped shared workflow configuration records.
+CRM deals can use them, but the stage model is not owned by CRM. v1 supports
 list/create/update and intentionally does not delete stages yet.
 
 ## Deals

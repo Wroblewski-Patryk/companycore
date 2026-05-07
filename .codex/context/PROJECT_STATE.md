@@ -10,6 +10,9 @@ Last updated: 2026-05-07
 - Current phase: v2 agent runtime hardening and onboarding.
 
 ## Product Decisions (Confirmed)
+- 2026-05-07: CRM and pipelines are separate domain concepts. Pipelines are a
+  shared cross-department workflow/status mechanism; CRM may use them for deals
+  and relationship work, but pipeline stages are not CRM-owned.
 - 2026-05-06: Agent-facing "CRUD for every table" means full
   workspace-scoped CRUD for business records where safe, and controlled
   lifecycle/action APIs for system, auth, secret, provider inbox, webhook,
@@ -133,6 +136,17 @@ Last updated: 2026-05-07
 - Next required mode: TESTER for production smoke and release evidence.
 
 ## Recent Progress
+- 2026-05-07: Completed V2WEB-031 Cross-Department Pipeline Semantics.
+  `/pipeline`, dashboard module metadata, module search grouping, integration
+  taxonomy, and data module copy now describe pipelines as shared workflow
+  infrastructure with current CRM usage records, not as a CRM-owned module.
+  Source-of-truth docs now record that pipeline stages are reusable across
+  departments while clients, deals, and interactions remain CRM records.
+  Validation passed: `node --check public/app.js`, `npm run build`,
+  `git diff --check`, `npm test` against disposable Postgres on port `55466`,
+  and local Playwright desktop/mobile `/pipeline` smoke with no console errors
+  or horizontal overflow. Browser plugin validation was attempted first but
+  blocked by the local Node REPL runtime requirement of Node `>=22.22.0`.
 - 2026-05-07: Completed V2GD-012 Drive Consent Guidance And Folder Picker.
   `/settings/drive` now explains Google OAuth consent Testing mode, test-user
   access, authorized redirect URI setup, and unverified-app behavior before the

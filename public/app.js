@@ -184,7 +184,7 @@ const COMPANY_AREAS = [
   { number: "00", label: "Główny", key: "main-general", description: "Default home for unclassified imported lists, folders, records, and shared company context." },
   { number: "01", label: "Strategia", key: "strategy-governance", description: "Goals, targets, decisions, and the strategic source of truth." },
   { number: "02", label: "Produkt", key: "projects-delivery", description: "Projects, delivery containers, product work, and shipped outcomes." },
-  { number: "03", label: "Sprzedaż", key: "sales-crm", description: "Clients, pipeline stages, deals, and sales interactions." },
+  { number: "03", label: "Sprzedaż", key: "sales-crm", description: "Clients, deals, and sales interactions that can use shared pipelines." },
   { number: "04", label: "Operacje", key: "operations-administration", description: "Operational administration and unclassified execution structure." },
   { number: "05", label: "Relacje", key: "tasks-workflow", description: "Workflows, task lists, ClickUp Lists, and active execution records." },
   { number: "06", label: "Kadry", key: "people-roles", description: "People, roles, responsibilities, and future HR records." },
@@ -411,7 +411,7 @@ const moduleRoutes = [
   { path: "/areas", label: "Operating areas", group: "Operating model", keywords: "departments areas tables records mapping workspace" },
   { path: "/relationships", label: "Relationships", group: "Operating model", keywords: "review queue provider drive unmapped correction relations" },
   { path: "/tasks-adapter", label: "Tasks & adapters", group: "Adapters", keywords: "tasks clickup lists priority status due sync" },
-  { path: "/pipeline", label: "Pipeline", group: "CRM", keywords: "clients deals stages interactions sales crm" },
+  { path: "/pipeline", label: "Pipeline", group: "Workflow", keywords: "shared pipelines workflow stages clients deals interactions sales crm departments" },
   { path: "/settings/account", label: "Account", group: "Settings", keywords: "owner workspace readiness login account" },
   { path: "/settings/integrations", label: "Integrations", group: "Settings", keywords: "data map modules sources tables drive clickup api" },
   { path: "/settings", label: "ClickUp adapter", group: "Settings", keywords: "clickup token workspace lists sync import" },
@@ -426,7 +426,7 @@ const dataModuleCatalog = [
   { slug: "task-lists", label: "Task Lists", group: "Execution", href: "/data/task-lists", description: "Execution containers, including ClickUp-sourced Lists." },
   { slug: "tasks", label: "Tasks", group: "Execution", href: "/data/tasks", description: "CompanyCore and ClickUp task records with status and priority." },
   { slug: "clients", label: "Clients", group: "CRM", href: "/data/clients", description: "Client records for sales, delivery, and relationship context." },
-  { slug: "pipeline-stages", label: "Pipeline Stages", group: "CRM", href: "/data/pipeline-stages", description: "Pipeline stage records used to organize sales flow." },
+  { slug: "pipeline-stages", label: "Pipeline Stages", group: "Workflow", href: "/data/pipeline-stages", description: "Shared pipeline stage records that can organize work across departments." },
   { slug: "deals", label: "Deals", group: "CRM", href: "/data/deals", description: "Deal records with status, value, source, and client context." },
   { slug: "interactions", label: "Interactions", group: "CRM", href: "/data/interactions", description: "Sales or client timeline interactions." },
   { slug: "notes", label: "Notes", group: "Knowledge", href: "/data/notes", description: "Operational notes linked to projects, tasks, clients, or deals." },
@@ -474,7 +474,7 @@ function moduleMetric(path) {
     case "/tasks-adapter":
       return `${state.tasks.length} tasks, ${signals?.openTasks.length || 0} open`;
     case "/pipeline":
-      return `${recordCountForSlugs(["clients", "pipeline-stages", "deals", "interactions"])} CRM records`;
+      return `${recordCountForSlugs(["pipeline-stages"])} shared stages, ${recordCountForSlugs(["clients", "deals", "interactions"])} CRM usage records`;
     case "/settings/account":
       return state.user?.email || "Owner workspace settings";
     case "/settings/integrations":
@@ -1075,14 +1075,18 @@ function dashboardSignals() {
   });
   const unmappedProviderMappings = state.operatingModel.externalMappings.filter((mapping) => !mapping.areaId && !mapping.operatingAreaId);
   const unassignedDriveFolders = state.googleDrive.files.filter((file) => file.isFolder && !file.operatingAreaId);
-  const pipelineRecords = recordCountForSlugs(["clients", "pipeline-stages", "deals", "interactions"]);
+  const pipelineStageRecords = recordCountForSlugs(["pipeline-stages"]);
+  const pipelineUsageRecords = recordCountForSlugs(["clients", "deals", "interactions"]);
+  const pipelineRecords = pipelineStageRecords + pipelineUsageRecords;
 
   return {
     openTasks,
     dueSoonTasks,
     unmappedProviderMappings,
     unassignedDriveFolders,
-    pipelineRecords
+    pipelineRecords,
+    pipelineStageRecords,
+    pipelineUsageRecords
   };
 }
 
@@ -1099,14 +1103,14 @@ function renderDashboardCommandCenter() {
   moduleDataMeta.textContent = `${tables || 0} tables, ${totalDatabaseRecords()} records loaded, ${apiRouteRows().length} API routes available.`;
   moduleRelationshipsMeta.textContent = `${signals.unmappedProviderMappings.length + signals.unassignedDriveFolders.length} relationship${signals.unmappedProviderMappings.length + signals.unassignedDriveFolders.length === 1 ? "" : "s"} need review.`;
   moduleTasksMeta.textContent = `${state.tasks.length} tasks, ${signals.openTasks.length} open, ${signals.dueSoonTasks.length} due soon.`;
-  modulePipelineMeta.textContent = `${signals.pipelineRecords} CRM/pipeline records across clients, stages, deals, and interactions.`;
+  modulePipelineMeta.textContent = `${signals.pipelineStageRecords} shared stages, ${signals.pipelineUsageRecords} CRM usage records from clients, deals, and interactions.`;
   moduleDriveMeta.textContent = state.googleDrive.configured
     ? `${driveItems} Drive items imported, ${signals.unassignedDriveFolders.length} folders need area review.`
     : "Google Drive is not connected yet.";
   moduleClickUpMeta.textContent = state.clickup.configured
     ? `${clickUpLists} selected ClickUp List${clickUpLists === 1 ? "" : "s"}, ${state.clickup.active ? "active" : "inactive"} connection.`
     : "ClickUp is not connected yet.";
-  moduleIntegrationsMeta.textContent = `${implementedGroups} implemented groups: tasks, files, pipeline, API.`;
+  moduleIntegrationsMeta.textContent = `${implementedGroups} implemented groups: tasks, files, shared pipelines, API.`;
 
   const items = dashboardAttentionItems(signals);
   attentionList.innerHTML = "";
@@ -1171,7 +1175,7 @@ function renderOperationalCockpit(signals, items, counts) {
     {
       label: "Data model",
       title: `${counts.areas} areas`,
-      detail: `${counts.tables} tables, ${counts.mappings} provider mappings, ${counts.pipelineRecords} pipeline records.`,
+      detail: `${counts.tables} tables, ${counts.mappings} provider mappings, ${counts.pipelineRecords} shared pipeline and usage records.`,
       href: "/areas",
       status: counts.areas > 0 && counts.tables > 0 ? "good" : "warn"
     }
@@ -1317,8 +1321,8 @@ function dashboardAttentionItems(signals) {
 
   if (signals.pipelineRecords === 0) {
     items.push({
-      title: "Review pipeline data",
-      detail: "Clients, stages, deals, and interactions are implemented, but no pipeline records are loaded yet.",
+      title: "Review shared pipelines",
+      detail: "Shared stages and current CRM usage records are implemented, but no pipeline data is loaded yet.",
       href: "/pipeline",
       action: "Open pipeline"
     });
@@ -1578,7 +1582,7 @@ function renderPipeline() {
   const filteredRecords = filteredPipelineRecords(records);
 
   pipelineSummary.textContent = isSignedIn()
-    ? `${filteredRecords.length} of ${total} CRM/pipeline record${total === 1 ? "" : "s"} shown from implemented CompanyCore tables.`
+    ? `${filteredRecords.length} of ${total} shared pipeline and CRM usage record${total === 1 ? "" : "s"} shown from implemented CompanyCore tables.`
     : "Sign in to load pipeline data.";
 
   renderPipelineStat("Clients", clients.length);
@@ -1697,10 +1701,10 @@ function renderPipelineFeed(records, filteredRecords) {
   pipelineRecordFeed.innerHTML = "";
 
   if (records.length === 0) {
-    pipelineFeedSummary.textContent = "No CRM records are loaded from the implemented pipeline tables yet.";
+    pipelineFeedSummary.textContent = "No shared pipeline or CRM usage records are loaded from the implemented tables yet.";
     const empty = document.createElement("p");
     empty.className = "empty-note";
-    empty.textContent = "Add or sync clients, stages, deals, or interactions to populate this feed.";
+    empty.textContent = "Add or sync shared stages, clients, deals, or interactions to populate this feed.";
     pipelineRecordFeed.append(empty);
     return;
   }
@@ -1803,10 +1807,10 @@ function renderIntegrationTaxonomy() {
     },
     {
       type: "Pipelines",
-      name: "CRM and pipeline data",
+      name: "Shared pipeline data",
       status: "Implemented API",
       metric: `${pipelineRecords} record${pipelineRecords === 1 ? "" : "s"}`,
-      detail: "Clients, pipeline stages, deals, and interactions are available through CompanyCore tables.",
+      detail: "Pipeline stages are shared workflow infrastructure; CRM clients, deals, and interactions are current usage records.",
       primaryHref: "/pipeline",
       primaryLabel: "Open pipeline",
       secondaryHref: "/settings/api",

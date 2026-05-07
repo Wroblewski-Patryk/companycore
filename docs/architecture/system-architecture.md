@@ -47,7 +47,10 @@ advanced RBAC, organization administration, and a full CRM UI are out of scope.
 ## Core Data Areas
 
 - Strategy and delivery: projects, goals, targets, task lists, tasks.
-- CRM and sales: clients, deals, pipeline stages, interactions.
+- Shared pipelines: reusable workflow/status stages that can be used by any
+  department.
+- CRM and sales: clients, deals, interactions, and CRM usage of shared
+  pipelines where needed.
 - Knowledge: notes, decisions.
 - AI operations: agents, agent logs.
 - Platform state: events, users, workspaces, workspace-scoped API keys,
@@ -95,6 +98,10 @@ The approved company operating areas are:
 10. Assets and storage
 11. Automations and integrations
 12. AI agents and observability
+
+Pipelines are a shared workflow capability, not a Sales/CRM-owned module. CRM
+can use pipeline stages for deals, but the same pipeline concept must remain
+available to other operating areas when their workflows need staged movement.
 
 For each workspace, the operating model should make the following resources
 addressable through one consistent scope:

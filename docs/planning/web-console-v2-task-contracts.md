@@ -1,5 +1,59 @@
 # Web Console V2 Task Contracts
 
+## V2WEB-031 Cross-Department Pipeline Semantics
+
+- Task Type: product/frontend/docs
+- Current Stage: done
+- Deliverable For This Stage: owner console and source-of-truth docs describe
+  pipelines as shared workflow infrastructure rather than a CRM-owned module.
+- Goal: Keep CompanyCore domain language aligned with the product decision that
+  CRM can use pipelines, but pipelines must be usable by every department.
+- Scope:
+  - `public/index.html`
+  - `public/app.js`
+  - `docs/architecture/system-architecture.md`
+  - `docs/API.md`
+  - `docs/DATABASE.md`
+  - `docs/ux/design-memory.md`
+  - `.codex/context/LEARNING_JOURNAL.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+- Implementation Plan:
+  - Update `/pipeline`, module-switcher, dashboard, and integration taxonomy
+    copy to say shared pipeline plus current CRM usage records.
+  - Move `pipeline-stages` UI grouping from CRM to workflow while keeping
+    routes, table names, and API contracts stable.
+  - Record the confirmed domain boundary in architecture, API, database, UX,
+    planning, task-board, and project-state docs.
+- Acceptance Criteria:
+  - `/pipeline` no longer presents pipelines as CRM-owned.
+  - CRM clients/deals/interactions remain visible as current consumers of the
+    shared pipeline workbench.
+  - No API route, database table, or persisted slug is renamed in this slice.
+  - Validation covers frontend syntax, build, tests, and a browser smoke.
+- Definition of Done:
+  - `node --check public/app.js`, `npm run build`, `git diff --check`, and
+    `npm test` pass.
+  - Desktop and mobile `/pipeline` smoke confirm the corrected copy renders
+    without console errors or horizontal overflow.
+- Result Report:
+  - Reworded dashboard, module switcher, integration taxonomy, and `/pipeline`
+    copy around shared pipeline infrastructure and current CRM usage records.
+  - Moved Pipeline route search grouping and `pipeline-stages` catalog grouping
+    from CRM to Workflow.
+  - Updated architecture, API, database, UX, project-state, task-board, and
+    next-commits docs with the cross-department pipeline decision.
+  - Validation passed: `node --check public/app.js`, `npm run build`,
+    `git diff --check`, and `npm test` against disposable Postgres database
+    `companycore_test` on port `55466`.
+  - Local `/pipeline` Playwright smoke passed on desktop `1440x960` and mobile
+    `390x844`: corrected shared-workflow copy rendered, search input accepted
+    text, there were no console errors, and no horizontal overflow. Browser
+    plugin validation was attempted first but blocked because its Node REPL
+    requires Node `>=22.22.0` while this workstation exposes Node `22.13.0`.
+
 ## V2WEB-020 Main Operating Area Foundation
 
 - Task Type: backend/frontend
@@ -418,10 +472,11 @@
 
 - Task Type: design/frontend
 - Current Stage: done
-- Deliverable For This Stage: searchable pipeline workbench feed backed by
-  implemented CRM tables.
-- Goal: Make `/pipeline` useful once CRM records grow by adding a unified feed,
-  search, and filters without adding backend contracts or placeholder data.
+- Deliverable For This Stage: searchable shared pipeline workbench feed backed
+  by implemented pipeline stage and CRM usage tables.
+- Goal: Make `/pipeline` useful once shared pipeline and CRM usage records grow
+  by adding a unified feed, search, and filters without adding backend
+  contracts or placeholder data.
 - Scope:
   - `public/index.html`
   - `public/app.js`
@@ -439,7 +494,8 @@
     matches.
   - Validate syntax, build, tests, local route rendering, and production smoke.
 - Acceptance Criteria:
-  - `/pipeline` supports search across visible CRM/pipeline fields.
+  - `/pipeline` supports search across visible shared pipeline and CRM usage
+    fields.
   - Record-type and status filters update the feed without reloading.
   - Summary reflects filtered count versus total implemented records.
   - Empty state explains when filters hide all pipeline records.
@@ -665,7 +721,7 @@
 - Task Type: design/frontend
 - Current Stage: done
 - Deliverable For This Stage: dedicated `/pipeline` owner-console route that
-  reuses implemented CompanyCore CRM/pipeline tables.
+  reuses implemented CompanyCore shared pipeline and CRM usage tables.
 - Goal: Add the first pipeline module surface using existing clients,
   pipeline stages, deals, and interactions data without adding new backend
   behavior.
@@ -680,14 +736,16 @@
   - `docs/planning/web-console-v2-task-contracts.md`
 - Implementation Plan:
   - Add `/pipeline` to authenticated web routes and signed-in navigation.
-  - Render CRM/pipeline summary cards from existing database snapshots.
+  - Render shared pipeline and CRM usage summary cards from existing database
+    snapshots.
   - Render compact lists for stages, deals, clients, and interactions.
   - Link dashboard and integration taxonomy to the implemented pipeline view.
   - Validate syntax, build, tests, local route rendering, and production smoke.
 - Acceptance Criteria:
   - Signed-in navigation includes `Pipeline`.
-  - `/pipeline` renders existing implemented CRM/pipeline records.
-  - Empty states are clear when no CRM/pipeline records exist.
+  - `/pipeline` renders existing implemented shared pipeline and CRM usage
+    records.
+  - Empty states are clear when no shared pipeline or CRM usage records exist.
   - No placeholder provider integration or unimplemented pipeline write flow is
     introduced.
   - Existing `/settings/integrations`, `/tasks-adapter`, `/areas`, and

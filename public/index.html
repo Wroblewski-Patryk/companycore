@@ -219,7 +219,7 @@
             </a>
             <a class="module-link" href="/pipeline" data-link>
               <strong>Pipeline</strong>
-              <span id="modulePipelineMeta">Review clients, stages, deals, and sales interactions from implemented CompanyCore tables.</span>
+              <span id="modulePipelineMeta">Review shared stages plus CRM usage records from implemented CompanyCore tables.</span>
             </a>
             <a class="module-link" href="/settings/drive" data-link>
               <strong>Drive folders</strong>
@@ -567,7 +567,7 @@
       <section class="view" data-view="/pipeline">
         <div class="page-title">
           <div>
-            <p class="label">CRM</p>
+            <p class="label">Shared workflow</p>
             <h1>Pipeline</h1>
             <p id="pipelineSummary">Sign in to load pipeline data.</p>
           </div>
@@ -582,7 +582,7 @@
         <section class="pipeline-filter-bar" aria-label="Pipeline filters">
           <label>
             Search records
-            <input id="pipelineSearch" type="search" autocomplete="off" placeholder="Client, deal, status, source..." />
+            <input id="pipelineSearch" type="search" autocomplete="off" placeholder="Stage, client, deal, status, source..." />
           </label>
           <label>
             Record type
@@ -605,7 +605,7 @@
         <section class="panel pipeline-panel pipeline-feed-panel">
           <div class="section-title">
             <h2>Record feed</h2>
-            <p id="pipelineFeedSummary">Sign in to review the unified CRM feed.</p>
+            <p id="pipelineFeedSummary">Sign in to review shared pipeline records and current CRM usage.</p>
           </div>
           <div class="compact-list" id="pipelineRecordFeed"></div>
         </section>
@@ -614,7 +614,7 @@
           <article class="panel pipeline-panel">
             <div class="section-title">
               <h2>Stages</h2>
-              <p>Pipeline stages currently stored in CompanyCore.</p>
+              <p>Reusable pipeline stages currently stored in CompanyCore.</p>
             </div>
             <div class="compact-list" id="pipelineStagesList"></div>
           </article>

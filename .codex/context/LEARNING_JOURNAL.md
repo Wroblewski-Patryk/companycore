@@ -154,3 +154,22 @@ fixes for this repository.
 - Evidence: V2GD-009 rolled production from `6731b82` to
   `a52afef4492445c87d1313324dcee8bbe82f3323`; `/health` then reported the
   expected build commit and protected Google Drive smoke passed.
+
+### 2026-05-07 - Browser plugin Node runtime may block local UI smoke
+- Context: Local UI validation should prefer the in-app Browser plugin when it
+  is available.
+- Symptom: Browser runtime setup failed before opening the local app because
+  the Node REPL reported Node `22.13.0` while requiring Node `>=22.22.0`.
+- Root cause: The workstation Node binary used by `node_repl` is older than
+  the Browser plugin runtime requirement.
+- Guardrail: Attempt the Browser plugin first for local UI checks; if it fails
+  with the Node version gate, record the exact blocker and run a Playwright
+  fallback from the repository Node environment.
+- Preferred pattern: Keep the local app smoke evidence explicit: target URL,
+  viewports, console health, screenshot path, and whether Browser or fallback
+  Playwright produced the proof.
+- Avoid: Claiming Browser validation passed when only fallback Playwright ran,
+  or skipping rendered UI smoke after a Browser runtime blocker.
+- Evidence: V2WEB-031 Browser setup failed with `requires >= v22.22.0`;
+  fallback Playwright verified `/pipeline` at desktop `1440x960` and mobile
+  `390x844` with no console errors or horizontal overflow.
