@@ -143,6 +143,15 @@ Last updated: 2026-05-07
   `npm test` against disposable Postgres on port `55459`, and local
   authenticated Playwright desktop/mobile `/data/notes` smoke that created,
   updated, archived, and reloaded real Notes records.
+- 2026-05-07: Deployed V2WEB-026 to production with manual VPS backend
+  rollover after public health still reported `3a96c3f` following the GitHub
+  push. The running backend container is
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-614e6b8`, image
+  `rnqqkhl3o3dut4qv56mlxly2_backend:614e6b8f20fbfe28e6f8f4bef7234111ceb2c62c`.
+  Public `/health` reports commit
+  `614e6b8f20fbfe28e6f8f4bef7234111ceb2c62c`; `/data/notes` returns the SPA
+  shell and production `app.js` includes `renderNoteEditor`,
+  `noteEditorContent`, and `Archive selected`.
 - 2026-05-07: Completed V2WEB-025 Generic Table Record Workbench. Data module
   rows now open `/data/:table`, where owners can inspect records through a
   split workbench with module stats, source/search filters, selected record

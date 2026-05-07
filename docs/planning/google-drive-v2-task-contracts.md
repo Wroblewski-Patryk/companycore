@@ -734,3 +734,6 @@ It follows the repository task contract and must stay synchronized with
   - Validation passed against a disposable Postgres database and local
     Playwright desktop/mobile smokes that created, edited, and archived real
     Notes API records.
+  - Deployed to production at commit
+    `614e6b8f20fbfe28e6f8f4bef7234111ceb2c62c`; production health and
+    static asset markers confirmed the typed editor code is live.
