@@ -64,3 +64,17 @@ of rediscovering them.
 - Evidence: AGRUN-005 `/settings/api` browser smoke created a scoped key,
   displayed the raw key once, deactivated the key, and passed desktop/mobile
   visual checks without console errors.
+
+### 2026-05-07 - Split Record Workbench
+- Type: reusable_pattern
+- Context: Operators need to inspect records from many CompanyCore tables
+  before typed create/edit forms exist for every module.
+- Decision: Use a split layout with a searchable record list on the left and a
+  selected-record inspector on the right. Show concise record title/meta,
+  readable field rows, and a collapsible raw JSON block for verification.
+- Reuse when: A database, provider, or integration module needs fast read-only
+  triage before a payload-specific editor is implemented.
+- Avoid when: The task requires multi-row comparison, bulk actions, or typed
+  editing controls; use a table or typed form pattern instead.
+- Evidence: V2WEB-025 `/data/notes` browser smoke created a note through the
+  API, filtered the table, and inspected the record on desktop/mobile.

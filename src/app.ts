@@ -60,6 +60,7 @@ const webAppRoutes = [
   "/auth/register",
   "/dashboard",
   "/data",
+  "/data/:table",
   "/areas",
   "/relationships",
   "/tasks-adapter",

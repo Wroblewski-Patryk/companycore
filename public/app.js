@@ -75,6 +75,11 @@ const state = {
     search: "",
     group: ""
   },
+  tableWorkbench: {
+    search: "",
+    source: "",
+    selectedId: ""
+  },
   relationshipFilters: {
     search: "",
     source: ""
@@ -325,6 +330,17 @@ const dataOperationsStats = document.querySelector("#dataOperationsStats");
 const dataSearch = document.querySelector("#dataSearch");
 const dataGroupFilter = document.querySelector("#dataGroupFilter");
 const dataModuleList = document.querySelector("#dataModuleList");
+const tableWorkbenchLabel = document.querySelector("#tableWorkbenchLabel");
+const tableWorkbenchTitle = document.querySelector("#tableWorkbenchTitle");
+const tableWorkbenchSummary = document.querySelector("#tableWorkbenchSummary");
+const tableWorkbenchStats = document.querySelector("#tableWorkbenchStats");
+const tableWorkbenchApiLink = document.querySelector("#tableWorkbenchApiLink");
+const tableRecordsTitle = document.querySelector("#tableRecordsTitle");
+const tableRecordsSummary = document.querySelector("#tableRecordsSummary");
+const tableRecordSearch = document.querySelector("#tableRecordSearch");
+const tableRecordSourceFilter = document.querySelector("#tableRecordSourceFilter");
+const tableRecordList = document.querySelector("#tableRecordList");
+const recordInspector = document.querySelector("#recordInspector");
 const integrationSummary = document.querySelector("#integrationSummary");
 const integrationGroups = document.querySelector("#integrationGroups");
 const integrationMatrixSummary = document.querySelector("#integrationMatrixSummary");
@@ -396,24 +412,33 @@ const moduleRoutes = [
 ];
 
 const dataModuleCatalog = [
-  { slug: "projects", label: "Projects", group: "Strategy and delivery", href: "/data", description: "Project containers for delivery work and roadmap context." },
-  { slug: "goals", label: "Goals", group: "Strategy and delivery", href: "/data", description: "Goal records connected to strategy, projects, and targets." },
-  { slug: "targets", label: "Targets", group: "Strategy and delivery", href: "/data", description: "Measurable target records for strategic follow-through." },
-  { slug: "task-lists", label: "Task Lists", group: "Execution", href: "/tasks-adapter", description: "Execution containers, including ClickUp-sourced Lists." },
-  { slug: "tasks", label: "Tasks", group: "Execution", href: "/tasks-adapter", description: "CompanyCore and ClickUp task records with status and priority." },
-  { slug: "clients", label: "Clients", group: "CRM", href: "/pipeline", description: "Client records for sales, delivery, and relationship context." },
-  { slug: "pipeline-stages", label: "Pipeline Stages", group: "CRM", href: "/pipeline", description: "Pipeline stage records used to organize sales flow." },
-  { slug: "deals", label: "Deals", group: "CRM", href: "/pipeline", description: "Deal records with status, value, source, and client context." },
-  { slug: "interactions", label: "Interactions", group: "CRM", href: "/pipeline", description: "Sales or client timeline interactions." },
-  { slug: "notes", label: "Notes", group: "Knowledge", href: "/data", description: "Operational notes linked to projects, tasks, clients, or deals." },
-  { slug: "decisions", label: "Decisions", group: "Knowledge", href: "/data", description: "Durable decision records with rationale and outcome." },
-  { slug: "agents", label: "Agents", group: "AI operations", href: "/settings/api", description: "Agent identities for Jarvis, Paperclip, Aviary, and future clients." },
-  { slug: "agent-logs", label: "Agent Logs", group: "AI operations", href: "/settings/api", description: "Agent log records for observability and training smoke." }
+  { slug: "projects", label: "Projects", group: "Strategy and delivery", href: "/data/projects", description: "Project containers for delivery work and roadmap context." },
+  { slug: "goals", label: "Goals", group: "Strategy and delivery", href: "/data/goals", description: "Goal records connected to strategy, projects, and targets." },
+  { slug: "targets", label: "Targets", group: "Strategy and delivery", href: "/data/targets", description: "Measurable target records for strategic follow-through." },
+  { slug: "task-lists", label: "Task Lists", group: "Execution", href: "/data/task-lists", description: "Execution containers, including ClickUp-sourced Lists." },
+  { slug: "tasks", label: "Tasks", group: "Execution", href: "/data/tasks", description: "CompanyCore and ClickUp task records with status and priority." },
+  { slug: "clients", label: "Clients", group: "CRM", href: "/data/clients", description: "Client records for sales, delivery, and relationship context." },
+  { slug: "pipeline-stages", label: "Pipeline Stages", group: "CRM", href: "/data/pipeline-stages", description: "Pipeline stage records used to organize sales flow." },
+  { slug: "deals", label: "Deals", group: "CRM", href: "/data/deals", description: "Deal records with status, value, source, and client context." },
+  { slug: "interactions", label: "Interactions", group: "CRM", href: "/data/interactions", description: "Sales or client timeline interactions." },
+  { slug: "notes", label: "Notes", group: "Knowledge", href: "/data/notes", description: "Operational notes linked to projects, tasks, clients, or deals." },
+  { slug: "decisions", label: "Decisions", group: "Knowledge", href: "/data/decisions", description: "Durable decision records with rationale and outcome." },
+  { slug: "agents", label: "Agents", group: "AI operations", href: "/data/agents", description: "Agent identities for Jarvis, Paperclip, Aviary, and future clients." },
+  { slug: "agent-logs", label: "Agent Logs", group: "AI operations", href: "/data/agent-logs", description: "Agent log records for observability and training smoke." }
 ];
 
 function normalizedPath(pathname = window.location.pathname) {
   const trimmed = pathname.replace(/\/+$/, "");
   return trimmed || "/";
+}
+
+function dataTableSlugFromPath(pathname = window.location.pathname) {
+  const match = normalizedPath(pathname).match(/^\/data\/([^/]+)$/);
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
+function isDataWorkbenchPath(path) {
+  return Boolean(dataTableSlugFromPath(path));
 }
 
 function isSignedIn() {
@@ -590,12 +615,13 @@ function renderRoute() {
   updateChrome();
 
   let path = normalizedPath();
-  if (!publicRoutes.has(path) && !privateRoutes.has(path)) {
+  const dataWorkbench = isDataWorkbenchPath(path);
+  if (!publicRoutes.has(path) && !privateRoutes.has(path) && !dataWorkbench) {
     path = isSignedIn() ? "/dashboard" : "/";
     window.history.replaceState({}, "", path);
   }
 
-  if (privateRoutes.has(path) && !isSignedIn()) {
+  if ((privateRoutes.has(path) || dataWorkbench) && !isSignedIn()) {
     window.history.replaceState({}, "", "/auth/login");
     path = "/auth/login";
     showResult("Sign in to continue.", "error");
@@ -607,15 +633,16 @@ function renderRoute() {
   }
 
   views.forEach((view) => {
-    view.hidden = view.dataset.view !== path;
+    const activeView = dataWorkbench && path !== "/auth/login" ? "/data-table" : path;
+    view.hidden = view.dataset.view !== activeView;
   });
 
   navLinks.forEach((link) => {
     const target = link.dataset.nav;
-    link.classList.toggle("active", target === path);
+    link.classList.toggle("active", target === path || target === "/data" && isDataWorkbenchPath(path));
   });
   if (routeTitle) {
-    routeTitle.textContent = routeLabels[path] || "CompanyCore";
+    routeTitle.textContent = isDataWorkbenchPath(path) ? "Data" : routeLabels[path] || "CompanyCore";
   }
   if (workspaceEyebrow) {
     workspaceEyebrow.textContent = state.workspace
@@ -627,6 +654,9 @@ function renderRoute() {
   renderModuleSwitcher();
   setClickUpEnabled(isSignedIn());
   setGoogleDriveEnabled(isSignedIn());
+  if (isDataWorkbenchPath(path)) {
+    renderTableWorkbench();
+  }
 }
 
 function setBusy(isBusy) {
@@ -1915,13 +1945,221 @@ function dataModuleRowElement(row) {
       <span>${escapeHtml(methods)}</span>
       <span>${escapeHtml(row.sources.length > 0 ? row.sources.join(", ") : "no source data")}</span>
     </div>
-    <span class="workbench-index-action">${row.href === "/data" ? "Plan workbench" : "Open workbench"}</span>
+    <span class="workbench-index-action">Open table</span>
   `;
   link.addEventListener("click", (event) => {
     event.preventDefault();
     navigate(row.href);
   });
   return link;
+}
+
+function currentTableModule() {
+  const slug = dataTableSlugFromPath();
+  return dataModuleRows().find((row) => row.slug === slug) || null;
+}
+
+function renderTableWorkbench() {
+  const module = currentTableModule();
+  tableWorkbenchStats.innerHTML = "";
+  tableRecordList.innerHTML = "";
+  recordInspector.innerHTML = "";
+
+  if (!module) {
+    tableWorkbenchLabel.textContent = "Database table";
+    tableWorkbenchTitle.textContent = "Unknown table";
+    tableWorkbenchSummary.textContent = "This data module is not part of the current CompanyCore table catalog.";
+    tableRecordsTitle.textContent = "Records";
+    tableRecordsSummary.textContent = "Open the data index to choose an implemented module.";
+    tableWorkbenchStats.append(summaryStatCard("Records", 0), summaryStatCard("Routes", 0), summaryStatCard("Fields", 0), summaryStatCard("Sources", 0));
+    tableRecordList.append(emptyNote("No table module matches this route."));
+    recordInspector.append(emptyNote("Choose a supported data module from the Data index."));
+    return;
+  }
+
+  const records = module.records || [];
+  const fields = tableFieldNames(records);
+  const sources = tableSources(records);
+  const filteredRecords = filteredTableRecords(module, records);
+  const selected = selectedTableRecord(filteredRecords, records);
+
+  tableWorkbenchLabel.textContent = module.group;
+  tableWorkbenchTitle.textContent = module.label;
+  tableWorkbenchSummary.textContent = `${module.description} ${module.area ? `Mapped to ${areaLabel(module.area)}.` : "Not mapped to an operating area yet."}`;
+  tableRecordsTitle.textContent = `${module.label} records`;
+  tableRecordsSummary.textContent = `${filteredRecords.length} of ${records.length} record${records.length === 1 ? "" : "s"} shown.`;
+  tableWorkbenchApiLink.href = `/settings/api`;
+
+  [
+    ["Records", records.length],
+    ["Fields", fields.length],
+    ["Routes", module.routes.length],
+    ["Sources", sources.length || 1]
+  ].forEach(([label, value]) => tableWorkbenchStats.append(summaryStatCard(label, value)));
+
+  syncTableFilters(sources);
+
+  if (!isSignedIn()) {
+    tableRecordList.append(emptyNote("Sign in to inspect table records."));
+    renderRecordInspector(null, module, fields);
+    return;
+  }
+
+  if (filteredRecords.length === 0) {
+    tableRecordList.append(emptyNote(records.length === 0
+      ? "This table has no records yet."
+      : "No records match the current filters."));
+  } else {
+    for (const record of filteredRecords) {
+      tableRecordList.append(tableRecordRowElement(record, module, selected?.id));
+    }
+  }
+
+  renderRecordInspector(selected, module, fields);
+}
+
+function tableFieldNames(records) {
+  const preferred = ["title", "name", "status", "priority", "source", "createdAt", "updatedAt"];
+  const discovered = [...new Set(records.flatMap((record) => Object.keys(record || {})))];
+  return [
+    ...preferred.filter((field) => discovered.includes(field)),
+    ...discovered.filter((field) => !preferred.includes(field)).sort((left, right) => left.localeCompare(right))
+  ];
+}
+
+function tableSources(records) {
+  return [...new Set(records.map((record) => record?.source || "companycore").filter(Boolean).map(String))]
+    .sort((left, right) => left.localeCompare(right));
+}
+
+function recordTitle(record, module) {
+  const contentPreview = record?.content || record?.body || record?.summary || record?.description;
+  if (record?.title || record?.name || record?.subject || record?.key) {
+    return record.title || record.name || record.subject || record.key;
+  }
+  if (contentPreview) {
+    const text = String(contentPreview).replace(/\s+/g, " ").trim();
+    return text.length > 84 ? `${text.slice(0, 84)}...` : text;
+  }
+  return record?.id || module.label;
+}
+
+function recordSubtitle(record) {
+  const parts = [
+    record?.status,
+    record?.priority,
+    record?.source || "companycore",
+    formatDate(record?.updatedAt || record?.createdAt)
+  ].filter(Boolean);
+  return parts.join(" - ");
+}
+
+function recordSearchText(record, module) {
+  return [
+    module.label,
+    module.slug,
+    ...Object.values(record || {}).map((value) => typeof value === "object" ? JSON.stringify(value) : String(value))
+  ].join(" ").toLowerCase();
+}
+
+function filteredTableRecords(module, records) {
+  const search = state.tableWorkbench.search.trim().toLowerCase();
+  return records.filter((record) => (!search || recordSearchText(record, module).includes(search))
+    && (!state.tableWorkbench.source || String(record?.source || "companycore") === state.tableWorkbench.source));
+}
+
+function selectedTableRecord(filteredRecords, allRecords) {
+  const selected = filteredRecords.find((record) => record.id === state.tableWorkbench.selectedId)
+    || filteredRecords[0]
+    || allRecords.find((record) => record.id === state.tableWorkbench.selectedId)
+    || null;
+  state.tableWorkbench.selectedId = selected?.id || "";
+  return selected;
+}
+
+function syncTableFilters(sources) {
+  tableRecordSearch.value = state.tableWorkbench.search;
+  const nextSource = sources.includes(state.tableWorkbench.source) ? state.tableWorkbench.source : "";
+  tableRecordSourceFilter.innerHTML = "";
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = "All sources";
+  tableRecordSourceFilter.append(placeholder);
+  for (const source of sources) {
+    const option = document.createElement("option");
+    option.value = source;
+    option.textContent = source;
+    tableRecordSourceFilter.append(option);
+  }
+  tableRecordSourceFilter.value = nextSource;
+  state.tableWorkbench.source = nextSource;
+}
+
+function tableRecordRowElement(record, module, selectedId) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = `record-list-row ${record.id === selectedId ? "is-selected" : ""}`;
+  button.innerHTML = `
+    <span class="summary-kicker">${escapeHtml(record?.source || "companycore")}</span>
+    <strong>${escapeHtml(recordTitle(record, module))}</strong>
+    <small>${escapeHtml(recordSubtitle(record) || record.id || "No metadata")}</small>
+  `;
+  button.addEventListener("click", () => {
+    state.tableWorkbench.selectedId = record.id;
+    renderTableWorkbench();
+  });
+  return button;
+}
+
+function renderRecordInspector(record, module, fields) {
+  recordInspector.innerHTML = "";
+  if (!record) {
+    recordInspector.append(emptyNote("Select a record to inspect its fields."));
+    return;
+  }
+
+  const header = document.createElement("div");
+  header.className = "record-inspector-header";
+  header.innerHTML = `
+    <span class="summary-kicker">${escapeHtml(module.label)}</span>
+    <strong>${escapeHtml(recordTitle(record, module))}</strong>
+    <p>${escapeHtml(recordSubtitle(record) || "No status metadata")}</p>
+  `;
+
+  const fieldList = document.createElement("dl");
+  fieldList.className = "record-field-list";
+  for (const field of fields.slice(0, 18)) {
+    const value = record[field];
+    const item = document.createElement("div");
+    const term = document.createElement("dt");
+    term.textContent = field;
+    const detail = document.createElement("dd");
+    detail.textContent = formatRecordValue(value);
+    item.append(term, detail);
+    fieldList.append(item);
+  }
+
+  const raw = document.createElement("details");
+  raw.className = "record-json";
+  raw.innerHTML = `
+    <summary>Raw JSON</summary>
+    <pre>${escapeHtml(JSON.stringify(record, null, 2))}</pre>
+  `;
+
+  recordInspector.append(header, fieldList, raw);
+}
+
+function formatRecordValue(value) {
+  if (value === null || value === undefined || value === "") {
+    return "-";
+  }
+  if (typeof value === "object") {
+    return JSON.stringify(value);
+  }
+  if (String(value).match(/^\d{4}-\d{2}-\d{2}T/)) {
+    return formatDate(value);
+  }
+  return String(value);
 }
 
 function summaryStatCard(label, value) {
@@ -3688,6 +3926,9 @@ logoutButton.addEventListener("click", () => {
   state.driveFilters.scan = "";
   state.apiFilters.search = "";
   state.apiFilters.method = "";
+  state.tableWorkbench.search = "";
+  state.tableWorkbench.source = "";
+  state.tableWorkbench.selectedId = "";
   renderAgentKeys();
   renderTasks();
   renderGoogleDriveFiles();
@@ -3870,6 +4111,16 @@ dataSearch.addEventListener("input", () => {
 dataGroupFilter.addEventListener("change", () => {
   state.dataFilters.group = dataGroupFilter.value;
   renderDataOperations();
+});
+
+tableRecordSearch.addEventListener("input", () => {
+  state.tableWorkbench.search = tableRecordSearch.value;
+  renderTableWorkbench();
+});
+
+tableRecordSourceFilter.addEventListener("change", () => {
+  state.tableWorkbench.source = tableRecordSourceFilter.value;
+  renderTableWorkbench();
 });
 
 loginForm.addEventListener("submit", async (event) => {

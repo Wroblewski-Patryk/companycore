@@ -641,3 +641,50 @@ It follows the repository task contract and must stay synchronized with
   - Added dashboard and module-switcher entry points for Data Operations.
   - Confirmed the frontend baseline remains static CSS; Tailwind and DaisyUI
     were not added because the project has no Tailwind build pipeline.
+
+## V2WEB-025 Generic Table Record Workbench
+
+- Task Type: frontend/ux
+- Current Stage: done
+- Deliverable For This Stage: read/inspect table workbench for CompanyCore
+  database modules.
+- Goal: Let operators open a database module from `/data` and inspect actual
+  records without guessing from raw API calls.
+- Scope:
+  - `public/index.html`
+  - `public/app.js`
+  - `public/styles.css`
+  - `src/app.ts`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/ux/design-memory.md`
+- Implementation Plan:
+  - Reuse the approved Data Operations index and `workbench-*` patterns.
+  - Route every Data module to `/data/:table` and add a backend SPA route for
+    `/data/:table`.
+  - Render a split workbench with table stats, source/search filters, record
+    list, selected-record inspector, field list, and raw JSON details.
+  - Keep the slice read/inspect only; defer create/edit/archive controls to a
+    later route-level editing task.
+  - Validate desktop and mobile behavior with authenticated browser smoke.
+- Acceptance Criteria:
+  - Signed-in owners can open `/data/notes` and other supported table routes.
+  - The workbench shows table label, group, description, operating-area mapping,
+    record count, field count, API route count, and source count.
+  - Record search and source filters update the list without page reload.
+  - Selecting a record updates the inspector with readable field values and raw
+    JSON.
+  - `/data/:table` is served as an SPA route by the backend.
+- Definition of Done:
+  - `node --check public/app.js`, `npm run build`, `npm test`,
+    `git diff --check`, and authenticated Playwright smoke pass.
+  - Canonical task, project-state, planning, and UX memory docs are updated.
+- Result Report:
+  - Added `/data/:table` generic record workbench.
+  - Data module rows now open table-specific routes.
+  - Added reusable record list, selected state, inspector, field-list, and raw
+    JSON presentation styles.
+  - Added backend SPA route support for `/data/:table`.
+  - Validation passed against `/data/notes` with a real note record created
+    through the API.

@@ -859,6 +859,136 @@ h4 {
   white-space: nowrap;
 }
 
+.table-workbench-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.table-workbench-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(360px, 1.1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.record-list {
+  display: grid;
+  gap: 8px;
+  max-height: 720px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.record-list-row {
+  display: grid;
+  gap: 5px;
+  width: 100%;
+  min-height: 82px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fbfcfe;
+  color: var(--text);
+  text-align: left;
+}
+
+.record-list-row:hover,
+.record-list-row.is-selected {
+  border-color: #9fc1ff;
+  background: #eef4ff;
+}
+
+.record-list-row strong {
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+.record-list-row small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.record-inspector {
+  display: grid;
+  gap: 14px;
+  min-height: 360px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.record-inspector-header {
+  display: grid;
+  gap: 6px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.record-inspector-header strong {
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.record-inspector-header p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.record-field-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.record-field-list div {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.45fr) minmax(0, 1fr);
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #edf0f5;
+}
+
+.record-field-list dt {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+.record-field-list dd {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.record-json {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.record-json summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.record-json pre {
+  max-height: 340px;
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fbfcfe;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .integration-action-list {
   display: grid;
   gap: 10px;
@@ -1907,6 +2037,8 @@ button.danger:hover {
     .integration-action-row,
     .agent-key-layout,
     .agent-key-row,
+    .table-workbench-layout,
+    .record-field-list div,
     .workbench-index-row,
     .integration-area-row {
     grid-template-columns: 1fr;

@@ -308,6 +308,49 @@
         </section>
       </section>
 
+      <section class="view" data-view="/data-table">
+        <div class="page-title">
+          <div>
+            <p class="label" id="tableWorkbenchLabel">Database table</p>
+            <h1 id="tableWorkbenchTitle">Table workbench</h1>
+            <p id="tableWorkbenchSummary">Choose a data module to inspect records.</p>
+          </div>
+          <div class="actions">
+            <a class="button-link secondary compact" href="/data" data-link>All data</a>
+            <a class="button-link secondary compact" id="tableWorkbenchApiLink" href="/settings/api" data-link>API routes</a>
+          </div>
+        </div>
+
+        <section class="dashboard-grid dense-grid" id="tableWorkbenchStats"></section>
+
+        <section class="panel workbench-panel table-workbench-panel">
+          <div class="section-title row-title">
+            <div>
+              <h2 id="tableRecordsTitle">Records</h2>
+              <p id="tableRecordsSummary">Sign in to load records.</p>
+            </div>
+          </div>
+          <section class="workbench-filter-bar" aria-label="Table record filters">
+            <label>
+              Search records
+              <input id="tableRecordSearch" type="search" autocomplete="off" placeholder="Search visible fields, source, status..." />
+            </label>
+            <label>
+              Source
+              <select id="tableRecordSourceFilter">
+                <option value="">All sources</option>
+              </select>
+            </label>
+          </section>
+          <div class="table-workbench-layout">
+            <div class="record-list" id="tableRecordList"></div>
+            <aside class="record-inspector" id="recordInspector">
+              <p class="empty-note">Select a record to inspect its fields.</p>
+            </aside>
+          </div>
+        </section>
+      </section>
+
       <section class="view" data-view="/tasks-adapter">
         <div class="page-title">
           <div>

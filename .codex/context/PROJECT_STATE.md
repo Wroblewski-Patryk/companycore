@@ -133,6 +133,15 @@ Last updated: 2026-05-07
 - Next required mode: TESTER for production smoke and release evidence.
 
 ## Recent Progress
+- 2026-05-07: Completed V2WEB-025 Generic Table Record Workbench. Data module
+  rows now open `/data/:table`, where owners can inspect records through a
+  split workbench with module stats, source/search filters, selected record
+  state, readable field values, and raw JSON details. The slice is intentionally
+  read/inspect only; create/edit/archive controls remain a later typed
+  route-level task. Validation passed: `node --check public/app.js`,
+  `npm run build`, `git diff --check`, `npm test` against disposable Postgres
+  on port `55458`, and authenticated local Playwright desktop/mobile
+  `/data/notes` smoke using a real note created through the API.
 - 2026-05-07: Completed AGRUN-005 Scoped Agent Key Owner UI. `/settings/api`
   now includes an Agent service keys panel with least-privilege presets for
   read-only agents, memory writers, event consumers, and operators. Owners can
