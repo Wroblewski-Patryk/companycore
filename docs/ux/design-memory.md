@@ -96,4 +96,5 @@ of rediscovering them.
   archived, and reloaded real Notes API records on desktop and mobile without
   console errors. V2WEB-027 reused the same pattern for `/data/projects` with
   typed name/status/description controls and responsive `record-editor-grid`
-  validation.
+  validation. V2WEB-028 reused it for `/data/clients` with a CRM-specific grid
+  and full-width email field so longer contact values remain readable.

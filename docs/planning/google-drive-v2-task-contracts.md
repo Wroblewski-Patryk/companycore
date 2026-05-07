@@ -791,3 +791,55 @@ It follows the repository task contract and must stay synchronized with
   - Deployed to production at commit
     `9d50920361aaeeaa494c795e01973d319dd859d9`; production health and
     static asset markers confirmed the typed Projects editor code is live.
+
+## V2WEB-028 Typed Clients Editor Workbench
+
+- Task Type: frontend/ux
+- Current Stage: done
+- Deliverable For This Stage: typed client create/edit/archive editor inside
+  the Data Operations workbench.
+- Goal: Let owners manage CompanyCore CRM clients from `/data/clients` without
+  leaving the operational data center or hand-writing API payloads.
+- Scope:
+  - `public/app.js`
+  - `public/styles.css`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/operations/agent-runtime-coverage-ledger.csv`
+  - `docs/ux/design-memory.md`
+- Implementation Plan:
+  - Reuse the split `/data/:table` workbench and existing `record-editor`
+    typed editor pattern.
+  - Add a typed editor only for the `clients` module.
+  - Wire create, update, and archive actions to the existing Clients API
+    (`POST /v1/clients`, `PATCH /v1/clients/:id`,
+    `DELETE /v1/clients/:id`).
+  - Add responsive CRM field layout so email and phone remain readable.
+  - Validate desktop and mobile rendered behavior with an authenticated browser
+    smoke.
+- Acceptance Criteria:
+  - Signed-in owners can create a client from `/data/clients`.
+  - Selecting a client loads name, status, company, email, and phone into typed
+    controls.
+  - Saving updates the selected client and refreshes the record list and
+    inspector.
+  - Archiving a selected client calls the Clients archive API and shows
+    archived status in the inspector.
+  - The editor reuses shared `record-editor` styles and does not introduce a
+    page-local visual variant.
+- Definition of Done:
+  - `node --check public/app.js`, `npm run build`, `npm test`,
+    `git diff --check`, and authenticated Playwright desktop/mobile smoke pass.
+  - Canonical task, project-state, planning, coverage-ledger, and UX memory
+    docs are updated.
+- Result Report:
+  - Added typed client name, status, company, email, and phone controls to
+    `/data/clients`.
+  - Generalized the typed editor selector so Notes, Projects, and Clients share
+    the same workbench pattern while other modules remain read-only.
+  - Added client-specific grid styling and full-width email handling for
+    readable CRM input.
+  - Validation passed against a disposable Postgres database and local
+    Playwright desktop/mobile smokes that created, edited, archived, and
+    reloaded real Clients API records.

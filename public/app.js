@@ -2163,10 +2163,13 @@ function renderRecordInspector(record, module, fields) {
 }
 
 function hasTypedRecordEditor(slug) {
-  return ["notes", "projects"].includes(slug);
+  return ["notes", "projects", "clients"].includes(slug);
 }
 
 function renderTypedRecordEditor(slug, record) {
+  if (slug === "clients") {
+    return renderClientEditor(record);
+  }
   if (slug === "projects") {
     return renderProjectEditor(record);
   }
@@ -2259,6 +2262,66 @@ function renderProjectEditor(record) {
   return panel;
 }
 
+function renderClientEditor(record) {
+  const panel = document.createElement("section");
+  panel.className = "record-editor";
+  const status = record?.status || "active";
+  panel.innerHTML = `
+    <div class="record-editor-heading">
+      <div>
+        <span class="summary-kicker">Typed editor</span>
+        <h3>${record ? "Edit selected client" : "Create client"}</h3>
+      </div>
+      ${record ? `<span class="status-pill">${escapeHtml(status)}</span>` : ""}
+    </div>
+    <div class="record-editor-grid client-editor-grid">
+      <label>
+        Client name
+        <input id="clientEditorName" type="text" autocomplete="off" placeholder="Jane Doe..." value="${escapeHtml(record?.name || "")}" />
+      </label>
+      <label>
+        Status
+        <select id="clientEditorStatus">
+          <option value="active" ${status === "active" ? "selected" : ""}>active</option>
+          <option value="lead" ${status === "lead" ? "selected" : ""}>lead</option>
+          <option value="customer" ${status === "customer" ? "selected" : ""}>customer</option>
+          <option value="paused" ${status === "paused" ? "selected" : ""}>paused</option>
+          <option value="archived" ${status === "archived" ? "selected" : ""}>archived</option>
+        </select>
+      </label>
+      <label>
+        Company
+        <input id="clientEditorCompany" type="text" autocomplete="off" placeholder="Company or organization..." value="${escapeHtml(record?.companyName || "")}" />
+      </label>
+      <label class="record-editor-span-2">
+        Email
+        <input id="clientEditorEmail" type="email" autocomplete="off" placeholder="name@example.com" value="${escapeHtml(record?.email || "")}" />
+      </label>
+      <label>
+        Phone
+        <input id="clientEditorPhone" type="tel" autocomplete="off" placeholder="+48..." value="${escapeHtml(record?.phone || "")}" />
+      </label>
+    </div>
+    <div class="record-editor-actions">
+      <button type="button" class="compact" data-client-action="create">Create client</button>
+      <button type="button" class="secondary compact" data-client-action="save" ${record ? "" : "disabled"}>Save selected</button>
+      <button type="button" class="secondary compact" data-client-action="new">New draft</button>
+      <button type="button" class="danger compact" data-client-action="archive" ${record && record.status !== "archived" ? "" : "disabled"}>Archive selected</button>
+    </div>
+    <p class="form-note" id="clientEditorStatusMessage">${record ? "Changes are saved into the Clients API and reflected in this database index." : "Create a local CompanyCore CRM client for deals, notes, and interactions."}</p>
+  `;
+
+  panel.querySelector('[data-client-action="create"]').addEventListener("click", () => createClientFromEditor(panel));
+  panel.querySelector('[data-client-action="save"]').addEventListener("click", () => saveSelectedClientFromEditor(panel, record));
+  panel.querySelector('[data-client-action="new"]').addEventListener("click", () => {
+    state.tableWorkbench.selectedId = "";
+    state.tableWorkbench.newDraft = true;
+    renderTableWorkbench();
+  });
+  panel.querySelector('[data-client-action="archive"]').addEventListener("click", () => archiveSelectedClient(record));
+  return panel;
+}
+
 function noteEditorContent(panel) {
   return panel.querySelector("#noteEditorContent")?.value.trim() || "";
 }
@@ -2269,6 +2332,10 @@ function setNoteEditorStatus(panel, message, tone = "") {
 
 function setProjectEditorStatus(panel, message, tone = "") {
   setRecordEditorStatus(panel, "#projectEditorStatusMessage", message, tone);
+}
+
+function setClientEditorStatus(panel, message, tone = "") {
+  setRecordEditorStatus(panel, "#clientEditorStatusMessage", message, tone);
 }
 
 function setRecordEditorStatus(panel, selector, message, tone = "") {
@@ -2454,6 +2521,103 @@ async function archiveSelectedProject(record) {
     await refreshTableRecords("projects");
     renderTableWorkbench();
     showResult("Project archived.", "success");
+  } catch (error) {
+    showResult(friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+}
+
+function clientEditorPayload(panel) {
+  const name = panel.querySelector("#clientEditorName")?.value.trim() || "";
+  const companyName = panel.querySelector("#clientEditorCompany")?.value.trim() || "";
+  const email = panel.querySelector("#clientEditorEmail")?.value.trim() || "";
+  const phone = panel.querySelector("#clientEditorPhone")?.value.trim() || "";
+  const status = panel.querySelector("#clientEditorStatus")?.value || "active";
+  return {
+    name,
+    companyName: companyName || undefined,
+    email: email || undefined,
+    phone: phone || undefined,
+    status
+  };
+}
+
+async function createClientFromEditor(panel) {
+  const payload = clientEditorPayload(panel);
+  if (!payload.name) {
+    setClientEditorStatus(panel, "Name the client before creating it.", "error");
+    return;
+  }
+
+  setBusy(true);
+  try {
+    const response = await api("/v1/clients", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    state.tableWorkbench.selectedId = response.data?.id || "";
+    state.tableWorkbench.newDraft = false;
+    await refreshTableRecords("clients");
+    renderTableWorkbench();
+    showResult("Client created in the database.", "success");
+  } catch (error) {
+    setClientEditorStatus(panel, friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function saveSelectedClientFromEditor(panel, record) {
+  if (!record?.id) {
+    setClientEditorStatus(panel, "Select a client before saving changes.", "error");
+    return;
+  }
+
+  const payload = clientEditorPayload(panel);
+  if (!payload.name) {
+    setClientEditorStatus(panel, "Client name cannot be empty.", "error");
+    return;
+  }
+
+  setBusy(true);
+  try {
+    await api(`/v1/clients/${record.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    state.tableWorkbench.selectedId = record.id;
+    state.tableWorkbench.newDraft = false;
+    await refreshTableRecords("clients");
+    renderTableWorkbench();
+    showResult("Client updated.", "success");
+  } catch (error) {
+    setClientEditorStatus(panel, friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function archiveSelectedClient(record) {
+  if (!record?.id) {
+    return;
+  }
+
+  const confirmed = window.confirm("Archive this client? Related deals, notes, and interactions stay in the database.");
+  if (!confirmed) {
+    return;
+  }
+
+  setBusy(true);
+  try {
+    await api(`/v1/clients/${record.id}`, { method: "DELETE" });
+    state.tableWorkbench.selectedId = record.id;
+    state.tableWorkbench.newDraft = false;
+    await refreshTableRecords("clients");
+    renderTableWorkbench();
+    showResult("Client archived.", "success");
   } catch (error) {
     showResult(friendlyError(error), "error");
   } finally {

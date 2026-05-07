@@ -133,6 +133,16 @@ Last updated: 2026-05-07
 - Next required mode: TESTER for production smoke and release evidence.
 
 ## Recent Progress
+- 2026-05-07: Completed V2WEB-028 Typed Clients Editor Workbench.
+  `/data/clients` now has a typed CRM client editor inside the reusable split
+  record workbench: owners can create clients, edit client name, status,
+  company, email, and phone, and archive selected clients through the existing
+  Clients API. The typed editor selector now covers Notes, Projects, and
+  Clients while keeping unrelated modules read-only. Validation passed:
+  `node --check public/app.js`, `npm run build`, `git diff --check`,
+  `npm test` against disposable Postgres on port `55461`, and local
+  authenticated Playwright desktop/mobile `/data/clients` smoke that created,
+  updated, archived, and reloaded real Clients records.
 - 2026-05-07: Completed V2WEB-027 Typed Projects Editor Workbench.
   `/data/projects` now has a typed project editor inside the reusable split
   record workbench: owners can create project workstreams, edit project name,
