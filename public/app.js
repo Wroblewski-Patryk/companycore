@@ -2164,10 +2164,13 @@ function renderRecordInspector(record, module, fields) {
 }
 
 function hasTypedRecordEditor(slug) {
-  return ["notes", "projects", "clients", "task-lists"].includes(slug);
+  return ["notes", "projects", "clients", "task-lists", "tasks"].includes(slug);
 }
 
 function renderTypedRecordEditor(slug, record) {
+  if (slug === "tasks") {
+    return renderTaskEditor(record);
+  }
   if (slug === "task-lists") {
     return renderTaskListEditor(record);
   }
@@ -2422,6 +2425,120 @@ function renderTaskListEditor(record) {
   return panel;
 }
 
+function renderTaskEditor(record) {
+  const panel = document.createElement("section");
+  panel.className = "record-editor";
+  const draft = record ? {} : typedEditorDraft("tasks");
+  const title = record?.title ?? draft.title ?? "";
+  const description = record?.description ?? draft.description ?? "";
+  const status = record?.status ?? draft.status ?? "todo";
+  const priority = record?.priority ?? draft.priority ?? "";
+  const dueDate = taskEditorDateValue(record?.dueDate ?? draft.dueDate ?? "");
+  const selectedProjectId = record?.projectId ?? draft.projectId ?? "";
+  const selectedTaskListId = record?.taskListId ?? draft.taskListId ?? "";
+  const projects = recordsForSlug("projects");
+  const taskLists = recordsForSlug("task-lists");
+  const projectOptions = projects.map((project) => `
+    <option value="${escapeHtml(project.id)}" ${selectedProjectId === project.id ? "selected" : ""}>${escapeHtml(recordTitle(project, { label: "Project" }))}</option>
+  `).join("");
+  const taskListOptions = taskLists.map((taskList) => `
+    <option value="${escapeHtml(taskList.id)}" ${selectedTaskListId === taskList.id ? "selected" : ""}>${escapeHtml(recordTitle(taskList, { label: "Task list" }))}</option>
+  `).join("");
+
+  panel.innerHTML = `
+    <div class="record-editor-heading">
+      <div>
+        <span class="summary-kicker">Typed editor</span>
+        <h3>${record ? "Edit selected task" : "Create task"}</h3>
+      </div>
+      ${record ? `<span class="status-pill">${escapeHtml(status)}</span>` : ""}
+    </div>
+    <div class="record-editor-grid task-editor-grid">
+      <label class="record-editor-span-2">
+        Task title
+        <input id="taskEditorTitle" type="text" autocomplete="off" placeholder="Describe the next concrete action..." value="${escapeHtml(title)}" />
+      </label>
+      <label>
+        Status
+        <select id="taskEditorStatus">
+          <option value="todo" ${status === "todo" ? "selected" : ""}>todo</option>
+          <option value="in_progress" ${status === "in_progress" ? "selected" : ""}>in_progress</option>
+          <option value="blocked" ${status === "blocked" ? "selected" : ""}>blocked</option>
+          <option value="done" ${status === "done" ? "selected" : ""}>done</option>
+          <option value="archived" ${status === "archived" ? "selected" : ""}>archived</option>
+        </select>
+      </label>
+      <label>
+        Priority
+        <input id="taskEditorPriority" type="text" autocomplete="off" placeholder="normal, high, urgent..." value="${escapeHtml(priority)}" />
+      </label>
+      <label>
+        Due date
+        <input id="taskEditorDueDate" type="date" value="${escapeHtml(dueDate)}" />
+      </label>
+      <label>
+        Project
+        <select id="taskEditorProject">
+          <option value="" ${selectedProjectId ? "" : "selected"}>No project</option>
+          ${projectOptions}
+        </select>
+      </label>
+      <label class="record-editor-span-2">
+        Task list
+        <select id="taskEditorTaskList">
+          <option value="" ${selectedTaskListId ? "" : "selected"}>No task list</option>
+          ${taskListOptions}
+        </select>
+      </label>
+    </div>
+    <label>
+      Description
+      <textarea id="taskEditorDescription" rows="5" autocomplete="off" placeholder="Add context, acceptance notes, or handoff detail.">${escapeHtml(description)}</textarea>
+    </label>
+    <div class="record-editor-actions">
+      <button type="button" class="compact" data-task-action="create">Create task</button>
+      <button type="button" class="secondary compact" data-task-action="save" ${record ? "" : "disabled"}>Save selected</button>
+      <button type="button" class="secondary compact" data-task-action="new">New draft</button>
+      <button type="button" class="danger compact" data-task-action="archive" ${record && record.status !== "archived" ? "" : "disabled"}>Archive selected</button>
+    </div>
+    <p class="form-note" id="taskEditorStatusMessage">${record ? "Changes are saved into the Tasks API and reflected in this database index." : "Create a local CompanyCore task. Project and task-list linkage are optional."}</p>
+  `;
+
+  panel.querySelector('[data-task-action="create"]').addEventListener("click", () => createTaskFromEditor(panel));
+  panel.querySelector('[data-task-action="save"]').addEventListener("click", () => saveSelectedTaskFromEditor(panel, record));
+  panel.querySelector('[data-task-action="new"]').addEventListener("click", () => {
+    state.tableWorkbench.selectedId = "";
+    state.tableWorkbench.newDraft = true;
+    clearTypedEditorDraft("tasks");
+    renderTableWorkbench();
+  });
+  panel.querySelector('[data-task-action="archive"]').addEventListener("click", () => archiveSelectedTask(record));
+  if (!record) {
+    panel.querySelector("#taskEditorTitle")?.addEventListener("input", (event) => {
+      updateTypedEditorDraft("tasks", { title: event.target.value });
+    });
+    panel.querySelector("#taskEditorDescription")?.addEventListener("input", (event) => {
+      updateTypedEditorDraft("tasks", { description: event.target.value });
+    });
+    panel.querySelector("#taskEditorStatus")?.addEventListener("change", (event) => {
+      updateTypedEditorDraft("tasks", { status: event.target.value });
+    });
+    panel.querySelector("#taskEditorPriority")?.addEventListener("input", (event) => {
+      updateTypedEditorDraft("tasks", { priority: event.target.value });
+    });
+    panel.querySelector("#taskEditorDueDate")?.addEventListener("change", (event) => {
+      updateTypedEditorDraft("tasks", { dueDate: event.target.value });
+    });
+    panel.querySelector("#taskEditorProject")?.addEventListener("change", (event) => {
+      updateTypedEditorDraft("tasks", { projectId: event.target.value });
+    });
+    panel.querySelector("#taskEditorTaskList")?.addEventListener("change", (event) => {
+      updateTypedEditorDraft("tasks", { taskListId: event.target.value });
+    });
+  }
+  return panel;
+}
+
 function noteEditorContent(panel) {
   return panel.querySelector("#noteEditorContent")?.value.trim() || "";
 }
@@ -2442,6 +2559,10 @@ function setTaskListEditorStatus(panel, message, tone = "") {
   setRecordEditorStatus(panel, "#taskListEditorStatusMessage", message, tone);
 }
 
+function setTaskEditorStatus(panel, message, tone = "") {
+  setRecordEditorStatus(panel, "#taskEditorStatusMessage", message, tone);
+}
+
 function setRecordEditorStatus(panel, selector, message, tone = "") {
   const status = panel.querySelector(selector);
   if (!status) {
@@ -2454,7 +2575,12 @@ function setRecordEditorStatus(panel, selector, message, tone = "") {
 
 async function refreshTableRecords(slug) {
   const response = await api(`/v1/${slug}`);
-  state.databaseTables.set(slug, { records: response.data || [] });
+  const records = response.data || [];
+  state.databaseTables.set(slug, { records });
+  if (slug === "tasks") {
+    state.tasks = records;
+    renderTasks();
+  }
 }
 
 async function createNoteFromEditor(panel) {
@@ -2818,6 +2944,119 @@ async function archiveSelectedTaskList(record) {
     await refreshTableRecords("task-lists");
     renderTableWorkbench();
     showResult("Task list archived.", "success");
+  } catch (error) {
+    showResult(friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+}
+
+function taskEditorDateValue(value) {
+  if (!value) {
+    return "";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+  return date.toISOString().slice(0, 10);
+}
+
+function taskEditorPayload(panel) {
+  const title = panel.querySelector("#taskEditorTitle")?.value.trim() || "";
+  const description = panel.querySelector("#taskEditorDescription")?.value.trim() || "";
+  const status = panel.querySelector("#taskEditorStatus")?.value || "todo";
+  const priority = panel.querySelector("#taskEditorPriority")?.value.trim() || "";
+  const dueDate = panel.querySelector("#taskEditorDueDate")?.value || "";
+  const projectId = panel.querySelector("#taskEditorProject")?.value || "";
+  const taskListId = panel.querySelector("#taskEditorTaskList")?.value || "";
+  return {
+    title,
+    description: description || undefined,
+    status,
+    priority: priority || undefined,
+    dueDate: dueDate || undefined,
+    projectId: projectId || undefined,
+    taskListId: taskListId || undefined
+  };
+}
+
+async function createTaskFromEditor(panel) {
+  const payload = taskEditorPayload(panel);
+  if (!payload.title) {
+    setTaskEditorStatus(panel, "Name the task before creating it.", "error");
+    return;
+  }
+
+  setBusy(true);
+  try {
+    const response = await api("/v1/tasks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    state.tableWorkbench.selectedId = response.data?.id || "";
+    state.tableWorkbench.newDraft = false;
+    clearTypedEditorDraft("tasks");
+    await refreshTableRecords("tasks");
+    renderTableWorkbench();
+    showResult("Task created in the database.", "success");
+  } catch (error) {
+    setTaskEditorStatus(panel, friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function saveSelectedTaskFromEditor(panel, record) {
+  if (!record?.id) {
+    setTaskEditorStatus(panel, "Select a task before saving changes.", "error");
+    return;
+  }
+
+  const payload = taskEditorPayload(panel);
+  if (!payload.title) {
+    setTaskEditorStatus(panel, "Task title cannot be empty.", "error");
+    return;
+  }
+
+  setBusy(true);
+  try {
+    await api(`/v1/tasks/${record.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    state.tableWorkbench.selectedId = record.id;
+    state.tableWorkbench.newDraft = false;
+    await refreshTableRecords("tasks");
+    renderTableWorkbench();
+    showResult("Task updated.", "success");
+  } catch (error) {
+    setTaskEditorStatus(panel, friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function archiveSelectedTask(record) {
+  if (!record?.id) {
+    return;
+  }
+
+  const confirmed = window.confirm("Archive this task? Linked project and task list stay in the database.");
+  if (!confirmed) {
+    return;
+  }
+
+  setBusy(true);
+  try {
+    await api(`/v1/tasks/${record.id}`, { method: "DELETE" });
+    state.tableWorkbench.selectedId = record.id;
+    state.tableWorkbench.newDraft = false;
+    await refreshTableRecords("tasks");
+    renderTableWorkbench();
+    showResult("Task archived.", "success");
   } catch (error) {
     showResult(friendlyError(error), "error");
   } finally {

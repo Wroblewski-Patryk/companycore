@@ -133,6 +133,18 @@ Last updated: 2026-05-07
 - Next required mode: TESTER for production smoke and release evidence.
 
 ## Recent Progress
+- 2026-05-07: Completed V2WEB-030 Typed Tasks Editor Workbench. `/data/tasks`
+  now has a typed task editor inside the reusable split record workbench:
+  owners can create tasks, edit title, status, priority, due date, project,
+  task-list, and description, and archive selected tasks through the existing
+  Tasks API. The typed editor selector now covers Notes, Projects, Clients,
+  Task Lists, and Tasks while keeping unrelated modules read-only. Refreshing
+  the `tasks` table after mutations also updates the task adapter state so
+  route-to-route UI stays coherent. Validation passed: `node --check
+  public/app.js`, `npm run build`, `git diff --check`, `npm test` against
+  disposable Postgres database `companycore_test` on port `55463`, and local
+  authenticated Playwright desktop/mobile `/data/tasks` smokes that created,
+  updated, archived, and reloaded real Tasks records.
 - 2026-05-07: Completed V2WEB-029 Typed Task Lists Editor Workbench.
   `/data/task-lists` now has a typed task-list editor inside the reusable
   split record workbench: owners can create task lists, edit name, status,

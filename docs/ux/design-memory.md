@@ -100,4 +100,6 @@ of rediscovering them.
   and full-width email field so longer contact values remain readable.
   V2WEB-029 reused it for `/data/task-lists` with typed project linkage and
   draft preservation so background workspace refreshes do not wipe in-progress
-  create input.
+  create input. V2WEB-030 reused it for `/data/tasks` with denser task fields
+  while keeping provider-specific ClickUp custom-field and sync actions out of
+  the local business-record editor.

@@ -906,3 +906,60 @@ It follows the repository task contract and must stay synchronized with
     `eaad4fd3a0e12435e0906b73691b5de77a18a1b6`; production health and static
     asset markers confirmed the typed Task Lists editor and draft-preservation
     code are live.
+
+## V2WEB-030 Typed Tasks Editor Workbench
+
+- Task Type: frontend/ux
+- Current Stage: verification
+- Deliverable For This Stage: typed task create/edit/archive editor inside the
+  Data Operations workbench.
+- Goal: Let owners manage concrete CompanyCore tasks from `/data/tasks`
+  without leaving the database workbench or hand-writing API payloads.
+- Scope:
+  - `public/app.js`
+  - `public/styles.css`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/operations/agent-runtime-coverage-ledger.csv`
+  - `docs/ux/design-memory.md`
+- Implementation Plan:
+  - Reuse the split `/data/:table` workbench and existing `record-editor`
+    typed editor pattern.
+  - Add a typed editor only for the `tasks` module.
+  - Wire create, update, and archive actions to the existing Tasks API
+    (`POST /v1/tasks`, `PATCH /v1/tasks/:id`, `DELETE /v1/tasks/:id`).
+  - Include status, priority, due date, project, task-list, and description
+    fields without exposing ClickUp custom-field or sync controls in this
+    local business-record editor.
+  - Preserve new task draft inputs across background workspace refreshes.
+  - Validate desktop and mobile rendered behavior with authenticated browser
+    smokes.
+- Acceptance Criteria:
+  - Signed-in owners can create a task from `/data/tasks`.
+  - Selecting a task loads title, status, priority, due date, project,
+    task-list, and description into typed controls.
+  - Saving updates the selected task and refreshes the record list, inspector,
+    and task adapter state.
+  - Archiving a selected task calls the Tasks archive API and shows archived
+    status in the inspector.
+  - The editor reuses shared `record-editor` styles and does not expose
+    provider-specific write-back controls as generic local editing.
+- Definition of Done:
+  - `node --check public/app.js`, `npm run build`, `npm test`,
+    `git diff --check`, and authenticated Playwright desktop/mobile smokes
+    pass.
+  - Canonical task, project-state, planning, coverage-ledger, and UX memory
+    docs are updated.
+- Result Report:
+  - Added typed task title, status, priority, due date, project, task-list, and
+    description controls to `/data/tasks`.
+  - Extended the typed editor selector so Notes, Projects, Clients, Task
+    Lists, and Tasks share the same workbench pattern while other modules
+    remain read-only.
+  - Refreshing `tasks` table records now also updates the task adapter state so
+    route-to-route UI remains coherent after mutations.
+  - Local validation passed: `node --check public/app.js`, `npm run build`,
+    `git diff --check`, `npm test` against disposable Postgres on port
+    `55463`, and authenticated Playwright desktop/mobile smokes that created,
+    edited, archived, and reloaded real Tasks API records.
