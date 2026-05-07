@@ -40,6 +40,30 @@ Use this file to record the minimum checks after each deploy.
 
 ## Evidence
 
+- Timestamp: 2026-05-07
+- Environment: production public domains
+- Deployment:
+  - Manual VPS backend rollover for V2WEB-024.
+  - Previous runtime commit:
+    `b2b493b9eb3d6ed3c31e4a82e0b57f67f8de2565`.
+  - New runtime commit:
+    `bab9d589b7260f3e4a72a29b0f2bf907a94238ea`.
+  - Running backend container:
+    `backend-rnqqkhl3o3dut4qv56mlxly2-manual-bab9d58`.
+  - Running backend image:
+    `rnqqkhl3o3dut4qv56mlxly2_backend:bab9d589b7260f3e4a72a29b0f2bf907a94238ea`.
+  - Production Postgres container remained healthy.
+- Public checks:
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `200` with
+    build commit `bab9d589b7260f3e4a72a29b0f2bf907a94238ea`.
+  - `GET https://companycore.luckysparrow.ch/data` returned `200` and included
+    the Data Operations SPA shell markers `Database modules` and
+    `dataModuleList`.
+- Residual risks:
+  - Full protected browser verification in production still depends on an owner
+    login session. Local authenticated desktop/mobile Playwright smoke covered
+    the `/data` interaction before deploy.
+
 - Timestamp: 2026-05-02
 - Environment: production public domains
 - Domains checked:

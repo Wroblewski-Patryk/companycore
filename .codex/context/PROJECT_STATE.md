@@ -142,6 +142,15 @@ Last updated: 2026-05-07
   architecture change. Validation passed: `npm run build`,
   `node --check public/app.js`, `git diff --check`, and authenticated local
   Playwright desktop/mobile data-view smoke.
+- 2026-05-07: Deployed V2WEB-024 to production with manual VPS backend
+  rollover after public health still reported `b2b493b` following the GitHub
+  push. The running backend container is
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-bab9d58`, image
+  `rnqqkhl3o3dut4qv56mlxly2_backend:bab9d589b7260f3e4a72a29b0f2bf907a94238ea`.
+  Production Postgres remained healthy. Public `/health` reports commit
+  `bab9d589b7260f3e4a72a29b0f2bf907a94238ea`, and
+  `https://companycore.luckysparrow.ch/data` returns the Data Operations SPA
+  shell with `Database modules` and `dataModuleList`.
 - 2026-05-07: Completed V2WEB-023 Dashboard Operational Cockpit. The dashboard
   now starts with an Operational Cockpit panel that ranks the current priority,
   exposes primary and secondary next actions, and shows four operational
