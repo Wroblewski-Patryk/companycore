@@ -1,5 +1,59 @@
 # Web Console V2 Task Contracts
 
+## V2WEB-034 Command Bar Module Switcher Polish
+
+- Task Type: design/frontend
+- Current Stage: done
+- Deliverable For This Stage: top command bar and module switcher use the same
+  semantic lane model as the sidebar and expose clearer active-module context.
+- Goal: Make cross-module navigation feel intentional and fast from every
+  screen without changing route behavior or adding backend state.
+- Scope:
+  - `public/index.html`
+  - `public/app.js`
+  - `public/styles.css`
+  - `docs/ux/design-memory.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+- Implementation Plan:
+  - Rename the topbar search affordance from "Open module" to "Jump to module",
+    replace long workspace-name eyebrow text with stable current-module copy,
+    and tighten route title styling.
+  - Align module switcher groups with sidebar lanes: Command, Operate,
+    Integrations, and Workspace.
+  - Render grouped search results with group headings and active-module state.
+  - Validate syntax, build, tests, and desktop/mobile command-bar rendering.
+- Acceptance Criteria:
+  - Module switcher results are grouped by the same job-family labels as the
+    sidebar.
+  - The current module is marked as selected in the switcher result list.
+  - Enter-first-result navigation and click navigation keep using existing
+    route paths.
+  - Desktop and mobile topbar layouts render without horizontal overflow.
+- Definition of Done:
+  - `node --check public/app.js`, `npm run build`, `git diff --check`, and
+    `npm test` pass.
+  - Local Playwright smoke verifies module search/open behavior on desktop and
+    mobile with no console errors or horizontal overflow.
+- Result Report:
+  - Updated topbar copy to "Jump to module", changed the signed-in eyebrow to
+    "Current module", and tightened route title chrome.
+  - Aligned `moduleRoutes` groups to Command, Operate, Integrations, and
+    Workspace.
+  - Added grouped switcher result headings and active-result state while
+    preserving the same navigation paths.
+  - Validation passed: `node --check public/app.js`, `npm run build`,
+    `git diff --check`, and `npm test` against disposable Postgres database
+    `companycore_test` on port `55473`.
+  - Local Playwright command-bar smoke passed on desktop `1440x960` and mobile
+    `390x844`: "Jump to module" rendered, grouped results appeared, active
+    Dashboard result was marked selected, Enter navigation opened API settings,
+    there were no console errors, and no horizontal overflow. Browser plugin
+    validation was attempted first but remained blocked because its Node REPL
+    requires Node `>=22.22.0` while this workstation exposes Node `22.13.0`.
+
 ## V2WEB-033 App Shell Navigation Polish
 
 - Task Type: design/frontend

@@ -68,6 +68,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] V2WEB-031 Cross-Department Pipeline Semantics
 - [x] V2WEB-032 Dashboard Command Layout Polish
 - [x] V2WEB-033 App Shell Navigation Polish
+- [x] V2WEB-034 Command Bar Module Switcher Polish
 - [x] AGRUN-005 Scoped Agent Key Owner UI
 - [x] CCV1-009P Protected production smoke for adapter CRUD
 - [x] CCV1-027 Paperclip and Jarvis production env wiring
@@ -195,6 +196,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] 77. V2WEB-031 Cross-Department Pipeline Semantics
 - [x] 78. V2WEB-032 Dashboard Command Layout Polish
 - [x] 79. V2WEB-033 App Shell Navigation Polish
+- [x] 80. V2WEB-034 Command Bar Module Switcher Polish
 - [x] 66. V2WEB-019 Relationship Review Filters
 - [x] 65. V2WEB-018 Global Module Switcher
 - [x] 49. V2WEB-002 Manual Provider Scope Mapping

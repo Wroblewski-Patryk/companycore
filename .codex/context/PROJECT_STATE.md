@@ -136,6 +136,17 @@ Last updated: 2026-05-07
 - Next required mode: TESTER for production smoke and release evidence.
 
 ## Recent Progress
+- 2026-05-07: Completed V2WEB-034 Command Bar Module Switcher Polish.
+  The top command bar now uses "Jump to module", a tighter route-context style,
+  and grouped module-switcher results that match the sidebar lanes: Command,
+  Operate, Integrations, and Workspace. The active module is marked in the
+  switcher without changing route paths or existing Enter/click navigation.
+  Validation passed: `node --check public/app.js`, `npm run build`,
+  `git diff --check`, `npm test` against disposable Postgres on port `55473`,
+  and local Playwright desktop/mobile command-bar smoke with no console errors
+  or horizontal overflow. Browser plugin validation was attempted first but
+  remained blocked by the local Node REPL runtime requirement of Node
+  `>=22.22.0`.
 - 2026-05-07: Completed V2WEB-033 App Shell Navigation Polish.
   The owner console sidebar now groups existing routes into Command, Operate,
   Integrations, and Workspace lanes while preserving route URLs, `data-link`,

@@ -166,3 +166,17 @@ of rediscovering them.
   strict linear stepper instead of persistent navigation.
 - Evidence: V2WEB-033 grouped the CompanyCore sidebar while preserving every
   existing `href`, `data-link`, and `data-nav` route contract.
+
+### 2026-05-07 - Shared Navigation Lanes
+- Type: reusable_pattern
+- Context: Persistent sidebar navigation and command-bar search should teach
+  the same mental model instead of presenting two different taxonomies.
+- Decision: Use the same job-family lanes in sidebar links and module switcher
+  results. Mark the active destination in both surfaces so the operator always
+  knows where they are before jumping elsewhere.
+- Reuse when: A command bar, global search, or module switcher points at the
+  same destinations as the app shell.
+- Avoid when: Search results are heterogeneous objects rather than navigation
+  destinations; those should group by object type or relevance instead.
+- Evidence: V2WEB-034 aligned module switcher groups with the V2WEB-033
+  sidebar lanes and added active-result styling without changing route paths.

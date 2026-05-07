@@ -406,17 +406,17 @@ const routeLabels = {
 };
 
 const moduleRoutes = [
-  { path: "/dashboard", label: "Dashboard", group: "Command center", keywords: "home overview summary next action attention" },
-  { path: "/data", label: "Data", group: "Database operations", keywords: "database records tables crud modules workbench" },
-  { path: "/areas", label: "Operating areas", group: "Operating model", keywords: "departments areas tables records mapping workspace" },
-  { path: "/relationships", label: "Relationships", group: "Operating model", keywords: "review queue provider drive unmapped correction relations" },
-  { path: "/tasks-adapter", label: "Tasks & adapters", group: "Adapters", keywords: "tasks clickup lists priority status due sync" },
-  { path: "/pipeline", label: "Pipeline", group: "Workflow", keywords: "shared pipelines workflow stages clients deals interactions sales crm departments" },
-  { path: "/settings/account", label: "Account", group: "Settings", keywords: "owner workspace readiness login account" },
-  { path: "/settings/integrations", label: "Integrations", group: "Settings", keywords: "data map modules sources tables drive clickup api" },
-  { path: "/settings", label: "ClickUp adapter", group: "Settings", keywords: "clickup token workspace lists sync import" },
-  { path: "/settings/drive", label: "Google Drive", group: "Settings", keywords: "drive folders files oauth import reconcile scan" },
-  { path: "/settings/api", label: "API settings", group: "Settings", keywords: "api routes manifest agents service keys capabilities" }
+  { path: "/dashboard", label: "Dashboard", group: "Command", keywords: "home overview summary next action attention" },
+  { path: "/areas", label: "Operating areas", group: "Operate", keywords: "departments areas tables records mapping workspace" },
+  { path: "/relationships", label: "Relationships", group: "Operate", keywords: "review queue provider drive unmapped correction relations" },
+  { path: "/data", label: "Data", group: "Operate", keywords: "database records tables crud modules workbench" },
+  { path: "/tasks-adapter", label: "Tasks & adapters", group: "Operate", keywords: "tasks clickup lists priority status due sync" },
+  { path: "/pipeline", label: "Pipeline", group: "Operate", keywords: "shared pipelines workflow stages clients deals interactions sales crm departments" },
+  { path: "/settings/integrations", label: "Integration map", group: "Integrations", keywords: "data map modules sources tables drive clickup api" },
+  { path: "/settings", label: "ClickUp adapter", group: "Integrations", keywords: "clickup token workspace lists sync import" },
+  { path: "/settings/drive", label: "Google Drive", group: "Integrations", keywords: "drive folders files oauth import reconcile scan" },
+  { path: "/settings/api", label: "API settings", group: "Integrations", keywords: "api routes manifest agents service keys capabilities" },
+  { path: "/settings/account", label: "Account", group: "Workspace", keywords: "owner workspace readiness login account" }
 ];
 
 const dataModuleCatalog = [
@@ -536,18 +536,29 @@ function renderModuleSwitcher({ open = false } = {}) {
     empty.textContent = "No implemented module matches this search.";
     moduleResults.append(empty);
   } else {
+    let currentGroup = "";
+    const currentPath = normalizedPath();
     for (const row of rows) {
+      if (row.group !== currentGroup) {
+        currentGroup = row.group;
+        const heading = document.createElement("p");
+        heading.className = "module-result-group";
+        heading.textContent = currentGroup;
+        moduleResults.append(heading);
+      }
+
       const button = document.createElement("button");
       button.type = "button";
-      button.className = "module-result";
+      button.className = `module-result${currentPath === row.path ? " active" : ""}`;
       button.dataset.path = row.path;
       button.setAttribute("role", "option");
+      button.setAttribute("aria-selected", String(currentPath === row.path));
 
       const copy = document.createElement("span");
       const title = document.createElement("strong");
       title.textContent = row.label;
       const meta = document.createElement("small");
-      meta.textContent = `${row.group} - ${row.metric}`;
+      meta.textContent = row.metric;
       copy.append(title, meta);
 
       const route = document.createElement("kbd");
@@ -653,9 +664,7 @@ function renderRoute() {
     routeTitle.textContent = isDataWorkbenchPath(path) ? "Data" : routeLabels[path] || "CompanyCore";
   }
   if (workspaceEyebrow) {
-    workspaceEyebrow.textContent = state.workspace
-      ? `${state.workspace.name} workspace`
-      : "Private workspace";
+    workspaceEyebrow.textContent = isSignedIn() ? "Current module" : "Private workspace";
   }
   document.body.dataset.route = path;
   renderConnectionState();
@@ -4100,7 +4109,7 @@ function renderConnectionState() {
     sidebarWorkspaceName.textContent = connected ? state.workspace.name : "Workspace";
   }
   if (workspaceEyebrow) {
-    workspaceEyebrow.textContent = connected ? `${state.workspace.name} workspace` : "Private workspace";
+    workspaceEyebrow.textContent = connected ? "Current module" : "Private workspace";
   }
 
   workspaceLabel.textContent = connected
