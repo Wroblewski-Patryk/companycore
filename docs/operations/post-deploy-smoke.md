@@ -43,6 +43,30 @@ Use this file to record the minimum checks after each deploy.
 - Timestamp: 2026-05-07
 - Environment: production public domains
 - Deployment:
+  - Manual VPS backend rollover for AGRUN-005.
+  - Previous runtime commit:
+    `1d9f5869bd0951693375a196a37689df64d33fcf`.
+  - New runtime commit:
+    `68ef5f99659ffd8cc1de88476aab97bcaa9bccbd`.
+  - Running backend container:
+    `backend-rnqqkhl3o3dut4qv56mlxly2-manual-68ef5f9`.
+  - Running backend image:
+    `rnqqkhl3o3dut4qv56mlxly2_backend:68ef5f99659ffd8cc1de88476aab97bcaa9bccbd`.
+  - Production Postgres container remained healthy.
+- Public checks:
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `200` with
+    build commit `68ef5f99659ffd8cc1de88476aab97bcaa9bccbd`.
+  - `GET https://companycore.luckysparrow.ch/settings/api` returned `200` and
+    included the Agent service keys shell markers `Agent service keys` and
+    `agentKeyForm`.
+- Residual risks:
+  - Full protected production key creation was not run to avoid creating real
+    service credentials during public smoke. Local authenticated Playwright
+    smoke covered create, copy-once display, and deactivate before deploy.
+
+- Timestamp: 2026-05-07
+- Environment: production public domains
+- Deployment:
   - Manual VPS backend rollover for V2WEB-024.
   - Previous runtime commit:
     `b2b493b9eb3d6ed3c31e4a82e0b57f67f8de2565`.

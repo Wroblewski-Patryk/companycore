@@ -142,6 +142,15 @@ Last updated: 2026-05-07
   `node --check public/app.js`, `npm run build`, `git diff --check`,
   `npm test` against disposable Postgres on port `55457`, and authenticated
   local Playwright desktop/mobile API-settings smoke.
+- 2026-05-07: Deployed AGRUN-005 to production with manual VPS backend
+  rollover after public health still reported `1d9f586` following the GitHub
+  push. The running backend container is
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-68ef5f9`, image
+  `rnqqkhl3o3dut4qv56mlxly2_backend:68ef5f99659ffd8cc1de88476aab97bcaa9bccbd`.
+  Production Postgres remained healthy. Public `/health` reports commit
+  `68ef5f99659ffd8cc1de88476aab97bcaa9bccbd`, and
+  `https://companycore.luckysparrow.ch/settings/api` returns the Agent service
+  keys panel and `agentKeyForm` shell marker.
 - 2026-05-07: Completed V2WEB-024 Data Operations Index. The owner console now
   exposes `/data` as a reusable database operations entry point with 13
   CompanyCore module rows, record counts, API route coverage, area mappings,
