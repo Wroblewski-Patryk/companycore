@@ -312,6 +312,7 @@ const pipelineDealsList = document.querySelector("#pipelineDealsList");
 const pipelineClientsList = document.querySelector("#pipelineClientsList");
 const pipelineInteractionsList = document.querySelector("#pipelineInteractionsList");
 const relationshipSummary = document.querySelector("#relationshipSummary");
+const relationshipContext = document.querySelector("#relationshipContext");
 const relationshipSearch = document.querySelector("#relationshipSearch");
 const relationshipSourceFilter = document.querySelector("#relationshipSourceFilter");
 const relationshipQueue = document.querySelector("#relationshipQueue");
@@ -1533,6 +1534,7 @@ function relationshipMatchesFilters(row) {
 }
 
 function renderRelationshipCenter() {
+  relationshipContext.innerHTML = "";
   relationshipQueue.innerHTML = "";
   relationshipProviderList.innerHTML = "";
   relationshipDriveList.innerHTML = "";
@@ -1549,6 +1551,13 @@ function renderRelationshipCenter() {
   relationshipSummary.textContent = isSignedIn()
     ? `${filteredRows.length} of ${rows.length} relationship${rows.length === 1 ? "" : "s"} shown. ${queueCount} need review.`
     : "Sign in to load relationship data.";
+  relationshipContext.append(relationshipContextElement({
+    mappings,
+    driveFolders,
+    rows,
+    filteredRows,
+    queueCount
+  }));
 
   if (queueRows.length === 0) {
     const empty = document.createElement("p");
@@ -1591,6 +1600,36 @@ function renderRelationshipCenter() {
       label: "Assign area"
     })}
   `, state.relationshipFilters.source === "provider" ? "Drive folders are hidden by the current filter." : state.googleDrive.configured ? "No Drive folders match the current filters." : "Google Drive is not connected yet.");
+}
+
+function relationshipContextElement({ mappings, driveFolders, rows, filteredRows, queueCount }) {
+  const panel = document.createElement("article");
+  panel.className = "relationship-context-card";
+  const status = queueCount > 0
+    ? `${queueCount} need review`
+    : rows.length > 0 ? "All mapped" : "Ready for imports";
+  panel.innerHTML = `
+    <div class="relationship-context-copy">
+      <span class="summary-kicker">Relationship context</span>
+      <div class="relationship-context-heading">
+        <strong>Provider and Drive area mapping</strong>
+        <span class="workbench-index-status">${escapeHtml(status)}</span>
+      </div>
+      <p>Use this review center to assign ClickUp structures and imported Drive folders to the right operating areas before agents rely on that context.</p>
+      <div class="relationship-context-pills" aria-label="Relationship operation context">
+        <span>${mappings.length} provider mapping${mappings.length === 1 ? "" : "s"}</span>
+        <span>${driveFolders.length} Drive folder${driveFolders.length === 1 ? "" : "s"}</span>
+        <span>${queueCount} review item${queueCount === 1 ? "" : "s"}</span>
+        <span>${filteredRows.length} of ${rows.length} visible</span>
+      </div>
+    </div>
+    <div class="relationship-context-actions">
+      <a class="button-link compact" href="/areas" data-link>Open area map</a>
+      <a class="button-link secondary compact" href="/settings/integrations" data-link>Integration map</a>
+    </div>
+  `;
+  bindInlineNavigation(panel);
+  return panel;
 }
 
 function relationshipQueueRow(queueItem) {

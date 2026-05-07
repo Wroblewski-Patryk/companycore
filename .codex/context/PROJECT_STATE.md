@@ -137,6 +137,21 @@ Last updated: 2026-05-07
 
 ## Recent Progress
 
+- 2026-05-07: Completed V2WEB-039 Relationships Mapping Context Polish.
+  `/relationships` now includes a compact mapping context panel before the
+  review queue. The panel shows provider mapping count, Drive folder count,
+  review item count, filtered relationship visibility, mapping health, and
+  links to `/areas` plus `/settings/integrations` through existing SPA
+  navigation while preserving relationship filters, review rows, assign-area
+  controls, and provider/Drive lists.
+  Validation passed: `node --check public/app.js`, `npm run build`,
+  `git diff --check`, `npm test` against disposable Postgres on port `55485`,
+  and local Playwright desktop/mobile `/relationships` smoke with no console
+  errors or horizontal overflow. Smoke verified the context copy, provider and
+  Drive count pills, and actions to `/areas` plus `/settings/integrations`.
+  Browser plugin fallback note: in-app Browser could not initialize because
+  node_repl resolved Node `22.13.0` while the plugin requires `>=22.22.0`.
+
 - 2026-05-07: Completed V2WEB-038 Pipeline Workflow Context Polish.
   `/pipeline` now includes a compact workflow context panel before stats,
   filters, and the record feed. The panel explains that pipeline stages are

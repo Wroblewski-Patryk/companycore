@@ -54,6 +54,7 @@ No active task.
 
 ## Done
 
+- V2WEB-039 Relationships Mapping Context Polish.
 - V2WEB-038 Pipeline Workflow Context Polish.
 - V2WEB-037 Tasks Adapter Context Polish.
 - V2WEB-036 Table Workbench Context Polish.

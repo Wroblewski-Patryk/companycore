@@ -1,5 +1,56 @@
 # Web Console V2 Task Contracts
 
+## V2WEB-039 Relationships Mapping Context Polish
+
+- Task Type: design/frontend
+- Current Stage: done
+- Deliverable For This Stage: `/relationships` shows a compact mapping context
+  panel before the review queue.
+- Goal: Make the relationship review center immediately explain provider and
+  Drive area mapping health, what needs review, and where the owner should go
+  next to fix operating-area context.
+- Scope:
+  - `public/index.html`
+  - `public/app.js`
+  - `public/styles.css`
+  - `docs/ux/design-memory.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+- Implementation Plan:
+  - Add a relationship context slot above the existing review queue.
+  - Render mapping health, provider mapping count, Drive folder count, review
+    item count, and filtered visibility.
+  - Add local actions to open the operating area map and integration map
+    through existing SPA navigation.
+  - Preserve existing relationship filters, review queue rows, assign-area
+    controls, and provider/Drive lists.
+  - Validate syntax, build, tests, and desktop/mobile `/relationships`
+    rendering.
+- Acceptance Criteria:
+  - `/relationships` explains provider/Drive area mapping before the review
+    queue.
+  - `Open area map` navigates to `/areas` through the SPA.
+  - `Integration map` navigates to `/settings/integrations` through the SPA.
+  - Desktop and mobile layouts render without horizontal overflow.
+- Definition of Done:
+  - `node --check public/app.js`, `npm run build`, `git diff --check`, and
+    `npm test` pass.
+  - Local browser smoke verifies relationship context, both actions, responsive
+    layout, and no console errors.
+- Result Report:
+  - Added a dynamic mapping context panel to `/relationships`.
+  - Added provider mapping, Drive folder, review item, and visible relationship
+    pills plus actions to `/areas` and `/settings/integrations`.
+  - Passed `node --check public/app.js`, `npm run build`, `git diff --check`,
+    and `npm test` against disposable Postgres on port `55485`.
+  - Passed local Playwright desktop/mobile `/relationships` smoke with no
+    console errors or horizontal overflow; smoke verified context copy, pills,
+    and both SPA navigation actions.
+  - Browser plugin fallback was required because node_repl resolved Node
+    `22.13.0` while the Browser plugin requires `>=22.22.0`.
+
 ## V2WEB-038 Pipeline Workflow Context Polish
 
 - Task Type: design/frontend

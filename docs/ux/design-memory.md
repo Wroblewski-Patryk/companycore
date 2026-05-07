@@ -34,6 +34,21 @@ of rediscovering them.
 
 ## Entries
 
+### 2026-05-07 - Relationship Mapping Context Panel
+- Type: reusable_pattern
+- Context: Mapping review screens need to show whether external structures are
+  assigned to operating areas before the operator scans individual rows.
+- Decision: Place a compact relationship context panel before the review queue.
+  Show mapping health, provider/Drive counts, review-item count, filtered
+  visibility, and actions to the area map plus integration map.
+- Reuse when: A route reconciles external provider structures, files, folders,
+  or imported containers against internal ownership or operating-area context.
+- Avoid when: The route is a detail editor for one relationship or when there
+  is no remediation path outside the current list.
+- Evidence: V2WEB-039 adds `/relationships` context with provider mapping,
+  Drive folder, review item, visible relationship counts, and links into area
+  and integration maps.
+
 ### 2026-05-07 - Workflow Context Panel
 - Type: reusable_pattern
 - Context: Cross-module workflow screens need to explain reusable process
