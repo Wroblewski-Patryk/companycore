@@ -268,6 +268,7 @@ const apiSearch = document.querySelector("#apiSearch");
 const apiMethodFilter = document.querySelector("#apiMethodFilter");
 const apiRouteSummary = document.querySelector("#apiRouteSummary");
 const apiRouteList = document.querySelector("#apiRouteList");
+const areaContext = document.querySelector("#areaContext");
 const operatingAreasNav = document.querySelector("#operatingAreasNav");
 const areaTitle = document.querySelector("#areaTitle");
 const areaDescription = document.querySelector("#areaDescription");
@@ -3541,9 +3542,18 @@ function renderDataCounters() {
 
 function renderOperatingMap() {
   operatingAreasNav.innerHTML = "";
+  areaContext.innerHTML = "";
   const areas = sortedOperatingAreas();
 
   if (areas.length === 0) {
+    areaContext.append(areaContextElement({
+      area: null,
+      areas,
+      tables: [],
+      files: [],
+      mappings: [],
+      recordCount: 0
+    }));
     areaTitle.textContent = "No operating model loaded";
     areaDescription.textContent = isSignedIn()
       ? "Refresh the workspace connection to load CompanyCore areas."
@@ -3599,6 +3609,7 @@ function renderOperatingMap() {
     || mapping.tableId && tableIds.has(mapping.tableId)
   ));
   const recordCount = tables.reduce((sum, table) => sum + countForTable(table), 0);
+  areaContext.append(areaContextElement({ area, areas, tables, files, mappings, recordCount }));
 
   areaTitle.textContent = `${definition.number}. ${definition.label}`;
   areaDescription.textContent = definition.description || area.description || area.name;
@@ -3673,6 +3684,44 @@ function renderOperatingMap() {
   renderIntegrationTaxonomy();
   renderRelationshipCenter();
   bindScopeEditors();
+}
+
+function areaContextElement({ area, areas, tables, files, mappings, recordCount }) {
+  const panel = document.createElement("article");
+  panel.className = "area-context-card";
+  const totalTables = areas.flatMap((item) => item.tables || []).length;
+  const totalRecords = [...state.databaseTables.values()].reduce((sum, table) => sum + table.records.length, 0);
+  const totalMappings = state.operatingModel.externalMappings.length;
+  const totalDrive = state.googleDrive.files.length;
+  const selectedSignals = tables.length + files.length + mappings.length + recordCount;
+  const selectedLabel = area ? areaLabel(area) : "No selected area";
+  const status = !isSignedIn()
+    ? "Sign in required"
+    : areas.length === 0 ? "No model loaded" : `${selectedLabel} selected`;
+  panel.innerHTML = `
+    <div class="area-context-copy">
+      <span class="summary-kicker">Operating model context</span>
+      <div class="area-context-heading">
+        <strong>Company areas, tables, Drive files, and provider mappings</strong>
+        <span class="workbench-index-status">${escapeHtml(status)}</span>
+      </div>
+      <p>Use this map as the source of truth for where imported structures, database tables, and agent-readable context belong across the company.</p>
+      <div class="area-context-pills" aria-label="Operating area context">
+        <span>${areas.length} area${areas.length === 1 ? "" : "s"}</span>
+        <span>${totalTables} table${totalTables === 1 ? "" : "s"}</span>
+        <span>${totalRecords} record${totalRecords === 1 ? "" : "s"}</span>
+        <span>${totalMappings} provider mapping${totalMappings === 1 ? "" : "s"}</span>
+        <span>${totalDrive} Drive item${totalDrive === 1 ? "" : "s"}</span>
+        <span>${selectedSignals} selected-area signal${selectedSignals === 1 ? "" : "s"}</span>
+      </div>
+    </div>
+    <div class="area-context-actions">
+      <a class="button-link compact" href="/relationships" data-link>Review mappings</a>
+      <a class="button-link secondary compact" href="/settings/integrations" data-link>Integration map</a>
+    </div>
+  `;
+  bindInlineNavigation(panel);
+  return panel;
 }
 
 function areaWorkbenchItems(area, definition, tables, files, mappings, previews) {

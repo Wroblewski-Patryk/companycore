@@ -1,5 +1,55 @@
 # Web Console V2 Task Contracts
 
+## V2WEB-041 Operating Area Context Polish
+
+- Task Type: design/frontend
+- Current Stage: done
+- Deliverable For This Stage: `/areas` shows a compact operating model context
+  panel before the company operating map.
+- Goal: Make the operating-area screen immediately explain how the selected
+  company area fits into tables, records, Drive files, provider mappings, and
+  agent-readable context before the owner scans the area rail and workbench.
+- Scope:
+  - `public/index.html`
+  - `public/app.js`
+  - `public/styles.css`
+  - `docs/ux/design-memory.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+- Implementation Plan:
+  - Add an operating model context slot above the existing operating map.
+  - Render area count, table count, record count, provider mapping count,
+    Drive item count, selected-area signal count, and selected-area status.
+  - Add local actions to relationship review and the integration map through
+    existing SPA navigation.
+  - Preserve existing area rail, selected-area detail, filters, workbench,
+    delete guardrails, assignment controls, and linked-content previews.
+  - Validate syntax, build, tests, and desktop/mobile `/areas` rendering.
+- Acceptance Criteria:
+  - `/areas` explains company-area context before the operating map.
+  - `Review mappings` navigates to `/relationships` through the SPA.
+  - `Integration map` navigates to `/settings/integrations` through the SPA.
+  - Desktop and mobile layouts render without horizontal overflow.
+- Definition of Done:
+  - `node --check public/app.js`, `npm run build`, `git diff --check`, and
+    `npm test` pass.
+  - Local browser smoke verifies area context, both actions, responsive layout,
+    and no console errors.
+- Result Report:
+  - Added a dynamic operating model context panel to `/areas`.
+  - Added area, table, record, provider mapping, Drive item, and selected-area
+    signal pills plus actions to review mappings and open the integration map.
+  - Passed `node --check public/app.js`, `npm run build`, `git diff --check`,
+    and `npm test` against disposable Postgres on port `55489`.
+  - Passed local Playwright desktop/mobile `/areas` smoke with no console
+    errors or horizontal overflow; smoke verified context copy, inventory
+    pills, selected-area status, and SPA navigation to `/relationships` plus
+    `/settings/integrations`.
+  - Browser plugin fallback was required because node_repl resolved Node
+    `22.13.0` while the Browser plugin requires `>=22.22.0`.
+
 ## V2WEB-040 API Agent Access Context Polish
 
 - Task Type: design/frontend

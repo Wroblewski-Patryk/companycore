@@ -34,6 +34,23 @@ of rediscovering them.
 
 ## Entries
 
+### 2026-05-07 - Operating Area Context Panel
+- Type: reusable_pattern
+- Context: Operating-model screens need to show the full company map and the
+  selected area's local signal before operators inspect nested tables,
+  provider mappings, Drive files, and record previews.
+- Decision: Place a compact context panel before the operating map. Show area
+  count, table count, record count, provider mapping count, Drive item count,
+  selected-area signal count, and actions to relationship review plus the
+  integration map.
+- Reuse when: A route is the ownership map for multiple data sources and one
+  selected object controls the workbench below.
+- Avoid when: The route already has a single-record detail header that contains
+  both global inventory and selected-record remediation actions.
+- Evidence: V2WEB-041 adds `/areas` context with operating-model inventory,
+  selected-area signal count, and links into relationship review plus the
+  integration map.
+
 ### 2026-05-07 - Agent API Context Panel
 - Type: reusable_pattern
 - Context: Security-sensitive integration screens need to show readiness,

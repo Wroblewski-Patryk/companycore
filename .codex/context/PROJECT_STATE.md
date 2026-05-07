@@ -137,6 +137,23 @@ Last updated: 2026-05-07
 
 ## Recent Progress
 
+- 2026-05-07: Completed V2WEB-041 Operating Area Context Polish.
+  `/areas` now includes a compact operating model context panel before the
+  company operating map. The panel shows area count, table count, record count,
+  provider mapping count, Drive item count, selected-area signal count,
+  selected-area status, and links to `/relationships` plus
+  `/settings/integrations` through existing SPA navigation while preserving
+  the area rail, selected-area detail, filters, workbench, delete guardrails,
+  assignment controls, and linked-content previews.
+  Validation passed: `node --check public/app.js`, `npm run build`,
+  `git diff --check`, `npm test` against disposable Postgres on port `55489`,
+  and local Playwright desktop/mobile `/areas` smoke with no console errors or
+  horizontal overflow. Smoke verified context copy, area/table/record/provider
+  mapping/Drive/selected-area signal pills, SPA navigation to `/relationships`,
+  and SPA navigation to `/settings/integrations`. Browser plugin fallback note:
+  in-app Browser could not initialize because node_repl resolved Node `22.13.0`
+  while the plugin requires `>=22.22.0`.
+
 - 2026-05-07: Completed V2WEB-040 API Agent Access Context Polish.
   `/settings/api` now includes a compact agent API context panel before the API
   summary cards and service-key workbench. The panel shows active key count,

@@ -1981,6 +1981,73 @@ button.compact,
   scroll-margin-top: 104px;
 }
 
+.area-context-panel {
+  display: grid;
+  margin: 0 0 20px;
+}
+
+.area-context-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, auto);
+  gap: 18px;
+  align-items: center;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(35, 48, 73, 0.06);
+}
+
+.area-context-copy {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.area-context-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.area-context-heading strong {
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.area-context-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.area-context-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.area-context-pills span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #fbfcfe;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.area-context-actions {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+
 .operating-layout {
   display: grid;
   grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
@@ -2685,6 +2752,7 @@ button.danger:hover {
     .agent-key-layout,
     .agent-key-row,
     .api-context-card,
+    .area-context-card,
     .adapter-context-card,
     .pipeline-context-card,
     .relationship-context-card,
@@ -2723,6 +2791,10 @@ button.danger:hover {
   }
 
   .api-context-actions {
+    justify-items: start;
+  }
+
+  .area-context-actions {
     justify-items: start;
   }
 
