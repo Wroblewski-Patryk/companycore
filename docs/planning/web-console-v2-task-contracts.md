@@ -1,5 +1,57 @@
 # Web Console V2 Task Contracts
 
+## V2WEB-048 Global Feedback Panel Polish
+
+- Task Type: design/frontend
+- Current Stage: done
+- Deliverable For This Stage: the shared `#resultPanel` shows clearer action
+  feedback for success and error states.
+- Goal: Make global action feedback easier to scan across auth, ClickUp,
+  Google Drive, CRUD, and API workflows without changing backend behavior.
+- Scope:
+  - `public/index.html`
+  - `public/app.js`
+  - `public/styles.css`
+  - `docs/ux/design-memory.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+- Implementation Plan:
+  - Add an accessible live region and tone label to the shared result panel.
+  - Update `showResult` to mark success versus attention states on the panel.
+  - Style success/error result states with the existing compact panel language.
+  - Preserve existing result messages, sync metrics, and action behavior.
+  - Validate syntax/build, tests, and desktop/mobile feedback rendering.
+- Acceptance Criteria:
+  - Success feedback shows a `Success` tone label and readable message box.
+  - Error feedback shows a `Needs attention` tone label and readable message
+    box.
+  - Existing sync/detail metrics still render inside the result panel.
+  - Desktop and mobile layouts render without horizontal overflow.
+- Definition of Done:
+  - `node --check public/app.js`, `npm run build`, `git diff --check`, and
+    `npm test` pass.
+  - Local browser smoke verifies error and success feedback states,
+    responsive layout, and no console errors.
+- Result Report:
+  - Added an accessible live region, tone label, and bordered message box to
+    the shared `#resultPanel`.
+  - Updated `showResult` so success feedback shows `Success` and error
+    feedback shows `Needs attention` while preserving existing result messages,
+    sync metrics, and action behavior.
+  - Added tone-aware success/error styling using the existing compact panel
+    language.
+  - Passed `node --check public/app.js`, `npm run build`, `git diff --check`,
+    and `npm test` against disposable Postgres on port `55503`.
+  - Passed local Playwright desktop/mobile smoke for wrong-login error feedback
+    and successful workspace creation feedback; smoke verified tone labels,
+    message boxes, no horizontal overflow, and no unexpected console/page
+    errors. The expected `401 Unauthorized` response from the wrong-login
+    action was filtered as the tested failure path.
+  - Browser plugin fallback was required because node_repl resolved Node
+    `22.13.0` while the plugin requires `>=22.22.0`.
+
 ## V2WEB-047 Public Entry Context Polish
 
 - Task Type: design/frontend

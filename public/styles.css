@@ -2968,6 +2968,66 @@ button.danger:hover {
   padding: 26px;
 }
 
+.result.is-success-result {
+  border-color: rgba(22, 101, 52, 0.22);
+}
+
+.result.is-error-result {
+  border-color: rgba(153, 27, 27, 0.26);
+}
+
+.result-tone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #fbfcfe;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.is-success-result .result-tone {
+  border-color: rgba(22, 101, 52, 0.2);
+  background: #f0fdf4;
+  color: var(--success);
+}
+
+.is-error-result .result-tone {
+  border-color: rgba(153, 27, 27, 0.22);
+  background: #fef2f2;
+  color: var(--danger);
+}
+
+.result-message-box {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.result-message-box p {
+  margin: 0;
+  font-weight: 850;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.is-success-result .result-message-box {
+  border-color: rgba(22, 101, 52, 0.18);
+  background: #f7fef9;
+}
+
+.is-error-result .result-message-box {
+  border-color: rgba(153, 27, 27, 0.2);
+  background: #fff7f7;
+}
+
 .metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(120px, 1fr));

@@ -329,6 +329,7 @@ const listFilterBar = document.querySelector("#listFilterBar");
 const listSearch = document.querySelector("#listSearch");
 const listSelectionFilter = document.querySelector("#listSelectionFilter");
 const resultPanel = document.querySelector("#resultPanel");
+const resultToneLabel = document.querySelector("#resultToneLabel");
 const resultMessage = document.querySelector("#resultMessage");
 const metrics = document.querySelector("#metrics");
 const taskStats = document.querySelector("#taskStats");
@@ -740,6 +741,9 @@ function setGoogleDriveEnabled(isEnabled) {
 
 function showResult(message, tone = "success", sync = null) {
   resultPanel.hidden = false;
+  resultPanel.classList.toggle("is-error-result", tone === "error");
+  resultPanel.classList.toggle("is-success-result", tone !== "error");
+  resultToneLabel.textContent = tone === "error" ? "Needs attention" : "Success";
   resultMessage.textContent = message;
   resultMessage.className = tone === "error" ? "is-error" : "is-success";
   metrics.innerHTML = "";

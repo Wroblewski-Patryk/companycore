@@ -137,6 +137,21 @@ Last updated: 2026-05-07
 
 ## Recent Progress
 
+- 2026-05-07: Completed V2WEB-048 Global Feedback Panel Polish.
+  The shared `#resultPanel` now uses accessible live feedback, a tone label,
+  and a bordered message box so success states read as `Success` and
+  recoverable error states read as `Needs attention` while preserving existing
+  result messages, sync metrics, and action behavior.
+  Validation passed: `node --check public/app.js`, `npm run build`,
+  `git diff --check`, `npm test` against disposable Postgres on port `55503`,
+  and local Playwright desktop/mobile feedback smoke with no unexpected console
+  or page errors and no horizontal overflow. Smoke verified wrong-login error
+  feedback and successful workspace creation feedback; the expected
+  `401 Unauthorized` response from the wrong-login action was filtered as the
+  tested failure path. Browser plugin fallback note: in-app Browser could not
+  initialize because node_repl resolved Node `22.13.0` while the plugin
+  requires `>=22.22.0`.
+
 - 2026-05-07: Completed V2WEB-047 Public Entry Context Polish.
   `/` now includes public entry pills for ClickUp, Google Drive, agent-safe
   API, and operating areas plus a compact operational console card instead of

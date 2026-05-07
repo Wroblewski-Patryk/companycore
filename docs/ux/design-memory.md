@@ -34,6 +34,21 @@ of rediscovering them.
 
 ## Entries
 
+### 2026-05-07 - Global Action Feedback Panel
+- Type: reusable_pattern
+- Context: Shared action feedback appears after auth, integration, CRUD, Drive,
+  and sync actions, so it needs to be scannable and accessible without
+  becoming a blocking modal.
+- Decision: Use a compact result panel with `aria-live`, a tone label, and a
+  bordered message box. Success uses `Success`; error/recovery states use
+  `Needs attention`, while existing sync metrics remain below the message.
+- Reuse when: A shared non-modal feedback surface reports the outcome of user
+  actions across modules.
+- Avoid when: The feedback belongs next to one specific form field or button;
+  keep that feedback local to the action instead.
+- Evidence: V2WEB-048 upgrades `#resultPanel` with tone-aware success/error
+  styling and accessible live feedback.
+
 ### 2026-05-07 - Public Entry Operational Context
 - Type: reusable_pattern
 - Context: The public `/` route should set up the product's operational

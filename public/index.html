@@ -1156,9 +1156,15 @@
         </section>
       </section>
 
-      <section class="panel result" id="resultPanel" hidden>
-        <div class="section-title">
-          <h2>Latest result</h2>
+      <section class="panel result" id="resultPanel" aria-live="polite" hidden>
+        <div class="section-title row-title">
+          <div>
+            <span class="summary-kicker">Latest result</span>
+            <h2>Action feedback</h2>
+          </div>
+          <span class="result-tone" id="resultToneLabel">Success</span>
+        </div>
+        <div class="result-message-box">
           <p id="resultMessage"></p>
         </div>
         <dl class="metrics" id="metrics"></dl>
