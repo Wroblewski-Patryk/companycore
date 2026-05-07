@@ -1016,6 +1016,12 @@ h4 {
   line-height: 1.5;
 }
 
+.record-editor-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(140px, 0.6fr);
+  gap: 12px;
+}
+
 .record-editor-actions {
   display: flex;
   flex-wrap: wrap;
@@ -2092,6 +2098,7 @@ button.danger:hover {
     .agent-key-layout,
     .agent-key-row,
     .table-workbench-layout,
+    .record-editor-grid,
     .record-field-list div,
     .workbench-index-row,
     .integration-area-row {

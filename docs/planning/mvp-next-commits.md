@@ -60,6 +60,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] V2WEB-024 Data Operations Index
 - [x] V2WEB-025 Generic Table Record Workbench
 - [x] V2WEB-026 Typed Notes Editor Workbench
+- [x] V2WEB-027 Typed Projects Editor Workbench
 - [x] AGRUN-005 Scoped Agent Key Owner UI
 - [x] CCV1-009P Protected production smoke for adapter CRUD
 - [x] CCV1-027 Paperclip and Jarvis production env wiring
@@ -179,6 +180,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] 69. V2WEB-024 Data Operations Index
 - [x] 70. V2WEB-025 Generic Table Record Workbench
 - [x] 71. V2WEB-026 Typed Notes Editor Workbench
+- [x] 72. V2WEB-027 Typed Projects Editor Workbench
 - [x] 66. V2WEB-019 Relationship Review Filters
 - [x] 65. V2WEB-018 Global Module Switcher
 - [x] 49. V2WEB-002 Manual Provider Scope Mapping

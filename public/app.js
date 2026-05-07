@@ -1982,7 +1982,7 @@ function renderTableWorkbench() {
   const fields = tableFieldNames(records);
   const sources = tableSources(records);
   const filteredRecords = filteredTableRecords(module, records);
-  const selected = module.slug === "notes" && state.tableWorkbench.newDraft
+  const selected = hasTypedRecordEditor(module.slug) && state.tableWorkbench.newDraft
     ? null
     : selectedTableRecord(filteredRecords, records);
 
@@ -2118,8 +2118,8 @@ function tableRecordRowElement(record, module, selectedId) {
 function renderRecordInspector(record, module, fields) {
   recordInspector.innerHTML = "";
   if (!record) {
-    if (module?.slug === "notes" && isSignedIn()) {
-      recordInspector.append(renderNoteEditor(null));
+    if (hasTypedRecordEditor(module?.slug) && isSignedIn()) {
+      recordInspector.append(renderTypedRecordEditor(module.slug, null));
       return;
     }
     recordInspector.append(emptyNote("Select a record to inspect its fields."));
@@ -2155,11 +2155,22 @@ function renderRecordInspector(record, module, fields) {
   `;
 
   const sections = [header];
-  if (module.slug === "notes") {
-    sections.push(renderNoteEditor(record));
+  if (hasTypedRecordEditor(module.slug)) {
+    sections.push(renderTypedRecordEditor(module.slug, record));
   }
   sections.push(fieldList, raw);
   recordInspector.append(...sections);
+}
+
+function hasTypedRecordEditor(slug) {
+  return ["notes", "projects"].includes(slug);
+}
+
+function renderTypedRecordEditor(slug, record) {
+  if (slug === "projects") {
+    return renderProjectEditor(record);
+  }
+  return renderNoteEditor(record);
 }
 
 function renderNoteEditor(record) {
@@ -2197,12 +2208,71 @@ function renderNoteEditor(record) {
   return panel;
 }
 
+function renderProjectEditor(record) {
+  const panel = document.createElement("section");
+  panel.className = "record-editor";
+  const status = record?.status || "active";
+  panel.innerHTML = `
+    <div class="record-editor-heading">
+      <div>
+        <span class="summary-kicker">Typed editor</span>
+        <h3>${record ? "Edit selected project" : "Create project"}</h3>
+      </div>
+      ${record ? `<span class="status-pill">${escapeHtml(status)}</span>` : ""}
+    </div>
+    <div class="record-editor-grid">
+      <label>
+        Project name
+        <input id="projectEditorName" type="text" autocomplete="off" placeholder="Name the workstream..." value="${escapeHtml(record?.name || "")}" />
+      </label>
+      <label>
+        Status
+        <select id="projectEditorStatus">
+          <option value="active" ${status === "active" ? "selected" : ""}>active</option>
+          <option value="paused" ${status === "paused" ? "selected" : ""}>paused</option>
+          <option value="done" ${status === "done" ? "selected" : ""}>done</option>
+          <option value="archived" ${status === "archived" ? "selected" : ""}>archived</option>
+        </select>
+      </label>
+    </div>
+    <label>
+      Description
+      <textarea id="projectEditorDescription" rows="6" autocomplete="off" placeholder="Describe outcome, scope, and context for operators and agents.">${escapeHtml(record?.description || "")}</textarea>
+    </label>
+    <div class="record-editor-actions">
+      <button type="button" class="compact" data-project-action="create">Create project</button>
+      <button type="button" class="secondary compact" data-project-action="save" ${record ? "" : "disabled"}>Save selected</button>
+      <button type="button" class="secondary compact" data-project-action="new">New draft</button>
+      <button type="button" class="danger compact" data-project-action="archive" ${record && record.status !== "archived" ? "" : "disabled"}>Archive selected</button>
+    </div>
+    <p class="form-note" id="projectEditorStatusMessage">${record ? "Changes are saved into the Projects API and reflected in this database index." : "Create a local CompanyCore project as an operational workstream."}</p>
+  `;
+
+  panel.querySelector('[data-project-action="create"]').addEventListener("click", () => createProjectFromEditor(panel));
+  panel.querySelector('[data-project-action="save"]').addEventListener("click", () => saveSelectedProjectFromEditor(panel, record));
+  panel.querySelector('[data-project-action="new"]').addEventListener("click", () => {
+    state.tableWorkbench.selectedId = "";
+    state.tableWorkbench.newDraft = true;
+    renderTableWorkbench();
+  });
+  panel.querySelector('[data-project-action="archive"]').addEventListener("click", () => archiveSelectedProject(record));
+  return panel;
+}
+
 function noteEditorContent(panel) {
   return panel.querySelector("#noteEditorContent")?.value.trim() || "";
 }
 
 function setNoteEditorStatus(panel, message, tone = "") {
-  const status = panel.querySelector("#noteEditorStatus");
+  setRecordEditorStatus(panel, "#noteEditorStatus", message, tone);
+}
+
+function setProjectEditorStatus(panel, message, tone = "") {
+  setRecordEditorStatus(panel, "#projectEditorStatusMessage", message, tone);
+}
+
+function setRecordEditorStatus(panel, selector, message, tone = "") {
+  const status = panel.querySelector(selector);
   if (!status) {
     return;
   }
@@ -2291,6 +2361,99 @@ async function archiveSelectedNote(record) {
     await refreshTableRecords("notes");
     renderTableWorkbench();
     showResult("Note archived.", "success");
+  } catch (error) {
+    showResult(friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+}
+
+function projectEditorPayload(panel) {
+  const name = panel.querySelector("#projectEditorName")?.value.trim() || "";
+  const description = panel.querySelector("#projectEditorDescription")?.value.trim() || "";
+  const status = panel.querySelector("#projectEditorStatus")?.value || "active";
+  return {
+    name,
+    description: description || undefined,
+    status
+  };
+}
+
+async function createProjectFromEditor(panel) {
+  const payload = projectEditorPayload(panel);
+  if (!payload.name) {
+    setProjectEditorStatus(panel, "Name the project before creating it.", "error");
+    return;
+  }
+
+  setBusy(true);
+  try {
+    const response = await api("/v1/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    state.tableWorkbench.selectedId = response.data?.id || "";
+    state.tableWorkbench.newDraft = false;
+    await refreshTableRecords("projects");
+    renderTableWorkbench();
+    showResult("Project created in the database.", "success");
+  } catch (error) {
+    setProjectEditorStatus(panel, friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function saveSelectedProjectFromEditor(panel, record) {
+  if (!record?.id) {
+    setProjectEditorStatus(panel, "Select a project before saving changes.", "error");
+    return;
+  }
+
+  const payload = projectEditorPayload(panel);
+  if (!payload.name) {
+    setProjectEditorStatus(panel, "Project name cannot be empty.", "error");
+    return;
+  }
+
+  setBusy(true);
+  try {
+    await api(`/v1/projects/${record.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    state.tableWorkbench.selectedId = record.id;
+    state.tableWorkbench.newDraft = false;
+    await refreshTableRecords("projects");
+    renderTableWorkbench();
+    showResult("Project updated.", "success");
+  } catch (error) {
+    setProjectEditorStatus(panel, friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function archiveSelectedProject(record) {
+  if (!record?.id) {
+    return;
+  }
+
+  const confirmed = window.confirm("Archive this project? Related records stay in the database.");
+  if (!confirmed) {
+    return;
+  }
+
+  setBusy(true);
+  try {
+    await api(`/v1/projects/${record.id}`, { method: "DELETE" });
+    state.tableWorkbench.selectedId = record.id;
+    state.tableWorkbench.newDraft = false;
+    await refreshTableRecords("projects");
+    renderTableWorkbench();
+    showResult("Project archived.", "success");
   } catch (error) {
     showResult(friendlyError(error), "error");
   } finally {

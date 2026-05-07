@@ -94,4 +94,6 @@ of rediscovering them.
   mapping, bulk editing, or ambiguous archive/delete semantics.
 - Evidence: V2WEB-026 `/data/notes` local Playwright smoke created, updated,
   archived, and reloaded real Notes API records on desktop and mobile without
-  console errors.
+  console errors. V2WEB-027 reused the same pattern for `/data/projects` with
+  typed name/status/description controls and responsive `record-editor-grid`
+  validation.

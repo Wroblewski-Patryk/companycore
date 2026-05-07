@@ -133,6 +133,16 @@ Last updated: 2026-05-07
 - Next required mode: TESTER for production smoke and release evidence.
 
 ## Recent Progress
+- 2026-05-07: Completed V2WEB-027 Typed Projects Editor Workbench.
+  `/data/projects` now has a typed project editor inside the reusable split
+  record workbench: owners can create project workstreams, edit project name,
+  status, and description, and archive selected projects through the existing
+  Projects API. The typed editor selector now covers Notes and Projects while
+  keeping unrelated modules read-only. Validation passed:
+  `node --check public/app.js`, `npm run build`, `git diff --check`,
+  `npm test` against disposable Postgres on port `55460`, and local
+  authenticated Playwright desktop/mobile `/data/projects` smoke that created,
+  updated, archived, and reloaded real Projects records.
 - 2026-05-07: Completed V2WEB-026 Typed Notes Editor Workbench. `/data/notes`
   now has a typed note editor inside the reusable split record workbench:
   owners can create local notes, select a note to edit its content, save

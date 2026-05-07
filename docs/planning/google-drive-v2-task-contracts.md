@@ -737,3 +737,54 @@ It follows the repository task contract and must stay synchronized with
   - Deployed to production at commit
     `614e6b8f20fbfe28e6f8f4bef7234111ceb2c62c`; production health and
     static asset markers confirmed the typed editor code is live.
+
+## V2WEB-027 Typed Projects Editor Workbench
+
+- Task Type: frontend/ux
+- Current Stage: done
+- Deliverable For This Stage: typed project create/edit/archive editor inside
+  the Data Operations workbench.
+- Goal: Let owners manage CompanyCore project workstreams from `/data/projects`
+  without leaving the operational data center or hand-writing API payloads.
+- Scope:
+  - `public/app.js`
+  - `public/styles.css`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/operations/agent-runtime-coverage-ledger.csv`
+  - `docs/ux/design-memory.md`
+- Implementation Plan:
+  - Reuse the split `/data/:table` workbench and existing `record-editor`
+    pattern from the Notes editor.
+  - Add a typed editor only for the `projects` module.
+  - Wire create, update, and archive actions to the existing Projects API
+    (`POST /v1/projects`, `PATCH /v1/projects/:id`,
+    `DELETE /v1/projects/:id`).
+  - Keep unrelated modules read-only until their typed forms are implemented.
+  - Validate desktop and mobile rendered behavior with an authenticated browser
+    smoke.
+- Acceptance Criteria:
+  - Signed-in owners can create a project from `/data/projects`.
+  - Selecting a project loads its name, status, and description into typed
+    controls.
+  - Saving updates the selected project and refreshes the record list and
+    inspector.
+  - Archiving a selected project calls the Projects archive API and shows
+    archived status in the inspector.
+  - The editor reuses shared `record-editor` styles and does not introduce a
+    page-local visual variant.
+- Definition of Done:
+  - `node --check public/app.js`, `npm run build`, `npm test`,
+    `git diff --check`, and authenticated Playwright desktop/mobile smoke pass.
+  - Canonical task, project-state, planning, coverage-ledger, and UX memory
+    docs are updated.
+- Result Report:
+  - Added typed project name, status, and description controls to
+    `/data/projects`.
+  - Generalized the typed editor selection so Notes and Projects share the same
+    workbench pattern while other modules remain read-only.
+  - Added responsive `record-editor-grid` styling for compact typed editors.
+  - Validation passed against a disposable Postgres database and local
+    Playwright desktop/mobile smokes that created, edited, archived, and
+    reloaded real Projects API records.
