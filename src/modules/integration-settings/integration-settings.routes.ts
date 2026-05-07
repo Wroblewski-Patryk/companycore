@@ -14,6 +14,7 @@ import { IntegrationError } from "../../integrations/errors";
 import {
   buildGoogleDriveAuthorizationUrl,
   exchangeGoogleDriveAuthorizationCode,
+  getGoogleDriveClientForWorkspace,
   mergeGoogleDriveConfig
 } from "../../integrations/google-drive/google-drive.auth";
 import { importGoogleDriveFoldersForWorkspace, reconcileGoogleDriveChangesForWorkspace } from "../../integrations/google-drive/google-drive.sync";
@@ -316,6 +317,72 @@ integrationSettingsRouter.post("/google_drive/import", asyncHandler(async (req, 
       maxPagesPerFolder: input.maxPagesPerFolder
     });
     return res.json({ data: result });
+  } catch (error) {
+    if (error instanceof IntegrationError) {
+      return res.status(error.status).json({ error: error.code });
+    }
+    throw error;
+  }
+}));
+
+integrationSettingsRouter.get("/google_drive/folders/discover", asyncHandler(async (req, res) => {
+  if (req.auth!.authType !== "user") {
+    return res.status(403).json({ error: "forbidden" });
+  }
+
+  try {
+    const settings = await prisma.integrationSetting.findUnique({
+      where: {
+        workspaceId_provider: {
+          workspaceId: req.auth!.workspaceId,
+          provider: "google_drive"
+        }
+      }
+    });
+    const config = settings?.config && typeof settings.config === "object" && !Array.isArray(settings.config)
+      ? settings.config as { selectedFolderIds?: string[]; rootFolderIds?: string[] }
+      : {};
+    const selectedFolderIds = new Set(config.selectedFolderIds ?? config.rootFolderIds ?? []);
+    const client = await getGoogleDriveClientForWorkspace(req.auth!.workspaceId);
+    const folders: Array<{
+      id: string;
+      name: string;
+      parents?: string[];
+      driveId?: string;
+      webViewLink?: string;
+      modifiedTime?: string;
+      selected: boolean;
+    }> = [];
+    let pageToken: string | undefined;
+
+    for (let page = 0; page < 5; page += 1) {
+      const response = await client.listFiles({
+        query: "mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+        pageToken,
+        pageSize: 100,
+        fields: "nextPageToken,files(id,name,driveId,parents,webViewLink,modifiedTime)"
+      });
+      folders.push(...(response.files ?? []).filter((folder) => (
+        folder.id
+        && folder.name
+        && folder.mimeType === "application/vnd.google-apps.folder"
+      )).map((folder) => ({
+        id: folder.id,
+        name: folder.name,
+        parents: folder.parents,
+        driveId: folder.driveId,
+        webViewLink: folder.webViewLink,
+        modifiedTime: folder.modifiedTime,
+        selected: selectedFolderIds.has(folder.id)
+      })));
+      if (!response.nextPageToken) {
+        break;
+      }
+      pageToken = response.nextPageToken;
+    }
+
+    folders.sort((left, right) => left.name.localeCompare(right.name));
+    return res.json({ data: folders });
   } catch (error) {
     if (error instanceof IntegrationError) {
       return res.status(error.status).json({ error: error.code });

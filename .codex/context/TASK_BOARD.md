@@ -54,6 +54,7 @@ No active task.
 
 ## Done
 
+- V2GD-012 Drive Consent Guidance And Folder Picker.
 - V2WEB-030 Typed Tasks Editor Workbench.
 - V2WEB-029 Typed Task Lists Editor Workbench.
 - V2WEB-028 Typed Clients Editor Workbench.

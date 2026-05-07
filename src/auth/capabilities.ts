@@ -217,6 +217,7 @@ export const adapterManifest = {
       { method: "GET", path: "/v1/integration-settings/google_drive", capability: "integration-settings:google-drive:read" },
       { method: "PUT", path: "/v1/integration-settings/google_drive", capability: "integration-settings:google-drive:write" },
       { method: "POST", path: "/v1/integration-settings/google_drive/import", capability: "integration-settings:google-drive:import" },
+      { method: "GET", path: "/v1/integration-settings/google_drive/folders/discover", capability: "integration-settings:google-drive:read" },
       { method: "POST", path: "/v1/integration-settings/google_drive/changes/reconcile", capability: "integration-settings:google-drive:changes:reconcile" },
       { method: "POST", path: "/v1/integration-settings/google_drive/oauth/authorize-url", capability: "integration-settings:google-drive:oauth" },
       { method: "POST", path: "/v1/integration-settings/google_drive/oauth/exchange", capability: "integration-settings:google-drive:oauth" }

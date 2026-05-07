@@ -865,9 +865,11 @@
             <strong>How to connect Google Drive APIs</strong>
             <ol>
               <li>In Google Cloud, enable Google Drive API, Google Docs API, and Google Sheets API for the project.</li>
+              <li>Configure the OAuth consent screen. During testing, add the exact Google account you will use here as a Test user; otherwise Google can block sign-in before CompanyCore receives a code.</li>
               <li>Create an OAuth Web application client and add the Redirect URI below exactly as an authorized redirect URI.</li>
-              <li>Paste the OAuth client ID and client secret below, then save the OAuth client in this workspace.</li>
-              <li>Paste the Drive folder IDs, create the OAuth URL, approve Google consent, paste the returned code, save the connection, then import folders.</li>
+              <li>Paste the OAuth client ID and client secret below, save the OAuth client, create the OAuth URL, then open Google consent.</li>
+              <li>If Google shows an unverified-app warning, use Advanced / continue only for your own test app, or finish Google's OAuth verification before wider use.</li>
+              <li>After the authorization code is saved, load Drive folders, select the folders to import, save selection, then run import.</li>
             </ol>
           </aside>
 
@@ -892,8 +894,8 @@
               <input id="googleDriveRedirectUri" name="googleDriveRedirectUri" type="url" readonly>
             </label>
             <label>
-              Folder IDs to import
-              <input id="googleDriveFolderIds" name="googleDriveFolderIds" type="text" autocomplete="off" placeholder="Folder IDs separated by commas">
+              Advanced fallback: Folder IDs to import
+              <input id="googleDriveFolderIds" name="googleDriveFolderIds" type="text" autocomplete="off" placeholder="Optional; checkbox selection fills this after Drive consent">
             </label>
             <div class="actions">
               <button type="button" class="secondary" id="googleDriveAuthUrlButton">Create OAuth URL</button>
@@ -908,10 +910,25 @@
             </label>
             <div class="actions">
               <button type="button" id="googleDriveExchangeButton">Save OAuth connection</button>
+              <button type="button" class="secondary" id="googleDriveDiscoverFoldersButton">Load Drive folders</button>
+              <button type="button" class="secondary" id="googleDriveSaveFoldersButton">Save selected folders</button>
               <button type="button" class="secondary" id="googleDriveImportButton">Import folders</button>
               <button type="button" class="secondary" id="googleDriveReconcileButton">Reconcile changes</button>
             </div>
           </div>
+
+          <section class="drive-folder-picker" aria-label="Google Drive folder picker">
+            <div class="section-title row-title">
+              <div>
+                <h2>Folders to import</h2>
+                <p id="googleDriveFolderPickerSummary">Connect Google Drive, then load folders and select what CompanyCore should import.</p>
+              </div>
+              <span class="inline-status" id="googleDriveFolderPickerStatus">No folders loaded.</span>
+            </div>
+            <div class="drive-folder-list" id="googleDriveFolderPicker">
+              <p class="empty-note">No Drive folders loaded yet.</p>
+            </div>
+          </section>
 
           <label>
             Import mode

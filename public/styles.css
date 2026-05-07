@@ -1449,6 +1449,74 @@ button.compact,
   line-height: 1.4;
 }
 
+.drive-folder-picker {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  margin: 0 0 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fbfcff;
+}
+
+.drive-folder-list {
+  display: grid;
+  gap: 8px;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.drive-folder-option {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 58px;
+  padding: 10px;
+  margin: 0;
+  border: 1px solid #dbe4f2;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.drive-folder-option:hover {
+  border-color: #b9c8e2;
+  background: var(--soft);
+}
+
+.drive-folder-option input {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  padding: 0;
+  accent-color: var(--accent);
+}
+
+.drive-folder-option span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.drive-folder-option strong,
+.drive-folder-option small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drive-folder-option small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.drive-folder-option a {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 900;
+}
+
 .switch {
   display: inline-flex;
   grid-template-columns: auto auto;
@@ -2017,6 +2085,14 @@ button.danger:hover {
 
   .is-signed-in .app-shell {
     grid-template-columns: 1fr;
+  }
+
+  .drive-folder-option {
+    grid-template-columns: 22px minmax(0, 1fr);
+  }
+
+  .drive-folder-option a {
+    grid-column: 2;
   }
 
   .sidebar {

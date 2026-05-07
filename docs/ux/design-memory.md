@@ -103,3 +103,21 @@ of rediscovering them.
   create input. V2WEB-030 reused it for `/data/tasks` with denser task fields
   while keeping provider-specific ClickUp custom-field and sync actions out of
   the local business-record editor.
+
+### 2026-05-07 - Provider Folder Picker
+- Type: reusable_pattern
+- Context: Provider import setup should not force operators to paste opaque
+  external IDs when the provider can list selectable containers after consent.
+- Decision: Use a setup guide for provider-specific auth prerequisites, keep
+  manual IDs as an advanced fallback, and make the normal import path a
+  checkbox list with selected-count feedback plus an explicit save-selection
+  action before import.
+- Reuse when: A provider integration imports folders, lists, projects, or other
+  external containers and the owner can discover them safely through an OAuth
+  or API token.
+- Avoid when: The provider cannot list containers with the granted scopes, or
+  selection has destructive side effects before a separate confirmation/import
+  action.
+- Evidence: V2GD-012 added Google Drive folder discovery and selection in
+  `/settings/drive`, passed authenticated desktop/mobile Playwright smoke, and
+  retained manual folder IDs as a fallback for restricted Google accounts.

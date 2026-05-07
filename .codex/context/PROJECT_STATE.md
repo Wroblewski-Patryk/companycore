@@ -133,6 +133,20 @@ Last updated: 2026-05-07
 - Next required mode: TESTER for production smoke and release evidence.
 
 ## Recent Progress
+- 2026-05-07: Completed V2GD-012 Drive Consent Guidance And Folder Picker.
+  `/settings/drive` now explains Google OAuth consent Testing mode, test-user
+  access, authorized redirect URI setup, and unverified-app behavior before the
+  owner attempts sign-in. Added an owner-only
+  `GET /v1/integration-settings/google_drive/folders/discover` endpoint that
+  lists Drive folders through the saved OAuth token and exposes the route in
+  `/v1/connection`. The web console now lets owners load Drive folders, select
+  import roots with checkboxes, save the selected folders into integration
+  config, and import from the checked selection while preserving manual folder
+  IDs as an advanced fallback. Validation passed: `npm run build`,
+  `node --check public/app.js`, `git diff --check`, `npm test` against
+  disposable Postgres database `companycore_test` on port `55464`, and local
+  authenticated Playwright desktop/mobile `/settings/drive` smoke with no
+  console errors or mobile horizontal overflow.
 - 2026-05-07: Completed V2WEB-030 Typed Tasks Editor Workbench. `/data/tasks`
   now has a typed task editor inside the reusable split record workbench:
   owners can create tasks, edit title, status, priority, due date, project,

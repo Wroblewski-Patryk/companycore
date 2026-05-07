@@ -1548,6 +1548,19 @@ test("CompanyCore v1 protected API flow", async () => {
   }) as typeof fetch;
 
   try {
+    const discoveredDriveFolders = await request("/v1/integration-settings/google_drive/folders/discover", {
+      headers: authA
+    });
+    assert.equal(discoveredDriveFolders.status, 200);
+    const discoveredDriveFoldersBody = discoveredDriveFolders.body as {
+      data: Array<{ id: string; name: string; selected: boolean }>;
+    };
+    assert.ok(discoveredDriveFoldersBody.data.some((folder) => (
+      folder.id === "drive-nested-folder"
+      && folder.name === "Nested Drive folder"
+    )));
+    assert.equal(discoveredDriveFoldersBody.data.some((folder) => folder.id === "drive-doc-1"), false);
+
     const inspectDriveImport = await request("/v1/integration-settings/google_drive/import", {
       method: "POST",
       headers: authA,

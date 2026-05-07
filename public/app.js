@@ -29,7 +29,8 @@ const state = {
     oauthClientConfigured: false,
     oauthTokenConfigured: false,
     config: {},
-    files: []
+    files: [],
+    discoveredFolders: []
   },
   operatingModel: {
     areas: [],
@@ -356,9 +357,14 @@ const googleDriveAuthUrlButton = document.querySelector("#googleDriveAuthUrlButt
 const googleDriveAuthLink = document.querySelector("#googleDriveAuthLink");
 const googleDriveSaveClientButton = document.querySelector("#googleDriveSaveClientButton");
 const googleDriveExchangeButton = document.querySelector("#googleDriveExchangeButton");
+const googleDriveDiscoverFoldersButton = document.querySelector("#googleDriveDiscoverFoldersButton");
+const googleDriveSaveFoldersButton = document.querySelector("#googleDriveSaveFoldersButton");
 const googleDriveImportButton = document.querySelector("#googleDriveImportButton");
 const googleDriveReconcileButton = document.querySelector("#googleDriveReconcileButton");
 const refreshDriveFilesButton = document.querySelector("#refreshDriveFilesButton");
+const googleDriveFolderPicker = document.querySelector("#googleDriveFolderPicker");
+const googleDriveFolderPickerSummary = document.querySelector("#googleDriveFolderPickerSummary");
+const googleDriveFolderPickerStatus = document.querySelector("#googleDriveFolderPickerStatus");
 const driveSearch = document.querySelector("#driveSearch");
 const driveKindFilter = document.querySelector("#driveKindFilter");
 const driveAreaFilter = document.querySelector("#driveAreaFilter");
@@ -702,6 +708,8 @@ function setGoogleDriveEnabled(isEnabled) {
   googleDriveAuthUrlButton.disabled = !isEnabled;
   googleDriveExchangeButton.disabled = !isEnabled || !state.googleDrive.oauthClientConfigured;
   googleDriveAuthLink.hidden = !googleDriveAuthLink.href || googleDriveAuthLink.getAttribute("href") === "#";
+  googleDriveDiscoverFoldersButton.disabled = !isEnabled || !state.googleDrive.oauthTokenConfigured;
+  googleDriveSaveFoldersButton.disabled = !isEnabled || !state.googleDrive.oauthTokenConfigured;
   googleDriveImportButton.disabled = !isEnabled || !state.googleDrive.oauthTokenConfigured;
   googleDriveReconcileButton.disabled = !isEnabled || !state.googleDrive.oauthTokenConfigured;
   refreshDriveFilesButton.disabled = !isEnabled;
@@ -791,6 +799,63 @@ function syncGoogleDriveCredentialPlaceholders() {
   fields.googleDriveClientSecret.placeholder = state.googleDrive.oauthClientConfigured
     ? "Leave blank to keep the saved secret"
     : "Paste the OAuth client secret";
+}
+
+function selectedGoogleDriveFolderIds() {
+  return [...document.querySelectorAll("[data-drive-folder-select]:checked")]
+    .map((input) => input.value)
+    .filter(Boolean);
+}
+
+function syncSelectedGoogleDriveFolderInput() {
+  const checkedIds = selectedGoogleDriveFolderIds();
+  if (checkedIds.length > 0 || state.googleDrive.discoveredFolders.length > 0) {
+    fields.googleDriveFolderIds.value = checkedIds.join(", ");
+  }
+  renderGoogleDriveFolderPicker();
+}
+
+function renderGoogleDriveFolderPicker() {
+  googleDriveFolderPicker.innerHTML = "";
+  const selectedIds = new Set(parseIdList(fields.googleDriveFolderIds.value));
+  const folders = state.googleDrive.discoveredFolders || [];
+  const selectedCount = folders.filter((folder) => selectedIds.has(folder.id)).length;
+
+  if (!state.googleDrive.oauthTokenConfigured) {
+    googleDriveFolderPickerSummary.textContent = "Save the OAuth connection before CompanyCore can list Drive folders.";
+    googleDriveFolderPickerStatus.textContent = "OAuth required";
+    googleDriveFolderPicker.append(emptyNote("After Google consent succeeds, load folders here and select what should be imported."));
+    return;
+  }
+
+  if (folders.length === 0) {
+    googleDriveFolderPickerSummary.textContent = "Load folders from Google Drive, then select the roots CompanyCore should import.";
+    googleDriveFolderPickerStatus.textContent = "No folders loaded";
+    googleDriveFolderPicker.append(emptyNote("No Drive folders loaded yet."));
+    return;
+  }
+
+  googleDriveFolderPickerSummary.textContent = `${selectedCount} of ${folders.length} discovered Drive folder${folders.length === 1 ? "" : "s"} selected for import.`;
+  googleDriveFolderPickerStatus.textContent = selectedCount > 0 ? `${selectedCount} selected` : "Select folders";
+
+  for (const folder of folders.slice(0, 150)) {
+    const row = document.createElement("label");
+    row.className = "drive-folder-option";
+    row.innerHTML = `
+      <input type="checkbox" value="${escapeHtml(folder.id)}" data-drive-folder-select ${selectedIds.has(folder.id) ? "checked" : ""}>
+      <span>
+        <strong>${escapeHtml(folder.name)}</strong>
+        <small>${escapeHtml([
+    folder.driveId ? `Shared drive ${folder.driveId}` : "My Drive or shared with me",
+    folder.modifiedTime ? `modified ${formatDate(folder.modifiedTime)}` : "",
+    folder.id
+  ].filter(Boolean).join(" - "))}</small>
+      </span>
+      ${folder.webViewLink ? `<a href="${escapeHtml(folder.webViewLink)}" target="_blank" rel="noreferrer">Open</a>` : ""}
+    `;
+    row.querySelector("[data-drive-folder-select]").addEventListener("change", syncSelectedGoogleDriveFolderInput);
+    googleDriveFolderPicker.append(row);
+  }
 }
 
 function areaDefinitionFor(area) {
@@ -3902,8 +3967,46 @@ async function saveGoogleDriveOAuthClient() {
   fields.googleDriveClientId.value = "";
   fields.googleDriveClientSecret.value = "";
   syncGoogleDriveCredentialPlaceholders();
+  renderGoogleDriveFolderPicker();
   renderConnectionState();
   setGoogleDriveEnabled(isSignedIn());
+}
+
+async function discoverGoogleDriveFolders() {
+  const response = await api("/v1/integration-settings/google_drive/folders/discover");
+  state.googleDrive.discoveredFolders = response.data || [];
+  renderGoogleDriveFolderPicker();
+  return state.googleDrive.discoveredFolders;
+}
+
+async function saveGoogleDriveFolderSelection() {
+  const selectedFolderIds = selectedGoogleDriveFolderIds();
+  if (state.googleDrive.discoveredFolders.length > 0 && selectedFolderIds.length === 0) {
+    throw new Error("Select at least one Drive folder before saving the import selection.");
+  }
+  const fallbackFolderIds = parseIdList(fields.googleDriveFolderIds.value);
+  const folderIds = selectedFolderIds.length > 0 ? selectedFolderIds : fallbackFolderIds;
+  if (folderIds.length === 0) {
+    throw new Error("Select Drive folders or paste folder IDs before saving the import selection.");
+  }
+
+  const response = await api("/v1/integration-settings/google_drive", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      active: fields.googleDriveActive.checked,
+      config: {
+        ...state.googleDrive.config,
+        selectedFolderIds: folderIds,
+        rootFolderIds: folderIds,
+        importMode: fields.googleDriveImportMode.value || "merge"
+      }
+    })
+  });
+  state.googleDrive.config = response.data.config || state.googleDrive.config;
+  fields.googleDriveFolderIds.value = folderIds.join(", ");
+  renderGoogleDriveFolderPicker();
+  return folderIds;
 }
 
 function friendlyError(error) {
@@ -3916,6 +4019,7 @@ function friendlyError(error) {
     integration_secret_required: "Paste a ClickUp token first, or use a saved connection.",
     integration_not_configured: "ClickUp is not configured for this workspace yet.",
     integration_unavailable: "ClickUp did not respond successfully. Try again shortly.",
+    sync_failed: "Select at least one Google Drive folder before importing.",
     google_drive_not_configured: "Google Drive is not configured for this workspace yet.",
     google_drive_oauth_required: "Google Drive needs an OAuth refresh token before it can import files.",
     validation_error: "Some fields are missing or invalid.",
@@ -4398,6 +4502,7 @@ function setConnected(connection) {
   fields.googleDriveClientId.value = "";
   fields.googleDriveClientSecret.value = "";
   syncGoogleDriveCredentialPlaceholders();
+  renderGoogleDriveFolderPicker();
   state.clickup.selectedListIds = new Set(state.clickup.config.listIds || []);
   state.operatingModel.areas = connection.data.operatingModel.areas || [];
 
@@ -5261,7 +5366,32 @@ googleDriveExchangeButton.addEventListener("click", async () => {
     });
     fields.googleDriveCode.value = "";
     await loadConnection();
-    showResult("Google Drive OAuth connection saved. Import folders to fill CompanyCore with Drive metadata.");
+    await discoverGoogleDriveFolders();
+    showResult("Google Drive OAuth connection saved. Select folders, save selection, then import.");
+  } catch (error) {
+    showResult(friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+});
+
+googleDriveDiscoverFoldersButton.addEventListener("click", async () => {
+  setBusy(true);
+  try {
+    const folders = await discoverGoogleDriveFolders();
+    showResult(`${folders.length} Google Drive folder${folders.length === 1 ? "" : "s"} loaded. Select folders to import.`);
+  } catch (error) {
+    showResult(friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+});
+
+googleDriveSaveFoldersButton.addEventListener("click", async () => {
+  setBusy(true);
+  try {
+    const folderIds = await saveGoogleDriveFolderSelection();
+    showResult(`${folderIds.length} Drive folder${folderIds.length === 1 ? "" : "s"} saved for import.`);
   } catch (error) {
     showResult(friendlyError(error), "error");
   } finally {
@@ -5272,7 +5402,8 @@ googleDriveExchangeButton.addEventListener("click", async () => {
 googleDriveImportButton.addEventListener("click", async () => {
   setBusy(true);
   try {
-    const folderIds = parseIdList(fields.googleDriveFolderIds.value);
+    const selectedFolderIds = selectedGoogleDriveFolderIds();
+    const folderIds = selectedFolderIds.length > 0 ? selectedFolderIds : parseIdList(fields.googleDriveFolderIds.value);
     const result = await api("/v1/integration-settings/google_drive/import", {
       method: "POST",
       body: JSON.stringify({

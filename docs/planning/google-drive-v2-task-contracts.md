@@ -966,3 +966,67 @@ It follows the repository task contract and must stay synchronized with
   - Deployed to production at commit
     `5a1904c336e9fd97e2f4a6842a886253eda56cf5`; production health and static
     asset markers confirmed the typed Tasks editor code is live.
+
+## V2GD-012 Drive Consent Guidance And Folder Picker
+
+- Task Type: integration/ux
+- Current Stage: verification
+- Deliverable For This Stage: clearer Google OAuth setup guidance and
+  checkbox-based Drive folder selection for import.
+- Goal: Make Google Drive setup usable when Google blocks unverified/test apps,
+  and remove the normal requirement to paste folder IDs before import.
+- Scope:
+  - `src/modules/integration-settings/integration-settings.routes.ts`
+  - `src/auth/capabilities.ts`
+  - `src/tests/api.test.ts`
+  - `public/index.html`
+  - `public/app.js`
+  - `public/styles.css`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/operations/agent-runtime-coverage-ledger.csv`
+  - `docs/ux/design-memory.md`
+- Implementation Plan:
+  - Update Drive setup copy to explain Google Cloud OAuth consent, Testing
+    mode test users, authorized redirect URI, unverified-app behavior, and the
+    post-consent folder selection flow.
+  - Add an owner-only folder discovery endpoint that lists Google Drive folders
+    with the saved OAuth token and marks already selected folders.
+  - Add the discovery route to the machine-readable capabilities manifest.
+  - Add a Drive folder picker with checkboxes, selected-count feedback, and a
+    save-selection action that persists `selectedFolderIds` and
+    `rootFolderIds`.
+  - Keep manual folder IDs as an advanced fallback for restricted accounts or
+    Drive search limitations.
+  - Validate backend behavior, desktop rendering, mobile rendering, and no
+    console errors.
+- Acceptance Criteria:
+  - The setup guide explains why Google can block sign-in for unverified or
+    testing apps and tells the owner to add their Google account as a test
+    user.
+  - After OAuth succeeds, owners can load Drive folders and choose import roots
+    with checkboxes.
+  - Saving selection persists the folder IDs into the Google Drive integration
+    config.
+  - Import uses checked folders first and falls back to the advanced folder-ID
+    field when no discovered checkbox selection exists.
+  - `/v1/connection` exposes the folder discovery route.
+- Definition of Done:
+  - `npm run build`, `node --check public/app.js`, `npm test`,
+    `git diff --check`, and authenticated desktop/mobile Drive setup smokes
+    pass.
+  - Canonical task, project-state, planning, coverage-ledger, and UX memory
+    docs are updated.
+- Result Report:
+  - Added `GET /v1/integration-settings/google_drive/folders/discover` for
+    owner folder discovery via the saved Google Drive OAuth token.
+  - Added checkbox-based Drive folder selection, selected-count feedback, and
+    `Save selected folders` action in `/settings/drive`.
+  - Updated Drive setup instructions for OAuth consent Testing mode, test
+    users, authorized redirect URI, and unverified-app behavior, based on
+    current Google OAuth verification guidance.
+  - Local validation passed: `npm run build`, `node --check public/app.js`,
+    `git diff --check`, `npm test` against disposable Postgres on port
+    `55464`, and authenticated Playwright desktop/mobile `/settings/drive`
+    smoke with no console errors or mobile horizontal overflow.
