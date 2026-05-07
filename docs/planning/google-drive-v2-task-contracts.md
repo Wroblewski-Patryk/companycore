@@ -850,7 +850,7 @@ It follows the repository task contract and must stay synchronized with
 ## V2WEB-029 Typed Task Lists Editor Workbench
 
 - Task Type: frontend/ux
-- Current Stage: verification
+- Current Stage: done
 - Deliverable For This Stage: typed task-list create/edit/archive editor
   inside the Data Operations workbench.
 - Goal: Let owners manage operational task lists from `/data/task-lists`
@@ -902,3 +902,7 @@ It follows the repository task contract and must stay synchronized with
     `git diff --check`, `npm test` against disposable Postgres on port
     `55462`, and authenticated Playwright desktop/mobile smoke that created,
     edited, archived, and reloaded real Task Lists API records.
+  - Deployed to production at commit
+    `eaad4fd3a0e12435e0906b73691b5de77a18a1b6`; production health and static
+    asset markers confirmed the typed Task Lists editor and draft-preservation
+    code are live.

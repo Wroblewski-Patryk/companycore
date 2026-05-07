@@ -146,6 +146,15 @@ Last updated: 2026-05-07
   database `companycore_test` on port `55462`, and local authenticated
   Playwright desktop/mobile `/data/task-lists` smoke that created, updated,
   archived, and reloaded real Task Lists records.
+- 2026-05-07: Deployed V2WEB-029 to production with manual VPS backend
+  rollover after public health still reported `6aa94e8` following the GitHub
+  push. The running backend container is
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-eaad4fd`, image
+  `rnqqkhl3o3dut4qv56mlxly2_backend:eaad4fd3a0e12435e0906b73691b5de77a18a1b6`.
+  Public `/health` reports commit
+  `eaad4fd3a0e12435e0906b73691b5de77a18a1b6`; production `app.js` includes
+  `renderTaskListEditor`, `taskListEditorName`, `Create list`, and
+  `updateTypedEditorDraft`.
 - 2026-05-07: Completed V2WEB-028 Typed Clients Editor Workbench.
   `/data/clients` now has a typed CRM client editor inside the reusable split
   record workbench: owners can create clients, edit client name, status,
