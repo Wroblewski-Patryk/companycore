@@ -58,6 +58,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] V2WEB-022 Unified API Integration Setup
 - [x] V2WEB-023 Dashboard Operational Cockpit
 - [x] V2WEB-024 Data Operations Index
+- [x] AGRUN-005 Scoped Agent Key Owner UI
 - [x] CCV1-009P Protected production smoke for adapter CRUD
 - [x] CCV1-027 Paperclip and Jarvis production env wiring
 - [x] CCV1-029 ClickUp production bootstrap slot
@@ -110,7 +111,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NEXT
 
-- [ ] AGRUN-005 Scoped Agent Key Owner UI:
+- [x] AGRUN-005 Scoped Agent Key Owner UI:
       expose scoped agent key creation, copy-once raw key display, rotation or
       deactivation, and capability presets in `/settings/api`.
 - [x] AGRUN-006 Agent Event Ack Positive Smoke:
@@ -160,7 +161,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] 74. AGRUN-002 Service Key Scope Enforcement
 - [x] 75. AGRUN-003 Machine-Readable Agent Contract
 - [x] 76. AGRUN-004 Reusable Agent Training Smoke
-- [ ] 77. AGRUN-005 Scoped Agent Key Owner UI
+- [x] 77. AGRUN-005 Scoped Agent Key Owner UI
 - [x] 78. AGRUN-006 Agent Event Ack Positive Smoke
 - [ ] 79. AGRUN-007 Google Drive Owner Consent And First Import
 - [ ] 80. AGRUN-008 Route-Level Business Editing Surfaces

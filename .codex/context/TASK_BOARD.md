@@ -2,12 +2,7 @@
 
 ## Ready
 
-- AGRUN-005 Scoped Agent Key Owner UI
-  - Stage: planning
-  - Owner: Frontend Builder
-  - Priority: P1
-  - Goal: let owners create, rotate, and deactivate scoped agent service keys
-    from the web console.
+No ready task.
 
 ## In Progress
 
@@ -59,6 +54,7 @@ No active task.
 
 ## Done
 
+- AGRUN-005 Scoped Agent Key Owner UI.
 - V2WEB-024 Data Operations Index.
 - V2WEB-023 Dashboard Operational Cockpit.
 - V2WEB-022 Unified API Integration Setup.

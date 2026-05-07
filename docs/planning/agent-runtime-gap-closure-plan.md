@@ -279,10 +279,10 @@ CompanyCore memory through the deployed API.
 ## AGRUN-005 Scoped Agent Key Owner UI
 
 - Task Type: security/frontend
-- Current Stage: planning
+- Current Stage: done
 - Deliverable For This Stage: owner-console flow for creating, rotating, and
   deactivating scoped agent keys.
-- Status: READY
+- Status: DONE
 - Owner: Frontend Builder
 - Priority: P1
 - Coverage Ledger Rows: AGRUN-COV-004
@@ -327,7 +327,17 @@ Make safe agent credential management usable without manual API calls.
 
 ### Result Report
 
-- Pending implementation.
+- Added a guided Agent service keys panel to `/settings/api`.
+- Added scoped presets for read-only agents, memory writers, event consumers,
+  and operators.
+- The UI creates owner-only scoped keys through `POST /v1/api-keys`, shows raw
+  key material only in the one-time creation panel, lists existing keys without
+  raw key material, deactivates keys through `PATCH /v1/api-keys/:id`, and
+  rotates by creating a replacement with the same scopes before deactivating
+  the previous key.
+- Validation passed: `node --check public/app.js`, `npm run build`,
+  `git diff --check`, `npm test` against disposable Postgres on port `55457`,
+  and authenticated local Playwright desktop/mobile browser smoke.
 
 ## AGRUN-006 Agent Event Ack Positive Smoke
 

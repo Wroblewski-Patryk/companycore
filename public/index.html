@@ -959,6 +959,51 @@
           </article>
         </section>
 
+        <section class="panel api-panel agent-key-panel">
+          <div class="section-title row-title">
+            <div>
+              <h2>Agent service keys</h2>
+              <p id="agentKeySummary">Sign in to manage scoped keys for Jarvis, Paperclip, Aviary, and internal agents.</p>
+            </div>
+            <button type="button" class="secondary compact" id="refreshAgentKeysButton">Refresh keys</button>
+          </div>
+
+          <div class="agent-key-layout">
+            <form class="agent-key-form" id="agentKeyForm">
+              <label>
+                Key name
+                <input id="agentKeyName" name="agentKeyName" type="text" autocomplete="off" placeholder="Jarvis memory writer">
+              </label>
+              <label>
+                Scope preset
+                <select id="agentKeyPreset" name="agentKeyPreset"></select>
+              </label>
+              <label>
+                Scopes
+                <textarea id="agentKeyScopes" name="agentKeyScopes" rows="6" spellcheck="false" placeholder="connection:read&#10;notes:read"></textarea>
+              </label>
+              <div class="actions setup-actions">
+                <button type="submit" id="agentKeyCreateButton">Create scoped key</button>
+                <button type="button" class="secondary" id="agentKeyResetButton">Reset preset</button>
+              </div>
+              <p class="form-note" id="agentKeyStatus">Choose a preset, adjust scopes if needed, then create the key.</p>
+            </form>
+
+            <aside class="agent-key-once" id="agentKeyOnce" hidden>
+              <span class="summary-kicker">Copy once</span>
+              <strong>New raw key</strong>
+              <p>This value is shown only now. After refresh, CompanyCore keeps only the hashed key and prefix.</p>
+              <code id="agentKeyRawValue"></code>
+              <div class="actions">
+                <button type="button" class="secondary compact" id="agentKeyCopyButton">Copy key</button>
+                <button type="button" class="secondary compact" id="agentKeyDismissButton">Hide</button>
+              </div>
+            </aside>
+          </div>
+
+          <div class="agent-key-list" id="agentKeyList"></div>
+        </section>
+
         <section class="panel api-panel">
           <div class="section-title">
             <h2>Capabilities</h2>

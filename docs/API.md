@@ -218,6 +218,17 @@ Safe response:
 List and update responses never include `key`. `PATCH /v1/api-keys/:id`
 currently supports `{ "active": false }` or `{ "active": true }`.
 
+Owner console support:
+
+- `/settings/api` includes the guided Agent service keys panel.
+- New keys should be created from the least-privilege preset that matches the
+  agent role, then adjusted only when the connection manifest proves another
+  capability is required.
+- Raw key material is displayed only immediately after creation. Refreshing the
+  page or dismissing the one-time panel leaves only the safe key prefix.
+- Rotation is performed by creating a replacement key with the same scopes,
+  copying the new raw key once, and deactivating the previous key.
+
 ## Integration Settings
 
 Workspace-owned integration settings are configured through protected routes.

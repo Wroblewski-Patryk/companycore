@@ -7,6 +7,8 @@ const state = {
   user: null,
   capabilities: [],
   adapterManifest: null,
+  apiKeys: [],
+  lastRawApiKey: null,
   mobileMenuOpen: false,
   clickup: {
     configured: false,
@@ -79,6 +81,97 @@ const state = {
   }
 };
 
+const agentKeyPresets = [
+  {
+    id: "read_only",
+    label: "Read-only agent",
+    description: "Discovery plus read access for core records and Drive metadata.",
+    scopes: [
+      "connection:read",
+      "projects:read",
+      "goals:read",
+      "targets:read",
+      "task-lists:read",
+      "tasks:read",
+      "clients:read",
+      "pipeline-stages:read",
+      "deals:read",
+      "interactions:read",
+      "notes:read",
+      "decisions:read",
+      "google-drive:read",
+      "agent-events:read"
+    ]
+  },
+  {
+    id: "memory_writer",
+    label: "Memory writer",
+    description: "Read company context and write notes, decisions, and agent logs.",
+    scopes: [
+      "connection:read",
+      "projects:read",
+      "goals:read",
+      "targets:read",
+      "tasks:read",
+      "clients:read",
+      "notes:read",
+      "notes:write",
+      "decisions:read",
+      "decisions:write",
+      "agent-logs:read",
+      "agent-logs:write",
+      "agent-events:read",
+      "agent-events:ack"
+    ]
+  },
+  {
+    id: "event_consumer",
+    label: "Event consumer",
+    description: "Minimal event inbox client that can read and acknowledge assigned work.",
+    scopes: [
+      "connection:read",
+      "agent-events:read",
+      "agent-events:ack",
+      "agent-logs:write"
+    ]
+  },
+  {
+    id: "operator",
+    label: "Operator",
+    description: "Broad operational agent for controlled create/update workflows.",
+    scopes: [
+      "connection:read",
+      "projects:read",
+      "projects:write",
+      "goals:read",
+      "goals:write",
+      "targets:read",
+      "targets:write",
+      "task-lists:read",
+      "task-lists:write",
+      "tasks:read",
+      "tasks:write",
+      "clients:read",
+      "clients:write",
+      "pipeline-stages:read",
+      "pipeline-stages:write",
+      "deals:read",
+      "deals:write",
+      "interactions:read",
+      "interactions:write",
+      "notes:read",
+      "notes:write",
+      "decisions:read",
+      "decisions:write",
+      "google-drive:read",
+      "google-drive:write",
+      "agent-logs:write",
+      "agent-events:read",
+      "agent-events:ack"
+    ]
+  }
+];
+
 const COMPANY_AREAS = [
   { number: "00", label: "Główny", key: "main-general", description: "Default home for unclassified imported lists, folders, records, and shared company context." },
   { number: "01", label: "Strategia", key: "strategy-governance", description: "Goals, targets, decisions, and the strategic source of truth." },
@@ -148,6 +241,20 @@ const googleDriveStatusLabel = document.querySelector("#googleDriveStatusLabel")
 const googleDriveStatusHint = document.querySelector("#googleDriveStatusHint");
 const capabilitySummary = document.querySelector("#capabilitySummary");
 const capabilityList = document.querySelector("#capabilityList");
+const agentKeySummary = document.querySelector("#agentKeySummary");
+const agentKeyForm = document.querySelector("#agentKeyForm");
+const agentKeyName = document.querySelector("#agentKeyName");
+const agentKeyPreset = document.querySelector("#agentKeyPreset");
+const agentKeyScopes = document.querySelector("#agentKeyScopes");
+const agentKeyCreateButton = document.querySelector("#agentKeyCreateButton");
+const agentKeyResetButton = document.querySelector("#agentKeyResetButton");
+const refreshAgentKeysButton = document.querySelector("#refreshAgentKeysButton");
+const agentKeyStatus = document.querySelector("#agentKeyStatus");
+const agentKeyOnce = document.querySelector("#agentKeyOnce");
+const agentKeyRawValue = document.querySelector("#agentKeyRawValue");
+const agentKeyCopyButton = document.querySelector("#agentKeyCopyButton");
+const agentKeyDismissButton = document.querySelector("#agentKeyDismissButton");
+const agentKeyList = document.querySelector("#agentKeyList");
 const apiSearch = document.querySelector("#apiSearch");
 const apiMethodFilter = document.querySelector("#apiMethodFilter");
 const apiRouteSummary = document.querySelector("#apiRouteSummary");
@@ -2877,6 +2984,189 @@ function renderApiWorkbench() {
   }
 }
 
+function setupAgentKeyPresets() {
+  agentKeyPreset.innerHTML = "";
+  for (const preset of agentKeyPresets) {
+    const option = document.createElement("option");
+    option.value = preset.id;
+    option.textContent = preset.label;
+    agentKeyPreset.append(option);
+  }
+  applyAgentKeyPreset(agentKeyPresets[0]?.id || "");
+}
+
+function applyAgentKeyPreset(presetId) {
+  const preset = agentKeyPresets.find((item) => item.id === presetId) || agentKeyPresets[0];
+  if (!preset) {
+    return;
+  }
+  agentKeyPreset.value = preset.id;
+  if (!agentKeyName.value.trim()) {
+    agentKeyName.value = preset.label;
+  }
+  agentKeyScopes.value = preset.scopes.join("\n");
+  setAgentKeyStatus(preset.description);
+}
+
+function parseScopesInput(value) {
+  return String(value || "")
+    .split(/[\n,]/)
+    .map((scope) => scope.trim())
+    .filter(Boolean);
+}
+
+function renderAgentKeys() {
+  agentKeyList.innerHTML = "";
+  const signedIn = isSignedIn();
+  const activeCount = state.apiKeys.filter((key) => key.active).length;
+  const inactiveCount = state.apiKeys.length - activeCount;
+
+  agentKeySummary.textContent = signedIn
+    ? `${activeCount} active service key${activeCount === 1 ? "" : "s"} and ${inactiveCount} inactive key${inactiveCount === 1 ? "" : "s"} in this workspace.`
+    : "Sign in to manage scoped keys for Jarvis, Paperclip, Aviary, and internal agents.";
+
+  agentKeyForm.querySelectorAll("input, select, textarea, button").forEach((control) => {
+    control.disabled = !signedIn;
+  });
+  refreshAgentKeysButton.disabled = !signedIn;
+
+  if (state.lastRawApiKey) {
+    agentKeyOnce.hidden = false;
+    agentKeyRawValue.textContent = state.lastRawApiKey;
+  } else {
+    agentKeyOnce.hidden = true;
+    agentKeyRawValue.textContent = "";
+  }
+
+  if (!signedIn) {
+    agentKeyList.append(emptyNote("Sign in to review service keys."));
+    return;
+  }
+
+  if (state.apiKeys.length === 0) {
+    agentKeyList.append(emptyNote("No service keys yet. Create a scoped key from a preset above."));
+    return;
+  }
+
+  for (const key of state.apiKeys) {
+    agentKeyList.append(agentKeyRowElement(key));
+  }
+}
+
+function agentKeyRowElement(key) {
+  const row = document.createElement("article");
+  row.className = `agent-key-row ${key.active ? "is-active" : "is-inactive"}`;
+  const scopes = Array.isArray(key.scopes) ? key.scopes : [];
+  const scopePreview = scopes.length > 0 ? scopes.slice(0, 8).join(", ") : "broad compatibility";
+  row.innerHTML = `
+    <div class="agent-key-main">
+      <span class="summary-kicker">${key.active ? "Active" : "Inactive"}</span>
+      <strong>${escapeHtml(key.name)}</strong>
+      <p>Prefix ${escapeHtml(key.keyPrefix || "-")} - ${scopes.length} scope${scopes.length === 1 ? "" : "s"} - last used ${escapeHtml(formatDate(key.lastUsedAt))}</p>
+    </div>
+    <div class="agent-key-scopes">${escapeHtml(scopePreview)}${scopes.length > 8 ? `, +${scopes.length - 8} more` : ""}</div>
+    <div class="row-actions agent-key-actions"></div>
+  `;
+
+  const actions = row.querySelector(".agent-key-actions");
+  if (key.active) {
+    const rotateButton = document.createElement("button");
+    rotateButton.type = "button";
+    rotateButton.className = "secondary compact";
+    rotateButton.textContent = "Rotate";
+    rotateButton.addEventListener("click", () => rotateAgentKey(key));
+    const deactivateButton = document.createElement("button");
+    deactivateButton.type = "button";
+    deactivateButton.className = "secondary compact danger-action";
+    deactivateButton.textContent = "Deactivate";
+    deactivateButton.addEventListener("click", () => deactivateAgentKey(key));
+    actions.append(rotateButton, deactivateButton);
+  } else {
+    const inactiveNote = document.createElement("span");
+    inactiveNote.className = "agent-key-note";
+    inactiveNote.textContent = "Inactive - disabled";
+    actions.append(inactiveNote);
+  }
+  return row;
+}
+
+async function loadApiKeys() {
+  if (!isSignedIn()) {
+    state.apiKeys = [];
+    renderAgentKeys();
+    return;
+  }
+
+  const response = await api("/v1/api-keys");
+  state.apiKeys = response.data || [];
+  renderAgentKeys();
+}
+
+async function createAgentKey({ name, scopes }) {
+  const response = await api("/v1/api-keys", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, scopes })
+  });
+  state.lastRawApiKey = response.data.key;
+  await loadApiKeys();
+  return response.data;
+}
+
+async function deactivateAgentKey(key) {
+  const confirmed = window.confirm(`Deactivate "${key.name}"? Existing agents using this key will stop authenticating.`);
+  if (!confirmed) {
+    return;
+  }
+  setBusy(true);
+  try {
+    await api(`/v1/api-keys/${key.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ active: false })
+    });
+    state.lastRawApiKey = null;
+    await loadApiKeys();
+    setAgentKeyStatus("Service key deactivated.", "success");
+  } catch (error) {
+    setAgentKeyStatus(friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function rotateAgentKey(key) {
+  const confirmed = window.confirm(`Rotate "${key.name}"? CompanyCore will create a replacement key with the same scopes and deactivate the current key.`);
+  if (!confirmed) {
+    return;
+  }
+  setBusy(true);
+  try {
+    const replacementName = `${key.name} replacement`;
+    await createAgentKey({
+      name: replacementName,
+      scopes: Array.isArray(key.scopes) ? key.scopes : []
+    });
+    await api(`/v1/api-keys/${key.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ active: false })
+    });
+    await loadApiKeys();
+    setAgentKeyStatus("Replacement key created. Copy the raw key before leaving this screen.", "success");
+  } catch (error) {
+    setAgentKeyStatus(friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+}
+
+function setAgentKeyStatus(message, tone = "") {
+  agentKeyStatus.textContent = message;
+  agentKeyStatus.classList.toggle("is-error", tone === "error");
+  agentKeyStatus.classList.toggle("is-success", tone === "success");
+}
+
 function renderApiRouteEmpty(message) {
   const empty = document.createElement("p");
   empty.className = "empty-note";
@@ -2956,6 +3246,7 @@ function setConnected(connection) {
   }
 
   renderConnectionState();
+  renderAgentKeys();
   renderGoogleDriveFiles();
   renderOperatingMap();
   renderDataOperations();
@@ -2970,7 +3261,8 @@ async function loadConnection() {
   await Promise.all([
     loadOperatingModel(),
     loadGoogleDriveFiles(),
-    loadTasks()
+    loadTasks(),
+    loadApiKeys()
   ]);
 }
 
@@ -3357,6 +3649,8 @@ logoutButton.addEventListener("click", () => {
   state.user = null;
   state.capabilities = [];
   state.adapterManifest = null;
+  state.apiKeys = [];
+  state.lastRawApiKey = null;
   state.clickup.configured = false;
   state.clickup.active = false;
   state.clickup.config = {};
@@ -3394,6 +3688,7 @@ logoutButton.addEventListener("click", () => {
   state.driveFilters.scan = "";
   state.apiFilters.search = "";
   state.apiFilters.method = "";
+  renderAgentKeys();
   renderTasks();
   renderGoogleDriveFiles();
   renderOperatingMap();
@@ -3499,6 +3794,72 @@ apiSearch.addEventListener("input", () => {
 apiMethodFilter.addEventListener("change", () => {
   state.apiFilters.method = apiMethodFilter.value;
   renderApiWorkbench();
+});
+
+agentKeyPreset.addEventListener("change", () => {
+  applyAgentKeyPreset(agentKeyPreset.value);
+});
+
+agentKeyResetButton.addEventListener("click", () => {
+  agentKeyName.value = "";
+  applyAgentKeyPreset(agentKeyPreset.value);
+});
+
+refreshAgentKeysButton.addEventListener("click", async () => {
+  setBusy(true);
+  try {
+    state.lastRawApiKey = null;
+    await loadApiKeys();
+    setAgentKeyStatus("Service keys refreshed.");
+  } catch (error) {
+    setAgentKeyStatus(friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+});
+
+agentKeyForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const name = agentKeyName.value.trim();
+  const scopes = parseScopesInput(agentKeyScopes.value);
+  if (!name) {
+    setAgentKeyStatus("Name the service key before creating it.", "error");
+    return;
+  }
+  if (scopes.length === 0) {
+    setAgentKeyStatus("Choose at least one scope for a least-privilege key.", "error");
+    return;
+  }
+
+  setBusy(true);
+  try {
+    await createAgentKey({ name, scopes });
+    agentKeyName.value = "";
+    applyAgentKeyPreset(agentKeyPreset.value);
+    setAgentKeyStatus("Scoped service key created. Copy the raw key before leaving this screen.", "success");
+  } catch (error) {
+    setAgentKeyStatus(friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+});
+
+agentKeyCopyButton.addEventListener("click", async () => {
+  if (!state.lastRawApiKey) {
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(state.lastRawApiKey);
+    setAgentKeyStatus("Raw key copied.", "success");
+  } catch {
+    setAgentKeyStatus("Copy failed. Select the raw key text manually before hiding it.", "error");
+  }
+});
+
+agentKeyDismissButton.addEventListener("click", () => {
+  state.lastRawApiKey = null;
+  renderAgentKeys();
+  setAgentKeyStatus("Raw key hidden. It cannot be shown again.", "success");
 });
 
 dataSearch.addEventListener("input", () => {
@@ -3782,6 +4143,7 @@ refreshDriveFilesButton.addEventListener("click", async () => {
   }
 });
 
+setupAgentKeyPresets();
 renderRoute();
 
 if (state.ownerToken) {

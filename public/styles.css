@@ -1579,6 +1579,121 @@ button.danger:hover {
   font-size: 13px;
 }
 
+.agent-key-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.agent-key-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(280px, 1.1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.agent-key-form {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.agent-key-form textarea {
+  min-height: 154px;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.agent-key-once {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid #9fc1ff;
+  border-radius: 8px;
+  background: #eef4ff;
+}
+
+.agent-key-once strong {
+  font-size: 20px;
+}
+
+.agent-key-once p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.agent-key-once code {
+  display: block;
+  max-width: 100%;
+  padding: 12px;
+  overflow-wrap: anywhere;
+  border: 1px solid #b9c8e2;
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.agent-key-list {
+  display: grid;
+  gap: 10px;
+}
+
+.agent-key-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.1fr) minmax(220px, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  min-height: 92px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.agent-key-row.is-inactive {
+  background: #f2f4f7;
+  color: var(--muted);
+}
+
+.agent-key-main {
+  display: grid;
+  gap: 4px;
+}
+
+.agent-key-main strong {
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.agent-key-main p,
+.agent-key-scopes {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.agent-key-scopes {
+  overflow-wrap: anywhere;
+}
+
+.agent-key-note {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.danger-action {
+  color: var(--danger);
+}
+
 .table-wrap {
   overflow-x: auto;
 }
@@ -1788,10 +1903,12 @@ button.danger:hover {
   .attention-row,
   .pipeline-layout,
   .relationship-grid,
-  .relationship-row,
-  .integration-action-row,
-  .workbench-index-row,
-  .integration-area-row {
+    .relationship-row,
+    .integration-action-row,
+    .agent-key-layout,
+    .agent-key-row,
+    .workbench-index-row,
+    .integration-area-row {
     grid-template-columns: 1fr;
     display: grid;
   }

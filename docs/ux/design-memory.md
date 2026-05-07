@@ -48,3 +48,19 @@ of rediscovering them.
   cells where a real table is more scannable.
 - Evidence: V2WEB-024 `/data` desktop and mobile Playwright smoke passed with
   13 module rows, filter interaction, and no browser console errors.
+
+### 2026-05-07 - Agent Key Control Panel
+- Type: reusable_pattern
+- Context: Auth-sensitive owner-console actions need guided forms, copy-once
+  secret handling, local status, and clear inactive states without exposing raw
+  provider/backend errors.
+- Decision: Use a two-column control panel with a scoped preset form on the
+  left, one-time secret output on the right, and a row list below for current
+  credentials and lifecycle actions.
+- Reuse when: A settings screen creates sensitive credentials, webhooks, OAuth
+  client material, or agent runtime tokens.
+- Avoid when: The action is a simple non-secret toggle or a read-only status
+  summary.
+- Evidence: AGRUN-005 `/settings/api` browser smoke created a scoped key,
+  displayed the raw key once, deactivated the key, and passed desktop/mobile
+  visual checks without console errors.

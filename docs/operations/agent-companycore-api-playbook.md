@@ -18,6 +18,11 @@ Raw service keys are secret material. Store them only in the agent's secret
 store or runtime environment. Do not print them in logs, screenshots, traces,
 or task notes.
 
+Owners create and rotate scoped service keys in the CompanyCore web console at
+`/settings/api`. Use the narrowest preset that fits the agent role, copy the
+raw key from the one-time panel, then store it directly in the agent runtime
+secret store. Existing raw keys cannot be shown again.
+
 ## Startup Flow
 
 1. Call the connection handshake:
@@ -239,6 +244,8 @@ Expected result:
 ## Production Safety
 
 - Use a dedicated key per agent.
+- Create new keys from `/settings/api` presets instead of using broad
+  compatibility scopes for new agents.
 - Rotate any key that was copied through chat, logs, screenshots, or shell
   history.
 - Prefer narrow agent behavior even when the service key currently has broad

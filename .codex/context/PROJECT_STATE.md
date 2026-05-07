@@ -133,6 +133,15 @@ Last updated: 2026-05-07
 - Next required mode: TESTER for production smoke and release evidence.
 
 ## Recent Progress
+- 2026-05-07: Completed AGRUN-005 Scoped Agent Key Owner UI. `/settings/api`
+  now includes an Agent service keys panel with least-privilege presets for
+  read-only agents, memory writers, event consumers, and operators. Owners can
+  create scoped keys, copy raw key material from a one-time panel only,
+  refresh the list, deactivate keys, and rotate by creating a same-scope
+  replacement before disabling the previous key. Validation passed:
+  `node --check public/app.js`, `npm run build`, `git diff --check`,
+  `npm test` against disposable Postgres on port `55457`, and authenticated
+  local Playwright desktop/mobile API-settings smoke.
 - 2026-05-07: Completed V2WEB-024 Data Operations Index. The owner console now
   exposes `/data` as a reusable database operations entry point with 13
   CompanyCore module rows, record counts, API route coverage, area mappings,
