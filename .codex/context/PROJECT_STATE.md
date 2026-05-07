@@ -143,6 +143,14 @@ Last updated: 2026-05-07
   `npm test` against disposable Postgres on port `55461`, and local
   authenticated Playwright desktop/mobile `/data/clients` smoke that created,
   updated, archived, and reloaded real Clients records.
+- 2026-05-07: Deployed V2WEB-028 to production with manual VPS backend
+  rollover after public health still reported `df4e7b2` following the GitHub
+  push. The running backend container is
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-fd4b2f3`, image
+  `rnqqkhl3o3dut4qv56mlxly2_backend:fd4b2f3f32794a2538b50f76d315bcd3d1d8d135`.
+  Public `/health` reports commit
+  `fd4b2f3f32794a2538b50f76d315bcd3d1d8d135`; production `app.js` includes
+  `renderClientEditor`, `clientEditorName`, and `Create client`.
 - 2026-05-07: Completed V2WEB-027 Typed Projects Editor Workbench.
   `/data/projects` now has a typed project editor inside the reusable split
   record workbench: owners can create project workstreams, edit project name,

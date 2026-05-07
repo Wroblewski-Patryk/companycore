@@ -843,3 +843,6 @@ It follows the repository task contract and must stay synchronized with
   - Validation passed against a disposable Postgres database and local
     Playwright desktop/mobile smokes that created, edited, archived, and
     reloaded real Clients API records.
+  - Deployed to production at commit
+    `fd4b2f3f32794a2538b50f76d315bcd3d1d8d135`; production health and static
+    asset markers confirmed the typed Clients editor code is live.
