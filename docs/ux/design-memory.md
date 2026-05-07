@@ -98,3 +98,6 @@ of rediscovering them.
   typed name/status/description controls and responsive `record-editor-grid`
   validation. V2WEB-028 reused it for `/data/clients` with a CRM-specific grid
   and full-width email field so longer contact values remain readable.
+  V2WEB-029 reused it for `/data/task-lists` with typed project linkage and
+  draft preservation so background workspace refreshes do not wipe in-progress
+  create input.

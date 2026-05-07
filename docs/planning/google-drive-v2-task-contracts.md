@@ -846,3 +846,59 @@ It follows the repository task contract and must stay synchronized with
   - Deployed to production at commit
     `fd4b2f3f32794a2538b50f76d315bcd3d1d8d135`; production health and static
     asset markers confirmed the typed Clients editor code is live.
+
+## V2WEB-029 Typed Task Lists Editor Workbench
+
+- Task Type: frontend/ux
+- Current Stage: verification
+- Deliverable For This Stage: typed task-list create/edit/archive editor
+  inside the Data Operations workbench.
+- Goal: Let owners manage operational task lists from `/data/task-lists`
+  without leaving the database workbench or hand-writing API payloads.
+- Scope:
+  - `public/app.js`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/operations/agent-runtime-coverage-ledger.csv`
+  - `docs/ux/design-memory.md`
+- Implementation Plan:
+  - Reuse the split `/data/:table` workbench and existing `record-editor`
+    typed editor pattern.
+  - Add a typed editor only for the `task-lists` module.
+  - Wire create, update, and archive actions to the existing Task Lists API
+    (`POST /v1/task-lists`, `PATCH /v1/task-lists/:id`,
+    `DELETE /v1/task-lists/:id`).
+  - Include project linkage with the existing Projects record index.
+  - Preserve task-list draft inputs across background workspace refreshes so
+    operator input is not lost during route-level data loading.
+  - Validate desktop and mobile rendered behavior with an authenticated browser
+    smoke.
+- Acceptance Criteria:
+  - Signed-in owners can create a task list from `/data/task-lists`.
+  - Selecting a task list loads name, status, project, and description into
+    typed controls.
+  - Saving updates the selected task list and refreshes the record list and
+    inspector.
+  - Archiving a selected task list calls the Task Lists archive API and shows
+    archived status in the inspector.
+  - The editor reuses shared `record-editor` styles and preserves draft values
+    during background workspace refresh.
+- Definition of Done:
+  - `node --check public/app.js`, `npm run build`, `npm test`,
+    `git diff --check`, and authenticated Playwright desktop/mobile smoke pass.
+  - Canonical task, project-state, planning, coverage-ledger, and UX memory
+    docs are updated.
+- Result Report:
+  - Added typed task-list name, status, project, and description controls to
+    `/data/task-lists`.
+  - Extended the typed editor selector so Notes, Projects, Clients, and Task
+    Lists share the same workbench pattern while other modules remain
+    read-only.
+  - Added draft preservation for new task lists and fail-soft startup refresh
+    handling so a transient workspace reload does not wipe operator input or
+    sign the user out unless the error is actually auth-related.
+  - Local validation passed: `node --check public/app.js`, `npm run build`,
+    `git diff --check`, `npm test` against disposable Postgres on port
+    `55462`, and authenticated Playwright desktop/mobile smoke that created,
+    edited, archived, and reloaded real Task Lists API records.

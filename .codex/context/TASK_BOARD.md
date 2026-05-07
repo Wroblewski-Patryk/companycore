@@ -54,6 +54,7 @@ No active task.
 
 ## Done
 
+- V2WEB-029 Typed Task Lists Editor Workbench.
 - V2WEB-028 Typed Clients Editor Workbench.
 - V2WEB-027 Typed Projects Editor Workbench.
 - V2WEB-026 Typed Notes Editor Workbench.

@@ -79,7 +79,8 @@ const state = {
     search: "",
     source: "",
     selectedId: "",
-    newDraft: false
+    newDraft: false,
+    drafts: {}
   },
   relationshipFilters: {
     search: "",
@@ -2163,10 +2164,13 @@ function renderRecordInspector(record, module, fields) {
 }
 
 function hasTypedRecordEditor(slug) {
-  return ["notes", "projects", "clients"].includes(slug);
+  return ["notes", "projects", "clients", "task-lists"].includes(slug);
 }
 
 function renderTypedRecordEditor(slug, record) {
+  if (slug === "task-lists") {
+    return renderTaskListEditor(record);
+  }
   if (slug === "clients") {
     return renderClientEditor(record);
   }
@@ -2174,6 +2178,21 @@ function renderTypedRecordEditor(slug, record) {
     return renderProjectEditor(record);
   }
   return renderNoteEditor(record);
+}
+
+function typedEditorDraft(slug) {
+  return state.tableWorkbench.drafts[slug] || {};
+}
+
+function updateTypedEditorDraft(slug, values) {
+  state.tableWorkbench.drafts[slug] = {
+    ...typedEditorDraft(slug),
+    ...values
+  };
+}
+
+function clearTypedEditorDraft(slug) {
+  delete state.tableWorkbench.drafts[slug];
 }
 
 function renderNoteEditor(record) {
@@ -2322,6 +2341,87 @@ function renderClientEditor(record) {
   return panel;
 }
 
+function renderTaskListEditor(record) {
+  const panel = document.createElement("section");
+  panel.className = "record-editor";
+  const draft = record ? {} : typedEditorDraft("task-lists");
+  const name = record?.name ?? draft.name ?? "";
+  const description = record?.description ?? draft.description ?? "";
+  const status = record?.status ?? draft.status ?? "active";
+  const selectedProjectId = record?.projectId ?? draft.projectId ?? "";
+  const projects = recordsForSlug("projects");
+  const projectOptions = projects.map((project) => `
+    <option value="${escapeHtml(project.id)}" ${selectedProjectId === project.id ? "selected" : ""}>${escapeHtml(recordTitle(project, { label: "Project" }))}</option>
+  `).join("");
+  panel.innerHTML = `
+    <div class="record-editor-heading">
+      <div>
+        <span class="summary-kicker">Typed editor</span>
+        <h3>${record ? "Edit selected task list" : "Create task list"}</h3>
+      </div>
+      ${record ? `<span class="status-pill">${escapeHtml(status)}</span>` : ""}
+    </div>
+    <div class="record-editor-grid">
+      <label>
+        List name
+        <input id="taskListEditorName" type="text" autocomplete="off" placeholder="Delivery, intake, QA..." value="${escapeHtml(name)}" />
+      </label>
+      <label>
+        Status
+        <select id="taskListEditorStatus">
+          <option value="active" ${status === "active" ? "selected" : ""}>active</option>
+          <option value="paused" ${status === "paused" ? "selected" : ""}>paused</option>
+          <option value="done" ${status === "done" ? "selected" : ""}>done</option>
+          <option value="archived" ${status === "archived" ? "selected" : ""}>archived</option>
+        </select>
+      </label>
+      <label class="record-editor-span-2">
+        Project
+        <select id="taskListEditorProject">
+          <option value="" ${selectedProjectId ? "" : "selected"}>No project</option>
+          ${projectOptions}
+        </select>
+      </label>
+    </div>
+    <label>
+      Description
+      <textarea id="taskListEditorDescription" rows="5" autocomplete="off" placeholder="Describe what belongs on this list.">${escapeHtml(description)}</textarea>
+    </label>
+    <div class="record-editor-actions">
+      <button type="button" class="compact" data-task-list-action="create">Create list</button>
+      <button type="button" class="secondary compact" data-task-list-action="save" ${record ? "" : "disabled"}>Save selected</button>
+      <button type="button" class="secondary compact" data-task-list-action="new">New draft</button>
+      <button type="button" class="danger compact" data-task-list-action="archive" ${record && record.status !== "archived" ? "" : "disabled"}>Archive selected</button>
+    </div>
+    <p class="form-note" id="taskListEditorStatusMessage">${record ? "Changes are saved into the Task Lists API and reflected in this database index." : "Create a local CompanyCore task list. Project linkage is optional."}</p>
+  `;
+
+  panel.querySelector('[data-task-list-action="create"]').addEventListener("click", () => createTaskListFromEditor(panel));
+  panel.querySelector('[data-task-list-action="save"]').addEventListener("click", () => saveSelectedTaskListFromEditor(panel, record));
+  panel.querySelector('[data-task-list-action="new"]').addEventListener("click", () => {
+    state.tableWorkbench.selectedId = "";
+    state.tableWorkbench.newDraft = true;
+    clearTypedEditorDraft("task-lists");
+    renderTableWorkbench();
+  });
+  panel.querySelector('[data-task-list-action="archive"]').addEventListener("click", () => archiveSelectedTaskList(record));
+  if (!record) {
+    panel.querySelector("#taskListEditorName")?.addEventListener("input", (event) => {
+      updateTypedEditorDraft("task-lists", { name: event.target.value });
+    });
+    panel.querySelector("#taskListEditorDescription")?.addEventListener("input", (event) => {
+      updateTypedEditorDraft("task-lists", { description: event.target.value });
+    });
+    panel.querySelector("#taskListEditorStatus")?.addEventListener("change", (event) => {
+      updateTypedEditorDraft("task-lists", { status: event.target.value });
+    });
+    panel.querySelector("#taskListEditorProject")?.addEventListener("change", (event) => {
+      updateTypedEditorDraft("task-lists", { projectId: event.target.value });
+    });
+  }
+  return panel;
+}
+
 function noteEditorContent(panel) {
   return panel.querySelector("#noteEditorContent")?.value.trim() || "";
 }
@@ -2336,6 +2436,10 @@ function setProjectEditorStatus(panel, message, tone = "") {
 
 function setClientEditorStatus(panel, message, tone = "") {
   setRecordEditorStatus(panel, "#clientEditorStatusMessage", message, tone);
+}
+
+function setTaskListEditorStatus(panel, message, tone = "") {
+  setRecordEditorStatus(panel, "#taskListEditorStatusMessage", message, tone);
 }
 
 function setRecordEditorStatus(panel, selector, message, tone = "") {
@@ -2618,6 +2722,102 @@ async function archiveSelectedClient(record) {
     await refreshTableRecords("clients");
     renderTableWorkbench();
     showResult("Client archived.", "success");
+  } catch (error) {
+    showResult(friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+}
+
+function taskListEditorPayload(panel) {
+  const name = panel.querySelector("#taskListEditorName")?.value.trim() || "";
+  const description = panel.querySelector("#taskListEditorDescription")?.value.trim() || "";
+  const status = panel.querySelector("#taskListEditorStatus")?.value || "active";
+  const projectId = panel.querySelector("#taskListEditorProject")?.value || "";
+  return {
+    name,
+    description: description || undefined,
+    status,
+    projectId: projectId || undefined
+  };
+}
+
+async function createTaskListFromEditor(panel) {
+  const payload = taskListEditorPayload(panel);
+  if (!payload.name) {
+    setTaskListEditorStatus(panel, "Name the task list before creating it.", "error");
+    return;
+  }
+
+  setBusy(true);
+  try {
+    const response = await api("/v1/task-lists", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    state.tableWorkbench.selectedId = response.data?.id || "";
+    state.tableWorkbench.newDraft = false;
+    clearTypedEditorDraft("task-lists");
+    await refreshTableRecords("task-lists");
+    renderTableWorkbench();
+    showResult("Task list created in the database.", "success");
+  } catch (error) {
+    setTaskListEditorStatus(panel, friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function saveSelectedTaskListFromEditor(panel, record) {
+  if (!record?.id) {
+    setTaskListEditorStatus(panel, "Select a task list before saving changes.", "error");
+    return;
+  }
+
+  const payload = taskListEditorPayload(panel);
+  if (!payload.name) {
+    setTaskListEditorStatus(panel, "Task list name cannot be empty.", "error");
+    return;
+  }
+
+  setBusy(true);
+  try {
+    await api(`/v1/task-lists/${record.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    state.tableWorkbench.selectedId = record.id;
+    state.tableWorkbench.newDraft = false;
+    await refreshTableRecords("task-lists");
+    renderTableWorkbench();
+    showResult("Task list updated.", "success");
+  } catch (error) {
+    setTaskListEditorStatus(panel, friendlyError(error), "error");
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function archiveSelectedTaskList(record) {
+  if (!record?.id) {
+    return;
+  }
+
+  const confirmed = window.confirm("Archive this task list? Related tasks stay in the database.");
+  if (!confirmed) {
+    return;
+  }
+
+  setBusy(true);
+  try {
+    await api(`/v1/task-lists/${record.id}`, { method: "DELETE" });
+    state.tableWorkbench.selectedId = record.id;
+    state.tableWorkbench.newDraft = false;
+    await refreshTableRecords("task-lists");
+    renderTableWorkbench();
+    showResult("Task list archived.", "success");
   } catch (error) {
     showResult(friendlyError(error), "error");
   } finally {
@@ -3492,6 +3692,13 @@ function parseApiError(body, fallback) {
     return body.error;
   }
   return body?.error?.message || body?.error?.code || fallback;
+}
+
+function isAuthSessionError(error) {
+  const message = error?.message || "";
+  return message === "invalid_token"
+    || message === "unauthorized"
+    || message.includes("401");
 }
 
 async function api(path, options = {}) {
@@ -4877,10 +5084,16 @@ renderRoute();
 if (state.ownerToken) {
   loadConnection().then(() => {
     renderRoute();
-  }).catch(() => {
-    sessionStorage.removeItem("companycoreOwnerToken");
-    state.ownerToken = "";
-    setClickUpEnabled(false);
+  }).catch((error) => {
+    if (isAuthSessionError(error)) {
+      sessionStorage.removeItem("companycoreOwnerToken");
+      state.ownerToken = "";
+      setClickUpEnabled(false);
+      setGoogleDriveEnabled(false);
+      showResult("Sign in again to refresh your workspace session.", "error");
+    } else {
+      showResult("Workspace data could not refresh. The current screen stayed available; try refreshing in a moment.", "error");
+    }
     renderRoute();
   });
 } else {
