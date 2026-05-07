@@ -1,5 +1,52 @@
 # Web Console V2 Task Contracts
 
+## V2WEB-047 Public Entry Context Polish
+
+- Task Type: design/frontend
+- Current Stage: done
+- Deliverable For This Stage: `/` shows a stronger public entry context for
+  CompanyCore v1 before owner login or workspace creation.
+- Goal: Make the public landing route explain the operational console, core
+  integration surfaces, and agent API value before the user chooses sign-in or
+  registration.
+- Scope:
+  - `public/index.html`
+  - `public/styles.css`
+  - `docs/ux/design-memory.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+- Implementation Plan:
+  - Add public entry pills for ClickUp, Drive, agent API, and operating areas.
+  - Replace the minimal Web UI status chip with a compact operational console
+    card.
+  - Preserve public sign-in/register navigation and auth behavior.
+  - Validate syntax/build, tests, and desktop/mobile public-entry rendering.
+- Acceptance Criteria:
+  - `/` explains the operational console and core integration surfaces before
+    auth.
+  - `Sign in` and `Create account` keep navigating to existing auth routes.
+  - Desktop and mobile layouts render without horizontal overflow.
+- Definition of Done:
+  - `node --check public/app.js`, `npm run build`, `git diff --check`, and
+    `npm test` pass.
+  - Local browser smoke verifies public entry context, auth navigation,
+    responsive layout, and no console errors.
+- Result Report:
+  - Added public entry pills for ClickUp, Google Drive, agent-safe API, and
+    operating areas.
+  - Replaced the minimal Web UI status chip with a compact operational console
+    card.
+  - Preserved public sign-in/register navigation and auth behavior.
+  - Passed `node --check public/app.js`, `npm run build`, `git diff --check`,
+    and `npm test` against disposable Postgres on port `55501`.
+  - Passed local Playwright desktop/mobile `/` smoke with no console errors or
+    horizontal overflow; smoke verified public entry copy and navigation to
+    `/auth/login` plus `/auth/register`.
+  - Browser plugin fallback was required because node_repl resolved Node
+    `22.13.0` while the plugin requires `>=22.22.0`.
+
 ## V2WEB-046 Auth Onboarding Context Polish
 
 - Task Type: design/frontend

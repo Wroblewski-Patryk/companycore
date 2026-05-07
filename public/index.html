@@ -79,21 +79,32 @@
 
     <main class="shell">
       <section class="view hero" data-view="/">
-        <div>
+        <div class="public-entry-copy">
           <p class="label">CompanyCore v1</p>
           <h1>Company operations bridge</h1>
           <p class="lede">
             Connect company tools once, keep operational data in CompanyCore,
             and let Jarvis, Paperclip, and Aviary read one clean API.
           </p>
+          <div class="public-entry-pills" aria-label="CompanyCore public entry context">
+            <span>ClickUp adapter</span>
+            <span>Google Drive index</span>
+            <span>Agent-safe API</span>
+            <span>Operating areas</span>
+          </div>
           <div class="actions">
             <a class="button-link" href="/auth/login" data-link>Sign in</a>
             <a class="button-link secondary" href="/auth/register" data-link>Create account</a>
           </div>
         </div>
-        <div class="status-card" id="publicStatus">
-          <span class="dot muted"></span>
-          <span>Web UI</span>
+        <div class="public-entry-card" id="publicStatus">
+          <span class="summary-kicker">Operational console</span>
+          <strong>Workspace first, integrations next</strong>
+          <p>Owner login unlocks ClickUp setup, Drive import, business tables, scoped service keys, and the same API surface agents use.</p>
+          <div class="public-entry-status">
+            <span class="dot muted"></span>
+            <span>Web UI ready</span>
+          </div>
         </div>
       </section>
 

@@ -34,6 +34,20 @@ of rediscovering them.
 
 ## Entries
 
+### 2026-05-07 - Public Entry Operational Context
+- Type: reusable_pattern
+- Context: The public `/` route should set up the product's operational
+  promise before sending owners to sign in or create a workspace.
+- Decision: Keep the entry compact and app-like. Show core surface pills
+  for ClickUp, Drive, agent-safe API, and operating areas, plus a small
+  operational console card instead of a bare status chip.
+- Reuse when: A public route introduces the private operational console and
+  must quickly explain why the owner should continue into auth.
+- Avoid when: The user is already authenticated; private routes should show
+  live workspace state instead of static public-entry copy.
+- Evidence: V2WEB-047 upgrades `/` with operational surface pills and a
+  compact public entry card.
+
 ### 2026-05-07 - Auth Onboarding Context Panels
 - Type: reusable_pattern
 - Context: Public owner-auth screens need enough product context to explain

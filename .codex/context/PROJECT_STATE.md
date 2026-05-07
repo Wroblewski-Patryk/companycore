@@ -137,6 +137,19 @@ Last updated: 2026-05-07
 
 ## Recent Progress
 
+- 2026-05-07: Completed V2WEB-047 Public Entry Context Polish.
+  `/` now includes public entry pills for ClickUp, Google Drive, agent-safe
+  API, and operating areas plus a compact operational console card instead of
+  the previous minimal Web UI status chip. The route preserves public
+  sign-in/register navigation and auth behavior.
+  Validation passed: `node --check public/app.js`, `npm run build`,
+  `git diff --check`, `npm test` against disposable Postgres on port `55501`,
+  and local Playwright desktop/mobile `/` smoke with no console errors or
+  horizontal overflow. Smoke verified public entry copy and navigation to
+  `/auth/login` plus `/auth/register`. Browser plugin fallback note: in-app
+  Browser could not initialize because node_repl resolved Node `22.13.0` while
+  the plugin requires `>=22.22.0`.
+
 - 2026-05-07: Completed V2WEB-046 Auth Onboarding Context Polish.
   `/auth/login` now includes an owner onboarding context panel and
   `/auth/register` now includes a workspace bootstrap context panel. The
