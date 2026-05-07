@@ -74,6 +74,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] V2WEB-037 Tasks Adapter Context Polish
 - [x] V2WEB-038 Pipeline Workflow Context Polish
 - [x] V2WEB-039 Relationships Mapping Context Polish
+- [x] V2WEB-040 API Agent Access Context Polish
 - [x] AGRUN-005 Scoped Agent Key Owner UI
 - [x] CCV1-009P Protected production smoke for adapter CRUD
 - [x] CCV1-027 Paperclip and Jarvis production env wiring

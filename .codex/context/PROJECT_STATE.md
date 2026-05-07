@@ -137,6 +137,24 @@ Last updated: 2026-05-07
 
 ## Recent Progress
 
+- 2026-05-07: Completed V2WEB-040 API Agent Access Context Polish.
+  `/settings/api` now includes a compact agent API context panel before the API
+  summary cards and service-key workbench. The panel shows active key count,
+  inactive key count, scoped key count, capability count, route count,
+  write-route count, readiness state, and links into key creation plus
+  `/settings/integrations` through existing SPA navigation while preserving
+  scoped-key creation, copy-once raw key display, key rotation/deactivation,
+  capability chips, route filters, and the route manifest list.
+  Validation passed: `node --check public/app.js`, `npm run build`,
+  `git diff --check`, `npm test` against disposable Postgres on port `55487`,
+  and local Playwright desktop/mobile `/settings/api` smoke with no console
+  errors or horizontal overflow. Smoke verified the initial no-key context,
+  `Create key` anchor behavior, scoped key creation, copy-once raw key display,
+  post-create `Agent access ready` context refresh, and SPA navigation to
+  `/settings/integrations`. Browser plugin fallback note: in-app Browser could
+  not initialize because node_repl resolved Node `22.13.0` while the plugin
+  requires `>=22.22.0`.
+
 - 2026-05-07: Completed V2WEB-039 Relationships Mapping Context Polish.
   `/relationships` now includes a compact mapping context panel before the
   review queue. The panel shows provider mapping count, Drive folder count,

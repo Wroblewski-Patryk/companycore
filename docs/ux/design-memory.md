@@ -34,6 +34,23 @@ of rediscovering them.
 
 ## Entries
 
+### 2026-05-07 - Agent API Context Panel
+- Type: reusable_pattern
+- Context: Security-sensitive integration screens need to show readiness,
+  least-privilege state, and route surface before the operator creates or
+  hands off credentials.
+- Decision: Place a compact API context panel before credential/key management.
+  Show active key count, inactive key count, scoped key count, capability
+  count, route count, write-route count, and actions to create a key or review
+  integration mapping.
+- Reuse when: A route manages API keys, service clients, OAuth credentials,
+  webhooks, or another auth-sensitive integration handoff.
+- Avoid when: The screen only displays static documentation and has no owner
+  action or credential lifecycle.
+- Evidence: V2WEB-040 adds `/settings/api` context with service-key readiness,
+  route/capability inventory, and direct actions into key creation plus the
+  integration map.
+
 ### 2026-05-07 - Relationship Mapping Context Panel
 - Type: reusable_pattern
 - Context: Mapping review screens need to show whether external structures are

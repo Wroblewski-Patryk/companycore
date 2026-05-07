@@ -247,6 +247,7 @@ const clickupStatusLabel = document.querySelector("#clickupStatusLabel");
 const clickupStatusHint = document.querySelector("#clickupStatusHint");
 const googleDriveStatusLabel = document.querySelector("#googleDriveStatusLabel");
 const googleDriveStatusHint = document.querySelector("#googleDriveStatusHint");
+const apiContext = document.querySelector("#apiContext");
 const capabilitySummary = document.querySelector("#capabilitySummary");
 const capabilityList = document.querySelector("#capabilityList");
 const agentKeySummary = document.querySelector("#agentKeySummary");
@@ -4377,6 +4378,8 @@ function renderConnectionState() {
     ? "OAuth client saved. Paste a new client ID and secret only when rotating credentials."
     : "OAuth client not saved yet.";
 
+  renderApiSecurityContext();
+
   if (state.capabilities.length > 0) {
     capabilitySummary.textContent = `${state.capabilities.length} capabilities available for this workspace.`;
     capabilityList.innerHTML = "";
@@ -4393,6 +4396,46 @@ function renderConnectionState() {
   }
 
   renderApiWorkbench();
+}
+
+function renderApiSecurityContext() {
+  apiContext.innerHTML = "";
+  const signedIn = isSignedIn();
+  const routes = apiRouteRows();
+  const activeKeys = state.apiKeys.filter((key) => key.active);
+  const inactiveKeys = state.apiKeys.length - activeKeys.length;
+  const scopedKeys = activeKeys.filter((key) => Array.isArray(key.scopes) && key.scopes.length > 0);
+  const writeRoutes = routes.filter((route) => ["POST", "PATCH", "PUT", "DELETE"].includes(route.method)).length;
+  const health = !signedIn
+    ? "Sign in required"
+    : activeKeys.length > 0 ? "Agent access ready" : "No active keys";
+
+  const panel = document.createElement("article");
+  panel.className = "api-context-card";
+  panel.innerHTML = `
+    <div class="api-context-copy">
+      <span class="summary-kicker">Agent API command center</span>
+      <div class="api-context-heading">
+        <strong>Least-privilege access for Jarvis, Paperclip, and Aviary</strong>
+        <span class="workbench-index-status">${escapeHtml(health)}</span>
+      </div>
+      <p>Create scoped service keys, inspect route capabilities, and verify which write surfaces agents can use before handing a key to another app.</p>
+      <div class="api-context-pills" aria-label="API operation context">
+        <span>${activeKeys.length} active key${activeKeys.length === 1 ? "" : "s"}</span>
+        <span>${inactiveKeys} inactive key${inactiveKeys === 1 ? "" : "s"}</span>
+        <span>${scopedKeys.length} scoped key${scopedKeys.length === 1 ? "" : "s"}</span>
+        <span>${state.capabilities.length} capabilit${state.capabilities.length === 1 ? "y" : "ies"}</span>
+        <span>${routes.length} route${routes.length === 1 ? "" : "s"}</span>
+        <span>${writeRoutes} write route${writeRoutes === 1 ? "" : "s"}</span>
+      </div>
+    </div>
+    <div class="api-context-actions">
+      <a class="button-link compact" href="#agentKeyForm">Create key</a>
+      <a class="button-link secondary compact" href="/settings/integrations" data-link>Integration map</a>
+    </div>
+  `;
+  bindInlineNavigation(panel);
+  apiContext.append(panel);
 }
 
 async function createOperatingArea() {
@@ -4526,6 +4569,7 @@ function renderAgentKeys() {
   agentKeySummary.textContent = signedIn
     ? `${activeCount} active service key${activeCount === 1 ? "" : "s"} and ${inactiveCount} inactive key${inactiveCount === 1 ? "" : "s"} in this workspace.`
     : "Sign in to manage scoped keys for Jarvis, Paperclip, Aviary, and internal agents.";
+  renderApiSecurityContext();
 
   agentKeyForm.querySelectorAll("input, select, textarea, button").forEach((control) => {
     control.disabled = !signedIn;

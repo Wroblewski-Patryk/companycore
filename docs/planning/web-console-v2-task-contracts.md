@@ -1,5 +1,58 @@
 # Web Console V2 Task Contracts
 
+## V2WEB-040 API Agent Access Context Polish
+
+- Task Type: design/frontend
+- Current Stage: done
+- Deliverable For This Stage: `/settings/api` shows a compact agent API
+  command context panel above API cards and key management.
+- Goal: Make the API settings screen immediately explain whether agent access
+  is ready, how many scoped service keys exist, and how much route/capability
+  surface is available before the owner creates or hands off a key.
+- Scope:
+  - `public/index.html`
+  - `public/app.js`
+  - `public/styles.css`
+  - `docs/ux/design-memory.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+- Implementation Plan:
+  - Add an API context slot above the existing API summary cards.
+  - Render active key count, inactive key count, scoped key count, capability
+    count, route count, and write-route count from existing client state.
+  - Add local actions for key creation and integration map review.
+  - Preserve existing scoped-key form, copy-once raw key behavior, key list,
+    capability chips, route filters, and route list.
+  - Validate syntax, build, tests, and desktop/mobile `/settings/api`
+    rendering.
+- Acceptance Criteria:
+  - `/settings/api` explains agent API readiness before key management.
+  - `Create key` moves focus context to the existing key form without a new
+    backend path.
+  - `Integration map` navigates to `/settings/integrations` through the SPA.
+  - Desktop and mobile layouts render without horizontal overflow.
+- Definition of Done:
+  - `node --check public/app.js`, `npm run build`, `git diff --check`, and
+    `npm test` pass.
+  - Local browser smoke verifies API context, both actions, responsive layout,
+    and no console errors.
+- Result Report:
+  - Added a dynamic agent API context panel to `/settings/api`.
+  - Added active/inactive/scoped key, capability, route, and write-route pills
+    plus actions to create a key and open the integration map.
+  - Fixed context refresh after scoped key creation so the panel updates from
+    `No active keys` to `Agent access ready` with current key counts.
+  - Passed `node --check public/app.js`, `npm run build`, `git diff --check`,
+    and `npm test` against disposable Postgres on port `55487`.
+  - Passed local Playwright desktop/mobile `/settings/api` smoke with no
+    console errors or horizontal overflow; smoke verified initial context,
+    create-key anchor behavior, scoped key creation, copy-once raw key display,
+    post-create context refresh, and SPA navigation to `/settings/integrations`.
+  - Browser plugin fallback was required because node_repl resolved Node
+    `22.13.0` while the Browser plugin requires `>=22.22.0`.
+
 ## V2WEB-039 Relationships Mapping Context Polish
 
 - Task Type: design/frontend
