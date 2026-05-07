@@ -34,6 +34,22 @@ of rediscovering them.
 
 ## Entries
 
+### 2026-05-07 - ClickUp Adapter Command Panel
+- Type: reusable_pattern
+- Context: Provider setup screens with token validation, workspace selection,
+  scope selection, import policy, and sync actions need a compact command
+  summary before the operator works through the form.
+- Decision: Place a ClickUp adapter command panel before the setup form. Show
+  ClickUp status, token readiness, workspace selection state, selected/saved/
+  loaded List counts, ClickUp task count, import mode, and actions to setup,
+  task review, and the integration map.
+- Reuse when: A provider adapter route has multi-step credential, scope, and
+  import controls that need a quick operational read.
+- Avoid when: The route is a read-only provider inventory or a generic
+  cross-provider overview.
+- Evidence: V2WEB-045 adds `/settings` context with ClickUp setup readiness,
+  List scope, task count, import mode, and navigation actions.
+
 ### 2026-05-07 - Account Workspace Command Profile
 - Type: reusable_pattern
 - Context: Account/workspace settings screens need to confirm owner session,

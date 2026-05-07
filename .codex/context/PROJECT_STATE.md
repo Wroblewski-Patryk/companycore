@@ -137,6 +137,24 @@ Last updated: 2026-05-07
 
 ## Recent Progress
 
+- 2026-05-07: Completed V2WEB-045 ClickUp Setup Context Polish.
+  `/settings` now includes a compact ClickUp adapter command panel before the
+  setup form. The panel shows ClickUp status, token readiness, workspace
+  selection state, selected/saved/loaded List counts, ClickUp task count,
+  import mode, and links to the local setup form, `/tasks-adapter`, and
+  `/settings/integrations` through existing navigation while preserving token
+  check, refresh, Workspace select, List picker, import mode, save, and sync
+  controls. The ClickUp token placeholder was shortened so the mobile form
+  stays readable.
+  Validation passed: `node --check public/app.js`, `npm run build`,
+  `git diff --check`, `npm test` against disposable Postgres on port `55497`,
+  and local Playwright desktop/mobile `/settings` smoke with no console errors
+  or horizontal overflow. Smoke verified context copy, readiness/count pills,
+  local setup anchor behavior, and SPA navigation to `/tasks-adapter` plus
+  `/settings/integrations`. Browser plugin fallback note: in-app Browser could
+  not initialize because node_repl resolved Node `22.13.0` while the plugin
+  requires `>=22.22.0`.
+
 - 2026-05-07: Completed V2WEB-044 Account Context Polish.
   `/settings/account` now includes a compact workspace command profile before
   account cards. The panel shows owner session state, workspace identity,

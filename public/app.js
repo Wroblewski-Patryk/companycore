@@ -213,6 +213,7 @@ const registerForm = document.querySelector("#registerForm");
 const logoutButton = document.querySelector("#logoutButton");
 const mobileMenuButton = document.querySelector("#mobileMenuButton");
 const clickupPanel = document.querySelector("#clickupPanel");
+const clickupContext = document.querySelector("#clickupContext");
 const checkTokenButton = document.querySelector("#checkTokenButton");
 const refreshButton = document.querySelector("#refreshButton");
 const saveButton = document.querySelector("#saveButton");
@@ -4565,6 +4566,7 @@ function renderConnectionState() {
     ? "OAuth client saved. Paste a new client ID and secret only when rotating credentials."
     : "OAuth client not saved yet.";
 
+  renderClickUpSetupContext();
   renderApiSecurityContext();
 
   if (state.capabilities.length > 0) {
@@ -4583,6 +4585,50 @@ function renderConnectionState() {
   }
 
   renderApiWorkbench();
+}
+
+function renderClickUpSetupContext() {
+  clickupContext.innerHTML = "";
+  const signedIn = isSignedIn();
+  const selectedLists = state.clickup.selectedListIds.size;
+  const savedLists = (state.clickup.config.listIds || []).length;
+  const loadedLists = allLists().length;
+  const clickUpTasks = state.tasks.filter((task) => task.source === "clickup").length;
+  const status = state.clickup.configured
+    ? state.clickup.active ? "ClickUp active" : "ClickUp saved, inactive"
+    : "ClickUp not connected";
+  const workspaceStatus = workspaceSelect.value
+    ? "Workspace selected"
+    : state.clickup.config.teamId ? "Saved workspace" : "Workspace not selected";
+  const tokenStatus = state.clickup.configured ? "Saved token available" : "Token required";
+  const panel = document.createElement("article");
+  panel.className = "clickup-context-card";
+  panel.innerHTML = `
+    <div class="clickup-context-copy">
+      <span class="summary-kicker">ClickUp adapter command</span>
+      <div class="clickup-context-heading">
+        <strong>${escapeHtml(signedIn && state.workspace ? state.workspace.name : "Workspace ClickUp setup")}</strong>
+        <span class="workbench-index-status">${escapeHtml(signedIn ? status : "Sign in required")}</span>
+      </div>
+      <p>Use this adapter surface to verify a ClickUp token, choose the Workspace, select Lists, and sync external execution records into CompanyCore.</p>
+      <div class="clickup-context-pills" aria-label="ClickUp setup context">
+        <span>${escapeHtml(tokenStatus)}</span>
+        <span>${escapeHtml(workspaceStatus)}</span>
+        <span>${selectedLists} selected List${selectedLists === 1 ? "" : "s"}</span>
+        <span>${savedLists} saved List${savedLists === 1 ? "" : "s"}</span>
+        <span>${loadedLists} loaded List${loadedLists === 1 ? "" : "s"}</span>
+        <span>${clickUpTasks} ClickUp task${clickUpTasks === 1 ? "" : "s"}</span>
+        <span>${escapeHtml(fields.importMode.value || "merge")} mode</span>
+      </div>
+    </div>
+    <div class="clickup-context-actions">
+      <a class="button-link compact" href="/settings#clickupPanel" data-link>Setup form</a>
+      <a class="button-link secondary compact" href="/tasks-adapter" data-link>Review tasks</a>
+      <a class="button-link secondary compact" href="/settings/integrations" data-link>Integration map</a>
+    </div>
+  `;
+  bindInlineNavigation(panel);
+  clickupContext.append(panel);
 }
 
 function renderApiSecurityContext() {

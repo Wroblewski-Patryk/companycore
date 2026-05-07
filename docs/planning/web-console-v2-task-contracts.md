@@ -1,5 +1,59 @@
 # Web Console V2 Task Contracts
 
+## V2WEB-045 ClickUp Setup Context Polish
+
+- Task Type: design/frontend
+- Current Stage: done
+- Deliverable For This Stage: `/settings` shows a compact ClickUp adapter
+  command panel before the ClickUp setup form.
+- Goal: Make the ClickUp setup screen immediately explain connection status,
+  token readiness, selected workspace/list scope, import mode, synced ClickUp
+  task count, and next actions before the owner works through the form.
+- Scope:
+  - `public/index.html`
+  - `public/app.js`
+  - `public/styles.css`
+  - `docs/ux/design-memory.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+- Implementation Plan:
+  - Add a ClickUp context slot above the existing setup form.
+  - Render ClickUp status, token readiness, workspace selection state,
+    selected/saved/loaded List counts, ClickUp task count, and import mode from
+    existing frontend state.
+  - Add local actions to the setup form, task adapter, and integration map
+    through existing SPA navigation.
+  - Preserve the existing token check, refresh, Workspace select, List picker,
+    import mode, save, and sync controls.
+  - Validate syntax, build, tests, and desktop/mobile `/settings` rendering.
+- Acceptance Criteria:
+  - `/settings` explains the ClickUp adapter command state before the setup
+    form.
+  - `Setup form`, `Review tasks`, and `Integration map` navigate through the
+    SPA to existing dedicated surfaces or the local setup anchor.
+  - Desktop and mobile layouts render without horizontal overflow.
+- Definition of Done:
+  - `node --check public/app.js`, `npm run build`, `git diff --check`, and
+    `npm test` pass.
+  - Local browser smoke verifies ClickUp context, all actions, responsive
+    layout, and no console errors.
+- Result Report:
+  - Added a dynamic ClickUp adapter command panel to `/settings`.
+  - Added ClickUp status, token readiness, workspace selection, selected/saved/
+    loaded List counts, ClickUp task count, and import mode pills plus actions
+    to the setup form, task review, and integration map.
+  - Shortened the ClickUp token placeholder so the mobile form stays readable.
+  - Passed `node --check public/app.js`, `npm run build`, `git diff --check`,
+    and `npm test` against disposable Postgres on port `55497`.
+  - Passed local Playwright desktop/mobile `/settings` smoke with no console
+    errors or horizontal overflow; smoke verified context copy,
+    readiness/count pills, local setup anchor behavior, and SPA navigation to
+    `/tasks-adapter` plus `/settings/integrations`.
+  - Browser plugin fallback was required because node_repl resolved Node
+    `22.13.0` while the plugin requires `>=22.22.0`.
+
 ## V2WEB-044 Account Context Polish
 
 - Task Type: design/frontend

@@ -1482,6 +1482,74 @@ h4 {
   margin: 0 0 12px;
 }
 
+.clickup-context-panel {
+  display: grid;
+  margin: 0 0 20px;
+}
+
+.clickup-context-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(170px, auto);
+  gap: 18px;
+  align-items: center;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(35, 48, 73, 0.06);
+}
+
+.clickup-context-copy {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.clickup-context-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.clickup-context-heading strong {
+  font-size: 18px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.clickup-context-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.clickup-context-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.clickup-context-pills span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #fbfcfe;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.clickup-context-actions {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+
 .relationship-filter-bar {
   margin: 0 0 14px;
 }
@@ -2958,6 +3026,7 @@ button.danger:hover {
     .api-context-card,
     .area-context-card,
     .adapter-context-card,
+    .clickup-context-card,
     .drive-context-card,
     .integration-context-card,
     .pipeline-context-card,
@@ -3001,6 +3070,10 @@ button.danger:hover {
   }
 
   .account-context-actions {
+    justify-items: start;
+  }
+
+  .clickup-context-actions {
     justify-items: start;
   }
 
