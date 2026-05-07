@@ -1457,6 +1457,73 @@ h4 {
   margin-bottom: 20px;
 }
 
+.pipeline-context-panel {
+  display: grid;
+  margin: 0 0 20px;
+}
+
+.pipeline-context-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(190px, auto);
+  gap: 18px;
+  align-items: center;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(35, 48, 73, 0.06);
+}
+
+.pipeline-context-copy {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.pipeline-context-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.pipeline-context-heading strong {
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.pipeline-context-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.pipeline-context-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pipeline-context-pills span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #fbfcfe;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.pipeline-context-actions {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+
 .pipeline-layout {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2484,6 +2551,7 @@ button.danger:hover {
     .agent-key-layout,
     .agent-key-row,
     .adapter-context-card,
+    .pipeline-context-card,
     .table-context-card,
     .table-workbench-layout,
     .record-editor-grid,
@@ -2507,6 +2575,10 @@ button.danger:hover {
   }
 
   .adapter-context-actions {
+    justify-items: start;
+  }
+
+  .pipeline-context-actions {
     justify-items: start;
   }
 

@@ -1,5 +1,57 @@
 # Web Console V2 Task Contracts
 
+## V2WEB-038 Pipeline Workflow Context Polish
+
+- Task Type: design/frontend
+- Current Stage: done
+- Deliverable For This Stage: `/pipeline` shows a compact workflow context
+  panel before stats, filters, and the record feed.
+- Goal: Make the pipeline screen immediately explain that pipeline stages are
+  reusable cross-department workflow infrastructure while clients, deals, and
+  interactions are the current CRM usage records.
+- Scope:
+  - `public/index.html`
+  - `public/app.js`
+  - `public/styles.css`
+  - `docs/ux/design-memory.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+- Implementation Plan:
+  - Add a pipeline context slot above the stats strip.
+  - Render workflow readiness, reusable stage count, CRM usage record count,
+    visible filtered count, and implemented table count.
+  - Add local actions to open pipeline stages and CRM client records in the Data
+    workbench through existing SPA navigation.
+  - Preserve existing pipeline stats, filters, feed, and list sections.
+  - Validate syntax, build, tests, and desktop/mobile `/pipeline` rendering.
+- Acceptance Criteria:
+  - `/pipeline` explains shared stages versus CRM usage before the stats strip.
+  - `Open stages` navigates to `/data/pipeline-stages` through the SPA.
+  - `Open CRM records` navigates to `/data/clients` through the SPA.
+  - Desktop and mobile layouts render without horizontal overflow.
+- Definition of Done:
+  - `node --check public/app.js`, `npm run build`, `git diff --check`, and
+    `npm test` pass.
+  - Local browser smoke verifies pipeline context, both actions, responsive
+    layout, and no console errors.
+- Result Report:
+  - Added a dynamic workflow context panel to `/pipeline`.
+  - Added shared-stage versus CRM-usage copy, workflow status, context pills,
+    and actions to `/data/pipeline-stages` and `/data/clients`.
+  - Validation passed: `node --check public/app.js`, `npm run build`,
+    `git diff --check`, and `npm test` against disposable Postgres database
+    `companycore_test` on port `55483`.
+  - Local Playwright `/pipeline` smoke passed on desktop `1440x960` and mobile
+    `390x844`: workflow context rendered, shared-stage versus CRM-usage copy
+    and pills were visible, `Open stages` navigated through the SPA to
+    `/data/pipeline-stages`, `Open CRM records` navigated through the SPA to
+    `/data/clients`, there were no console errors, and there was no horizontal
+    overflow. Browser plugin validation was attempted first but remained
+    blocked because its Node REPL requires Node `>=22.22.0` while this
+    workstation exposes Node `22.13.0`.
+
 ## V2WEB-037 Tasks Adapter Context Polish
 
 - Task Type: design/frontend

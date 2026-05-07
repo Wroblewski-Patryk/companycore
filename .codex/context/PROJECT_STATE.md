@@ -137,6 +137,22 @@ Last updated: 2026-05-07
 
 ## Recent Progress
 
+- 2026-05-07: Completed V2WEB-038 Pipeline Workflow Context Polish.
+  `/pipeline` now includes a compact workflow context panel before stats,
+  filters, and the record feed. The panel explains that pipeline stages are
+  reusable cross-department workflow infrastructure while clients, deals, and
+  interactions are current CRM usage records. It shows workflow readiness,
+  reusable stage count, CRM usage count, filtered visibility, implemented table
+  count, and links to `/data/pipeline-stages` plus `/data/clients` through
+  existing SPA navigation.
+  Validation passed: `node --check public/app.js`, `npm run build`,
+  `git diff --check`, `npm test` against disposable Postgres on port `55483`,
+  and local Playwright desktop/mobile `/pipeline` smoke with no console errors
+  or horizontal overflow. The Playwright smoke verified workflow context copy,
+  shared-stage versus CRM-usage pills, SPA navigation to
+  `/data/pipeline-stages`, SPA navigation to `/data/clients`, and mobile
+  first-viewport placement.
+
 - 2026-05-07: Completed V2WEB-037 Tasks Adapter Context Polish.
   `/tasks-adapter` now includes a compact adapter context panel before task
   stats and the task table. The panel shows ClickUp connection state,

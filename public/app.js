@@ -301,6 +301,7 @@ const accountWorkspaceId = document.querySelector("#accountWorkspaceId");
 const accountReadiness = document.querySelector("#accountReadiness");
 const pipelineSummary = document.querySelector("#pipelineSummary");
 const pipelineStats = document.querySelector("#pipelineStats");
+const pipelineContext = document.querySelector("#pipelineContext");
 const pipelineSearch = document.querySelector("#pipelineSearch");
 const pipelineTypeFilter = document.querySelector("#pipelineTypeFilter");
 const pipelineStatusFilter = document.querySelector("#pipelineStatusFilter");
@@ -1630,11 +1631,13 @@ function relationshipQueueRow(queueItem) {
 
 function renderPipeline() {
   pipelineStats.innerHTML = "";
+  pipelineContext.innerHTML = "";
   const clients = recordsForSlug("clients");
   const stages = recordsForSlug("pipeline-stages");
   const deals = recordsForSlug("deals");
   const interactions = recordsForSlug("interactions");
   const total = clients.length + stages.length + deals.length + interactions.length;
+  const usageRecords = clients.length + deals.length + interactions.length;
   const records = pipelineRecords({ clients, stages, deals, interactions });
   syncPipelineFilters(records);
   const filteredRecords = filteredPipelineRecords(records);
@@ -1647,6 +1650,12 @@ function renderPipeline() {
   renderPipelineStat("Stages", stages.length);
   renderPipelineStat("Deals", deals.length);
   renderPipelineStat("Interactions", interactions.length);
+  pipelineContext.append(pipelineContextElement({
+    stagesCount: stages.length,
+    usageRecords,
+    total,
+    filteredCount: filteredRecords.length
+  }));
   renderPipelineFeed(records, filteredRecords);
 
   renderPipelineList(pipelineStagesList, stages, "No pipeline stages found yet.", (stage) => ({
@@ -1665,6 +1674,35 @@ function renderPipeline() {
     title: interaction.summary || interaction.title || interaction.type || interaction.id,
     meta: [interaction.channel || interaction.type, interaction.source || "companycore", formatDate(interaction.occurredAt || interaction.createdAt)].filter(Boolean).join(" · ")
   }));
+}
+
+function pipelineContextElement({ stagesCount, usageRecords, total, filteredCount }) {
+  const panel = document.createElement("article");
+  panel.className = "pipeline-context-card";
+  const status = stagesCount > 0 ? "Workflow stages ready" : "Workflow API ready";
+  const usageLabel = usageRecords === 1 ? "CRM usage record" : "CRM usage records";
+  panel.innerHTML = `
+    <div class="pipeline-context-copy">
+      <span class="summary-kicker">Workflow context</span>
+      <div class="pipeline-context-heading">
+        <strong>Shared stages, current CRM usage</strong>
+        <span class="workbench-index-status">${escapeHtml(status)}</span>
+      </div>
+      <p>Pipeline stages are reusable workflow infrastructure for any department. Clients, deals, and interactions are the current CRM records using that workflow model.</p>
+      <div class="pipeline-context-pills" aria-label="Pipeline operation context">
+        <span>${stagesCount} reusable stage${stagesCount === 1 ? "" : "s"}</span>
+        <span>${usageRecords} ${escapeHtml(usageLabel)}</span>
+        <span>${filteredCount} of ${total} visible</span>
+        <span>4 implemented tables</span>
+      </div>
+    </div>
+    <div class="pipeline-context-actions">
+      <a class="button-link compact" href="/data/pipeline-stages" data-link>Open stages</a>
+      <a class="button-link secondary compact" href="/data/clients" data-link>Open CRM records</a>
+    </div>
+  `;
+  bindInlineNavigation(panel);
+  return panel;
 }
 
 function recordsForSlug(slug) {

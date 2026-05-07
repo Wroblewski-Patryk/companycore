@@ -34,6 +34,21 @@ of rediscovering them.
 
 ## Entries
 
+### 2026-05-07 - Workflow Context Panel
+- Type: reusable_pattern
+- Context: Cross-module workflow screens need to explain reusable process
+  infrastructure separately from the business records currently using it.
+- Decision: Place a compact workflow context panel before stats and filters.
+  Use a workflow status badge, scope/count pills, and actions into the relevant
+  Data workbenches so the operator can inspect the underlying tables.
+- Reuse when: A route combines a shared workflow model with department-specific
+  usage records, such as pipelines, approvals, or delivery stages.
+- Avoid when: A screen owns only one business table and does not need a
+  cross-department explanation.
+- Evidence: V2WEB-038 adds `/pipeline` context that separates reusable stages
+  from CRM clients/deals/interactions and links into stage/client Data
+  workbenches.
+
 ### 2026-05-07 - Adapter Context Panel
 - Type: reusable_pattern
 - Context: Integration adapter screens need to explain connection state,
