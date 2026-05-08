@@ -47,6 +47,72 @@
     `javascript:` session injection; the next task explicitly creates an
     approved authenticated evidence path.
 
+## UXA-002 Authenticated Private Route UX Evidence Harness
+
+- Task Type: qa/design-tooling
+- Current Stage: done
+- Deliverable For This Stage: approved local authenticated screenshot and
+  interaction smoke for private owner-console UX review.
+- Goal: Unblock evidence-driven private-route polish without production writes
+  or Browser security-policy bypasses.
+- Scope:
+  - `scripts/owner-console-ux-smoke.mjs`
+  - `package.json`
+  - `package-lock.json`
+  - `docs/ux/companycore-v1-ux-ui-audit.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+  - `.agents/state/known-issues.md`
+- Implementation Plan:
+  - Add a local Playwright smoke script that authenticates through
+    `/auth/login`, seeds the owner token into session storage before page load,
+    and captures private routes without submitting write actions.
+  - Cover `/dashboard`, `/data`, `/data/tasks`, `/areas`, `/relationships`,
+    `/settings/drive`, and `/settings/api` at desktop, tablet, and mobile
+    viewports.
+  - Add desktop interaction proof for the module switcher, data filter, typed
+    tasks editor draft state, and disabled Drive import setup control.
+  - Save screenshots and a JSON report outside the repository by default.
+  - Update planning and state files so UXA-003 can start from real private-route
+    evidence.
+- Acceptance Criteria:
+  - Private-route screenshots exist for all priority routes at desktop, tablet,
+    and mobile.
+  - Smoke proves signed-in hydration and fails on page errors, console
+    warnings/errors, missing signed-in state, or enabled Drive import without
+    setup.
+  - Interaction proof covers navigation/module switcher, one filter, one
+    editor draft state, and one disabled setup form state.
+  - The workflow does not create production users, write production data, or
+    rely on `javascript:` URL injection.
+- Definition of Done:
+  - `node --check scripts/owner-console-ux-smoke.mjs` passes.
+  - `npm run owner-console:ux-smoke` passes against local Docker runtime on
+    `http://localhost:3000`.
+  - `git diff --check` passes.
+  - Task board, next steps, project state, system health, and UX audit evidence
+    are updated.
+- Result Report:
+  - Added `scripts/owner-console-ux-smoke.mjs` and the
+    `owner-console:ux-smoke` package command.
+  - Added Playwright as a dev dependency in package metadata for the local UX
+    evidence workflow.
+  - Local run passed against `http://localhost:3000`.
+  - Artifacts were written to
+    `C:\Users\wrobl\AppData\Local\Temp\companycore-ux-smoke\2026-05-08T19-47-08-826Z`.
+  - Captured all seven private routes at `1440x960`, `834x1112`, and `390x844`,
+    plus desktop interaction screenshots for module search, data filtering,
+    tasks editor draft state, and disabled Drive import.
+  - Console issues were empty, and all signed-in/private-route assertions
+    passed.
+  - Screenshot observations confirm UXA-003: the dashboard first viewport is
+    still too panel-heavy and mobile dashboard pushes the primary action below
+    the fold.
+
 ## V2WEB-049 Table Workbench Empty State Polish
 
 - Task Type: design/frontend

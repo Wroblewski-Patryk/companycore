@@ -5,10 +5,16 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NOW
 
-- [ ] UXA-002 Authenticated Private Route UX Evidence Harness:
+- [ ] UXA-003 Dashboard First-Viewport Command Polish:
+      tighten `/dashboard` so the first viewport has one dominant next action,
+      visible blocker state, and quieter secondary module exploration.
+- [x] UXA-002 Authenticated Private Route UX Evidence Harness:
       create or document an approved local authenticated screenshot path for
       the private owner-console routes, then capture desktop/tablet/mobile
-      evidence without writing test data to production.
+      evidence without writing test data to production. Added
+      `owner-console:ux-smoke`, captured all priority private routes at
+      desktop/tablet/mobile, and recorded zero console issues in the local
+      report.
 - [x] UXA-001 CompanyCore V1 UX/UI Audit:
       audited the public/auth owner entry, local seeded runtime state, private
       route implementation patterns, and UX source-of-truth docs; published
@@ -180,9 +186,6 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NEXT
 
-- [ ] UXA-003 Dashboard First-Viewport Command Polish:
-      tighten `/dashboard` so the first viewport has one dominant next action,
-      visible blocker state, and quieter secondary module exploration.
 - [ ] UXA-004 Mobile Auth Action-First Layout:
       reorder mobile `/auth/login` and `/auth/register` so the form comes
       before onboarding context while desktop keeps the two-column layout.

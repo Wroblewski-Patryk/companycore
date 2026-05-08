@@ -2,13 +2,6 @@
 
 ## Ready
 
-- UXA-002 Authenticated Private Route UX Evidence Harness
-  - Stage: planning
-  - Owner: QA/Test
-  - Priority: P0
-  - Scope: create or document an approved local authenticated screenshot path
-    for `/dashboard`, `/data`, `/data/tasks`, `/areas`, `/relationships`,
-    `/settings/drive`, and `/settings/api` without production writes.
 - UXA-003 Dashboard First-Viewport Command Polish
   - Stage: planning
   - Owner: Frontend Builder
@@ -60,6 +53,18 @@ No active task.
 
 ## Backlog
 
+- UXA-005 Workbench Visual Role Cleanup
+  - Stage: planning
+  - Owner: Frontend Builder
+  - Priority: P1
+  - Scope: reduce equal-weight panel fatigue across dense workbench routes by
+    clarifying command, filter, list, selected-detail, and feedback roles.
+- UXA-006 Local Action Feedback Placement
+  - Stage: planning
+  - Owner: Frontend Builder
+  - Priority: P1
+  - Scope: keep success, error, and status feedback near auth, provider setup,
+    Drive import, typed editor, and API key lifecycle actions.
 - Future v2 OAuth browser consent UI and token refresh hardening after core
   server-side API slices are complete.
 - Future v2 dashboard surfaces that show ClickUp Lists, Drive folders/files,
@@ -70,6 +75,7 @@ No active task.
 
 ## Done
 
+- UXA-002 Authenticated Private Route UX Evidence Harness.
 - UXA-001 CompanyCore V1 UX/UI Audit.
 - CCV1-067 Tech Stack Runtime Status Refresh.
 - CCV1-066 Historical Guardrail Plan Classification.

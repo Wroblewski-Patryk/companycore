@@ -58,6 +58,27 @@ priority, not add new product scope.
     `javascript:` session injection was blocked by browser security policy.
   - Authenticated private screens were therefore audited through source,
     local API state, existing UX memory, and current implementation contracts.
+- UXA-002 authenticated evidence addendum:
+  - Added local Playwright command `npm run owner-console:ux-smoke`.
+  - Passed against `http://localhost:3000` with seeded owner credentials and no
+    production writes.
+  - Artifacts:
+    `C:\Users\wrobl\AppData\Local\Temp\companycore-ux-smoke\2026-05-08T19-47-08-826Z`.
+  - Captured `/dashboard`, `/data`, `/data/tasks`, `/areas`,
+    `/relationships`, `/settings/drive`, and `/settings/api` at desktop
+    `1440x960`, tablet `834x1112`, and mobile `390x844`.
+  - Captured desktop interaction proof for module switcher search, data
+    filtering, tasks editor draft state, and disabled Drive import setup.
+  - Reported `0` console warnings/errors and all signed-in route assertions
+    passed.
+  - Screenshot observations:
+    - desktop dashboard remains too panel-heavy in the first viewport
+    - mobile dashboard chrome plus page title and connection card push the
+      primary action below the fold
+    - `/data/tasks` typed editor draft state is available without submitting
+      data
+    - mobile API settings exposes context and create-key action early, but the
+      lower flow still belongs in a later feedback/role audit
 
 ## Current UX Strengths
 
@@ -283,6 +304,10 @@ Acceptance:
 - console errors are recorded
 - interaction proof covers navigation, module switcher, one filter, one editor,
   and one setup form disabled/error state
+
+Status: Completed by UXA-002. The reusable local Playwright harness captures
+private-route screenshots and writes `report.json` plus image artifacts outside
+the repository.
 
 ### Slice 2: Dashboard First-Viewport Command Polish
 

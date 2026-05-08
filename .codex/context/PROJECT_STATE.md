@@ -125,16 +125,35 @@ Last updated: 2026-05-08
   and the next executable task is selected from the canonical queue.
 
 ## Autonomous Iteration State
-- Current iteration: CCV1-064 Historical Checklist Closure.
+- Current iteration: UXA-003 Dashboard First-Viewport Command Polish.
 - Current operation mode: BUILDER
-- Last completed iteration: CCV1-063 Historical Next Steps Refresh.
-- Last completed task: closed stale historical AGCRUD and CCV1-009 checklist
-  signals using later accepted evidence.
-- Next required mode: product or operator decision required; no ready v1
-  runtime or agent-runtime task remains.
+- Last completed iteration: UXA-002 Authenticated Private Route UX Evidence
+  Harness.
+- Last completed task: added local authenticated private-route UX smoke
+  evidence for the owner console.
+- Next required mode: BUILDER; implement the smallest dashboard first-viewport
+  polish slice from the UX audit.
 
 ## Recent Progress
 
+- 2026-05-08: Completed UXA-002 Authenticated Private Route UX Evidence
+  Harness. Added `scripts/owner-console-ux-smoke.mjs`,
+  `npm run owner-console:ux-smoke`, and Playwright package metadata for local
+  screenshot evidence. The smoke authenticates through `/auth/login`, injects
+  the local owner token into session storage before private route load, and
+  captures `/dashboard`, `/data`, `/data/tasks`, `/areas`, `/relationships`,
+  `/settings/drive`, and `/settings/api` at desktop `1440x960`, tablet
+  `834x1112`, and mobile `390x844`. It also proves module search, data
+  filtering, task editor draft state, and disabled Drive import setup without
+  submitting writes. Local run passed against `http://localhost:3000`; artifacts
+  are in
+  `C:\Users\wrobl\AppData\Local\Temp\companycore-ux-smoke\2026-05-08T19-47-08-826Z`
+  with zero console issues. Screenshot review confirms UXA-003 as the next
+  slice: dashboard first viewport is still too panel-heavy and mobile pushes
+  the primary action below the fold. Validation passed: script syntax check,
+  `npm run build`, `npm run validate`, `git diff --check`, the owner-console UX
+  smoke, and a container-scoped Prisma migration plus Node test run inside the
+  backend service.
 - 2026-05-08: Completed UXA-001 CompanyCore V1 UX/UI Audit. Added
   `docs/ux/companycore-v1-ux-ui-audit.md`, reviewed project UX contracts,
   production public/auth routes, mobile auth screenshots, local Docker runtime
