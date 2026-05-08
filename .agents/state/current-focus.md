@@ -7,9 +7,8 @@ Last updated: 2026-05-08
 CompanyCore v1 runtime is accepted and live for the approved owner, ClickUp,
 Jarvis, Paperclip, workspace API, and agent CRUD scope. The current focus has
 shifted to owner-console UX/UI polish planning after the 2026-05-08 audit in
-`docs/ux/companycore-v1-ux-ui-audit.md`. Dashboard first-viewport command
-polish is now complete, so the active UX focus moves to mobile auth
-action-first layout.
+`docs/ux/companycore-v1-ux-ui-audit.md`. Mobile auth action-first layout is now
+complete, so the active UX focus moves to dense workbench visual role cleanup.
 
 ## Current System Objective
 
@@ -22,9 +21,11 @@ and what the next action is.
 Planning. V1 operator handoff remains documented in
 `docs/operations/v1-operator-handoff.md`; release readiness is documented in
 `docs/operations/v1-release-readiness.md`. Runtime work is not being reopened.
-The active planning lane is `UXA-004..UXA-006`, derived from the UX/UI audit.
+The active planning lane is `UXA-005..UXA-006`, derived from the UX/UI audit.
 UXA-002 closed the private-route screenshot evidence gap with a local
 Playwright harness, and UXA-003 tightened the dashboard command surface.
+UXA-004 reordered mobile auth so login/register forms appear before static
+onboarding context.
 
 ## Current Priority Order
 

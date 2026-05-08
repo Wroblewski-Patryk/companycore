@@ -4,15 +4,12 @@ Last updated: 2026-05-08
 
 ## NOW
 
-1. UXA-004 Mobile Auth Action-First Layout: reorder mobile auth so returning
-   owners reach the form before onboarding context while desktop keeps the
-   two-column layout.
+1. UXA-005 Workbench Visual Role Cleanup: reduce equal-weight panel fatigue
+   across dense workbench routes.
 
 ## NEXT
 
-1. UXA-005 Workbench Visual Role Cleanup: reduce equal-weight panel fatigue
-   across dense workbench routes.
-2. UXA-006 Local Action Feedback Placement: keep success/error feedback near
+1. UXA-006 Local Action Feedback Placement: keep success/error feedback near
    the action that caused it.
 
 ## LATER

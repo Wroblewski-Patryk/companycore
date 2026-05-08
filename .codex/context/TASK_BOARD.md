@@ -2,12 +2,12 @@
 
 ## Ready
 
-- UXA-004 Mobile Auth Action-First Layout
+- UXA-005 Workbench Visual Role Cleanup
   - Stage: planning
   - Owner: Frontend Builder
-  - Priority: P0
-  - Scope: reorder mobile `/auth/login` and `/auth/register` so forms appear
-    before onboarding context while preserving desktop two-column auth.
+  - Priority: P1
+  - Scope: reduce equal-weight panel fatigue across dense workbench routes by
+    clarifying command, filter, list, selected-detail, and feedback roles.
 
 ## In Progress
 
@@ -47,12 +47,6 @@ No active task.
 
 ## Backlog
 
-- UXA-005 Workbench Visual Role Cleanup
-  - Stage: planning
-  - Owner: Frontend Builder
-  - Priority: P1
-  - Scope: reduce equal-weight panel fatigue across dense workbench routes by
-    clarifying command, filter, list, selected-detail, and feedback roles.
 - UXA-006 Local Action Feedback Placement
   - Stage: planning
   - Owner: Frontend Builder
@@ -69,6 +63,7 @@ No active task.
 
 ## Done
 
+- UXA-004 Mobile Auth Action-First Layout.
 - UXA-003 Dashboard First-Viewport Command Polish.
 - UXA-002 Authenticated Private Route UX Evidence Harness.
 - UXA-001 CompanyCore V1 UX/UI Audit.

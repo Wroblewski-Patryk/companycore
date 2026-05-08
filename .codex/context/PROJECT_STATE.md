@@ -125,17 +125,26 @@ Last updated: 2026-05-08
   and the next executable task is selected from the canonical queue.
 
 ## Autonomous Iteration State
-- Current iteration: UXA-004 Mobile Auth Action-First Layout.
+- Current iteration: UXA-005 Workbench Visual Role Cleanup.
 - Current operation mode: BUILDER
-- Last completed iteration: UXA-003 Dashboard First-Viewport Command Polish.
-- Last completed task: tightened the dashboard first viewport around one
-  dominant priority, compact readiness evidence, and quieter module
-  exploration.
-- Next required mode: BUILDER; implement the mobile auth action-first layout
+- Last completed iteration: UXA-004 Mobile Auth Action-First Layout.
+- Last completed task: reordered mobile auth so login/register forms appear
+  before static onboarding context while desktop auth stays two-column.
+- Next required mode: BUILDER; implement the dense workbench visual role cleanup
   slice from the UX audit.
 
 ## Recent Progress
 
+- 2026-05-08: Completed UXA-004 Mobile Auth Action-First Layout. Updated
+  responsive auth CSS so `/auth/login` and `/auth/register` keep desktop
+  context-plus-form columns, while stacked mobile layouts put the form before
+  onboarding context. Mobile screenshots confirm sign-in and create-workspace
+  submit actions are visible in the first viewport. Validation passed:
+  `node --check public/app.js`, `npm run build`, rendered Browser DOM check
+  with zero console issues, local Playwright desktop/mobile auth screenshots,
+  and `git diff --check`. Browser screenshot capture timed out, so viewport
+  evidence used Playwright fallback. Artifacts:
+  `C:\Users\wrobl\AppData\Local\Temp\companycore-auth-ux-smoke\2026-05-08T20-08-09-640Z`.
 - 2026-05-08: Completed UXA-003 Dashboard First-Viewport Command Polish.
   Updated `/dashboard` so the first private viewport centers on one current
   priority action, one secondary action, compact workspace/integration/data

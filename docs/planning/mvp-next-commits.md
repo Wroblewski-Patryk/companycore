@@ -5,9 +5,14 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NOW
 
-- [ ] UXA-004 Mobile Auth Action-First Layout:
+- [ ] UXA-005 Workbench Visual Role Cleanup:
+      reduce equal-weight panel fatigue across dense workbenches by clarifying
+      command, filter, list, selected-detail, and feedback roles.
+- [x] UXA-004 Mobile Auth Action-First Layout:
       reorder mobile `/auth/login` and `/auth/register` so the form comes
       before onboarding context while desktop keeps the two-column layout.
+      Verified mobile login/register form-first screenshots and desktop
+      two-column auth preservation.
 - [x] UXA-003 Dashboard First-Viewport Command Polish:
       tighten `/dashboard` so the first viewport has one dominant next action,
       visible blocker state, and quieter secondary module exploration. Moved
@@ -192,9 +197,6 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NEXT
 
-- [ ] UXA-005 Workbench Visual Role Cleanup:
-      reduce equal-weight panel fatigue across dense workbenches by clarifying
-      command, filter, list, selected-detail, and feedback roles.
 - [ ] UXA-006 Local Action Feedback Placement:
       add local success/error/status placement for auth, provider setup, Drive
       import, typed editors, and API key lifecycle while preserving the global

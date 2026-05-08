@@ -85,15 +85,21 @@ of rediscovering them.
   why the owner is signing in or creating a workspace before they reach the
   private operational console.
 - Decision: Place compact onboarding context panels beside login and
-  registration forms. Use the existing context-panel language, concise
-  operational copy, and pill signals for workspace owner, integrations,
-  operating areas, provider imports, and agent-safe API access.
+  registration forms on desktop. On stacked tablet/mobile layouts, place the
+  auth form before the onboarding context so returning owners reach the action
+  first. Use the existing context-panel language, concise operational copy, and
+  pill signals for workspace owner, integrations, operating areas, provider
+  imports, and agent-safe API access.
 - Reuse when: A public or transitional route gates access to a private
   operational surface and should explain what the user unlocks next.
 - Avoid when: The route is an in-app settings screen where live workspace
-  state should be shown instead of static onboarding context.
+  state should be shown instead of static onboarding context. Also avoid
+  putting static explanatory context above login or registration forms on
+  phone-sized screens.
 - Evidence: V2WEB-046 adds `/auth/login` and `/auth/register` context panels
-  while preserving auth behavior.
+  while preserving auth behavior. UXA-004 keeps desktop two-column auth and
+  reorders mobile auth so login/register forms appear before onboarding
+  context.
 
 ### 2026-05-07 - ClickUp Adapter Command Panel
 - Type: reusable_pattern

@@ -202,6 +202,75 @@
   - Updated design memory with the refined command-center pattern and captured
     a local smoke isolation guardrail in the learning journal.
 
+## UXA-004 Mobile Auth Action-First Layout
+
+- Task Type: design/frontend
+- Current Stage: done
+- Operation Mode: BUILDER
+- Deliverable For This Stage: mobile `/auth/login` and `/auth/register` show
+  the form before onboarding context while preserving desktop two-column auth.
+- Process Self-Audit:
+  - Analyze current state: UX audit P0 mobile auth finding and existing auth
+    context pattern reviewed.
+  - Select exactly one priority task: UXA-004 only.
+  - Plan implementation: keep existing auth markup and desktop pattern; use
+    responsive ordering and spacing only.
+  - Execute implementation: scoped to auth CSS plus source-of-truth docs.
+  - Verify and test: syntax/build, rendered public auth screenshots, and
+    regression checks.
+  - Self-review: confirm auth logic, routes, validation, and copy remain stable.
+  - Update documentation and knowledge: task board, project state, next steps,
+    and design memory when the responsive pattern should guide future auth work.
+- Goal: Let returning owners reach sign-in and account creation fields before
+  static onboarding context on phone-sized screens.
+- Scope:
+  - `public/styles.css`
+  - `docs/ux/design-memory.md`
+  - `docs/ux/companycore-v1-ux-ui-audit.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+- Implementation Plan:
+  - Keep desktop auth as context panel plus form in the current two-column
+    layout.
+  - On responsive stacked layouts, order `.auth-card` before
+    `.auth-context-card`.
+  - Tighten mobile auth spacing enough that the primary form and submit action
+    appear early without hiding context below.
+  - Verify login and register at mobile and desktop widths.
+- Acceptance Criteria:
+  - Mobile login shows the sign-in form before onboarding context.
+  - Mobile register shows account creation fields before onboarding context.
+  - Desktop login/register preserve the existing two-column layout.
+  - Required fields, submit buttons, links, focus styling, and auth route
+    redirects remain intact.
+- Definition of Done:
+  - `node --check public/app.js` passes.
+  - `npm run build` and `npm run validate` pass.
+  - Rendered screenshots verify mobile login/register and desktop auth.
+  - `git diff --check` passes.
+- Validation Evidence:
+  - Browser plugin page identity and DOM check passed for
+    `http://localhost:3003/auth/login`; console warnings/errors were empty.
+  - Browser screenshot capture timed out, so rendered viewport evidence fell
+    back to local Playwright screenshots.
+  - `node --check public/app.js` passed.
+  - `npm run build` passed.
+  - Local Playwright auth smoke passed for desktop `1440x960` and mobile
+    `390x844`.
+  - Screenshot artifacts:
+    `C:\Users\wrobl\AppData\Local\Temp\companycore-auth-ux-smoke\2026-05-08T20-08-09-640Z`.
+- Result Report:
+  - Added responsive ordering so `.auth-card` appears before
+    `.auth-context-card` when the auth grid stacks.
+  - Preserved desktop login/register as two-column context plus form layouts.
+  - Tightened mobile auth spacing and context-card padding.
+  - Verified mobile login and register show their forms before context and keep
+    submit buttons visible inside the first viewport.
+
 ## V2WEB-049 Table Workbench Empty State Polish
 
 - Task Type: design/frontend

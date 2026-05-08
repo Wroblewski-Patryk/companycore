@@ -346,6 +346,11 @@ Acceptance:
 - desktop two-column auth layout is preserved
 - form focus/required/error behavior remains intact
 
+Status: Completed by UXA-004. Mobile login/register now show forms before
+onboarding context, submit actions remain visible in the first viewport, and
+desktop auth keeps the existing two-column layout. Screenshot artifacts:
+`C:\Users\wrobl\AppData\Local\Temp\companycore-auth-ux-smoke\2026-05-08T20-08-09-640Z`.
+
 ### Slice 4: Workbench Visual Role Cleanup
 
 Goal: reduce equal-weight panel fatigue across dense routes.

@@ -3263,6 +3263,19 @@ button.danger:hover {
     margin-bottom: 12px;
   }
 
+  .auth-grid {
+    align-items: start;
+  }
+
+  .auth-card {
+    order: 1;
+  }
+
+  .auth-context-card {
+    order: 2;
+    min-height: auto;
+  }
+
   .dashboard-command-layout {
     gap: 12px;
   }
@@ -3392,8 +3405,17 @@ button.danger:hover {
   .summary-card,
   .module-launch,
   .next-panel,
-  .api-panel {
+  .api-panel,
+  .auth-context-card {
     padding: 20px;
+  }
+
+  .auth-grid {
+    gap: 14px;
+  }
+
+  .auth-card .section-title {
+    margin-bottom: 16px;
   }
 
   .command-evidence-strip {
