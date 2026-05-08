@@ -202,7 +202,6 @@
                 <h2>Operational cockpit</h2>
                 <p>Start here to see the current priority, what is blocked, and which operational lane needs the next click.</p>
               </div>
-              <a class="button-link secondary compact" href="/settings/integrations" data-link>Integration setup</a>
             </div>
             <div class="command-focus-main">
               <div>
@@ -215,6 +214,28 @@
                 <a class="button-link secondary" id="commandSecondaryAction" href="/settings/integrations" data-link>Review integrations</a>
               </div>
             </div>
+            <div class="command-evidence-strip" aria-label="Workspace readiness evidence">
+              <article>
+                <span class="summary-kicker">Workspace</span>
+                <strong id="workspaceNameLabel">-</strong>
+                <p>Owner context</p>
+              </article>
+              <article>
+                <span class="summary-kicker">ClickUp</span>
+                <strong id="clickupStatusLabel">Not configured</strong>
+                <p id="clickupStatusHint">Connect ClickUp in settings.</p>
+              </article>
+              <article>
+                <span class="summary-kicker">Google Drive</span>
+                <strong id="googleDriveStatusLabel">Not configured</strong>
+                <p id="googleDriveStatusHint">Connect Google Drive to import folders and files.</p>
+              </article>
+              <article>
+                <span class="summary-kicker">Data</span>
+                <strong id="dashboardDataStatusLabel">-</strong>
+                <p id="dashboardDataStatusHint">Load workspace data to review coverage.</p>
+              </article>
+            </div>
             <div class="operational-steps" id="operationalSteps" aria-label="Operational readiness"></div>
           </section>
 
@@ -224,39 +245,15 @@
                 <h2>What needs attention</h2>
                 <p id="attentionSummary">Sign in to load operational signals.</p>
               </div>
-              <a class="button-link secondary compact" href="/settings/integrations" data-link>Integration map</a>
             </div>
             <div class="attention-list" id="attentionList"></div>
           </section>
         </section>
 
-        <section class="dashboard-grid health-grid" aria-label="Workspace readiness summary">
-          <article class="panel summary-card">
-            <span class="summary-kicker">Workspace</span>
-            <strong id="workspaceNameLabel">-</strong>
-            <p>Active owner session and workspace context.</p>
-          </article>
-          <article class="panel summary-card">
-            <span class="summary-kicker">ClickUp</span>
-            <strong id="clickupStatusLabel">Not configured</strong>
-            <p id="clickupStatusHint">Connect ClickUp in settings.</p>
-          </article>
-          <article class="panel summary-card">
-            <span class="summary-kicker">API</span>
-            <strong>Ready</strong>
-            <p>Jarvis, Paperclip, and Aviary read CompanyCore through the API domain.</p>
-          </article>
-          <article class="panel summary-card">
-            <span class="summary-kicker">Google Drive</span>
-            <strong id="googleDriveStatusLabel">Not configured</strong>
-            <p id="googleDriveStatusHint">Connect Google Drive to import folders and files.</p>
-          </article>
-        </section>
-
         <section class="panel module-launch">
           <div class="section-title">
-            <h2>Operating areas</h2>
-            <p>Open the main area and 12 company departments to review tables, Drive folders, provider mappings, and manual relationship corrections.</p>
+            <h2>Explore modules</h2>
+            <p>Use this directory after the command center when you need a specific operating surface.</p>
           </div>
           <div class="module-launch-grid">
             <a class="module-link" href="/areas" data-link>
@@ -303,14 +300,7 @@
           </div>
           <div class="actions">
             <a class="button-link" href="/areas" data-link>Open areas</a>
-            <a class="button-link" href="/data" data-link>Open data</a>
             <a class="button-link" href="/relationships" data-link>Review relationships</a>
-            <a class="button-link" href="/tasks-adapter" data-link>Open tasks</a>
-            <a class="button-link" href="/pipeline" data-link>Open pipeline</a>
-            <a class="button-link" href="/settings/integrations" data-link>Open integrations</a>
-            <a class="button-link secondary" href="/settings/account" data-link>Account</a>
-            <a class="button-link" href="/settings" data-link>Open settings</a>
-            <a class="button-link secondary" href="/settings/drive" data-link>Connect Drive</a>
             <a class="button-link secondary" href="/settings/api" data-link>View API</a>
           </div>
         </section>

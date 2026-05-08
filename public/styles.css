@@ -673,11 +673,11 @@ h4 {
   gap: 18px;
   align-items: center;
   margin-bottom: 18px;
-  padding: 18px;
-  border: 1px solid #c9d7ee;
+  padding: 20px;
+  border: 1px solid #b8c9e6;
   border-radius: 8px;
   background:
-    linear-gradient(135deg, rgba(35, 100, 210, 0.08), rgba(22, 132, 91, 0.04)),
+    linear-gradient(135deg, rgba(35, 100, 210, 0.1), rgba(22, 132, 91, 0.05)),
     #f8fbff;
 }
 
@@ -696,6 +696,40 @@ h4 {
 
 .command-focus-actions {
   justify-content: flex-end;
+}
+
+.command-evidence-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.command-evidence-strip article {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.command-evidence-strip .summary-kicker {
+  margin-bottom: 8px;
+}
+
+.command-evidence-strip strong {
+  display: block;
+  overflow-wrap: anywhere;
+  margin-bottom: 5px;
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.command-evidence-strip p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .operational-steps {
@@ -966,7 +1000,7 @@ h4 {
   display: grid;
   gap: 12px;
   align-items: start;
-  padding: 14px;
+  padding: 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: #fbfcfe;
@@ -989,6 +1023,17 @@ h4 {
   color: var(--muted);
   font-size: 14px;
   line-height: 1.45;
+}
+
+.attention-overflow-note {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px dashed #c8d3e3;
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .mini-card {
@@ -3214,6 +3259,34 @@ button.danger:hover {
     grid-template-columns: 1fr;
   }
 
+  .view[data-view="/dashboard"] .page-title {
+    margin-bottom: 12px;
+  }
+
+  .dashboard-command-layout {
+    gap: 12px;
+  }
+
+  .command-focus,
+  .command-panel {
+    padding: 18px;
+  }
+
+  .command-focus-main {
+    gap: 14px;
+    margin-bottom: 12px;
+    padding: 16px;
+  }
+
+  .command-evidence-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: 12px;
+  }
+
+  .operational-step {
+    min-height: auto;
+  }
+
   .dense-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -3321,6 +3394,14 @@ button.danger:hover {
   .next-panel,
   .api-panel {
     padding: 20px;
+  }
+
+  .command-evidence-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .command-evidence-strip article:nth-child(n + 3) {
+    display: none;
   }
 
   .actions button,

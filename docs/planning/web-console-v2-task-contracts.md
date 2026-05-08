@@ -113,6 +113,95 @@
     still too panel-heavy and mobile dashboard pushes the primary action below
     the fold.
 
+## UXA-003 Dashboard First-Viewport Command Polish
+
+- Task Type: design/frontend
+- Current Stage: done
+- Operation Mode: BUILDER
+- Deliverable For This Stage: a tighter `/dashboard` first viewport that makes
+  the current priority, blockers, and next action dominant before secondary
+  module exploration.
+- Process Self-Audit:
+  - Analyze current state: UXA-002 screenshots and v1 UX audit reviewed.
+  - Select exactly one priority task: UXA-003 only.
+  - Plan implementation: reuse the existing command center, attention queue,
+    readiness lanes, summary cards, and module launch patterns.
+  - Execute implementation: scoped to dashboard markup, dashboard render logic,
+    shared CSS, and source-of-truth docs.
+  - Verify and test: build, syntax check, integration test, and authenticated UX
+    smoke with desktop/tablet/mobile screenshots.
+  - Self-review: confirm no architecture/API/backend behavior changed and no
+    duplicate dashboard mechanism was introduced.
+  - Update documentation and knowledge: task board, project state, next steps,
+    and UX memory if the refined pattern should be reused.
+- Goal: Make the owner dashboard answer "what matters now, what is blocked, and
+  what should I click next" within the first viewport.
+- Scope:
+  - `public/index.html`
+  - `public/app.js`
+  - `public/styles.css`
+  - `docs/ux/design-memory.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+- Implementation Plan:
+  - Move workspace, ClickUp, Drive, and data readiness evidence into a compact
+    strip inside the existing cockpit instead of presenting separate competing
+    health cards immediately below it.
+  - Keep the attention queue beside the cockpit on desktop and stacked below it
+    on mobile, but cap visible attention items so the first screen remains
+    decisive.
+  - Turn the large module launcher into a secondary exploration section below
+    the command decision area.
+  - Reduce the lower next-action panel to a short continuation path instead of
+    a directory of equal-weight buttons.
+  - Tighten dashboard mobile spacing so the dominant action appears earlier
+    without hiding context.
+- Acceptance Criteria:
+  - First viewport shows one dominant current-priority action and one secondary
+    action.
+  - Blocker count and reason are visible without scrolling on desktop and near
+    the top on mobile.
+  - Module launch grid reads as secondary exploration, not a competing command
+    center.
+  - Lower next-action panel has no more than three action links.
+  - Desktop, tablet, and mobile screenshots show no overlap, horizontal
+    overflow, or developer-looking diagnostic text.
+- Definition of Done:
+  - `node --check public/app.js` passes.
+  - `npm run build` and `npm run validate` pass.
+  - Integration test command passes against the local Docker backend service.
+  - `npm run owner-console:ux-smoke` passes and records desktop/tablet/mobile
+    screenshots for `/dashboard`.
+  - `git diff --check` passes.
+- Validation Evidence:
+  - `node --check public/app.js` passed.
+  - `npm run build` passed.
+  - `npm run validate` passed.
+  - Container-scoped Prisma migration plus Node integration test passed inside
+    the backend service.
+  - `npm run owner-console:ux-smoke` passed against isolated local compose
+    project `companycore_uxa003` at `http://localhost:3002`.
+  - Screenshot artifacts:
+    `C:\Users\wrobl\AppData\Local\Temp\companycore-ux-smoke\2026-05-08T20-00-12-315Z`.
+- Result Report:
+  - Moved workspace, ClickUp, Google Drive, and data readiness evidence into a
+    compact cockpit strip.
+  - Removed the competing first-viewport health-card row.
+  - Limited visible attention rows to the top three signals with a concise
+    overflow note when more signals exist.
+  - Renamed the module launcher to secondary `Explore modules` context and
+    moved it below the command decision area.
+  - Reduced the lower next-action panel from ten links to three continuation
+    links.
+  - Removed secondary header shortcuts that appeared above the primary action
+    on mobile.
+  - Updated design memory with the refined command-center pattern and captured
+    a local smoke isolation guardrail in the learning journal.
+
 ## V2WEB-049 Table Workbench Empty State Polish
 
 - Task Type: design/frontend

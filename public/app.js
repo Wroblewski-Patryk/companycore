@@ -248,6 +248,8 @@ const clickupStatusLabel = document.querySelector("#clickupStatusLabel");
 const clickupStatusHint = document.querySelector("#clickupStatusHint");
 const googleDriveStatusLabel = document.querySelector("#googleDriveStatusLabel");
 const googleDriveStatusHint = document.querySelector("#googleDriveStatusHint");
+const dashboardDataStatusLabel = document.querySelector("#dashboardDataStatusLabel");
+const dashboardDataStatusHint = document.querySelector("#dashboardDataStatusHint");
 const apiContext = document.querySelector("#apiContext");
 const capabilitySummary = document.querySelector("#capabilitySummary");
 const capabilityList = document.querySelector("#capabilityList");
@@ -1227,6 +1229,7 @@ function renderDashboardCommandCenter() {
   moduleIntegrationsMeta.textContent = `${implementedGroups} implemented groups: tasks, files, shared pipelines, API.`;
 
   const items = dashboardAttentionItems(signals);
+  const visibleItems = items.slice(0, 3);
   attentionList.innerHTML = "";
   attentionSummary.textContent = isSignedIn()
     ? items.length === 0
@@ -1242,8 +1245,14 @@ function renderDashboardCommandCenter() {
       : "Sign in to load dashboard attention items.";
     attentionList.append(empty);
   } else {
-    for (const item of items) {
+    for (const item of visibleItems) {
       attentionList.append(attentionItemElement(item));
+    }
+    if (items.length > visibleItems.length) {
+      const remaining = document.createElement("p");
+      remaining.className = "attention-overflow-note";
+      remaining.textContent = `${items.length - visibleItems.length} more signal${items.length - visibleItems.length === 1 ? "" : "s"} are available after the top priority.`;
+      attentionList.append(remaining);
     }
   }
 
@@ -4642,6 +4651,12 @@ function renderConnectionState() {
     ? `${state.workspace.name} workspace`
     : "Sign in to load workspace settings.";
   workspaceNameLabel.textContent = connected ? state.workspace.name : "-";
+  dashboardDataStatusLabel.textContent = connected
+    ? `${state.operatingModel.areas.length} areas`
+    : "-";
+  dashboardDataStatusHint.textContent = connected
+    ? `${state.operatingModel.areas.flatMap((area) => area.tables || []).length} tables and ${totalDatabaseRecords()} records loaded.`
+    : "Sign in to load workspace data.";
 
   if (state.clickup.configured) {
     clickupStatusLabel.textContent = state.clickup.active ? "Active" : "Saved, inactive";

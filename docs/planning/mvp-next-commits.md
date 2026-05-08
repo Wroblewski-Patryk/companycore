@@ -5,9 +5,15 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NOW
 
-- [ ] UXA-003 Dashboard First-Viewport Command Polish:
+- [ ] UXA-004 Mobile Auth Action-First Layout:
+      reorder mobile `/auth/login` and `/auth/register` so the form comes
+      before onboarding context while desktop keeps the two-column layout.
+- [x] UXA-003 Dashboard First-Viewport Command Polish:
       tighten `/dashboard` so the first viewport has one dominant next action,
-      visible blocker state, and quieter secondary module exploration.
+      visible blocker state, and quieter secondary module exploration. Moved
+      readiness evidence into the cockpit, capped visible attention items,
+      made modules secondary exploration, reduced the lower next-action panel
+      to three links, and verified desktop/tablet/mobile screenshots.
 - [x] UXA-002 Authenticated Private Route UX Evidence Harness:
       create or document an approved local authenticated screenshot path for
       the private owner-console routes, then capture desktop/tablet/mobile
@@ -186,9 +192,6 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NEXT
 
-- [ ] UXA-004 Mobile Auth Action-First Layout:
-      reorder mobile `/auth/login` and `/auth/register` so the form comes
-      before onboarding context while desktop keeps the two-column layout.
 - [ ] UXA-005 Workbench Visual Role Cleanup:
       reduce equal-weight panel fatigue across dense workbenches by clarifying
       command, filter, list, selected-detail, and feedback roles.

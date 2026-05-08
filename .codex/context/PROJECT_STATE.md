@@ -7,7 +7,7 @@ Last updated: 2026-05-08
 - Goal: Central backend for company projects, goals, tasks, CRM, notes,
   decisions, agents, and system events.
 - Commercial model: Internal operational infrastructure.
-- Current phase: v1 owner-console UX/UI polish planning after runtime
+- Current phase: v1 owner-console UX/UI polish implementation after runtime
   acceptance.
 
 ## Product Decisions (Confirmed)
@@ -125,17 +125,31 @@ Last updated: 2026-05-08
   and the next executable task is selected from the canonical queue.
 
 ## Autonomous Iteration State
-- Current iteration: UXA-003 Dashboard First-Viewport Command Polish.
+- Current iteration: UXA-004 Mobile Auth Action-First Layout.
 - Current operation mode: BUILDER
-- Last completed iteration: UXA-002 Authenticated Private Route UX Evidence
-  Harness.
-- Last completed task: added local authenticated private-route UX smoke
-  evidence for the owner console.
-- Next required mode: BUILDER; implement the smallest dashboard first-viewport
-  polish slice from the UX audit.
+- Last completed iteration: UXA-003 Dashboard First-Viewport Command Polish.
+- Last completed task: tightened the dashboard first viewport around one
+  dominant priority, compact readiness evidence, and quieter module
+  exploration.
+- Next required mode: BUILDER; implement the mobile auth action-first layout
+  slice from the UX audit.
 
 ## Recent Progress
 
+- 2026-05-08: Completed UXA-003 Dashboard First-Viewport Command Polish.
+  Updated `/dashboard` so the first private viewport centers on one current
+  priority action, one secondary action, compact workspace/integration/data
+  evidence, and the top attention items. Removed the competing health-card row,
+  renamed the large launcher to secondary `Explore modules`, reduced the lower
+  next-action panel from ten links to three, and removed secondary header
+  shortcuts that appeared above the primary action on mobile. Validation
+  passed: `node --check public/app.js`, `npm run build`, `npm run validate`,
+  container-scoped Prisma migration plus Node integration test, `git diff
+  --check`, and `npm run owner-console:ux-smoke` against isolated
+  `http://localhost:3002`. Screenshot artifacts:
+  `C:\Users\wrobl\AppData\Local\Temp\companycore-ux-smoke\2026-05-08T20-00-12-315Z`.
+  Captured guardrail: use isolated compose projects for seeded UI smoke when
+  the default local database has been touched by integration tests.
 - 2026-05-08: Completed UXA-002 Authenticated Private Route UX Evidence
   Harness. Added `scripts/owner-console-ux-smoke.mjs`,
   `npm run owner-console:ux-smoke`, and Playwright package metadata for local

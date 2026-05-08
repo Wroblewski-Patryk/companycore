@@ -382,15 +382,21 @@ of rediscovering them.
 - Context: Operational dashboards need to answer priority, blockers, and next
   action before the operator scrolls.
 - Decision: Pair the current-priority cockpit with the attention queue in one
-  responsive command layout. Put readiness lanes inside the cockpit and keep
-  secondary health cards below as a compact strip.
+  responsive command layout. Put readiness evidence inside the cockpit as a
+  compact strip, cap visible attention items to the highest-priority few, and
+  move module directories below the first decision surface.
 - Reuse when: A dashboard is the owner's starting point and has both ranked
   action items and readiness/status lanes.
 - Avoid when: The screen is a single-purpose editor, table workbench, or setup
-  flow where a split command center would distract from the main form.
+  flow where a split command center would distract from the main form. Also
+  avoid placing secondary header shortcuts above the dominant primary action on
+  mobile.
 - Evidence: V2WEB-032 moved dashboard attention items beside the operational
   cockpit on desktop, stacked them cleanly on mobile, and preserved existing
-  dynamic state wiring.
+  dynamic state wiring. UXA-003 refined the pattern by moving health evidence
+  into the cockpit, limiting attention rows to three, reducing the lower
+  next-action panel to three links, and validating dashboard screenshots at
+  desktop, tablet, and mobile.
 
 ### 2026-05-07 - Semantic Sidebar Sections
 - Type: reusable_pattern

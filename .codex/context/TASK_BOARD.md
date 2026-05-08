@@ -2,12 +2,6 @@
 
 ## Ready
 
-- UXA-003 Dashboard First-Viewport Command Polish
-  - Stage: planning
-  - Owner: Frontend Builder
-  - Priority: P0
-  - Scope: tighten `/dashboard` so the first viewport has one dominant next
-    action, blocker visibility, and a quieter module exploration surface.
 - UXA-004 Mobile Auth Action-First Layout
   - Stage: planning
   - Owner: Frontend Builder
@@ -75,6 +69,7 @@ No active task.
 
 ## Done
 
+- UXA-003 Dashboard First-Viewport Command Polish.
 - UXA-002 Authenticated Private Route UX Evidence Harness.
 - UXA-001 CompanyCore V1 UX/UI Audit.
 - CCV1-067 Tech Stack Runtime Status Refresh.

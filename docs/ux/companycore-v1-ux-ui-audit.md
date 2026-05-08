@@ -325,6 +325,12 @@ Acceptance:
 - module grid is secondary, not competing with the command center
 - desktop/mobile screenshots show no overlap or horizontal overflow
 
+Status: Completed by UXA-003. The dashboard now keeps the current-priority
+decision, compact readiness evidence, and top attention items in the first
+surface, while module exploration and broad continuation links are secondary.
+Validated screenshots are in
+`C:\Users\wrobl\AppData\Local\Temp\companycore-ux-smoke\2026-05-08T20-00-12-315Z`.
+
 ### Slice 3: Mobile Auth Action-First Layout
 
 Goal: make returning owners sign in quickly on mobile.
