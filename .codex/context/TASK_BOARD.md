@@ -2,7 +2,12 @@
 
 ## Ready
 
-No active ready task.
+- UXA-009 React Tailwind DaisyUI Migration Foundation
+  - Stage: planning
+  - Owner: Frontend Builder
+  - Priority: P1
+  - Scope: introduce an explicit React + Vite + Tailwind + DaisyUI frontend
+    foundation while preserving backend APIs, auth, and owner-console flows.
 
 ## In Progress
 
@@ -52,6 +57,7 @@ No active task.
 
 ## Done
 
+- UXA-008 Dashboard Iconography And UX Governance.
 - UXA-007 Mobile Private Header Compression.
 - UXA-006 Local Action Feedback Placement.
 - UXA-005 Workbench Visual Role Cleanup.

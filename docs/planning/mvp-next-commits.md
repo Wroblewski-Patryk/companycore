@@ -5,6 +5,18 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NOW
 
+- [ ] UXA-009 React Tailwind DaisyUI Migration Foundation:
+      introduce an explicit React + Vite + Tailwind + DaisyUI frontend
+      foundation as a reversible architecture slice while preserving backend
+      APIs, auth, deployment shape, and owner-console flows.
+- [x] UXA-008 Dashboard Iconography And UX Governance:
+      add local Phosphor icon assets, apply consistent dashboard operational
+      iconography, and document canonical CompanyCore management-UI rules.
+      Tailwind/DaisyUI are not currently installed, so any DaisyUI adoption is
+      treated as a separate architecture/build-pipeline decision. Added
+      vendored Phosphor bold assets, dashboard icons, management-first UX
+      rules, and passed build, validate, targeted rendered checks,
+      owner-console smoke, and container integration tests.
 - [x] UXA-007 Mobile Private Header Compression:
       reduce authenticated mobile topbar height by keeping Menu, current route,
       and Sign out visible while moving module jumping to the existing drawer

@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>CompanyCore</title>
+    <link rel="stylesheet" href="/vendor/phosphor/bold/style.css">
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
@@ -199,7 +200,8 @@
 
         <section class="dashboard-command-layout">
           <section class="panel command-focus">
-            <div class="section-title row-title">
+            <div class="section-title row-title with-icon">
+              <span class="section-title-icon" aria-hidden="true"><i class="ph-bold ph-compass"></i></span>
               <div>
                 <h2>Operational cockpit</h2>
                 <p>Start here to see the current priority, what is blocked, and which operational lane needs the next click.</p>
@@ -218,31 +220,44 @@
             </div>
             <div class="command-evidence-strip" aria-label="Workspace readiness evidence">
               <article>
-                <span class="summary-kicker">Workspace</span>
-                <strong id="workspaceNameLabel">-</strong>
-                <p>Owner context</p>
+                <span class="ui-icon" aria-hidden="true"><i class="ph-bold ph-buildings"></i></span>
+                <div>
+                  <span class="summary-kicker">Workspace</span>
+                  <strong id="workspaceNameLabel">-</strong>
+                  <p>Owner context</p>
+                </div>
               </article>
               <article>
-                <span class="summary-kicker">ClickUp</span>
-                <strong id="clickupStatusLabel">Not configured</strong>
-                <p id="clickupStatusHint">Connect ClickUp in settings.</p>
+                <span class="ui-icon" aria-hidden="true"><i class="ph-bold ph-plugs-connected"></i></span>
+                <div>
+                  <span class="summary-kicker">ClickUp</span>
+                  <strong id="clickupStatusLabel">Not configured</strong>
+                  <p id="clickupStatusHint">Connect ClickUp in settings.</p>
+                </div>
               </article>
               <article>
-                <span class="summary-kicker">Google Drive</span>
-                <strong id="googleDriveStatusLabel">Not configured</strong>
-                <p id="googleDriveStatusHint">Connect Google Drive to import folders and files.</p>
+                <span class="ui-icon" aria-hidden="true"><i class="ph-bold ph-cloud"></i></span>
+                <div>
+                  <span class="summary-kicker">Google Drive</span>
+                  <strong id="googleDriveStatusLabel">Not configured</strong>
+                  <p id="googleDriveStatusHint">Connect Google Drive to import folders and files.</p>
+                </div>
               </article>
               <article>
-                <span class="summary-kicker">Data</span>
-                <strong id="dashboardDataStatusLabel">-</strong>
-                <p id="dashboardDataStatusHint">Load workspace data to review coverage.</p>
+                <span class="ui-icon" aria-hidden="true"><i class="ph-bold ph-database"></i></span>
+                <div>
+                  <span class="summary-kicker">Data</span>
+                  <strong id="dashboardDataStatusLabel">-</strong>
+                  <p id="dashboardDataStatusHint">Load workspace data to review coverage.</p>
+                </div>
               </article>
             </div>
             <div class="operational-steps" id="operationalSteps" aria-label="Operational readiness"></div>
           </section>
 
           <section class="panel command-panel">
-            <div class="section-title row-title">
+            <div class="section-title row-title with-icon">
+              <span class="section-title-icon attention" aria-hidden="true"><i class="ph-bold ph-warning-circle"></i></span>
               <div>
                 <h2>What needs attention</h2>
                 <p id="attentionSummary">Sign in to load operational signals.</p>
@@ -259,36 +274,60 @@
           </div>
           <div class="module-launch-grid">
             <a class="module-link" href="/areas" data-link>
-              <strong>00 main + 12 departments</strong>
-              <span id="moduleAreasMeta">Browse Main, Strategy, Product, Sales, Operations, Relationships, and the rest of the operating model.</span>
+              <span class="ui-icon module-icon" aria-hidden="true"><i class="ph-bold ph-tree-structure"></i></span>
+              <span class="module-link-copy">
+                <strong>00 main + 12 departments</strong>
+                <span id="moduleAreasMeta">Browse Main, Strategy, Product, Sales, Operations, Relationships, and the rest of the operating model.</span>
+              </span>
             </a>
             <a class="module-link" href="/data" data-link>
-              <strong>Data operations</strong>
-              <span id="moduleDataMeta">Review database modules, record counts, API coverage, and the right workbench for each table.</span>
+              <span class="ui-icon module-icon" aria-hidden="true"><i class="ph-bold ph-database"></i></span>
+              <span class="module-link-copy">
+                <strong>Data operations</strong>
+                <span id="moduleDataMeta">Review database modules, record counts, API coverage, and the right workbench for each table.</span>
+              </span>
             </a>
             <a class="module-link" href="/relationships" data-link>
-              <strong>Relationships</strong>
-              <span id="moduleRelationshipsMeta">Review unmapped provider and Drive relationships in one queue.</span>
+              <span class="ui-icon module-icon" aria-hidden="true"><i class="ph-bold ph-git-branch"></i></span>
+              <span class="module-link-copy">
+                <strong>Relationships</strong>
+                <span id="moduleRelationshipsMeta">Review unmapped provider and Drive relationships in one queue.</span>
+              </span>
             </a>
             <a class="module-link" href="/tasks-adapter" data-link>
-              <strong>Tasks & adapters</strong>
-              <span id="moduleTasksMeta">Review synced CompanyCore and ClickUp tasks with list ownership, status, priority, and due dates.</span>
+              <span class="ui-icon module-icon" aria-hidden="true"><i class="ph-bold ph-list-checks"></i></span>
+              <span class="module-link-copy">
+                <strong>Tasks & adapters</strong>
+                <span id="moduleTasksMeta">Review synced CompanyCore and ClickUp tasks with list ownership, status, priority, and due dates.</span>
+              </span>
             </a>
             <a class="module-link" href="/pipeline" data-link>
-              <strong>Pipeline</strong>
-              <span id="modulePipelineMeta">Review shared stages plus CRM usage records from implemented CompanyCore tables.</span>
+              <span class="ui-icon module-icon" aria-hidden="true"><i class="ph-bold ph-kanban"></i></span>
+              <span class="module-link-copy">
+                <strong>Pipeline</strong>
+                <span id="modulePipelineMeta">Review shared stages plus CRM usage records from implemented CompanyCore tables.</span>
+              </span>
             </a>
             <a class="module-link" href="/settings/drive" data-link>
-              <strong>Drive folders</strong>
-              <span id="moduleDriveMeta">Connect or refresh imported folders before assigning them to areas.</span>
+              <span class="ui-icon module-icon" aria-hidden="true"><i class="ph-bold ph-folder"></i></span>
+              <span class="module-link-copy">
+                <strong>Drive folders</strong>
+                <span id="moduleDriveMeta">Connect or refresh imported folders before assigning them to areas.</span>
+              </span>
             </a>
             <a class="module-link" href="/settings" data-link>
-              <strong>ClickUp Lists</strong>
-              <span id="moduleClickUpMeta">Refresh provider structure and keep task lists aligned with the right department.</span>
+              <span class="ui-icon module-icon" aria-hidden="true"><i class="ph-bold ph-plugs"></i></span>
+              <span class="module-link-copy">
+                <strong>ClickUp Lists</strong>
+                <span id="moduleClickUpMeta">Refresh provider structure and keep task lists aligned with the right department.</span>
+              </span>
             </a>
             <a class="module-link" href="/settings/integrations" data-link>
-              <strong>Integration map</strong>
-              <span id="moduleIntegrationsMeta">Review implemented data groups by source, module, and operating area.</span>
+              <span class="ui-icon module-icon" aria-hidden="true"><i class="ph-bold ph-map-trifold"></i></span>
+              <span class="module-link-copy">
+                <strong>Integration map</strong>
+                <span id="moduleIntegrationsMeta">Review implemented data groups by source, module, and operating area.</span>
+              </span>
             </a>
           </div>
         </section>

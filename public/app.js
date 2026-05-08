@@ -1295,6 +1295,7 @@ function renderOperationalCockpit(signals, items, counts) {
       label: "Integrations",
       title: integrationReadinessTitle(),
       detail: integrationReadinessDetail(),
+      icon: "ph-plugs-connected",
       href: "/settings/integrations",
       status: state.clickup.configured && state.googleDrive.oauthTokenConfigured ? "good" : state.clickup.configured || state.googleDrive.oauthClientConfigured ? "warn" : "blocked"
     },
@@ -1302,6 +1303,7 @@ function renderOperationalCockpit(signals, items, counts) {
       label: "Relationships",
       title: reviewCount === 0 ? "Mapped" : `${reviewCount} to review`,
       detail: reviewCount === 0 ? "Provider and Drive relationships look assigned." : "Provider mappings or Drive folders still need an operating area.",
+      icon: "ph-git-branch",
       href: "/relationships",
       status: reviewCount === 0 ? "good" : "warn"
     },
@@ -1311,6 +1313,7 @@ function renderOperationalCockpit(signals, items, counts) {
       detail: signals.dueSoonTasks.length > 0
         ? `${signals.dueSoonTasks.length} due within seven days.`
         : "No urgent due-date pressure detected.",
+      icon: "ph-list-checks",
       href: "/tasks-adapter",
       status: signals.dueSoonTasks.length > 0 ? "warn" : "good"
     },
@@ -1318,6 +1321,7 @@ function renderOperationalCockpit(signals, items, counts) {
       label: "Data model",
       title: `${counts.areas} areas`,
       detail: `${counts.tables} tables, ${counts.mappings} provider mappings, ${counts.pipelineRecords} shared pipeline and usage records.`,
+      icon: "ph-tree-structure",
       href: "/areas",
       status: counts.areas > 0 && counts.tables > 0 ? "good" : "warn"
     }
@@ -1402,9 +1406,12 @@ function operationalStepElement(step) {
   link.href = step.href;
   link.dataset.link = "";
   link.innerHTML = `
-    <span>${escapeHtml(step.label)}</span>
-    <strong>${escapeHtml(step.title)}</strong>
-    <small>${escapeHtml(step.detail)}</small>
+    <span class="ui-icon operational-step-icon" aria-hidden="true"><i class="ph-bold ${escapeHtml(step.icon || "ph-circle")}"></i></span>
+    <span class="operational-step-copy">
+      <span>${escapeHtml(step.label)}</span>
+      <strong>${escapeHtml(step.title)}</strong>
+      <small>${escapeHtml(step.detail)}</small>
+    </span>
   `;
   link.addEventListener("click", (event) => {
     event.preventDefault();
@@ -1420,6 +1427,7 @@ function dashboardAttentionItems(signals) {
     items.push({
       title: "Connect ClickUp",
       detail: "Task Lists and ClickUp-sourced tasks need a saved connection before the task module is useful.",
+      icon: "ph-plugs",
       href: "/settings",
       action: "Open ClickUp"
     });
@@ -1429,6 +1437,7 @@ function dashboardAttentionItems(signals) {
     items.push({
       title: "Connect Google Drive",
       detail: "Drive folders and files can be mapped to company areas after OAuth and import.",
+      icon: "ph-cloud",
       href: "/settings/drive",
       action: "Open Drive"
     });
@@ -1438,6 +1447,7 @@ function dashboardAttentionItems(signals) {
     items.push({
       title: "Review provider mappings",
       detail: `${signals.unmappedProviderMappings.length} provider mapping${signals.unmappedProviderMappings.length === 1 ? "" : "s"} still need an operating area.`,
+      icon: "ph-git-branch",
       href: "/relationships",
       action: "Correct areas"
     });
@@ -1447,6 +1457,7 @@ function dashboardAttentionItems(signals) {
     items.push({
       title: "Assign Drive folders",
       detail: `${signals.unassignedDriveFolders.length} Drive folder${signals.unassignedDriveFolders.length === 1 ? "" : "s"} can be assigned to the right company area.`,
+      icon: "ph-folder",
       href: "/relationships",
       action: "Review folders"
     });
@@ -1456,6 +1467,7 @@ function dashboardAttentionItems(signals) {
     items.push({
       title: "Check due tasks",
       detail: `${signals.dueSoonTasks.length} open task${signals.dueSoonTasks.length === 1 ? "" : "s"} are due within seven days.`,
+      icon: "ph-warning-circle",
       href: "/tasks-adapter",
       action: "Open tasks"
     });
@@ -1465,6 +1477,7 @@ function dashboardAttentionItems(signals) {
     items.push({
       title: "Review shared pipelines",
       detail: "Shared stages and current CRM usage records are implemented, but no pipeline data is loaded yet.",
+      icon: "ph-kanban",
       href: "/pipeline",
       action: "Open pipeline"
     });
@@ -1476,6 +1489,11 @@ function dashboardAttentionItems(signals) {
 function attentionItemElement(item) {
   const row = document.createElement("article");
   row.className = "attention-row";
+
+  const icon = document.createElement("span");
+  icon.className = "ui-icon attention-icon";
+  icon.setAttribute("aria-hidden", "true");
+  icon.innerHTML = `<i class="ph-bold ${escapeHtml(item.icon || "ph-warning-circle")}"></i>`;
 
   const copy = document.createElement("div");
   const title = document.createElement("strong");
@@ -1494,7 +1512,7 @@ function attentionItemElement(item) {
     navigate(item.href);
   });
 
-  row.append(copy, link);
+  row.append(icon, copy, link);
   return row;
 }
 

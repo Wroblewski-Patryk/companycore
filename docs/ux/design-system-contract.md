@@ -47,6 +47,49 @@ Every meaningful UI change should preserve or improve:
 - Reuse previously approved visual motifs recorded in `docs/ux/design-memory.md`
   when they still fit the product.
 
+## CompanyCore Management UI Principles
+
+CompanyCore is an owner console for understanding and steering a company. The
+UI must help the user answer three questions quickly:
+
+- What matters now?
+- What is blocked or needs review?
+- Where do I go next to act?
+
+Every dashboard, workbench, settings, and integration surface should make those
+answers visible before secondary exploration. Dense management screens should
+feel calm and operational, not promotional.
+
+## Iconography
+
+- Approved icon family: Phosphor Icons, using the local bold webfont in
+  `public/vendor/phosphor/bold/`.
+- Use icons to clarify operational concepts: company structure, integrations,
+  data, relationships, execution, pipeline, files, warnings, and settings.
+- Icons should sit in an 8px-radius square container when they label a module,
+  readiness signal, attention item, or dashboard step.
+- Icons are decorative when adjacent text already names the concept; keep
+  visible text as the accessible source of truth.
+- Do not mix icon families on the same surface unless an existing branded
+  provider mark requires it.
+- Avoid icon-only navigation for business-critical actions unless the control
+  has an accessible name, tooltip where appropriate, and a well-established
+  symbol.
+
+## Component Strategy
+
+- The current web console is a static vanilla frontend served from `public/`.
+  Tailwind CSS and DaisyUI are not installed in the project baseline.
+- Do not silently introduce Tailwind, DaisyUI, or a new build pipeline inside a
+  local UI-polish task. That change requires an explicit architecture decision
+  because it changes the frontend implementation model.
+- Until such a decision is approved, improve reusable vanilla patterns:
+  buttons, local feedback, empty states, context panels, data rows, tables,
+  module links, icon containers, and responsive shells.
+- If DaisyUI is approved later, migrate by replacing repeated vanilla patterns
+  with shared component primitives first; do not mix page-local DaisyUI classes
+  into isolated screens without a component inventory.
+
 ## Forbidden Behaviors
 
 - creating a custom button style for a single screen when a reusable button

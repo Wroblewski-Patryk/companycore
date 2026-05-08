@@ -1,5 +1,151 @@
 # Web Console V2 Task Contracts
 
+## UXA-009 React Tailwind DaisyUI Migration Foundation
+
+- Task Type: architecture/frontend
+- Current Stage: planning
+- Operation Mode: BUILDER
+- Deliverable For This Stage: a small migration foundation that introduces a
+  React + Vite + Tailwind + DaisyUI frontend shell without changing backend,
+  auth, database, provider, or production deployment behavior beyond serving
+  the built frontend assets.
+- Process Self-Audit:
+  - Analyze current state: UXA-008 confirmed the current web console is a
+    vanilla static frontend served from `public/`.
+  - Select exactly one priority task: UXA-009 only after UXA-008 closure.
+  - Plan implementation: introduce the framework foundation as a reversible
+    frontend architecture slice before migrating every route.
+  - Execute implementation: pending.
+  - Verify and test: pending.
+  - Self-review: pending.
+  - Update documentation and knowledge: pending.
+- Goal: Prepare CompanyCore for reusable dashboard, table, notification,
+  filter, shell, and workbench components through an explicit frontend
+  framework foundation.
+- Scope:
+  - `package.json`
+  - `package-lock.json`
+  - `vite.config.*`
+  - `tailwind.config.*`
+  - `postcss.config.*`
+  - `src/web/*` or an approved equivalent frontend source directory
+  - `public/` serving boundary if needed
+  - `Dockerfile` only if frontend build output must be copied differently
+  - `docs/architecture/tech-stack.md`
+  - `docs/ux/design-system-contract.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.agents/state/*`
+- Implementation Plan:
+  - Add React + Vite + Tailwind + DaisyUI dependencies and config.
+  - Preserve the backend Express API and auth model.
+  - Keep existing routes usable while establishing the new component shell.
+  - Start with shared primitives for app shell, buttons, alert/toast feedback,
+    module links, dashboard panels, and table foundations.
+  - Validate build, static serving, owner-console smoke, and no regression in
+    login/dashboard navigation.
+- Acceptance Criteria:
+  - The project has an explicit React/Vite frontend build path.
+  - Tailwind and DaisyUI are configured through project-level config files.
+  - The app can still serve the owner console through the backend.
+  - At least one private route proves the new framework shell/component path
+    without breaking existing owner workflows.
+  - UX docs explain how DaisyUI components should be wrapped/reused instead of
+    scattered as page-local classes.
+- Definition of Done:
+  - `npm run build` and `npm run validate` pass.
+  - Relevant frontend build command passes.
+  - `npm run owner-console:ux-smoke` passes against an isolated local compose
+    project.
+  - Targeted rendered checks prove login/dashboard still load and at least one
+    React component path renders.
+  - `git diff --check` passes.
+- Result Report:
+  - Pending.
+
+## UXA-008 Dashboard Iconography And UX Governance
+
+- Task Type: design/frontend
+- Current Stage: done
+- Operation Mode: BUILDER
+- Deliverable For This Stage: local Phosphor icon assets, dashboard icon
+  treatment, and canonical CompanyCore management-UI rules that help owners
+  understand their company structure, blockers, and next action quickly.
+- Process Self-Audit:
+  - Analyze current state: confirmed the web console is a vanilla static
+    frontend and that Tailwind/DaisyUI are not installed in `package.json`.
+  - Select exactly one priority task: UXA-008 only.
+  - Plan implementation: add Phosphor locally, reuse existing dashboard panels
+    and layout primitives, and document the canonical icon/component strategy.
+  - Execute implementation: scoped to dashboard iconography, local asset
+    wiring, and UX source-of-truth updates.
+  - Verify and test: build/validate, rendered dashboard checks, responsive
+    screenshots, and owner-console smoke against an isolated local runtime.
+  - Self-review: confirm no runtime architecture, auth, API, database, or
+    provider behavior changed.
+  - Update documentation and knowledge: task board, project state, next steps,
+    system health, and reusable UX memory.
+- Goal: Make the dashboard more intuitive as a company-management command
+  surface by using consistent operational icons and by documenting the UI rules
+  future work must follow.
+- Scope:
+  - `package.json`
+  - `package-lock.json`
+  - `public/index.html`
+  - `public/styles.css`
+  - `public/app.js`
+  - `public/vendor/phosphor/bold/*`
+  - `docs/ux/design-system-contract.md`
+  - `docs/ux/visual-direction-brief.md`
+  - `docs/ux/design-memory.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+- Implementation Plan:
+  - Add `@phosphor-icons/web` and vendor the bold webfont/CSS into `public/`
+    so the dashboard does not depend on a CDN.
+  - Link the local Phosphor stylesheet before the app stylesheet.
+  - Add icon containers to dashboard readiness evidence, operational steps,
+    attention rows, and module-launch links using management-specific
+    metaphors.
+  - Keep existing panel/layout architecture and responsive behavior.
+  - Document canonical CompanyCore UI principles, including when DaisyUI or a
+    Tailwind migration would require an explicit architecture decision.
+- Acceptance Criteria:
+  - Dashboard uses consistent Phosphor icons to clarify integrations,
+    relationships, execution, data, and module destinations.
+  - Icons are decorative where text already names the action, with accessible
+    labels preserved in visible text.
+  - Responsive dashboard layouts remain stable on desktop and mobile.
+  - UX docs define management-first visual hierarchy, icon rules, component
+    reuse rules, and DaisyUI/Tailwind decision boundaries.
+- Definition of Done:
+  - `npm run build` and `npm run validate` pass.
+  - `npm run owner-console:ux-smoke` passes against an isolated local compose
+    project.
+  - Targeted rendered checks prove local Phosphor font loading, visible
+    dashboard icon coverage, desktop/mobile stability, and no console errors.
+  - `git diff --check` passes.
+- Result Report:
+  - Added `@phosphor-icons/web` and vendored the local bold Phosphor webfont
+    and stylesheet under `public/vendor/phosphor/bold/`.
+  - Linked the local Phosphor stylesheet before the app stylesheet.
+  - Added icon containers to dashboard readiness evidence, operational steps,
+    attention rows, and module-launch destinations.
+  - Documented CompanyCore's management-first UX rules, Phosphor iconography
+    rules, and the Tailwind/DaisyUI architecture boundary.
+  - Validation passed: `npm run build`, `npm run validate`, `git diff --check`,
+    targeted desktop/mobile rendered checks, `npm run owner-console:ux-smoke`
+    against isolated `http://localhost:3000`, and container-scoped Prisma
+    migration plus Node integration test.
+  - Rendered evidence: Phosphor font loaded on desktop/mobile, dashboard showed
+    20 Phosphor icons on desktop, mobile showed no horizontal overflow, and
+    console issues were empty in targeted checks.
+
 ## UXA-007 Mobile Private Header Compression
 
 - Task Type: design/frontend

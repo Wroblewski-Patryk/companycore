@@ -4,14 +4,16 @@ Last updated: 2026-05-08
 
 ## NOW
 
-No active ready task after completing UXA-007. Canonical cross-check performed
-against `.codex/context/TASK_BOARD.md` and `docs/planning/mvp-next-commits.md`;
-remaining unchecked items are blocked or future/backlog work, not active NOW
-tasks.
+UXA-009 React Tailwind DaisyUI Migration Foundation is ready. Introduce an
+explicit React + Vite + Tailwind + DaisyUI frontend foundation as a reversible
+architecture slice while preserving backend APIs, auth, deployment shape, and
+owner-console flows.
 
 ## NEXT
 
-No additional active UX polish task is selected.
+After UXA-009, migrate the highest-value dashboard surface into reusable
+components: app shell, command panel, attention rows, module launcher,
+notifications, and table foundation.
 
 ## LATER
 

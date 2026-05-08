@@ -17,6 +17,7 @@ Last updated: 2026-05-08
 | ux/workbench smoke | `npm run owner-console:ux-smoke` against isolated `http://localhost:3004` | PASS | `C:\Users\wrobl\AppData\Local\Temp\companycore-ux-smoke\2026-05-08T20-13-50-112Z` | UXA-005 verified private workbench routes after shared visual-role cleanup across desktop/tablet/mobile with zero console issues. |
 | ux/local feedback smoke | Playwright fallback plus `npm run owner-console:ux-smoke` against isolated `http://localhost:3005` | PASS | `.tmp/uxa006-owner-console-rerun`; `.tmp/companycore-uxa006-login-local-status-rerun.png` | UXA-006 verified invalid login renders local error status, ClickUp/Drive empty status slots stay hidden, and private routes pass desktop/tablet/mobile smoke. Browser opened the route but interaction fallback was required because Browser failed on `locator.fill`. |
 | ux/mobile header smoke | Targeted Playwright plus `npm run owner-console:ux-smoke` against isolated `http://localhost:3006` | PASS | `.tmp/uxa007-targeted`; `.tmp/uxa007-owner-console-rerun` | UXA-007 verified mobile topbar height `70px`, no horizontal overflow, drawer opens, Sign out remains visible, and desktop module search remains visible. |
+| ux/dashboard iconography smoke | Browser login-page load plus targeted Playwright and `npm run owner-console:ux-smoke` against isolated `http://localhost:3000` | PASS | `.tmp/companycore-uxa008-targeted-final`; `.tmp/companycore-uxa008-owner-console-final` | UXA-008 verified local Phosphor font loading, 20 dashboard Phosphor icons on desktop, 18 visible in the first mobile viewport, no horizontal overflow, module icon color `rgb(35, 100, 210)`, and zero targeted console issues. |
 | ux/browser | Production public/auth Browser audit | PARTIAL PASS | 2026-05-08 UXA-001 | Public entry, login, register, and mobile auth rendered with no relevant console warnings/errors; authenticated Browser entry was blocked by an automation issue on `input[type=email]`. |
 | local runtime | Docker local runtime for UX audit | PASS | 2026-05-08 UXA-001 | Local backend ran on `http://localhost:3001`; `/health` returned `ok`; migrations and seed completed. |
 | web editor markers | Production `app.js` marker check | PASS | 2026-05-08 AGRUN-008 public `app.js` check | Typed editor markers for Notes, Projects, Clients, Task Lists, and Tasks are present. |
@@ -39,6 +40,10 @@ Last updated: 2026-05-08
 - UXA-006 confirmed integration tests and UX smoke must run sequentially when
   sharing one isolated compose database, because the integration test suite
   mutates seeded owner data.
+- UXA-008 confirmed local Phosphor assets render from the backend-served static
+  app without CDN dependency. Browser login-page load had no console issues;
+  form filling used the approved Playwright fallback because the in-app browser
+  hit the known form-fill limitation.
 
 ## Quality Gate Notes
 

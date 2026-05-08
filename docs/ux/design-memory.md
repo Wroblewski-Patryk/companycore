@@ -34,6 +34,39 @@ of rediscovering them.
 
 ## Entries
 
+### 2026-05-08 - Phosphor Operational Iconography
+- Type: reusable_pattern
+- Context: Dashboard modules, readiness signals, attention rows, and
+  operational steps need fast recognition so owners can orient themselves in
+  the company map without reading every paragraph first.
+- Decision: Use the local Phosphor bold webfont for operational icons. Place
+  icons in restrained 8px-radius square containers, keep text as the accessible
+  source of truth, and map icons to stable management concepts: structure,
+  integrations, relationships, execution, data, files, pipeline, and warnings.
+- Reuse when: A dashboard, context panel, module launcher, navigation row,
+  status/readiness signal, or action queue benefits from immediate operational
+  recognition.
+- Avoid when: A row is already visually dense enough that another icon would
+  compete with the primary data, or when a branded provider mark is the correct
+  source of recognition.
+- Evidence: UXA-008 adds local Phosphor assets and applies consistent
+  dashboard iconography to readiness evidence, operational steps, attention
+  rows, and module-launch destinations.
+
+### 2026-05-08 - Management-First UX Rule
+- Type: visual_direction
+- Context: CompanyCore is used to manage a company, so the UI must help users
+  understand what matters now, what is blocked, and where to act next.
+- Decision: Private routes should prefer command surfaces, local feedback,
+  structured rows, tables, and clear module destinations over decorative
+  dashboard cards or marketing-style composition.
+- Reuse when: Designing or polishing dashboard, workbench, settings,
+  integration, table, relationship, or provider setup routes.
+- Avoid when: Building public marketing pages where a different visual contract
+  is explicitly approved.
+- Evidence: UXA-008 updates the canonical visual direction and design-system
+  contract with CompanyCore management UI principles.
+
 ### 2026-05-07 - Table Workbench Empty State
 - Type: reusable_pattern
 - Context: Route-level table workbenches can be empty because records have not

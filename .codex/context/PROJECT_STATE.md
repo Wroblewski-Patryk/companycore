@@ -66,8 +66,10 @@ Last updated: 2026-05-08
 
 ## Technical Baseline
 - Backend: Node.js 22, Express, TypeScript.
-- Frontend: minimal static owner console served by the backend for v1
-  integration setup only.
+- Frontend: static owner console served by the backend, with local Phosphor
+  icon assets for dashboard and operational UI polish. React + Vite + Tailwind
+  + DaisyUI migration foundation is the next approved frontend architecture
+  slice, not yet implemented.
 - Mobile: None in v1; planned from v2 based on the web product experience.
 - Database: PostgreSQL with Prisma.
 - Infra: Docker Compose.
@@ -125,16 +127,24 @@ Last updated: 2026-05-08
   and the next executable task is selected from the canonical queue.
 
 ## Autonomous Iteration State
-- Current iteration: UXA-007 Mobile Private Header Compression completed.
+- Current iteration: UXA-008 Dashboard Iconography And UX Governance
+  completed.
 - Current operation mode: BUILDER
-- Last completed iteration: UXA-007 Mobile Private Header Compression.
-- Last completed task: compressed the authenticated mobile topbar to Menu,
-  route identity, and Sign out while preserving desktop/tablet module search
-  and quick links.
-- Next required mode: BUILDER; no active ready UX polish task remains in the
-  canonical queue after UXA-007.
+- Last completed iteration: UXA-008 Dashboard Iconography And UX Governance.
+- Last completed task: added local Phosphor icon assets, applied dashboard
+  operational iconography, and documented management-first UX/UI rules.
+- Next required mode: BUILDER; UXA-009 React Tailwind DaisyUI Migration
+  Foundation is ready.
 
 ## Recent Progress
+
+- 2026-05-08: Completed UXA-008 Dashboard Iconography And UX Governance. Added
+  `@phosphor-icons/web`, vendored the Phosphor bold webfont/CSS under
+  `public/vendor/phosphor/bold/`, applied operational dashboard iconography,
+  and documented canonical management-first UI rules plus the Tailwind/DaisyUI
+  decision boundary. Validation passed: `npm run build`, `npm run validate`,
+  targeted rendered checks, `npm run owner-console:ux-smoke`, container
+  migration/integration test, and `git diff --check`.
 
 - 2026-05-08: Completed UXA-007 Mobile Private Header Compression. Updated
   mobile private-shell CSS so authenticated phone routes show one compact
