@@ -4,6 +4,812 @@ These task contracts turn the v1 audit into executable work. Each task must be
 completed as its own small iteration and must update `.codex/context/TASK_BOARD.md`,
 `.codex/context/PROJECT_STATE.md`, and relevant docs when status changes.
 
+## CCV1-067 Tech Stack Runtime Status Refresh
+
+### Header
+- ID: CCV1-067
+- Title: Tech stack runtime status refresh
+- Task Type: architecture documentation
+- Current Stage: post-release
+- Status: DONE
+- Owner: Product Docs
+- Depends on: CCV1-066
+- Priority: P2
+- Iteration: v1-067
+- Operation Mode: BUILDER
+
+### Context
+`docs/architecture/tech-stack.md` still described auth, tests, migrations,
+owner console, and Google Drive as planned or future-only surfaces.
+
+### Goal
+Align the tech stack source-of-truth with the accepted runtime and documented
+validation commands.
+
+### Scope
+- `docs/architecture/tech-stack.md`
+- `.codex/context/TASK_BOARD.md`
+- `.codex/context/PROJECT_STATE.md`
+- `docs/planning/mvp-next-commits.md`
+- `docs/planning/companycore-v1-task-contracts.md`
+
+### Implementation Plan
+1. Review stale stack statements against current project state.
+2. Update implemented auth, tests, migrations, owner console, scheduler, and
+   Google Drive foundation language.
+3. Keep true non-goals such as mobile app, billing, advanced RBAC, workflow
+   engine, separate queue/worker tier, and Obsidian sync.
+4. Validate formatting and targeted architecture-doc search.
+
+### Autonomous Loop Evidence
+
+#### 1. Analyze Current State
+- Issues: tech stack doc said tests were not configured and CCV1-006 still
+  needed to add them.
+- Gaps: owner console and Google Drive v2 foundation were described as future
+  or minimal-only.
+- Architecture constraints: do not introduce a new runtime stack.
+
+#### 2. Select One Priority Task
+- Selected task: CCV1-067.
+- Priority rationale: architecture docs must not contradict accepted runtime.
+- Why other candidates were deferred: remaining implementation work is blocked
+  or decision-dependent.
+
+#### 3. Plan Implementation
+- Files or surfaces to modify: architecture documentation and queue metadata.
+- Logic: update runtime status, not architecture direction.
+- Edge cases: keep separate worker tier and mobile out of scope.
+
+#### 4. Execute Implementation
+- Implementation notes: refreshed tech stack wording.
+
+#### 5. Verify and Test
+- Validation performed: `git diff --check`; targeted architecture-doc search.
+- Result: passed.
+
+#### 6. Self-Review
+- Simpler option considered: leave tech stack as early-v1 historical context.
+- Technical debt introduced: no.
+- Scalability assessment: future stack changes have a cleaner baseline.
+- Refinements made: distinguished backend in-process scheduler from separate
+  worker infrastructure.
+
+#### 7. Update Documentation and Knowledge
+- Docs updated: tech stack, task board, project state, next commits, and this
+  contract.
+- Context updated: yes.
+- Learning journal updated: not applicable.
+
+### Acceptance Criteria
+- [x] Tech stack doc records `npm test` instead of saying tests are missing.
+- [x] Tech stack doc records implemented auth and migration deploy path.
+- [x] Tech stack doc no longer treats Google Drive foundation as wholly future
+  scope.
+
+### Definition of Done
+- [x] No runtime code changes are made.
+- [x] Changes are documented in source-of-truth files.
+- [x] `DEFINITION_OF_DONE.md` was checked before status changed to `DONE`.
+
+### Validation Evidence
+- Tests: not applicable for docs-only architecture refresh.
+- Manual checks: targeted architecture-doc search.
+- High-risk checks: no secrets, deploy commands, migrations, or runtime files
+  changed.
+
+### Result Report
+- Task summary: Refreshed tech stack docs to match accepted runtime status.
+- Files changed: `docs/architecture/tech-stack.md`,
+  `.codex/context/TASK_BOARD.md`, `.codex/context/PROJECT_STATE.md`,
+  `docs/planning/mvp-next-commits.md`, and this file.
+- How tested: `git diff --check` and targeted architecture-doc search.
+- What is incomplete: no ready v1 task remains.
+- Next steps: product/access decision.
+
+## CCV1-066 Historical Guardrail Plan Classification
+
+### Header
+- ID: CCV1-066
+- Title: Historical guardrail plan classification
+- Task Type: release documentation
+- Current Stage: post-release
+- Status: DONE
+- Owner: Product Docs
+- Depends on: CCV1-065
+- Priority: P2
+- Iteration: v1-066
+- Operation Mode: ARCHITECT
+
+### Context
+The auth/workspace and regression-prevention planning docs still used
+pre-stability language even though the corresponding CCV1 guardrail tasks were
+delivered and v1 was accepted.
+
+### Goal
+Classify those planning docs as implemented historical guardrail plans so they
+do not appear as active pre-v1 work.
+
+### Scope
+- `docs/planning/auth-workspace-integration-plan.md`
+- `docs/planning/regression-prevention-plan.md`
+- `docs/planning/planning-catalog-index.md`
+- `.codex/context/TASK_BOARD.md`
+- `.codex/context/PROJECT_STATE.md`
+- `docs/planning/mvp-next-commits.md`
+- `docs/planning/companycore-v1-task-contracts.md`
+
+### Implementation Plan
+1. Add status notes to both historical guardrail plans.
+2. Rename pre-stability headings to completed/implemented language.
+3. Add both files to the planning catalog index.
+4. Validate formatting and targeted search results.
+
+### Autonomous Loop Evidence
+
+#### 1. Analyze Current State
+- Issues: `regression-prevention-plan.md` said fundamentals were missing before
+  v1 could be called stable.
+- Gaps: `auth-workspace-integration-plan.md` still presented delivered schema
+  and implementation order as proposed.
+- Architecture constraints: no runtime behavior changes.
+
+#### 2. Select One Priority Task
+- Selected task: CCV1-066.
+- Priority rationale: stale guardrail docs can cause future agents to reopen
+  completed foundational work.
+- Why other candidates were deferred: active runtime work remains blocked or
+  decision-dependent.
+
+#### 3. Plan Implementation
+- Files or surfaces to modify: planning docs and queue metadata only.
+- Logic: classify, do not rewrite architecture.
+- Edge cases: keep the invariant and done-state rules reusable.
+
+#### 4. Execute Implementation
+- Implementation notes: added historical status notes and catalog rows.
+
+#### 5. Verify and Test
+- Validation performed: `git diff --check`; targeted planning-source search.
+- Result: passed.
+
+#### 6. Self-Review
+- Simpler option considered: leaving these docs as archived context only.
+- Technical debt introduced: no.
+- Scalability assessment: planning catalog now better separates historical
+  guardrails from active queue.
+- Refinements made: preserved guardrail content while changing active-status
+  wording.
+
+#### 7. Update Documentation and Knowledge
+- Docs updated: auth/workspace plan, regression-prevention plan, planning
+  catalog, task board, project state, next commits, and this contract.
+- Context updated: yes.
+- Learning journal updated: not applicable.
+
+### Acceptance Criteria
+- [x] Auth/workspace plan is clearly historical/implemented.
+- [x] Regression-prevention plan no longer reads as missing pre-v1 work.
+- [x] Planning catalog classifies both files.
+
+### Definition of Done
+- [x] No runtime code changes are made.
+- [x] Changes are documented in source-of-truth files.
+- [x] `DEFINITION_OF_DONE.md` was checked before status changed to `DONE`.
+
+### Validation Evidence
+- Tests: not applicable for docs-only classification.
+- Manual checks: targeted search for pre-v1-stability language.
+- High-risk checks: no secrets, deploy commands, migrations, or runtime files
+  changed.
+
+### Result Report
+- Task summary: Classified auth/workspace and regression-prevention plans as
+  implemented historical guardrail docs.
+- Files changed: `docs/planning/auth-workspace-integration-plan.md`,
+  `docs/planning/regression-prevention-plan.md`,
+  `docs/planning/planning-catalog-index.md`, `.codex/context/TASK_BOARD.md`,
+  `.codex/context/PROJECT_STATE.md`, `docs/planning/mvp-next-commits.md`, and
+  this file.
+- How tested: `git diff --check` and targeted planning-source search.
+- What is incomplete: no ready v1 task remains.
+- Next steps: product/access decision.
+
+## CCV1-065 Front-Door Docs Scope Refresh
+
+### Header
+- ID: CCV1-065
+- Title: Front-door docs scope refresh
+- Task Type: release documentation
+- Current Stage: post-release
+- Status: DONE
+- Owner: Product Docs
+- Depends on: CCV1-064
+- Priority: P2
+- Iteration: v1-065
+- Operation Mode: BUILDER
+
+### Context
+The top-level README, API, and deployment docs still described the owner
+console as minimal/ClickUp-only and treated Google Drive/dashboarding as wholly
+future scope, while later accepted work delivered owner-console modules, typed
+business editors, and the Google Drive v2 server-side foundation.
+
+### Goal
+Align front-door documentation with the current accepted product surface
+without changing runtime behavior.
+
+### Scope
+- `docs/README.md`
+- `docs/API.md`
+- `docs/DEPLOYMENT.md`
+- `.codex/context/TASK_BOARD.md`
+- `.codex/context/PROJECT_STATE.md`
+- `docs/planning/mvp-next-commits.md`
+- `docs/planning/companycore-v1-task-contracts.md`
+
+### Implementation Plan
+1. Search front-door docs for stale minimal-console/backend-only language.
+2. Update descriptions to name current owner-console and Google Drive v2
+   foundation scope.
+3. Keep blocked first real Drive import explicit.
+4. Validate formatting and targeted search results.
+
+### Autonomous Loop Evidence
+
+#### 1. Analyze Current State
+- Issues: README/API/DEPLOYMENT described an older minimal owner console.
+- Gaps: Google Drive v2 foundation was absent from front-door scope summary.
+- Architecture constraints: API remains the supported integration layer.
+
+#### 2. Select One Priority Task
+- Selected task: CCV1-065.
+- Priority rationale: entry docs should not contradict accepted v1/v2 evidence.
+- Why other candidates were deferred: remaining runtime tasks are externally
+  blocked or require a product decision.
+
+#### 3. Plan Implementation
+- Files or surfaces to modify: documentation only.
+- Logic: update scope language, not contracts.
+- Edge cases: keep owner consent/import blocked and do not claim mobile/full
+  automation scope.
+
+#### 4. Execute Implementation
+- Implementation notes: refreshed README, API, and deployment descriptions.
+
+#### 5. Verify and Test
+- Validation performed: `git diff --check`; targeted front-door docs search.
+- Result: passed.
+
+#### 6. Self-Review
+- Simpler option considered: leave front-door docs as historical.
+- Technical debt introduced: no.
+- Scalability assessment: new contributors now see the current surface before
+  diving into planning history.
+- Refinements made: distinguished Google Drive foundation from real owner
+  consent/import proof.
+
+#### 7. Update Documentation and Knowledge
+- Docs updated: front-door docs, task board, project state, next commits, and
+  this contract.
+- Context updated: yes.
+- Learning journal updated: not applicable.
+
+### Acceptance Criteria
+- [x] README names the current owner console and Google Drive v2 foundation.
+- [x] API docs no longer describe the console as ClickUp-only.
+- [x] Deployment docs describe the backend as serving the owner console, not a
+  minimal setup-only page.
+
+### Definition of Done
+- [x] No runtime code changes are made.
+- [x] Changes are documented in source-of-truth files.
+- [x] `DEFINITION_OF_DONE.md` was checked before status changed to `DONE`.
+
+### Validation Evidence
+- Tests: not applicable for docs-only front-door refresh.
+- Manual checks: targeted search in README/API/DEPLOYMENT for stale scope
+  language.
+- High-risk checks: no secrets, deploy commands, migrations, or runtime files
+  changed.
+
+### Result Report
+- Task summary: Refreshed front-door docs to match the current owner-console,
+  typed editor, and Google Drive v2 foundation scope.
+- Files changed: `docs/README.md`, `docs/API.md`, `docs/DEPLOYMENT.md`,
+  `.codex/context/TASK_BOARD.md`, `.codex/context/PROJECT_STATE.md`,
+  `docs/planning/mvp-next-commits.md`, and this file.
+- How tested: `git diff --check` and targeted front-door docs search.
+- What is incomplete: no ready v1 task remains; first real Drive import remains
+  blocked by owner OAuth consent.
+- Next steps: product/access decision.
+
+## CCV1-063 Historical Next Steps Refresh
+
+### Header
+- ID: CCV1-063
+- Title: Historical next steps refresh
+- Task Type: release documentation
+- Current Stage: post-release
+- Status: DONE
+- Owner: Product Docs
+- Depends on: CCV1-062
+- Priority: P2
+- Iteration: v1-063
+- Operation Mode: ARCHITECT
+
+### Context
+`docs/NEXT_STEPS.md` still described the early foundation state and instructed
+future agents to start CCV1-001/CCV1-011, even though v1 runtime, agent
+runtime hardening, and web-console polish are complete or externally blocked.
+
+### Goal
+Remove stale human-facing next-step guidance that could cause a future agent to
+reopen completed v1 foundation work.
+
+### Scope
+- `docs/NEXT_STEPS.md`
+- `docs/planning/mvp-execution-plan.md`
+- `docs/planning/planning-catalog-index.md`
+- `.codex/context/TASK_BOARD.md`
+- `.codex/context/PROJECT_STATE.md`
+- `docs/planning/mvp-next-commits.md`
+- `docs/planning/companycore-v1-task-contracts.md`
+
+### Implementation Plan
+1. Compare `docs/NEXT_STEPS.md` against the current task board and project
+   state.
+2. Replace obsolete v1 foundation guidance with the current post-release
+   boundary and blocked work.
+3. Update the planning catalog so old planning files are classified correctly.
+4. Validate formatting and source-of-truth consistency.
+
+### Autonomous Loop Evidence
+
+#### 1. Analyze Current State
+- Issues: `docs/NEXT_STEPS.md` claimed auth, workspace settings, tests, API key
+  hardening, and ClickUp integration were still missing.
+- Gaps: planning catalog still called AGRUN queued and only listed V2WEB
+  through 021.
+- Architecture constraints: no runtime behavior changes.
+
+#### 2. Select One Priority Task
+- Selected task: CCV1-063.
+- Priority rationale: stale next-step docs can misdirect future autonomous work.
+- Why other candidates were deferred: remaining real work is blocked by
+  credentials/access or requires a product decision.
+
+#### 3. Plan Implementation
+- Files or surfaces to modify: documentation and queue metadata only.
+- Logic: point readers to canonical queue files and name blocked work.
+- Edge cases: do not create new product scope.
+
+#### 4. Execute Implementation
+- Implementation notes: rewrote `docs/NEXT_STEPS.md` and refreshed planning
+  catalog classifications.
+
+#### 5. Verify and Test
+- Validation performed: `git diff --check`; source-of-truth review.
+- Result: passed.
+
+#### 6. Self-Review
+- Simpler option considered: deleting `docs/NEXT_STEPS.md`.
+- Technical debt introduced: no.
+- Scalability assessment: future agents now have a human-readable summary that
+  agrees with the canonical queue.
+- Refinements made: marked Google Drive and agent source handoff as blocked
+  rather than ready.
+
+#### 7. Update Documentation and Knowledge
+- Docs updated: next steps, planning catalog, task board, project state, next
+  commits, and this contract.
+- Context updated: yes.
+- Learning journal updated: not applicable.
+
+### Acceptance Criteria
+- [x] `docs/NEXT_STEPS.md` no longer instructs agents to start completed v1
+  foundation tasks.
+- [x] Planning catalog reflects current AGRUN, V2WEB, and V2GD status.
+- [x] Canonical queue remains the task board, agent state, and next commits.
+
+### Definition of Done
+- [x] No runtime code changes are made.
+- [x] Changes are documented in source-of-truth files.
+- [x] `DEFINITION_OF_DONE.md` was checked before status changed to `DONE`.
+
+### Validation Evidence
+- Tests: not applicable for docs-only next-step refresh.
+- Manual checks: searched planning and operations files for stale open work
+  signals and compared active queue files.
+- High-risk checks: no secrets, deploy commands, migrations, or runtime files
+  changed.
+
+### Result Report
+- Task summary: Replaced stale early-v1 `docs/NEXT_STEPS.md` guidance with the
+  current post-release boundary and blocked-work summary, and marked the
+  original MVP execution plan as historical/implemented.
+- Files changed: `docs/NEXT_STEPS.md`,
+  `docs/planning/mvp-execution-plan.md`,
+  `docs/planning/planning-catalog-index.md`, `.codex/context/TASK_BOARD.md`,
+  `.codex/context/PROJECT_STATE.md`, `docs/planning/mvp-next-commits.md`, and
+  this file.
+- How tested: `git diff --check` and source-of-truth review.
+- What is incomplete: no ready v1 task remains; next work needs a product or
+  access decision.
+- Next steps: choose v2 scope, provide Google OAuth consent, provide upstream
+  handoff access, or invest in deploy automation tooling.
+
+## CCV1-064 Historical Checklist Closure
+
+### Header
+- ID: CCV1-064
+- Title: Historical checklist closure
+- Task Type: release documentation
+- Current Stage: post-release
+- Status: DONE
+- Owner: Product Docs
+- Depends on: CCV1-063
+- Priority: P2
+- Iteration: v1-064
+- Operation Mode: BUILDER
+
+### Context
+Historical planning documents still contained unchecked checklist items and a
+blocked CCV1-009 contract even though later production smoke, AGCRUD rollout,
+and v1 handoff evidence closed or superseded them.
+
+### Goal
+Remove false open-work signals from historical planning docs without changing
+runtime behavior or hiding real external blockers.
+
+### Scope
+- `docs/planning/agent-crud-api-rollout-plan.md`
+- `docs/planning/companycore-v1-task-contracts.md`
+- `.codex/context/TASK_BOARD.md`
+- `.codex/context/PROJECT_STATE.md`
+- `docs/planning/mvp-next-commits.md`
+
+### Implementation Plan
+1. Identify historical checklist rows that conflict with canonical done-state.
+2. Mark AGCRUD planning checklist items complete because AGCRUD-001 through
+   AGCRUD-006 are done.
+3. Convert the old CCV1-009 blocked contract to done with a note that later
+   production evidence superseded the original blocked state.
+4. Validate formatting and source-of-truth consistency.
+
+### Autonomous Loop Evidence
+
+#### 1. Analyze Current State
+- Issues: AGCRUD planning task had `Status: DONE` but unchecked acceptance and
+  done criteria.
+- Gaps: old CCV1-009 contract remained `BLOCKED` even though later release
+  readiness and operator handoff accepted v1 runtime.
+- Architecture constraints: no runtime behavior changes.
+
+#### 2. Select One Priority Task
+- Selected task: CCV1-064.
+- Priority rationale: unchecked historical checklist rows can misdirect future
+  agents into reopening completed v1 work.
+- Why other candidates were deferred: remaining real tasks are externally
+  blocked or require product choice.
+
+#### 3. Plan Implementation
+- Files or surfaces to modify: documentation only.
+- Logic: close only historical rows with later evidence.
+- Edge cases: keep Google Drive owner consent and upstream source merge blocked.
+
+#### 4. Execute Implementation
+- Implementation notes: updated AGCRUD checklist rows and CCV1-009 result
+  report/status.
+
+#### 5. Verify and Test
+- Validation performed: `git diff --check`; targeted source-of-truth search.
+- Result: passed.
+
+#### 6. Self-Review
+- Simpler option considered: leave historical documents untouched.
+- Technical debt introduced: no.
+- Scalability assessment: future planning-source cross-checks now produce fewer
+  false positives.
+- Refinements made: result reports now point to later accepted evidence instead
+  of claiming new runtime work.
+
+#### 7. Update Documentation and Knowledge
+- Docs updated: AGCRUD plan, v1 task contracts, task board, project state, and
+  next commits.
+- Context updated: yes.
+- Learning journal updated: not applicable.
+
+### Acceptance Criteria
+- [x] AGCRUD planning checklist no longer appears incomplete.
+- [x] Old CCV1-009 contract no longer appears as a live blocker.
+- [x] External blockers remain blocked in canonical queue files.
+
+### Definition of Done
+- [x] No runtime code changes are made.
+- [x] Changes are documented in source-of-truth files.
+- [x] `DEFINITION_OF_DONE.md` was checked before status changed to `DONE`.
+
+### Validation Evidence
+- Tests: not applicable for docs-only historical checklist closure.
+- Manual checks: searched planning docs for stale unchecked CCV1/AGCRUD signals.
+- High-risk checks: no secrets, deploy commands, migrations, or runtime files
+  changed.
+
+### Result Report
+- Task summary: Closed stale historical checklist rows that contradicted later
+  accepted v1 evidence.
+- Files changed: `docs/planning/agent-crud-api-rollout-plan.md`,
+  `docs/planning/companycore-v1-task-contracts.md`,
+  `.codex/context/TASK_BOARD.md`, `.codex/context/PROJECT_STATE.md`, and
+  `docs/planning/mvp-next-commits.md`.
+- How tested: `git diff --check` and targeted planning-source search.
+- What is incomplete: no ready v1 task remains.
+- Next steps: product/access decision.
+
+## CCV1-062 V1 Operator Runtime Pointer Refresh
+
+### Header
+- ID: CCV1-062
+- Title: V1 operator runtime pointer refresh
+- Task Type: release documentation
+- Current Stage: post-release
+- Status: DONE
+- Owner: Ops/Release + Product Docs
+- Depends on: CCV1-061, AGRUN-009
+- Priority: P2
+- Iteration: v1-062
+- Operation Mode: BUILDER
+
+### Context
+The v1 handoff and rollback docs still referenced older runtime images after
+the 2026-05-08 public health check reported build/image
+`71f3eb3b063ea68226a1736c727c52882b33f27a`.
+
+### Goal
+Keep operator-facing v1 runtime and rollback pointers aligned with public
+health evidence without inventing unverified VPS inventory.
+
+### Scope
+- `docs/operations/v1-operator-handoff.md`
+- `docs/operations/rollback-and-recovery.md`
+- `.agents/state/system-health.md`
+- `.codex/context/TASK_BOARD.md`
+- `.codex/context/PROJECT_STATE.md`
+- `docs/planning/companycore-v1-task-contracts.md`
+- `docs/planning/mvp-next-commits.md`
+
+### Implementation Plan
+1. Compare handoff and rollback pointers against the latest public health
+   evidence.
+2. Update operator docs to reference the current public build/image.
+3. Preserve a clear warning that Docker/Coolify inventory must be refreshed
+   from an approved operator shell before an actual rollback.
+4. Validate docs formatting and source-of-truth consistency.
+
+### Autonomous Loop Evidence
+
+#### 1. Analyze Current State
+- Issues: operator handoff pointed at `bf59b2f`; rollback docs pointed at
+  `7f0e090`; public health reported `71f3eb3`.
+- Gaps: SSH inventory refresh failed in this session, so container names cannot
+  be asserted as current.
+- Architecture constraints: no runtime behavior changes.
+
+#### 2. Select One Priority Task
+- Selected task: CCV1-062.
+- Priority rationale: stale rollback and runtime pointers are operational risk.
+- Why other candidates were deferred: blocked external tasks still require
+  credentials or write access.
+
+#### 3. Plan Implementation
+- Files or surfaces to modify: operations docs and state files only.
+- Logic: document current public runtime signal and inventory limitation.
+- Edge cases: do not claim a current Docker container name without SSH evidence.
+
+#### 4. Execute Implementation
+- Implementation notes: refreshed public runtime image/build references and
+  rollback guidance.
+
+#### 5. Verify and Test
+- Validation performed: `git diff --check`; source-of-truth review.
+- Result: passed.
+
+#### 6. Self-Review
+- Simpler option considered: leaving old pointers until SSH access is fixed.
+- Technical debt introduced: no.
+- Scalability assessment: operators now have safer current evidence and know
+  what must be refreshed before rollback.
+- Refinements made: rollback doc explicitly distinguishes public health evidence
+  from unverified container inventory.
+
+#### 7. Update Documentation and Knowledge
+- Docs updated: handoff, rollback, task board, project state, system health,
+  this contract, and next commits.
+- Context updated: yes.
+- Learning journal updated: not applicable.
+
+### Acceptance Criteria
+- [x] Handoff doc references current public `/health` build/image.
+- [x] Rollback doc no longer presents stale container inventory as current.
+- [x] SSH inventory limitation is explicit.
+
+### Definition of Done
+- [x] No runtime code changes are made.
+- [x] Changes are documented in source-of-truth files.
+- [x] `DEFINITION_OF_DONE.md` was checked before status changed to `DONE`.
+
+### Validation Evidence
+- Tests: not applicable for docs-only operations pointer refresh.
+- Manual checks: compared v1 handoff and rollback docs against 2026-05-08
+  public health evidence.
+- High-risk checks: no secrets, deploy commands, migrations, or runtime files
+  changed.
+
+### Result Report
+- Task summary: Refreshed v1 operator runtime and rollback docs to align with
+  current public health build/image.
+- Files changed: `docs/operations/v1-operator-handoff.md`,
+  `docs/operations/rollback-and-recovery.md`, `.agents/state/system-health.md`,
+  `.codex/context/TASK_BOARD.md`, `.codex/context/PROJECT_STATE.md`,
+  `docs/planning/mvp-next-commits.md`, and this file.
+- How tested: `git diff --check` and source-of-truth review.
+- What is incomplete: VPS Docker inventory still needs an approved operator
+  shell before an actual rollback.
+- Next steps: no ready v1 runtime task remains.
+
+## CCV1-061 Agent State Source-Of-Truth Sync
+
+### Header
+- ID: CCV1-061
+- Title: Agent state source-of-truth sync
+- Task Type: release documentation
+- Current Stage: post-release
+- Status: DONE
+- Owner: Product Docs
+- Depends on: CCV1-060
+- Priority: P2
+- Iteration: v1-061
+- Operation Mode: BUILDER
+
+### Process Self-Audit
+- [x] All seven autonomous loop steps are planned.
+- [x] No loop step is being skipped.
+- [x] Exactly one priority task is selected.
+- [x] Operation mode matches the iteration number.
+- [x] The task is aligned with repository source-of-truth documents.
+
+### Context
+CompanyCore v1 runtime is accepted, but `.agents/state/*` still contained
+bootstrap placeholders. That made a continuation request ambiguous even though
+`TASK_BOARD`, release readiness, and the operator handoff had enough evidence
+to continue safely.
+
+### Goal
+Synchronize agent continuation state with the accepted v1 handoff and select
+the next smallest executable task from the canonical queue.
+
+### Scope
+- `.agents/state/current-focus.md`
+- `.agents/state/known-issues.md`
+- `.agents/state/regression-log.md`
+- `.agents/state/system-health.md`
+- `.agents/state/next-steps.md`
+- `.codex/context/TASK_BOARD.md`
+- `.codex/context/PROJECT_STATE.md`
+- `docs/planning/mvp-next-commits.md`
+- `docs/planning/companycore-v1-task-contracts.md`
+
+### Implementation Plan
+1. Cross-check v1 handoff, release readiness, task board, and next commits.
+2. Replace placeholder agent-state content with current v1 post-release truth.
+3. Activate the next non-blocked task without changing runtime behavior.
+4. Record validation and next-step evidence.
+
+### Autonomous Loop Evidence
+
+#### 1. Analyze Current State
+- Issues: `.agents/state/*` files had placeholders after v1 runtime closure.
+- Gaps: `mvp-next-commits.md` had a historical auto-deploy success note while
+  operations docs still classify auto-deploy as unresolved/manual rollover
+  approved.
+- Inconsistencies: `TASK_BOARD.md` had no ready task even though AGRUN-009 is a
+  non-blocked evidence-reconciliation task.
+- Architecture constraints: no runtime or architecture behavior should change.
+
+#### 2. Select One Priority Task
+- Selected task: CCV1-061 Agent State Source-Of-Truth Sync.
+- Priority rationale: continuation state is the gateway for all future safe
+  autonomous work.
+- Why other candidates were deferred: AGRUN-007 and AGRUN-010 are externally
+  blocked; AGRUN-008 should wait until release automation evidence is clean.
+
+#### 3. Plan Implementation
+- Files or surfaces to modify: documentation and agent-state files only.
+- Logic: state v1 is accepted, keep external blockers explicit, make AGRUN-009
+  the next ready analysis task.
+- Edge cases: do not mark auto-deploy verified until operations evidence is
+  reconciled.
+
+#### 4. Execute Implementation
+- Implementation notes: replaced placeholders, updated board/project state,
+  and added this contract.
+
+#### 5. Verify and Test
+- Validation performed: source-of-truth cross-check and `git diff --check`.
+- Result: passed.
+
+#### 6. Self-Review
+- Simpler option considered: only updating `.agents/state/next-steps.md`.
+- Technical debt introduced: no.
+- Scalability assessment: future agents can resume from repo state without
+  hidden chat memory.
+- Refinements made: captured the deploy-automation evidence drift as the next
+  ready task instead of silently choosing feature work.
+
+#### 7. Update Documentation and Knowledge
+- Docs updated: task board, project state, next commits, agent state, and this
+  task contract.
+- Context updated: yes.
+- Learning journal updated: not applicable.
+
+### Acceptance Criteria
+- [x] Agent state files no longer contain template placeholders.
+- [x] The next executable task is visible in both `TASK_BOARD.md` and
+  `.agents/state/next-steps.md`.
+- [x] External blockers remain explicit and are not hidden as ready work.
+
+### Definition of Done
+- [x] No runtime code changes are made.
+- [x] Changes are documented in the relevant source of truth.
+- [x] Behavior is reproducible from the evidence recorded below.
+- [x] `DEFINITION_OF_DONE.md` was checked before status changed to `DONE`.
+
+### Validation Evidence
+- Tests: not applicable for docs-only state sync.
+- Manual checks: reviewed v1 handoff, release readiness, task board, next
+  commits, and agent-state files.
+- High-risk checks: no secrets, runtime routes, migrations, or deployment
+  scripts changed.
+
+### Integration Evidence
+- `INTEGRATION_CHECKLIST.md` reviewed: yes.
+- Real API/service path used: not applicable.
+- Endpoint and client contract match: not applicable.
+- DB schema and migrations verified: not applicable.
+- Regression check performed: confirmed no runtime behavior changed and
+  recorded state-placeholder drift in `.agents/state/regression-log.md`.
+
+### Architecture Evidence
+- Architecture source reviewed: `.agents/core/operating-system.md`,
+  `.agents/core/execution-loop.md`, `docs/operations/v1-operator-handoff.md`,
+  and `docs/operations/v1-release-readiness.md`.
+- Fits approved architecture: yes.
+- Mismatch discovered: no.
+- Decision required from user: no.
+
+### Deployment / Ops Evidence
+- Deploy impact: none.
+- Env or secret changes: none.
+- Health-check impact: none.
+- Rollback note: revert documentation-only changes if the state sync is wrong.
+- `DEPLOYMENT_GATE.md` reviewed: not applicable.
+
+### Result Report
+- Task summary: Synced the agent continuation state to the accepted v1
+  post-release boundary and activated AGRUN-009 as the next ready analysis
+  task.
+- Files changed: `.agents/state/current-focus.md`,
+  `.agents/state/known-issues.md`, `.agents/state/regression-log.md`,
+  `.agents/state/system-health.md`, `.agents/state/next-steps.md`,
+  `.codex/context/TASK_BOARD.md`, `.codex/context/PROJECT_STATE.md`,
+  `docs/planning/mvp-next-commits.md`, and this file.
+- How tested: source-of-truth review and `git diff --check`.
+- What is incomplete: deploy automation evidence still needs AGRUN-009.
+- Next steps: Run AGRUN-009 before changing deployment guidance.
+- Decisions made: treat auto-deploy as unresolved until operations evidence is
+  reconciled.
+
 ## CCV1-060 V1 Operator Handoff
 
 ### Header
@@ -4489,9 +5295,10 @@ needed for v1 consumers.
 - How tested: Ran `npm test` against a disposable PostgreSQL database at
   `localhost:55432`, which built TypeScript, applied all migrations from
   scratch, and passed the endpoint integration test.
-- What is incomplete: Deferred modules remain without routes until workflows
-  justify them: task lists, pipeline stages, interactions, and agents.
-- Next steps: Start CCV1-009 production deployment verification.
+- What is incomplete: nothing for the approved minimal route slice; later
+  AGCRUD and AGRUN tasks superseded the deferred-route notes with broader
+  agent-safe CRUD and lifecycle coverage.
+- Next steps: no CCV1-008/CCV1-009 follow-up remains ready.
 
 ### Priority
 P1
@@ -4503,7 +5310,7 @@ P1
 - Title: Production deployment verification
 - Task Type: release
 - Current Stage: verification
-- Status: BLOCKED
+- Status: DONE
 - Owner: Ops/Release
 - Depends on: CCV1-003, CCV1-004, CCV1-005, CCV1-006
 - Priority: P1
@@ -4522,20 +5329,19 @@ flow.
 
 ### Acceptance Criteria
 - [x] `https://api.companycore.luckysparrow.ch/health` returns healthy status.
-- [ ] Owner registration/login works or a first-owner bootstrap path is
+- [x] Owner registration/login works or a first-owner bootstrap path is
   documented and verified.
-- [ ] Protected API calls work with the configured workspace-scoped production
+- [x] Protected API calls work with the configured workspace-scoped production
   API key.
-- [ ] Native ClickUp sync creates or updates a task using workspace integration
+- [x] Native ClickUp sync creates or updates a task using workspace integration
   settings.
-- [ ] `GET /events` shows `task_synced_from_clickup`.
-- [ ] Smoke evidence and residual risks are recorded.
+- [x] `GET /events` shows `task_synced_from_clickup`.
+- [x] Smoke evidence and residual risks are recorded.
 
 ### Result Report
-- Task summary: Started production verification and confirmed the public API
-  health endpoint works. Verification is blocked because production is not yet
-  serving the current v1 route build and production credentials were not
-  available for protected smoke checks.
+- Task summary: Original public-only verification was superseded by later
+  production deployment, protected adapter smoke, final v1 runtime rollover,
+  full live-system smoke, and v1 operator handoff evidence.
 - Files changed: `docs/operations/post-deploy-smoke.md`,
   `.codex/context/PROJECT_STATE.md`, `.codex/context/TASK_BOARD.md`, and this
   task contract.
@@ -4544,12 +5350,13 @@ flow.
   `https://api.companycore.luckysparrow.ch/v1/health`,
   `https://api.companycore.luckysparrow.ch/v1/projects`,
   `https://api.companycore.luckysparrow.ch/projects`, and
-  `https://companycore.luckysparrow.ch`.
-- What is incomplete: owner/auth protected smoke, workspace API key smoke,
-  ClickUp settings read/write, native ClickUp sync, and event readback require
-  deploying the latest commits and providing production credentials.
-- Next steps: Deploy current branch, then rerun CCV1-009 with owner token or
-  workspace API key and configured ClickUp settings.
+  `https://companycore.luckysparrow.ch`; later evidence in
+  `docs/operations/post-deploy-smoke.md`,
+  `docs/operations/v1-release-readiness.md`, and
+  `docs/operations/v1-operator-handoff.md` verifies protected connection,
+  ClickUp maintenance/sync, Jarvis, Paperclip, and agent CRUD paths.
+- What is incomplete: nothing for v1 production verification.
+- Next steps: no ready v1 runtime task remains; only external blockers remain.
 
 ### Priority
 P1

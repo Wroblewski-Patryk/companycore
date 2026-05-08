@@ -1,5 +1,9 @@
 # Regression Prevention Plan
 
+Status: implemented historical guardrail plan. The regression-prevention work
+for v1 was delivered through CCV1-014, CCV1-015, CCV1-016, CCV1-017, and
+CCV1-006, then extended by later AGCRUD/AGRUN runtime hardening.
+
 CompanyCore v1 is allowed to stay small, but it must not become fragile. The
 main regression risk is not one broken endpoint; it is adding a feature that
 silently bypasses workspace ownership, auth, events, migrations, or integration
@@ -21,12 +25,13 @@ These invariants should be treated as product architecture rules:
 - Tests must include both allowed and denied paths.
 - Deployment smoke must exercise the real production path, not only `/health`.
 
-## Missing Fundamentals To Add Before v1 Is Called Stable
+## Fundamentals Added Before v1 Was Accepted
 
 ### 1. API Contract
 
-Add a stable API contract source, preferably OpenAPI or an equivalent
-repository-local contract document generated or maintained from routes.
+CompanyCore uses repository-local API documentation and `/v1/connection`
+manifest metadata as the current contract surface. A full OpenAPI artifact can
+still be added later, but it is not a v1 readiness blocker.
 
 Minimum coverage:
 
@@ -80,7 +85,7 @@ counts and stable error codes.
 
 ### 5. Observability Minimum
 
-Before production verification, add:
+Production verification and later handoff evidence now include:
 
 - structured request logs or equivalent runtime logs
 - sync start/success/failure events or logs
@@ -115,7 +120,7 @@ Define stable error responses before agents depend on the API:
 
 Provider/raw backend errors should not be returned directly to clients.
 
-## Required v1 Regression Task Order
+## Completed v1 Regression Task Order
 
 1. CCV1-014 API contract and error response standard.
 2. CCV1-015 Workspace guardrail test matrix.

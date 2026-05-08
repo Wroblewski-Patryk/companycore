@@ -6,16 +6,19 @@ replace these choices without an explicit architecture decision.
 ## Runtime Stack
 
 - Backend: Node.js 22, Express 4, TypeScript.
-- Frontend: minimal static HTML/CSS/JavaScript owner console in v1, served by
-  the backend for integration setup only.
+- Frontend: static HTML/CSS/JavaScript owner console served by the backend.
+  The accepted web surface now includes auth, settings, API-key management,
+  ClickUp setup, Google Drive setup, operating areas, relationships, data
+  operations, and typed business editors.
 - Mobile: none in v1; v2 mobile should follow the web product experience.
 - Database: PostgreSQL 16 with Prisma.
 - Cache or queue: none in v1.
-- Jobs or workers: none in current runtime; first sync flows should be exposed
-  through authenticated backend API commands before introducing workers.
-- External integrations: native ClickUp adapter first; n8n optional for
-  orchestration, not the required primary path.
-- Auth: planned owner-user auth plus workspace-scoped service API keys.
+- Jobs or workers: no separate worker tier in v1; the backend includes the
+  lightweight in-process ClickUp maintenance scheduler.
+- External integrations: native ClickUp adapter is live; Google Drive v2
+  server-side foundation is implemented and blocked only on real owner OAuth
+  consent/import proof. n8n remains optional for orchestration.
+- Auth: owner-user auth plus workspace-scoped service API keys.
 
 ## Backend Libraries
 
@@ -25,8 +28,9 @@ replace these choices without an explicit architecture decision.
 - `cors`: CORS middleware.
 - `dotenv`: local env loading.
 
-Future auth, token, password-hashing, test, and secret-encryption libraries
-should be selected during the relevant scoped task, then recorded here.
+Auth, password hashing, tests, and secret encryption are implemented in the
+runtime slices that introduced those capabilities. Record future library
+changes here only when a scoped task changes the stack.
 
 ## Developer Tooling
 
@@ -34,11 +38,12 @@ should be selected during the relevant scoped task, then recorded here.
 - Typecheck/build: `npm run build`.
 - Development server: `npm run dev`.
 - Prisma generate: `npm run prisma:generate`.
-- Prisma schema push: currently available for local foundation use; production
-  should move to migrations through CCV1-003.
+- Prisma schema push: available for local experimentation only; production uses
+  migrations through `npm run prisma:migrate:deploy`.
 - Lint: not configured yet.
-- Unit/integration tests: not configured yet; CCV1-006 must add and document
-  the test command.
+- Unit/integration tests: `npm test` builds TypeScript, applies Prisma
+  migrations, and runs Node test files under `dist/tests/**/*.test.js` against
+  the configured PostgreSQL database.
 - Browser automation: applicable for v1 owner-console smoke when UI changes
   are made.
 
@@ -60,23 +65,21 @@ should be selected during the relevant scoped task, then recorded here.
 
 ## Required Configuration
 
-Current foundation:
+Current runtime:
 
 - `DATABASE_URL`
-- `SEED_API_KEY`
+- `SERVICE_PASSWORD_POSTGRES`
+- `SERVICE_PASSWORD_API_KEY` or `SEED_API_KEY`
+- `AUTH_TOKEN_SECRET`
+- `API_KEY_HASH_SECRET`
+- `INTEGRATION_SECRET_KEY`
 - `PORT` optional, default `3000`
 
-Planned v1 additions:
-
-- app auth/session/JWT secret, depending on CCV1-012 decisions
-- secret encryption key for workspace integration settings, depending on
-  CCV1-013 decisions
-- workspace-owned ClickUp token/config stored in database-backed integration
-  settings, not as global process-only configuration
+Workspace-owned ClickUp and Google Drive token/config material is stored in
+database-backed integration settings, not as global process-only configuration.
 
 ## Non-Goals For v1
 
-- Full company operations dashboard.
 - Mobile app.
 - Billing.
 - Invitations.
@@ -84,6 +87,5 @@ Planned v1 additions:
 - Workflow engine.
 - Queue or worker infrastructure unless a later approved task proves it is
   required.
-- Google Drive sync.
 - Obsidian sync.
-- Full CRM UI.
+- Full CRM product suite beyond the accepted typed business editor workbenches.

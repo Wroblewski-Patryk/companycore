@@ -5,6 +5,41 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NOW
 
+- [x] CCV1-067 Tech Stack Runtime Status Refresh:
+      update `docs/architecture/tech-stack.md` so it reflects implemented auth,
+      tests, migrations, owner console, ClickUp scheduler, and Google Drive v2
+      foundation instead of older planned/foundation wording.
+- [x] CCV1-066 Historical Guardrail Plan Classification:
+      classify auth/workspace and regression-prevention planning docs as
+      implemented historical guardrail plans, so they no longer read as active
+      pre-v1-stability work.
+- [x] CCV1-065 Front-Door Docs Scope Refresh:
+      refresh `docs/README.md`, `docs/API.md`, and `docs/DEPLOYMENT.md` so
+      they describe the current owner console and Google Drive v2 foundation
+      instead of the earlier minimal-console/backend-only scope.
+- [x] CCV1-064 Historical Checklist Closure:
+      close stale unchecked AGCRUD planning criteria and the old blocked
+      CCV1-009 contract using later accepted production and agent-runtime
+      evidence.
+- [x] CCV1-063 Historical Next Steps Refresh:
+      replace stale `docs/NEXT_STEPS.md` v1 foundation guidance with current
+      post-release status, blocked work, and canonical queue pointers; update
+      the planning catalog so historical plans are not mistaken for active v1
+      work.
+- [x] CCV1-062 V1 Operator Runtime Pointer Refresh:
+      refresh operator handoff and rollback docs to reference the current
+      public `/health` build/image `71f3eb3b063ea68226a1736c727c52882b33f27a`
+      and record that VPS Docker inventory still needs an approved operator
+      shell before rollback.
+- [x] AGRUN-008 Route-Level Business Editing Surfaces:
+      reconcile whether the typed Notes, Projects, Clients, Task Lists, and
+      Tasks editor workbenches already close the route-level business editing
+      gap; if not, select exactly one remaining implemented route slice.
+- [x] CCV1-061 Agent State Source-Of-Truth Sync:
+      replace placeholder `.agents/state/*` continuation files with current v1
+      post-release focus, known blockers, health evidence, and the next
+      executable queue item.
+
 - [x] AGRUN-002 Service Key Scope Enforcement:
       enforce `api_keys.scopes` per route capability, keep owner bearer-token
       access intact, preserve existing production agent compatibility through
@@ -148,12 +183,16 @@ synchronized with `.codex/context/TASK_BOARD.md`.
       blocked until real OAuth credentials and owner consent are available;
       then connect Drive, import a selected folder, and prove agent file
       readback through CompanyCore.
-- [ ] AGRUN-008 Route-Level Business Editing Surfaces:
-      continue web-console editing one implemented route at a time after the
-      P0/P1 agent safety tasks are done.
-- [ ] AGRUN-009 Deploy Automation Reliability:
+- [x] AGRUN-008 Route-Level Business Editing Surfaces:
+      closed by evidence reconciliation; the typed editor workbenches for
+      Notes, Projects, Clients, Task Lists, and Tasks are present locally and
+      in production `app.js`.
+- [x] AGRUN-009 Deploy Automation Reliability:
       audit whether current Coolify auto-deploy reliably updates production or
-      document a one-command approved rollover path.
+      document a one-command approved rollover path. First reconcile the
+      current source-of-truth drift: this file contains a historical note about
+      a successful auto-deploy, while operations docs still classify manual
+      rollover as the approved path and auto-deploy tooling as unresolved.
 - [x] AGCRUD-004 Registry Resource Lifecycle API:
       complete scoped lifecycle APIs for storage locations, knowledge roots,
       automation definitions, and operating folders.
@@ -178,9 +217,10 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [ ] Blocked source merge execution: push or upstream the Paperclip
       `4cfa476f` adapter commit after write access or a fork/PR route is
       available.
-- [x] Optional release automation: confirm GitHub-to-Coolify auto-deploy path
-      without GitHub Actions; Coolify auto deploy was enabled, received the
-      pushed `63348d6` commit, and succeeded after reloading the compose file.
+- [x] Optional release automation evidence reconciliation: confirm whether the
+      historical note about pushed commit `63348d6` supersedes the operations
+      docs, or update the note so manual rollover remains the explicit approved
+      path.
 
 ## PIPELINE
 
@@ -190,8 +230,8 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] 77. AGRUN-005 Scoped Agent Key Owner UI
 - [x] 78. AGRUN-006 Agent Event Ack Positive Smoke
 - [ ] 79. AGRUN-007 Google Drive Owner Consent And First Import
-- [ ] 80. AGRUN-008 Route-Level Business Editing Surfaces
-- [ ] 81. AGRUN-009 Deploy Automation Reliability
+- [x] 80. AGRUN-008 Route-Level Business Editing Surfaces
+- [x] 81. AGRUN-009 Deploy Automation Reliability
 - [ ] 82. AGRUN-010 Upstream Agent Source Merge Execution
 - [x] 69. AGCRUD-002 Business Read/Update API Completion
 - [x] 70. AGCRUD-003 Business Archive/Delete Policy And Slice
@@ -283,11 +323,14 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## GROUP QUEUE
 
-- [ ] CCV1-A (docs and planning): CCV1-001, CCV1-002, CCV1-005
-- [ ] CCV1-B (workspace and auth): CCV1-011, CCV1-012, CCV1-013, CCV1-007
-- [ ] CCV1-C (regression prevention): CCV1-014, CCV1-015, CCV1-016, CCV1-017
-- [ ] CCV1-D (runtime foundation): CCV1-003, CCV1-004, CCV1-006, CCV1-010
-- [ ] CCV1-E (completion): CCV1-008, CCV1-009
+- [x] CCV1-A (docs and planning): CCV1-001, CCV1-002, CCV1-005
+- [x] CCV1-B (workspace and auth): CCV1-011, CCV1-012, CCV1-013, CCV1-007
+- [x] CCV1-C (regression prevention): CCV1-014, CCV1-015, CCV1-016, CCV1-017
+- [x] CCV1-D (runtime foundation): CCV1-003, CCV1-004, CCV1-006, CCV1-010
+- [x] CCV1-E (completion): CCV1-008, CCV1-009
+
+The group queue is historical. Current active and blocked work is represented
+in `NOW`, `NEXT`, `PIPELINE`, and `.codex/context/TASK_BOARD.md`.
 
 ## Refill Rules
 

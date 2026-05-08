@@ -16,12 +16,18 @@ Company Core v1 provides:
   notes, decisions, agents, interactions, events, and operating-model records.
 - Native ClickUp import, signed webhook ingestion, scheduled maintenance,
   write-back, comments, views, custom fields, and retry observability.
+- Google Drive v2 server-side integration foundation with OAuth setup guidance,
+  folder discovery, selected-folder configuration, Docs/Sheets APIs, file
+  metadata/content snapshots, and freshness routes. Real owner consent and the
+  first production import remain externally blocked.
+- Owner web console surfaces for API keys, ClickUp setup, Google Drive setup,
+  operating areas, relationships, data operations, and typed business editors.
 - OpenJarvis read integration through the CompanyCore connector.
 - Paperclip agent-event consumption through the CompanyCore adapter.
 - Docker Compose runtime for local and Coolify-style deployment.
 
-It deliberately keeps broad company dashboarding, Google Drive sync, Obsidian
-sync, advanced analytics, and full business automation as v2+ scope.
+It deliberately keeps broad automation orchestration, Obsidian sync, advanced
+analytics, and mobile app scope beyond the accepted v1/v2 web-console slice.
 
 ## Documentation Index
 

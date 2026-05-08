@@ -449,10 +449,10 @@ imported Drive metadata/content through CompanyCore.
 ## AGRUN-008 Route-Level Business Editing Surfaces
 
 - Task Type: frontend/backend
-- Current Stage: planning
-- Deliverable For This Stage: next route-level web console editing slice after
-  agent security tasks.
-- Status: BACKLOG
+- Current Stage: done
+- Deliverable For This Stage: evidence reconciliation for completed typed
+  route-level editor slices.
+- Status: DONE
 - Owner: Frontend Builder
 - Priority: P2
 - Coverage Ledger Rows: AGRUN-COV-007
@@ -494,14 +494,24 @@ surface at a time.
 
 ### Result Report
 
-- Pending later slice selection.
+- Completed on 2026-05-08 as an evidence-reconciliation slice.
+- Existing V2WEB slices already implemented typed create/edit/archive
+  workbenches for `/data/notes`, `/data/projects`, `/data/clients`,
+  `/data/task-lists`, and `/data/tasks`.
+- Local source contains the typed editor functions:
+  `renderNoteEditor`, `renderProjectEditor`, `renderClientEditor`,
+  `renderTaskListEditor`, and `renderTaskEditor`.
+- Production `https://companycore.luckysparrow.ch/app.js` contains those same
+  editor markers plus `taskEditorDueDate`.
+- No additional placeholder edit surface was added.
 
 ## AGRUN-009 Deploy Automation Reliability
 
 - Task Type: ops/release
-- Current Stage: planning
-- Deliverable For This Stage: verified or repaired repeatable deployment path.
-- Status: BACKLOG
+- Current Stage: done
+- Deliverable For This Stage: verified deployment-path verdict and operations
+  evidence reconciliation.
+- Status: DONE
 - Owner: Ops/Release
 - Priority: P2
 - Coverage Ledger Rows: AGRUN-COV-008
@@ -541,7 +551,17 @@ Reduce release drift by making the deploy path either reliably automatic from
 
 ### Result Report
 
-- Pending later ops slice.
+- Completed on 2026-05-08 as an evidence-reconciliation slice.
+- Public health, v1 health, and web root returned `200`.
+- `/health` reported build commit
+  `71f3eb3b063ea68226a1736c727c52882b33f27a`.
+- The planning-only `63348d6` auto-deploy success note is not treated as
+  superseding operations truth because no matching post-deploy smoke entry was
+  found.
+- Manual VPS backend rollover remains the approved release path until a future
+  push-to-running-image smoke proves reliable auto-deploy.
+- Residual risk: VPS container inventory could not be refreshed from this
+  local session because the available SSH key/password path was rejected.
 
 ## AGRUN-010 Upstream Agent Source Merge Execution
 

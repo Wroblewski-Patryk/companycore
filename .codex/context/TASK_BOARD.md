@@ -42,8 +42,6 @@ No active task.
 
 ## Backlog
 
-- AGRUN-008 Route-Level Business Editing Surfaces.
-- AGRUN-009 Deploy Automation Reliability.
 - Future v2 OAuth browser consent UI and token refresh hardening after core
   server-side API slices are complete.
 - Future v2 dashboard surfaces that show ClickUp Lists, Drive folders/files,
@@ -54,6 +52,15 @@ No active task.
 
 ## Done
 
+- CCV1-067 Tech Stack Runtime Status Refresh.
+- CCV1-066 Historical Guardrail Plan Classification.
+- CCV1-065 Front-Door Docs Scope Refresh.
+- CCV1-064 Historical Checklist Closure.
+- CCV1-063 Historical Next Steps Refresh.
+- CCV1-062 V1 Operator Runtime Pointer Refresh.
+- AGRUN-008 Route-Level Business Editing Surfaces.
+- AGRUN-009 Deploy Automation Reliability.
+- CCV1-061 Agent State Source-Of-Truth Sync.
 - V2WEB-049 Table Workbench Empty State Polish.
 - V2WEB-048 Global Feedback Panel Polish.
 - V2WEB-047 Public Entry Context Polish.

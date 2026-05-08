@@ -1,5 +1,10 @@
 # MVP Execution Plan
 
+Status: historical v1 foundation plan. The approved v1 runtime scope is
+achieved; use `.codex/context/TASK_BOARD.md`,
+`.agents/state/next-steps.md`, `docs/planning/mvp-next-commits.md`, and
+`docs/NEXT_STEPS.md` for current queue status.
+
 CompanyCore v1 is a backend-only foundation. The implementation target is a
 working operational flow:
 
@@ -8,9 +13,11 @@ Owner registration -> workspace -> workspace settings -> ClickUp API
   -> CompanyCore integration adapter -> PostgreSQL -> event
 ```
 
-Design for scale, implement for v1. Do not add a GUI, Google Drive sync,
-Obsidian sync, billing, advanced RBAC, invitations, a workflow engine, or a full
-CRM UI during this plan.
+Design for scale, implement for v1. During this original plan, the project did
+not add a broad GUI, Google Drive sync, Obsidian sync, billing, advanced RBAC,
+invitations, a workflow engine, or a full CRM UI. Later accepted work added the
+minimal owner console, Google Drive v2 server-side integration, and typed
+business editors under separate documented task queues.
 
 ## Principles
 
@@ -194,17 +201,24 @@ CRM UI during this plan.
 
 ## Phase 10: Deployment Verification
 
-- [ ] CCV1-009 Production deployment verification
+- [x] CCV1-009 Production deployment verification
   - Why now: Project is reported deployed, but repository evidence does not yet
     record production smoke results.
   - Depends on: CCV1-003, CCV1-004, CCV1-005, CCV1-006, CCV1-012, CCV1-013,
     CCV1-010.
-  - Validation: `GET /health`, owner registration/login, protected
-    workspace-scoped project/task calls, native ClickUp sync, and event readback
-    pass against `api.companycore.luckysparrow.ch`.
+  - Validation: Production smoke evidence is recorded in
+    `docs/operations/post-deploy-smoke.md`,
+    `docs/operations/v1-release-readiness.md`, and
+    `docs/operations/v1-operator-handoff.md`.
   - Deployment impact: High. Confirms production readiness.
 
 ## Progress Log
+
+- 2026-05-08: Marked this file as a historical v1 foundation plan. Its final
+  production verification item is closed by later production smoke and operator
+  handoff evidence. Current queue truth lives in `mvp-next-commits.md`,
+  `.codex/context/TASK_BOARD.md`, `.agents/state/next-steps.md`, and
+  `docs/NEXT_STEPS.md`.
 
 - 2026-05-02: Audited repository state. Backend foundation exists, build
   passes, canonical architecture/operations/planning docs need alignment before

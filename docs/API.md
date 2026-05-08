@@ -17,10 +17,11 @@ Base URL in local Docker:
 http://localhost:3000
 ```
 
-The minimal owner console is served from `/`. It is intentionally limited to
-owner login, ClickUp settings, and native ClickUp sync in v1. Agents,
+The owner console is served from `/`. It includes owner login, API key
+management, ClickUp setup and sync, Google Drive setup, operating-area review,
+relationship mapping, data operations, and typed business editors. Agents,
 automations, future dashboards, and future mobile clients should still use the
-HTTP API.
+HTTP API as the supported integration layer.
 
 v1 routes are available under `/v1/*` without an `/api` prefix because the API
 uses a dedicated API domain in production. Root-level routes remain as v1

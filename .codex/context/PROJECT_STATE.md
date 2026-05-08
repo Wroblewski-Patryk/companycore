@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-05-07
+Last updated: 2026-05-08
 
 ## Product Snapshot
 - Name: LuckySparrow Company Core
@@ -112,30 +112,95 @@ Last updated: 2026-05-07
   Postgres volume.
 
 ## Current Focus
-- Main active objective: close the post-CRUD agent runtime gaps so service
-  agents can use CompanyCore through least-privilege keys, machine-readable
-  contracts, repeatable training smoke, and verified event acknowledgement.
+- Main active objective: keep v1 post-release handoff clean and prepare the
+  next approved work slice without reopening completed runtime scope.
 - Top blockers: real Google OAuth credentials and owner consent are required
   for the first Drive import proof; upstream Paperclip/OpenJarvis source merge
   execution is blocked by external GitHub write access or an approved fork/PR
-  route.
-- Success criteria for this phase: service-key scopes are enforced per route,
-  `/v1/connection` remains the machine-readable contract for agents, scoped
-  keys can be managed by the owner, agent training smoke is repeatable, and a
-  pending agent event can be acknowledged in local and production smoke.
+  route; auto-deploy remains unverified and manual VPS backend rollover remains
+  the approved release path.
+- Success criteria for this phase: source-of-truth docs and `.agents/state/*`
+  agree on the accepted v1 runtime boundary, external blockers remain explicit,
+  and the next executable task is selected from the canonical queue.
 
 ## Autonomous Iteration State
-- Current iteration: AGRUN-002 through AGRUN-004 and AGRUN-006 are implemented
-  locally and pending production release evidence.
+- Current iteration: CCV1-064 Historical Checklist Closure.
 - Current operation mode: BUILDER
-- Last completed iteration: AGRUN-001 Agent Runtime Gap Plan.
-- Last completed task: enforced service-key scopes per route capability,
-  added machine-readable agent contract metadata, added the reusable
-  `agent:training-smoke` script, and added local positive agent-event ack
-  coverage.
-- Next required mode: TESTER for production smoke and release evidence.
+- Last completed iteration: CCV1-063 Historical Next Steps Refresh.
+- Last completed task: closed stale historical AGCRUD and CCV1-009 checklist
+  signals using later accepted evidence.
+- Next required mode: product or operator decision required; no ready v1
+  runtime or agent-runtime task remains.
 
 ## Recent Progress
+
+- 2026-05-08: Completed CCV1-061 Agent State Source-Of-Truth Sync. Replaced
+  placeholder `.agents/state/*` continuation files with the current v1
+  post-release focus, known blockers, health evidence, regression monitoring,
+  and next-step queue. Activated AGRUN-009 as the next ready P2 analysis task
+  to reconcile release automation evidence before changing deploy guidance.
+  Validation passed: source-of-truth cross-check against
+  `.agents/core/operating-system.md`, `.codex/context/TASK_BOARD.md`,
+  `docs/planning/mvp-next-commits.md`, `docs/operations/v1-operator-handoff.md`,
+  `docs/operations/v1-release-readiness.md`, and `git diff --check`.
+- 2026-05-08: Completed AGRUN-009 Deploy Automation Reliability evidence
+  reconciliation. Public production checks returned `200` for
+  `https://api.companycore.luckysparrow.ch/health`,
+  `https://api.companycore.luckysparrow.ch/v1/health`, and
+  `https://companycore.luckysparrow.ch/`. `/health` reported build commit and
+  image `71f3eb3b063ea68226a1736c727c52882b33f27a`. The historical planning
+  note about auto-deploy commit `63348d6` is not treated as superseding
+  operations truth because no matching post-deploy smoke entry exists. Manual
+  VPS backend rollover remains the approved release path until a future
+  push-to-running-image smoke proves reliable auto-deploy. VPS container
+  inventory could not be refreshed because the available SSH key/password path
+  was rejected.
+- 2026-05-08: Completed AGRUN-008 Route-Level Business Editing Surfaces
+  evidence reconciliation. Local source contains `renderNoteEditor`,
+  `renderProjectEditor`, `renderClientEditor`, `renderTaskListEditor`, and
+  `renderTaskEditor`; production
+  `https://companycore.luckysparrow.ch/app.js` contains the same markers plus
+  `taskEditorDueDate`. The AGRUN-COV-007 ledger row is now PASS locally and in
+  production evidence. No additional UI was added because the typed editor
+  slices already close the tracked route-level business editing gap.
+- 2026-05-08: Completed CCV1-062 V1 Operator Runtime Pointer Refresh.
+  `docs/operations/v1-operator-handoff.md` and
+  `docs/operations/rollback-and-recovery.md` now reference the current public
+  `/health` build/image
+  `71f3eb3b063ea68226a1736c727c52882b33f27a` instead of older runtime pointers.
+  The docs explicitly note that VPS Docker inventory was not refreshed because
+  the available SSH key/password path was rejected, so an approved operator
+  shell should refresh container inventory before an actual rollback.
+- 2026-05-08: Completed CCV1-063 Historical Next Steps Refresh. Replaced stale
+  early-v1 guidance in `docs/NEXT_STEPS.md` with the current accepted v1
+  boundary, blocked work, and canonical queue pointers. Updated
+  `docs/planning/mvp-execution-plan.md` to historical/implemented status and
+  refreshed `docs/planning/planning-catalog-index.md` so AGRUN is classified
+  as external-blocked, V2WEB is recorded through V2WEB-049, and Google Drive v2
+  is external-blocked on owner consent/import proof. Validation passed:
+  `git diff --check` and source-of-truth review.
+- 2026-05-08: Completed CCV1-064 Historical Checklist Closure. Marked stale
+  unchecked AGCRUD planning criteria as complete because AGCRUD-001 through
+  AGCRUD-006 are done, and updated the old CCV1-009 contract from blocked to
+  done using later production smoke, v1 release readiness, and operator handoff
+  evidence. Validation passed: `git diff --check` and targeted planning-source
+  search.
+- 2026-05-08: Completed CCV1-065 Front-Door Docs Scope Refresh. Updated
+  `docs/README.md`, `docs/API.md`, and `docs/DEPLOYMENT.md` so the public docs
+  describe the current owner console, typed business editors, and Google Drive
+  v2 foundation instead of the earlier minimal-console/backend-only scope.
+  Validation passed: `git diff --check` and targeted front-door docs search.
+- 2026-05-08: Completed CCV1-066 Historical Guardrail Plan Classification.
+  Marked `docs/planning/auth-workspace-integration-plan.md` and
+  `docs/planning/regression-prevention-plan.md` as implemented historical plans,
+  refreshed their headings from pre-stability language to completed guardrail
+  language, and indexed both in `docs/planning/planning-catalog-index.md`.
+  Validation passed: `git diff --check` and targeted planning-source search.
+- 2026-05-08: Completed CCV1-067 Tech Stack Runtime Status Refresh. Updated
+  `docs/architecture/tech-stack.md` to reflect the accepted owner console,
+  implemented owner/service auth, Prisma migration deploy path, `npm test`,
+  ClickUp maintenance scheduler, and Google Drive v2 foundation. Validation
+  passed: `git diff --check` and targeted architecture-doc search.
 
 - 2026-05-07: Completed V2WEB-049 Table Workbench Empty State Polish.
   The `/data-table` workbench now uses actionable empty-state panels for

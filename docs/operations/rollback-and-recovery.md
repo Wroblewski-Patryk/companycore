@@ -1,16 +1,21 @@
 # Rollback And Recovery
 
-Document the first safe rollback path before the first production deploy.
+Document the safe rollback path for production deploys.
 
 ## Current V1 Rollback Pointer
 
-- Current production backend container:
-  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-7f0e090`.
-- Current production backend image:
-  `rnqqkhl3o3dut4qv56mlxly2_backend:7f0e09078f6b9f54db641328ea3d75830c2d2b3d`.
-- Previous verified rollback container retained on the VPS:
-  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-8b604d8-previous-7f0e090`.
-- Previous verified rollback image retained on the VPS:
+- Current exposed production backend image from public `/health`:
+  `rnqqkhl3o3dut4qv56mlxly2_backend:71f3eb3b063ea68226a1736c727c52882b33f27a`.
+- Current exposed production build commit from public `/health`:
+  `71f3eb3b063ea68226a1736c727c52882b33f27a`.
+- VPS container inventory:
+  - Not refreshed in the 2026-05-08 local session because the available SSH
+    key/password path was rejected.
+  - Before an actual rollback, refresh Docker/Coolify inventory from an
+    approved operator shell and identify the previous known-good image from
+    `docs/operations/post-deploy-smoke.md` plus Coolify deployment history.
+- Previous verified rollback image last recorded before the 2026-05-08 public
+  health reconciliation:
   `rnqqkhl3o3dut4qv56mlxly2_backend:8b604d8e56f24c24f5f095815f8d52c6a84887dd`.
 - Production Postgres container/volume must be preserved during rollback.
 

@@ -1,5 +1,10 @@
 # Auth, Workspace, And Integration Plan
 
+Status: implemented historical architecture plan. The owner/workspace auth,
+workspace-scoped service keys, workspace-scoped integration settings, and
+native ClickUp integration direction were delivered by the CCV1 runtime queue
+and later hardened by AGCRUD/AGRUN tasks.
+
 CompanyCore v1 must secure company operations without becoming an overbuilt
 enterprise tenant system. The target is a simple owner workspace:
 
@@ -24,9 +29,9 @@ register owner -> create workspace -> authenticate -> configure integration
 - v1 does not include invitations, billing, advanced RBAC, organization admin
   UI, or full multi-tenant product workflows.
 
-## Proposed v1 Data Model
+## Implemented v1 Data Model Direction
 
-Final schema names must be confirmed during CCV1-011, but the working target is:
+The original working target was:
 
 - `users`
   - `id`
@@ -178,7 +183,7 @@ only owns backend encryption/auth secrets.
 - Treat service API keys as credentials for agents and automation clients.
 - Defer invitations, non-owner roles, and advanced RBAC.
 
-## Implementation Order
+## Completed Implementation Order
 
 1. CCV1-001: align canonical docs with workspace/auth/native ClickUp direction.
 2. CCV1-011: finalize workspace/auth architecture contract.

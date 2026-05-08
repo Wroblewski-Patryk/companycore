@@ -8,7 +8,7 @@ docker compose up -d --build
 
 Services:
 
-- `backend`: Node/Express API and minimal owner console on port `3000`
+- `backend`: Node/Express API and owner console on port `3000`
 - `postgres`: PostgreSQL available inside the Compose network
 
 The backend startup command runs:
@@ -60,7 +60,7 @@ Required environment values:
 - `INTEGRATION_SECRET_KEY`
 
 Map domains to the `backend` service on container port `3000`.
-The backend serves the minimal owner console from `/` on the web domain. The
+The backend serves the owner console from `/` on the web domain. The
 owner console calls the API domain for `/auth/*`, `/v1/*`, and compatibility
 API aliases. The API domain root returns API metadata instead of the web UI.
 

@@ -1,5 +1,10 @@
 # Agent CRUD API Rollout Plan
 
+Status: implemented. AGCRUD-001 through AGCRUD-006 are complete; later
+agent-runtime evidence is tracked in
+`docs/planning/agent-runtime-gap-closure-plan.md` and
+`docs/operations/agent-runtime-coverage-ledger.csv`.
+
 ## Purpose
 
 CompanyCore should become the safe read/write memory layer for Jarvis,
@@ -343,9 +348,9 @@ CompanyCore as operational memory.
 - Learning journal updated: not applicable.
 
 ## Acceptance Criteria
-- [ ] Every Prisma model is classified by safe API access policy.
-- [ ] The first implementation task is narrow and executable.
-- [ ] Agent-facing rules are explicit enough to teach an agent read/write usage.
+- [x] Every Prisma model is classified by safe API access policy.
+- [x] The first implementation task is narrow and executable.
+- [x] Agent-facing rules are explicit enough to teach an agent read/write usage.
 
 ## Success Signal
 - User or operator problem: agents cannot confidently use CompanyCore memory.
@@ -367,16 +372,16 @@ A planning document and canonical queue entries only.
 - no runtime implementation during this planning stage
 
 ## Definition of Done
-- [ ] Plan is committed to canonical planning docs.
-- [ ] Task board and next-commits queue are synchronized.
-- [ ] Runtime follow-up tasks are small enough for one-agent implementation.
-- [ ] `DEFINITION_OF_DONE.md` will be checked before any implementation task is
+- [x] Plan is committed to canonical planning docs.
+- [x] Task board and next-commits queue are synchronized.
+- [x] Runtime follow-up tasks are small enough for one-agent implementation.
+- [x] `DEFINITION_OF_DONE.md` will be checked before any implementation task is
   marked `DONE`.
 
 ## Stage Exit Criteria
-- [ ] Output matches `planning`.
-- [ ] Later-stage implementation was not mixed in.
-- [ ] Risks and assumptions are stated clearly.
+- [x] Output matches `planning`.
+- [x] Later-stage implementation was not mixed in.
+- [x] Risks and assumptions are stated clearly.
 
 ## Validation Evidence
 - Tests: not applicable for planning.
@@ -441,6 +446,7 @@ A planning document and canonical queue entries only.
 - Task summary: planning task for safe agent CRUD rollout.
 - Files changed: planning/API queue docs.
 - How tested: documentation review only.
-- What is incomplete: runtime CRUD completion and agent playbook.
-- Next steps: AGCRUD-002 business read/update API completion.
+- What is incomplete: nothing for AGCRUD planning; runtime follow-up work was
+  completed by AGCRUD-002 through AGCRUD-006 and later AGRUN tasks.
+- Next steps: no AGCRUD follow-up remains ready.
 - Decisions made: system tables use controlled lifecycle actions, not raw CRUD.

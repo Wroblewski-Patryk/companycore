@@ -1,6 +1,6 @@
 # CompanyCore V1 Operator Handoff
 
-Last updated: 2026-05-06
+Last updated: 2026-05-08
 
 ## Verdict
 
@@ -39,13 +39,18 @@ CompanyCore as the company operational source of truth.
 
 ## Current Runtime
 
-- CompanyCore backend container:
-  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-bf59b2f`
-- CompanyCore backend image:
-  `rnqqkhl3o3dut4qv56mlxly2_backend:bf59b2f80d9a837e05694cbb3f6417b8a7bf83c2`
+- CompanyCore public health currently reports backend image:
+  `rnqqkhl3o3dut4qv56mlxly2_backend:71f3eb3b063ea68226a1736c727c52882b33f27a`
 - CompanyCore source evidence:
-  - Runtime image built from agent CRUD API commit `bf59b2f`.
-  - Documentation/source-of-truth `main` is at or after `bf59b2f`.
+  - Public `/health` reports build commit
+    `71f3eb3b063ea68226a1736c727c52882b33f27a`.
+  - Documentation/source-of-truth `main` is at or after the accepted v1 runtime
+    scope and includes later v2 web-console polish.
+- Container inventory:
+  - Not refreshed in the 2026-05-08 local session because the available SSH
+    key/password path was rejected.
+  - Treat public `/health` as the current exposed runtime signal until VPS
+    inventory can be refreshed from an approved operator shell.
 - Database:
   - Production Postgres container remains running and healthy.
   - Production Postgres volume must be preserved on deploy and rollback.
@@ -68,6 +73,11 @@ CompanyCore as the company operational source of truth.
   `/v1/connection` manifest routes, created/deleted a user-created operating
   area, created/read/updated/archived a note, and confirmed Paperclip
   agent-event reads.
+- 2026-05-08 public smoke returned `200` for CompanyCore `/health`,
+  `/v1/health`, and the web root; `/health` reported build/image
+  `71f3eb3b063ea68226a1736c727c52882b33f27a`.
+- 2026-05-08 public `app.js` marker check confirmed typed editor surfaces for
+  Notes, Projects, Clients, Task Lists, and Tasks.
 
 ## Data State
 
@@ -96,8 +106,13 @@ environment. Do not print raw API keys in terminals, logs, docs, or chat.
 
 ## Rollback
 
-- Current rollback pointer:
-  `rnqqkhl3o3dut4qv56mlxly2_backend:ae2c3bf`.
+- Current rollback guidance:
+  - Preserve the production Postgres volume.
+  - Prefer the previous known-good backend image/container recorded in
+    `docs/operations/rollback-and-recovery.md` after refreshing VPS inventory.
+  - If inventory cannot be refreshed, use public `/health` build metadata,
+    Coolify deployment history, and the latest post-deploy smoke evidence to
+    identify the previous known-good image before changing traffic.
 - Preserve the production Postgres volume.
 - Roll back the backend image/container first.
 - Restore database backup only for confirmed data corruption.

@@ -40,6 +40,28 @@ Use this file to record the minimum checks after each deploy.
 
 ## Evidence
 
+- Timestamp: 2026-05-08
+- Environment: production public domains
+- Purpose: AGRUN-009 deploy automation reliability evidence reconciliation.
+- Public checks:
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `200`.
+  - `GET https://api.companycore.luckysparrow.ch/v1/health` returned `200`.
+  - `GET https://companycore.luckysparrow.ch/` returned `200`.
+  - `/health` reported build commit
+    `71f3eb3b063ea68226a1736c727c52882b33f27a` and image
+    `rnqqkhl3o3dut4qv56mlxly2_backend:71f3eb3b063ea68226a1736c727c52882b33f27a`.
+- Deployment-path verdict:
+  - Auto-deploy remains unverified as a reliable path because the available
+    operations evidence repeatedly records manual VPS rollovers after GitHub
+    pushes, and the historical `63348d6` planning note has no matching
+    post-deploy smoke entry.
+  - Manual VPS backend rollover remains the approved release path until a
+    future push-to-running-image smoke proves otherwise.
+- Residual risks:
+  - VPS container inventory could not be refreshed in this local session
+    because the available SSH key/password path was rejected. Public health
+    still proves the current exposed runtime image.
+
 - Timestamp: 2026-05-07
 - Environment: production public domains
 - Deployment:
