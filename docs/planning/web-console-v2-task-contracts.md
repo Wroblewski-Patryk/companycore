@@ -271,6 +271,86 @@
   - Verified mobile login and register show their forms before context and keep
     submit buttons visible inside the first viewport.
 
+## UXA-005 Workbench Visual Role Cleanup
+
+- Task Type: design/frontend
+- Current Stage: done
+- Operation Mode: BUILDER
+- Deliverable For This Stage: dense owner-console workbenches have clearer
+  visual roles for filters, lists, selected details, compact rows, and
+  relationship review items.
+- Process Self-Audit:
+  - Analyze current state: v1 UX audit P1 dense-workbench finding and existing
+    workbench design memory reviewed.
+  - Select exactly one priority task: UXA-005 only.
+  - Plan implementation: reuse existing `workbench-*`, filter-bar,
+    `record-list`, `record-inspector`, `relationship-row`, and `compact-row`
+    patterns instead of adding route-local variants.
+  - Execute implementation: scoped to shared CSS plus source-of-truth docs.
+  - Verify and test: syntax/build, authenticated smoke screenshots, and
+    regression checks for desktop/tablet/mobile.
+  - Self-review: confirm no route behavior, auth, API, or data contract
+    changed.
+  - Update documentation and knowledge: task board, project state, next steps,
+    and design memory when the role cleanup becomes reusable guidance.
+- Goal: Reduce equal-weight panel fatigue across dense routes so operators can
+  scan filters, lists, selected details, and remediation rows faster.
+- Scope:
+  - `public/styles.css`
+  - `docs/ux/design-memory.md`
+  - `docs/ux/companycore-v1-ux-ui-audit.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+- Implementation Plan:
+  - Make filter surfaces quieter than content surfaces.
+  - Reduce repeated list-row shadow/weight and give list zones a distinct
+    quiet background.
+  - Strengthen selected-row and selected-detail treatment without relying only
+    on color.
+  - Keep compact relationship/area rows lightweight and readable.
+  - Validate `/data`, `/data/tasks`, `/areas`, and `/relationships` through the
+    authenticated UX smoke screenshots.
+- Acceptance Criteria:
+  - Filters are visually quieter than lists/details.
+  - Selected rows/details are stronger and do not rely only on color.
+  - Repeated rows use less shadow and clearer hover/focus states.
+  - No new page-local component family is introduced.
+  - Desktop/tablet/mobile screenshots show no overlap or horizontal overflow.
+- Definition of Done:
+  - `node --check public/app.js` passes.
+  - `npm run build` and `npm run validate` pass.
+  - Container-scoped integration test passes.
+  - `npm run owner-console:ux-smoke` passes against an isolated local compose
+    project and captures the priority workbench routes.
+  - `git diff --check` passes.
+- Validation Evidence:
+  - `node --check public/app.js` passed.
+  - `npm run build` passed.
+  - `npm run validate` passed.
+  - Container-scoped Prisma migration plus Node integration test passed inside
+    isolated compose project `companycore_uxa005`.
+  - `npm run owner-console:ux-smoke` passed against isolated local compose
+    project `companycore_uxa005` at `http://localhost:3004`.
+  - Screenshot artifacts:
+    `C:\Users\wrobl\AppData\Local\Temp\companycore-ux-smoke\2026-05-08T20-13-50-112Z`.
+  - `git diff --check` passed.
+- Result Report:
+  - Made shared filter bars quieter with a low-emphasis background and border.
+  - Reduced repeated workbench row weight by removing raised hover shadows and
+    using subtle inset state markers.
+  - Gave record lists a quiet list-zone background and strengthened selected
+    rows with a non-color-only left inset.
+  - Strengthened selected-detail/inspector treatment with a distinct border,
+    soft surface, and light depth.
+  - Made relationship and compact rows lighter while preserving readable row
+    boundaries.
+  - Updated design memory with reusable visual-role guidance for dense
+    workbenches.
+
 ## V2WEB-049 Table Workbench Empty State Polish
 
 - Task Type: design/frontend

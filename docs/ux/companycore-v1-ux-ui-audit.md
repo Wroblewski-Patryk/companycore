@@ -365,6 +365,12 @@ Acceptance:
 - repeated rows use less shadow and clearer hover/focus
 - no new one-off page-local component family is introduced
 
+Status: Completed by UXA-005. Shared workbench CSS now makes filters quieter,
+list zones and repeated rows lighter, selected rows/details stronger, and
+relationship/compact rows easier to scan without adding route-local component
+families. Screenshot artifacts:
+`C:\Users\wrobl\AppData\Local\Temp\companycore-ux-smoke\2026-05-08T20-13-50-112Z`.
+
 ### Slice 5: Local Feedback Placement
 
 Goal: keep action outcomes close to where users acted.

@@ -286,13 +286,19 @@ of rediscovering them.
 - Decision: Reuse `workbench-panel`, `workbench-filter-bar`,
   `workbench-index-list`, `workbench-index-row`, `workbench-index-metrics`,
   `workbench-index-meta`, and `workbench-index-action` for dense index screens.
+  Keep filter surfaces visually quieter than content, use low-shadow repeated
+  rows, and reserve stronger borders or inset markers for selected/detail
+  states.
 - Reuse when: A page needs searchable/filterable rows that combine a primary
   entity description, operational metrics, source/status metadata, and one
   route action.
 - Avoid when: The user is editing one record in detail or comparing tabular
-  cells where a real table is more scannable.
+  cells where a real table is more scannable. Avoid giving filters, list rows,
+  empty states, and inspectors the same visual weight.
 - Evidence: V2WEB-024 `/data` desktop and mobile Playwright smoke passed with
-  13 module rows, filter interaction, and no browser console errors.
+  13 module rows, filter interaction, and no browser console errors. UXA-005
+  refined the role treatment across filters, index rows, record lists, record
+  inspectors, relationship rows, and compact area rows.
 
 ### 2026-05-07 - Agent Key Control Panel
 - Type: reusable_pattern

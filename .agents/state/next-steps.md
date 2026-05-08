@@ -4,13 +4,12 @@ Last updated: 2026-05-08
 
 ## NOW
 
-1. UXA-005 Workbench Visual Role Cleanup: reduce equal-weight panel fatigue
-   across dense workbench routes.
+1. UXA-006 Local Action Feedback Placement: keep success/error feedback near
+   the action that caused it.
 
 ## NEXT
 
-1. UXA-006 Local Action Feedback Placement: keep success/error feedback near
-   the action that caused it.
+No active UX polish task remains after UXA-006 in the current queue.
 
 ## LATER
 

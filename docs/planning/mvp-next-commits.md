@@ -5,9 +5,15 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NOW
 
-- [ ] UXA-005 Workbench Visual Role Cleanup:
+- [ ] UXA-006 Local Action Feedback Placement:
+      add local success/error/status placement for auth, provider setup, Drive
+      import, typed editors, and API key lifecycle while preserving the global
+      result panel for cross-route outcomes.
+- [x] UXA-005 Workbench Visual Role Cleanup:
       reduce equal-weight panel fatigue across dense workbenches by clarifying
-      command, filter, list, selected-detail, and feedback roles.
+      command, filter, list, selected-detail, and feedback roles. Made filter
+      surfaces quieter, repeated rows lighter, selected rows/details stronger,
+      and verified private workbench screenshots at desktop/tablet/mobile.
 - [x] UXA-004 Mobile Auth Action-First Layout:
       reorder mobile `/auth/login` and `/auth/register` so the form comes
       before onboarding context while desktop keeps the two-column layout.
@@ -197,10 +203,6 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NEXT
 
-- [ ] UXA-006 Local Action Feedback Placement:
-      add local success/error/status placement for auth, provider setup, Drive
-      import, typed editors, and API key lifecycle while preserving the global
-      result panel for cross-route outcomes.
 - [x] AGRUN-005 Scoped Agent Key Owner UI:
       expose scoped agent key creation, copy-once raw key display, rotation or
       deactivation, and capability presets in `/settings/api`.

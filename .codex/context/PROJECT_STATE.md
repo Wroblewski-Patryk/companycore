@@ -125,16 +125,27 @@ Last updated: 2026-05-08
   and the next executable task is selected from the canonical queue.
 
 ## Autonomous Iteration State
-- Current iteration: UXA-005 Workbench Visual Role Cleanup.
+- Current iteration: UXA-006 Local Action Feedback Placement.
 - Current operation mode: BUILDER
-- Last completed iteration: UXA-004 Mobile Auth Action-First Layout.
-- Last completed task: reordered mobile auth so login/register forms appear
-  before static onboarding context while desktop auth stays two-column.
-- Next required mode: BUILDER; implement the dense workbench visual role cleanup
-  slice from the UX audit.
+- Last completed iteration: UXA-005 Workbench Visual Role Cleanup.
+- Last completed task: clarified dense workbench visual roles for filters,
+  list rows, selected details, relationship rows, and compact rows.
+- Next required mode: BUILDER; implement local action feedback placement from
+  the UX audit.
 
 ## Recent Progress
 
+- 2026-05-08: Completed UXA-005 Workbench Visual Role Cleanup. Updated shared
+  CSS so dense workbench filters are quieter, repeated rows are lighter,
+  selected rows use stronger non-color-only inset markers, record inspectors
+  read as selected-detail surfaces, and relationship/compact rows keep readable
+  boundaries without matching every panel's weight. Validation passed:
+  `node --check public/app.js`, `npm run build`, `npm run validate`,
+  container-scoped Prisma migration plus Node integration test in isolated
+  `companycore_uxa005`, `git diff --check`, and
+  `npm run owner-console:ux-smoke` against `http://localhost:3004`.
+  Screenshot artifacts:
+  `C:\Users\wrobl\AppData\Local\Temp\companycore-ux-smoke\2026-05-08T20-13-50-112Z`.
 - 2026-05-08: Completed UXA-004 Mobile Auth Action-First Layout. Updated
   responsive auth CSS so `/auth/login` and `/auth/register` keep desktop
   context-plus-form columns, while stacked mobile layouts put the form before

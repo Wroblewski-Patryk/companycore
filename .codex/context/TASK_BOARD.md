@@ -2,12 +2,12 @@
 
 ## Ready
 
-- UXA-005 Workbench Visual Role Cleanup
+- UXA-006 Local Action Feedback Placement
   - Stage: planning
   - Owner: Frontend Builder
   - Priority: P1
-  - Scope: reduce equal-weight panel fatigue across dense workbench routes by
-    clarifying command, filter, list, selected-detail, and feedback roles.
+  - Scope: keep success, error, and status feedback near auth, provider setup,
+    Drive import, typed editor, and API key lifecycle actions.
 
 ## In Progress
 
@@ -47,12 +47,6 @@ No active task.
 
 ## Backlog
 
-- UXA-006 Local Action Feedback Placement
-  - Stage: planning
-  - Owner: Frontend Builder
-  - Priority: P1
-  - Scope: keep success, error, and status feedback near auth, provider setup,
-    Drive import, typed editor, and API key lifecycle actions.
 - Future v2 OAuth browser consent UI and token refresh hardening after core
   server-side API slices are complete.
 - Future v2 dashboard surfaces that show ClickUp Lists, Drive folders/files,
@@ -63,6 +57,7 @@ No active task.
 
 ## Done
 
+- UXA-005 Workbench Visual Role Cleanup.
 - UXA-004 Mobile Auth Action-First Layout.
 - UXA-003 Dashboard First-Viewport Command Polish.
 - UXA-002 Authenticated Private Route UX Evidence Harness.
