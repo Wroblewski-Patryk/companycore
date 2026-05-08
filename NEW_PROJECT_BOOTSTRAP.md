@@ -150,3 +150,9 @@ Project is ready when:
 - Definition of Done, integration checklist, AI testing protocol, no-temporary
   solutions rule, and deployment gate are active
 - the plan -> execute -> test -> review -> deploy-aware loop is operational
+
+## App-Building Addendum
+
+- Create an initial app blueprint from `.codex/templates/app-blueprint-template.md`.
+- Capture setup feedback through `docs/governance/user-feedback-loop.md`.
+- Use `.codex/templates/handoff-packet-template.md` when setup spans sessions.

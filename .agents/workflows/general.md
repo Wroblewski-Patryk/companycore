@@ -119,3 +119,9 @@ description: Workspace rules for this project
 - Apply the validation commands from `.codex/context/PROJECT_STATE.md` before
   every commit.
 - Use subagents only according to `.agents/workflows/subagent-orchestration.md`.
+
+## Template Sync: App Creation, Feedback, And Handoff
+
+- Start broad app or major-surface work from `docs/governance/app-creation-playbook.md` and `.codex/templates/app-blueprint-template.md`.
+- Classify mid-build user feedback through `docs/governance/user-feedback-loop.md`; update the active task, queue, docs, design memory, learning journal, or open decisions.
+- For substantial or multi-session work, prepare `.codex/templates/handoff-packet-template.md`.

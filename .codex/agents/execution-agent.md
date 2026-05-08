@@ -84,3 +84,8 @@ Never mark a task complete without a result report containing:
 - next steps
 - decisions made
 - residual risks or assumptions
+
+## Template Sync: Feedback And Handoff
+
+- Classify mid-build feedback with `docs/governance/user-feedback-loop.md`.
+- For substantial or multi-session work, prepare `.codex/templates/handoff-packet-template.md`.

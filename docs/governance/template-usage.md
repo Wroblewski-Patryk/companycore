@@ -45,3 +45,9 @@ This repository uses local, manual bootstrap artifacts.
   `docs/governance/repository-structure-policy.md`.
 - Treat the function coverage ledger as optional until the project has enough
   module surface area that ad-hoc "test everything" loops stop being useful.
+
+## App-Building Addendum
+
+- Start broad app creation from `docs/governance/app-creation-playbook.md`, not ad hoc scaffolding.
+- Use `docs/governance/user-feedback-loop.md` to preserve user notes and priority changes.
+- Use `.codex/templates/handoff-packet-template.md` for substantial or multi-session closeout.

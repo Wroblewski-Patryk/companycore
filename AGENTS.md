@@ -503,3 +503,9 @@ This repository bootstrap is maintained in manual mode:
 
 Use the validation commands recorded in `.codex/context/PROJECT_STATE.md` as the
 required pre-commit contract.
+
+## Template Sync: App Creation, Feedback, And Handoff
+
+- Use `docs/governance/app-creation-playbook.md` and `.codex/templates/app-blueprint-template.md` before broad implementation of a new app, major module, dashboard, tool, website, game, or product surface.
+- Use `docs/governance/user-feedback-loop.md` and `.codex/templates/user-feedback-item-template.md` when user feedback changes behavior, UX, visual direction, copy, priority, architecture, validation, or future screen decisions.
+- For substantial or multi-session work, finish with a concise handoff packet from `.codex/templates/handoff-packet-template.md`.

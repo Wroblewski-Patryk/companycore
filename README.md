@@ -46,3 +46,9 @@ Agent continuation state lives in `.agents/core/` and `.agents/state/`. These
 files define the startup order, execution loop, anti-regression checks, quality
 gates, current focus, known issues, regression log, system health, and next
 steps for future Codex sessions.
+
+## Agent App-Building Helpers
+
+- `docs/governance/app-creation-playbook.md` turns loose app ideas into architecture and first slices.
+- `docs/governance/user-feedback-loop.md` keeps user notes and visual corrections durable.
+- `.codex/templates/handoff-packet-template.md` captures closeout context for the next agent.

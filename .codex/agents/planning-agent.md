@@ -63,3 +63,8 @@ Translate current project truth into executable work.
 - Do not treat planning docs as the long-term home of resolved architecture;
   point accepted behavior back into `docs/architecture/`.
 - Flag deployment-impacting work explicitly.
+
+## Template Sync: App Creation And Feedback
+
+- Run `docs/governance/app-creation-playbook.md` before planning broad app or major-surface work.
+- Use `docs/governance/user-feedback-loop.md` to turn user feedback into task updates, new tasks, memory updates, open decisions, or explicit deferrals.

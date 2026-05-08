@@ -120,3 +120,9 @@ After each iteration, update these files when applicable:
 - `.codex/context/LEARNING_JOURNAL.md`: recurring verified pitfalls
 - relevant `docs/*`: architecture, contracts, flows, modules, testing, UX,
   operations, governance, or planning truth that changed
+
+## App Build Continuity
+
+- Use `docs/governance/app-creation-playbook.md` for new apps and major product surfaces.
+- Treat accepted user feedback as durable repo memory through `docs/governance/user-feedback-loop.md`.
+- Use `.codex/templates/handoff-packet-template.md` for substantial or multi-session handoffs.

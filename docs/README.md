@@ -142,3 +142,11 @@ or architecture truth:
   - `ux/canonical-visual-implementation-workflow.md`
   - `ux/background-and-decorative-asset-strategy.md`
   - `ux/evidence-driven-ux-review.md`
+
+## Agent App-Building Docs
+
+- `governance/app-creation-playbook.md`
+- `governance/user-feedback-loop.md`
+- `../.codex/templates/app-blueprint-template.md`
+- `../.codex/templates/user-feedback-item-template.md`
+- `../.codex/templates/handoff-packet-template.md`

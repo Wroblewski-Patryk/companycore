@@ -153,6 +153,17 @@ Describe exactly what should be produced in the current stage only.
 - Feature flag, staged rollout, or disable path: yes | no | not applicable
 - Post-launch feedback or metric check:
 
+## User Feedback Evidence
+- `docs/governance/user-feedback-loop.md` reviewed: yes | no | not applicable
+- Feedback item IDs:
+- Feedback accepted:
+- Feedback needs clarification:
+- Feedback conflicts:
+- Feedback deferred or rejected:
+- Active task changed by feedback: yes | no
+- New task created from feedback: yes | no | not applicable
+- Design memory updated: yes | no | not applicable
+- Learning journal updated: yes | no | not applicable
 ## Reliability / Observability Evidence
 - `docs/operations/service-reliability-and-observability.md` reviewed: yes | no | not applicable
 - Critical user journey:
