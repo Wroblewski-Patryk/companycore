@@ -20,6 +20,7 @@ Last updated: 2026-05-08
 | ux/dashboard iconography smoke | Browser login-page load plus targeted Playwright and `npm run owner-console:ux-smoke` against isolated `http://localhost:3000` | PASS | `.tmp/companycore-uxa008-targeted-final`; `.tmp/companycore-uxa008-owner-console-final` | UXA-008 verified local Phosphor font loading, 20 dashboard Phosphor icons on desktop, 18 visible in the first mobile viewport, no horizontal overflow, module icon color `rgb(35, 100, 210)`, and zero targeted console issues. |
 | ux/react foundation smoke | Browser route load plus targeted Playwright and `npm run owner-console:ux-smoke` against isolated `http://localhost:3000` | PASS | `.tmp/companycore-uxa009-react-foundation`; `.tmp/companycore-uxa009-owner-console-final` | UXA-009 verified `/react-dashboard`, DaisyUI primary button and success alert, 3 table rows, owner-session detection on desktop/mobile, no horizontal overflow, and zero targeted console issues. |
 | ux/react dashboard smoke | Targeted Playwright plus `npm run owner-console:ux-smoke` against isolated `http://localhost:3000` | PASS | `.tmp/companycore-uxa010-react-dashboard-final`; `.tmp/companycore-uxa010-owner-console-final` | UXA-010 verified `/react-dashboard` title, `companycore` DaisyUI theme, live `LuckySparrow` workspace data, 4 module links, 4 migration table rows, 13 Phosphor icons, desktop/mobile no horizontal overflow, and zero targeted console issues. |
+| ux/react primitives smoke | Targeted Playwright plus `npm run owner-console:ux-smoke` against isolated `http://localhost:3000` | PASS | `.tmp/companycore-uxa011-react-primitives-final`; `.tmp/companycore-uxa011-owner-console-final` | UXA-011 verified `/react-dashboard` with 2 local notices, 1 reusable table primitive, 6 live table rows, internal table scroller, `companycore` theme, desktop/mobile no horizontal overflow, and zero targeted console issues. |
 | ux/browser | Production public/auth Browser audit | PARTIAL PASS | 2026-05-08 UXA-001 | Public entry, login, register, and mobile auth rendered with no relevant console warnings/errors; authenticated Browser entry was blocked by an automation issue on `input[type=email]`. |
 | local runtime | Docker local runtime for UX audit | PASS | 2026-05-08 UXA-001 | Local backend ran on `http://localhost:3001`; `/health` returned `ok`; migrations and seed completed. |
 | web editor markers | Production `app.js` marker check | PASS | 2026-05-08 AGRUN-008 public `app.js` check | Typed editor markers for Notes, Projects, Clients, Task Lists, and Tasks are present. |
@@ -51,6 +52,8 @@ Last updated: 2026-05-08
   stage into the runtime image.
 - UXA-010 confirmed the React route can read the existing owner browser session
   boundary and `/v1/connection` without changing the vanilla dashboard route.
+- UXA-011 confirmed generated React output should be cleaned before Vite builds
+  and that table overflow must stay inside `.react-table-shell` on mobile.
 
 ## Quality Gate Notes
 

@@ -5,9 +5,17 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NOW
 
-- [ ] UXA-011 React Table And Notification Primitive Migration:
+- [ ] UXA-012 React Workbench Route Migration:
+      migrate one high-value workbench route into React using the approved
+      dashboard, table, and local-notification primitives while preserving
+      vanilla fallback routes.
+- [x] UXA-011 React Table And Notification Primitive Migration:
       create reusable React/DaisyUI table and local notification primitives for
       the next workbench migration while preserving existing vanilla routes.
+      Added `LocalNotice`, generic `DataTable`, live operating-model preview
+      rows, migration ledger reuse, React build-output cleanup, Docker build
+      stage script copy, and passed build, validate, rendered React checks,
+      owner-console smoke, and container integration tests.
 - [x] UXA-010 React Dashboard Component Migration:
       migrate the dashboard command surface into reusable React components,
       starting with app-shell-safe primitives for command panel, attention rows,

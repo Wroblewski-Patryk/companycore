@@ -34,6 +34,21 @@ of rediscovering them.
 
 ## Entries
 
+### 2026-05-08 - React Table And Local Notice Primitives
+- Type: reusable_pattern
+- Context: Dense workbench migration needs reusable table and action-feedback
+  primitives before whole vanilla routes move into React.
+- Decision: Use `LocalNotice` for local info/success/warning/error feedback
+  and a generic `DataTable` with column definitions, empty state, and an
+  internal `.react-table-shell` scroller for mobile overflow containment.
+- Reuse when: Building React workbenches, settings tables, relationship queues,
+  provider review surfaces, migration ledgers, and local action feedback.
+- Avoid when: A table is merely static documentation or when a route has not
+  yet moved into the React migration path.
+- Evidence: UXA-011 renders live operating-model preview rows and migration
+  readiness rows on `/react-dashboard`, with desktop/mobile rendered checks
+  proving no page-level horizontal overflow.
+
 ### 2026-05-08 - CompanyCore DaisyUI Theme
 - Type: reusable_pattern
 - Context: React migration needs a consistent, management-first theme instead

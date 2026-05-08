@@ -4,14 +4,14 @@ Last updated: 2026-05-08
 
 ## NOW
 
-UXA-011 React Table And Notification Primitive Migration is ready. Create
-reusable React/DaisyUI table and local notification primitives for the next
-workbench migration while preserving existing vanilla routes.
+UXA-012 React Workbench Route Migration is ready. Migrate one high-value
+workbench route into React using the approved dashboard, table, and
+local-notification primitives while preserving vanilla fallback routes.
 
 ## NEXT
 
-After UXA-011, migrate one high-value workbench route into React using the new
-table and notification primitives.
+After UXA-012, decide whether to point the canonical route at the React
+workbench or keep it as a parallel preview until one more route proves parity.
 
 ## LATER
 

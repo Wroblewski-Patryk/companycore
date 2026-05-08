@@ -50,6 +50,16 @@ body {
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
 }
 
+.card,
+.card-body {
+  min-width: 0;
+}
+
+.react-table-shell {
+  width: 100%;
+  max-width: 100%;
+}
+
 .eyebrow {
   margin: 0;
   color: var(--color-primary);
@@ -78,4 +88,16 @@ body {
 .dashboard-icon-sm {
   width: 2.25rem;
   height: 2.25rem;
+}
+
+.table th,
+.table td {
+  vertical-align: middle;
+}
+
+.table th {
+  color: var(--color-company-muted);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
 }

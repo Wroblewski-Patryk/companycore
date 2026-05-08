@@ -127,17 +127,27 @@ Last updated: 2026-05-08
   and the next executable task is selected from the canonical queue.
 
 ## Autonomous Iteration State
-- Current iteration: UXA-010 React Dashboard Component Migration
+- Current iteration: UXA-011 React Table And Notification Primitive Migration
   completed.
 - Current operation mode: BUILDER
-- Last completed iteration: UXA-010 React Dashboard Component Migration.
-- Last completed task: added the `companycore` DaisyUI theme, live
-  `/v1/connection` loading, explicit route states, and reusable React dashboard
-  primitives on `/react-dashboard`.
-- Next required mode: BUILDER; UXA-011 React Table And Notification Primitive
-  Migration is ready.
+- Last completed iteration: UXA-011 React Table And Notification Primitive
+  Migration.
+- Last completed task: added reusable React/DaisyUI `LocalNotice` and
+  `DataTable` primitives, live operating-model preview rows, table overflow
+  containment, and a repeatable React build-output cleanup step.
+- Next required mode: BUILDER; UXA-012 React Workbench Route Migration is
+  ready.
 
 ## Recent Progress
+
+- 2026-05-08: Completed UXA-011 React Table And Notification Primitive
+  Migration. Added reusable `LocalNotice` and generic `DataTable` primitives,
+  rendered live operating-model preview rows on `/react-dashboard`, contained
+  mobile table overflow, added `scripts/clean-react-build.mjs`, and copied
+  scripts into the Docker build stage. Validation passed: `npm run build`,
+  `npm run validate`, targeted rendered desktop/mobile React checks,
+  `npm run owner-console:ux-smoke`, container migration and integration test,
+  and `git diff --check`.
 
 - 2026-05-08: Completed UXA-010 React Dashboard Component Migration. Added the
   `companycore` DaisyUI theme, live owner-session `/v1/connection` loading,

@@ -2,13 +2,13 @@
 
 ## Ready
 
-- UXA-011 React Table And Notification Primitive Migration
+- UXA-012 React Workbench Route Migration
   - Stage: planning
   - Owner: Frontend Builder
   - Priority: P1
-  - Scope: create reusable React/DaisyUI table and local notification
-    primitives for the next workbench migration while preserving existing
-    vanilla routes.
+  - Scope: migrate one high-value workbench route into React using the
+    approved dashboard, table, and local-notification primitives while
+    preserving vanilla fallback routes.
 
 ## In Progress
 
@@ -58,6 +58,7 @@ No active task.
 
 ## Done
 
+- UXA-011 React Table And Notification Primitive Migration.
 - UXA-010 React Dashboard Component Migration.
 - UXA-009 React Tailwind DaisyUI Migration Foundation.
 - UXA-008 Dashboard Iconography And UX Governance.

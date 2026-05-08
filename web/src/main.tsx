@@ -73,6 +73,27 @@ type ModuleLink = {
   icon: string;
 };
 
+type NoticeTone = "info" | "success" | "warning" | "error";
+
+type TableColumn<Row> = {
+  key: string;
+  header: string;
+  cell: (row: Row) => React.ReactNode;
+  className?: string;
+};
+
+type OperatingPreviewRow = {
+  id: string;
+  area: string;
+  ownership: string;
+  tables: number;
+  source: string;
+  action: {
+    label: string;
+    href: string;
+  };
+};
+
 const modules: ModuleLink[] = [
   {
     title: "Operating areas",
@@ -230,6 +251,27 @@ function attentionItems(connection: ConnectionData): AttentionItem[] {
   return items.slice(0, 4);
 }
 
+function operatingPreviewRows(connection: ConnectionData): OperatingPreviewRow[] {
+  return connection.operatingModel.areas
+    .filter((area) => !area.isSystem)
+    .slice(0, 6)
+    .map((area) => {
+      const tables = area.tables || [];
+      const source = [...new Set(tables.map((table) => table.source || "companycore"))].join(", ") || "companycore";
+      return {
+        id: area.id,
+        area: area.name,
+        ownership: area.key,
+        tables: tables.length,
+        source,
+        action: {
+          label: "Open area",
+          href: `/areas`
+        }
+      };
+    });
+}
+
 function Shell({ children, connection }: { children: React.ReactNode; connection?: ConnectionData }) {
   return (
     <main className="min-h-screen bg-base-200 text-base-content" data-theme="companycore">
@@ -303,6 +345,91 @@ function StatePanel({ state, onRetry }: { state: DashboardState; onRetry: () => 
         ) : null}
       </div>
     </section>
+  );
+}
+
+function LocalNotice({
+  tone,
+  title,
+  detail,
+  action
+}: {
+  tone: NoticeTone;
+  title: string;
+  detail: string;
+  action?: { label: string; href: string };
+}) {
+  const toneClass = {
+    info: "alert-info",
+    success: "alert-success",
+    warning: "alert-warning",
+    error: "alert-error"
+  }[tone];
+  const icon = {
+    info: "ph-info",
+    success: "ph-check-circle",
+    warning: "ph-warning-circle",
+    error: "ph-warning-diamond"
+  }[tone];
+
+  return (
+    <div className={`alert ${toneClass} items-start`} role="status">
+      <i className={`ph-bold ${icon} mt-0.5 text-xl`} aria-hidden="true"></i>
+      <div>
+        <strong>{title}</strong>
+        <p className="text-sm leading-6">{detail}</p>
+      </div>
+      {action ? (
+        <a className="btn btn-sm" href={action.href}>{action.label}</a>
+      ) : null}
+    </div>
+  );
+}
+
+function DataTable<Row extends { id: string }>({
+  columns,
+  rows,
+  emptyTitle,
+  emptyDetail
+}: {
+  columns: Array<TableColumn<Row>>;
+  rows: Row[];
+  emptyTitle: string;
+  emptyDetail: string;
+}) {
+  if (rows.length === 0) {
+    return (
+      <div className="rounded-company border border-dashed border-base-300 bg-base-200/45 p-5">
+        <LocalNotice
+          tone="info"
+          title={emptyTitle}
+          detail={emptyDetail}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="react-table-shell overflow-x-auto rounded-company border border-base-300 bg-base-100">
+      <table className="table table-zebra table-pin-rows min-w-[640px]">
+        <thead>
+          <tr>
+            {columns.map((column) => (
+              <th className={column.className} key={column.key}>{column.header}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.id}>
+              {columns.map((column) => (
+                <td className={column.className} key={column.key}>{column.cell(row)}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -436,38 +563,117 @@ function ModuleLauncher() {
   );
 }
 
-function MigrationTable() {
-  const rows = [
-    ["Command panel", "React component", "Ready"],
-    ["Attention rows", "DaisyUI themed cards", "Ready"],
-    ["Module launcher", "Reusable shortcut grid", "Ready"],
-    ["Dense workbench table", "Next migration slice", "Next"]
+function WorkbenchPreview({ connection }: { connection: ConnectionData }) {
+  const rows = operatingPreviewRows(connection);
+  const columns: Array<TableColumn<OperatingPreviewRow>> = [
+    {
+      key: "area",
+      header: "Operating area",
+      cell: (row) => (
+        <div>
+          <strong className="block">{row.area}</strong>
+          <span className="text-xs text-company-muted">{row.ownership}</span>
+        </div>
+      )
+    },
+    {
+      key: "tables",
+      header: "Tables",
+      className: "text-right",
+      cell: (row) => <span className="font-black">{row.tables}</span>
+    },
+    {
+      key: "source",
+      header: "Source",
+      cell: (row) => <span className="badge badge-outline">{row.source}</span>
+    },
+    {
+      key: "action",
+      header: "Next action",
+      cell: (row) => <a className="btn btn-ghost btn-xs" href={row.action.href}>{row.action.label}</a>
+    }
   ];
 
   return (
-    <section className="overflow-x-auto rounded-company border border-base-300 bg-base-100 shadow-sm">
-      <table className="table table-zebra">
-        <thead>
-          <tr>
-            <th>Dashboard primitive</th>
-            <th>Migration role</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map(([name, role, status]) => (
-            <tr key={name}>
-              <td className="font-black">{name}</td>
-              <td>{role}</td>
-              <td>
-                <span className={status === "Ready" ? "badge badge-success" : "badge badge-warning"}>
-                  {status}
-                </span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <section className="card border border-base-300 bg-base-100 shadow-sm">
+      <div className="card-body gap-4">
+        <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-start">
+          <div>
+            <p className="eyebrow">Workbench primitive</p>
+            <h2 className="text-xl font-black">Operating model table preview</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-company-muted">
+              This is the React/DaisyUI table primitive that will carry dense workbench migrations:
+              clear ownership, comparable rows, local empty state, and action placement inside the table surface.
+            </p>
+          </div>
+          <LocalNotice
+            tone="success"
+            title="Reusable primitive live"
+            detail="This table is fed by `/v1/connection` operating-area data, not static mock rows."
+          />
+        </div>
+        <DataTable
+          columns={columns}
+          rows={rows}
+          emptyTitle="No operating areas available"
+          emptyDetail="CompanyCore could not find non-system operating areas in the owner connection response."
+        />
+      </div>
+    </section>
+  );
+}
+
+function MigrationTable() {
+  type MigrationRow = {
+    id: string;
+    name: string;
+    role: string;
+    status: "Ready" | "Next";
+  };
+  const rows: MigrationRow[] = [
+    { id: "command", name: "Command panel", role: "React component", status: "Ready" },
+    { id: "attention", name: "Attention rows", role: "DaisyUI themed cards", status: "Ready" },
+    { id: "module", name: "Module launcher", role: "Reusable shortcut grid", status: "Ready" },
+    { id: "table", name: "Dense workbench table", role: "Reusable table primitive", status: "Ready" },
+    { id: "notification", name: "Local notification", role: "Reusable action feedback primitive", status: "Ready" },
+    { id: "workbench", name: "Workbench route migration", role: "Next migration slice", status: "Next" }
+  ];
+  const columns: Array<TableColumn<MigrationRow>> = [
+    {
+      key: "name",
+      header: "Primitive",
+      cell: (row) => <span className="font-black">{row.name}</span>
+    },
+    {
+      key: "role",
+      header: "Migration role",
+      cell: (row) => row.role
+    },
+    {
+      key: "status",
+      header: "Status",
+      cell: (row) => (
+        <span className={row.status === "Ready" ? "badge badge-success" : "badge badge-warning"}>
+          {row.status}
+        </span>
+      )
+    }
+  ];
+
+  return (
+    <section className="card border border-base-300 bg-base-100 shadow-sm">
+      <div className="card-body gap-4">
+        <div>
+          <p className="eyebrow">Migration ledger</p>
+          <h2 className="text-xl font-black">React primitive readiness</h2>
+        </div>
+        <DataTable
+          columns={columns}
+          rows={rows}
+          emptyTitle="No migration primitives"
+          emptyDetail="Add at least one primitive before migrating workbench routes."
+        />
+      </div>
     </section>
   );
 }
@@ -483,6 +689,7 @@ function ReadyDashboard({ connection }: { connection: ConnectionData }) {
       </section>
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-10">
         <ModuleLauncher />
+        <WorkbenchPreview connection={connection} />
         <MigrationTable />
       </section>
     </Shell>

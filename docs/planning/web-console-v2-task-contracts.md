@@ -1,5 +1,85 @@
 # Web Console V2 Task Contracts
 
+## UXA-011 React Table And Notification Primitive Migration
+
+- Task Type: architecture/frontend
+- Current Stage: done
+- Operation Mode: BUILDER
+- Deliverable For This Stage: reusable React/DaisyUI local notification and
+  table primitives rendered on `/react-dashboard` with live operating-model
+  preview data, while preserving existing vanilla routes.
+- Process Self-Audit:
+  - Analyze current state: UXA-010 added the `companycore` DaisyUI theme and
+    reusable React dashboard primitives.
+  - Select exactly one priority task: UXA-011 only.
+  - Plan implementation: add primitives that can be reused by future workbench
+    migrations before moving a full vanilla route.
+  - Execute implementation: added reusable `LocalNotice`, generic `DataTable`,
+    live operating-model preview rows, and a React build-output cleaner.
+  - Verify and test: build/validate, rendered React checks, owner-console
+    smoke, and container integration test passed.
+  - Self-review: confirmed existing vanilla routes and backend APIs remain
+    unchanged.
+  - Update documentation and knowledge: task board, project state, next steps,
+    system health, design memory, and learning journal updated.
+- Goal: Prepare the React migration path for dense workbench screens by
+  establishing reusable table and local notification primitives.
+- Scope:
+  - `package.json`
+  - `Dockerfile`
+  - `scripts/clean-react-build.mjs`
+  - `web/src/main.tsx`
+  - `web/src/styles.css`
+  - `.codex/context/LEARNING_JOURNAL.md`
+  - `docs/ux/design-memory.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+- Implementation Plan:
+  - Add a reusable local notification primitive with `info`, `success`,
+    `warning`, and `error` tones.
+  - Add a generic reusable table primitive with columns, rows, empty state, and
+    optional row actions.
+  - Render operating-area/table preview rows from `/v1/connection` data.
+  - Keep copy focused on company management: ownership, source, table count,
+    and next action.
+  - Preserve existing `/dashboard` and backend behavior.
+- Acceptance Criteria:
+  - `/react-dashboard` shows reusable local notification primitives.
+  - `/react-dashboard` shows a reusable DaisyUI table fed by live operating
+    model data.
+  - Empty/error states are represented by the same primitives.
+  - Desktop and mobile layouts have no horizontal overflow.
+  - Existing owner-console smoke continues to pass.
+- Definition of Done:
+  - `npm run build` and `npm run validate` pass.
+  - Targeted desktop/mobile rendered checks verify table and notification
+    primitives.
+  - `npm run owner-console:ux-smoke` passes against an isolated local compose
+    project.
+  - Container-scoped Prisma migration and Node integration test pass.
+  - `git diff --check` passes.
+- Result Report:
+  - Added reusable React/DaisyUI `LocalNotice` with info, success, warning, and
+    error tones.
+  - Added generic reusable `DataTable` with column definitions, rows, empty
+    state, and internal horizontal scrolling for mobile safety.
+  - Rendered live operating-area/table preview rows from `/v1/connection`.
+  - Reused the table primitive for the React migration readiness ledger.
+  - Added `scripts/clean-react-build.mjs` and wired `build:web` to clean
+    generated `public/react/` output before Vite builds.
+  - Updated Docker build stage to copy `scripts/` before `npm run build`.
+  - Validation passed: `npm run build`, `npm run validate`, `git diff --check`,
+    targeted desktop/mobile rendered React checks, `npm run owner-console:ux-smoke`,
+    and container-scoped Prisma migration plus Node integration test.
+  - Rendered evidence: `/react-dashboard` showed 2 local notices, 1 table
+    primitive, 6 live table rows, `companycore` theme, no desktop/mobile
+    horizontal overflow, and zero targeted console issues.
+
 ## UXA-010 React Dashboard Component Migration
 
 - Task Type: architecture/frontend

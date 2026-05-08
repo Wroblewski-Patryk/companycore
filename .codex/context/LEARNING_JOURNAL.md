@@ -26,6 +26,23 @@ fixes for this repository.
 
 ## Entries
 
+### 2026-05-08 - Clean Vite generated output before React builds
+- Context: UXA-010 and UXA-011 rebuilt the React/Vite frontend into
+  `public/react/` on Windows.
+- Symptom: A subsequent `vite build` failed in `vite:build-html` with an
+  emitted chunk name containing a relative path back to `web/index.html`.
+- Root cause: The ignored generated `public/react/` output from a previous
+  build can confuse Vite/Rolldown's HTML asset emission on this Windows
+  workspace.
+- Guardrail: Clean only the generated `public/react/` output before each Vite
+  build.
+- Preferred pattern: Keep `public/react/` ignored and run
+  `node scripts/clean-react-build.mjs && vite build` through `npm run build:web`.
+- Avoid: Manually deleting generated assets during every task or committing
+  `public/react/` build output.
+- Evidence: UXA-011 reproduced the Vite/Rolldown error; adding
+  `scripts/clean-react-build.mjs` made `npm run build` pass consistently.
+
 ### 2026-05-08 - Isolate UI smoke from integration-test database state
 - Context: UXA-003 and UXA-006 ran authenticated owner-console screenshot smoke
   while compose-backed integration tests were also mutating local

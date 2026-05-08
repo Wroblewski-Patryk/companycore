@@ -22,7 +22,7 @@ and what the next action is.
 Post-verification. V1 operator handoff remains documented in
 `docs/operations/v1-operator-handoff.md`; release readiness is documented in
 `docs/operations/v1-release-readiness.md`. Runtime work is not being reopened.
-The UX audit implementation lane `UXA-002..UXA-010` is complete.
+The UX audit implementation lane `UXA-002..UXA-011` is complete.
 UXA-002 closed the private-route screenshot evidence gap with a local
 Playwright harness, and UXA-003 tightened the dashboard command surface.
 UXA-004 reordered mobile auth so login/register forms appear before static
@@ -38,8 +38,10 @@ management-first UX rules.
 UXA-009 added the React + Vite + Tailwind + DaisyUI foundation and a
 framework-backed `/react-dashboard` route.
 UXA-010 added the `companycore` DaisyUI theme, live `/v1/connection` loading,
-and reusable React dashboard primitives on `/react-dashboard`. The next ready
-slice is UXA-011: React table and local notification primitives.
+and reusable React dashboard primitives on `/react-dashboard`.
+UXA-011 added reusable React/DaisyUI table and local-notification primitives,
+live operating-model preview rows, and a repeatable React build cleanup step.
+The next ready slice is UXA-012: migrate one high-value workbench route.
 
 ## Current Priority Order
 

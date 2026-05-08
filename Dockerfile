@@ -12,6 +12,7 @@ COPY package*.json tsconfig.json ./
 COPY prisma ./prisma
 COPY src ./src
 COPY public ./public
+COPY scripts ./scripts
 COPY web ./web
 COPY vite.config.mjs tailwind.config.mjs ./
 RUN npx prisma generate
