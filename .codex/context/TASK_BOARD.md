@@ -2,13 +2,13 @@
 
 ## Ready
 
-- UXA-010 React Dashboard Component Migration
+- UXA-011 React Table And Notification Primitive Migration
   - Stage: planning
   - Owner: Frontend Builder
   - Priority: P1
-  - Scope: migrate the highest-value dashboard command surface into reusable
-    React components while preserving the existing owner-console route and
-    smoke coverage.
+  - Scope: create reusable React/DaisyUI table and local notification
+    primitives for the next workbench migration while preserving existing
+    vanilla routes.
 
 ## In Progress
 
@@ -58,6 +58,7 @@ No active task.
 
 ## Done
 
+- UXA-010 React Dashboard Component Migration.
 - UXA-009 React Tailwind DaisyUI Migration Foundation.
 - UXA-008 Dashboard Iconography And UX Governance.
 - UXA-007 Mobile Private Header Compression.

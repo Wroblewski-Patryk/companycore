@@ -5,10 +5,19 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ## NOW
 
-- [ ] UXA-010 React Dashboard Component Migration:
+- [ ] UXA-011 React Table And Notification Primitive Migration:
+      create reusable React/DaisyUI table and local notification primitives for
+      the next workbench migration while preserving existing vanilla routes.
+- [x] UXA-010 React Dashboard Component Migration:
       migrate the dashboard command surface into reusable React components,
       starting with app-shell-safe primitives for command panel, attention rows,
-      module launcher, notifications, and table foundation.
+      module launcher, notifications, and table foundation. Current stage:
+      implementation on `/react-dashboard` with the existing vanilla
+      `/dashboard` preserved. Added the `companycore` DaisyUI theme, live
+      owner-session `/v1/connection` loading, dashboard primitives, explicit
+      signed-out/loading/error/connected states, and passed build, validate,
+      rendered React checks, owner-console smoke, and container integration
+      tests.
 - [x] UXA-009 React Tailwind DaisyUI Migration Foundation:
       introduce an explicit React + Vite + Tailwind + DaisyUI frontend
       foundation as a reversible architecture slice while preserving backend

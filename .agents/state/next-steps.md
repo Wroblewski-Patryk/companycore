@@ -4,15 +4,14 @@ Last updated: 2026-05-08
 
 ## NOW
 
-UXA-010 React Dashboard Component Migration is ready. Migrate the dashboard
-command surface into reusable React components, starting with app-shell-safe
-primitives for command panel, attention rows, module launcher, notifications,
-and table foundation.
+UXA-011 React Table And Notification Primitive Migration is ready. Create
+reusable React/DaisyUI table and local notification primitives for the next
+workbench migration while preserving existing vanilla routes.
 
 ## NEXT
 
-After UXA-010, migrate the highest-value table/workbench primitive into React
-with DaisyUI table foundations and existing local-feedback behavior.
+After UXA-011, migrate one high-value workbench route into React using the new
+table and notification primitives.
 
 ## LATER
 

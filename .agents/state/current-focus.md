@@ -7,9 +7,9 @@ Last updated: 2026-05-08
 CompanyCore v1 runtime is accepted and live for the approved owner, ClickUp,
 Jarvis, Paperclip, workspace API, and agent CRUD scope. The current focus has
 shifted to owner-console UX/UI polish planning after the 2026-05-08 audit in
-`docs/ux/companycore-v1-ux-ui-audit.md`. The active UXA-002 through UXA-009
-polish and framework-foundation wave is complete; UXA-010 is the next ready
-dashboard migration task.
+`docs/ux/companycore-v1-ux-ui-audit.md`. The active UXA-002 through UXA-010
+polish, framework-foundation, and React dashboard migration wave is complete;
+UXA-011 is the next ready table and notification primitive task.
 
 ## Current System Objective
 
@@ -22,7 +22,7 @@ and what the next action is.
 Post-verification. V1 operator handoff remains documented in
 `docs/operations/v1-operator-handoff.md`; release readiness is documented in
 `docs/operations/v1-release-readiness.md`. Runtime work is not being reopened.
-The UX audit implementation lane `UXA-002..UXA-009` is complete.
+The UX audit implementation lane `UXA-002..UXA-010` is complete.
 UXA-002 closed the private-route screenshot evidence gap with a local
 Playwright harness, and UXA-003 tightened the dashboard command surface.
 UXA-004 reordered mobile auth so login/register forms appear before static
@@ -36,8 +36,10 @@ starts earlier while drawer navigation and sign-out remain available.
 UXA-008 added local Phosphor dashboard iconography and canonical
 management-first UX rules.
 UXA-009 added the React + Vite + Tailwind + DaisyUI foundation and a
-framework-backed `/react-dashboard` route. The next approved slice is UXA-010:
-dashboard component migration.
+framework-backed `/react-dashboard` route.
+UXA-010 added the `companycore` DaisyUI theme, live `/v1/connection` loading,
+and reusable React dashboard primitives on `/react-dashboard`. The next ready
+slice is UXA-011: React table and local notification primitives.
 
 ## Current Priority Order
 

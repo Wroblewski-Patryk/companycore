@@ -1,145 +1,505 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 
-type ComponentRow = {
-  name: string;
-  role: string;
-  nextUse: string;
-  state: "Ready" | "Next";
+type IntegrationState = {
+  configured: boolean;
+  active: boolean;
+  oauthClientConfigured?: boolean;
+  oauthTokenConfigured?: boolean;
+  config?: {
+    listIds?: string[];
+    selectedFolderIds?: string[];
+    rootFolderIds?: string[];
+  };
 };
 
-const componentRows: ComponentRow[] = [
+type OperatingArea = {
+  id: string;
+  key: string;
+  name: string;
+  isSystem?: boolean;
+  tables?: Array<{
+    id: string;
+    name: string;
+    apiSlug: string;
+    source?: string;
+  }>;
+};
+
+type ConnectionData = {
+  workspace: {
+    id: string;
+    name: string;
+  };
+  user?: {
+    email?: string;
+    name?: string;
+  };
+  operatingModel: {
+    areas: OperatingArea[];
+    systemTables: string[];
+  };
+  capabilities: string[];
+  integrations: {
+    clickup: IntegrationState;
+    googleDrive: IntegrationState;
+  };
+};
+
+type ConnectionResponse = {
+  data: ConnectionData;
+};
+
+type DashboardState =
+  | { status: "signed-out" }
+  | { status: "loading" }
+  | { status: "error"; message: string }
+  | { status: "ready"; connection: ConnectionData };
+
+type AttentionItem = {
+  title: string;
+  detail: string;
+  href: string;
+  action: string;
+  icon: string;
+  tone: "warning" | "success" | "info";
+};
+
+type ModuleLink = {
+  title: string;
+  detail: string;
+  href: string;
+  icon: string;
+};
+
+const modules: ModuleLink[] = [
   {
-    name: "App shell",
-    role: "Route frame, workspace identity, and safe navigation back to the current console.",
-    nextUse: "Dashboard and workbench migration",
-    state: "Ready"
+    title: "Operating areas",
+    detail: "Browse the company structure, departments, and table ownership.",
+    href: "/areas",
+    icon: "ph-tree-structure"
   },
   {
-    name: "Action feedback",
-    role: "Local success, error, and recovery messages near the user action.",
-    nextUse: "Provider setup and CRUD forms",
-    state: "Ready"
+    title: "Relationships",
+    detail: "Review provider and Drive relationships that need owner context.",
+    href: "/relationships",
+    icon: "ph-git-branch"
   },
   {
-    name: "Data table",
-    role: "Comparable operational records with clear status, owner, and next step.",
-    nextUse: "Tasks, relationships, and data workbenches",
-    state: "Next"
+    title: "Tasks & adapters",
+    detail: "Inspect execution records, ClickUp sync state, and task ownership.",
+    href: "/tasks-adapter",
+    icon: "ph-list-checks"
+  },
+  {
+    title: "Integration map",
+    detail: "Review provider readiness and implemented data groups.",
+    href: "/settings/integrations",
+    icon: "ph-map-trifold"
   }
 ];
 
-function hasOwnerSession() {
-  return Boolean(window.sessionStorage.getItem("companycoreOwnerToken"));
+function ownerToken() {
+  return window.sessionStorage.getItem("companycoreOwnerToken");
 }
 
-function ReactFoundationApp() {
-  const signedIn = hasOwnerSession();
+async function loadConnection(token: string): Promise<ConnectionData> {
+  const response = await fetch("/v1/connection", {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+  const body = await response.json() as ConnectionResponse | { error?: string };
 
+  if (!response.ok || !("data" in body)) {
+    const message = "error" in body && body.error ? body.error : "connection_failed";
+    throw new Error(message);
+  }
+
+  return body.data;
+}
+
+function useDashboardState(): [DashboardState, () => void] {
+  const [reloadKey, setReloadKey] = useState(0);
+  const [dashboardState, setDashboardState] = useState<DashboardState>(() => (
+    ownerToken() ? { status: "loading" } : { status: "signed-out" }
+  ));
+
+  useEffect(() => {
+    const token = ownerToken();
+    if (!token) {
+      setDashboardState({ status: "signed-out" });
+      return;
+    }
+
+    let cancelled = false;
+    setDashboardState({ status: "loading" });
+    loadConnection(token)
+      .then((connection) => {
+        if (!cancelled) {
+          setDashboardState({ status: "ready", connection });
+        }
+      })
+      .catch((error: Error) => {
+        if (!cancelled) {
+          setDashboardState({
+            status: "error",
+            message: error.message === "invalid_token"
+              ? "Your session expired. Sign in again to load the company dashboard."
+              : "CompanyCore could not load the owner dashboard. Try again or return to the current dashboard."
+          });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [reloadKey]);
+
+  return [dashboardState, () => setReloadKey((value) => value + 1)];
+}
+
+function integrationStatus(integration: IntegrationState, label: string) {
+  if (integration.active) {
+    return `${label} active`;
+  }
+  if (integration.configured) {
+    return `${label} saved`;
+  }
+  return `${label} not connected`;
+}
+
+function connectionMetrics(connection: ConnectionData) {
+  const areas = connection.operatingModel.areas.length;
+  const tables = connection.operatingModel.areas.reduce((sum, area) => sum + (area.tables?.length || 0), 0);
+  const selectedLists = connection.integrations.clickup.config?.listIds?.length || 0;
+  const selectedDriveFolders = [
+    ...(connection.integrations.googleDrive.config?.selectedFolderIds || []),
+    ...(connection.integrations.googleDrive.config?.rootFolderIds || [])
+  ].length;
+
+  return { areas, tables, selectedLists, selectedDriveFolders };
+}
+
+function attentionItems(connection: ConnectionData): AttentionItem[] {
+  const items: AttentionItem[] = [];
+
+  if (!connection.integrations.clickup.configured) {
+    items.push({
+      title: "Connect ClickUp",
+      detail: "Task Lists and ClickUp-sourced tasks need a saved connection before execution work is useful.",
+      href: "/settings",
+      action: "Open ClickUp",
+      icon: "ph-plugs",
+      tone: "warning"
+    });
+  }
+
+  if (!connection.integrations.googleDrive.configured) {
+    items.push({
+      title: "Connect Google Drive",
+      detail: "Drive folders and files can be mapped to company areas after OAuth and import.",
+      href: "/settings/drive",
+      action: "Open Drive",
+      icon: "ph-cloud",
+      tone: "warning"
+    });
+  }
+
+  if (items.length === 0) {
+    items.push({
+      title: "Workspace foundation looks ready",
+      detail: "Core provider connections are available. Continue by reviewing operating areas and table ownership.",
+      href: "/areas",
+      action: "Open areas",
+      icon: "ph-check-circle",
+      tone: "success"
+    });
+  }
+
+  items.push({
+    title: "React migration lane",
+    detail: "This surface is now using shared React primitives, Tailwind tokens, and the CompanyCore DaisyUI theme.",
+    href: "/react-dashboard",
+    action: "Stay here",
+    icon: "ph-squares-four",
+    tone: "info"
+  });
+
+  return items.slice(0, 4);
+}
+
+function Shell({ children, connection }: { children: React.ReactNode; connection?: ConnectionData }) {
   return (
-    <main className="min-h-screen bg-slate-50 text-company-ink">
-      <header className="border-b border-company-border bg-white">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+    <main className="min-h-screen bg-base-200 text-base-content" data-theme="companycore">
+      <header className="border-b border-base-300 bg-base-100">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
           <a className="flex items-center gap-3 font-black no-underline" href="/dashboard">
-            <span className="grid h-9 w-9 place-items-center rounded-company bg-slate-950 text-sm text-white">CC</span>
+            <span className="grid h-9 w-9 place-items-center rounded-company bg-neutral text-sm text-neutral-content">CC</span>
             <span>
               CompanyCore
-              <small className="block text-xs font-black text-company-muted">React foundation</small>
+              <small className="block text-xs font-black text-company-muted">
+                {connection?.workspace.name || "React dashboard"}
+              </small>
             </span>
           </a>
-          <nav className="flex flex-wrap gap-2" aria-label="React foundation navigation">
+          <nav className="flex flex-wrap gap-2" aria-label="React dashboard navigation">
             <a className="btn btn-ghost btn-sm" href="/dashboard">Current dashboard</a>
-            <a className="btn btn-primary btn-sm" href="/settings/integrations">Integrations</a>
+            <a className="btn btn-ghost btn-sm" href="/settings/integrations">Integrations</a>
+            <a className="btn btn-primary btn-sm" href="/areas">Operating areas</a>
           </nav>
         </div>
       </header>
-
-      <section className="mx-auto grid w-full max-w-6xl gap-5 px-5 py-8 lg:grid-cols-[1.25fr_0.75fr]">
-        <div className="rounded-company border border-company-border bg-white p-6 shadow-sm">
-          <div className="mb-5 flex items-start gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-company border border-blue-100 bg-blue-50 text-company-blue">
-              <i className="ph-bold ph-squares-four text-xl" aria-hidden="true"></i>
-            </span>
-            <div>
-              <p className="mb-1 text-xs font-black uppercase text-company-blue">Framework path</p>
-              <h1 className="text-3xl font-black leading-tight">React + Tailwind + DaisyUI foundation</h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-company-muted">
-                This route proves the new component stack while the current owner console stays intact.
-                Future migrations can move one surface at a time into reusable app-shell, table,
-                notification, and dashboard primitives.
-              </p>
-            </div>
-          </div>
-
-          <div className={signedIn ? "alert alert-success mb-5" : "alert alert-warning mb-5"} role="status">
-            <i className={signedIn ? "ph-bold ph-check-circle text-xl" : "ph-bold ph-warning-circle text-xl"} aria-hidden="true"></i>
-            <span>
-              {signedIn
-                ? "Owner session detected. This private-style React route can read the same browser session boundary as the current console."
-                : "Owner session not detected. Sign in through the current console before using private React surfaces."}
-            </span>
-          </div>
-
-          <div className="stats stats-vertical w-full border border-company-border bg-slate-50 shadow-none sm:stats-horizontal">
-            <div className="stat">
-              <div className="stat-title">Stack</div>
-              <div className="stat-value text-xl">React</div>
-              <div className="stat-desc">Vite build target</div>
-            </div>
-            <div className="stat">
-              <div className="stat-title">UI layer</div>
-              <div className="stat-value text-xl">DaisyUI</div>
-              <div className="stat-desc">Tailwind primitives</div>
-            </div>
-            <div className="stat">
-              <div className="stat-title">Migration</div>
-              <div className="stat-value text-xl">Slice</div>
-              <div className="stat-desc">No big rewrite</div>
-            </div>
-          </div>
-        </div>
-
-        <aside className="rounded-company border border-company-border bg-white p-6 shadow-sm">
-          <h2 className="mb-3 text-xl font-black">Canonical UX rules</h2>
-          <ul className="steps steps-vertical">
-            <li className="step step-primary">Show what matters now</li>
-            <li className="step step-primary">Expose blockers locally</li>
-            <li className="step">Move tables into shared components</li>
-            <li className="step">Migrate routes one by one</li>
-          </ul>
-        </aside>
-      </section>
-
-      <section className="mx-auto w-full max-w-6xl px-5 pb-10">
-        <div className="overflow-x-auto rounded-company border border-company-border bg-white shadow-sm">
-          <table className="table table-zebra">
-            <thead>
-              <tr>
-                <th>Component</th>
-                <th>Role</th>
-                <th>Next use</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {componentRows.map((row) => (
-                <tr key={row.name}>
-                  <td className="font-black">{row.name}</td>
-                  <td>{row.role}</td>
-                  <td>{row.nextUse}</td>
-                  <td>
-                    <span className={row.state === "Ready" ? "badge badge-success" : "badge badge-warning"}>
-                      {row.state}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      {children}
     </main>
+  );
+}
+
+function StatePanel({ state, onRetry }: { state: DashboardState; onRetry: () => void }) {
+  if (state.status === "ready") {
+    return null;
+  }
+
+  const content = {
+    "signed-out": {
+      icon: "ph-sign-in",
+      className: "alert alert-warning",
+      title: "Owner session required",
+      detail: "Sign in through the current console to load the React dashboard with live workspace data.",
+      action: "Sign in",
+      href: "/auth/login"
+    },
+    loading: {
+      icon: "ph-arrows-clockwise",
+      className: "alert alert-info",
+      title: "Loading company signals",
+      detail: "CompanyCore is reading the owner session, integration state, operating areas, and API capability map.",
+      action: "",
+      href: ""
+    },
+    error: {
+      icon: "ph-warning-circle",
+      className: "alert alert-error",
+      title: "Dashboard could not load",
+      detail: state.status === "error" ? state.message : "",
+      action: "Retry",
+      href: ""
+    }
+  }[state.status];
+
+  return (
+    <section className="mx-auto w-full max-w-7xl px-5 pt-8">
+      <div className={content.className} role="status">
+        <i className={`ph-bold ${content.icon} text-xl`} aria-hidden="true"></i>
+        <div>
+          <strong>{content.title}</strong>
+          <p className="text-sm">{content.detail}</p>
+        </div>
+        {content.href ? (
+          <a className="btn btn-sm" href={content.href}>{content.action}</a>
+        ) : content.action ? (
+          <button className="btn btn-sm" type="button" onClick={onRetry}>{content.action}</button>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+function CommandPanel({ connection }: { connection: ConnectionData }) {
+  const metrics = connectionMetrics(connection);
+  const missingClickUp = !connection.integrations.clickup.configured;
+  const missingDrive = !connection.integrations.googleDrive.configured;
+  const priorityTitle = missingClickUp
+    ? "Connect ClickUp"
+    : missingDrive
+      ? "Connect Google Drive"
+      : "Review operating map";
+  const priorityDetail = missingClickUp
+    ? "ClickUp is the next blocker for task and execution visibility."
+    : missingDrive
+      ? "Google Drive is the next blocker for file and folder ownership."
+      : "Core integrations are ready. Continue by reviewing company structure and table ownership.";
+  const priorityHref = missingClickUp ? "/settings" : missingDrive ? "/settings/drive" : "/areas";
+
+  return (
+    <section className="card border border-base-300 bg-base-100 shadow-sm">
+      <div className="card-body gap-5">
+        <div className="flex items-start gap-3">
+          <span className="dashboard-icon text-primary">
+            <i className="ph-bold ph-compass" aria-hidden="true"></i>
+          </span>
+          <div>
+            <p className="eyebrow">Operational cockpit</p>
+            <h1 className="text-3xl font-black leading-tight">Dashboard</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-company-muted">
+              Start here to see the current priority, what is blocked, and which company-management lane needs the next click.
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-company border border-primary/30 bg-primary/10 p-5">
+          <p className="eyebrow">Current priority</p>
+          <div className="mt-2 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div>
+              <h2 className="text-2xl font-black">{priorityTitle}</h2>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-company-muted">{priorityDetail}</p>
+            </div>
+            <a className="btn btn-primary" href={priorityHref}>{priorityTitle}</a>
+          </div>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <MetricCard icon="ph-buildings" label="Workspace" value={connection.workspace.name} detail="Owner context" />
+          <MetricCard icon="ph-plugs-connected" label="ClickUp" value={integrationStatus(connection.integrations.clickup, "ClickUp")} detail={`${metrics.selectedLists} selected list${metrics.selectedLists === 1 ? "" : "s"}`} />
+          <MetricCard icon="ph-cloud" label="Google Drive" value={integrationStatus(connection.integrations.googleDrive, "Drive")} detail={`${metrics.selectedDriveFolders} selected folder${metrics.selectedDriveFolders === 1 ? "" : "s"}`} />
+          <MetricCard icon="ph-database" label="Data model" value={`${metrics.areas} areas`} detail={`${metrics.tables} tables, ${connection.capabilities.length} capabilities`} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function MetricCard({ icon, label, value, detail }: { icon: string; label: string; value: string; detail: string }) {
+  return (
+    <article className="rounded-company border border-base-300 bg-base-200/45 p-4">
+      <div className="flex items-start gap-3">
+        <span className="dashboard-icon dashboard-icon-sm text-primary">
+          <i className={`ph-bold ${icon}`} aria-hidden="true"></i>
+        </span>
+        <div className="min-w-0">
+          <p className="eyebrow">{label}</p>
+          <strong className="block break-words text-lg leading-tight">{value}</strong>
+          <p className="mt-1 text-xs leading-5 text-company-muted">{detail}</p>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function AttentionQueue({ items }: { items: AttentionItem[] }) {
+  return (
+    <aside className="card border border-base-300 bg-base-100 shadow-sm">
+      <div className="card-body gap-4">
+        <div className="flex items-start gap-3">
+          <span className="dashboard-icon text-warning">
+            <i className="ph-bold ph-warning-circle" aria-hidden="true"></i>
+          </span>
+          <div>
+            <p className="eyebrow">Action queue</p>
+            <h2 className="text-xl font-black">What needs attention</h2>
+          </div>
+        </div>
+
+        <div className="grid gap-3">
+          {items.map((item) => (
+            <article className="rounded-company border border-base-300 bg-base-200/45 p-4" key={item.title}>
+              <div className="flex items-start gap-3">
+                <span className={`dashboard-icon dashboard-icon-sm ${item.tone === "success" ? "text-success" : item.tone === "info" ? "text-info" : "text-warning"}`}>
+                  <i className={`ph-bold ${item.icon}`} aria-hidden="true"></i>
+                </span>
+                <div className="min-w-0">
+                  <strong className="block leading-tight">{item.title}</strong>
+                  <p className="mt-1 text-sm leading-6 text-company-muted">{item.detail}</p>
+                  <a className="btn btn-ghost btn-sm mt-3" href={item.href}>{item.action}</a>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+function ModuleLauncher() {
+  return (
+    <section className="card border border-base-300 bg-base-100 shadow-sm">
+      <div className="card-body gap-4">
+        <div>
+          <p className="eyebrow">Operate</p>
+          <h2 className="text-xl font-black">Company map shortcuts</h2>
+        </div>
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {modules.map((module) => (
+            <a className="rounded-company border border-base-300 bg-base-200/45 p-4 no-underline transition hover:border-primary hover:bg-primary/5" href={module.href} key={module.title}>
+              <span className="dashboard-icon dashboard-icon-sm text-primary">
+                <i className={`ph-bold ${module.icon}`} aria-hidden="true"></i>
+              </span>
+              <strong className="mt-3 block">{module.title}</strong>
+              <span className="mt-2 block text-sm leading-6 text-company-muted">{module.detail}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function MigrationTable() {
+  const rows = [
+    ["Command panel", "React component", "Ready"],
+    ["Attention rows", "DaisyUI themed cards", "Ready"],
+    ["Module launcher", "Reusable shortcut grid", "Ready"],
+    ["Dense workbench table", "Next migration slice", "Next"]
+  ];
+
+  return (
+    <section className="overflow-x-auto rounded-company border border-base-300 bg-base-100 shadow-sm">
+      <table className="table table-zebra">
+        <thead>
+          <tr>
+            <th>Dashboard primitive</th>
+            <th>Migration role</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(([name, role, status]) => (
+            <tr key={name}>
+              <td className="font-black">{name}</td>
+              <td>{role}</td>
+              <td>
+                <span className={status === "Ready" ? "badge badge-success" : "badge badge-warning"}>
+                  {status}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  );
+}
+
+function ReadyDashboard({ connection }: { connection: ConnectionData }) {
+  const items = useMemo(() => attentionItems(connection), [connection]);
+
+  return (
+    <Shell connection={connection}>
+      <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-8 xl:grid-cols-[1.4fr_0.8fr]">
+        <CommandPanel connection={connection} />
+        <AttentionQueue items={items} />
+      </section>
+      <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-10">
+        <ModuleLauncher />
+        <MigrationTable />
+      </section>
+    </Shell>
+  );
+}
+
+function ReactDashboardApp() {
+  const [dashboardState, reload] = useDashboardState();
+
+  if (dashboardState.status === "ready") {
+    return <ReadyDashboard connection={dashboardState.connection} />;
+  }
+
+  return (
+    <Shell>
+      <StatePanel state={dashboardState} onRetry={reload} />
+    </Shell>
   );
 }
 
@@ -148,7 +508,7 @@ const root = document.getElementById("root");
 if (root) {
   createRoot(root).render(
     <React.StrictMode>
-      <ReactFoundationApp />
+      <ReactDashboardApp />
     </React.StrictMode>
   );
 }

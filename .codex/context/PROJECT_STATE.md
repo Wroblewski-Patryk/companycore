@@ -127,19 +127,25 @@ Last updated: 2026-05-08
   and the next executable task is selected from the canonical queue.
 
 ## Autonomous Iteration State
-- Current iteration: UXA-009 React Tailwind DaisyUI Migration Foundation
+- Current iteration: UXA-010 React Dashboard Component Migration
   completed.
 - Current operation mode: BUILDER
-- Last completed iteration: UXA-009 React Tailwind DaisyUI Migration
-  Foundation.
-- Last completed task: added the explicit React + Vite + Tailwind CSS +
-  DaisyUI frontend foundation, Docker build integration, and
-  `/react-dashboard` proof route.
-- Next required mode: ARCHITECT for the third iteration in this wave unless
-  the next selected task is classified as tester-only; UXA-010 React Dashboard
-  Component Migration is ready.
+- Last completed iteration: UXA-010 React Dashboard Component Migration.
+- Last completed task: added the `companycore` DaisyUI theme, live
+  `/v1/connection` loading, explicit route states, and reusable React dashboard
+  primitives on `/react-dashboard`.
+- Next required mode: BUILDER; UXA-011 React Table And Notification Primitive
+  Migration is ready.
 
 ## Recent Progress
+
+- 2026-05-08: Completed UXA-010 React Dashboard Component Migration. Added the
+  `companycore` DaisyUI theme, live owner-session `/v1/connection` loading,
+  signed-out/loading/error/connected states, and reusable React dashboard
+  primitives while preserving the existing vanilla `/dashboard`. Validation
+  passed: `npm run build`, `npm run validate`, targeted rendered desktop/mobile
+  React checks, `npm run owner-console:ux-smoke`, container migration and
+  integration test, and `git diff --check`.
 
 - 2026-05-08: Completed UXA-009 React Tailwind DaisyUI Migration Foundation.
   Added React/Vite/Tailwind/DaisyUI dependencies and config, `web/` source,

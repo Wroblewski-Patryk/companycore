@@ -34,6 +34,36 @@ of rediscovering them.
 
 ## Entries
 
+### 2026-05-08 - CompanyCore DaisyUI Theme
+- Type: reusable_pattern
+- Context: React migration needs a consistent, management-first theme instead
+  of ad hoc DaisyUI defaults.
+- Decision: Use the `companycore` DaisyUI theme for React surfaces, with white
+  and soft-blue operational surfaces, blue primary actions, green success,
+  amber review states, 8px radii, low visual noise, and Phosphor icons for
+  operational meaning.
+- Reuse when: Building or migrating React dashboard, workbench, table,
+  notification, provider setup, or app-shell surfaces.
+- Avoid when: A task is only maintaining the current vanilla route and does not
+  touch the React migration path.
+- Evidence: UXA-010 applies `data-theme="companycore"` on `/react-dashboard`
+  and verifies live dashboard rendering across desktop/mobile.
+
+### 2026-05-08 - React Dashboard Primitives
+- Type: reusable_pattern
+- Context: Dashboard migration should not become another monolithic frontend
+  file as more workbenches move from vanilla to React.
+- Decision: Split React dashboard UI into shell, state panel, command panel,
+  metric cards, attention queue, module launcher, and migration table
+  primitives. Keep live owner data loading local to the route and show
+  signed-out, loading, error, and connected states.
+- Reuse when: Migrating the current dashboard or building adjacent React
+  management surfaces.
+- Avoid when: A dense workbench needs table-first architecture; use the next
+  table/notification primitive slice instead.
+- Evidence: UXA-010 replaces the proof route with structured primitives and
+  live `/v1/connection` data.
+
 ### 2026-05-08 - React DaisyUI Migration Foundation
 - Type: reusable_pattern
 - Context: CompanyCore needs reusable dashboard, notification, table, and

@@ -1,5 +1,85 @@
 # Web Console V2 Task Contracts
 
+## UXA-010 React Dashboard Component Migration
+
+- Task Type: architecture/frontend
+- Current Stage: done
+- Operation Mode: ARCHITECT
+- Deliverable For This Stage: a React dashboard command surface that uses the
+  approved Tailwind + DaisyUI theme foundation, reusable dashboard primitives,
+  live owner-session connection loading, and clear loading/empty/error/success
+  states on `/react-dashboard` while preserving the existing `/dashboard`.
+- Process Self-Audit:
+  - Analyze current state: UXA-009 added the React/Vite/Tailwind/DaisyUI
+    foundation and `/react-dashboard` proof route.
+  - Select exactly one priority task: UXA-010 only.
+  - Plan implementation: build reusable dashboard components and theme tokens
+    first, then wire the route to live `/v1/connection` data.
+  - Execute implementation: added a `companycore` DaisyUI theme, reusable
+    React dashboard primitives, and live `/v1/connection` loading.
+  - Verify and test: build/validate, rendered React route checks, existing
+    owner-console smoke, and container integration tests passed.
+  - Self-review: confirmed the existing vanilla `/dashboard` and backend API
+    behavior remain unchanged.
+  - Update documentation and knowledge: task board, project state, next steps,
+    system health, and design memory updated.
+- Goal: Start the real dashboard migration by turning the framework proof route
+  into a reusable, theme-backed management dashboard surface.
+- Scope:
+  - `web/src/main.tsx`
+  - `web/src/styles.css`
+  - `docs/ux/design-memory.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+- Implementation Plan:
+  - Define a `companycore` DaisyUI theme and apply it to the React route.
+  - Split the React route into dashboard primitives: shell, status alert,
+    command panel, attention queue, readiness metrics, module launcher, and
+    migration table.
+  - Load owner connection data from `sessionStorage` token via `/v1/connection`.
+  - Render no-session, loading, error, and connected states with local recovery
+    actions.
+  - Preserve the current vanilla `/dashboard` route during this slice.
+- Acceptance Criteria:
+  - `/react-dashboard` uses the custom DaisyUI theme and Tailwind tokens.
+  - React dashboard primitives render from structured data instead of one
+    monolithic component.
+  - Signed-in users see live workspace/integration/operating-area signals from
+    `/v1/connection`.
+  - Signed-out, loading, error, and connected states are explicit and local to
+    the dashboard action area.
+  - Existing `/dashboard` and owner-console smoke continue to pass.
+- Definition of Done:
+  - `npm run build` and `npm run validate` pass.
+  - Targeted desktop/mobile rendered checks verify `/react-dashboard`.
+  - `npm run owner-console:ux-smoke` passes against an isolated local compose
+    project.
+  - Container-scoped Prisma migration and Node integration test pass.
+  - `git diff --check` passes.
+- Result Report:
+  - Added a custom DaisyUI `companycore` theme with CompanyCore colors,
+    radius, and low-noise light surface behavior.
+  - Replaced the single React proof component with reusable dashboard
+    primitives: shell, state panel, command panel, metric cards, attention
+    queue, module launcher, and migration table.
+  - Wired `/react-dashboard` to live owner-session data from `/v1/connection`
+    using `companycoreOwnerToken` from `sessionStorage`.
+  - Added explicit signed-out, loading, error, and connected states.
+  - Preserved the existing vanilla `/dashboard` route and owner-console smoke
+    contract.
+  - Validation passed: `npm run build`, `npm run validate`, `git diff --check`,
+    targeted desktop/mobile rendered React checks, `npm run owner-console:ux-smoke`,
+    and container-scoped Prisma migration plus Node integration test.
+  - Rendered evidence: `/react-dashboard` title is `CompanyCore React
+    Dashboard`, `data-theme="companycore"` is applied, desktop/mobile show live
+    `LuckySparrow` workspace data, 4 module links, 4 migration table rows, 13
+    Phosphor icons, no horizontal overflow, and zero targeted console issues.
+
 ## UXA-009 React Tailwind DaisyUI Migration Foundation
 
 - Task Type: architecture/frontend
