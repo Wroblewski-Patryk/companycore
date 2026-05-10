@@ -108,6 +108,46 @@ When the user sends a short execution nudge, the agent must:
 Do not rely on hidden chat memory to continue work. Future agents must be able
 to recover from repository files alone.
 
+## Knowledge Bootstrap Rule
+
+If required state files, tables, ledgers, or planning docs are missing, empty,
+stale, or still contain template/sample rows, the agent must not stop by
+default. First rebuild the minimum useful project picture from repository
+sources, then continue.
+
+Bootstrap from these sources in order:
+
+1. `docs/architecture/`, product specs, UX references, security contracts, and
+   deployment contracts.
+2. `.codex/context/*`, `.agents/state/*`, task boards, reports, and accepted
+   user feedback.
+3. Existing code, tests, routes, schemas, migrations, scripts, and runtime
+   configuration.
+4. Historical planning docs, handoffs, audits, and archived notes when active
+   sources do not answer the question.
+
+During bootstrap:
+
+- create missing state files from existing templates when the project has no
+  active version yet;
+- replace sample rows with project-specific rows;
+- mark every inferred row with a concrete source path or `inferred from code`;
+- classify assumptions as `safe`, `risky`, or `blocking` in the decision
+  register or task artifact;
+- use `accepted` only for requirements backed by explicit product,
+  architecture, or user-approved sources;
+- use `implemented_not_verified` when code exists but proof is missing;
+- use `proposed` for plausible requirements inferred from code or old notes
+  without clear approval;
+- ask the user only when the missing information would change product
+  direction, data safety, deployment risk, payments, AI authority, permissions,
+  or canonical UX intent.
+
+For a new app or new major product surface, create the baseline blueprint,
+delivery map, requirement matrix, quality scenarios, risk register, task board,
+and next-step file before implementation, then fill them progressively as
+decisions become clear.
+
 ## Project Analysis Model
 
 Every autonomous iteration should classify the project through these lenses:

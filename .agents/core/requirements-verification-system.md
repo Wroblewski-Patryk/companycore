@@ -47,9 +47,31 @@ evidence, next action, and last updated date. Free-form notes may explain
 context, but actionable state belongs in a table, ledger, queue, checklist, or
 register.
 
+## Missing Table Bootstrap
+
+If the requirement matrix, quality scenarios, risk register, delivery map, or
+module confidence ledger is missing, empty, stale, or still contains sample
+rows, rebuild a minimum viable version before selecting implementation work.
+
+Use explicit source documents first. If a row is inferred from code, tests, or
+older planning notes, say so in the source/evidence field and choose a cautious
+status:
+
+- explicit accepted product or architecture source -> `accepted`;
+- code exists but proof is missing -> `implemented_not_verified`;
+- partial proof exists -> `partially_verified`;
+- plausible but not clearly approved -> `proposed`;
+- cannot proceed safely without input -> `blocked`.
+
+Do not invent product truth silently. Inferred rows are allowed so work can
+continue, but they must be traceable, conservative, and easy for the owner or a
+future agent to correct.
+
 ## Autonomous Continuation Rule
 
 When the user says "continue", "next", "rob dalej", "jedziemy dalej", or
-similar, choose the highest-value requirement that is `failed`, `blocked`,
-`implemented_not_verified`, or release-critical `accepted`; then run one
-mission tied to requirement IDs, verify it, and update all affected state files.
+similar, first bootstrap missing, empty, stale, or template-like tables from
+repository sources. Then choose the highest-value requirement that is `failed`,
+`blocked`, `implemented_not_verified`, or release-critical `accepted`; then run
+one mission tied to requirement IDs, verify it, and update all affected state
+files.

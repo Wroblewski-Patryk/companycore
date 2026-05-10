@@ -197,6 +197,11 @@ documentation parity.
 - On "continue", "next", "rob dalej", or "jedziemy dalej", prioritize
   `failed`, `blocked`, `implemented_not_verified`, and release-critical
   `accepted` requirements before adding unrelated work.
+- If those tables or state files are missing, stale, or still template-like,
+  bootstrap the minimum useful rows from existing repo documentation and code
+  before selecting work. Mark inferred rows with source paths and cautious
+  statuses; ask the user only when the gap changes product direction, data
+  safety, deployment risk, permissions, payments, AI authority, or canonical UX.
 
 ### 2. Critical Prohibitions
 

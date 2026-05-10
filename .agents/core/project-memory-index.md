@@ -33,6 +33,11 @@ continue from repository files alone:
 - `docs/operations/`: release, deploy, smoke, rollback, and target-environment
   evidence.
 
+If one of these files is missing, empty, stale, or still template-like, rebuild
+the minimum useful version from architecture docs, context files, accepted
+feedback, code, tests, and planning notes before choosing implementation work.
+Every inferred row must name its source and use a cautious status.
+
 ## Architecture Refresh Protocol
 
 When architecture, module boundaries, app flow, route ownership, data model,
