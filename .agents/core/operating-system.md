@@ -20,23 +20,27 @@ For non-trivial work, read this order:
 4. `.agents/core/mission-control.md`
 5. `.agents/core/product-delivery-system.md`
 6. `.agents/core/product-intake-and-decision-handshake.md`
-7. `.agents/core/execution-loop.md`
-8. `.agents/core/anti-regression.md`
-9. `.agents/core/quality-gates.md`
-10. `.agents/state/current-focus.md`
-11. `.agents/state/known-issues.md`
-12. `.agents/state/module-confidence-ledger.md`
-13. `.agents/state/delivery-map.md`
-14. `.agents/state/decision-register.md`
-15. `.agents/state/regression-log.md`
-16. `.agents/state/system-health.md`
-17. `.agents/state/next-steps.md`
-18. `.codex/context/PROJECT_STATE.md`
-19. `.codex/context/TASK_BOARD.md`
-20. `.codex/context/LEARNING_JOURNAL.md`
-21. `docs/planning/mvp-next-commits.md`
-22. `docs/planning/mvp-execution-plan.md`
-23. `docs/planning/open-decisions.md`
+7. `.agents/core/requirements-verification-system.md`
+8. `.agents/core/execution-loop.md`
+9. `.agents/core/anti-regression.md`
+10. `.agents/core/quality-gates.md`
+11. `.agents/state/current-focus.md`
+12. `.agents/state/known-issues.md`
+13. `.agents/state/module-confidence-ledger.md`
+14. `.agents/state/delivery-map.md`
+15. `.agents/state/decision-register.md`
+16. `.agents/state/requirements-verification-matrix.md`
+17. `.agents/state/quality-attribute-scenarios.md`
+18. `.agents/state/risk-register.md`
+19. `.agents/state/regression-log.md`
+20. `.agents/state/system-health.md`
+21. `.agents/state/next-steps.md`
+22. `.codex/context/PROJECT_STATE.md`
+23. `.codex/context/TASK_BOARD.md`
+24. `.codex/context/LEARNING_JOURNAL.md`
+25. `docs/planning/mvp-next-commits.md`
+26. `docs/planning/mvp-execution-plan.md`
+27. `docs/planning/open-decisions.md`
 
 If these sources drift, canonical priority is:
 
@@ -67,6 +71,9 @@ If these sources drift, canonical priority is:
 - Use `.agents/core/product-intake-and-decision-handshake.md` and
   `.agents/state/decision-register.md` when intent, assumptions, product
   rules, UX direction, data, integrations, or validation are unclear.
+- Use `.agents/core/requirements-verification-system.md` to connect
+  requirements, quality scenarios, risks, code, validation, and evidence before
+  reporting progress.
 - Never introduce temporary bypasses, fake data, mock-only product behavior, or
   hidden fallback paths.
 - For auth-sensitive, AI, secrets, payments, permissions, integrations,
@@ -84,10 +91,12 @@ If these sources drift, canonical priority is:
 
 When the user sends a short execution nudge, the agent must:
 
-1. Refresh the state files in `.agents/state/`.
+1. Refresh the state files in `.agents/state/`, especially requirements,
+   quality scenarios, risk register, delivery map, and module confidence.
 2. Cross-check `.codex/context/TASK_BOARD.md` and
    `docs/planning/mvp-next-commits.md`.
-3. Pick the first executable `READY` or `IN_PROGRESS` task in the active queue.
+3. Pick the first executable `READY` or `IN_PROGRESS` task in the active queue,
+   preferring failed, blocked, unverified, or release-critical requirements.
 4. If no active task exists, derive the smallest safe task from
    `.agents/state/next-steps.md`, `docs/planning/mvp-execution-plan.md`, or
    `docs/planning/open-decisions.md`.
