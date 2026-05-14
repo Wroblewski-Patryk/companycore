@@ -474,6 +474,49 @@ const dataModuleCatalog = [
   { slug: "agent-logs", label: "Agent Logs", group: "AI operations", href: "/data/agent-logs", description: "Agent log records for observability and training smoke." }
 ];
 
+const implementedDataModuleSlugs = new Set(dataModuleCatalog.map((module) => module.slug));
+const companyOsCollectionSlugs = new Set([
+  "processes",
+  "pipelines",
+  "pipeline-stages",
+  "procedures",
+  "procedure-steps",
+  "company-roles",
+  "resources",
+  "tool-adapters",
+  "integration-capabilities",
+  "standards",
+  "pipeline-runs",
+  "stage-runs",
+  "approvals",
+  "checklist-templates",
+  "checklist-items",
+  "acceptance-criteria",
+  "audit-logs",
+  "policies",
+  "metrics",
+  "risks",
+  "controls",
+  "knowledge-items",
+  "decision-logs",
+  "automation-rules",
+  "triggers",
+  "artifacts",
+  "dependencies",
+  "business-functions",
+  "stakeholders"
+]);
+
+function tableRecordApiPath(apiSlug) {
+  if (implementedDataModuleSlugs.has(apiSlug)) {
+    return `/v1/${apiSlug}`;
+  }
+  if (companyOsCollectionSlugs.has(apiSlug)) {
+    return `/v1/company-os/${apiSlug}`;
+  }
+  return null;
+}
+
 function normalizedPath(pathname = window.location.pathname) {
   const trimmed = pathname.replace(/\/+$/, "");
   return trimmed || "/";
@@ -4401,8 +4444,13 @@ async function loadDatabaseSnapshot() {
   const next = new Map(state.databaseTables);
 
   await Promise.all(tables.map(async (table) => {
+    const apiPath = tableRecordApiPath(table.apiSlug);
+    if (!apiPath) {
+      next.set(table.apiSlug, { records: [] });
+      return;
+    }
     try {
-      const response = await api(`/v1/${table.apiSlug}`);
+      const response = await api(apiPath);
       next.set(table.apiSlug, { records: response.data || [] });
     } catch {
       next.set(table.apiSlug, { records: [] });

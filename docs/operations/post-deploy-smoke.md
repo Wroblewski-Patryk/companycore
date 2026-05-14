@@ -83,7 +83,7 @@ Use this file to record the minimum checks after each deploy.
   - After owner clarification, selected numbered department root folders
     `00. Główny` through `12. Zarządzanie` and excluded the non-department
     `Gemini Gems` folder.
-  - First import completed for the selected roots. Readback returned 715
+  - First import completed for the selected roots. Readback returned 748
     imported Drive items, including 171 folders.
   - Department scoping was applied root-by-root with child inheritance.
     Verification returned `unassignedCount=0` and `mismatches=[]`, proving

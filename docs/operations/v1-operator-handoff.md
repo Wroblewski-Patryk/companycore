@@ -84,7 +84,7 @@ achievement boundary and external blocker list.
   `/v1/health`, and `/settings/drive`; protected `google-drive:smoke` passed
   with OAuth active; owner folder discovery returned 172 folders; the numbered
   department roots `00`-`12` were selected, imported, and mapped to operating
-  areas; Drive readback returned 715 imported items, 171 folders,
+  areas; Drive readback returned 748 imported items, 171 folders,
   `unassignedCount=0`, and descendant scope `mismatches=[]`.
 - 2026-05-08 public `app.js` marker check confirmed typed editor surfaces for
   Notes, Projects, Clients, Task Lists, and Tasks.

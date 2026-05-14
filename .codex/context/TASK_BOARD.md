@@ -51,7 +51,7 @@ No active local implementation task is currently in progress.
   - Evidence: production runs commit
     `c5878d95a47f17745f65689c08e9e317a6465777`; OAuth is active; folder
     discovery found 172 folders; 13 numbered department roots (`00`-`12`) were
-    selected and imported; `/v1/google-drive/files` readback returned 715
+    selected and imported; `/v1/google-drive/files` readback returned 748
     imported Drive items, including 171 folders; all imported items have an
     operating-area assignment and descendant scope verification reported
     `mismatches=[]`.

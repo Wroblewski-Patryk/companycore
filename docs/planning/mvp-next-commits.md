@@ -34,7 +34,7 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       production runs `c5878d95a47f17745f65689c08e9e317a6465777`; OAuth is
       active; discovery found 172 folders; 13 numbered department root folders
       (`00`-`12`) were selected, imported, and mapped to operating areas;
-      readback returned 715 imported Drive items, 171 folders,
+      readback returned 748 imported Drive items, 171 folders,
       `unassignedCount=0`, and descendant scope verification
       `mismatches=[]`.
 - [x] V2WEB-AGENT-015 Workflow Archive And Rollback Command Decision:

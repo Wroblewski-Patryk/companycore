@@ -78,7 +78,7 @@ Last updated: 2026-05-14
   with OAuth active, and owner folder discovery returns 172 folders. The
   numbered Google Drive department roots `00`-`12` are now selected, imported,
   and mapped to operating areas. `/v1/google-drive/files` readback returned
-  715 imported items, 171 folders, `unassignedCount=0`, and descendant scope
+  748 imported items, 171 folders, `unassignedCount=0`, and descendant scope
   verification `mismatches=[]`.
 - 2026-05-14: `V2WEB-AGENT-002 Company OS Correlation Timeline` added a
   client-composed evidence chain to `/react-company-os` using existing recent
