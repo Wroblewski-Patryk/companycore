@@ -22,6 +22,7 @@
     "operating-model:registry-smoke": "node scripts/operating-model-registry-lifecycle-smoke.mjs",
     "mcp:server": "node scripts/companycore-mcp-server.mjs",
     "mcp:smoke": "node scripts/companycore-mcp-smoke.mjs",
+    "ai-ready:smoke": "node scripts/companycore-ai-ready-smoke.mjs",
     "google-drive:smoke": "node scripts/google-drive-production-smoke.mjs",
     "clickup:bootstrap": "node scripts/clickup-production-bootstrap.mjs",
     "test": "npm run build && npm run prisma:migrate:deploy && node --test \"dist/tests/**/*.test.js\"",

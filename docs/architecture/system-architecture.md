@@ -8,9 +8,12 @@ source of truth, and the HTTP API is the supported integration access layer.
 ## Main Runtime Surfaces
 
 - API or backend: Node.js 22, Express, TypeScript, Prisma.
-- Web: minimal owner-only static console in v1 for ClickUp integration setup.
-  A broader company operations dashboard is v2 scope.
-- Mobile: none in v1; v2 mobile should follow the web product experience.
+- Web: owner-only console for workspace setup, operating model visibility,
+  integrations, data workbenches, relationship review, Company OS surfaces, and
+  MCP/API key management. Before V2 visuals, the web console must become the
+  reliable human control plane for the backend and MCP tools.
+- Mobile: no native app before V2. Mobile web must remain usable for owner
+  checks and core actions, but native mobile product work is deferred.
 - Jobs or workers: the backend owns a lightweight in-process ClickUp
   maintenance scheduler. It reuses the authenticated maintenance service for
   active workspace settings so missed webhooks, failed inbox rows, and provider
@@ -46,6 +49,14 @@ settings are production-ready.
 
 This is not full enterprise multi-tenancy in v1. Invitations, billing,
 advanced RBAC, organization administration, and a full CRM UI are out of scope.
+However, a single owner may need to manage several company workspaces before
+V2. Workspace switching must therefore be explicit: the active workspace stays
+inside the signed auth token, switching workspaces mints a new scoped token,
+and service API keys remain bound to exactly one workspace.
+
+Before Company City or gamification work begins, follow
+`docs/architecture/web-and-mcp-foundation-before-v2.md` as the web/backend/MCP
+foundation target.
 
 ## Core Data Areas
 

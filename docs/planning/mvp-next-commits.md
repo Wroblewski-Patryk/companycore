@@ -7,17 +7,21 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] ACF-PROD-001 Operating Model Data Completion Decision:
-      decide whether empty production projects, storage locations, knowledge
-      roots, and automation definitions need seed/import work or explicit
-      accepted deferral.
+- [ ] ACF-MAINT-001 Large File Modularization:
+      split hotspots only after product/data decisions are no longer blocking
+      owner-grade usefulness.
 
 ### NEXT
 
-- [ ] ACF-UX-002 Canonical Authenticated Shell And Company City Dashboard:
-      implement the approved Company City direction through one shared
-      post-login shell, or record a superseding product decision before
-      claiming owner-grade dashboard quality.
+- [ ] V2VIS-001 Shared CompanyShell And Dashboard Frame:
+      start only when the user explicitly chooses to move from planning into
+      V2 visual implementation.
+
+### DEFERRED TO V2
+
+- [ ] ACF-UX-002 Company City Dashboard / Gamified Strategic Map:
+      keep the approved visual direction as V2 target after the web/backend/MCP
+      foundation readiness gate passes.
 
 ### BLOCKED
 
@@ -38,6 +42,79 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       architecture, function-coverage audit, project-control, system-health,
       active queue, and state files. Remaining Drive gaps are now framed as
       target-safe content/write/freshness samples, not first-import blockers.
+- [x] WEBFOUND-002/003/004 Workspace And Sidebar Foundation:
+      added owner workspace list/create/select API, `/auth/me` workspace
+      readback, area inventory API, shell workspace selector/create controls,
+      expandable area resource sidebar, and mobile/tablet drawer backdrop.
+      `npm test` passed against disposable PostgreSQL on `localhost:55453`;
+      Playwright owner-shell smoke passed at desktop, tablet, and mobile.
+- [x] ACF-PROD-001 Operating Model Data Completion Decision:
+      decided not to seed fake projects, storage locations, knowledge roots,
+      or automation definitions before V2. Empty containers are accepted
+      foundation-ready states when future UI labels them honestly and uses real
+      owner creation/import flows.
+- [x] WEBFOUND-005 Sidebar Area Tree Hardening:
+      added accessible area/resource labels, active-area state, visible focus,
+      Escape close for workspace-create and mobile drawer, scroll lock, and
+      focus return. `npm test` passed on disposable PostgreSQL
+      `localhost:55455`; responsive Playwright smoke passed on isolated
+      `http://127.0.0.1:3107`.
+- [x] WEBFOUND-007 Relationship Graph Audit:
+      classified implemented, inferred, unsupported, and missing relationship
+      families across schema, operating-model routes, and current web
+      surfaces. Published
+      `docs/architecture/relationship-graph-audit-2026-05-14.md` and selected
+      a read-only relationship graph API as the next safe implementation.
+- [x] WEBFOUND-008A Relationship Graph Read API:
+      added `GET /v1/relationships/graph`, `relationships:read`, MCP manifest
+      exposure, and profile access for MCP reader/operator presets. `npm run
+      build` passed; `npm test` passed against disposable PostgreSQL on
+      `localhost:55457`, covering confidence labels, review items, unsupported
+      families, and manifest visibility.
+- [x] WEBFOUND-008B Relationship Workbench Upgrade:
+      `/relationships` now consumes the graph API, shows confidence labels for
+      direct, provider-hierarchy, route-inferred, needs-review, and unsupported
+      relationship states, and preserves existing provider/Drive assignment
+      controls. `node --check public/app.js`, `npm run build`, `npm test`, and
+      Playwright desktop/mobile render proof passed.
+- [x] WEBFOUND-009 Integration Readiness Dashboard:
+      `/settings/integrations` now shows readiness for ClickUp, Google Drive,
+      relationship graph, and MCP agents from real connection, graph, API key,
+      and manifest state. `node --check public/app.js`, `npm run build`,
+      `npm test`, and Playwright desktop/tablet/mobile render proof passed.
+- [x] WEBFOUND-010 MCP Key Workspace Clarity:
+      `/settings/api` now previews active workspace, selected risk, selected
+      scopes, MCP tool exposure, supervised tools, relationship graph
+      availability, missing MCP base scopes, and tool families before a key is
+      created. `node --check public/app.js`, `npm run build`, `npm test`, and
+      Playwright desktop/tablet/mobile render proof passed.
+- [x] WEBFOUND-011 Agent Tool Surface In Canonical Shell:
+      canonical shell sidebar/topbar/module search now expose `Agent tools`,
+      module search opens the backend-served React route safely, and React
+      shell navigation now uses canonical CompanyCore destinations instead of
+      React preview route taxonomy. `node --check public/app.js`,
+      `npm run build`, `npm test`, and Playwright desktop/tablet/mobile route
+      proof passed.
+- [x] WEBFOUND-012 AI-Ready Smoke Pack:
+      added `npm run ai-ready:smoke`, which registers a disposable owner,
+      creates MCP reader/operator profile keys, verifies manifest visibility,
+      reads the relationship graph through HTTP and MCP bridge paths, and
+      verifies a risky stage-complete MCP tool returns
+      `mcp_tool_requires_supervision` by default. `node --check`, `npm test`
+      on disposable PostgreSQL `localhost:55462`, and
+      `npm run ai-ready:smoke` against `http://127.0.0.1:3112` passed.
+- [x] WEBFOUND-013 V2 UX Readiness Review:
+      reviewed WEBFOUND-002 through WEBFOUND-012 and recorded GO for
+      WEBFOUND-014 visual planning while keeping direct Company
+      City/gamification implementation gated on a canonical
+      shell/map/brief/status plan. Review:
+      `docs/ux/v2-ux-readiness-review-2026-05-14.md`.
+- [x] WEBFOUND-014 V2 Visual Implementation Plan:
+      added `docs/ux/v2-visual-implementation-plan-2026-05-14.md`, defining
+      the canonical V2 shell, Company City dashboard composition, command
+      brief, status strip, responsive behavior, state model, route migration,
+      visual asset strategy, validation plan, and first future code candidate
+      `V2VIS-001 Shared CompanyShell And Dashboard Frame`.
 - [x] ACF-SEC-001 Production Secret And CORS Hardening:
       production now fails closed when required secret env vars are absent or
       still use committed development placeholder values; production CORS is

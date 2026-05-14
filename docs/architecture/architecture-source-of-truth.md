@@ -65,6 +65,8 @@ At minimum, keep these files aligned:
 - `docs/architecture/tech-stack.md`
 - `docs/architecture/company-os-definition-editing-contract.md`
 - `docs/architecture/company-os-workflow-definition-command-contract.md`
+- `docs/architecture/web-and-mcp-foundation-before-v2.md`
+- `docs/architecture/relationship-graph-audit-2026-05-14.md`
 - `docs/ARCHITECTURE.md`
 - `docs/DATABASE.md`
 - `docs/API.md`
@@ -107,6 +109,11 @@ The approved v1 direction is:
   behavior before v1 is considered stable
 - full company dashboard and mobile app are v2 scope; mobile should follow the
   web product experience
+- before V2 Company City, gamification, or native mobile app work, the product
+  must finish the web/backend/MCP foundation described in
+  `docs/architecture/web-and-mcp-foundation-before-v2.md`: workspace selection,
+  operating-area/resource navigation, relationship/integration clarity, and
+  MCP workspace-safe usability
 
 ## Implementation Contract
 

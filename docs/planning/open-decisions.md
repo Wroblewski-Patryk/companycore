@@ -4,9 +4,30 @@ Track unresolved decisions that can block or reshape execution.
 
 ## Active Decisions
 
-No active decisions.
+| ID | Decision | Status | Recommendation | Needed before |
+| --- | --- | --- | --- | --- |
+No active product decisions are currently blocking the pre-V2 foundation queue.
 
 ## Resolved Decisions
+
+- 2026-05-14: ACF-PROD-001 resolved. Do not seed fake projects, storage
+  locations, knowledge roots, or automation definitions before V2. Empty
+  containers are accepted foundation-ready states when the UI labels them
+  honestly and they can be populated by real owner actions or imports. Source:
+  `docs/planning/acf-prod-001-task-contract.md`.
+
+- 2026-05-14: DEC-WEBFOUND-002 resolved by WEBFOUND-002/003/004. One owner can
+  manage multiple workspaces through token-scoped list/create/select behavior;
+  protected APIs derive workspace from auth context, not arbitrary client-side
+  IDs.
+
+- 2026-05-14: DEC-WEBFOUND-003 resolved by WEBFOUND-004. Sidebar areas should
+  show expandable resource families and counts, then drill into workbenches for
+  records rather than rendering all records directly in navigation.
+
+- 2026-05-14: Company City, game-like visuals, gamification, and native mobile
+  app work are V2 direction, not the immediate foundation task. Current focus
+  is backend + web + MCP working exceptionally well and intuitively.
 
 - 2026-05-11: After V1EVID-001 and V1EVID-002 closed the local V1 evidence
   gaps, Agent-First Company OS is the selected next V2 lane. The next task is

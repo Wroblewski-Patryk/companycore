@@ -80,6 +80,43 @@ briefs; tablet should balance map plus selected context; mobile web and native
 mobile should compress the city into an overview, district switcher, or
 progressive drill-down rather than forcing a tiny unreadable map.
 
+## Authenticated Shell Contract
+
+All private web routes should converge on one CompanyCore shell rather than
+separate vanilla and React navigation models. Before V2 Company City visuals,
+the shell should be a clear operating console: workspace selection, operating
+areas, resource families, integration relationships, and MCP readiness. The
+shell must make workspace, active route, active company area or workbench
+family, command pressure, and health visible without making every route build
+its own product chrome.
+
+Canonical shell zones:
+
+- `CompanySidebar`: command/company/workbench/integration/workspace navigation.
+- `TopCommandBar`: command search, create/action launch, attention, account.
+- `CommandBriefPanel`: contextual next action, blockers, decisions, risks,
+  integration state, and agent-ready actions.
+- `CompanyAreaSwitcher`: `00 Ogolny` plus the 12 departments, usually as
+  active/pinned areas plus a switcher instead of a permanent full list.
+- `StatusStrip`: quiet workspace health, sync freshness, environment, and
+  agent/integration readiness.
+
+Responsive behavior:
+
+- Desktop: persistent sidebar, top command bar, optional right command brief,
+  and status strip.
+- Tablet: compact rail or drawer rail with split map/workbench and contextual
+  command panel when space allows.
+- Mobile: compact topbar, drawer for full IA, optional bottom shortcuts for
+  core destinations, command brief before broad stats, and map as overview or
+  district switcher instead of a tiny full canvas.
+
+The sidebar should not remain a generic route directory. It should express the
+operating model: Workspace selector, Operating Areas, Workbenches, Integrations
+& Relationships, AI/MCP, and Workspace settings. Badges and readiness signals
+must come from real product state. Do not introduce a second route-local shell
+for React surfaces.
+
 ## Iconography
 
 - Approved icon family: Phosphor Icons, using the local bold webfont in

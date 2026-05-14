@@ -23,19 +23,23 @@ import { notesRouter } from "./modules/notes/notes.routes";
 import { operatingModelRouter } from "./modules/operating-model/operating-model.routes";
 import { pipelineStagesRouter } from "./modules/pipeline-stages/pipeline-stages.routes";
 import { projectsRouter } from "./modules/projects/projects.routes";
+import { relationshipsRouter } from "./modules/relationships/relationships.routes";
 import { targetsRouter } from "./modules/targets/targets.routes";
 import { taskListsRouter } from "./modules/task-lists/task-lists.routes";
 import { tasksRouter } from "./modules/tasks/tasks.routes";
 import { clickUpWebhooksRouter } from "./modules/webhooks/clickup-webhooks.routes";
 import { healthRouter } from "./health/health.routes";
 import { interactionsRouter } from "./modules/interactions/interactions.routes";
+import { workspacesRouter } from "./modules/workspaces/workspaces.routes";
 
 function mountProtectedRoutes(router: Router) {
   router.use("/projects", projectsRouter);
   router.use("/company-os", companyOsRouter);
   router.use("/connection", connectionRouter);
+  router.use("/workspaces", workspacesRouter);
   router.use("/mcp", mcpRouter);
   router.use("/operating-model", operatingModelRouter);
+  router.use("/relationships", relationshipsRouter);
   router.use("/goals", goalsRouter);
   router.use("/google-drive", googleDriveRouter);
   router.use("/targets", targetsRouter);

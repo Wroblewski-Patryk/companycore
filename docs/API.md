@@ -701,6 +701,107 @@ Operational setup and smoke instructions live in
 Paperclip, and generic MCP-compatible agents live in
 `docs/operations/mcp-agent-runtime-setup.md`.
 
+## Relationship Graph
+
+```http
+GET /v1/relationships/graph
+GET /relationships/graph
+```
+
+Required capability:
+
+```text
+relationships:read
+```
+
+Returns a workspace-scoped read-only relationship graph for the owner web
+console and MCP bridge. The endpoint derives all nodes and edges from existing
+workspace records; it does not create links, mutate scope, or use a generic
+relationship edge table.
+
+Query:
+
+| Name | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `limit` | number | `200` | Optional per-family read cap from `1` to `500` for high-volume graph families such as Drive files and provider mappings. |
+
+Response shape:
+
+```json
+{
+  "data": {
+    "workspace": {
+      "id": "workspace-id",
+      "name": "LuckySparrow"
+    },
+    "graph": {
+      "nodes": [
+        {
+          "id": "operating_area:area-id",
+          "type": "operating_area",
+          "label": "05 Relacje"
+        }
+      ],
+      "edges": [
+        {
+          "id": "area:area-id->table:table-id",
+          "from": "operating_area:area-id",
+          "to": "operating_table:table-id",
+          "label": "contains table",
+          "confidence": "direct",
+          "sourceModel": "OperatingTable",
+          "sourceField": "areaId"
+        }
+      ],
+      "reviewItems": [
+        {
+          "id": "review:mapping:mapping-id",
+          "severity": "warning",
+          "nodeId": "external_container_mapping:mapping-id",
+          "type": "unassigned_provider_container",
+          "title": "Provider container needs operating scope",
+          "actionHint": {
+            "label": "Assign operating area",
+            "method": "PATCH",
+            "path": "/v1/operating-model/external-mappings/mapping-id/scope"
+          }
+        }
+      ],
+      "unsupportedFamilies": [
+        {
+          "family": "custom_cross_domain_edges",
+          "reason": "No approved generic relationship edge table exists."
+        }
+      ]
+    },
+    "summary": {
+      "nodes": 1,
+      "edges": 1,
+      "reviewItems": 1,
+      "unsupportedFamilies": 1,
+      "confidence": {
+        "direct": 1,
+        "providerHierarchy": 0,
+        "routeInferred": 0,
+        "needsReview": 1,
+        "unsupported": 1
+      },
+      "limit": 200
+    }
+  }
+}
+```
+
+Confidence values:
+
+- `direct`: database FK or direct relation field.
+- `provider_hierarchy`: provider external IDs and stored parent metadata.
+- `route_inferred`: operating-table `apiSlug` to workspace route/collection.
+- `needs_review`: represented in `reviewItems` when an assignment is missing
+  or ambiguous.
+- `unsupported`: represented in `unsupportedFamilies` when the schema or read
+  contract cannot support a useful relationship without inventing data.
+
 ## Company OS
 
 Company OS records are exposed through a mostly read-oriented,

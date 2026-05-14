@@ -411,6 +411,226 @@ test("CompanyCore v1 protected API flow", async () => {
   const authA = { Authorization: `Bearer ${ownerA.token}` };
   const authB = { Authorization: `Bearer ${ownerB.token}` };
 
+  const ownerAWorkspacesInitial = await request("/v1/workspaces", { headers: authA });
+  assert.equal(ownerAWorkspacesInitial.status, 200);
+  const ownerAWorkspacesInitialBody = ownerAWorkspacesInitial.body as {
+    data: Array<{ id: string; name: string; role: string; active: boolean }>;
+  };
+  assert.equal(ownerAWorkspacesInitialBody.data.length, 1);
+  assert.equal(ownerAWorkspacesInitialBody.data[0]?.id, ownerA.workspace.id);
+  assert.equal(ownerAWorkspacesInitialBody.data[0]?.active, true);
+
+  const secondWorkspace = await request("/v1/workspaces", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({ name: "Workspace A2" })
+  });
+  assert.equal(secondWorkspace.status, 201);
+  const secondWorkspaceBody = secondWorkspace.body as {
+    data: { token: string; workspace: { id: string; name: string } };
+  };
+  assert.equal(secondWorkspaceBody.data.workspace.name, "Workspace A2");
+  assert.notEqual(secondWorkspaceBody.data.workspace.id, ownerA.workspace.id);
+
+  const ownerAWorkspacesAfterCreate = await request("/v1/workspaces", { headers: authA });
+  assert.equal(ownerAWorkspacesAfterCreate.status, 200);
+  const ownerAWorkspacesAfterCreateBody = ownerAWorkspacesAfterCreate.body as {
+    data: Array<{ id: string; name: string; active: boolean }>;
+  };
+  assert.equal(ownerAWorkspacesAfterCreateBody.data.length, 2);
+  assert.ok(ownerAWorkspacesAfterCreateBody.data.some((workspace) => workspace.id === secondWorkspaceBody.data.workspace.id));
+  assert.equal(ownerAWorkspacesAfterCreateBody.data.find((workspace) => workspace.id === ownerA.workspace.id)?.active, true);
+
+  const ownerAMe = await request("/auth/me", { headers: authA });
+  assert.equal(ownerAMe.status, 200);
+  const ownerAMeBody = ownerAMe.body as {
+    data: { workspaceId: string; workspaces: Array<{ id: string; active: boolean }> };
+  };
+  assert.equal(ownerAMeBody.data.workspaceId, ownerA.workspace.id);
+  assert.equal(ownerAMeBody.data.workspaces.length, 2);
+
+  const selectedWorkspace = await request(`/v1/workspaces/${secondWorkspaceBody.data.workspace.id}/actions/select`, {
+    method: "POST",
+    headers: authA
+  });
+  assert.equal(selectedWorkspace.status, 200);
+  const selectedWorkspaceBody = selectedWorkspace.body as {
+    data: { token: string; workspace: { id: string }; role: string };
+  };
+  assert.ok(selectedWorkspaceBody.data.token);
+  assert.equal(selectedWorkspaceBody.data.workspace.id, secondWorkspaceBody.data.workspace.id);
+  assert.equal(selectedWorkspaceBody.data.role, "owner");
+
+  const selectedWorkspaceAuth = { Authorization: `Bearer ${selectedWorkspaceBody.data.token}` };
+  const selectedWorkspaceConnection = await request("/v1/connection", { headers: selectedWorkspaceAuth });
+  assert.equal(selectedWorkspaceConnection.status, 200);
+  const selectedWorkspaceConnectionBody = selectedWorkspaceConnection.body as {
+    data: { auth: { workspaceId: string }; operatingModel: { areas: unknown[] } };
+  };
+  assert.equal(selectedWorkspaceConnectionBody.data.auth.workspaceId, secondWorkspaceBody.data.workspace.id);
+  assert.equal(selectedWorkspaceConnectionBody.data.operatingModel.areas.length, 13);
+
+  const selectedWorkspaceInventory = await request("/v1/operating-model/area-inventory", {
+    headers: selectedWorkspaceAuth
+  });
+  assert.equal(selectedWorkspaceInventory.status, 200);
+  const selectedWorkspaceInventoryBody = selectedWorkspaceInventory.body as {
+    data: Array<{
+      key: string;
+      resources: { tables: number; folders: number; driveFiles: number; externalMappings: number };
+      tables: Array<{ apiSlug: string }>;
+    }>;
+  };
+  assert.equal(selectedWorkspaceInventoryBody.data.length, 13);
+  assert.ok(selectedWorkspaceInventoryBody.data.some((area) => area.key === "main-general"));
+  assert.ok(selectedWorkspaceInventoryBody.data.reduce((sum, area) => sum + area.resources.tables, 0) > 0);
+
+  const graphArea = await prisma.operatingArea.findFirstOrThrow({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      tables: { some: {} }
+    },
+    include: { tables: { orderBy: { apiSlug: "asc" }, take: 1 } }
+  });
+  const graphTable = graphArea.tables[0]!;
+  const assignedMapping = await prisma.externalContainerMapping.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      provider: "clickup",
+      entityType: "list",
+      externalId: "rel-graph-list-assigned",
+      name: "Relationship Graph Assigned List",
+      areaId: graphArea.id,
+      tableId: graphTable.id
+    }
+  });
+  const unassignedMapping = await prisma.externalContainerMapping.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      provider: "clickup",
+      entityType: "folder",
+      externalId: "rel-graph-folder-unassigned",
+      name: "Relationship Graph Unassigned Folder"
+    }
+  });
+  const mappedField = await prisma.externalFieldMapping.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      provider: "clickup",
+      externalId: "rel-graph-field-status",
+      name: "Status",
+      tableId: graphTable.id,
+      nativeField: "status"
+    }
+  });
+  const driveRoot = await prisma.googleDriveFile.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      externalId: "rel-graph-drive-root",
+      name: "Relationship Graph Drive Root",
+      mimeType: "application/vnd.google-apps.folder",
+      isFolder: true,
+      operatingAreaId: graphArea.id
+    }
+  });
+  const driveChild = await prisma.googleDriveFile.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      externalId: "rel-graph-drive-child",
+      name: "Relationship Graph Drive Child",
+      mimeType: "application/vnd.google-apps.document",
+      parentExternalId: driveRoot.externalId
+    }
+  });
+  const graphStorageLocation = await prisma.storageLocation.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      provider: "google_drive",
+      name: "Relationship Graph Storage",
+      locator: { externalId: driveRoot.externalId },
+      areaId: graphArea.id
+    }
+  });
+  const graphKnowledgeRoot = await prisma.knowledgeRoot.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      provider: "google_drive",
+      name: "Relationship Graph Knowledge",
+      locator: { externalId: driveRoot.externalId },
+      areaId: graphArea.id
+    }
+  });
+  const graphAutomationDefinition = await prisma.automationDefinition.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      provider: "companycore",
+      triggerType: "relationship_review",
+      name: "Relationship Graph Automation",
+      areaId: graphArea.id
+    }
+  });
+
+  const relationshipGraph = await request("/v1/relationships/graph?limit=50", { headers: authA });
+  assert.equal(relationshipGraph.status, 200);
+  const relationshipGraphBody = relationshipGraph.body as {
+    data: {
+      workspace: { id: string };
+      graph: {
+        nodes: Array<{ id: string; type: string; label: string }>;
+        edges: Array<{ from: string; to: string; confidence: string; sourceModel: string; sourceField: string }>;
+        reviewItems: Array<{ id: string; nodeId: string; type: string; actionHint?: { path: string } }>;
+        unsupportedFamilies: Array<{ family: string }>;
+      };
+      summary: { confidence: { direct: number; providerHierarchy: number; routeInferred: number; needsReview: number; unsupported: number } };
+    };
+  };
+  assert.equal(relationshipGraphBody.data.workspace.id, ownerA.workspace.id);
+  assert.ok(relationshipGraphBody.data.graph.nodes.some((node) => node.id === `external_container_mapping:${assignedMapping.id}`));
+  assert.ok(relationshipGraphBody.data.graph.nodes.some((node) => node.id === `external_field_mapping:${mappedField.id}`));
+  assert.ok(relationshipGraphBody.data.graph.edges.some((edge) => (
+    edge.from === `external_container_mapping:${assignedMapping.id}`
+    && edge.to === `operating_area:${graphArea.id}`
+    && edge.confidence === "direct"
+    && edge.sourceModel === "ExternalContainerMapping"
+    && edge.sourceField === "areaId"
+  )));
+  assert.ok(relationshipGraphBody.data.graph.edges.some((edge) => (
+    edge.from === `google_drive_file:${driveRoot.id}`
+    && edge.to === `google_drive_file:${driveChild.id}`
+    && edge.confidence === "provider_hierarchy"
+  )));
+  assert.ok(relationshipGraphBody.data.graph.edges.some((edge) => edge.confidence === "route_inferred"));
+  assert.ok(relationshipGraphBody.data.graph.reviewItems.some((item) => (
+    item.nodeId === `external_container_mapping:${unassignedMapping.id}`
+    && item.type === "unassigned_provider_container"
+    && item.actionHint?.path === `/v1/operating-model/external-mappings/${unassignedMapping.id}/scope`
+  )));
+  assert.ok(relationshipGraphBody.data.graph.reviewItems.some((item) => item.nodeId === `google_drive_file:${driveChild.id}`));
+  assert.ok(relationshipGraphBody.data.graph.unsupportedFamilies.some((family) => family.family === "custom_cross_domain_edges"));
+  assert.ok(relationshipGraphBody.data.summary.confidence.direct > 0);
+  assert.ok(relationshipGraphBody.data.summary.confidence.providerHierarchy > 0);
+  assert.ok(relationshipGraphBody.data.summary.confidence.routeInferred > 0);
+  assert.ok(relationshipGraphBody.data.summary.confidence.needsReview >= 2);
+  assert.ok(relationshipGraphBody.data.summary.confidence.unsupported > 0);
+
+  await prisma.googleDriveFile.deleteMany({
+    where: { id: { in: [driveRoot.id, driveChild.id] } }
+  });
+  await prisma.automationDefinition.delete({ where: { id: graphAutomationDefinition.id } });
+  await prisma.knowledgeRoot.delete({ where: { id: graphKnowledgeRoot.id } });
+  await prisma.storageLocation.delete({ where: { id: graphStorageLocation.id } });
+  await prisma.externalFieldMapping.delete({ where: { id: mappedField.id } });
+  await prisma.externalContainerMapping.deleteMany({
+    where: { id: { in: [assignedMapping.id, unassignedMapping.id] } }
+  });
+
+  const foreignWorkspaceSelect = await request(`/v1/workspaces/${secondWorkspaceBody.data.workspace.id}/actions/select`, {
+    method: "POST",
+    headers: authB
+  });
+  assert.equal(foreignWorkspaceSelect.status, 404);
+  assert.equal((foreignWorkspaceSelect.body as { error: string }).error, "not_found");
+
   const humanOwnerRole = await prisma.companyRole.create({
     data: {
       workspaceId: ownerA.workspace.id,
@@ -2256,6 +2476,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(companyOsReaderProfile.riskLevel, "low");
   assert.ok(companyOsReaderProfile.scopes.includes("mcp:read"));
   assert.ok(companyOsReaderProfile.scopes.includes("company-os:read"));
+  assert.ok(companyOsReaderProfile.scopes.includes("relationships:read"));
   assert.ok(!companyOsReaderProfile.scopes.includes("company-os:definition:write"));
   assert.ok(!companyOsReaderProfile.scopes.includes("company-os:workflow-definition:write"));
   assert.ok(!companyOsReaderProfile.scopes.includes("company-os:workflow-definition:activate"));
@@ -2281,6 +2502,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(createdProfileKeyBody.data.profile.id, "mcp_company_os_reader");
   assert.ok(createdProfileKeyBody.data.scopes.includes("mcp:read"));
   assert.ok(createdProfileKeyBody.data.scopes.includes("company-os:read"));
+  assert.ok(createdProfileKeyBody.data.scopes.includes("relationships:read"));
   assert.ok(!createdProfileKeyBody.data.scopes.includes("company-os:definition:write"));
   assert.ok(!createdProfileKeyBody.data.scopes.includes("company-os:workflow-definition:write"));
   assert.ok(!createdProfileKeyBody.data.scopes.includes("company-os:workflow-definition:activate"));
@@ -2293,6 +2515,10 @@ test("CompanyCore v1 protected API flow", async () => {
     data: { tools: Array<{ path: string; capability: string }> };
   };
   assert.ok(profileMcpManifestBody.data.tools.some((tool) => tool.path === "/v1/company-os"));
+  assert.ok(profileMcpManifestBody.data.tools.some((tool) => (
+    tool.path === "/v1/relationships/graph"
+    && tool.capability === "relationships:read"
+  )));
   assert.ok(!profileMcpManifestBody.data.tools.some((tool) => tool.capability === "company-os:definition:write"));
   assert.ok(!profileMcpManifestBody.data.tools.some((tool) => tool.capability === "company-os:workflow-definition:write"));
   assert.ok(!profileMcpManifestBody.data.tools.some((tool) => tool.capability === "company-os:workflow-definition:activate"));

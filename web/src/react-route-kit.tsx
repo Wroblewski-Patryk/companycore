@@ -1716,14 +1716,13 @@ export function Shell({
               </small>
             </span>
           </a>
-          <nav className="flex min-w-0 flex-wrap gap-2" aria-label="React dashboard navigation">
-            <a className="btn btn-ghost btn-sm" href="/dashboard">Current dashboard</a>
-            <a className="btn btn-ghost btn-sm" href="/react-dashboard">React dashboard</a>
-            <a className="btn btn-ghost btn-sm" href="/react-company-os">Company OS</a>
-            <a className="btn btn-ghost btn-sm" href="/react-agent-tools">Agent tools</a>
-            <a className="btn btn-ghost btn-sm" href="/react-tasks">React tasks</a>
-            <a className="btn btn-ghost btn-sm" href="/react-integrations">React integrations</a>
-            <a className="btn btn-primary btn-sm" href="/areas">Operating areas</a>
+          <nav className="flex min-w-0 flex-wrap gap-2" aria-label="CompanyCore navigation">
+            <a className="btn btn-ghost btn-sm" href="/dashboard">Dashboard</a>
+            <a className="btn btn-ghost btn-sm" href="/areas">Operating areas</a>
+            <a className="btn btn-ghost btn-sm" href="/relationships">Relationships</a>
+            <a className="btn btn-ghost btn-sm" href="/settings/integrations">Integrations</a>
+            <a className="btn btn-ghost btn-sm" href="/settings/api">API settings</a>
+            <a className="btn btn-primary btn-sm" href="/react-agent-tools">Agent tools</a>
           </nav>
         </div>
       </header>

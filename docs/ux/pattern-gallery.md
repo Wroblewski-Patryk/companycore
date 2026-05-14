@@ -16,9 +16,15 @@ This is not a component inventory. It is a screen and flow pattern catalog.
 ### App Shell
 
 - Purpose: stable navigation and page rhythm for the main product surface.
-- Mobile: bottom navigation, compact top bar, primary action reachable.
-- Tablet: room for split panels, wider navigation rails, contextual side panels.
-- Desktop: persistent navigation, visible filters, wider content lanes.
+- Project-specific contract:
+  `docs/ux/authenticated-shell-layout-audit-2026-05-14.md`.
+- Mobile: compact top bar, drawer for full IA, command-first content, optional
+  bottom shortcuts for core destinations, and primary action reachable.
+- Tablet: compact rail or drawer rail, split panels when useful, contextual
+  command panel.
+- Desktop: persistent command/company navigation, top command bar, optional
+  right command brief, status strip, visible filters, wider content lanes.
+- Avoid: permanent route-local shells that teach a second navigation model.
 
 ### List Detail
 

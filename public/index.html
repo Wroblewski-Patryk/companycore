@@ -28,6 +28,31 @@
             <small id="sidebarWorkspaceName">Workspace</small>
           </span>
         </a>
+        <section class="sidebar-workspace" aria-label="Workspace selector">
+          <div class="sidebar-workspace-header">
+            <label for="workspaceSwitcher">Workspace</label>
+            <button type="button" class="secondary compact" id="workspaceCreateToggle">New</button>
+          </div>
+          <select id="workspaceSwitcher" aria-label="Switch workspace"></select>
+          <form class="sidebar-workspace-create" id="workspaceCreateForm" hidden>
+            <label>
+              Workspace name
+              <input id="workspaceCreateName" type="text" autocomplete="off" maxlength="80">
+            </label>
+            <div class="sidebar-workspace-actions">
+              <button type="submit" class="compact">Create</button>
+              <button type="button" class="secondary compact" id="workspaceCreateCancel">Cancel</button>
+            </div>
+          </form>
+          <p class="form-note local-status" id="workspaceSwitchStatus" aria-live="polite"></p>
+        </section>
+        <section class="sidebar-area-nav" aria-label="Operating area resources">
+          <div class="sidebar-area-nav-title">
+            <p>Areas</p>
+            <a href="/areas" data-link>Manage</a>
+          </div>
+          <div class="sidebar-area-list" id="sidebarAreaList"></div>
+        </section>
         <nav class="side-nav" aria-label="Workspace navigation">
           <section class="side-nav-section" aria-label="Command">
             <p>Command</p>
@@ -47,6 +72,7 @@
             <a href="/settings" data-link data-nav="/settings">ClickUp adapter</a>
             <a href="/settings/drive" data-link data-nav="/settings/drive">Google Drive</a>
             <a href="/settings/api" data-link data-nav="/settings/api">API settings</a>
+            <a href="/react-agent-tools" data-nav="/react-agent-tools">Agent tools</a>
           </section>
           <section class="side-nav-section" aria-label="Workspace">
             <p>Workspace</p>
@@ -58,6 +84,7 @@
           <span id="sidebarStatusText">Not connected</span>
         </div>
       </aside>
+      <button type="button" class="mobile-sidebar-backdrop" id="mobileSidebarBackdrop" aria-label="Close navigation" data-private></button>
 
       <div class="workspace-frame">
         <header class="workspace-topbar" data-private>
@@ -74,6 +101,7 @@
           <div class="topbar-actions">
             <a class="button-link secondary compact" href="/settings/account" data-link>Account</a>
             <a class="button-link secondary compact" href="/settings/api" data-link>API</a>
+            <a class="button-link secondary compact" href="/react-agent-tools">Agent tools</a>
             <button type="button" class="link-button compact" id="logoutButton">Sign out</button>
           </div>
         </header>
@@ -607,7 +635,7 @@
           <div class="section-title row-title">
             <div>
               <h2>Review queue</h2>
-              <p>Provider mappings and Drive folders that need an operating area.</p>
+              <p>Graph links that need owner review before agents rely on them.</p>
             </div>
             <a class="button-link secondary compact" href="/areas" data-link>Open area map</a>
           </div>
@@ -619,10 +647,14 @@
             <label>
               View
               <select id="relationshipSourceFilter">
-                <option value="">All relationships</option>
+                <option value="">All graph links</option>
                 <option value="review">Needs review</option>
                 <option value="provider">Provider mappings</option>
-                <option value="drive">Drive folders</option>
+                <option value="drive">Drive links</option>
+                <option value="direct">Direct facts</option>
+                <option value="provider_hierarchy">Provider hierarchy</option>
+                <option value="route_inferred">Route inferred</option>
+                <option value="unsupported">Unsupported</option>
               </select>
             </label>
           </section>
@@ -632,15 +664,15 @@
         <section class="relationship-grid">
           <article class="panel relationship-panel">
             <div class="section-title">
-              <h2>Provider mappings</h2>
-              <p>ClickUp Spaces, Folders, and Lists currently known by CompanyCore.</p>
+              <h2>Provider graph</h2>
+              <p>Provider containers and fields with their operating-model relationship evidence.</p>
             </div>
             <div class="compact-list" id="relationshipProviderList"></div>
           </article>
           <article class="panel relationship-panel">
             <div class="section-title">
-              <h2>Drive folders</h2>
-              <p>Imported Google Drive folders that can be assigned to operating areas.</p>
+              <h2>Drive and unsupported links</h2>
+              <p>Drive hierarchy, Drive scope, and relationship families CompanyCore refuses to invent.</p>
             </div>
             <div class="compact-list" id="relationshipDriveList"></div>
           </article>
@@ -865,7 +897,7 @@
           </div>
           <div class="status-card">
             <span class="dot ok"></span>
-            <span>Implemented paths</span>
+            <span>Readiness view</span>
           </div>
         </div>
 
@@ -877,7 +909,7 @@
           <div class="section-title row-title">
             <div>
               <h2>API integration setup</h2>
-              <p>Use this list to connect provider APIs, then open the dedicated workbench only when you need provider-specific import or review controls.</p>
+              <p>Use this list to connect provider APIs, inspect graph evidence, and open dedicated workbenches only when you need provider-specific controls.</p>
             </div>
             <a class="button-link secondary compact" href="/settings/api" data-link>Agent API</a>
           </div>
@@ -899,6 +931,12 @@
               <strong>CompanyCore API</strong>
               <p>Review route capabilities for Jarvis, Paperclip, Aviary, and other service clients.</p>
               <span>Review API routes</span>
+            </a>
+            <a class="integration-action-row" href="/relationships" data-link>
+              <span class="summary-kicker">Graph</span>
+              <strong>Relationship graph</strong>
+              <p>Review direct, provider-derived, route-inferred, and unsupported links before agents rely on synchronized context.</p>
+              <span>Review graph</span>
             </a>
           </div>
         </section>
@@ -1138,6 +1176,7 @@
                 Scopes
                 <textarea id="agentKeyScopes" name="agentKeyScopes" rows="6" spellcheck="false" placeholder="connection:read&#10;notes:read"></textarea>
               </label>
+              <section class="agent-key-preview" id="agentKeyPreview" aria-label="Selected key workspace, scope, and MCP tool preview"></section>
               <div class="actions setup-actions">
                 <button type="submit" id="agentKeyCreateButton">Create scoped key</button>
                 <button type="button" class="secondary" id="agentKeyResetButton">Reset preset</button>

@@ -34,6 +34,62 @@ of rediscovering them.
 
 ## Entries
 
+### 2026-05-14 - Relationship Confidence Badges
+- Type: reusable_pattern
+- Context: WEBFOUND-008B upgraded `/relationships` from raw provider/Drive
+  lists to a graph-backed review workbench that can be trusted by owners and
+  future MCP agents.
+- Decision: Relationship rows that may influence owner or agent decisions must
+  visibly label whether a link is `Direct`, `Provider hierarchy`,
+  `Route inferred`, `Needs review`, or `Unsupported`.
+- Reuse when: Rendering relationship graph rows, integration readiness gaps,
+  MCP relationship-read previews, operating-area relationship cards, and any UI
+  that mixes direct database facts with inferred/provider-derived context.
+- Avoid when: The row is a simple local UI action with no relationship
+  confidence or AI-facing meaning.
+- Evidence: WEBFOUND-008B Playwright proof verified `/relationships` renders
+  direct, provider-hierarchy, route-inferred, needs-review, and unsupported
+  markers without overflow or console failures.
+
+### 2026-05-14 - Pre-V2 Web And MCP Foundation
+- Type: ux_learning
+- Context: The user clarified that Company City V3, game-like visuals,
+  gamification, and native mobile app work are V2 direction. Before that, the
+  application must become a fully working web + backend + MCP foundation.
+- Decision: Prioritize workspace selection, operating-area/resource navigation,
+  relationship and integration clarity, and MCP workspace-safe usability before
+  implementing Company City visuals or gamification.
+- Reuse when: Planning near-term owner-console work, sidebar changes,
+  workspace management, integration mapping, relationship review, API key/MCP
+  usability, and data-completeness work.
+- Avoid when: Starting visual/game-like V2 implementation before the foundation
+  readiness gate passes.
+- Evidence:
+  `docs/architecture/web-and-mcp-foundation-before-v2.md` and user feedback on
+  2026-05-14.
+
+### 2026-05-14 - Canonical Authenticated Shell
+- Type: reusable_pattern
+- Context: The user asked for a post-login web layout audit because the main
+  sidebar felt odd and should help manage everything the app touches. The audit
+  found that vanilla private routes and React routes currently teach two
+  different navigation models.
+- Decision: Use one private `CompanyShell` contract across the logged-in web
+  app: workspace selector, operating-area/resource navigation, workbench links,
+  integration/relationship links, AI/MCP links, top command bar, contextual
+  command brief, and status strip. Desktop keeps persistent orientation,
+  tablet uses a compact rail or split panel, and mobile leads with a compact
+  topbar plus command-first content.
+- Reuse when: Building or migrating dashboard, Company OS, areas, integrations,
+  task/data workbenches, agent tools, and any private route that needs product
+  chrome.
+- Avoid when: A route is an intentionally transitional proof route; even then,
+  document the exception and do not add another permanent navigation model.
+- Evidence:
+  `docs/ux/authenticated-shell-layout-audit-2026-05-14.md` and APP-AUDIT-001
+  screenshot artifacts from
+  `C:\Users\wrobl\AppData\Local\Temp\companycore-full-audit-20260514-180653`.
+
 ### 2026-05-14 - Company City Strategic Map
 - Type: visual_direction
 - Context: The user approved the generated dashboard direction showing a
@@ -707,3 +763,71 @@ of rediscovering them.
   destinations; those should group by object type or relevance instead.
 - Evidence: V2WEB-034 aligned module switcher groups with the V2WEB-033
   sidebar lanes and added active-result styling without changing route paths.
+
+### 2026-05-14 - Integration Readiness Cards
+- Type: reusable_pattern
+- Context: Provider setup, relationship evidence, and MCP access are too risky
+  to leave as separate configuration pages when agents may consume the same
+  workspace context.
+- Decision: Use compact readiness cards with `ready`, `attention`, and
+  `blocked` states. Each card must be derived from real workspace/API state,
+  include the next action, and sit above deeper provider workbenches.
+- Reuse when: A setup or settings screen must explain whether a provider,
+  graph, sync process, or agent access surface is safe to use.
+- Avoid when: The status cannot be backed by real state or evidence; in that
+  case show an honest empty/loading/error state instead of a green readiness
+  claim.
+- Evidence: WEBFOUND-009 added readiness cards to `/settings/integrations` for
+  ClickUp, Google Drive, relationship graph, and MCP agents, then verified the
+  screen at desktop, tablet, and mobile with no overflow, console issues, or
+  failed requests.
+
+### 2026-05-14 - Scoped Key Impact Preview
+- Type: reusable_pattern
+- Context: Service API keys and MCP profiles are security-sensitive because the
+  user may copy a key into another app or agent immediately after creation.
+- Decision: Before key creation, show the active workspace, selected profile
+  risk, scope count, MCP tool count, write/destructive exposure, supervised
+  tools, relationship graph availability, missing MCP base scopes, and tool
+  families. The preview must update when the preset or scope list changes and
+  must never expose a raw key before creation.
+- Reuse when: A user is about to create, rotate, or hand off credentials,
+  webhooks, tokens, API keys, or agent profiles.
+- Avoid when: The data cannot be derived from the same source of truth that the
+  backend uses for authorization or manifest generation.
+- Evidence: WEBFOUND-010 added the key impact preview to `/settings/api` and
+  verified preset/scope update behavior across desktop, tablet, and mobile
+  with no overflow, console issues, or failed requests.
+
+### 2026-05-14 - V2 Visual Readiness Gate
+- Type: delivery_gate_pattern
+- Context: Company City and gamification are attractive V2 directions, but
+  they can become decorative if they start before workspace, relationship,
+  integration, MCP, and agent-readiness foundations are proven.
+- Decision: Treat V2 visuals as a gated planning step. Open visual planning
+  only after foundation evidence exists, and separate "GO for planning" from
+  "GO for implementation".
+- Reuse when: A major visual metaphor, game-like shell, or new dashboard
+  paradigm depends on operational data, permissions, integrations, or AI
+  safety foundations.
+- Avoid when: The change is a small route polish task that does not alter
+  product IA or user decision flow.
+- Evidence: WEBFOUND-013 reviewed WEBFOUND-002 through WEBFOUND-012 and
+  approved WEBFOUND-014 planning while keeping direct Company City/gamification
+  implementation gated on a canonical shell/map/brief/status plan.
+
+### 2026-05-14 - Company Map Command Shell
+- Type: canonical_layout_pattern
+- Context: CompanyCore V2 needs a memorable Company City direction without
+  weakening the operational workflows that owners and AI agents depend on.
+- Decision: Use a shared authenticated shell with a company rail, command bar,
+  route content, command brief, and status strip. Dashboard may become a city
+  canvas, while dense workbenches remain quiet, scannable, and action-first.
+- Reuse when: Building V2 dashboard, shell, relationship, integration, MCP, or
+  Company OS surfaces that need active workspace, active area, blockers,
+  readiness, and next action visible together.
+- Avoid when: Building a narrow form/editor where the shell already provides
+  enough orientation and adding a map would slow the task.
+- Evidence: WEBFOUND-014 added
+  `docs/ux/v2-visual-implementation-plan-2026-05-14.md` with desktop,
+  tablet, mobile zones, state model, migration order, and proof gates.

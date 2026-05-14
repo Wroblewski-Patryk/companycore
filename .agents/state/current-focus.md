@@ -4,12 +4,25 @@ Last updated: 2026-05-14
 
 ## Active Focus
 
-ACF-DOC-001 is now complete. Stale source-of-truth wording no longer treats
-Google Drive owner consent or first import as open work; active docs now
-distinguish the verified AGRUN-007 production import from future target-safe
-Drive content/write/freshness samples. The next active finish task is
-ACF-PROD-001 operating-model data completion, followed by ACF-UX-002 Company
-City dashboard implementation or supersession.
+WEBFOUND-002/003/004, WEBFOUND-005, WEBFOUND-007, WEBFOUND-008A, WEBFOUND-008B, WEBFOUND-009, WEBFOUND-010, WEBFOUND-011, WEBFOUND-012, WEBFOUND-013, WEBFOUND-014, and ACF-PROD-001 are now complete. The
+pre-V2 foundation has token-scoped multi-workspace owner switching, a workspace
+selector, area-resource sidebar inventory, responsive drawer proof,
+keyboard/focus-hardened sidebar behavior, a durable relationship graph audit,
+a read-only relationship graph API, graph-backed relationship workbench UI,
+an integration readiness dashboard for providers, graph evidence, and MCP,
+API key workspace/risk/MCP tool preview before key creation,
+canonical shell access to the agent tool surface without a separate React nav
+taxonomy,
+repeatable AI-ready smoke coverage for scoped MCP keys, manifest visibility,
+relationship graph reads, and default guarded-command blocking,
+and a V2 readiness gate that approves visual planning while keeping direct V2
+implementation gated,
+plus a canonical V2 visual implementation plan for shell, Company City,
+command brief, status strip, route migration, responsive behavior, and proof,
+and an explicit product decision not to seed fake projects, storage locations,
+knowledge roots, or automation definitions before V2. Company City, game-like
+visuals, gamification, and native mobile remain V2 scope after the
+web/backend/MCP foundation gate.
 
 CompanyCore v1 runtime is accepted and live for the approved owner, ClickUp,
 Jarvis, Paperclip, workspace API, and agent CRUD scope. The current focus has
@@ -116,9 +129,10 @@ No local Company OS workflow recovery task remains ready.
 ## Current System Objective
 
 Optimize for source-of-truth clarity, no regression, correct owner workflows,
-and application completion. The immediate objective is ACF-PROD-001: decide
-whether empty production projects, storage locations, knowledge roots, and
-automation definitions need seed/import work or accepted deferral.
+and application completion. The WEBFOUND queue is complete. The immediate
+global objective is ACF-MAINT-001 Large File Modularization unless the user
+explicitly chooses to start V2VIS-001 Shared CompanyShell And Dashboard Frame
+from the completed V2 visual plan.
 
 ## Current Delivery Stage
 

@@ -71,6 +71,28 @@ continue from repository files alone:
   collection fetch paths, V2WEB-AGENT-023 proved the full UI recovery flow
   through inline approval decision and activation, and V2WEB-AGENT-024 repeated
   that flow against a migrated Docker Compose backend.
+- `docs/architecture/relationship-graph-audit-2026-05-14.md`: current
+  relationship graph source audit for the pre-V2 web/backend/MCP foundation.
+  Relationship APIs and UI must distinguish direct database edges,
+  provider-derived hierarchy, route-inferred table-to-record links,
+  needs-review items, and unsupported relation families. WEBFOUND-008A added
+  read-only `GET /v1/relationships/graph` plus `relationships:read` MCP
+  exposure. WEBFOUND-008B made `/relationships` consume that API, and
+  WEBFOUND-009 added `/settings/integrations` readiness cards for ClickUp,
+  Google Drive, relationship graph, and MCP agent access. WEBFOUND-010 added
+  `/settings/api` workspace/risk/MCP tool preview before service key creation.
+  WEBFOUND-011 connected `/react-agent-tools` to the canonical shell and
+  removed the separate React preview navigation taxonomy from the shared React
+  shell. WEBFOUND-012 added a repeatable AI-ready smoke for disposable owner
+  bootstrap, MCP reader/operator profile keys, manifest visibility, HTTP/MCP
+  relationship graph reads, and default guarded-command blocking. WEBFOUND-013
+  approved WEBFOUND-014 visual planning while keeping direct Company City and
+  gamification implementation gated on a canonical shell/map/brief/status
+  plan. WEBFOUND-014 added that canonical visual implementation plan and the
+  first future candidate `V2VIS-001 Shared CompanyShell And Dashboard Frame`.
+  The WEBFOUND queue is complete. Do not add a
+  generic edge table or fake relationship data before a concrete editable
+  workflow proves the need.
 - Google Drive integration memory: as of 2026-05-14, Google Drive uses one
   workspace OAuth connection for Drive, Docs, and Sheets. The callback route is
   `/settings/drive`; private-route login redirects must preserve callback query
@@ -78,8 +100,11 @@ continue from repository files alone:
   request `mimeType`, and imports refresh searchable content snapshots for
   Google Docs and Sheets. Production now runs commit
   `c5878d95a47f17745f65689c08e9e317a6465777`; OAuth is active, protected smoke
-  passes, and owner discovery returns 172 folders. First import is blocked
-  until owner-selected folder roots exist in production settings.
+  passes, and owner discovery returns 172 folders. The numbered department
+  roots `00`-`12` have been selected, imported, and mapped; first import is no
+  longer a blocker. Future Drive work should focus on freshness,
+  content-quality, Docs/Sheets write, or changes reconciliation only when those
+  become active scope.
 
 If one of these files is missing, empty, stale, or still template-like, rebuild
 the minimum useful version from architecture docs, context files, accepted

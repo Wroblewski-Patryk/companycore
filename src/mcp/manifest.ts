@@ -109,6 +109,10 @@ function routeDescription(route: ManifestRoute) {
     return "Use the CompanyCore Google Drive adapter through audited workspace-scoped API access.";
   }
 
+  if (route.capability === "relationships:read") {
+    return "Read the workspace relationship graph with direct, inferred, provider-derived, review, and unsupported relationship context.";
+  }
+
   if (route.capability.startsWith("integration-settings:")) {
     return "Inspect or operate workspace integration settings through controlled lifecycle actions.";
   }

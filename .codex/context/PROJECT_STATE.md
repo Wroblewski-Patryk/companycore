@@ -90,6 +90,39 @@ Last updated: 2026-05-14
   Playwright production checks for `/dashboard`, `/data`, `/relationships`,
   `/settings/drive`, `/settings/api`, and `/areas` reported no failed requests
   and no console warnings or errors.
+- 2026-05-14: WEBFOUND-009 turned `/settings/integrations` into the
+  pre-V2 integration readiness dashboard. The screen derives ClickUp, Google
+  Drive, relationship graph, and MCP agent readiness from real connection,
+  graph, API key, and MCP manifest state, with next actions for setup, graph
+  review, and agent API management.
+- 2026-05-14: WEBFOUND-010 added `/settings/api` key impact preview before
+  service key creation. The owner can now see the active workspace, selected
+  profile risk, selected scopes, MCP tool count, write/destructive exposure,
+  supervised tool count, relationship graph availability, missing MCP base
+  scopes, and tool families before a raw key is generated.
+- 2026-05-14: WEBFOUND-011 connected `/react-agent-tools` to the canonical
+  authenticated shell. The vanilla sidebar, topbar, and module switcher now
+  expose Agent tools, module search opens the backend-served React route
+  through full-page navigation, and the shared React shell now links to
+  canonical CompanyCore destinations instead of a separate React preview
+  route taxonomy.
+- 2026-05-14: WEBFOUND-012 added `npm run ai-ready:smoke` as the repeatable
+  AI/MCP readiness proof. The smoke registers a disposable owner/workspace,
+  creates `mcp_company_os_reader` and `mcp_operator` profile keys, verifies
+  reader `/v1/mcp/manifest` visibility, reads `/v1/relationships/graph` over
+  HTTP and the stdio MCP bridge, and verifies a risky stage-complete MCP tool
+  returns `mcp_tool_requires_supervision` in default bridge mode.
+- 2026-05-14: WEBFOUND-013 recorded the V2 UX readiness gate in
+  `docs/ux/v2-ux-readiness-review-2026-05-14.md`. Decision: GO for
+  WEBFOUND-014 visual planning, not direct Company City or gamification
+  implementation. Direct V2 UI work remains gated on a canonical
+  shell/map/brief/status plan with desktop, tablet, and mobile behavior.
+- 2026-05-14: WEBFOUND-014 added
+  `docs/ux/v2-visual-implementation-plan-2026-05-14.md`, defining the
+  canonical V2 shell, Company City dashboard composition, command brief,
+  status strip, responsive behavior, component contract, state model, visual
+  asset strategy, route migration order, validation plan, and first future
+  code candidate `V2VIS-001 Shared CompanyShell And Dashboard Frame`.
 - 2026-05-14: `V2WEB-AGENT-002 Company OS Correlation Timeline` added a
   client-composed evidence chain to `/react-company-os` using existing recent
   event and audit log `correlationId` data from `/v1/company-os`.
@@ -163,6 +196,68 @@ Last updated: 2026-05-14
   transitional until the implementation proves one shared shell across
   desktop, tablet, and mobile. Source:
   `docs/ux/authenticated-shell-layout-audit-2026-05-14.md`.
+- 2026-05-14: The user clarified that Company City V3, strategy-game visuals,
+  gamification, and the native mobile app belong to V2. Before that,
+  CompanyCore must complete the web/backend/MCP foundation: multi-workspace
+  owner context, workspace selector, operating-area/resource navigation,
+  integration and relationship clarity, data-completeness decisions, and
+  MCP-safe AI usability. Immediate source:
+  `docs/architecture/web-and-mcp-foundation-before-v2.md`; task plan:
+  `docs/planning/web-and-mcp-foundation-task-plan.md`.
+- 2026-05-14: WEBFOUND-002/003/004 implemented the first pre-V2
+  web/backend/MCP foundation slice: owner-only workspace list/create/select
+  routes, `/auth/me` workspace readback, `/v1/operating-model/area-inventory`,
+  an authenticated shell workspace selector/create control, and expandable
+  area/resource sidebar navigation with mobile/tablet drawer backdrop.
+  `npm test` passed against disposable PostgreSQL on `localhost:55453`.
+  Playwright owner-shell smoke passed against isolated
+  `http://127.0.0.1:3106` and disposable PostgreSQL on `localhost:55454`,
+  covering desktop `1366x900`, tablet `834x1112`, mobile `390x844`,
+  workspace create/select/switch, 13 sidebar areas, no horizontal overflow, no
+  relevant console errors, no failed requests, and drawer close via backdrop.
+  The verification task contract is
+  `docs/planning/webfound-002-004-task-contract.md`.
+- 2026-05-14: ACF-PROD-001 resolved the operating-model data completion
+  decision. CompanyCore should not seed fake projects, storage locations,
+  knowledge roots, or automation definitions before V2. Empty containers are
+  accepted foundation-ready states when UI labels them honestly and future
+  flows populate them with real owner-created or imported data. Source:
+  `docs/planning/acf-prod-001-task-contract.md`.
+- 2026-05-14: WEBFOUND-005 hardened the area/resource sidebar as the current
+  pre-V2 shell navigation pattern. Area summaries and resource-family buttons
+  now have actionable accessible labels; the selected/open area has an active
+  state; Escape closes workspace creation and the mobile drawer with focus
+  return; mobile drawer open state locks body scroll. `npm test` passed
+  against disposable PostgreSQL on `localhost:55455`, and Playwright smoke
+  passed on isolated `http://127.0.0.1:3107` with no overflow, no relevant
+  console errors, and no failed requests. Source:
+  `docs/planning/webfound-005-task-contract.md`.
+- 2026-05-14: WEBFOUND-007 completed the relationship graph audit. Existing
+  workspace, operating-area, provider mapping, Drive, storage, knowledge,
+  automation definition, business object, resource, integration, and
+  agent-event relationship sources are classified in
+  `docs/architecture/relationship-graph-audit-2026-05-14.md`. The next safe
+  implementation is a read-only `GET /v1/relationships/graph` endpoint that
+  returns nodes, edges, confidence labels, review items, and unsupported
+  families before broad `/relationships` UI expansion or MCP relationship
+  exposure.
+- 2026-05-14: WEBFOUND-008A implemented the read-only relationship graph API.
+  `GET /v1/relationships/graph` returns workspace-scoped nodes, edges,
+  review items, unsupported families, summary counts, and edge confidence
+  labels. `relationships:read` is now part of the capability manifest and MCP
+  reader/operator profiles. `npm run build` passed, and `npm test` passed
+  against disposable PostgreSQL on `localhost:55457`; the validation container
+  was removed after the run. Source:
+  `docs/planning/webfound-008a-task-contract.md`.
+- 2026-05-14: WEBFOUND-008B upgraded `/relationships` to consume the graph API.
+  The workbench now labels direct, provider-hierarchy, route-inferred,
+  needs-review, and unsupported relationship states while preserving existing
+  provider/Drive assignment actions. `node --check public/app.js`,
+  `npm run build`, and `npm test` passed against disposable PostgreSQL on
+  `localhost:55458`; Playwright fallback verified desktop and mobile
+  `/relationships` on `http://127.0.0.1:3108` with no overflow, console
+  issues, or failed requests. Source:
+  `docs/planning/webfound-008b-task-contract.md`.
 - 2026-05-14: Google Drive remains one workspace OAuth integration for Drive,
   Docs, and Sheets rather than one configuration per Google service. The owner
   callback route is `/settings/drive`, and authenticated private-route handling
@@ -292,10 +387,9 @@ Last updated: 2026-05-14
 - Main active objective: close audit-derived finish blockers in priority order
   so the web and agent Company OS can reach product-quality v1 without hiding
   UX, security, data, documentation, or deployment gaps.
-- Top blockers: operating-model data completeness, Company City dashboard
-  implementation or supersession, maintainability hotspots, upstream
-  Paperclip/OpenJarvis source merge permissions, and GitHub-to-Coolify
-  auto-deploy proof.
+- Top blockers: maintainability hotspots, explicit future V2 implementation
+  decision, upstream Paperclip/OpenJarvis source merge permissions, and
+  GitHub-to-Coolify auto-deploy proof.
 - Success criteria for this phase: APP-AUDIT-001 findings are represented in
   the canonical queue, ACF-UX-001 and ACF-SEC-001 have evidence-backed closure,
   stale Drive blockers are removed from active ledgers, and new product work
@@ -303,13 +397,13 @@ Last updated: 2026-05-14
   deferred.
 
 ## Autonomous Iteration State
-- Current iteration: ACF-DOC-001 Coverage Ledger Reconciliation completed.
+- Current iteration: WEBFOUND-014 V2 Visual Implementation Plan completed.
 - Current operation mode: BUILDER
-- Last completed iteration: ACF-DOC-001 Coverage Ledger Reconciliation.
-- Last completed task: stale Drive/import blocker wording and finish-queue
-  state reconciliation.
-- Current task status: ACF-DOC-001 verified; next implementation task is
-  ACF-PROD-001 Operating Model Data Completion Decision.
+- Last completed iteration: WEBFOUND-014 V2 Visual Implementation Plan.
+- Last completed task: canonical V2 shell, Company City, command brief, status
+  strip, route migration, state, asset, and proof plan.
+- Current task status: WEBFOUND queue complete; next global task is
+  ACF-MAINT-001 unless V2VIS-001 is explicitly selected.
 - Next required mode: BUILDER; execute ACF-PROD-001 before unrelated broad
   product work.
 

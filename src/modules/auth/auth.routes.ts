@@ -127,5 +127,25 @@ authRouter.post("/login", asyncHandler(async (req, res) => {
 }));
 
 authRouter.get("/me", requireAuthContext, asyncHandler(async (req, res) => {
-  res.json({ data: req.auth });
+  if (req.auth!.authType !== "user" || !req.auth!.userId) {
+    return res.json({ data: req.auth });
+  }
+
+  const memberships = await prisma.workspaceMembership.findMany({
+    where: { userId: req.auth!.userId },
+    orderBy: { createdAt: "asc" },
+    include: { workspace: true }
+  });
+
+  res.json({
+    data: {
+      ...req.auth,
+      workspaces: memberships.map((membership) => ({
+        id: membership.workspace.id,
+        name: membership.workspace.name,
+        role: membership.role,
+        active: membership.workspaceId === req.auth!.workspaceId
+      }))
+    }
+  });
 }));

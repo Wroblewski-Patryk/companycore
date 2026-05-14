@@ -205,6 +205,92 @@ operatingModelRouter.get("/areas", asyncHandler(async (req, res) => {
   res.json({ data: areas });
 }));
 
+operatingModelRouter.get("/area-inventory", asyncHandler(async (req, res) => {
+  const workspaceId = req.auth!.workspaceId;
+  await ensureOperatingModelForWorkspace(prisma, workspaceId);
+
+  const [
+    areas,
+    externalMappings,
+    driveFiles,
+    storageLocations,
+    knowledgeRoots,
+    automationDefinitions
+  ] = await Promise.all([
+    prisma.operatingArea.findMany({
+      where: { workspaceId },
+      orderBy: { position: "asc" },
+      include: {
+        folders: { select: { id: true } },
+        tables: { select: { id: true, apiSlug: true, name: true } }
+      }
+    }),
+    prisma.externalContainerMapping.groupBy({
+      by: ["areaId"],
+      where: { workspaceId },
+      _count: { _all: true }
+    }),
+    prisma.googleDriveFile.groupBy({
+      by: ["operatingAreaId"],
+      where: { workspaceId, operatingAreaId: { not: null } },
+      _count: { _all: true }
+    }),
+    prisma.storageLocation.groupBy({
+      by: ["areaId"],
+      where: { workspaceId, areaId: { not: null } },
+      _count: { _all: true }
+    }),
+    prisma.knowledgeRoot.groupBy({
+      by: ["areaId"],
+      where: { workspaceId, areaId: { not: null } },
+      _count: { _all: true }
+    }),
+    prisma.automationDefinition.groupBy({
+      by: ["areaId"],
+      where: { workspaceId, areaId: { not: null } },
+      _count: { _all: true }
+    })
+  ]);
+
+  const countById = <T extends { _count: { _all: number } }>(
+    rows: T[],
+    id: (row: T) => string | null
+  ) => new Map(rows.flatMap((row) => {
+    const key = id(row);
+    return key ? [[key, row._count._all] as const] : [];
+  }));
+
+  const externalMappingCounts = countById(externalMappings, (row) => row.areaId);
+  const driveFileCounts = countById(driveFiles, (row) => row.operatingAreaId);
+  const storageCounts = countById(storageLocations, (row) => row.areaId);
+  const knowledgeCounts = countById(knowledgeRoots, (row) => row.areaId);
+  const automationCounts = countById(automationDefinitions, (row) => row.areaId);
+
+  res.json({
+    data: areas.map((area) => ({
+      id: area.id,
+      key: area.key,
+      name: area.name,
+      position: area.position,
+      isSystem: area.isSystem,
+      resources: {
+        folders: area.folders.length,
+        tables: area.tables.length,
+        externalMappings: externalMappingCounts.get(area.id) ?? 0,
+        driveFiles: driveFileCounts.get(area.id) ?? 0,
+        storageLocations: storageCounts.get(area.id) ?? 0,
+        knowledgeRoots: knowledgeCounts.get(area.id) ?? 0,
+        automationDefinitions: automationCounts.get(area.id) ?? 0
+      },
+      tables: area.tables.map((table) => ({
+        id: table.id,
+        apiSlug: table.apiSlug,
+        name: table.name
+      }))
+    }))
+  });
+}));
+
 operatingModelRouter.post("/areas", asyncHandler(async (req, res) => {
   const input = operatingAreaSchema.parse(req.body);
   const workspaceId = req.auth!.workspaceId;

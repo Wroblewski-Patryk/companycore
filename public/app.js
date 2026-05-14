@@ -6,9 +6,11 @@ const apiRequestTimeoutMs = 20_000;
 const state = {
   ownerToken: sessionStorage.getItem("companycoreOwnerToken") || "",
   workspace: null,
+  workspaces: [],
   user: null,
   capabilities: [],
   adapterManifest: null,
+  mcpManifest: null,
   apiKeys: [],
   agentKeyProfiles: [],
   lastRawApiKey: null,
@@ -42,6 +44,15 @@ const state = {
     storageLocations: [],
     knowledgeRoots: [],
     automationDefinitions: []
+  },
+  areaInventory: [],
+  relationshipGraph: {
+    status: "idle",
+    nodes: [],
+    edges: [],
+    reviewItems: [],
+    unsupportedFamilies: [],
+    summary: null
   },
   databaseTables: new Map(),
   selectedAreaKey: "",
@@ -236,6 +247,7 @@ const loginStatus = document.querySelector("#loginStatus");
 const registerStatus = document.querySelector("#registerStatus");
 const logoutButton = document.querySelector("#logoutButton");
 const mobileMenuButton = document.querySelector("#mobileMenuButton");
+const mobileSidebarBackdrop = document.querySelector("#mobileSidebarBackdrop");
 const clickupPanel = document.querySelector("#clickupPanel");
 const clickupContext = document.querySelector("#clickupContext");
 const checkTokenButton = document.querySelector("#checkTokenButton");
@@ -266,6 +278,13 @@ const moduleResults = document.querySelector("#moduleResults");
 const sidebarWorkspaceName = document.querySelector("#sidebarWorkspaceName");
 const sidebarStatusDot = document.querySelector("#sidebarStatusDot");
 const sidebarStatusText = document.querySelector("#sidebarStatusText");
+const workspaceSwitcher = document.querySelector("#workspaceSwitcher");
+const workspaceCreateToggle = document.querySelector("#workspaceCreateToggle");
+const workspaceCreateForm = document.querySelector("#workspaceCreateForm");
+const workspaceCreateName = document.querySelector("#workspaceCreateName");
+const workspaceCreateCancel = document.querySelector("#workspaceCreateCancel");
+const workspaceSwitchStatus = document.querySelector("#workspaceSwitchStatus");
+const sidebarAreaList = document.querySelector("#sidebarAreaList");
 const clickupWorkspaceLabel = document.querySelector("#clickupWorkspaceLabel");
 const clickupActionStatus = document.querySelector("#clickupActionStatus");
 const workspaceNameLabel = document.querySelector("#workspaceNameLabel");
@@ -283,6 +302,7 @@ const agentKeyForm = document.querySelector("#agentKeyForm");
 const agentKeyName = document.querySelector("#agentKeyName");
 const agentKeyPreset = document.querySelector("#agentKeyPreset");
 const agentKeyScopes = document.querySelector("#agentKeyScopes");
+const agentKeyPreview = document.querySelector("#agentKeyPreview");
 const agentKeyCreateButton = document.querySelector("#agentKeyCreateButton");
 const agentKeyResetButton = document.querySelector("#agentKeyResetButton");
 const refreshAgentKeysButton = document.querySelector("#refreshAgentKeysButton");
@@ -441,7 +461,8 @@ const routeLabels = {
   "/settings/integrations": "Integrations",
   "/settings": "ClickUp adapter",
   "/settings/drive": "Google Drive",
-  "/settings/api": "API settings"
+  "/settings/api": "API settings",
+  "/react-agent-tools": "Agent tools"
 };
 
 const moduleRoutes = [
@@ -455,6 +476,7 @@ const moduleRoutes = [
   { path: "/settings", label: "ClickUp adapter", group: "Integrations", keywords: "clickup token workspace lists sync import" },
   { path: "/settings/drive", label: "Google Drive", group: "Integrations", keywords: "drive folders files oauth import reconcile scan" },
   { path: "/settings/api", label: "API settings", group: "Integrations", keywords: "api routes manifest agents service keys capabilities" },
+  { path: "/react-agent-tools", label: "Agent tools", group: "Integrations", keywords: "mcp tools manifest capabilities agent authority approval risk", external: true },
   { path: "/settings/account", label: "Account", group: "Workspace", keywords: "owner workspace readiness login account" }
 ];
 
@@ -575,6 +597,8 @@ function moduleMetric(path) {
         : "Google Drive not connected";
     case "/settings/api":
       return `${apiRoutes} implemented API routes`;
+    case "/react-agent-tools":
+      return `${Array.isArray(state.mcpManifest?.tools) ? state.mcpManifest.tools.length : 0} MCP tools visible`;
     default:
       return "";
   }
@@ -653,6 +677,10 @@ function renderModuleSwitcher({ open = false } = {}) {
       button.addEventListener("click", () => {
         moduleSearch.value = "";
         closeModuleSwitcher();
+        if (row.external) {
+          window.location.assign(row.path);
+          return;
+        }
         navigate(row.path);
       });
       moduleResults.append(button);
@@ -677,6 +705,10 @@ function openFirstModuleResult() {
 
   moduleSearch.value = "";
   closeModuleSwitcher();
+  if (first.external) {
+    window.location.assign(first.path);
+    return;
+  }
   navigate(first.path);
 }
 
@@ -684,6 +716,7 @@ function updateChrome() {
   const signedIn = isSignedIn();
   document.body.classList.toggle("is-signed-in", signedIn);
   document.body.classList.toggle("mobile-nav-open", state.mobileMenuOpen && signedIn);
+  document.body.style.overflow = state.mobileMenuOpen && signedIn ? "hidden" : "";
   privateControls.forEach((element) => {
     element.hidden = !signedIn;
   });
@@ -695,6 +728,9 @@ function updateChrome() {
   }
   if (mobileMenuButton) {
     mobileMenuButton.setAttribute("aria-expanded", String(state.mobileMenuOpen && signedIn));
+  }
+  if (mobileSidebarBackdrop) {
+    mobileSidebarBackdrop.hidden = !(state.mobileMenuOpen && signedIn);
   }
 }
 
@@ -1452,11 +1488,9 @@ function dashboardPriority(items, signals) {
 }
 
 function integrationReadinessTitle() {
-  const connected = [
-    state.clickup.configured,
-    state.googleDrive.oauthTokenConfigured
-  ].filter(Boolean).length;
-  return `${connected}/2 connected`;
+  const items = integrationReadinessItems();
+  const ready = items.filter((item) => item.status === "ready").length;
+  return `${ready}/${items.length} ready`;
 }
 
 function integrationReadinessDetail() {
@@ -1473,6 +1507,54 @@ function integrationReadinessDetail() {
     return "ClickUp is ready; Google Drive still needs consent/import.";
   }
   return "ClickUp and Google Drive are ready for operating work.";
+}
+
+function integrationReadinessItems() {
+  const graphSummary = state.relationshipGraph.summary || {};
+  const confidence = graphSummary.confidence || {};
+  const graphEdges = Number(graphSummary.edges || state.relationshipGraph.edges.length || 0);
+  const reviewCount = state.relationshipGraph.reviewItems.length || Number(confidence.needsReview || 0);
+  const unsupportedCount = state.relationshipGraph.unsupportedFamilies.length || Number(confidence.unsupported || 0);
+  const activeKeys = state.apiKeys.filter((key) => key.active).length;
+  const scopedKeys = state.apiKeys.filter((key) => key.active && Array.isArray(key.scopes) && key.scopes.length > 0).length;
+  const mcpTools = Array.isArray(state.mcpManifest?.tools) ? state.mcpManifest.tools.length : 0;
+  const hasRelationshipTool = Array.isArray(state.mcpManifest?.tools)
+    && state.mcpManifest.tools.some((tool) => tool.capability === "relationships:read");
+
+  return [
+    {
+      label: "ClickUp",
+      status: state.clickup.configured && state.clickup.active ? "ready" : state.clickup.configured ? "attention" : "blocked",
+      title: state.clickup.configured ? state.clickup.active ? "Token active" : "Saved, inactive" : "Token missing",
+      detail: `${state.tasks.filter((task) => task.source === "clickup").length} synced task${state.tasks.filter((task) => task.source === "clickup").length === 1 ? "" : "s"}, ${(state.clickup.config.listIds || []).length} selected List${(state.clickup.config.listIds || []).length === 1 ? "" : "s"}.`,
+      href: "/settings",
+      action: "Configure"
+    },
+    {
+      label: "Google Drive",
+      status: state.googleDrive.oauthTokenConfigured && state.googleDrive.active ? "ready" : state.googleDrive.oauthClientConfigured ? "attention" : "blocked",
+      title: state.googleDrive.oauthTokenConfigured ? state.googleDrive.active ? "OAuth active" : "Consent saved, inactive" : state.googleDrive.oauthClientConfigured ? "Consent required" : "OAuth client missing",
+      detail: `${state.googleDrive.files.length} imported item${state.googleDrive.files.length === 1 ? "" : "s"}, ${state.googleDrive.files.filter((file) => file.isFolder).length} folder${state.googleDrive.files.filter((file) => file.isFolder).length === 1 ? "" : "s"} available for mapping.`,
+      href: "/settings/drive",
+      action: "Open Drive"
+    },
+    {
+      label: "Relationship graph",
+      status: state.relationshipGraph.status !== "ready" ? "attention" : reviewCount > 0 || unsupportedCount > 0 ? "attention" : "ready",
+      title: state.relationshipGraph.status === "ready" ? `${graphEdges} edge${graphEdges === 1 ? "" : "s"}` : "Graph loading",
+      detail: `${reviewCount} review item${reviewCount === 1 ? "" : "s"}, ${unsupportedCount} unsupported provider famil${unsupportedCount === 1 ? "y" : "ies"}.`,
+      href: "/relationships",
+      action: "Review"
+    },
+    {
+      label: "MCP agents",
+      status: scopedKeys > 0 && hasRelationshipTool ? "ready" : activeKeys > 0 || mcpTools > 0 ? "attention" : "blocked",
+      title: `${scopedKeys} scoped active key${scopedKeys === 1 ? "" : "s"}`,
+      detail: `${mcpTools} manifest tool${mcpTools === 1 ? "" : "s"} exposed; relationship graph ${hasRelationshipTool ? "is" : "is not"} available to MCP.`,
+      href: "/settings/api",
+      action: "Open API"
+    }
+  ];
 }
 
 function operationalStepElement(step) {
@@ -1703,6 +1785,83 @@ function areaNameById(areaId) {
   return area ? areaLabel(area) : "Unassigned";
 }
 
+function relationshipGraphNodeMap() {
+  return new Map((state.relationshipGraph.nodes || []).map((node) => [node.id, node]));
+}
+
+function relationshipGraphNodeLabel(nodeMap, nodeId) {
+  const node = nodeMap.get(nodeId);
+  return node?.label || nodeId;
+}
+
+function confidenceLabel(confidence) {
+  return {
+    direct: "Direct",
+    provider_hierarchy: "Provider hierarchy",
+    route_inferred: "Route inferred",
+    needs_review: "Needs review",
+    unsupported: "Unsupported"
+  }[confidence] || "Relationship";
+}
+
+function relationshipGraphRows() {
+  const graph = state.relationshipGraph;
+  const nodeMap = relationshipGraphNodeMap();
+  const edgeRows = (graph.edges || []).map((edge) => {
+    const fromLabel = relationshipGraphNodeLabel(nodeMap, edge.from);
+    const toLabel = relationshipGraphNodeLabel(nodeMap, edge.to);
+    const source = edge.sourceModel === "GoogleDriveFile"
+      ? "drive"
+      : edge.sourceModel === "ExternalContainerMapping" || edge.sourceModel === "ExternalFieldMapping"
+        ? "provider"
+        : "graph";
+    return {
+      type: "edge",
+      source,
+      sourceLabel: edge.sourceModel,
+      title: `${fromLabel} -> ${toLabel}`,
+      detail: `${edge.label} / ${confidenceLabel(edge.confidence)} / ${edge.sourceModel}.${edge.sourceField}`,
+      provider: edge.sourceModel,
+      entityType: edge.sourceField,
+      confidence: edge.confidence,
+      needsReview: false,
+      item: edge,
+      searchable: [fromLabel, toLabel, edge.label, edge.confidence, edge.sourceModel, edge.sourceField].filter(Boolean).join(" ").toLowerCase()
+    };
+  });
+  const reviewRows = (graph.reviewItems || []).map((item) => {
+    const nodeLabel = relationshipGraphNodeLabel(nodeMap, item.nodeId);
+    return {
+      type: "review",
+      source: "review",
+      sourceLabel: item.type,
+      title: item.title,
+      detail: `${nodeLabel} / ${item.detail}`,
+      provider: item.type,
+      entityType: item.severity,
+      confidence: "needs_review",
+      needsReview: true,
+      item,
+      searchable: [item.title, item.detail, item.type, nodeLabel].filter(Boolean).join(" ").toLowerCase()
+    };
+  });
+  const unsupportedRows = (graph.unsupportedFamilies || []).map((family) => ({
+    type: "unsupported",
+    source: "unsupported",
+    sourceLabel: "Unsupported",
+    title: family.family,
+    detail: `${family.reason}${family.nextAction ? ` / ${family.nextAction}` : ""}`,
+    provider: "unsupported",
+    entityType: family.family,
+    confidence: "unsupported",
+    needsReview: false,
+    item: family,
+    searchable: [family.family, family.reason, family.nextAction].filter(Boolean).join(" ").toLowerCase()
+  }));
+
+  return [...reviewRows, ...edgeRows, ...unsupportedRows];
+}
+
 function relationshipRows(mappings, driveFolders) {
   return [
     ...mappings.map((mapping) => ({
@@ -1743,11 +1902,25 @@ function relationshipMatchesFilters(row) {
   if (source === "drive" && row.source !== "drive") {
     return false;
   }
+  if (source === "direct" && row.confidence !== "direct") {
+    return false;
+  }
+  if (source === "provider_hierarchy" && row.confidence !== "provider_hierarchy") {
+    return false;
+  }
+  if (source === "route_inferred" && row.confidence !== "route_inferred") {
+    return false;
+  }
+  if (source === "unsupported" && row.confidence !== "unsupported") {
+    return false;
+  }
 
   const searchable = [
+    row.searchable,
     row.title,
     row.provider,
     row.entityType,
+    row.confidence,
     row.sourceLabel,
     areaNameById(row.areaId)
   ].filter(Boolean).join(" ").toLowerCase();
@@ -1763,7 +1936,10 @@ function renderRelationshipCenter() {
 
   const mappings = state.operatingModel.externalMappings || [];
   const driveFolders = state.googleDrive.files.filter((file) => file.isFolder);
-  const rows = relationshipRows(mappings, driveFolders);
+  const graphReady = state.relationshipGraph.status === "ready";
+  const rows = graphReady
+    ? relationshipGraphRows()
+    : relationshipRows(mappings, driveFolders);
   const filteredRows = rows.filter(relationshipMatchesFilters);
   const queueRows = filteredRows.filter((row) => row.needsReview);
   const queueCount = rows.filter((row) => row.needsReview).length;
@@ -1771,7 +1947,9 @@ function renderRelationshipCenter() {
   relationshipSourceFilter.value = state.relationshipFilters.source;
 
   relationshipSummary.textContent = isSignedIn()
-    ? `${filteredRows.length} of ${rows.length} relationship${rows.length === 1 ? "" : "s"} shown. ${queueCount} need review.`
+    ? graphReady
+      ? `${filteredRows.length} of ${rows.length} graph relationship${rows.length === 1 ? "" : "s"} shown. ${queueCount} need review.`
+      : `${filteredRows.length} of ${rows.length} relationship${rows.length === 1 ? "" : "s"} shown. ${queueCount} need review.`
     : "Sign in to load relationship data.";
   relationshipContext.append(relationshipContextElement({
     mappings,
@@ -1794,8 +1972,18 @@ function renderRelationshipCenter() {
     relationshipQueue.append(empty);
   } else {
     for (const row of queueRows.slice(0, 12)) {
-      relationshipQueue.append(relationshipQueueRow({ type: row.type, item: row.item }));
+      relationshipQueue.append(relationshipQueueRow(row));
     }
+  }
+
+  if (graphReady) {
+    const providerGraphRows = filteredRows.filter((row) => row.source === "provider");
+    const driveGraphRows = filteredRows.filter((row) => row.source === "drive");
+    const unsupportedRows = filteredRows.filter((row) => row.source === "unsupported");
+
+    renderCompactList(relationshipProviderList, providerGraphRows.slice(0, 80), relationshipGraphListItemHtml, state.relationshipFilters.source === "drive" ? "Provider graph links are hidden by the current filter." : "No provider graph links match the current filters.");
+    renderCompactList(relationshipDriveList, [...driveGraphRows, ...unsupportedRows].slice(0, 80), relationshipGraphListItemHtml, state.relationshipFilters.source === "provider" ? "Drive and unsupported graph links are hidden by the current filter." : "No Drive or unsupported graph links match the current filters.");
+    return;
   }
 
   const filteredMappings = filteredRows.filter((row) => row.type === "mapping").map((row) => row.item);
@@ -1827,20 +2015,38 @@ function renderRelationshipCenter() {
 function relationshipContextElement({ mappings, driveFolders, rows, filteredRows, queueCount }) {
   const panel = document.createElement("article");
   panel.className = "relationship-context-card";
+  const graph = state.relationshipGraph;
+  const summary = graph.summary;
   const status = queueCount > 0
     ? `${queueCount} need review`
     : rows.length > 0 ? "All mapped" : "Ready for imports";
+  const heading = graph.status === "ready"
+    ? "Workspace relationship graph"
+    : "Provider and Drive area mapping";
+  const detail = graph.status === "ready"
+    ? "Use this review center to inspect direct, provider-derived, route-inferred, needs-review, and unsupported links before agents rely on workspace context."
+    : "Use this review center to assign ClickUp structures and imported Drive folders to the right operating areas before agents rely on that context.";
+  const graphPills = graph.status === "ready"
+    ? `
+        <span>${summary?.confidence?.direct ?? 0} direct</span>
+        <span>${summary?.confidence?.providerHierarchy ?? 0} provider hierarchy</span>
+        <span>${summary?.confidence?.routeInferred ?? 0} route inferred</span>
+        <span>${summary?.unsupportedFamilies ?? 0} unsupported</span>
+      `
+    : `
+        <span>${mappings.length} provider mapping${mappings.length === 1 ? "" : "s"}</span>
+        <span>${driveFolders.length} Drive folder${driveFolders.length === 1 ? "" : "s"}</span>
+      `;
   panel.innerHTML = `
     <div class="relationship-context-copy">
       <span class="summary-kicker">Relationship context</span>
       <div class="relationship-context-heading">
-        <strong>Provider and Drive area mapping</strong>
+        <strong>${escapeHtml(heading)}</strong>
         <span class="workbench-index-status">${escapeHtml(status)}</span>
       </div>
-      <p>Use this review center to assign ClickUp structures and imported Drive folders to the right operating areas before agents rely on that context.</p>
+      <p>${escapeHtml(detail)}</p>
       <div class="relationship-context-pills" aria-label="Relationship operation context">
-        <span>${mappings.length} provider mapping${mappings.length === 1 ? "" : "s"}</span>
-        <span>${driveFolders.length} Drive folder${driveFolders.length === 1 ? "" : "s"}</span>
+        ${graphPills}
         <span>${queueCount} review item${queueCount === 1 ? "" : "s"}</span>
         <span>${filteredRows.length} of ${rows.length} visible</span>
       </div>
@@ -1854,6 +2060,15 @@ function relationshipContextElement({ mappings, driveFolders, rows, filteredRows
   return panel;
 }
 
+function relationshipGraphListItemHtml(row) {
+  const badge = `<span class="relationship-confidence relationship-confidence-${escapeHtml(row.confidence)}">${escapeHtml(confidenceLabel(row.confidence))}</span>`;
+  return `
+    <strong>${escapeHtml(row.title)}</strong>
+    <span>${escapeHtml(row.detail)}</span>
+    ${badge}
+  `;
+}
+
 function relationshipQueueRow(queueItem) {
   const row = document.createElement("article");
   row.className = "relationship-row";
@@ -1863,7 +2078,31 @@ function relationshipQueueRow(queueItem) {
   const editor = document.createElement("div");
   editor.className = "relationship-editor";
 
-  if (queueItem.type === "mapping") {
+  if (queueItem.type === "review") {
+    const item = queueItem.item;
+    title.textContent = item.title;
+    detail.textContent = item.detail;
+    const actionPath = item.actionHint?.path || "";
+    const mappingMatch = actionPath.match(/external-mappings\/([^/]+)\/scope/);
+    const driveMatch = actionPath.match(/google-drive\/files\/([^/]+)\/scope/);
+    if (mappingMatch) {
+      editor.innerHTML = scopeEditorHtml({
+        id: mappingMatch[1],
+        selectedAreaId: state.operatingModel.areas[0]?.id,
+        type: "mapping",
+        label: "Assign area"
+      });
+    } else if (driveMatch) {
+      editor.innerHTML = scopeEditorHtml({
+        id: driveMatch[1],
+        selectedAreaId: state.operatingModel.areas[0]?.id,
+        type: "drive",
+        label: "Assign area"
+      });
+    } else {
+      editor.innerHTML = `<span class="relationship-confidence relationship-confidence-needs_review">${escapeHtml(confidenceLabel("needs_review"))}</span>`;
+    }
+  } else if (queueItem.type === "mapping") {
     const mapping = queueItem.item;
     title.textContent = mapping.name || mapping.externalId || mapping.id;
     detail.textContent = `${providerLabel(mapping.provider)} · ${mapping.entityType}`;
@@ -2138,6 +2377,16 @@ function renderIntegrationTaxonomy() {
   const driveStatus = state.googleDrive.oauthTokenConfigured
     ? state.googleDrive.active ? "Active" : "Saved, inactive"
     : state.googleDrive.oauthClientConfigured ? "OAuth client saved" : "Not connected";
+  const readinessItems = integrationReadinessItems();
+  const relationshipSummary = state.relationshipGraph.summary || {};
+  const relationshipConfidence = relationshipSummary.confidence || {};
+  const relationshipEdges = Number(relationshipSummary.edges || state.relationshipGraph.edges.length || 0);
+  const relationshipReviews = state.relationshipGraph.reviewItems.length || Number(relationshipConfidence.needsReview || 0);
+  const unsupportedFamilies = state.relationshipGraph.unsupportedFamilies.length || Number(relationshipConfidence.unsupported || 0);
+  const mcpTools = Array.isArray(state.mcpManifest?.tools) ? state.mcpManifest.tools.length : 0;
+  const activeApiKeys = state.apiKeys.filter((key) => key.active).length;
+  const scopedApiKeys = state.apiKeys.filter((key) => key.active && Array.isArray(key.scopes) && key.scopes.length > 0).length;
+  const readyChecks = readinessItems.filter((item) => item.status === "ready").length;
   const groups = [
     {
       type: "Tasks",
@@ -2164,6 +2413,19 @@ function renderIntegrationTaxonomy() {
       secondaryLabel: "Map areas"
     },
     {
+      type: "Graph",
+      name: "Relationship graph",
+      status: state.relationshipGraph.status === "ready"
+        ? relationshipReviews > 0 || unsupportedFamilies > 0 ? "Needs review" : "Ready"
+        : "Loading evidence",
+      metric: `${relationshipEdges} graph edge${relationshipEdges === 1 ? "" : "s"}`,
+      detail: `${relationshipReviews} review item${relationshipReviews === 1 ? "" : "s"} and ${unsupportedFamilies} unsupported provider famil${unsupportedFamilies === 1 ? "y" : "ies"} need owner attention before agents should trust inferred links.`,
+      primaryHref: "/relationships",
+      primaryLabel: "Open graph",
+      secondaryHref: "/settings/api",
+      secondaryLabel: "MCP access"
+    },
+    {
       type: "Pipelines",
       name: "Shared pipeline data",
       status: "Implemented API",
@@ -2177,9 +2439,9 @@ function renderIntegrationTaxonomy() {
     {
       type: "API",
       name: "Agents and service clients",
-      status: "Implemented API",
-      metric: `${state.capabilities.length} route${state.capabilities.length === 1 ? "" : "s"}`,
-      detail: "Jarvis, Paperclip, Aviary, and internal tools can use the protected CompanyCore API surface.",
+      status: scopedApiKeys > 0 ? "Scoped access ready" : activeApiKeys > 0 ? "Active key needs scopes" : "No active agent key",
+      metric: `${mcpTools} MCP tool${mcpTools === 1 ? "" : "s"}`,
+      detail: `${activeApiKeys} active API key${activeApiKeys === 1 ? "" : "s"}; ${scopedApiKeys} scoped for least-privilege MCP usage across Jarvis, Paperclip, Aviary, and internal tools.`,
       primaryHref: "/settings/api",
       primaryLabel: "Open API",
       secondaryHref: "/dashboard",
@@ -2188,11 +2450,13 @@ function renderIntegrationTaxonomy() {
   ];
 
   integrationSummary.textContent = isSignedIn()
-    ? `${groups.length} implemented integration/data groups are available in this workspace.`
+    ? `${readyChecks}/${readinessItems.length} readiness checks are green across ${groups.length} integration, graph, data, and MCP groups.`
     : "Sign in to load integration data.";
 
   integrationContext.append(integrationContextElement({
     groupsCount: groups.length,
+    readinessItems,
+    readyChecks,
     clickUpTasks,
     driveFolders,
     pipelineRecords,
@@ -2209,7 +2473,7 @@ function renderIntegrationTaxonomy() {
   renderIntegrationAreaMatrix();
 }
 
-function integrationContextElement({ groupsCount, clickUpTasks, driveFolders, pipelineRecords, driveStatus, integrationStatus }) {
+function integrationContextElement({ groupsCount, readinessItems, readyChecks, clickUpTasks, driveFolders, pipelineRecords, driveStatus, integrationStatus }) {
   const areas = sortedOperatingAreas();
   const apiRoutes = apiRouteRows().length;
   const panel = document.createElement("article");
@@ -2218,11 +2482,12 @@ function integrationContextElement({ groupsCount, clickUpTasks, driveFolders, pi
     <div class="integration-context-copy">
       <span class="summary-kicker">Integration command map</span>
       <div class="integration-context-heading">
-        <strong>Provider APIs, operating areas, and agent routes</strong>
+        <strong>Integration readiness dashboard</strong>
         <span class="workbench-index-status">${escapeHtml(isSignedIn() ? integrationStatus : "Sign in required")}</span>
       </div>
-      <p>Use this map to see which provider data sources, CompanyCore tables, and agent-facing API routes are connected to the operating model.</p>
+      <p>Use this map to see which provider sources, relationship evidence, CompanyCore tables, and MCP-facing routes are ready for daily work.</p>
       <div class="integration-context-pills" aria-label="Integration operation context">
+        <span>${readyChecks}/${readinessItems.length} ready</span>
         <span>${groupsCount} implemented group${groupsCount === 1 ? "" : "s"}</span>
         <span>${areas.length} area${areas.length === 1 ? "" : "s"}</span>
         <span>${clickUpTasks} ClickUp task${clickUpTasks === 1 ? "" : "s"}</span>
@@ -2231,15 +2496,32 @@ function integrationContextElement({ groupsCount, clickUpTasks, driveFolders, pi
         <span>${apiRoutes} API route${apiRoutes === 1 ? "" : "s"}</span>
         <span>Drive: ${escapeHtml(driveStatus)}</span>
       </div>
+      <div class="integration-readiness-grid" aria-label="Integration readiness checks">
+        ${readinessItems.map((item) => integrationReadinessItemHtml(item)).join("")}
+      </div>
     </div>
     <div class="integration-context-actions">
       <a class="button-link compact" href="/settings" data-link>ClickUp setup</a>
       <a class="button-link secondary compact" href="/settings/drive" data-link>Drive setup</a>
+      <a class="button-link secondary compact" href="/relationships" data-link>Graph review</a>
       <a class="button-link secondary compact" href="/settings/api" data-link>Agent API</a>
     </div>
   `;
   bindInlineNavigation(panel);
   return panel;
+}
+
+function integrationReadinessItemHtml(item) {
+  return `
+    <a class="integration-readiness-item is-${escapeHtml(item.status)}" href="${escapeHtml(item.href)}" data-link>
+      <span>
+        <small>${escapeHtml(item.label)}</small>
+        <strong>${escapeHtml(item.title)}</strong>
+      </span>
+      <em>${escapeHtml(item.detail)}</em>
+      <b>${escapeHtml(item.action)}</b>
+    </a>
+  `;
 }
 
 function integrationGroupCard(group) {
@@ -4424,7 +4706,9 @@ async function loadOperatingModel() {
       knowledgeRoots: [],
       automationDefinitions: []
     };
+    state.areaInventory = [];
     state.databaseTables = new Map();
+    renderSidebarAreaList();
     renderOperatingMap();
     renderIntegrationTaxonomy();
     renderRelationshipCenter();
@@ -4434,6 +4718,7 @@ async function loadOperatingModel() {
   const response = await api("/v1/operating-model");
   state.operatingModel = response.data || state.operatingModel;
   await loadDatabaseSnapshot();
+  renderSidebarAreaList();
   renderOperatingMap();
   renderIntegrationTaxonomy();
   renderRelationshipCenter();
@@ -4476,6 +4761,47 @@ async function loadGoogleDriveFiles() {
   renderRelationshipCenter();
 }
 
+async function loadRelationshipGraph() {
+  if (!isSignedIn()) {
+    state.relationshipGraph = {
+      status: "signed-out",
+      nodes: [],
+      edges: [],
+      reviewItems: [],
+      unsupportedFamilies: [],
+      summary: null
+    };
+    renderRelationshipCenter();
+    return;
+  }
+
+  state.relationshipGraph.status = "loading";
+  renderRelationshipCenter();
+  try {
+    const response = await api("/v1/relationships/graph");
+    const graph = response.data?.graph || {};
+    state.relationshipGraph = {
+      status: "ready",
+      nodes: graph.nodes || [],
+      edges: graph.edges || [],
+      reviewItems: graph.reviewItems || [],
+      unsupportedFamilies: graph.unsupportedFamilies || [],
+      summary: response.data?.summary || null
+    };
+  } catch (error) {
+    state.relationshipGraph = {
+      status: "error",
+      nodes: [],
+      edges: [],
+      reviewItems: [],
+      unsupportedFamilies: [],
+      summary: null,
+      message: friendlyError(error)
+    };
+  }
+  renderRelationshipCenter();
+}
+
 async function updateExternalMappingScope(mappingId, areaId) {
   if (!mappingId || !areaId) {
     return;
@@ -4489,6 +4815,7 @@ async function updateExternalMappingScope(mappingId, areaId) {
       body: JSON.stringify({ areaId, applyToChildren: true })
     });
     await loadOperatingModel();
+    await loadRelationshipGraph();
     renderGoogleDriveFiles();
     showResult("Provider mapping moved to the selected company area.");
   } catch (error) {
@@ -4511,7 +4838,7 @@ async function updateGoogleDriveFileScope(fileId, areaId) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ areaId, applyToChildren: true })
     });
-    await Promise.all([loadOperatingModel(), loadGoogleDriveFiles()]);
+    await Promise.all([loadOperatingModel(), loadGoogleDriveFiles(), loadRelationshipGraph()]);
     showResult(`${response.data?.updatedCount || 1} Drive item${response.data?.updatedCount === 1 ? "" : "s"} moved to the selected company area.`);
   } catch (error) {
     showResult(friendlyError(error), "error");
@@ -4747,9 +5074,213 @@ async function authRequest(path, payload) {
 
 function applyAuthPayload(payload) {
   state.ownerToken = payload.data.token;
-  state.user = payload.data.user;
+  state.user = payload.data.user || state.user;
   state.workspace = payload.data.workspace;
+  if (Array.isArray(payload.data.workspaces)) {
+    state.workspaces = payload.data.workspaces;
+  }
   sessionStorage.setItem("companycoreOwnerToken", state.ownerToken);
+  renderWorkspaceSwitcher();
+}
+
+function workspaceOptionLabel(workspace) {
+  const role = workspace.role ? ` · ${workspace.role}` : "";
+  return `${workspace.name}${workspace.active ? " (active)" : role}`;
+}
+
+function renderWorkspaceSwitcher() {
+  if (!workspaceSwitcher) {
+    return;
+  }
+
+  workspaceSwitcher.innerHTML = "";
+  const workspaces = state.workspaces.length > 0
+    ? state.workspaces
+    : state.workspace ? [{ ...state.workspace, active: true }] : [];
+
+  if (workspaces.length === 0) {
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "Sign in to load workspaces";
+    workspaceSwitcher.append(option);
+    workspaceSwitcher.disabled = true;
+    return;
+  }
+
+  for (const workspace of workspaces) {
+    const option = document.createElement("option");
+    option.value = workspace.id;
+    option.textContent = workspaceOptionLabel(workspace);
+    workspaceSwitcher.append(option);
+  }
+
+  workspaceSwitcher.value = state.workspace?.id || workspaces.find((workspace) => workspace.active)?.id || "";
+  workspaceSwitcher.disabled = !isSignedIn();
+}
+
+function areaInventoryTotal(area) {
+  const resources = area.resources || {};
+  return Object.values(resources).reduce((sum, value) => sum + Number(value || 0), 0);
+}
+
+function renderSidebarAreaList() {
+  if (!sidebarAreaList) {
+    return;
+  }
+
+  sidebarAreaList.innerHTML = "";
+  const inventory = state.areaInventory.length > 0
+    ? state.areaInventory
+    : state.operatingModel.areas.map((area) => ({
+      ...area,
+      resources: {
+        folders: area.folders?.length || 0,
+        tables: area.tables?.length || 0,
+        externalMappings: 0,
+        driveFiles: 0,
+        storageLocations: 0,
+        knowledgeRoots: 0,
+        automationDefinitions: 0
+      }
+    }));
+
+  if (!isSignedIn() || inventory.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "form-note";
+    empty.textContent = isSignedIn() ? "No operating areas loaded yet." : "Sign in to load areas.";
+    sidebarAreaList.append(empty);
+    return;
+  }
+
+  for (const area of inventory) {
+    const totalResources = areaInventoryTotal(area);
+    const details = document.createElement("details");
+    details.className = area.key === state.selectedAreaKey ? "is-active" : "";
+    details.open = state.selectedAreaKey === area.key;
+    details.addEventListener("toggle", () => {
+      if (details.open) {
+        state.selectedAreaKey = area.key;
+        details.classList.add("is-active");
+        sidebarAreaList.querySelectorAll("details").forEach((item) => {
+          if (item !== details) {
+            item.open = false;
+            item.classList.remove("is-active");
+          }
+        });
+      } else if (state.selectedAreaKey === area.key) {
+        details.classList.remove("is-active");
+      }
+    });
+    const summary = document.createElement("summary");
+    summary.setAttribute("aria-label", `${area.name}, ${totalResources} resources`);
+    const title = document.createElement("span");
+    title.textContent = area.name;
+    const count = document.createElement("span");
+    count.className = "sidebar-area-count";
+    count.textContent = `${totalResources} items`;
+    summary.append(title, count);
+
+    const links = document.createElement("div");
+    links.className = "sidebar-area-links";
+    const resources = [
+      ["tables", "Tables", "/data"],
+      ["driveFiles", "Drive", "/settings/drive"],
+      ["externalMappings", "Mappings", "/relationships"],
+      ["automationDefinitions", "Automations", "/settings/integrations"]
+    ];
+
+    for (const [key, label, path] of resources) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset.path = path;
+      button.dataset.areaKey = area.key;
+      button.textContent = `${label}: ${area.resources?.[key] || 0}`;
+      button.setAttribute("aria-label", `Open ${label.toLowerCase()} for ${area.name}`);
+      button.addEventListener("click", () => {
+        state.selectedAreaKey = area.key;
+        navigate(path);
+      });
+      links.append(button);
+    }
+
+    details.append(summary, links);
+    sidebarAreaList.append(details);
+  }
+}
+
+async function loadWorkspaces() {
+  if (!isSignedIn()) {
+    state.workspaces = [];
+    renderWorkspaceSwitcher();
+    return;
+  }
+
+  const response = await api("/v1/workspaces");
+  state.workspaces = response.data || [];
+  renderWorkspaceSwitcher();
+}
+
+async function loadAreaInventory() {
+  if (!isSignedIn()) {
+    state.areaInventory = [];
+    renderSidebarAreaList();
+    return;
+  }
+
+  const response = await api("/v1/operating-model/area-inventory");
+  state.areaInventory = response.data || [];
+  renderSidebarAreaList();
+}
+
+function resetWorkspaceScopedState() {
+  state.capabilities = [];
+  state.adapterManifest = null;
+  state.mcpManifest = null;
+  state.apiKeys = [];
+  state.agentKeyProfiles = [];
+  state.lastRawApiKey = null;
+  state.clickup.configured = false;
+  state.clickup.active = false;
+  state.clickup.config = {};
+  state.clickup.workspaces = [];
+  state.clickup.selectedWorkspace = null;
+  state.clickup.spaces = [];
+  state.clickup.selectedListIds = new Set();
+  state.googleDrive.configured = false;
+  state.googleDrive.active = false;
+  state.googleDrive.oauthClientConfigured = false;
+  state.googleDrive.oauthTokenConfigured = false;
+  state.googleDrive.config = {};
+  state.googleDrive.files = [];
+  state.googleDrive.discoveredFolders = [];
+  state.operatingModel = {
+    areas: [],
+    externalMappings: [],
+    externalFields: [],
+    storageLocations: [],
+    knowledgeRoots: [],
+    automationDefinitions: []
+  };
+  state.areaInventory = [];
+  state.relationshipGraph = {
+    status: "idle",
+    nodes: [],
+    edges: [],
+    reviewItems: [],
+    unsupportedFamilies: [],
+    summary: null
+  };
+  state.databaseTables = new Map();
+  state.selectedAreaKey = "";
+  state.tasks = [];
+}
+
+async function activateWorkspaceFromPayload(payload) {
+  applyAuthPayload(payload);
+  resetWorkspaceScopedState();
+  renderConnectionState();
+  await loadConnection();
+  renderRoute();
 }
 
 function renderConnectionState() {
@@ -4766,6 +5297,8 @@ function renderConnectionState() {
   if (sidebarWorkspaceName) {
     sidebarWorkspaceName.textContent = connected ? state.workspace.name : "Workspace";
   }
+  renderWorkspaceSwitcher();
+  renderSidebarAreaList();
   if (workspaceEyebrow) {
     workspaceEyebrow.textContent = connected ? "Current module" : "Private workspace";
   }
@@ -4888,6 +5421,8 @@ function renderApiSecurityContext() {
   const activeKeys = state.apiKeys.filter((key) => key.active);
   const inactiveKeys = state.apiKeys.length - activeKeys.length;
   const scopedKeys = activeKeys.filter((key) => Array.isArray(key.scopes) && key.scopes.length > 0);
+  const mcpTools = Array.isArray(state.mcpManifest?.tools) ? state.mcpManifest.tools : [];
+  const supervisedTools = mcpTools.filter((tool) => tool.requiresApproval || tool.riskLevel === "destructive");
   const writeRoutes = routes.filter((route) => ["POST", "PATCH", "PUT", "DELETE"].includes(route.method)).length;
   const health = !signedIn
     ? "Sign in required"
@@ -4899,15 +5434,18 @@ function renderApiSecurityContext() {
     <div class="api-context-copy">
       <span class="summary-kicker">Agent API command center</span>
       <div class="api-context-heading">
-        <strong>Least-privilege access for Jarvis, Paperclip, and Aviary</strong>
+        <strong>${escapeHtml(signedIn && state.workspace ? state.workspace.name : "Workspace")} agent access</strong>
         <span class="workbench-index-status">${escapeHtml(health)}</span>
       </div>
-      <p>Create scoped service keys, inspect route capabilities, and verify which write surfaces agents can use before handing a key to another app.</p>
+      <p>Create scoped service keys, inspect route capabilities, and preview MCP tool exposure before handing a key to another app.</p>
       <div class="api-context-pills" aria-label="API operation context">
+        <span>${escapeHtml(signedIn && state.workspace ? state.workspace.name : "No workspace")}</span>
         <span>${activeKeys.length} active key${activeKeys.length === 1 ? "" : "s"}</span>
         <span>${inactiveKeys} inactive key${inactiveKeys === 1 ? "" : "s"}</span>
         <span>${scopedKeys.length} scoped key${scopedKeys.length === 1 ? "" : "s"}</span>
         <span>${state.capabilities.length} capabilit${state.capabilities.length === 1 ? "y" : "ies"}</span>
+        <span>${mcpTools.length} MCP tool${mcpTools.length === 1 ? "" : "s"}</span>
+        <span>${supervisedTools.length} supervised tool${supervisedTools.length === 1 ? "" : "s"}</span>
         <span>${routes.length} route${routes.length === 1 ? "" : "s"}</span>
         <span>${writeRoutes} write route${writeRoutes === 1 ? "" : "s"}</span>
       </div>
@@ -5025,6 +5563,13 @@ function profileToAgentKeyPreset(profile) {
   };
 }
 
+function selectedAgentKeyProfile() {
+  const selectedId = agentKeyPreset.value;
+  return Array.isArray(state.agentKeyProfiles)
+    ? state.agentKeyProfiles.find((profile) => profile.id === selectedId) || null
+    : null;
+}
+
 function currentAgentKeyPresets() {
   const backendProfiles = Array.isArray(state.agentKeyProfiles)
     ? state.agentKeyProfiles.map(profileToAgentKeyPreset)
@@ -5069,6 +5614,7 @@ function applyAgentKeyPreset(presetId) {
   }
   agentKeyScopes.value = preset.scopes.join("\n");
   setAgentKeyStatus(preset.description);
+  renderAgentKeyPreview();
 }
 
 function parseScopesInput(value) {
@@ -5076,6 +5622,86 @@ function parseScopesInput(value) {
     .split(/[\n,]/)
     .map((scope) => scope.trim())
     .filter(Boolean);
+}
+
+function riskForScopes(scopes, profile) {
+  if (profile?.riskLevel) {
+    return profile.riskLevel;
+  }
+  const highRiskMarkers = [
+    ":write",
+    ":activate",
+    ":execute",
+    ":retry",
+    ":import",
+    ":reconcile",
+    "approval:decide"
+  ];
+  if (scopes.some((scope) => highRiskMarkers.some((marker) => scope.includes(marker)))) {
+    return "high";
+  }
+  if (scopes.some((scope) => scope.endsWith(":write") || scope.endsWith(":ack"))) {
+    return "medium";
+  }
+  return "low";
+}
+
+function toolsForScopes(scopes) {
+  const selected = new Set(scopes);
+  return Array.isArray(state.mcpManifest?.tools)
+    ? state.mcpManifest.tools.filter((tool) => selected.has(tool.capability))
+    : [];
+}
+
+function routeFamiliesForTools(tools) {
+  const families = tools.map((tool) => {
+    const parts = String(tool.path || "").split("/").filter(Boolean);
+    return parts[1] || parts[0] || "root";
+  });
+  return [...new Set(families)].sort((left, right) => left.localeCompare(right));
+}
+
+function renderAgentKeyPreview() {
+  if (!agentKeyPreview) {
+    return;
+  }
+
+  const signedIn = isSignedIn();
+  const scopes = parseScopesInput(agentKeyScopes.value);
+  const profile = selectedAgentKeyProfile();
+  const tools = toolsForScopes(scopes);
+  const readTools = tools.filter((tool) => tool.riskLevel === "read").length;
+  const writeTools = tools.filter((tool) => tool.riskLevel === "write").length;
+  const destructiveTools = tools.filter((tool) => tool.riskLevel === "destructive").length;
+  const supervisedTools = tools.filter((tool) => tool.requiresApproval).length;
+  const missingMcpScopes = ["connection:read", "mcp:read"].filter((scope) => !scopes.includes(scope));
+  const risk = riskForScopes(scopes, profile);
+  const families = routeFamiliesForTools(tools).slice(0, 5);
+  const relationshipReady = scopes.includes("relationships:read");
+  const workspaceName = signedIn && state.workspace ? state.workspace.name : "Sign in required";
+
+  agentKeyPreview.className = `agent-key-preview is-${risk}`;
+  agentKeyPreview.innerHTML = `
+    <div class="agent-key-preview-head">
+      <span class="summary-kicker">Key preview</span>
+      <strong>${escapeHtml(workspaceName)}</strong>
+      <span class="workbench-index-status">Risk: ${escapeHtml(risk)}</span>
+    </div>
+    <p>${escapeHtml(profile?.description || "Custom scoped key. Keep scopes narrow and verify the MCP tool impact before creating it.")}</p>
+    <div class="agent-key-preview-grid" aria-label="Selected key impact">
+      <span><strong>${scopes.length}</strong> scope${scopes.length === 1 ? "" : "s"}</span>
+      <span><strong>${tools.length}</strong> MCP tool${tools.length === 1 ? "" : "s"}</span>
+      <span><strong>${readTools}</strong> read</span>
+      <span><strong>${writeTools + destructiveTools}</strong> write/destructive</span>
+      <span><strong>${supervisedTools}</strong> supervised</span>
+      <span><strong>${relationshipReady ? "yes" : "no"}</strong> graph read</span>
+    </div>
+    <div class="agent-key-preview-notes">
+      ${missingMcpScopes.length > 0 ? `<span class="is-warning">Missing MCP base scope${missingMcpScopes.length === 1 ? "" : "s"}: ${escapeHtml(missingMcpScopes.join(", "))}</span>` : "<span>MCP base scopes included.</span>"}
+      ${families.length > 0 ? `<span>Tool families: ${escapeHtml(families.join(", "))}${routeFamiliesForTools(tools).length > families.length ? ", ..." : ""}</span>` : "<span>No MCP tools match the selected scopes yet.</span>"}
+      ${profile?.recommendedFor?.length ? `<span>Recommended for: ${escapeHtml(profile.recommendedFor.join(", "))}</span>` : ""}
+    </div>
+  `;
 }
 
 function renderAgentKeys() {
@@ -5088,6 +5714,7 @@ function renderAgentKeys() {
     ? `${activeCount} active service key${activeCount === 1 ? "" : "s"} and ${inactiveCount} inactive key${inactiveCount === 1 ? "" : "s"} in this workspace.`
     : "Sign in to manage scoped keys for Jarvis, Paperclip, Aviary, and internal agents.";
   renderApiSecurityContext();
+  renderAgentKeyPreview();
 
   agentKeyForm.querySelectorAll("input, select, textarea, button").forEach((control) => {
     control.disabled = !signedIn;
@@ -5312,6 +5939,7 @@ function setConnected(connection) {
   state.user = connection.data.user || state.user;
   state.capabilities = connection.data.capabilities || [];
   state.adapterManifest = connection.data.adapterManifest || null;
+  state.mcpManifest = connection.data.mcpManifest || null;
   state.clickup.configured = connection.data.integrations.clickup.configured;
   state.clickup.active = Boolean(connection.data.integrations.clickup.active);
   state.clickup.config = connection.data.integrations.clickup.config || {};
@@ -5351,8 +5979,11 @@ async function loadConnection() {
   const connection = await api("/v1/connection");
   setConnected(connection);
   const results = await Promise.allSettled([
+    loadWorkspaces(),
+    loadAreaInventory(),
     loadOperatingModel(),
     loadGoogleDriveFiles(),
+    loadRelationshipGraph(),
     loadTasks(),
     loadAgentKeyProfiles(),
     loadApiKeys()
@@ -5734,6 +6365,106 @@ if (mobileMenuButton) {
   });
 }
 
+if (mobileSidebarBackdrop) {
+  mobileSidebarBackdrop.addEventListener("click", () => {
+    state.mobileMenuOpen = false;
+    updateChrome();
+    mobileMenuButton?.focus();
+  });
+}
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") {
+    return;
+  }
+
+  if (state.mobileMenuOpen) {
+    event.preventDefault();
+    state.mobileMenuOpen = false;
+    updateChrome();
+    mobileMenuButton?.focus();
+    return;
+  }
+
+  if (workspaceCreateForm && !workspaceCreateForm.hidden) {
+    event.preventDefault();
+    workspaceCreateForm.hidden = true;
+    workspaceCreateName.value = "";
+    setLocalStatus(workspaceSwitchStatus);
+    workspaceCreateToggle?.focus();
+  }
+});
+
+if (workspaceCreateToggle && workspaceCreateForm && workspaceCreateName) {
+  workspaceCreateToggle.addEventListener("click", () => {
+    workspaceCreateForm.hidden = !workspaceCreateForm.hidden;
+    if (!workspaceCreateForm.hidden) {
+      workspaceCreateName.focus();
+    }
+  });
+}
+
+if (workspaceCreateCancel && workspaceCreateForm && workspaceCreateName) {
+  workspaceCreateCancel.addEventListener("click", () => {
+    workspaceCreateForm.hidden = true;
+    workspaceCreateName.value = "";
+    setLocalStatus(workspaceSwitchStatus);
+  });
+}
+
+if (workspaceSwitcher) {
+  workspaceSwitcher.addEventListener("change", async () => {
+    const workspaceId = workspaceSwitcher.value;
+    if (!workspaceId || workspaceId === state.workspace?.id) {
+      return;
+    }
+
+    setBusy(true);
+    setLocalStatus(workspaceSwitchStatus, "Switching workspace...", "pending");
+    try {
+      const response = await api(`/v1/workspaces/${workspaceId}/actions/select`, {
+        method: "POST"
+      });
+      await activateWorkspaceFromPayload(response);
+      reportAction(workspaceSwitchStatus, "Workspace switched.", "success");
+    } catch (error) {
+      renderWorkspaceSwitcher();
+      reportAction(workspaceSwitchStatus, friendlyError(error), "error");
+    } finally {
+      setBusy(false);
+    }
+  });
+}
+
+if (workspaceCreateForm && workspaceCreateName) {
+  workspaceCreateForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const name = workspaceCreateName.value.trim();
+    if (!name) {
+      reportAction(workspaceSwitchStatus, "Name the workspace before creating it.", "error");
+      return;
+    }
+
+    setBusy(true);
+    setLocalStatus(workspaceSwitchStatus, "Creating workspace...", "pending");
+    try {
+      const response = await api("/v1/workspaces", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name })
+      });
+      workspaceCreateName.value = "";
+      workspaceCreateForm.hidden = true;
+      await activateWorkspaceFromPayload(response);
+      reportAction(workspaceSwitchStatus, "Workspace created and selected.", "success");
+    } catch (error) {
+      reportAction(workspaceSwitchStatus, friendlyError(error), "error");
+    } finally {
+      setBusy(false);
+    }
+  });
+}
+
 function bindDriveFileActions() {
   document.querySelectorAll("[data-drive-preview]").forEach((button) => {
     if (button.dataset.previewBound === "true") {
@@ -5801,9 +6532,11 @@ logoutButton.addEventListener("click", () => {
   sessionStorage.removeItem("companycoreOwnerToken");
   state.ownerToken = "";
   state.workspace = null;
+  state.workspaces = [];
   state.user = null;
   state.capabilities = [];
   state.adapterManifest = null;
+  state.mcpManifest = null;
   state.apiKeys = [];
   state.agentKeyProfiles = [];
   state.lastRawApiKey = null;
@@ -5816,6 +6549,8 @@ logoutButton.addEventListener("click", () => {
   resetListFilters();
   state.googleDrive.configured = false;
   state.googleDrive.active = false;
+  state.googleDrive.oauthClientConfigured = false;
+  state.googleDrive.oauthTokenConfigured = false;
   state.googleDrive.config = {};
   state.googleDrive.files = [];
   state.operatingModel = {
@@ -5825,6 +6560,15 @@ logoutButton.addEventListener("click", () => {
     storageLocations: [],
     knowledgeRoots: [],
     automationDefinitions: []
+  };
+  state.areaInventory = [];
+  state.relationshipGraph = {
+    status: "signed-out",
+    nodes: [],
+    edges: [],
+    reviewItems: [],
+    unsupportedFamilies: [],
+    summary: null
   };
   state.databaseTables = new Map();
   state.selectedAreaKey = "";
@@ -5852,6 +6596,8 @@ logoutButton.addEventListener("click", () => {
   renderAgentKeys();
   renderTasks();
   renderGoogleDriveFiles();
+  renderWorkspaceSwitcher();
+  renderSidebarAreaList();
   renderOperatingMap();
   renderPipeline();
   renderIntegrationTaxonomy();
@@ -5959,6 +6705,10 @@ apiMethodFilter.addEventListener("change", () => {
 
 agentKeyPreset.addEventListener("change", () => {
   applyAgentKeyPreset(agentKeyPreset.value);
+});
+
+agentKeyScopes.addEventListener("input", () => {
+  renderAgentKeyPreview();
 });
 
 agentKeyResetButton.addEventListener("click", () => {
@@ -6387,6 +7137,8 @@ if (state.ownerToken) {
 } else {
   setClickUpEnabled(false);
   setGoogleDriveEnabled(false);
+  renderWorkspaceSwitcher();
+  renderSidebarAreaList();
   renderOperatingMap();
   renderGoogleDriveFiles();
   renderPipeline();

@@ -2,21 +2,13 @@
 
 ## Ready
 
-- ACF-PROD-001 Operating Model Data Completion Decision
+- ACF-MAINT-001 Large File Modularization
   - Stage: planning
-  - Owner: Product + Backend Builder
+  - Owner: Backend Builder + Frontend Builder
   - Priority: P1
   - Source: `docs/operations/application-completion-audit-2026-05-14.md`
-  - Goal: decide whether production projects, storage locations, knowledge
-    roots, and automation definitions need seed/import work or explicit
-    accepted deferral.
-- ACF-UX-002 Canonical Authenticated Shell And Company City Dashboard
-  - Stage: planning
-  - Owner: Frontend Builder + Product Docs
-  - Priority: P1
-  - Source: `docs/ux/authenticated-shell-layout-audit-2026-05-14.md`
-  - Goal: converge post-login web routes on one command/company shell and use
-    the Company City dashboard as the canonical first implementation target.
+  - Goal: split hotspots only after product/data decisions are no longer
+    blocking owner-grade usefulness.
 
 ## In Progress
 
@@ -50,6 +42,13 @@ No active local implementation task is currently in progress.
 
 ## Backlog
 
+- ACF-UX-002 Company City Dashboard / Gamified Strategic Map.
+  - Stage: planning
+  - Owner: Frontend Builder + Product Docs
+  - Priority: P1
+  - Source: `docs/ux/company-city-dashboard-v3-spec.md`
+  - Goal: deferred V2 visual/game-like dashboard direction after the
+    web/backend/MCP foundation readiness gate passes.
 - Future v2 OAuth browser consent UI and token refresh hardening after core
   server-side API slices are complete.
 - Future v2 dashboard surfaces that show ClickUp Lists, Drive folders/files,
@@ -59,6 +58,112 @@ No active local implementation task is currently in progress.
   auto-deploy webhook administration task.
 
 ## Done
+
+- ACF-PROD-001 Operating Model Data Completion Decision.
+  - Result: accepted deferral for fake seed data. Empty projects, storage
+    locations, knowledge roots, and automation definitions are valid
+    foundation-ready states when future UI labels them honestly and uses real
+    owner creation/import flows.
+  - Task contract: `docs/planning/acf-prod-001-task-contract.md`.
+
+- WEBFOUND-002/003/004 Workspace And Sidebar Foundation.
+  - Evidence: `npm test` passed against disposable PostgreSQL on
+    `localhost:55453`; Playwright owner-shell smoke passed against isolated
+    `http://127.0.0.1:3106` with desktop `1366x900`, tablet `834x1112`, and
+    mobile `390x844`. Smoke verified register/bootstrap, workspace create,
+    workspace switch back, 13 sidebar operating areas, no horizontal overflow,
+    no relevant console errors, no failed requests, and mobile/tablet drawer
+    close via backdrop.
+  - Task contract: `docs/planning/webfound-002-004-task-contract.md`.
+
+- WEBFOUND-005 Sidebar Area Tree Hardening.
+  - Evidence: `node --check public/app.js`, `git diff --check`, and
+    `npm test` passed against disposable PostgreSQL on `localhost:55455`;
+    Playwright smoke passed against isolated `http://127.0.0.1:3107`, proving
+    13 area summaries, 52 resource-family labels, active area state,
+    workspace-create Escape close, mobile Escape close, backdrop close, no
+    overflow, no console issues, and no failed requests.
+  - Task contract: `docs/planning/webfound-005-task-contract.md`.
+
+- WEBFOUND-007 Relationship Graph Audit.
+  - Evidence: source review classified implemented, inferred, unsupported,
+    and missing relationship families across Prisma schema, operating model
+    routes, and current owner web surfaces. `git diff --check` passed.
+  - Audit: `docs/architecture/relationship-graph-audit-2026-05-14.md`.
+  - Task contract: `docs/planning/webfound-007-task-contract.md`.
+
+- WEBFOUND-008A Relationship Graph Read API.
+  - Evidence: `npm run build` passed; `npm test` passed against disposable
+    PostgreSQL on `localhost:55457`, covering relationship graph shape,
+    direct/provider-hierarchy/route-inferred confidence labels, review items,
+    unsupported families, `relationships:read` profile scope, and MCP manifest
+    exposure. Validation container `companycore-test-postgres-webfound008a`
+    was removed.
+  - Task contract: `docs/planning/webfound-008a-task-contract.md`.
+
+- WEBFOUND-008B Relationship Workbench Upgrade.
+  - Evidence: `node --check public/app.js`, `npm run build`, and `npm test`
+    passed against disposable PostgreSQL on `localhost:55458`; Playwright
+    fallback rendered `/relationships` on `http://127.0.0.1:3108`, verifying
+    graph markers, route-inferred filter state, desktop `1366x900`, mobile
+    `390x844`, no overflow, no console issues, and no failed requests.
+  - Task contract: `docs/planning/webfound-008b-task-contract.md`.
+
+- WEBFOUND-009 Integration Readiness Dashboard.
+  - Evidence: `node --check public/app.js`, `npm run build`, and `npm test`
+    passed against disposable PostgreSQL on `localhost:55459`; Playwright
+    fallback rendered `/settings/integrations` on
+    `http://127.0.0.1:3109`, verifying readiness markers for ClickUp, Google
+    Drive, relationship graph, MCP agents, scoped API access, desktop
+    `1366x900`, tablet `820x1000`, mobile `390x844`, no overflow, no console
+    issues, and no failed requests.
+  - Task contract: `docs/planning/webfound-009-task-contract.md`.
+
+- WEBFOUND-010 MCP Key Workspace Clarity.
+  - Evidence: `node --check public/app.js`, `npm run build`, and `npm test`
+    passed against disposable PostgreSQL on `localhost:55460`; Playwright
+    fallback rendered `/settings/api` on `http://127.0.0.1:3110`, verifying
+    workspace agent access context, key preview markers, preset risk update,
+    missing MCP base-scope warning after scope edit, desktop `1366x900`,
+    tablet `820x1000`, mobile `390x844`, no overflow, no console issues, and
+    no failed requests.
+  - Task contract: `docs/planning/webfound-010-task-contract.md`.
+
+- WEBFOUND-011 Agent Tool Surface In Canonical Shell.
+  - Evidence: `node --check public/app.js`, `npm run build`, and `npm test`
+    passed against disposable PostgreSQL on `localhost:55461`; Playwright
+    fallback opened `/react-agent-tools` from the canonical `/dashboard`
+    sidebar on `http://127.0.0.1:3111`, verified MCP tool markers,
+    canonical React header destinations, removal of old React-only nav labels,
+    return to `/settings/api`, desktop `1366x900`, tablet `820x1000`, mobile
+    `390x844`, no overflow, no console issues, and no relevant failed
+    requests.
+  - Task contract: `docs/planning/webfound-011-task-contract.md`.
+
+- WEBFOUND-012 AI-Ready Smoke Pack.
+  - Evidence: added `npm run ai-ready:smoke`; `node --check
+    scripts/companycore-ai-ready-smoke.mjs` passed; `npm test` passed against
+    disposable PostgreSQL on `localhost:55462`; `npm run ai-ready:smoke`
+    passed against `http://127.0.0.1:3112`, proving disposable owner
+    bootstrap, MCP reader/operator profile key creation, manifest visibility,
+    HTTP and MCP relationship graph reads, and default fail-closed
+    `mcp_tool_requires_supervision` behavior for the stage-complete MCP tool.
+  - Task contract: `docs/planning/webfound-012-task-contract.md`.
+
+- WEBFOUND-013 V2 UX Readiness Review.
+  - Evidence: `docs/ux/v2-ux-readiness-review-2026-05-14.md` reviewed
+    WEBFOUND-002 through WEBFOUND-012 and recorded GO for WEBFOUND-014 visual
+    planning while keeping direct Company City/gamification implementation
+    gated on a canonical shell/map/brief/status plan.
+  - Task contract: `docs/planning/webfound-013-task-contract.md`.
+
+- WEBFOUND-014 V2 Visual Implementation Plan.
+  - Evidence: `docs/ux/v2-visual-implementation-plan-2026-05-14.md` defines
+    the canonical V2 shell, Company City dashboard composition, command brief,
+    status strip, responsive behavior, state model, visual asset strategy,
+    route migration order, validation plan, and first future code candidate
+    `V2VIS-001 Shared CompanyShell And Dashboard Frame`.
+  - Task contract: `docs/planning/webfound-014-task-contract.md`.
 
 - ACF-DOC-001 Coverage Ledger Reconciliation.
   - Evidence: stale Google Drive first-import blocker language was reconciled
