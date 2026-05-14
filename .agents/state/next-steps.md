@@ -4,15 +4,15 @@ Last updated: 2026-05-15
 
 ## NOW
 
-1. ACF-OPS-001 Auto-Deploy Proof Or Manual Path Acceptance.
-   - Reconcile the remaining deployment automation evidence gap or keep the
-     manual Coolify rollover path explicitly accepted.
+No ready local implementation task is currently queued.
 
 ## NEXT
 
 1. AGRUN-010 Upstream Agent Source Merge Execution.
-   - Still blocked until upstream write access or an approved fork/PR route
-     exists.
+   - Blocked until upstream write access or an approved fork/PR route exists.
+2. Restore build commit/image metadata in production health.
+   - Future deployability improvement so push-to-running-image proof can be
+     captured without privileged Coolify inspection.
 
 ## LATER
 

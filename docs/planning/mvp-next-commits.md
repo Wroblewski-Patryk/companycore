@@ -7,15 +7,16 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] ACF-OPS-001 Auto-Deploy Proof Or Manual Path Acceptance:
-      reconcile the remaining deployment automation evidence gap or keep the
-      manual Coolify rollover path explicitly accepted.
+No ready local implementation task is currently queued.
 
 ### NEXT
 
 - [ ] AGRUN-010 Upstream Agent Source Merge Execution:
       still blocked until upstream write access or an approved fork/PR route
       exists.
+- [ ] Restore build commit/image metadata in production health:
+      future deployability improvement so push-to-running-image proof can be
+      captured without privileged Coolify inspection.
 
 ### DEFERRED TO V2
 
@@ -183,6 +184,13 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       commands. `npm run check:public-js`, `npm run validate`, `git diff
       --check`, and `npm run test:api` passed against disposable PostgreSQL on
       `localhost:55473`.
+- [x] ACF-OPS-001 Auto-Deploy Proof Or Manual Path Acceptance Refresh:
+      latest pushed commit was `ece93b1`; public web/API `/health` returned
+      `200`, but both responses reported `build.commit="unknown"` and
+      `build.image="unknown"`. Updated deployment docs and KI-002 so
+      GitHub-to-Coolify auto-deploy remains unverified, while manual
+      VPS/Coolify backend rollover remains the accepted release path until
+      comparable commit/image metadata or equivalent Coolify evidence exists.
 - [x] ACF-SEC-001 Production Secret And CORS Hardening:
       production now fails closed when required secret env vars are absent or
       still use committed development placeholder values; production CORS is

@@ -2,13 +2,8 @@
 
 ## Ready
 
-- ACF-OPS-001 Auto-Deploy Proof Or Manual Path Acceptance
-  - Stage: planning
-  - Owner: Ops/Release
-  - Priority: P2
-  - Source: `docs/operations/application-completion-audit-2026-05-14.md`
-  - Goal: reconcile the remaining deployment automation evidence gap or keep
-    the manual Coolify rollover path explicitly accepted.
+No ready local implementation task is currently queued. The remaining known
+work is blocked on external upstream write access or future product decisions.
 
 ## In Progress
 
@@ -58,6 +53,17 @@ No active local implementation task is currently in progress.
   auto-deploy webhook administration task.
 
 ## Done
+
+- ACF-OPS-001 Auto-Deploy Proof Or Manual Path Acceptance Refresh.
+  - Evidence: latest pushed commit was `ece93b1`; public web and API
+    `/health` both returned `200`, but both reported `build.commit="unknown"`
+    and `build.image="unknown"`. Updated deployment docs and KI-002 so
+    GitHub-to-Coolify auto-deploy remains unverified, while manual
+    VPS/Coolify backend rollover remains the accepted release path until
+    commit/image metadata or equivalent Coolify evidence is available. `git
+    diff --check` passed.
+  - Task contract:
+    `docs/planning/acf-ops-001-deploy-path-acceptance-task-contract.md`.
 
 - ACF-QA-001 Validation Gate Entrypoints.
   - Evidence: added `npm run check:public-js`, `npm run test:api`, kept

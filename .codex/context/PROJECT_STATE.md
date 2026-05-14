@@ -2579,6 +2579,12 @@ Last updated: 2026-05-15
   build. Testing docs and project validation commands now list the new gates.
   `npm run check:public-js`, `npm run validate`, `git diff --check`, and
   `npm run test:api` passed against disposable PostgreSQL on `localhost:55473`.
+- 2026-05-15: Completed ACF-OPS-001 by refreshing deploy-path evidence after
+  the current queue commits. Local `HEAD` was `ece93b1`; public web and API
+  `/health` returned `200`, but both reported `build.commit="unknown"` and
+  `build.image="unknown"`. Auto-deploy therefore remains unverified, and
+  manual VPS/Coolify backend rollover remains the accepted release path until
+  comparable build metadata or equivalent Coolify evidence is available.
 - 2026-05-06: Deployed the Agent CRUD API rollout to production with manual
   VPS backend rollover. The running backend container is
   `backend-rnqqkhl3o3dut4qv56mlxly2-manual-bf59b2f`, image

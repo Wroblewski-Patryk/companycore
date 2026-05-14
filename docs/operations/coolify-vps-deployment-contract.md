@@ -112,7 +112,7 @@ Required smoke checks after deploy:
 
 GitHub-to-Coolify auto-deploy is not required for v1 runtime readiness.
 
-Current status as of 2026-05-14:
+Current status as of 2026-05-15:
 
 - Coolify services are healthy on the VPS.
 - CompanyCore manual runtime rollover is proven and documented.
@@ -124,15 +124,16 @@ Current status as of 2026-05-14:
 - A later planning note mentioned commit `63348d6` as an auto-deploy success,
   but no matching operations smoke record currently supersedes the repeated
   manual-rollover evidence.
-- Public health currently reports build commit
-  `a7557120b8ea4630a0b32097e66ba0d4bb012b1b` and image
-  `rnqqkhl3o3dut4qv56mlxly2_backend:a7557120b8ea4630a0b32097e66ba0d4bb012b1b`.
+- Public web and API health currently return `200`, but build metadata reports
+  `commit: unknown` and `image: unknown`; this cannot prove that GitHub push
+  `ece93b1` reached the running image automatically.
 - Auto-deploy should therefore be treated as unverified until a future task
   records a push-to-running-image smoke in `docs/operations/post-deploy-smoke.md`.
 
-Until then, manual VPS backend rollover is the approved release path. It must
-preserve the PostgreSQL volume, record the previous and new build commits,
-verify public health, and retain or document a rollback image/container.
+Until then, manual VPS/Coolify backend rollover remains the accepted and
+approved release path. It must preserve the PostgreSQL volume, record the
+previous and new build commits or the absence of build metadata, verify public
+health, and retain or document a rollback image/container.
 
 Rollback trigger:
 

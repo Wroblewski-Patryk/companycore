@@ -1,19 +1,23 @@
 # Known Issues
 
-Last updated: 2026-05-14
+Last updated: 2026-05-15
 
 ## Open Issues
 
 | ID | Severity | Area | Summary | Owner | Status | Next action |
 | --- | --- | --- | --- | --- | --- | --- |
 | KI-007 | P1 | Product data completeness | Production `/v1/operating-model` has 13 areas and 26 external mappings but `0` storage locations, `0` knowledge roots, `0` automation definitions, and `/v1/projects` returns `0` while tasks exist. | Product + Backend | OPEN | Execute ACF-PROD-001 to decide, seed, import, or explicitly defer these owner-facing operating model records. |
-| KI-002 | P2 | Release automation | GitHub-to-Coolify auto-deploy is not proven as reliable; manual VPS backend rollover remains the approved path. | Ops/Release | MONITORING | Record a push-to-running-image smoke before claiming auto-deploy is reliable. |
+| KI-002 | P2 | Release automation | GitHub-to-Coolify auto-deploy is not proven as reliable; manual VPS/Coolify backend rollover remains the accepted and approved path. | Ops/Release | ACCEPTED | Record a push-to-running-image smoke only after build commit/image metadata or equivalent Coolify evidence is available. |
 | KI-003 | P2 | Source handoff | Paperclip and OpenJarvis validated source changes could not be pushed upstream because GitHub returned `403`. | Ops/Release | BLOCKED | Resume AGRUN-010 after write access or an approved fork/PR route exists. |
 
 ## Accepted Residual Risks
 
 - 2026-05-06: Manual VPS/Coolify rollover remains an accepted v1 release path
   while GitHub-to-Coolify webhook/auto-deploy administration is unresolved.
+- 2026-05-15: ACF-OPS-001 refreshed public web/API health evidence. Both
+  domains are healthy, but `/health` reports `commit: unknown` and
+  `image: unknown`, so automatic deployment cannot be proven from public
+  metadata. Manual VPS/Coolify rollover remains the accepted path.
 
 ## Recently Closed Issues
 

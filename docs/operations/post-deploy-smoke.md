@@ -40,6 +40,28 @@ Use this file to record the minimum checks after each deploy.
 
 ## Evidence
 
+- Timestamp: 2026-05-15
+- Environment: production public domains
+- Purpose: ACF-OPS-001 auto-deploy proof or manual path acceptance refresh.
+- Current local source:
+  - Latest pushed commit checked locally: `ece93b1`.
+- Public checks:
+  - `GET https://companycore.luckysparrow.ch/health` returned `200`.
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `200`.
+  - Both health responses reported `build.commit="unknown"` and
+    `build.image="unknown"`.
+- Deployment-path verdict:
+  - GitHub-to-Coolify auto-deploy remains unverified because the public runtime
+    does not expose commit/image metadata that can be compared with the latest
+    pushed commit.
+  - Manual VPS/Coolify backend rollover remains the accepted release path until
+    either build metadata is restored or a future push-to-running-image smoke
+    records unambiguous Coolify deployment evidence.
+- Residual risks:
+  - A healthy public response proves the service is up, but not that it is
+    running the latest pushed commit. Operators must not claim automatic deploy
+    success from `/health` while build metadata is unknown.
+
 - Timestamp: 2026-05-14
 - Environment: production VPS Docker backend
 - Purpose: AGRUN-007 Google Drive owner consent/import release gate.
