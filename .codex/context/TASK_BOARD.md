@@ -2,13 +2,21 @@
 
 ## Ready
 
-- ACF-DOC-001 Coverage Ledger Reconciliation
+- ACF-PROD-001 Operating Model Data Completion Decision
   - Stage: planning
-  - Owner: Planner + Product Docs
+  - Owner: Product + Backend Builder
   - Priority: P1
   - Source: `docs/operations/application-completion-audit-2026-05-14.md`
-  - Goal: refresh stale Drive and completion audit rows so future agents do
-    not reopen completed blockers.
+  - Goal: decide whether production projects, storage locations, knowledge
+    roots, and automation definitions need seed/import work or explicit
+    accepted deferral.
+- ACF-UX-002 Canonical Authenticated Shell And Company City Dashboard
+  - Stage: planning
+  - Owner: Frontend Builder + Product Docs
+  - Priority: P1
+  - Source: `docs/ux/authenticated-shell-layout-audit-2026-05-14.md`
+  - Goal: converge post-login web routes on one command/company shell and use
+    the Company City dashboard as the canonical first implementation target.
 
 ## In Progress
 
@@ -51,6 +59,13 @@ No active local implementation task is currently in progress.
   auto-deploy webhook administration task.
 
 ## Done
+
+- ACF-DOC-001 Coverage Ledger Reconciliation.
+  - Evidence: stale Google Drive first-import blocker language was reconciled
+    in architecture, function-coverage audit, project-control, system-health,
+    active queue, and state files. Targeted source review preserves future
+    Drive content/write/freshness proof gaps without reopening first import.
+  - Task contract: `docs/planning/acf-doc-001-task-contract.md`.
 
 - ACF-SEC-001 Production Secret And CORS Hardening.
   - Evidence: `npm run build` passed; `npm test` passed against disposable

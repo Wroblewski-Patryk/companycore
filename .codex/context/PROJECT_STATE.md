@@ -155,6 +155,14 @@ Last updated: 2026-05-14
   `docs/ux/company-city-dashboard-v3-spec.md`, and the current target assets are
   `docs/ux/assets/company-city-dashboard-v3-target.png` and
   `docs/ux/assets/company-city-management-department-v1-target.png`.
+- 2026-05-14: ACF-UX-002 planning established the canonical authenticated web
+  shell direction from a post-login layout audit. Private routes should converge
+  on one `CompanyShell` with command/company/workbench/integration/workspace
+  navigation, top command bar, contextual command brief, company area switcher,
+  and status strip. The current vanilla sidebar and React horizontal nav are
+  transitional until the implementation proves one shared shell across
+  desktop, tablet, and mobile. Source:
+  `docs/ux/authenticated-shell-layout-audit-2026-05-14.md`.
 - 2026-05-14: Google Drive remains one workspace OAuth integration for Drive,
   Docs, and Sheets rather than one configuration per Google service. The owner
   callback route is `/settings/drive`, and authenticated private-route handling
@@ -284,10 +292,10 @@ Last updated: 2026-05-14
 - Main active objective: close audit-derived finish blockers in priority order
   so the web and agent Company OS can reach product-quality v1 without hiding
   UX, security, data, documentation, or deployment gaps.
-- Top blockers: coverage-ledger reconciliation, operating-model data
-  completeness, Company City dashboard implementation or supersession,
-  maintainability hotspots, upstream Paperclip/OpenJarvis source merge
-  permissions, and GitHub-to-Coolify auto-deploy proof.
+- Top blockers: operating-model data completeness, Company City dashboard
+  implementation or supersession, maintainability hotspots, upstream
+  Paperclip/OpenJarvis source merge permissions, and GitHub-to-Coolify
+  auto-deploy proof.
 - Success criteria for this phase: APP-AUDIT-001 findings are represented in
   the canonical queue, ACF-UX-001 and ACF-SEC-001 have evidence-backed closure,
   stale Drive blockers are removed from active ledgers, and new product work
@@ -295,17 +303,25 @@ Last updated: 2026-05-14
   deferred.
 
 ## Autonomous Iteration State
-- Current iteration: ACF-SEC-001 Production Secret And CORS Hardening completed.
+- Current iteration: ACF-DOC-001 Coverage Ledger Reconciliation completed.
 - Current operation mode: BUILDER
-- Last completed iteration: ACF-SEC-001 Production Secret And CORS Hardening.
-- Last completed task: production secret validation, production CORS
-  restriction, focused fail-closed tests, and deployment/security docs.
-- Current task status: ACF-SEC-001 verified; next implementation task is
-  ACF-DOC-001 Coverage Ledger Reconciliation.
-- Next required mode: BUILDER; execute ACF-DOC-001 before unrelated broad
+- Last completed iteration: ACF-DOC-001 Coverage Ledger Reconciliation.
+- Last completed task: stale Drive/import blocker wording and finish-queue
+  state reconciliation.
+- Current task status: ACF-DOC-001 verified; next implementation task is
+  ACF-PROD-001 Operating Model Data Completion Decision.
+- Next required mode: BUILDER; execute ACF-PROD-001 before unrelated broad
   product work.
 
 ## Recent Progress
+
+- 2026-05-14: Completed ACF-DOC-001 Coverage Ledger Reconciliation. Stale
+  source-of-truth wording that still treated Google Drive owner consent and
+  first import as open work was updated. Active docs now distinguish the verified
+  AGRUN-007 production import of 13 numbered department roots, 748 Drive items,
+  171 folders, `unassignedCount=0`, and descendant scope `mismatches=[]` from
+  remaining future Drive content/write/freshness samples. The active queue now
+  points to ACF-PROD-001.
 
 - 2026-05-14: Completed ACF-SEC-001 Production Secret And CORS Hardening.
   Production now fails closed when `DATABASE_URL`, `AUTH_TOKEN_SECRET`,

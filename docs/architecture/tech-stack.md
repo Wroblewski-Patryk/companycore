@@ -20,8 +20,10 @@ replace these choices without an explicit architecture decision.
 - Jobs or workers: no separate worker tier in v1; the backend includes the
   lightweight in-process ClickUp maintenance scheduler.
 - External integrations: native ClickUp adapter is live; Google Drive v2
-  server-side foundation is implemented and blocked only on real owner OAuth
-  consent/import proof. n8n remains optional for orchestration.
+  OAuth, selected-root import, and department scoping are production-proven for
+  the numbered company roots. Remaining Drive proof work is limited to future
+  content quality, Docs/Sheets write, and changes reconciliation samples.
+  n8n remains optional for orchestration.
 - Auth: owner-user auth plus workspace-scoped service API keys.
 
 ## Backend Libraries

@@ -7,16 +7,17 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] ACF-DOC-001 Coverage Ledger Reconciliation:
-      sync stale Drive/import and application-completion audit rows across
-      active ledgers and source-of-truth files.
-
-### NEXT
-
 - [ ] ACF-PROD-001 Operating Model Data Completion Decision:
       decide whether empty production projects, storage locations, knowledge
       roots, and automation definitions need seed/import work or explicit
       accepted deferral.
+
+### NEXT
+
+- [ ] ACF-UX-002 Canonical Authenticated Shell And Company City Dashboard:
+      implement the approved Company City direction through one shared
+      post-login shell, or record a superseding product decision before
+      claiming owner-grade dashboard quality.
 
 ### BLOCKED
 
@@ -32,6 +33,11 @@ The section below is retained as execution evidence. It is not the active
 queue. Future work must start from `Active Queue`, `.codex/context/TASK_BOARD.md`,
 and `docs/operations/v1-function-coverage-ledger.csv`.
 
+- [x] ACF-DOC-001 Coverage Ledger Reconciliation:
+      stale Drive first-import blocker language was reconciled across
+      architecture, function-coverage audit, project-control, system-health,
+      active queue, and state files. Remaining Drive gaps are now framed as
+      target-safe content/write/freshness samples, not first-import blockers.
 - [x] ACF-SEC-001 Production Secret And CORS Hardening:
       production now fails closed when required secret env vars are absent or
       still use committed development placeholder values; production CORS is

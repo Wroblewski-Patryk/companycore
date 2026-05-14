@@ -94,7 +94,6 @@ narrow fix should be created.
 Rows where code exists or architecture is ready, but target proof cannot happen
 without credentials, provider consent, or repository permissions.
 
-- Google Drive OAuth owner consent and first import
 - Google Drive real Docs/Sheets content and write samples
 - Google Drive changes reconcile target proof
 - GitHub-to-Coolify auto-deploy proof
@@ -208,7 +207,8 @@ Primary remaining improvement:
 
 ### Google Drive
 
-Status: implemented foundation, target proof blocked externally.
+Status: implemented foundation with production owner consent and first import
+verified for the numbered company department roots.
 
 Evidence:
 
@@ -218,16 +218,22 @@ Evidence:
 - Docs/Sheets create/edit code
 - changes reconcile code
 - owner setup documentation
+- AGRUN-007 production proof: OAuth active, owner discovery returned 172
+  folders, 13 numbered roots (`00`-`12`) were selected/imported/mapped,
+  `/v1/google-drive/files` returned 748 imported items and 171 folders, and
+  descendant scope verification reported `unassignedCount=0` and
+  `mismatches=[]`
 
-Blocked by:
+Remaining target-safe proof:
 
-- real Google OAuth credentials
-- owner consent
-- selected-folder target import action
+- sample Docs/Sheets content body readback for content quality
+- sample Docs/Sheets create/edit only with approved non-sensitive test files
+- sample Drive changes reconciliation when freshness becomes active scope
 
 Primary next action:
 
-- resume `AGRUN-007` only when credentials and owner action exist.
+- do not reopen first import; plan only the target-safe content/write/freshness
+  samples when those become active product scope.
 
 ### Owner UI
 
@@ -294,11 +300,14 @@ The ledger produces this execution order:
    - Choose the next product lane: agent-first Company OS, operational
      cockpit, provider expansion, or data quality.
 
-Blocked tasks stay blocked:
+External tasks stay blocked:
 
-- `AGRUN-007 Google Drive Owner Consent And First Import`
 - `AGRUN-010 Upstream Agent Source Merge Execution`
 - `KI-002 GitHub-to-Coolify Auto-Deploy Proof`
+
+Completed target proof:
+
+- `AGRUN-007 Google Drive Owner Consent And First Import`
 
 ## Release Gate Interpretation
 
@@ -308,8 +317,8 @@ For local V1 architecture completion:
   implementation
 - several `P0/P1` rows need fresher evidence before a new production release
   should claim current proof
-- Google Drive target import is blocked externally and should not be counted
-  as a local implementation miss
+- Google Drive target import is complete for the numbered department roots and
+  should not be counted as a local implementation miss or reopened blocker
 - upstream Paperclip/OpenJarvis merge and auto-deploy are operational/external
   blockers, not CompanyCore local runtime blockers
 
@@ -327,4 +336,3 @@ Update the ledger when:
 
 Do not mark a row `PASS` because adjacent behavior worked. Mark it `PASS` only
 when the row's concrete scenario has current credible evidence.
-

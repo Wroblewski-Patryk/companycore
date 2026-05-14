@@ -4,15 +4,12 @@ Last updated: 2026-05-14
 
 ## Active Focus
 
-ACF-SEC-001 is now complete. Production runtime configuration fails closed
-when required security secrets are missing or still use committed development
-placeholder values, and production CORS is restricted to
-`COMPANYCORE_ALLOWED_ORIGINS` or the documented CompanyCore web/API domains.
-`npm test` passed against disposable PostgreSQL on `localhost:55452`, including
-missing-secret, placeholder-secret, CORS allow/deny, and existing protected API
-flow coverage. The next active finish task is ACF-DOC-001 ledger
-reconciliation, followed by ACF-PROD-001 operating-model data completion and
-ACF-UX-002 Company City dashboard implementation or supersession.
+ACF-DOC-001 is now complete. Stale source-of-truth wording no longer treats
+Google Drive owner consent or first import as open work; active docs now
+distinguish the verified AGRUN-007 production import from future target-safe
+Drive content/write/freshness samples. The next active finish task is
+ACF-PROD-001 operating-model data completion, followed by ACF-UX-002 Company
+City dashboard implementation or supersession.
 
 CompanyCore v1 runtime is accepted and live for the approved owner, ClickUp,
 Jarvis, Paperclip, workspace API, and agent CRUD scope. The current focus has
@@ -119,9 +116,9 @@ No local Company OS workflow recovery task remains ready.
 ## Current System Objective
 
 Optimize for source-of-truth clarity, no regression, correct owner workflows,
-and application completion. The immediate objective is ACF-DOC-001: reconcile
-stale coverage and audit ledger rows so future agents do not reopen completed
-Drive or finish-queue blockers.
+and application completion. The immediate objective is ACF-PROD-001: decide
+whether empty production projects, storage locations, knowledge roots, and
+automation definitions need seed/import work or accepted deferral.
 
 ## Current Delivery Stage
 

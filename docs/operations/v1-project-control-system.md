@@ -107,8 +107,9 @@ These are project-control improvements, not proof that V1 runtime is missing:
    or rotated.
 3. A multi-workspace isolation regression scenario before security-sensitive
    releases.
-4. Google Drive target proof after real OAuth credentials and owner consent
-   exist.
+4. Google Drive target-safe content, write, or changes-reconcile proof when
+   those become active product scope. The numbered department-root OAuth and
+   first import proof is complete as of AGRUN-007.
 5. A V2 lane decision before opening broad new product work.
 
 ## Anti-Loop Rules
@@ -133,4 +134,3 @@ under 10 minutes from repository files:
 4. What is the next single task?
 5. Which file proves that this next task is legitimate?
 6. Which validation command proves completion?
-

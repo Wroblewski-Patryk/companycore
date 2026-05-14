@@ -159,3 +159,9 @@ still a known P2 gap. Rollback pointers are current after the hotfix deploy.
   including missing-secret, placeholder-secret, CORS allow/deny, and existing
   protected API flow coverage. Evidence is recorded in
   `docs/planning/acf-sec-001-task-contract.md`.
+- 2026-05-14: ACF-DOC-001 closed ACF-008 for stale first-import blocker
+  wording. Active source-of-truth docs now treat Google Drive OAuth and
+  numbered-root first import as verified by AGRUN-007, while preserving future
+  Drive content body readback, Docs/Sheets write, and changes reconcile samples
+  as target-safe proof tasks. Evidence is recorded in
+  `docs/planning/acf-doc-001-task-contract.md`.

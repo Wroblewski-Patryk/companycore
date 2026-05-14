@@ -102,9 +102,11 @@ Last updated: 2026-05-14
   v1 handoff evidence.
 - CompanyCore public health currently reports image
   `rnqqkhl3o3dut4qv56mlxly2_backend:71f3eb3b063ea68226a1736c727c52882b33f27a`.
-- Known blockers are external or target-environment gates: Google Drive
-  production deploy plus first selected-folder import smoke, Paperclip/OpenJarvis
-  upstream write access, and deploy-automation evidence reconciliation.
+- Known blockers are external or target-environment gates: Paperclip/OpenJarvis
+  upstream write access and deploy-automation evidence reconciliation. Google
+  Drive OAuth and first selected-root import are verified; future Drive work is
+  limited to target-safe content-quality, Docs/Sheets write, or changes
+  reconciliation samples when those become active scope.
 - Authenticated private-route UX screenshots now have an approved local
   Playwright path through `owner-console:ux-smoke`; UXA-003 used it to verify
   dashboard polish across desktop, tablet, and mobile.
