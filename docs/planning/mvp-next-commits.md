@@ -7,16 +7,16 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] ACF-MAINT-002 Additional Hotspot Modularization:
-      continue reducing delivery risk in the remaining large web/API/test
-      hotspots after V2VIS-002 closed the first route-frame convergence slice.
+- [ ] V2VIS-004 Next Route Body UX Polish Cycle:
+      repeat the 100-findings-plus-implementation UX cycle on the next dense
+      private route, likely `/settings/api` safety workflow or `/settings/drive`
+      import/scoping.
 
 ### NEXT
 
-- [ ] V2VIS-003 Route Body UX Polish Candidate:
-      select one high-value route body from the V2VIS-002 audit, likely
-      `/areas` mobile density or `/settings/api` safety workflow, and polish
-      it with evidence-driven screenshots instead of broad route rewrites.
+- [ ] ACF-MAINT-002 Additional Hotspot Modularization:
+      continue reducing delivery risk in the remaining large web/API/test
+      hotspots after V2VIS-002 closed the first route-frame convergence slice.
 
 ### DEFERRED TO V2
 
@@ -140,6 +140,14 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       zero unnamed visible controls. `node --check public/app.js`,
       `npm run build`, `git diff --check`, and `npm test` passed against
       disposable PostgreSQL on `localhost:55468`.
+- [x] V2VIS-003 Areas Route Body UX Polish:
+      published a 100-item `/areas` route-body audit, added an area command
+      summary, review/coverage command cards, earlier filters, anchored major
+      sections, coverage framing, and mobile density polish. `npm run build`,
+      `git diff --check`, and `npm test` passed against disposable PostgreSQL
+      on `localhost:55469`; Playwright verified `/areas` on desktop, tablet,
+      and mobile with no overflow, no failed requests, no console issues, four
+      command cards, and zero unnamed visible controls.
 - [x] ACF-SEC-001 Production Secret And CORS Hardening:
       production now fails closed when required secret env vars are absent or
       still use committed development placeholder values; production CORS is

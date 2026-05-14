@@ -9,13 +9,14 @@
   - Source: `docs/operations/application-completion-audit-2026-05-14.md`
   - Goal: continue reducing large-file delivery risk after the first dashboard
     and route-frame shell implementation paths are verified.
-- V2VIS-003 Route Body UX Polish Candidate
+- V2VIS-004 Next Route Body UX Polish Cycle
   - Stage: planning
   - Owner: Frontend Builder + QA/Test
   - Priority: P1
-  - Source: `docs/ux/route-frame-usability-audit-2026-05-15.md`
-  - Goal: select one route body from the V2VIS-002 audit and polish it with
-    evidence-driven screenshots after the shared frame convergence is deployed.
+  - Source: `docs/ux/areas-route-body-usability-audit-2026-05-15.md`
+  - Goal: repeat the 100-findings-plus-implementation UX cycle on the next
+    dense private route, likely `/settings/api` safety workflow or
+    `/settings/drive` import/scoping.
 
 ## In Progress
 
@@ -65,6 +66,20 @@ No active local implementation task is currently in progress.
   auto-deploy webhook administration task.
 
 ## Done
+
+- V2VIS-003 Areas Route Body UX Polish.
+  - Evidence: published `docs/ux/areas-route-body-usability-audit-2026-05-15.md`
+    with 100 route-body findings; added `/areas` area command summary,
+    review/coverage command cards, earlier filters, anchors for review queues,
+    selected context, lifecycle, coverage, and table sections, plus mobile
+    density CSS. `npm run build`, `git diff --check`, and `npm test` passed
+    against disposable PostgreSQL on `localhost:55469`. Playwright fallback
+    verified `/areas` on `http://127.0.0.1:3116` at desktop `1366x900`,
+    tablet `834x1112`, and mobile `390x844` with no horizontal overflow, no
+    console issues, no failed requests, four command cards, and zero unnamed
+    visible controls.
+  - Task contract:
+    `docs/planning/v2vis-003-areas-route-body-polish-task-contract.md`.
 
 - V2VIS-002 Route Frame Convergence And Usability Repair.
   - Evidence: published `docs/ux/route-frame-usability-audit-2026-05-15.md`

@@ -133,6 +133,29 @@ of rediscovering them.
   and mobile `390x844` with no overflow, no console issues, no failed
   requests, and zero unnamed visible controls.
 
+### 2026-05-15 - Route Body Command Summary
+- Type: reusable_pattern
+- Context: V2VIS-003 polished `/areas` after route-frame convergence showed
+  that route bodies still needed to answer "what matters now" before dense
+  panels, tables, and forms.
+- Decision: Dense owner workbenches should start their route body with a
+  compact command summary that promotes the current priority, review pressure,
+  and two next actions before broad metrics or deep detail. The summary should
+  use existing card, badge, button, icon, and token primitives, and section
+  anchors should let mobile/tablet users jump to review queues, selected
+  context, lifecycle controls, coverage, and tables.
+- Reuse when: Polishing `/settings/api`, `/settings/drive`,
+  `/react-company-os`, `/react-agent-tools`, data workbenches, or other dense
+  private routes that currently read like long reports.
+- Avoid when: The route already has a single obvious action above the fold or
+  when adding another command layer would duplicate the shared shell route
+  command strip.
+- Evidence: V2VIS-003 `npm run build`, `git diff --check`, `npm test` against
+  disposable PostgreSQL on `localhost:55469`, and Playwright `/areas` proof on
+  `http://127.0.0.1:3116` passed at desktop `1366x900`, tablet `834x1112`,
+  and mobile `390x844` with four command cards, no horizontal overflow, no
+  console issues, no failed requests, and zero unnamed visible controls.
+
 ### 2026-05-14 - Company City Strategic Map
 - Type: visual_direction
 - Context: The user approved the generated dashboard direction showing a

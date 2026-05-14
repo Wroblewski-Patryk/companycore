@@ -172,6 +172,89 @@ label {
   height: 2.25rem;
 }
 
+.area-section-anchor {
+  scroll-margin-top: 5rem;
+}
+
+.area-command-summary {
+  overflow: hidden;
+}
+
+.area-command-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.area-command-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  border: 1px solid var(--color-base-300);
+  border-radius: var(--radius-company);
+  background: color-mix(in srgb, var(--color-base-100) 88%, var(--color-primary) 4%);
+  padding: 0.85rem;
+  color: var(--color-base-content);
+  text-decoration: none;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+.area-command-card:hover,
+.area-command-card:focus-visible {
+  border-color: var(--color-primary);
+  background: var(--color-base-100);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+@media (max-width: 1024px) {
+  .area-command-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .area-route {
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .area-route .card-body {
+    padding: 1rem;
+  }
+
+  .area-hero-actions .btn {
+    flex: 1 1 9rem;
+  }
+
+  .area-hero-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .area-command-summary {
+    padding: 1rem;
+  }
+
+  .area-command-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .area-command-card {
+    padding: 0.75rem;
+  }
+
+  .area-context-card .card-body,
+  .area-context-panels {
+    gap: 0.75rem;
+  }
+
+  .area-context-card .rounded-company {
+    padding: 0.75rem;
+  }
+}
+
 .table th,
 .table td {
   vertical-align: middle;

@@ -1451,7 +1451,7 @@ function TasksStatePanel({ state, onRetry }: { state: TasksWorkbenchState; onRet
 
   return (
     <Shell appLabel="React tasks">
-      <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-8">
+      <section className="area-route mx-auto grid w-full max-w-7xl gap-5 px-5 py-8">
         <LocalNotice
           tone={content.tone}
           title={content.title}
@@ -1627,7 +1627,7 @@ function TasksWorkbench({ connection, tasks }: { connection: ConnectionData; tas
                   </p>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="area-hero-actions flex flex-wrap gap-2">
                 <a className="btn btn-primary" href="/data/tasks">Open task editor</a>
                 <a className="btn btn-ghost" href="/tasks-adapter">Current adapter</a>
               </div>
@@ -1642,7 +1642,7 @@ function TasksWorkbench({ connection, tasks }: { connection: ConnectionData; tas
               action={metrics.total === 0 ? { label: "Create task", href: "/data/tasks" } : undefined}
             />
 
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            <div className="area-hero-metrics grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
               <MetricCard icon="ph-stack" label="Total" value={`${metrics.total}`} detail="Task records" />
               <MetricCard icon="ph-circle-notch" label="Open" value={`${metrics.open}`} detail="Not complete or archived" />
               <MetricCard icon="ph-plugs-connected" label="ClickUp" value={`${metrics.clickUp}`} detail="Provider-owned tasks" />
@@ -1971,7 +1971,7 @@ function AreaFilters({
   onChange: (nextFilters: AreaFilterState) => void;
 }) {
   return (
-    <section className="card border border-base-300 bg-base-100 shadow-sm">
+    <section className="card area-section-anchor border border-base-300 bg-base-100 shadow-sm" id="area-filters">
       <div className="card-body gap-4">
         <div className="grid gap-3 md:grid-cols-[1fr_16rem]">
           <label className="form-control">
@@ -2075,28 +2075,134 @@ function AreaCoverageCards({ rows }: { rows: AreaWorkbenchRow[] }) {
     .slice(0, 4);
 
   return (
-    <section className="grid gap-3 lg:grid-cols-2">
-      {topRows.map((row) => (
-        <article className="rounded-company border border-base-300 bg-base-200/45 p-4" key={row.id}>
-          <div className="flex items-start gap-3">
-            <span className="dashboard-icon dashboard-icon-sm text-primary">
-              <i className="ph-bold ph-buildings" aria-hidden="true"></i>
-            </span>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <strong className="break-words">{row.name}</strong>
-                <span className="badge badge-outline">{row.tables} tables</span>
-              </div>
-              <p className="mt-2 text-sm leading-6 text-company-muted">{row.key}</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <span className="badge badge-primary">{row.companycoreTables} CompanyCore</span>
-                <span className="badge badge-secondary">{row.providerMappings} provider</span>
-                <span className="badge badge-accent">{row.driveFolders + row.driveFiles} Drive</span>
-              </div>
-            </div>
+    <section className="card area-section-anchor border border-base-300 bg-base-100 shadow-sm" id="area-coverage">
+      <div className="card-body gap-4">
+        <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-start">
+          <div>
+            <p className="eyebrow">Coverage highlights</p>
+            <h2 className="text-xl font-black">Strongest mapped areas</h2>
+            <p className="mt-1 text-sm leading-6 text-company-muted">
+              Start with these areas when you want to understand the richest data, Drive, and provider coverage.
+            </p>
           </div>
-        </article>
-      ))}
+          <a className="btn btn-ghost btn-sm" href="#area-table">Review all rows</a>
+        </div>
+        <div className="grid gap-3 lg:grid-cols-2">
+          {topRows.map((row) => (
+            <article className="rounded-company border border-base-300 bg-base-200/45 p-4" key={row.id}>
+              <div className="flex items-start gap-3">
+                <span className="dashboard-icon dashboard-icon-sm text-primary">
+                  <i className="ph-bold ph-buildings" aria-hidden="true"></i>
+                </span>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <strong className="break-words">{row.name}</strong>
+                    <span className="badge badge-outline">{row.tables} tables</span>
+                  </div>
+                  <p className="mt-2 text-sm leading-6 text-company-muted">{row.key}</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <span className="badge badge-primary">{row.companycoreTables} CompanyCore</span>
+                    <span className="badge badge-secondary">{row.providerMappings} provider</span>
+                    <span className="badge badge-accent">{row.driveFolders + row.driveFiles} Drive</span>
+                  </div>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function AreaCommandSummary({
+  rows,
+  visibleRows,
+  externalMappings,
+  googleDriveFiles
+}: {
+  rows: AreaWorkbenchRow[];
+  visibleRows: AreaWorkbenchRow[];
+  externalMappings: ExternalContainerMapping[];
+  googleDriveFiles: GoogleDriveFileRecord[];
+}) {
+  const providerReview = externalMappings.filter((mapping) => !mapping.areaId).length;
+  const driveReview = googleDriveFiles.filter((file) => !file.trashed && !file.operatingAreaId).length;
+  const emptyAreas = rows.filter((row) => row.tables === 0 && row.providerMappings === 0 && row.driveFolders + row.driveFiles === 0).length;
+  const coveredAreas = Math.max(rows.length - emptyAreas, 0);
+  const reviewTotal = providerReview + driveReview;
+  const priorityTitle = reviewTotal > 0
+    ? "Assign missing ownership"
+    : emptyAreas > 0
+      ? "Review empty areas"
+      : "Area map is ready";
+  const priorityDetail = reviewTotal > 0
+    ? "Provider and Drive resources need an operating area before AI workflows can rely on them."
+    : emptyAreas > 0
+      ? "Some operating areas have no mapped resources yet. Confirm whether they are future scope or missing imports."
+      : "Every loaded resource has operating-area context. Continue by checking selected-area details or table coverage.";
+  const cards = [
+    {
+      id: "provider-review",
+      label: "Provider review",
+      value: `${providerReview}`,
+      detail: "mappings without area",
+      href: "#area-review-queues",
+      icon: "ph-plugs-connected"
+    },
+    {
+      id: "drive-review",
+      label: "Drive review",
+      value: `${driveReview}`,
+      detail: "items without area",
+      href: "#area-review-queues",
+      icon: "ph-cloud"
+    },
+    {
+      id: "covered-areas",
+      label: "Covered areas",
+      value: `${coveredAreas}/${rows.length}`,
+      detail: "with mapped resources",
+      href: "#area-coverage",
+      icon: "ph-map-trifold"
+    },
+    {
+      id: "visible-rows",
+      label: "Visible table",
+      value: `${visibleRows.length}`,
+      detail: "rows after filters",
+      href: "#area-table",
+      icon: "ph-funnel"
+    }
+  ];
+
+  return (
+    <section className="area-command-summary rounded-company border border-primary/25 bg-primary/10 p-4 shadow-sm">
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1.9fr)] xl:items-center">
+        <div className="min-w-0">
+          <p className="eyebrow">Area command</p>
+          <h2 className="mt-1 text-2xl font-black leading-tight">{priorityTitle}</h2>
+          <p className="mt-2 text-sm leading-6 text-company-muted">{priorityDetail}</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <a className="btn btn-primary btn-sm" href="#area-review-queues">Resolve review</a>
+            <a className="btn btn-ghost btn-sm" href="#selected-area-context">Inspect selected area</a>
+          </div>
+        </div>
+        <div className="area-command-grid">
+          {cards.map((card) => (
+            <a className="area-command-card" href={card.href} key={card.id}>
+              <span className="dashboard-icon dashboard-icon-sm text-primary">
+                <i className={`ph-bold ${card.icon}`} aria-hidden="true"></i>
+              </span>
+              <span className="min-w-0">
+                <span className="block text-xs font-black uppercase text-company-muted">{card.label}</span>
+                <span className="block text-xl font-black leading-tight">{card.value}</span>
+                <span className="block text-xs leading-5 text-company-muted">{card.detail}</span>
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }
@@ -2250,7 +2356,7 @@ function AreaRelationshipQueues({
   const queues = useMemo(() => areaReviewQueues(externalMappings, googleDriveFiles), [externalMappings, googleDriveFiles]);
 
   return (
-    <section className="grid gap-4 xl:grid-cols-2">
+    <section className="area-section-anchor grid gap-4 xl:grid-cols-2" id="area-review-queues">
       <AreaReviewQueue
         title="Provider mappings needing area"
         detail="ClickUp or provider containers without an operating area should be reviewed before agents depend on them."
@@ -2348,7 +2454,7 @@ function AreaSelectedContext({
   const recordCount = tables.reduce((sum, table) => sum + (tableRecords[table.apiSlug]?.length || 0), 0);
 
   return (
-    <section className="card border border-base-300 bg-base-100 shadow-sm">
+    <section className="card area-context-card area-section-anchor border border-base-300 bg-base-100 shadow-sm" id="selected-area-context">
       <div className="card-body gap-5">
         <div className="grid gap-3 lg:grid-cols-[1fr_minmax(16rem,22rem)] lg:items-start">
           <div>
@@ -2378,7 +2484,7 @@ function AreaSelectedContext({
           <MetricCard icon="ph-plugs-connected" label="Provider" value={`${mappings.length}`} detail="Assigned mappings" />
         </div>
 
-        <div className="grid gap-4 xl:grid-cols-2">
+        <div className="area-context-panels grid gap-4 xl:grid-cols-2">
           <section className="rounded-company border border-base-300 bg-base-200/45 p-4">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <h3 className="font-black">Tables and records</h3>
@@ -2540,7 +2646,7 @@ function AreaLifecyclePanel({
   }
 
   return (
-    <section className="card border border-base-300 bg-base-100 shadow-sm">
+    <section className="card area-section-anchor border border-base-300 bg-base-100 shadow-sm" id="area-lifecycle">
       <div className="card-body gap-5">
         <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-start">
           <div>
@@ -2768,6 +2874,12 @@ function AreasWorkbench({
               </div>
             </div>
 
+            <AreaCommandSummary
+              rows={rows}
+              visibleRows={visibleRows}
+              externalMappings={externalMappings}
+              googleDriveFiles={googleDriveFiles}
+            />
             <LocalNotice
               tone={readiness.tone}
               title={readiness.title}
@@ -2785,6 +2897,7 @@ function AreasWorkbench({
           </div>
         </section>
 
+        <AreaFilters filters={filters} onChange={setFilters} />
         <AreaMappingSignalCards signals={mappingSignals} />
         {assignmentNotice ? (
           <LocalNotice
@@ -2818,9 +2931,8 @@ function AreasWorkbench({
           onDelete={handleDeleteArea}
         />
         <AreaCoverageCards rows={rows} />
-        <AreaFilters filters={filters} onChange={setFilters} />
 
-        <section className="card border border-base-300 bg-base-100 shadow-sm">
+        <section className="card area-section-anchor border border-base-300 bg-base-100 shadow-sm" id="area-table">
           <div className="card-body gap-4">
             <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-start">
               <div>

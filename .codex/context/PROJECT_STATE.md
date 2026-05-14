@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-05-14
+Last updated: 2026-05-15
 
 ## Product Snapshot
 - Name: LuckySparrow Company Core
@@ -195,6 +195,13 @@ Last updated: 2026-05-14
   prerequisite, expected-result, recovery-guidance, and proposal/effect context
   to the existing `/react-company-os` approval, stage lifecycle, and automation
   evaluator panels without changing backend command contracts.
+- 2026-05-15: V2VIS-003 completed the first route-body UX polish cycle after
+  shared route-frame convergence. The canonical `/areas` route now uses an
+  area command summary, review/coverage command cards, earlier filters,
+  anchored route sections, and mobile density improvements so the owner sees
+  what needs ownership review before scanning dense area tables and context
+  panels. Evidence lives in
+  `docs/ux/areas-route-body-usability-audit-2026-05-15.md`.
 - 2026-05-14: APP-AUDIT-001 completed a full application completion audit.
   `npm run build` passed, `npm test` passed against a disposable PostgreSQL
   database with all migrations applied, protected production API samples

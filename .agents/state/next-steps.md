@@ -4,16 +4,16 @@ Last updated: 2026-05-15
 
 ## NOW
 
-1. ACF-MAINT-002 Additional Hotspot Modularization.
-   - Continue reducing delivery risk in the remaining large web/API/test
-     hotspots after V2VIS-002 closed the first route-frame convergence slice.
+1. V2VIS-004 Next Route Body UX Polish Cycle.
+   - Repeat the 100-findings-plus-implementation UX cycle on the next dense
+     private route, likely `/settings/api` safety workflow or `/settings/drive`
+     import/scoping.
 
 ## NEXT
 
-1. V2VIS-003 Route Body UX Polish Candidate.
-   - Select one high-value route body from the V2VIS-002 audit, likely
-     `/areas` mobile density or `/settings/api` safety workflow, and polish it
-     with evidence-driven screenshots instead of broad route rewrites.
+1. ACF-MAINT-002 Additional Hotspot Modularization.
+   - Continue reducing delivery risk in the remaining large web/API/test
+     hotspots after V2VIS-002 closed the first route-frame convergence slice.
 
 ## LATER
 
