@@ -2,13 +2,13 @@
 
 ## Ready
 
-- V2VIS-001 Shared CompanyShell And Dashboard Frame
+- ACF-MAINT-002 Additional Hotspot Modularization
   - Stage: planning
-  - Owner: Frontend Builder + UX + QA/Test
+  - Owner: Frontend Builder + QA/Test
   - Priority: P1
-  - Source: `docs/ux/v2-visual-implementation-plan-2026-05-14.md`
-  - Goal: start the first bounded V2 implementation slice for the shared
-    shell and dashboard frame without broad workbench rewrites or gamification.
+  - Source: `docs/operations/application-completion-audit-2026-05-14.md`
+  - Goal: continue reducing large-file delivery risk after the first dashboard
+    shell implementation path is verified.
 
 ## In Progress
 
@@ -175,6 +175,21 @@ No active local implementation task is currently in progress.
     module loaded, graph markers rendered, no overflow, no console issues, and
     no failed requests.
   - Task contract: `docs/planning/acf-maint-001-task-contract.md`.
+
+- V2VIS-001 Shared CompanyShell And Dashboard Frame.
+  - Evidence: added a dashboard Company map frame using real workspace,
+    operating-area, relationship, integration, task, and MCP state; fixed
+    shared `data-link` query preservation so map cards deep-link to selected
+    areas. `node --check public/app.js`, `node --check
+    public/relationship-workbench.js`, `git diff --check`, and `npm test`
+    passed against disposable PostgreSQL on `localhost:55465`. Browser plugin
+    invocation was blocked by no active Codex browser pane, so Playwright
+    fallback verified `http://127.0.0.1:3000/dashboard` at desktop
+    `1366x900`, tablet `834x1112`, and mobile `390x844`: 13 area cards, 4
+    status pills, no overflow, no clipped cards, no console issues, no failed
+    requests, desktop map-card click to `/areas?area=main-general`, and
+    `/relationships` still loaded after ACF-MAINT-001.
+  - Task contract: `docs/planning/v2vis-001-task-contract.md`.
 
 - ACF-DOC-001 Coverage Ledger Reconciliation.
   - Evidence: stale Google Drive first-import blocker language was reconciled

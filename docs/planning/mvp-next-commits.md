@@ -7,16 +7,16 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] V2VIS-001 Shared CompanyShell And Dashboard Frame:
-      start the first bounded V2 implementation slice from the approved visual
-      plan: shared shell and dashboard frame only, no broad workbench rewrites
-      or gamification.
+- [ ] ACF-MAINT-002 Additional Hotspot Modularization:
+      continue reducing delivery risk in the remaining large web/API/test
+      hotspots now that the first dashboard shell implementation path is
+      verified.
 
 ### NEXT
 
-- [ ] ACF-MAINT-002 Additional Hotspot Modularization:
-      continue splitting remaining hotspots only after the first V2 shell
-      slice has a stable implementation path.
+- [ ] V2VIS-002 Route Frame Convergence Audit:
+      audit which private routes should adopt the dashboard frame patterns
+      next, without starting Company City gamification or native mobile work.
 
 ### DEFERRED TO V2
 
@@ -122,6 +122,15 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       6224 lines. `node --check`, `npm run build`, `npm test` on disposable
       PostgreSQL `localhost:55464`, and Playwright `/relationships` proof on
       `http://127.0.0.1:3113` passed.
+- [x] V2VIS-001 Shared CompanyShell And Dashboard Frame:
+      added the dashboard Company map frame from real workspace,
+      operating-area, relationship, integration, task, and MCP state; fixed
+      shared query-preserving `data-link` navigation for area deep links.
+      `node --check`, `git diff --check`, `npm test` on disposable PostgreSQL
+      `localhost:55465`, and Playwright fallback dashboard proof on
+      `http://127.0.0.1:3000` passed at desktop `1366x900`, tablet
+      `834x1112`, and mobile `390x844` with no overflow, no clipped cards,
+      no console issues, and no failed requests.
 - [x] ACF-SEC-001 Production Secret And CORS Hardening:
       production now fails closed when required secret env vars are absent or
       still use committed development placeholder values; production CORS is

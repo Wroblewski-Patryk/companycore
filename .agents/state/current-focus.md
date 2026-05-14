@@ -4,7 +4,7 @@ Last updated: 2026-05-14
 
 ## Active Focus
 
-WEBFOUND-002/003/004, WEBFOUND-005, WEBFOUND-007, WEBFOUND-008A, WEBFOUND-008B, WEBFOUND-009, WEBFOUND-010, WEBFOUND-011, WEBFOUND-012, WEBFOUND-013, WEBFOUND-014, ACF-MAINT-001, and ACF-PROD-001 are now complete. The
+WEBFOUND-002/003/004, WEBFOUND-005, WEBFOUND-007, WEBFOUND-008A, WEBFOUND-008B, WEBFOUND-009, WEBFOUND-010, WEBFOUND-011, WEBFOUND-012, WEBFOUND-013, WEBFOUND-014, ACF-MAINT-001, V2VIS-001, and ACF-PROD-001 are now complete. The
 pre-V2 foundation has token-scoped multi-workspace owner switching, a workspace
 selector, area-resource sidebar inventory, responsive drawer proof,
 keyboard/focus-hardened sidebar behavior, a durable relationship graph audit,
@@ -21,6 +21,9 @@ plus a canonical V2 visual implementation plan for shell, Company City,
 command brief, status strip, route migration, responsive behavior, and proof,
 and the first maintainability split that extracted the relationship workbench
 from the monolithic vanilla app,
+plus the first dashboard Company map frame that turns workspace, area,
+relationship, integration, task, and MCP signals into one responsive command
+surface,
 and an explicit product decision not to seed fake projects, storage locations,
 knowledge roots, or automation definitions before V2. Company City, game-like
 visuals, gamification, and native mobile remain V2 scope after the
@@ -132,9 +135,10 @@ No local Company OS workflow recovery task remains ready.
 
 Optimize for source-of-truth clarity, no regression, correct owner workflows,
 and application completion. The WEBFOUND queue and first maintainability split
-are complete. The immediate objective is V2VIS-001 Shared CompanyShell And
-Dashboard Frame, because the user explicitly asked to keep working toward
-100% usefulness and the current UX is still the biggest product gap.
+are complete. The immediate objective is ACF-MAINT-002 Additional Hotspot
+Modularization unless the user reprioritizes the next dashboard/shell
+convergence audit, because the first V2VIS dashboard frame is verified and the
+remaining large-file hotspots still slow safe delivery.
 
 ## Current Delivery Stage
 

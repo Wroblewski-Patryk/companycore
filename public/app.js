@@ -332,6 +332,10 @@ const areaFiles = document.querySelector("#areaFiles");
 const areaMappings = document.querySelector("#areaMappings");
 const areaRecords = document.querySelector("#areaRecords");
 const dataCounters = document.querySelector("#dataCounters");
+const companyMapSummary = document.querySelector("#companyMapSummary");
+const companyStatusStrip = document.querySelector("#companyStatusStrip");
+const companyMapCanvas = document.querySelector("#companyMapCanvas");
+const companyCommandBrief = document.querySelector("#companyCommandBrief");
 const attentionSummary = document.querySelector("#attentionSummary");
 const attentionList = document.querySelector("#attentionList");
 const nextActionText = document.querySelector("#nextActionText");
@@ -1387,6 +1391,7 @@ function renderDashboardCommandCenter() {
   }
 
   renderOperationalCockpit(signals, items, { areas, tables, mappings, pipelineRecords: signals.pipelineRecords });
+  renderCompanyMapFrame(signals, items, { areas, tables, mappings, driveItems, clickUpLists });
   nextActionText.textContent = nextActionCopy(items, signals);
 }
 
@@ -1441,6 +1446,154 @@ function renderOperationalCockpit(signals, items, counts) {
   for (const step of steps) {
     operationalSteps.append(operationalStepElement(step));
   }
+}
+
+function renderCompanyMapFrame(signals, items, counts) {
+  if (!companyMapSummary || !companyStatusStrip || !companyMapCanvas || !companyCommandBrief) {
+    return;
+  }
+
+  const graphSummary = state.relationshipGraph.summary || {};
+  const graphEdges = Number(graphSummary.edges || state.relationshipGraph.edges.length || 0);
+  const reviewCount = signals.unmappedProviderMappings.length
+    + signals.unassignedDriveFolders.length
+    + state.relationshipGraph.reviewItems.length;
+  const mcpTools = Array.isArray(state.mcpManifest?.tools) ? state.mcpManifest.tools.length : 0;
+  const priority = dashboardPriority(items, signals);
+  const areas = state.operatingModel.areas.length > 0 ? state.operatingModel.areas : COMPANY_AREAS;
+  const visibleAreas = areas.slice(0, 13);
+
+  companyMapSummary.textContent = isSignedIn()
+    ? `${counts.areas || visibleAreas.length} operating areas, ${counts.tables || 0} tables, ${counts.mappings || 0} provider mappings, ${counts.driveItems || 0} Drive items, and ${mcpTools} MCP tools are visible from this workspace.`
+    : "Sign in to load the operating map across areas, relationships, integrations, and agent access.";
+
+  const statusItems = [
+    {
+      label: "Workspace",
+      value: state.workspace?.name || "Not loaded",
+      tone: isSignedIn() && state.workspace ? "ready" : "blocked"
+    },
+    {
+      label: "Integrations",
+      value: integrationReadinessTitle(),
+      tone: integrationReadinessItems().every((item) => item.status === "ready") ? "ready" : "attention"
+    },
+    {
+      label: "Relations",
+      value: reviewCount === 0 ? `${graphEdges} clean edges` : `${reviewCount} to review`,
+      tone: reviewCount === 0 && state.relationshipGraph.status === "ready" ? "ready" : "attention"
+    },
+    {
+      label: "MCP",
+      value: mcpTools > 0 ? `${mcpTools} tools` : "No manifest",
+      tone: mcpTools > 0 ? "ready" : "blocked"
+    }
+  ];
+
+  companyStatusStrip.innerHTML = statusItems.map(companyStatusPillHtml).join("");
+
+  companyMapCanvas.innerHTML = visibleAreas.map((area) => {
+    const readiness = companyAreaReadiness(area, signals);
+    return companyAreaCardHtml(area, readiness);
+  }).join("");
+  bindInlineNavigation(companyMapCanvas);
+
+  const activeKeys = state.apiKeys.filter((key) => key.active).length;
+  const scopedKeys = state.apiKeys.filter((key) => key.active && Array.isArray(key.scopes) && key.scopes.length > 0).length;
+  companyCommandBrief.innerHTML = `
+    <span class="summary-kicker">Command brief</span>
+    <h3>${escapeHtml(priority.title)}</h3>
+    <p>${escapeHtml(priority.detail)}</p>
+    <dl class="company-brief-metrics">
+      <div>
+        <dt>Review queue</dt>
+        <dd>${reviewCount}</dd>
+      </div>
+      <div>
+        <dt>Open tasks</dt>
+        <dd>${signals.openTasks.length}</dd>
+      </div>
+      <div>
+        <dt>Scoped keys</dt>
+        <dd>${scopedKeys}/${activeKeys}</dd>
+      </div>
+    </dl>
+    <div class="actions company-brief-actions">
+      <a class="button-link" href="${escapeHtml(priority.href)}" data-link>${escapeHtml(priority.action)}</a>
+      <a class="button-link secondary" href="${escapeHtml(priority.secondaryHref)}" data-link>${escapeHtml(priority.secondaryAction)}</a>
+    </div>
+  `;
+  bindInlineNavigation(companyCommandBrief);
+}
+
+function companyAreaReadiness(area, signals) {
+  const areaId = area.id || area.key;
+  const tables = area.tables || [];
+  const mappings = state.operatingModel.externalMappings.filter((mapping) => mapping.areaId === areaId || mapping.operatingAreaId === areaId);
+  const driveItems = state.googleDrive.files.filter((file) => file.operatingAreaId === areaId);
+  const records = tables.reduce((sum, table) => sum + recordCountForSlugs([table.slug].filter(Boolean)), 0);
+
+  if (!isSignedIn()) {
+    return {
+      tone: "blocked",
+      label: "Locked",
+      detail: "Sign in to load area coverage."
+    };
+  }
+
+  if (area.key === "main-general" && (signals.unmappedProviderMappings.length > 0 || signals.unassignedDriveFolders.length > 0)) {
+    return {
+      tone: "attention",
+      label: "Review hub",
+      detail: `${signals.unmappedProviderMappings.length + signals.unassignedDriveFolders.length} imported relationship${signals.unmappedProviderMappings.length + signals.unassignedDriveFolders.length === 1 ? "" : "s"} need a home.`
+    };
+  }
+
+  if (tables.length === 0 && mappings.length === 0 && driveItems.length === 0) {
+    return {
+      tone: "empty",
+      label: "No resources",
+      detail: "Ready for future tables, mappings, or files."
+    };
+  }
+
+  if (tables.length > 0 && (mappings.length > 0 || driveItems.length > 0 || records > 0)) {
+    return {
+      tone: "ready",
+      label: "Operational",
+      detail: `${tables.length} table${tables.length === 1 ? "" : "s"}, ${mappings.length} mapping${mappings.length === 1 ? "" : "s"}, ${driveItems.length} Drive item${driveItems.length === 1 ? "" : "s"}.`
+    };
+  }
+
+  return {
+    tone: "attention",
+    label: "Needs wiring",
+    detail: `${tables.length} table${tables.length === 1 ? "" : "s"}, ${mappings.length} mapping${mappings.length === 1 ? "" : "s"}, ${driveItems.length} Drive item${driveItems.length === 1 ? "" : "s"}.`
+  };
+}
+
+function companyStatusPillHtml(item) {
+  return `
+    <article class="company-status-pill is-${escapeHtml(item.tone)}">
+      <span>${escapeHtml(item.label)}</span>
+      <strong>${escapeHtml(item.value)}</strong>
+    </article>
+  `;
+}
+
+function companyAreaCardHtml(area, readiness) {
+  const definition = areaDefinitionFor(area);
+  const href = area.key ? `/areas?area=${encodeURIComponent(area.key)}` : "/areas";
+  return `
+    <a class="company-district-card is-${escapeHtml(readiness.tone)}" href="${href}" data-link>
+      <span class="company-district-number">${escapeHtml(definition.number || "--")}</span>
+      <span class="company-district-copy">
+        <strong>${escapeHtml(definition.label || area.name || "Area")}</strong>
+        <small>${escapeHtml(readiness.label)}</small>
+        <span>${escapeHtml(readiness.detail)}</span>
+      </span>
+    </a>
+  `;
 }
 
 function dashboardPriority(items, signals) {
@@ -2623,7 +2776,7 @@ function bindInlineNavigation(root) {
         return;
       }
       event.preventDefault();
-      navigate(url.pathname, { hash: url.hash });
+      navigate(`${url.pathname}${url.search}`, { hash: url.hash });
     });
   });
 }
@@ -3895,6 +4048,11 @@ function renderOperatingMap() {
     renderIntegrationTaxonomy();
     renderRelationshipCenter();
     return;
+  }
+
+  const areaParam = new URLSearchParams(window.location.search).get("area");
+  if (areaParam && areas.some((area) => area.key === areaParam)) {
+    state.selectedAreaKey = areaParam;
   }
 
   if (!state.selectedAreaKey || !areas.some((area) => area.key === state.selectedAreaKey)) {

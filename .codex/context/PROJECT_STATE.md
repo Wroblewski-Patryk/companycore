@@ -127,6 +127,15 @@ Last updated: 2026-05-14
   `public/relationship-workbench.js`, loaded before `public/app.js`. The main
   vanilla app dropped from 6527 to 6224 lines, and `/relationships` render
   proof passed after the split.
+- 2026-05-14: V2VIS-001 implemented the first canonical post-login dashboard
+  frame. `/dashboard` now includes a Company map frame derived from real
+  workspace, operating-area, relationship, integration, task, and MCP state,
+  plus query-preserving area deep links. `node --check`, `git diff --check`,
+  and `npm test` passed against disposable PostgreSQL on `localhost:55465`.
+  Playwright fallback verified desktop `1366x900`, tablet `834x1112`, and
+  mobile `390x844` with 13 area cards, 4 status pills, no overflow, no
+  clipped cards, no console issues, no failed requests, map click to
+  `/areas?area=main-general`, and `/relationships` still loading.
 - 2026-05-14: `V2WEB-AGENT-002 Company OS Correlation Timeline` added a
   client-composed evidence chain to `/react-company-os` using existing recent
   event and audit log `correlationId` data from `/v1/company-os`.
@@ -391,8 +400,8 @@ Last updated: 2026-05-14
 - Main active objective: close audit-derived finish blockers in priority order
   so the web and agent Company OS can reach product-quality v1 without hiding
   UX, security, data, documentation, or deployment gaps.
-- Top blockers: V2 shell/dashboard usefulness, remaining maintainability
-  hotspots, upstream Paperclip/OpenJarvis source merge permissions, and
+- Top blockers: remaining maintainability hotspots, broader route-frame
+  convergence, upstream Paperclip/OpenJarvis source merge permissions, and
   GitHub-to-Coolify auto-deploy proof.
 - Success criteria for this phase: APP-AUDIT-001 findings are represented in
   the canonical queue, ACF-UX-001 and ACF-SEC-001 have evidence-backed closure,
@@ -401,15 +410,16 @@ Last updated: 2026-05-14
   deferred.
 
 ## Autonomous Iteration State
-- Current iteration: WEBFOUND-014 V2 Visual Implementation Plan completed.
+- Current iteration: V2VIS-001 Shared CompanyShell And Dashboard Frame completed.
 - Current operation mode: BUILDER
-- Last completed iteration: WEBFOUND-014 V2 Visual Implementation Plan.
-- Last completed task: canonical V2 shell, Company City, command brief, status
-  strip, route migration, state, asset, and proof plan.
-- Current task status: ACF-MAINT-001 verified; next task is V2VIS-001 Shared
-  CompanyShell And Dashboard Frame.
-- Next required mode: BUILDER; execute ACF-PROD-001 before unrelated broad
-  product work.
+- Last completed iteration: V2VIS-001 Shared CompanyShell And Dashboard Frame.
+- Last completed task: dashboard Company map frame from real workspace,
+  operating-area, relationship, integration, task, and MCP state.
+- Current task status: V2VIS-001 verified; next task is ACF-MAINT-002
+  Additional Hotspot Modularization unless route-frame convergence is
+  explicitly prioritized first.
+- Next required mode: BUILDER; execute ACF-MAINT-002 or a bounded route-frame
+  convergence audit before unrelated broad product work.
 
 ## Recent Progress
 

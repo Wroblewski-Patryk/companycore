@@ -831,3 +831,23 @@ of rediscovering them.
 - Evidence: WEBFOUND-014 added
   `docs/ux/v2-visual-implementation-plan-2026-05-14.md` with desktop,
   tablet, mobile zones, state model, migration order, and proof gates.
+
+### 2026-05-14 - Dashboard Company Map Frame
+- Type: implemented_layout_pattern
+- Context: The first post-login screen must answer what exists in the
+  workspace, what is blocked, what agents can see, and what the next owner
+  action is without waiting for V2 Company City visuals or gamification.
+- Decision: Place a Company map frame above the operational cockpit. The frame
+  combines a status strip, area readiness grid, and command brief, all derived
+  from real workspace, operating-area, relationship, integration, task, and
+  MCP state. Area cards may deep-link with query parameters, so shared
+  `data-link` navigation must preserve `url.search`.
+- Reuse when: A route needs an executive map/brief before deeper tables or
+  workbenches, especially dashboard, integration, relationship, or future
+  workspace overview surfaces.
+- Avoid when: A route is already a focused editor or dense workbench and the
+  extra map would hide the primary form/table task.
+- Evidence: V2VIS-001 verified `/dashboard` on desktop `1366x900`, tablet
+  `834x1112`, and mobile `390x844` with 13 area cards, 4 status pills, no
+  overflow, no clipped cards, no console issues, no failed requests, map click
+  to `/areas?area=main-general`, and `/relationships` regression proof.

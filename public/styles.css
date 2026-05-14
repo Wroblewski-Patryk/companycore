@@ -856,6 +856,241 @@ h4 {
   margin-bottom: 20px;
 }
 
+.company-map-frame {
+  display: grid;
+  gap: 18px;
+  margin-bottom: 20px;
+  padding: 24px;
+}
+
+.company-map-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.7fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.company-status-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.company-status-pill {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.company-status-pill span {
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.company-status-pill strong {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.company-status-pill.is-ready {
+  border-color: #b9dbc9;
+  background: #f5fbf7;
+}
+
+.company-status-pill.is-attention {
+  border-color: #ecd3a5;
+  background: #fffaf0;
+}
+
+.company-status-pill.is-blocked {
+  border-color: #efc0c4;
+  background: #fff7f8;
+}
+
+.company-map-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.34fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.company-city-canvas {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 10px;
+  min-height: 360px;
+  padding: 14px;
+  border: 1px solid #d8e1ef;
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(109, 122, 145, 0.08) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(109, 122, 145, 0.08) 1px, transparent 1px),
+    #f8fafc;
+  background-size: 48px 48px;
+}
+
+.company-district-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  min-width: 0;
+  min-height: 132px;
+  padding: 12px;
+  border: 1px solid #d6e0ee;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--text);
+  text-decoration: none;
+  box-shadow: 0 10px 24px rgba(30, 44, 73, 0.06);
+}
+
+.company-district-card:first-child {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.company-district-card:hover {
+  border-color: #9fb4d3;
+  transform: translateY(-1px);
+}
+
+.company-district-card::after {
+  content: "";
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--muted);
+}
+
+.company-district-card.is-ready::after {
+  background: var(--success);
+}
+
+.company-district-card.is-attention::after {
+  background: #b87700;
+}
+
+.company-district-card.is-blocked::after {
+  background: var(--danger);
+}
+
+.company-district-card.is-empty::after {
+  background: #8b99ad;
+}
+
+.company-district-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #d7e0ec;
+  border-radius: 8px;
+  background: #f4f7fb;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.company-district-copy {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.company-district-copy strong {
+  overflow-wrap: anywhere;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.company-district-copy small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.company-district-copy span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.company-command-brief {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid #d8e1ef;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.company-command-brief h3 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.16;
+}
+
+.company-command-brief p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.company-brief-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.company-brief-metrics div {
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.company-brief-metrics dt {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.company-brief-metrics dd {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.company-brief-actions {
+  align-self: end;
+}
+
 .summary-kicker {
   display: block;
   margin-bottom: 12px;
@@ -3820,6 +4055,8 @@ button.danger:hover {
   .dashboard-grid,
   .settings-grid,
   .auth-grid,
+  .company-map-head,
+  .company-map-layout,
   .dashboard-command-layout,
     .account-readiness-grid,
   .integration-grid,
@@ -3859,6 +4096,24 @@ button.danger:hover {
 
   .dashboard-command-layout {
     gap: 12px;
+  }
+
+  .company-map-frame {
+    padding: 18px;
+  }
+
+  .company-status-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .company-city-canvas {
+    grid-template-columns: repeat(3, minmax(150px, 1fr));
+    min-height: auto;
+  }
+
+  .company-district-card:first-child {
+    grid-column: span 1;
+    grid-row: span 1;
   }
 
   .command-focus,
@@ -3999,6 +4254,7 @@ button.danger:hover {
   .module-launch,
   .next-panel,
   .api-panel,
+  .company-map-frame,
   .auth-context-card {
     padding: 20px;
   }
@@ -4012,6 +4268,12 @@ button.danger:hover {
   }
 
   .command-evidence-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .company-status-strip,
+  .company-city-canvas,
+  .company-brief-metrics {
     grid-template-columns: 1fr;
   }
 

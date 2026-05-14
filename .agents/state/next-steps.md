@@ -4,16 +4,16 @@ Last updated: 2026-05-14
 
 ## NOW
 
-1. V2VIS-001 Shared CompanyShell And Dashboard Frame.
-   - Start the first bounded V2 implementation slice from the approved visual
-     plan: shared shell and dashboard frame only, no broad workbench rewrites
-     or gamification.
+1. ACF-MAINT-002 Additional Hotspot Modularization.
+   - Continue reducing delivery risk in the remaining large web/API/test
+     hotspots now that the first dashboard shell implementation path is
+     verified.
 
 ## NEXT
 
-1. ACF-MAINT-002 Additional Hotspot Modularization.
-   - Continue splitting remaining hotspots only after the first V2 shell slice
-     has a stable implementation path.
+1. V2VIS-002 Route Frame Convergence Audit.
+   - Audit which private routes should adopt the dashboard frame patterns next,
+     without starting Company City gamification or native mobile work.
 
 ## LATER
 
