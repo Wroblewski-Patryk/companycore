@@ -8,8 +8,8 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 ### NOW
 
 No local Company OS workflow recovery task is currently ready. Google Drive
-production deployment and discovery are verified; the remaining import gate is
-owner folder selection listed under `BLOCKED`.
+production deployment, folder-root selection, import, and department scoping
+are verified.
 
 ### NEXT
 V2WEB-AGENT-024 is complete. Workflow recovery has backend lineage, web
@@ -18,12 +18,6 @@ External blockers stay listed below.
 
 ### BLOCKED
 
-- [ ] AGRUN-007 Google Drive Owner Consent And First Import:
-      blocked until the owner selects the Google Drive folder roots that
-      CompanyCore is allowed to import. Production now runs
-      `c5878d95a47f17745f65689c08e9e317a6465777`, OAuth is active, protected
-      `google-drive:smoke` passes, and owner folder discovery returned 172
-      folders with `selectedFolderCount=0`.
 - [ ] AGRUN-010 Upstream Agent Source Merge Execution:
       blocked until upstream write access or an approved fork/PR route exists.
 - [ ] KI-002 GitHub-to-Coolify Auto-Deploy Proof:
@@ -36,6 +30,13 @@ The section below is retained as execution evidence. It is not the active
 queue. Future work must start from `Active Queue`, `.codex/context/TASK_BOARD.md`,
 and `docs/operations/v1-function-coverage-ledger.csv`.
 
+- [x] AGRUN-007 Google Drive Owner Consent And First Import:
+      production runs `c5878d95a47f17745f65689c08e9e317a6465777`; OAuth is
+      active; discovery found 172 folders; 13 numbered department root folders
+      (`00`-`12`) were selected, imported, and mapped to operating areas;
+      readback returned 715 imported Drive items, 171 folders,
+      `unassignedCount=0`, and descendant scope verification
+      `mismatches=[]`.
 - [x] V2WEB-AGENT-015 Workflow Archive And Rollback Command Decision:
       selected phased recovery commands. Archive should first support inactive
       historical workflow versions by explicit root type/root ID; rollback

@@ -11,26 +11,6 @@ No active local implementation task is currently in progress.
 
 ## Blocked
 
-- AGRUN-007 Google Drive Owner Consent And First Import
-  - Stage: verification
-  - Status: BLOCKED_OWNER_FOLDER_SELECTION
-  - Owner: Ops/Release
-  - Priority: P1
-  - Source: live owner consent session plus Google Drive integration
-    architecture.
-  - Goal: make Google Drive owner OAuth callback, folder discovery, selected
-    folder import, and Docs/Sheets content indexing available to CompanyCore
-    and MCP-facing agents.
-  - Evidence: Google Cloud OAuth consent, scopes, and test user were configured
-    for project `companycore-495601`; production workspace settings report
-    Google Drive OAuth token configured. Local fix evidence: `npm run build`
-    passed; Docker compiled API tests passed; production manual rollover to
-    commit `c5878d95a47f17745f65689c08e9e317a6465777` passed public health,
-    protected `google-drive:smoke`, and owner folder discovery with 172 folders.
-  - Blocked by: no Drive folders are selected in CompanyCore production
-    settings (`selectedFolderCount=0`), so first import is intentionally not
-    run until the owner selects the allowed folder roots.
-
 - AGRUN-010 Upstream Agent Source Merge Execution
   - Stage: planning
   - Owner: Ops/Release
@@ -66,6 +46,15 @@ No active local implementation task is currently in progress.
   auto-deploy webhook administration task.
 
 ## Done
+
+- AGRUN-007 Google Drive Owner Consent And First Import.
+  - Evidence: production runs commit
+    `c5878d95a47f17745f65689c08e9e317a6465777`; OAuth is active; folder
+    discovery found 172 folders; 13 numbered department roots (`00`-`12`) were
+    selected and imported; `/v1/google-drive/files` readback returned 715
+    imported Drive items, including 171 folders; all imported items have an
+    operating-area assignment and descendant scope verification reported
+    `mismatches=[]`.
 
 - V2WEB-AGENT-009 Workflow Definition Draft Backend Contract.
 - V2WEB-AGENT-010 Workflow Definition Activation Backend Contract.

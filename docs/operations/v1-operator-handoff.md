@@ -82,9 +82,10 @@ achievement boundary and external blocker list.
   `71f3eb3b063ea68226a1736c727c52882b33f27a`.
 - 2026-05-14 AGRUN-007 production smoke returned `200` for `/health`,
   `/v1/health`, and `/settings/drive`; protected `google-drive:smoke` passed
-  with OAuth active; owner folder discovery returned 172 folders and
-  `selectedFolderCount=0`, leaving first import blocked on owner folder-root
-  selection.
+  with OAuth active; owner folder discovery returned 172 folders; the numbered
+  department roots `00`-`12` were selected, imported, and mapped to operating
+  areas; Drive readback returned 715 imported items, 171 folders,
+  `unassignedCount=0`, and descendant scope `mismatches=[]`.
 - 2026-05-08 public `app.js` marker check confirmed typed editor surfaces for
   Notes, Projects, Clients, Task Lists, and Tasks.
 - 2026-05-11 public no-secret smoke returned `200` for CompanyCore `/health`,

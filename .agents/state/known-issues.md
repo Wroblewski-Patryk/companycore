@@ -6,7 +6,6 @@ Last updated: 2026-05-14
 
 | ID | Severity | Area | Summary | Owner | Status | Next action |
 | --- | --- | --- | --- | --- | --- | --- |
-| KI-001 | P1 | Google Drive | Production Drive OAuth and folder discovery are working, but no folder roots are selected for import. Owner discovery returned 172 folders and `selectedFolderCount=0`. | Ops/Release | BLOCKED_OWNER_FOLDER_SELECTION | Owner selects the allowed Drive folder roots in `/settings/drive`; then run first selected-folder import smoke. |
 | KI-002 | P2 | Release automation | GitHub-to-Coolify auto-deploy is not proven as reliable; manual VPS backend rollover remains the approved path. | Ops/Release | MONITORING | Record a push-to-running-image smoke before claiming auto-deploy is reliable. |
 | KI-003 | P2 | Source handoff | Paperclip and OpenJarvis validated source changes could not be pushed upstream because GitHub returned `403`. | Ops/Release | BLOCKED | Resume AGRUN-010 after write access or an approved fork/PR route exists. |
 

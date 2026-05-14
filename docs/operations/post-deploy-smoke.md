@@ -26,7 +26,7 @@ Use this file to record the minimum checks after each deploy.
 - [ ] `GET /events` includes `task_synced_from_clickup` and sync status events
 - [x] `npm run google-drive:smoke` passes with a real workspace API key
 - [x] Google Drive settings can be read without returning OAuth material
-- [ ] Google Drive file list route returns imported files/snapshots for the
+- [x] Google Drive file list route returns imported files/snapshots for the
   workspace
 
 ## Ops Checks
@@ -80,16 +80,21 @@ Use this file to record the minimum checks after each deploy.
   - Smoke returned `googleDriveConfigured=true`,
     `googleDriveActive=true`, and `importedFileCount=0`.
   - Owner-authenticated folder discovery returned 172 folders.
-  - First import was not run because production has `selectedFolderCount=0`.
-    Selecting an arbitrary Drive folder would change the data boundary without
-    owner approval.
+  - After owner clarification, selected numbered department root folders
+    `00. Główny` through `12. Zarządzanie` and excluded the non-department
+    `Gemini Gems` folder.
+  - First import completed for the selected roots. Readback returned 715
+    imported Drive items, including 171 folders.
+  - Department scoping was applied root-by-root with child inheritance.
+    Verification returned `unassignedCount=0` and `mismatches=[]`, proving
+    imported descendants are not assigned to other departments.
 - Cleanup:
   - Removed temporary VPS source archive, source directory, env file, label
     file, health file, and rollout/smoke scripts under `/tmp`.
 - Residual risks:
-  - AGRUN-007 remains blocked only on owner folder-root selection. After the
-    owner selects the allowed folders in `/settings/drive`, run the first
-    selected-folder import smoke and Drive file readback.
+  - Large Drive imports can exceed a synchronous request client timeout even
+    when backend work succeeds; consider an async import job/progress UI if
+    repeated large imports become a normal operator workflow.
 
 - Timestamp: 2026-05-08
 - Environment: production public domains
