@@ -2,6 +2,16 @@ import type { Request } from "express";
 
 export const capabilities = [
   "connection:read",
+  "company-os:read",
+  "company-os:definition:write",
+  "company-os:workflow-definition:write",
+  "company-os:workflow-definition:activate",
+  "company-os:approval:request",
+  "company-os:approval:decide",
+  "company-os:pipeline-run:write",
+  "company-os:stage-run:write",
+  "company-os:automation:execute",
+  "mcp:read",
   "operating-model:read",
   "operating-model:write",
   "operating-model:mappings:write",
@@ -73,6 +83,32 @@ export const adapterManifest = {
   routes: {
     connection: [
       { method: "GET", path: "/v1/connection", capability: "connection:read" }
+    ],
+    companyOs: [
+      { method: "GET", path: "/v1/company-os", capability: "company-os:read" },
+      { method: "GET", path: "/v1/company-os/workflow-definitions/drafts", capability: "company-os:workflow-definition:write" },
+      { method: "GET", path: "/v1/company-os/workflow-definitions/drafts/:id", capability: "company-os:workflow-definition:write" },
+      { method: "POST", path: "/v1/company-os/workflow-definitions/drafts", capability: "company-os:workflow-definition:write" },
+      { method: "PATCH", path: "/v1/company-os/workflow-definitions/drafts/:id", capability: "company-os:workflow-definition:write" },
+      { method: "POST", path: "/v1/company-os/workflow-definitions/drafts/:id/actions/preview-impact", capability: "company-os:workflow-definition:write" },
+      { method: "POST", path: "/v1/company-os/workflow-definitions/drafts/:id/actions/activate", capability: "company-os:workflow-definition:activate" },
+      { method: "POST", path: "/v1/company-os/workflow-definitions/:rootObjectType/:rootObjectId/actions/archive", capability: "company-os:workflow-definition:activate" },
+      { method: "POST", path: "/v1/company-os/workflow-definitions/:rootObjectType/:rootObjectId/actions/create-rollback-draft", capability: "company-os:workflow-definition:write" },
+      { method: "GET", path: "/v1/company-os/:collection", capability: "company-os:read" },
+      { method: "GET", path: "/v1/company-os/:collection/:id", capability: "company-os:read" },
+      { method: "POST", path: "/v1/company-os/standards", capability: "company-os:definition:write" },
+      { method: "PATCH", path: "/v1/company-os/standards/:id", capability: "company-os:definition:write" },
+      { method: "DELETE", path: "/v1/company-os/standards/:id", capability: "company-os:definition:write" },
+      { method: "POST", path: "/v1/company-os/approvals/request", capability: "company-os:approval:request" },
+      { method: "POST", path: "/v1/company-os/approvals/:id/decision", capability: "company-os:approval:decide" },
+      { method: "POST", path: "/v1/company-os/pipeline-runs/:id/actions/start-stage", capability: "company-os:pipeline-run:write" },
+      { method: "POST", path: "/v1/company-os/stage-runs/:id/actions/block", capability: "company-os:stage-run:write" },
+      { method: "POST", path: "/v1/company-os/stage-runs/:id/actions/validate", capability: "company-os:stage-run:write" },
+      { method: "POST", path: "/v1/company-os/stage-runs/:id/actions/complete", capability: "company-os:stage-run:write" },
+      { method: "POST", path: "/v1/company-os/events/:id/actions/evaluate-automation-rules", capability: "company-os:automation:execute" }
+    ],
+    mcp: [
+      { method: "GET", path: "/v1/mcp/manifest", capability: "mcp:read" }
     ],
     operatingModel: [
       { method: "GET", path: "/v1/connection", capability: "operating-model:read" },

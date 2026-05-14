@@ -1,6 +1,6 @@
 # Project Memory Index
 
-Last updated: 2026-05-11
+Last updated: 2026-05-14
 
 ## Purpose
 
@@ -32,6 +32,52 @@ continue from repository files alone:
 - `docs/planning/`: release plan and task sequencing.
 - `docs/operations/`: release, deploy, smoke, rollback, and target-environment
   evidence.
+- `docs/ux/`: approved visual direction, design-system rules, reusable UX
+  memory, and pattern guidance. As of 2026-05-14, high-level dashboard and map
+  work must preserve the accepted Company City strategic-map direction unless a
+  new decision supersedes it.
+- `docs/planning/human-agent-web-architecture-map.md`: current V2
+  human-agent web direction. As of 2026-05-14, `/react-agent-tools` exposes
+  the owner-visible MCP tool surface, and `/react-company-os` includes the
+  correlation timeline, operating graph detail, and workflow-grade command
+  panel slices.
+- `docs/architecture/company-os-definition-editing-contract.md`: Company OS
+  definition editing safety contract. It classifies which definitions may use
+  scoped CRUD, command routes, versioning, approval, or no raw editing. As of
+  2026-05-14, `standards` has the first Class A backend write contract through
+  `company-os:definition:write`; the narrow web editor is implemented and
+  verified.
+- `docs/architecture/company-os-workflow-definition-command-contract.md`:
+  workflow definition command/version contract. It blocks raw CRUD over active
+  processes, pipelines, stages, procedures, and steps, and defines draft,
+  impact preview, approval, activation, archive, rollback, evidence, and MCP
+  exposure requirements. As of 2026-05-14, V2WEB-AGENT-009 implemented
+  draft/update/impact-preview backend commands, V2WEB-AGENT-010 implemented
+  approval-aware procedure activation, V2WEB-AGENT-011 added process and
+  pipeline versioning plus activation, V2WEB-AGENT-012 added the guarded web
+  surface for workflow draft create, impact preview, approval request, and
+  activation gating, V2WEB-AGENT-013 selected draft history/readback before
+  archive/rollback, V2WEB-AGENT-014 added guarded draft list/detail readback
+  plus draft-only resume in `/react-company-os`, and V2WEB-AGENT-015 selected
+  phased recovery commands: inactive historical-version archive first, then
+  rollback-draft creation through existing preview and activation.
+  V2WEB-AGENT-016 implemented the inactive historical-version archive backend
+  command, and V2WEB-AGENT-017 implemented rollback-draft creation without
+  direct rollback execution. V2WEB-AGENT-018 selected a dedicated web recovery
+  panel, and V2WEB-AGENT-019 implemented `/react-company-os` recovery controls.
+  V2WEB-AGENT-020/021 selected and implemented explicit `family_id` lineage on
+  process, pipeline, and procedure roots so rollback-draft creation works
+  across renamed historical versions. V2WEB-AGENT-022 fixed Company OS
+  collection fetch paths, V2WEB-AGENT-023 proved the full UI recovery flow
+  through inline approval decision and activation, and V2WEB-AGENT-024 repeated
+  that flow against a migrated Docker Compose backend.
+- Google Drive integration memory: as of 2026-05-14, Google Drive uses one
+  workspace OAuth connection for Drive, Docs, and Sheets. The callback route is
+  `/settings/drive`; private-route login redirects must preserve callback query
+  parameters until the backend token exchange completes. Folder discovery must
+  request `mimeType`, and imports refresh searchable content snapshots for
+  Google Docs and Sheets. Local build and Docker API tests pass, but production
+  discovery/import proof is pending deploy.
 
 If one of these files is missing, empty, stale, or still template-like, rebuild
 the minimum useful version from architecture docs, context files, accepted

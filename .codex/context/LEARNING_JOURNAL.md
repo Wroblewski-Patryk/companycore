@@ -218,3 +218,125 @@ fixes for this repository.
 - Evidence: V2WEB-031 Browser setup failed with `requires >= v22.22.0`;
   fallback Playwright verified `/pipeline` at desktop `1440x960` and mobile
   `390x844` with no console errors or horizontal overflow.
+
+### 2026-05-14 - Playwright headless checks can hang after Vite port drift
+- Context: V2AGENT-006 attempted a focused rendered check for
+  `/react-company-os` after adding an agent command queue to the existing
+  React Company OS cockpit.
+- Symptom: A Vite validation server switched from the requested port because
+  the port was already occupied, and subsequent Playwright headless attempts
+  hung until the shell or MCP timeout even with a simple static server.
+- Root cause: The rendered-check harness mixed Vite port probing, Playwright
+  waits, and background process cleanup. Once the first port drifted, later
+  attempts left validation-owned headless browser processes that had to be
+  cleaned up separately.
+- Guardrail: For focused React route smoke, reserve a fresh high port with
+  `--strictPort`, avoid `networkidle` against Vite/HMR, and keep browser launch,
+  page checks, browser close, and server close inside one script with a short
+  explicit timeout.
+- Preferred pattern: If the render harness fails before page assertions,
+  record it as a tooling blocker, clean up validation-owned `vite`, `node -`,
+  and `chrome-headless-shell` processes, then use a deterministic fallback
+  such as system Chrome `--headless=new --dump-dom --virtual-time-budget=5000`
+  against a temporary static SPA server with mock `/v1` endpoints.
+- Avoid: Retrying the same hanging Playwright path repeatedly or marking a UI
+  slice fully verified from build evidence alone.
+- Evidence: V2AGENT-006 `npm run build` passed, but Vite/Playwright rendered
+  checks timed out. V2AGENT-006R then passed with system Chrome dump-DOM,
+  verifying the agent command queue markers without leaving validation ports
+  or Docker containers running.
+
+### 2026-05-14 - Check for stale route-smoke parents after browser proofs
+- Context: V2WEB-AGENT-006 did not run a browser proof, but final resource
+  hygiene found leftover `chrome-headless-shell` processes from earlier
+  route-smoke validation runs.
+- Symptom: `Get-Process chrome-headless-shell` and WMI still reported
+  headless browser children whose parent command lines referenced
+  `scripts/route-smoke.mjs`; `Stop-Process`, `taskkill`, and WMI termination
+  reported success or "no running task instance" inconsistently.
+- Root cause: Earlier route-smoke parent processes were still present or had
+  stale child process records after browser validation.
+- Guardrail: After any route-smoke or Playwright validation, inspect both
+  `chrome-headless-shell` and parent `node scripts/route-smoke.mjs`/`cmd`
+  processes, terminate the parent first, then re-check browser children.
+- Preferred pattern: Keep browser proof scripts self-contained with explicit
+  `finally` cleanup, and include the parent process command line in cleanup
+  evidence when stale headless browsers are found later.
+- Avoid: Assuming `Stop-Process chrome-headless-shell` fully cleans a route
+  smoke if the parent process can respawn or retain children.
+- Evidence: Final V2WEB-AGENT-006 hygiene found route-smoke parent processes
+  (`node scripts/route-smoke.mjs`) and multiple `chrome-headless-shell`
+  children; parent termination and repeated child cleanup were attempted, while
+  `taskkill` reported no running task instance for remaining stale PIDs.
+
+### 2026-05-14 - Split browser proof when Playwright/Chrome cannot produce a bounded PASS
+- Context: V2WEB-AGENT-007 implemented the standards editor and passed build,
+  static marker, and whitespace checks, then attempted local rendered proof
+  with mocked `/v1` data.
+- Symptom: Firefox was not installed in the Playwright cache; Chromium/Chrome
+  proof attempts timed out or failed to return a bounded success result. An
+  isolated Chrome profile directory under
+  `%TEMP%\cc-standards-chrome-34mVT0` was removed afterward, while WMI still
+  intermittently reported an old headless Chrome PID that `taskkill` described
+  as not running.
+- Root cause: Browser validation on this Windows desktop session can leave
+  stale process records or hang before returning command output, especially
+  after earlier route-smoke validation attempts.
+- Guardrail: Do not mark a browser-dependent UI task DONE from build/static
+  evidence alone. Record `IMPLEMENTED_NOT_VERIFIED`, queue a narrow render
+  proof task, and include process/profile cleanup evidence as an explicit
+  acceptance criterion.
+- Preferred pattern: Keep the render proof small, avoid multiple browser
+  engines in one command, print progress checkpoints early, and re-check only
+  the validation-specific command lines and temporary profile paths afterward.
+- Evidence: V2WEB-AGENT-007 is recorded as implemented-not-verified and
+  V2WEB-AGENT-007R is now the active QA checkpoint. A later Chrome
+  dump-DOM attempt with `%TEMP%\cc-standards-dump-U0vPUH` also timed out; its
+  crashpad child was terminated, two stale renderer PIDs reported "no running
+  task instance", and the temporary profile directory was removed. Follow-up
+  hygiene found no validation-specific Chrome/Node processes and removed
+  stale Playwright profile/artifact temp directories.
+- Resolution: Playwright Chromium became reliable when launched with
+  `--disable-crash-reporter` and
+  `--disable-features=Crashpad,CalculateNativeWinOcclusion`, while avoiding
+  `networkidle` as the primary readiness gate. V2WEB-AGENT-007R then passed
+  render/create proof and cleanup checks.
+
+### 2026-05-14 - Use explicit Node stack for large TypeScript server builds
+- Context: V2WEB-AGENT-009 added workflow definition draft routes and
+  extended the API integration test while the project already had a large
+  Prisma/Express/test graph.
+- Symptom: `npm run build:server` crashed inside TypeScript with
+  `RangeError: Maximum call stack size exceeded` and no source diagnostic.
+- Root cause: The TypeScript checker exceeded the default Node process stack
+  on Windows while checking the expanded project graph. Running the same
+  compiler with `node --stack_size=8192` completed successfully.
+- Guardrail: Keep `build:server` pinned to
+  `node --stack_size=8192 ./node_modules/typescript/bin/tsc` so local and CI
+  validation use the stable checker invocation.
+- Preferred pattern: If this crash returns, first run a single-file or trace
+  narrowing check to confirm it is a checker stack limit, then simplify
+  unusually large inferred helper return types before raising the stack again.
+- Evidence: V2WEB-AGENT-009 `npm run build` and `npm test` passed after the
+  script change; temporary TypeScript trace directories were removed.
+
+### 2026-05-14 - Register specific Company OS capability routes before generic collection routes
+- Context: V2WEB-AGENT-014 added guarded workflow draft list/detail routes
+  under `/v1/company-os/workflow-definitions/drafts`.
+- Symptom: The first regression run returned `200` for a read-only draft-list
+  call even though the route should require
+  `company-os:workflow-definition:write`.
+- Root cause: The capability manifest matched the generic
+  `/v1/company-os/:collection` GET rule before the more specific workflow
+  draft route, so the request inherited broad read behavior.
+- Guardrail: Add specific Company OS command/readback routes before generic
+  collection matchers in `src/auth/capabilities.ts`, then cover read-only
+  denial in API tests.
+- Preferred pattern: Keep high-specificity Company OS routes grouped above
+  `/v1/company-os/:collection` and `/v1/company-os/:collection/:id`, with
+  positive owner tests and negative read-only/cross-workspace tests.
+- Avoid: Appending new Company OS subroutes below generic collection routes or
+  relying on route name shape alone for capability safety.
+- Evidence: V2WEB-AGENT-014 `npm test` initially exposed the read-only `200`;
+  after reordering specific route entries and adding assertions, `npm test`
+  passed against disposable PostgreSQL on `localhost:55438`.

@@ -2,26 +2,31 @@
 
 ## Ready
 
-- UXA-015 React Canonical Route Switch Readiness
-  - Stage: planning
-  - Owner: Frontend Builder
-  - Priority: P1
-  - Scope: decide whether the React task or integration workbench can safely
-    become the first canonical route, or whether remaining adapter/editor
-    parity needs another migration slice.
+No local Company OS workflow recovery task is currently ready. External or
+target-environment tasks remain below.
 
 ## In Progress
 
-No active task.
-
-## Blocked
-
 - AGRUN-007 Google Drive Owner Consent And First Import
-  - Stage: planning
+  - Stage: verification
+  - Status: IMPLEMENTED_NOT_DEPLOYED
   - Owner: Ops/Release
   - Priority: P1
-  - Blocked by: real Google OAuth credentials and owner consent/import action
-    are required before target-environment evidence can be produced.
+  - Source: live owner consent session plus Google Drive integration
+    architecture.
+  - Goal: make Google Drive owner OAuth callback, folder discovery, selected
+    folder import, and Docs/Sheets content indexing available to CompanyCore
+    and MCP-facing agents.
+  - Evidence: Google Cloud OAuth consent, scopes, and test user were configured
+    for project `companycore-495601`; production workspace settings now report
+    Google Drive OAuth token configured. Local fix evidence: `npm run build`
+    passed; `docker compose exec -T backend sh -lc "npm run
+    prisma:migrate:deploy && node --test 'dist/tests/**/*.test.js'"` passed.
+  - Remaining gate: deploy the patched backend/web bundle to the production
+    CompanyCore service, then rerun production `/settings/drive` folder
+    discovery and first selected-folder import smoke.
+## Blocked
+
 - AGRUN-010 Upstream Agent Source Merge Execution
   - Stage: planning
   - Owner: Ops/Release
@@ -58,6 +63,91 @@ No active task.
 
 ## Done
 
+- V2WEB-AGENT-009 Workflow Definition Draft Backend Contract.
+- V2WEB-AGENT-010 Workflow Definition Activation Backend Contract.
+- V2WEB-AGENT-011 Process And Pipeline Workflow Versioning Migration Decision.
+- V2WEB-AGENT-012 Workflow Definition Draft Web Surface.
+- V2WEB-AGENT-013 Workflow Draft History And Resume Decision.
+- V2WEB-AGENT-014 Workflow Draft Readback And Resume Slice.
+- V2WEB-AGENT-015 Workflow Archive And Rollback Command Decision.
+- V2WEB-AGENT-016 Workflow Historical Version Archive Backend Slice.
+- V2WEB-AGENT-017 Workflow Rollback Draft Backend Slice.
+- V2WEB-AGENT-018 Workflow Recovery Controls Web Decision.
+- V2WEB-AGENT-019 Workflow Recovery Controls Web Surface.
+- V2WEB-AGENT-020 Workflow Version Lineage Decision.
+- V2WEB-AGENT-021 Workflow Version Lineage Implementation.
+- V2WEB-AGENT-022 Company OS Collection Fetch Alignment.
+- V2WEB-AGENT-023 Workflow Recovery End-To-End Activation Proof.
+- V2WEB-AGENT-024 Workflow Recovery Real Backend Proof.
+- V2WEB-AGENT-008 Versioned Workflow Definition Command Contract.
+- V2WEB-AGENT-007R Standards Editor Render Proof.
+- V2WEB-AGENT-007 Standards Definition Editor Web Surface.
+- UXD-003 Company City Dashboard V3 Department Model.
+- UXD-002 Company City Dashboard V2 Target Spec.
+- UXD-001 Company City UX Direction Decision.
+- V2WEB-AGENT-006 Class A Definition Editor Backend Contract.
+- V2WEB-AGENT-005 Definition Editing Contract Decision.
+- V2WEB-AGENT-004 Workflow-Grade Command Panels.
+- V2WEB-AGENT-003 Operating Graph Detail.
+- V2WEB-AGENT-002 Company OS Correlation Timeline.
+- V2WEB-AGENT-001 Agent Tool Surface Workbench.
+- V2WEB-ARCH-001 Human-Agent Web Architecture Map.
+- V2AGENT-006R Agent Command Queue Render Proof.
+- V2AGENT-006 Agent Command Queue Cockpit Slice.
+- V1CLOSE-001 V1 Achievement And External Blocker Handoff.
+- V2AGENT-005 Supervised Operator MCP Smoke Harness.
+- V2AGENT-004 MCP Requires-Approval Bridge Guard.
+- V2AGENT-003 Approval-Aware MCP Command Flow Design.
+- V2AGENT-002 MCP Company OS Reader Least-Privilege Correction.
+- V2AGENT-001 Agent-First Company OS MCP Command Surface Audit.
+- V2PLAN-001 V2 Product Lane Selection.
+- V1EVID-002 Operating Model Registry Lifecycle Smoke.
+- V1EVID-001 Company OS Lifecycle Trace Smoke.
+- V1CTRL-002 Canonical Queue Cleanup.
+- V1CTRL-001 Function Coverage Ledger.
+- UXA-031 V1 Architecture Completion Audit.
+- UXA-030 React Areas Canonical Route Switch.
+- UXA-029 React Areas Canonical Route Switch Decision.
+- UXA-028 React Areas Assigned Scope Reassignment Controls.
+- UXA-027 React Areas Selected Context Data Hook.
+- UXA-026 React Areas Selected Context Parity Decision.
+- UXA-025 React Areas Area Lifecycle Controls.
+- UXA-024 React Areas Canonical Switch Decision.
+- UXA-023 React Areas Scope Assignment Controls.
+- UXA-022 React Areas Canonical Switch Decision.
+- UXA-021 React Areas Relationship Data Hook.
+- UXA-020 React Areas Data Contract Gap Decision.
+- UXA-019 React Areas Mapping Parity Slice.
+- UXA-018 React Canonical Route Switch Decision.
+- UXA-017 React Workbench Third Route Candidate.
+- CCOS-020 Company OS Automation Lifecycle Proposal Execution.
+- CCOS-019 Company OS Stage Lifecycle Command Service Extraction.
+- CCOS-018 Company OS Automation Lifecycle Helper Reuse Design.
+- CCOS-017 Company OS Automation Evaluator UI Actions.
+- CCOS-016 Company OS Automation Rule Evaluator Backend.
+- CCOS-015 Company OS Automation Rule Execution Design.
+- CCOS-014 Company OS Stage Lifecycle UI Actions.
+- CCOS-013 Company OS Stage Lifecycle Backend.
+- CCOS-012 Company OS Pipeline Stage Lifecycle Design.
+- CCOS-011 Company OS Approval UI Actions.
+- CCOS-010 Company OS Approval Lifecycle Backend.
+- CCOS-009 Company OS Approval Lifecycle Design.
+- CCOS-008 Company OS Agent Context Panel.
+- CCOS-007 Company OS Collection Detail Route.
+- CCOS-006 Company OS Collection Drill-Down.
+- CCOS-005 Company OS Dashboard Surface.
+- UXA-016 React Route Shell Extraction.
+- MCP-006 MCP Agent Runtime Setup Guide.
+- MCP-005 MCP Bridge Runtime Smoke Harness.
+- MCP-004 Dynamic MCP Profile UI Loading.
+- MCP-001 MCP Bridge Manifest Foundation.
+- MCP-002 CompanyCore MCP Bridge Server.
+- MCP-003 MCP Agent Key Profiles.
+- CCOS-001 Company OS Stage 1 Data Foundation.
+- CCOS-002 Company OS Stage 2 Runtime Evidence Foundation.
+- CCOS-003 Company OS Stage 3 Governance Intelligence Foundation.
+- CCOS-004 Company OS Read API Surface.
+- UXA-015 React Canonical Route Switch Readiness.
 - UXA-014 React Integration Map Workbench Route.
 - UXA-013 React Workbench Canonical Route Decision.
 - UXA-012 React Workbench Route Migration.

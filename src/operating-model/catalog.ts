@@ -62,11 +62,11 @@ export const operatingTables = [
     description: "CRM contacts and companies"
   },
   {
-    areaKey: "sales-crm",
+    areaKey: "tasks-workflow",
     tableName: "pipeline_stages",
     apiSlug: "pipeline-stages",
     name: "Pipeline stages",
-    description: "Sales pipeline configuration"
+    description: "Reusable workflow stages used by company pipelines and CRM"
   },
   {
     areaKey: "sales-crm",
@@ -116,6 +116,202 @@ export const operatingTables = [
     apiSlug: "events",
     name: "Events",
     description: "System events and sync signals"
+  },
+  {
+    areaKey: "strategy-governance",
+    tableName: "processes",
+    apiSlug: "processes",
+    name: "Processes",
+    description: "Durable company processes mapped to departments, owners, policies, and metrics"
+  },
+  {
+    areaKey: "tasks-workflow",
+    tableName: "pipelines",
+    apiSlug: "pipelines",
+    name: "Pipelines",
+    description: "Reusable cross-department workflow definitions from input to outcome"
+  },
+  {
+    areaKey: "tasks-workflow",
+    tableName: "pipeline_runs",
+    apiSlug: "pipeline-runs",
+    name: "Pipeline runs",
+    description: "Concrete pipeline executions with status, current stage, payloads, links, and correlation"
+  },
+  {
+    areaKey: "tasks-workflow",
+    tableName: "stage_runs",
+    apiSlug: "stage-runs",
+    name: "Stage runs",
+    description: "Concrete execution records for individual pipeline stages"
+  },
+  {
+    areaKey: "tasks-workflow",
+    tableName: "checklist_templates",
+    apiSlug: "checklist-templates",
+    name: "Checklist templates",
+    description: "Reusable completion checklists for tasks, stages, procedures, and runs"
+  },
+  {
+    areaKey: "tasks-workflow",
+    tableName: "checklist_items",
+    apiSlug: "checklist-items",
+    name: "Checklist items",
+    description: "Ordered checklist template items with required/optional flags"
+  },
+  {
+    areaKey: "tasks-workflow",
+    tableName: "acceptance_criteria",
+    apiSlug: "acceptance-criteria",
+    name: "Acceptance criteria",
+    description: "Target-specific acceptance criteria and validation status for human or agent verification"
+  },
+  {
+    areaKey: "strategy-governance",
+    tableName: "policies",
+    apiSlug: "policies",
+    name: "Policies",
+    description: "Policy-driven agent and process rules with severity, enforcement mode, and escalation"
+  },
+  {
+    areaKey: "strategy-governance",
+    tableName: "metrics",
+    apiSlug: "metrics",
+    name: "Metrics",
+    description: "Company, process, pipeline, and agent KPIs with targets and calculation metadata"
+  },
+  {
+    areaKey: "strategy-governance",
+    tableName: "risks",
+    apiSlug: "risks",
+    name: "Risks",
+    description: "Process, pipeline, integration, and automation risks"
+  },
+  {
+    areaKey: "strategy-governance",
+    tableName: "controls",
+    apiSlug: "controls",
+    name: "Controls",
+    description: "Controls that reduce risks through approvals, tests, snapshots, limits, and rollback plans"
+  },
+  {
+    areaKey: "operations-administration",
+    tableName: "procedures",
+    apiSlug: "procedures",
+    name: "Procedures",
+    description: "Standard operating procedures that define how stages and actions are executed"
+  },
+  {
+    areaKey: "operations-administration",
+    tableName: "procedure_steps",
+    apiSlug: "procedure-steps",
+    name: "Procedure steps",
+    description: "Ordered manual, automated, agent, review, and integration-call instructions"
+  },
+  {
+    areaKey: "operations-administration",
+    tableName: "approvals",
+    apiSlug: "approvals",
+    name: "Approvals",
+    description: "Human or role-based approval requests for risky agent and automation actions"
+  },
+  {
+    areaKey: "operations-administration",
+    tableName: "dependencies",
+    apiSlug: "dependencies",
+    name: "Dependencies",
+    description: "Dependencies between resources, tasks, documents, integrations, agents, approvals, and runtime entities"
+  },
+  {
+    areaKey: "operations-administration",
+    tableName: "business_functions",
+    apiSlug: "business-functions",
+    name: "Business functions",
+    description: "LuckySparrow department and business-function map with accountable roles"
+  },
+  {
+    areaKey: "people-roles",
+    tableName: "company_roles",
+    apiSlug: "company-roles",
+    name: "Company roles",
+    description: "Human, agent, and system roles with responsibilities, permissions, tools, and escalation"
+  },
+  {
+    areaKey: "sales-crm",
+    tableName: "stakeholders",
+    apiSlug: "stakeholders",
+    name: "Stakeholders",
+    description: "Client, vendor, partner, internal, and other stakeholders linked to work and clients"
+  },
+  {
+    areaKey: "assets-storage",
+    tableName: "resources",
+    apiSlug: "resources",
+    name: "Resources",
+    description: "Provider-neutral resources such as tasks, files, repos, documents, prompts, and API endpoints"
+  },
+  {
+    areaKey: "assets-storage",
+    tableName: "artifacts",
+    apiSlug: "artifacts",
+    name: "Artifacts",
+    description: "Work outputs such as documents, reports, branches, pull requests, pages, prompts, contracts, and invoices"
+  },
+  {
+    areaKey: "automations-integrations",
+    tableName: "tool_adapters",
+    apiSlug: "tool-adapters",
+    name: "Tool adapters",
+    description: "Workspace-scoped adapter definitions for ClickUp, Drive, GitHub, Coolify, n8n, and future tools"
+  },
+  {
+    areaKey: "automations-integrations",
+    tableName: "integration_capabilities",
+    apiSlug: "integration-capabilities",
+    name: "Integration capabilities",
+    description: "Provider-neutral adapter capabilities with permissions, schemas, risk, approval, and audit flags"
+  },
+  {
+    areaKey: "automations-integrations",
+    tableName: "automation_rules",
+    apiSlug: "automation-rules",
+    name: "Automation rules",
+    description: "Condition/action automation rules that launch or escalate Company OS workflows"
+  },
+  {
+    areaKey: "automations-integrations",
+    tableName: "triggers",
+    apiSlug: "triggers",
+    name: "Triggers",
+    description: "Manual, schedule, webhook, provider-event, agent-decision, and system-event workflow triggers"
+  },
+  {
+    areaKey: "ai-agents-observability",
+    tableName: "audit_logs",
+    apiSlug: "audit-logs",
+    name: "Audit logs",
+    description: "Append-style evidence of actor, tool, resource, input, output, approval, errors, and correlation"
+  },
+  {
+    areaKey: "knowledge-decisions",
+    tableName: "knowledge_items",
+    apiSlug: "knowledge-items",
+    name: "Knowledge items",
+    description: "Company knowledge linked to processes, procedures, pipelines, projects, clients, agents, and documents"
+  },
+  {
+    areaKey: "knowledge-decisions",
+    tableName: "decision_logs",
+    apiSlug: "decision-logs",
+    name: "Decision logs",
+    description: "Structured decision records with options, chosen option, reason, consequences, and review date"
+  },
+  {
+    areaKey: "knowledge-decisions",
+    tableName: "standards",
+    apiSlug: "standards",
+    name: "Standards",
+    description: "Quality standards for code, UX, documentation, security, tasks, Drive structure, and agent prompts"
   }
 ] as const;
 

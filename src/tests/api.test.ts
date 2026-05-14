@@ -1,20 +1,54 @@
 import { strict as assert } from "assert";
+import { spawn } from "node:child_process";
 import type { AddressInfo } from "net";
 import test, { after, before } from "node:test";
 import { createApp } from "../app";
 import { prisma } from "../db/prisma";
 import { signClickUpWebhookBody, verifyClickUpWebhookSignature } from "../integrations/clickup/webhook-signature";
 import { getGoogleDriveSettingsForWorkspace } from "../integrations/integration-settings.service";
+import { createEvent } from "../modules/events/event.service";
 import { classifyOperatingAreaKey } from "../operating-model/catalog";
 
 const realFetch = globalThis.fetch.bind(globalThis);
 let baseUrl = "";
 let server: ReturnType<ReturnType<typeof createApp>["listen"]>;
 
+type TestHttpResponse = {
+  status: number;
+  body: unknown;
+};
+
+type RegisteredOwner = {
+  token: string;
+  workspace: { id: string };
+};
+
 async function resetDatabase() {
   await prisma.event.deleteMany();
   await prisma.googleDriveContentSnapshot.deleteMany();
   await prisma.googleDriveFile.deleteMany();
+  await prisma.auditLog.deleteMany();
+  await prisma.dependency.deleteMany();
+  await prisma.artifact.deleteMany();
+  await prisma.trigger.deleteMany();
+  await prisma.automationRule.deleteMany();
+  await prisma.decisionLog.deleteMany();
+  await prisma.knowledgeItem.deleteMany();
+  await prisma.control.deleteMany();
+  await prisma.risk.deleteMany();
+  await prisma.metric.deleteMany();
+  await prisma.policy.deleteMany();
+  await prisma.stakeholder.deleteMany();
+  await prisma.businessFunction.deleteMany();
+  await prisma.acceptanceCriterion.deleteMany();
+  await prisma.approval.deleteMany();
+  await prisma.stageRun.deleteMany();
+  await prisma.pipelineRun.deleteMany();
+  await prisma.checklistItem.deleteMany();
+  await prisma.checklistTemplate.deleteMany();
+  await prisma.integrationCapability.deleteMany();
+  await prisma.procedureStep.deleteMany();
+  await prisma.resource.deleteMany();
   await prisma.providerEventInbox.deleteMany();
   await prisma.agentEventOutbox.deleteMany();
   await prisma.externalWebhookRegistration.deleteMany();
@@ -30,6 +64,14 @@ async function resetDatabase() {
   await prisma.decision.deleteMany();
   await prisma.note.deleteMany();
   await prisma.deal.deleteMany();
+  await prisma.pipelineStage.deleteMany();
+  await prisma.procedure.deleteMany();
+  await prisma.standard.deleteMany();
+  await prisma.$executeRawUnsafe('DELETE FROM "workflow_definition_drafts"');
+  await prisma.pipeline.deleteMany();
+  await prisma.process.deleteMany();
+  await prisma.toolAdapter.deleteMany();
+  await prisma.companyRole.deleteMany();
   await prisma.interaction.deleteMany();
   await prisma.client.deleteMany();
   await prisma.task.deleteMany();
@@ -37,7 +79,6 @@ async function resetDatabase() {
   await prisma.goal.deleteMany();
   await prisma.taskList.deleteMany();
   await prisma.project.deleteMany();
-  await prisma.pipelineStage.deleteMany();
   await prisma.agent.deleteMany();
   await prisma.integrationSetting.deleteMany();
   await prisma.apiKey.deleteMany();
@@ -46,7 +87,7 @@ async function resetDatabase() {
   await prisma.user.deleteMany();
 }
 
-async function request(path: string, init: RequestInit = {}) {
+async function request(path: string, init: RequestInit = {}): Promise<TestHttpResponse> {
   const response = await realFetch(`${baseUrl}${path}`, {
     ...init,
     headers: {
@@ -61,7 +102,7 @@ async function request(path: string, init: RequestInit = {}) {
   };
 }
 
-async function registerOwner(email: string, workspaceName: string) {
+async function registerOwner(email: string, workspaceName: string): Promise<RegisteredOwner> {
   const response = await request("/auth/register", {
     method: "POST",
     body: JSON.stringify({
@@ -80,6 +121,92 @@ async function registerOwner(email: string, workspaceName: string) {
     };
   };
   return body.data;
+}
+
+async function runMcpBridgeSmoke(apiKey: string, options: {
+  toolName?: string;
+  arguments?: Record<string, unknown>;
+  commandMode?: "read_only" | "supervised_operator";
+  expectError?: boolean;
+  expectedErrorCode?: string;
+  expectedStatus?: number;
+  expectedResponseError?: string;
+} = {}) {
+  const {
+    arguments: toolArguments,
+    commandMode,
+    expectError,
+    expectedErrorCode,
+    expectedStatus,
+    expectedResponseError
+  } = options;
+  const toolName = options.toolName ?? "companycore_get_company_os";
+  const smokeEnv: NodeJS.ProcessEnv = {
+    ...process.env,
+    COMPANYCORE_BASE_URL: baseUrl,
+    COMPANYCORE_API_KEY: apiKey,
+    COMPANYCORE_MCP_SMOKE_TOOL: toolName,
+    COMPANYCORE_MCP_SMOKE_ARGUMENTS: JSON.stringify(toolArguments ?? {}),
+    COMPANYCORE_MCP_SMOKE_EXPECT_ERROR: expectError ? "true" : "false"
+  };
+  if (commandMode) {
+    smokeEnv.COMPANYCORE_MCP_COMMAND_MODE = commandMode;
+  }
+  if (expectedErrorCode) {
+    smokeEnv.COMPANYCORE_MCP_SMOKE_EXPECT_ERROR_CODE = expectedErrorCode;
+  }
+  if (expectedStatus) {
+    smokeEnv.COMPANYCORE_MCP_SMOKE_EXPECT_STATUS = String(expectedStatus);
+  }
+  if (expectedResponseError) {
+    smokeEnv.COMPANYCORE_MCP_SMOKE_EXPECT_RESPONSE_ERROR = expectedResponseError;
+  }
+
+  const child = spawn(process.execPath, ["scripts/companycore-mcp-smoke.mjs"], {
+    cwd: process.cwd(),
+    env: smokeEnv,
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+
+  let stdout = "";
+  let stderr = "";
+  child.stdout.on("data", (chunk) => {
+    stdout += chunk.toString();
+  });
+  child.stderr.on("data", (chunk) => {
+    stderr += chunk.toString();
+  });
+
+  const exitCode = await new Promise<number | null>((resolve, reject) => {
+    child.on("error", reject);
+    child.on("close", resolve);
+  });
+
+  assert.equal(exitCode, 0, `MCP smoke failed.\nstdout:\n${stdout}\nstderr:\n${stderr}`);
+  const summary = JSON.parse(stdout) as {
+    ok: boolean;
+    calledTool: string;
+    callStatus: number;
+    callError?: string;
+    responseError?: string;
+    toolCount: number;
+  };
+  assert.equal(summary.ok, true);
+  assert.equal(summary.calledTool, toolName);
+  if (expectError) {
+    if (expectedErrorCode) {
+      assert.equal(summary.callError, expectedErrorCode);
+    }
+    if (expectedStatus) {
+      assert.equal(summary.callStatus, expectedStatus);
+    }
+    if (expectedResponseError) {
+      assert.equal(summary.responseError, expectedResponseError);
+    }
+  } else {
+    assert.equal(summary.callStatus, 200);
+  }
+  assert.ok(summary.toolCount > 0);
 }
 
 before(async () => {
@@ -147,6 +274,1802 @@ test("CompanyCore v1 protected API flow", async () => {
   const authA = { Authorization: `Bearer ${ownerA.token}` };
   const authB = { Authorization: `Bearer ${ownerB.token}` };
 
+  const humanOwnerRole = await prisma.companyRole.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Human Owner",
+      type: "human",
+      responsibilities: ["approve high-risk work"],
+      permissions: ["approval:decide"],
+      allowedTools: ["companycore"]
+    }
+  });
+  const pmAgentRole = await prisma.companyRole.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Project Manager Agent",
+      type: "agent",
+      escalationTargetId: humanOwnerRole.id,
+      responsibilities: ["coordinate pipelines"],
+      permissions: ["pipeline:read", "task:write"],
+      allowedTools: ["companycore", "clickup"],
+      defaultPolicies: ["high-risk actions require approval"]
+    }
+  });
+  const clickUpAdapter = await prisma.toolAdapter.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      provider: "clickup",
+      name: "ClickUp",
+      authType: "api_key",
+      connectionStatus: "configured",
+      healthStatus: "unknown",
+      ownerRoleId: pmAgentRole.id
+    }
+  });
+  await prisma.integrationCapability.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      toolAdapterId: clickUpAdapter.id,
+      capabilityKey: "create_task",
+      requiredPermissions: ["clickup:create_task"],
+      riskLevel: "medium",
+      auditRequired: true
+    }
+  });
+  const onboardingProcess = await prisma.process.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Client onboarding",
+      ownerRoleId: pmAgentRole.id,
+      department: "Customer Success",
+      status: "active",
+      maturityLevel: "defined"
+    }
+  });
+  const onboardingPipeline = await prisma.pipeline.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      processId: onboardingProcess.id,
+      name: "Client Onboarding Pipeline",
+      purpose: "Move a client from lead to delivery kickoff.",
+      triggerType: "manual",
+      defaultOwnerRoleId: pmAgentRole.id,
+      status: "active",
+      isAutomatable: true,
+      riskLevel: "medium"
+    }
+  });
+  const onboardingProcedure = await prisma.procedure.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      processId: onboardingProcess.id,
+      name: "Client Onboarding SOP",
+      purpose: "Run client onboarding with evidence and approval gates.",
+      ownerRoleId: pmAgentRole.id,
+      status: "active",
+      requiredTools: ["companycore", "clickup"],
+      requiredPermissions: ["client:write", "task:write"]
+    }
+  });
+  const kickoffStage = await prisma.pipelineStage.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      pipelineId: onboardingPipeline.id,
+      name: "Kickoff",
+      position: 1,
+      assignedRoleId: pmAgentRole.id,
+      procedureId: onboardingProcedure.id,
+      requiredTools: ["companycore", "clickup"],
+      requiredApprovals: ["Human Owner"],
+      status: "active"
+    }
+  });
+  await prisma.procedureStep.create({
+    data: {
+      procedureId: onboardingProcedure.id,
+      stepOrder: 1,
+      instruction: "Prepare kickoff plan and create follow-up tasks.",
+      stepType: "integration_call",
+      requiredToolAdapterId: clickUpAdapter.id,
+      validationRule: { evidenceRequired: true }
+    }
+  });
+  const onboardingResource = await prisma.resource.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      type: "pipeline",
+      externalProvider: "companycore",
+      externalId: "client-onboarding-pipeline",
+      name: "Client onboarding pipeline resource",
+      ownerRoleId: pmAgentRole.id,
+      relatedProcessId: onboardingProcess.id
+    }
+  });
+  const hydratedPipeline = await prisma.pipeline.findUniqueOrThrow({
+    where: { id: onboardingPipeline.id },
+    include: {
+      process: true,
+      defaultOwnerRole: true,
+      stages: {
+        include: {
+          assignedRole: true,
+          procedure: {
+            include: { steps: true }
+          }
+        }
+      }
+    }
+  });
+  assert.equal(hydratedPipeline.process?.name, "Client onboarding");
+  assert.equal(hydratedPipeline.defaultOwnerRole?.name, "Project Manager Agent");
+  assert.equal(hydratedPipeline.stages[0]?.id, kickoffStage.id);
+  assert.equal(hydratedPipeline.stages[0]?.procedure?.steps[0]?.stepType, "integration_call");
+  const clickUpCapabilities = await prisma.integrationCapability.findMany({
+    where: { toolAdapterId: clickUpAdapter.id }
+  });
+  assert.equal(clickUpCapabilities[0]?.capabilityKey, "create_task");
+  const pipelineRun = await prisma.pipelineRun.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      pipelineId: onboardingPipeline.id,
+      initiatedByType: "agent",
+      initiatedById: pmAgentRole.id,
+      status: "running",
+      currentStageId: kickoffStage.id,
+      inputPayload: { client: "Acme" },
+      linkedClientId: null,
+      linkedProjectId: null,
+      correlationId: "ccos-test-onboarding-run"
+    }
+  });
+  const stageRun = await prisma.stageRun.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      pipelineRunId: pipelineRun.id,
+      pipelineStageId: kickoffStage.id,
+      assignedActorType: "agent",
+      assignedActorId: pmAgentRole.id,
+      status: "running",
+      approvalStatus: "pending",
+      inputPayload: { kickoff: true },
+      logs: [{ level: "info", message: "Stage started" }]
+    }
+  });
+  const approval = await prisma.approval.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      requestedByType: "agent",
+      requestedById: pmAgentRole.id,
+      requestedForAction: "send_kickoff_plan_to_client",
+      resourceType: "stage_run",
+      resourceId: stageRun.id,
+      riskLevel: "high",
+      approverRoleId: humanOwnerRole.id,
+      status: "pending",
+      pipelineRunId: pipelineRun.id,
+      stageRunId: stageRun.id
+    }
+  });
+  const checklistTemplate = await prisma.checklistTemplate.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Pipeline run completion checklist",
+      targetType: "pipeline_run",
+      status: "active",
+      items: {
+        create: [
+          {
+            workspaceId: ownerA.workspace.id,
+            itemOrder: 1,
+            text: "Output payload records the result.",
+            required: true
+          }
+        ]
+      }
+    },
+    include: { items: true }
+  });
+  const acceptanceCriterion = await prisma.acceptanceCriterion.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      checklistItemId: checklistTemplate.items[0]!.id,
+      targetType: "stage_run",
+      targetId: stageRun.id,
+      text: "Kickoff stage has validation evidence.",
+      required: true,
+      validationStatus: "pending",
+      pipelineRunId: pipelineRun.id,
+      stageRunId: stageRun.id,
+      evidence: { source: "test" }
+    }
+  });
+  const auditLog = await prisma.auditLog.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      actorType: "agent",
+      actorId: pmAgentRole.id,
+      action: "approval_requested",
+      resourceType: "approval",
+      resourceId: approval.id,
+      toolAdapterId: clickUpAdapter.id,
+      inputPayload: { action: "send_kickoff_plan_to_client" },
+      outputPayload: { status: "pending" },
+      approvalId: approval.id,
+      pipelineRunId: pipelineRun.id,
+      stageRunId: stageRun.id,
+      correlationId: pipelineRun.correlationId
+    }
+  });
+  await createEvent({
+    type: "approval_requested",
+    workspaceId: ownerA.workspace.id,
+    source: "companycore",
+    actorType: "agent",
+    actorId: pmAgentRole.id,
+    resourceType: "approval",
+    resourceId: approval.id,
+    correlationId: pipelineRun.correlationId,
+    payload: { auditLogId: auditLog.id }
+  });
+  const hydratedRun = await prisma.pipelineRun.findUniqueOrThrow({
+    where: { id: pipelineRun.id },
+    include: {
+      stageRuns: {
+        include: {
+          approvals: true,
+          auditLogs: true,
+          acceptanceCriteria: true
+        }
+      },
+      approvals: true,
+      auditLogs: true
+    }
+  });
+  assert.equal(hydratedRun.stageRuns[0]?.approvals[0]?.id, approval.id);
+  assert.equal(hydratedRun.stageRuns[0]?.auditLogs[0]?.id, auditLog.id);
+  assert.equal(hydratedRun.stageRuns[0]?.acceptanceCriteria[0]?.id, acceptanceCriterion.id);
+  assert.equal(hydratedRun.approvals[0]?.status, "pending");
+  assert.equal(hydratedRun.auditLogs[0]?.correlationId, "ccos-test-onboarding-run");
+  const correlatedEvent = await prisma.event.findFirstOrThrow({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      type: "approval_requested",
+      correlationId: pipelineRun.correlationId
+    }
+  });
+  assert.equal(correlatedEvent.resourceType, "approval");
+  const businessFunction = await prisma.businessFunction.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Customer Success",
+      category: "delivery",
+      description: "Owns client onboarding and post-sale continuity.",
+      accountableRoleId: pmAgentRole.id,
+      status: "active"
+    }
+  });
+  const policy = await prisma.policy.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Client-facing agent messages require approval",
+      description: "Agents can draft client-facing communication but need approval before sending.",
+      appliesTo: "agent",
+      ruleType: "external_communication",
+      severity: "high",
+      enforcementMode: "require_approval",
+      escalationRoleId: humanOwnerRole.id,
+      processId: onboardingProcess.id,
+      procedureId: onboardingProcedure.id,
+      status: "active"
+    }
+  });
+  const metric = await prisma.metric.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Client onboarding cycle time",
+      category: "delivery",
+      measurementType: "duration",
+      unit: "hours",
+      targetValue: 48,
+      currentValue: 12,
+      ownerRoleId: pmAgentRole.id,
+      processId: onboardingProcess.id,
+      pipelineId: onboardingPipeline.id,
+      calculation: { from: "pipeline_runs.started_at", to: "pipeline_runs.completed_at" }
+    }
+  });
+  const risk = await prisma.risk.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Kickoff sent without approval",
+      description: "An agent may send a client-facing kickoff plan before human review.",
+      category: "client_communication",
+      riskLevel: "high",
+      likelihood: "medium",
+      impact: "high",
+      processId: onboardingProcess.id,
+      pipelineId: onboardingPipeline.id
+    }
+  });
+  const control = await prisma.control.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      riskId: risk.id,
+      name: "Require approval before external kickoff message",
+      description: "Approval must exist before the client-facing message leaves CompanyCore.",
+      controlType: "approval_gate",
+      ownerRoleId: humanOwnerRole.id,
+      verificationMethod: "approval.status must be approved"
+    }
+  });
+  const knowledgeItem = await prisma.knowledgeItem.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      title: "Client onboarding SOP reference",
+      itemType: "procedure",
+      summary: "Knowledge item linked to the onboarding process and pipeline.",
+      sourceProvider: "companycore",
+      sourceExternalId: "client-onboarding-sop-reference",
+      processId: onboardingProcess.id,
+      pipelineId: onboardingPipeline.id
+    }
+  });
+  const decisionLog = await prisma.decisionLog.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      context: "Client-facing agent communication policy",
+      optionsConsidered: ["allow autonomous send", "require approval", "block all client messages"],
+      chosenOption: "require approval",
+      reason: "Client-facing messages are high-context and reputationally sensitive.",
+      decidedByType: "user",
+      decidedById: humanOwnerRole.id,
+      processId: onboardingProcess.id,
+      pipelineId: onboardingPipeline.id,
+      consequences: "Agents can draft but must request approval.",
+      reviewDate: new Date("2026-06-01T00:00:00.000Z")
+    }
+  });
+  const automationRule = await prisma.automationRule.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Escalate blocked onboarding stage",
+      description: "Escalate when a stage run is blocked.",
+      pipelineId: onboardingPipeline.id,
+      condition: { stageRunStatus: "blocked" },
+      action: { createApproval: true, notifyRole: "Human Owner" },
+      status: "active",
+      triggers: {
+        create: [
+          {
+            workspaceId: ownerA.workspace.id,
+            sourceType: "system_event",
+            eventType: "stage_blocked",
+            status: "active"
+          }
+        ]
+      }
+    },
+    include: { triggers: true }
+  });
+  const artifact = await prisma.artifact.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      artifactType: "report",
+      name: "Onboarding kickoff report",
+      resourceId: onboardingResource.id,
+      metadata: { pipelineRunId: pipelineRun.id }
+    }
+  });
+  const dependency = await prisma.dependency.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      dependencyType: "resource_to_artifact",
+      fromResourceId: onboardingResource.id,
+      toEntityType: "artifact",
+      toEntityId: artifact.id,
+      status: "active"
+    }
+  });
+  const stakeholder = await prisma.stakeholder.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Acme Project Sponsor",
+      type: "client",
+      role: "sponsor",
+      metadata: { pipelineRunId: pipelineRun.id }
+    }
+  });
+  const hydratedRisk = await prisma.risk.findUniqueOrThrow({
+    where: { id: risk.id },
+    include: { controls: true, pipeline: true, process: true }
+  });
+  assert.equal(hydratedRisk.controls[0]?.id, control.id);
+  assert.equal(hydratedRisk.pipeline?.id, onboardingPipeline.id);
+  assert.equal(policy.enforcementMode, "require_approval");
+  assert.equal(metric.targetValue, 48);
+  assert.equal(knowledgeItem.processId, onboardingProcess.id);
+  assert.equal(decisionLog.chosenOption, "require approval");
+  assert.equal(automationRule.triggers[0]?.eventType, "stage_blocked");
+  assert.equal(dependency.toEntityId, artifact.id);
+  assert.equal(businessFunction.accountableRoleId, pmAgentRole.id);
+  assert.equal(stakeholder.type, "client");
+
+  const companyOsSnapshot = await request("/v1/company-os", { headers: authA });
+  assert.equal(companyOsSnapshot.status, 200);
+  const companyOsSnapshotBody = companyOsSnapshot.body as {
+    data: {
+      service: string;
+      counts: {
+        definitions: { processes: number; pipelines: number; procedures: number; toolAdapters: number };
+        runtime: { pipelineRuns: number; stageRuns: number; approvals: number; auditLogs: number; events: number };
+        governance: { policies: number; risks: number; controls: number; automationRules: number; businessFunctions: number };
+      };
+      attention: {
+        pendingApprovals: Array<{ id: string }>;
+        highRisks: Array<{ id: string }>;
+      };
+      recent: {
+        pipelineRuns: Array<{ id: string }>;
+        auditLogs: Array<{ id: string }>;
+        events: Array<{ id: string }>;
+      };
+      collections: string[];
+    };
+  };
+  assert.equal(companyOsSnapshotBody.data.service, "company-os");
+  assert.equal(companyOsSnapshotBody.data.counts.definitions.processes, 1);
+  assert.equal(companyOsSnapshotBody.data.counts.definitions.pipelines, 1);
+  assert.equal(companyOsSnapshotBody.data.counts.definitions.procedures, 1);
+  assert.equal(companyOsSnapshotBody.data.counts.definitions.toolAdapters, 1);
+  assert.equal(companyOsSnapshotBody.data.counts.runtime.pipelineRuns, 1);
+  assert.equal(companyOsSnapshotBody.data.counts.runtime.stageRuns, 1);
+  assert.equal(companyOsSnapshotBody.data.counts.runtime.approvals, 1);
+  assert.equal(companyOsSnapshotBody.data.counts.runtime.auditLogs, 1);
+  assert.equal(companyOsSnapshotBody.data.counts.runtime.events, 1);
+  assert.equal(companyOsSnapshotBody.data.counts.governance.policies, 1);
+  assert.equal(companyOsSnapshotBody.data.counts.governance.risks, 1);
+  assert.equal(companyOsSnapshotBody.data.counts.governance.controls, 1);
+  assert.equal(companyOsSnapshotBody.data.counts.governance.automationRules, 1);
+  assert.equal(companyOsSnapshotBody.data.counts.governance.businessFunctions, 1);
+  assert.equal(companyOsSnapshotBody.data.attention.pendingApprovals[0]?.id, approval.id);
+  assert.equal(companyOsSnapshotBody.data.attention.highRisks[0]?.id, risk.id);
+  assert.equal(companyOsSnapshotBody.data.recent.pipelineRuns[0]?.id, pipelineRun.id);
+  assert.equal(companyOsSnapshotBody.data.recent.auditLogs[0]?.id, auditLog.id);
+  assert.equal(companyOsSnapshotBody.data.recent.events[0]?.id, correlatedEvent.id);
+  assert.ok(companyOsSnapshotBody.data.collections.includes("pipelines"));
+  assert.ok(companyOsSnapshotBody.data.collections.includes("automation-rules"));
+
+  const listedCompanyOsPipelines = await request("/v1/company-os/pipelines?limit=1", { headers: authA });
+  assert.equal(listedCompanyOsPipelines.status, 200);
+  const listedCompanyOsPipelinesBody = listedCompanyOsPipelines.body as {
+    data: Array<{ id: string; stages: Array<{ id: string }> }>;
+  };
+  assert.equal(listedCompanyOsPipelinesBody.data[0]?.id, onboardingPipeline.id);
+  assert.equal(listedCompanyOsPipelinesBody.data[0]?.stages[0]?.id, kickoffStage.id);
+
+  const readCompanyOsApproval = await request(`/v1/company-os/approvals/${approval.id}`, { headers: authA });
+  assert.equal(readCompanyOsApproval.status, 200);
+  assert.equal((readCompanyOsApproval.body as { data: { id: string; auditLogs: Array<{ id: string }> } }).data.auditLogs[0]?.id, auditLog.id);
+
+  const lifecycleApprovalRequest = await request("/v1/company-os/approvals/request", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      requestedByType: "agent",
+      requestedById: pmAgentRole.id,
+      requestedForAction: "drive.file.update",
+      resourceType: "stage_run",
+      resourceId: stageRun.id,
+      riskLevel: "high",
+      approverRoleId: humanOwnerRole.id,
+      pipelineRunId: pipelineRun.id,
+      stageRunId: stageRun.id,
+      inputPayload: {
+        reason: "Agent needs permission to update a client-facing document."
+      }
+    })
+  });
+  assert.equal(lifecycleApprovalRequest.status, 201);
+  const lifecycleApprovalRequestBody = lifecycleApprovalRequest.body as {
+    data: { id: string; status: string; correlationId: string; auditLogId: string };
+  };
+  assert.equal(lifecycleApprovalRequestBody.data.status, "pending");
+  assert.ok(lifecycleApprovalRequestBody.data.correlationId);
+  assert.ok(lifecycleApprovalRequestBody.data.auditLogId);
+  const lifecycleRequestAudit = await prisma.auditLog.findUniqueOrThrow({
+    where: { id: lifecycleApprovalRequestBody.data.auditLogId }
+  });
+  assert.equal(lifecycleRequestAudit.action, "approval.requested");
+  assert.equal(lifecycleRequestAudit.correlationId, lifecycleApprovalRequestBody.data.correlationId);
+  const lifecycleRequestEvent = await prisma.event.findFirstOrThrow({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      type: "approval_requested",
+      resourceId: lifecycleApprovalRequestBody.data.id,
+      correlationId: lifecycleApprovalRequestBody.data.correlationId
+    }
+  });
+  assert.equal(lifecycleRequestEvent.resourceType, "approval");
+
+  const lifecycleApprovalDecision = await request(`/v1/company-os/approvals/${lifecycleApprovalRequestBody.data.id}/decision`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      decision: "approved",
+      decisionReason: "Scope and rollback plan are acceptable."
+    })
+  });
+  assert.equal(lifecycleApprovalDecision.status, 200);
+  const lifecycleApprovalDecisionBody = lifecycleApprovalDecision.body as {
+    data: { id: string; status: string; decisionReason: string; approverUserId: string | null; correlationId: string; auditLogId: string };
+  };
+  assert.equal(lifecycleApprovalDecisionBody.data.status, "approved");
+  assert.equal(lifecycleApprovalDecisionBody.data.decisionReason, "Scope and rollback plan are acceptable.");
+  const ownerAWorkspace = await prisma.workspace.findUniqueOrThrow({
+    where: { id: ownerA.workspace.id }
+  });
+  assert.equal(lifecycleApprovalDecisionBody.data.approverUserId, ownerAWorkspace.ownerUserId);
+  const decidedApproval = await prisma.approval.findUniqueOrThrow({
+    where: { id: lifecycleApprovalRequestBody.data.id }
+  });
+  assert.equal(decidedApproval.status, "approved");
+  assert.equal(decidedApproval.approverUserId, ownerAWorkspace.ownerUserId);
+  const lifecycleDecisionAudit = await prisma.auditLog.findUniqueOrThrow({
+    where: { id: lifecycleApprovalDecisionBody.data.auditLogId }
+  });
+  assert.equal(lifecycleDecisionAudit.action, "approval.decided");
+  assert.equal(lifecycleDecisionAudit.correlationId, lifecycleApprovalDecisionBody.data.correlationId);
+  const lifecycleDecisionEvent = await prisma.event.findFirstOrThrow({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      type: "approval_approved",
+      resourceId: lifecycleApprovalRequestBody.data.id,
+      correlationId: lifecycleApprovalDecisionBody.data.correlationId
+    }
+  });
+  assert.equal(lifecycleDecisionEvent.resourceType, "approval");
+
+  const repeatedApprovalDecision = await request(`/v1/company-os/approvals/${lifecycleApprovalRequestBody.data.id}/decision`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      decision: "rejected",
+      decisionReason: "Trying to overwrite the decision."
+    })
+  });
+  assert.equal(repeatedApprovalDecision.status, 409);
+  assert.equal((repeatedApprovalDecision.body as { error: string }).error, "approval_already_decided");
+
+  const crossWorkspaceApprovalDecision = await request(`/v1/company-os/approvals/${lifecycleApprovalRequestBody.data.id}/decision`, {
+    method: "POST",
+    headers: authB,
+    body: JSON.stringify({
+      decision: "approved",
+      decisionReason: "Workspace B should not see this approval."
+    })
+  });
+  assert.equal(crossWorkspaceApprovalDecision.status, 404);
+
+  const startedStageRun = await request(`/v1/company-os/pipeline-runs/${pipelineRun.id}/actions/start-stage`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      pipelineStageId: kickoffStage.id,
+      assignedActorType: "agent",
+      assignedActorId: pmAgentRole.id,
+      inputPayload: {
+        source: "integration-test"
+      },
+      approvalId: lifecycleApprovalRequestBody.data.id
+    })
+  });
+  assert.equal(startedStageRun.status, 200);
+  const startedStageRunBody = startedStageRun.body as {
+    data: { id: string; status: string; approvalStatus: string; correlationId: string; auditLogId: string };
+  };
+  assert.equal(startedStageRunBody.data.id, stageRun.id);
+  assert.equal(startedStageRunBody.data.status, "running");
+  assert.equal(startedStageRunBody.data.approvalStatus, "approved");
+  const stageStartedAudit = await prisma.auditLog.findUniqueOrThrow({
+    where: { id: startedStageRunBody.data.auditLogId }
+  });
+  assert.equal(stageStartedAudit.action, "stage_run.started");
+  const stageStartedEvent = await prisma.event.findFirstOrThrow({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      type: "stage_started",
+      resourceId: stageRun.id,
+      correlationId: startedStageRunBody.data.correlationId
+    }
+  });
+  assert.equal(stageStartedEvent.resourceType, "stage_run");
+
+  const blockedStageRun = await request(`/v1/company-os/stage-runs/${stageRun.id}/actions/block`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      reason: "Waiting for document update verification.",
+      approvalId: lifecycleApprovalRequestBody.data.id,
+      errorState: {
+        blocker: "document_verification"
+      }
+    })
+  });
+  assert.equal(blockedStageRun.status, 200);
+  const blockedStageRunBody = blockedStageRun.body as {
+    data: { id: string; status: string; correlationId: string; auditLogId: string };
+  };
+  assert.equal(blockedStageRunBody.data.status, "blocked");
+  const blockedPipelineRun = await prisma.pipelineRun.findUniqueOrThrow({
+    where: { id: pipelineRun.id }
+  });
+  assert.equal(blockedPipelineRun.status, "blocked");
+  const stageBlockedAudit = await prisma.auditLog.findUniqueOrThrow({
+    where: { id: blockedStageRunBody.data.auditLogId }
+  });
+  assert.equal(stageBlockedAudit.action, "stage_run.blocked");
+  await prisma.event.findFirstOrThrow({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      type: "stage_blocked",
+      resourceId: stageRun.id,
+      correlationId: blockedStageRunBody.data.correlationId
+    }
+  });
+
+  const incompleteStageCompletion = await request(`/v1/company-os/stage-runs/${stageRun.id}/actions/complete`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      outputPayload: {
+        result: "not-ready"
+      },
+      approvalId: lifecycleApprovalRequestBody.data.id
+    })
+  });
+  assert.equal(incompleteStageCompletion.status, 409);
+  assert.equal((incompleteStageCompletion.body as { error: string }).error, "acceptance_criteria_incomplete");
+
+  const validatedStageRun = await request(`/v1/company-os/stage-runs/${stageRun.id}/actions/validate`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      validationStatus: "passed",
+      validationResult: {
+        checkedBy: "api-test"
+      },
+      acceptanceCriteria: [
+        {
+          id: acceptanceCriterion.id,
+          validationStatus: "passed",
+          evidence: {
+            note: "Kickoff plan verified."
+          }
+        }
+      ]
+    })
+  });
+  assert.equal(validatedStageRun.status, 200);
+  const validatedStageRunBody = validatedStageRun.body as {
+    data: { id: string; validationResult: { status: string }; correlationId: string; auditLogId: string };
+  };
+  assert.equal(validatedStageRunBody.data.validationResult.status, "passed");
+  const updatedAcceptanceCriterion = await prisma.acceptanceCriterion.findUniqueOrThrow({
+    where: { id: acceptanceCriterion.id }
+  });
+  assert.equal(updatedAcceptanceCriterion.validationStatus, "passed");
+  assert.equal(updatedAcceptanceCriterion.verifiedByType, "user");
+  const stageValidatedAudit = await prisma.auditLog.findUniqueOrThrow({
+    where: { id: validatedStageRunBody.data.auditLogId }
+  });
+  assert.equal(stageValidatedAudit.action, "stage_run.validated");
+  await prisma.event.findFirstOrThrow({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      type: "stage_validated",
+      resourceId: stageRun.id,
+      correlationId: validatedStageRunBody.data.correlationId
+    }
+  });
+
+  const completedStageRun = await request(`/v1/company-os/stage-runs/${stageRun.id}/actions/complete`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      outputPayload: {
+        result: "kickoff-ready"
+      },
+      validationResult: {
+        acceptance: "all-required-passed"
+      },
+      approvalId: lifecycleApprovalRequestBody.data.id
+    })
+  });
+  assert.equal(completedStageRun.status, 200);
+  const completedStageRunBody = completedStageRun.body as {
+    data: { id: string; status: string; outputPayload: { result: string }; correlationId: string; auditLogId: string };
+  };
+  assert.equal(completedStageRunBody.data.status, "completed");
+  assert.equal(completedStageRunBody.data.outputPayload.result, "kickoff-ready");
+  const stageCompletedAudit = await prisma.auditLog.findUniqueOrThrow({
+    where: { id: completedStageRunBody.data.auditLogId }
+  });
+  assert.equal(stageCompletedAudit.action, "stage_run.completed");
+  await prisma.event.findFirstOrThrow({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      type: "stage_completed",
+      resourceId: stageRun.id,
+      correlationId: completedStageRunBody.data.correlationId
+    }
+  });
+
+  const repeatedStageCompletion = await request(`/v1/company-os/stage-runs/${stageRun.id}/actions/complete`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      outputPayload: {
+        result: "repeat"
+      },
+      approvalId: lifecycleApprovalRequestBody.data.id
+    })
+  });
+  assert.equal(repeatedStageCompletion.status, 409);
+  assert.equal((repeatedStageCompletion.body as { error: string }).error, "invalid_stage_transition");
+
+  const automationSourceEvent = await prisma.event.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      type: "stage_completed",
+      source: "companycore",
+      actorType: "user",
+      actorId: ownerAWorkspace.ownerUserId,
+      resourceType: "stage_run",
+      resourceId: stageRun.id,
+      correlationId: completedStageRunBody.data.correlationId,
+      payload: {
+        stageRunId: stageRun.id,
+        pipelineRunId: pipelineRun.id,
+        status: "completed"
+      }
+    }
+  });
+  const emitAutomationRule = await prisma.automationRule.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Emit documentation follow-up after completed stage",
+      pipelineId: onboardingPipeline.id,
+      condition: { eventType: "stage_completed", payloadPath: "status", equals: "completed" },
+      action: { type: "emit_event", eventType: "documentation_followup_needed", payload: { source: "automation-test" } },
+      status: "active",
+      triggers: {
+        create: [{
+          workspaceId: ownerA.workspace.id,
+          sourceType: "system_event",
+          eventType: "stage_completed",
+          status: "active"
+        }]
+      }
+    }
+  });
+  const approvalAutomationRule = await prisma.automationRule.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Request owner approval after completed stage",
+      pipelineId: onboardingPipeline.id,
+      condition: { eventType: "stage_completed" },
+      action: {
+        type: "request_approval",
+        requestedForAction: "stage.completed.followup",
+        riskLevel: "high",
+        approverRoleId: humanOwnerRole.id
+      },
+      status: "active",
+      triggers: {
+        create: [{
+          workspaceId: ownerA.workspace.id,
+          sourceType: "system_event",
+          eventType: "stage_completed",
+          status: "active"
+        }]
+      }
+    }
+  });
+  const automationDryRun = await request(`/v1/company-os/events/${automationSourceEvent.id}/actions/evaluate-automation-rules`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      mode: "dry_run",
+      ruleIds: [emitAutomationRule.id, approvalAutomationRule.id]
+    })
+  });
+  assert.equal(automationDryRun.status, 200);
+  const automationDryRunBody = automationDryRun.body as {
+    data: {
+      matchedRuleIds: string[];
+      proposals: Array<{ ruleId: string; actionKind: string; requiresApproval: boolean }>;
+      executed: unknown[];
+    };
+  };
+  assert.deepEqual(new Set(automationDryRunBody.data.matchedRuleIds), new Set([emitAutomationRule.id, approvalAutomationRule.id]));
+  assert.equal(automationDryRunBody.data.proposals.length, 2);
+  assert.equal(automationDryRunBody.data.executed.length, 0);
+  assert.ok(automationDryRunBody.data.proposals.some((proposal) => (
+    proposal.ruleId === emitAutomationRule.id
+    && proposal.actionKind === "emit_event"
+    && proposal.requiresApproval === false
+  )));
+  assert.ok(automationDryRunBody.data.proposals.some((proposal) => (
+    proposal.ruleId === approvalAutomationRule.id
+    && proposal.actionKind === "request_approval"
+    && proposal.requiresApproval === true
+  )));
+
+  const automationExecute = await request(`/v1/company-os/events/${automationSourceEvent.id}/actions/evaluate-automation-rules`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      mode: "execute",
+      ruleIds: [emitAutomationRule.id, approvalAutomationRule.id],
+      idempotencyKey: "stage-completed-followup"
+    })
+  });
+  assert.equal(automationExecute.status, 200);
+  const automationExecuteBody = automationExecute.body as {
+    data: {
+      executed: Array<{ ruleId: string; actionKind: string; eventId?: string; approvalId?: string }>;
+      skipped: unknown[];
+      emittedEventIds: string[];
+      auditLogIds: string[];
+    };
+  };
+  assert.equal(automationExecuteBody.data.executed.length, 2);
+  assert.ok(automationExecuteBody.data.emittedEventIds.length >= 5);
+  assert.ok(automationExecuteBody.data.auditLogIds.length >= 5);
+  const automationApproval = automationExecuteBody.data.executed.find((execution) => execution.actionKind === "request_approval");
+  assert.ok(automationApproval?.approvalId);
+  const createdAutomationApproval = await prisma.approval.findUniqueOrThrow({
+    where: { id: automationApproval.approvalId }
+  });
+  assert.equal(createdAutomationApproval.status, "pending");
+  assert.equal(createdAutomationApproval.resourceType, "stage_run");
+  assert.equal(createdAutomationApproval.resourceId, stageRun.id);
+  const emittedAutomationEvent = await prisma.event.findFirstOrThrow({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      type: "documentation_followup_needed",
+      resourceType: "stage_run",
+      resourceId: stageRun.id
+    }
+  });
+  assert.equal(emittedAutomationEvent.correlationId, (automationExecute.body as { data: { correlationId: string } }).data.correlationId);
+
+  const repeatedAutomationExecute = await request(`/v1/company-os/events/${automationSourceEvent.id}/actions/evaluate-automation-rules`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      mode: "execute",
+      ruleIds: [emitAutomationRule.id, approvalAutomationRule.id],
+      idempotencyKey: "stage-completed-followup"
+    })
+  });
+  assert.equal(repeatedAutomationExecute.status, 200);
+  const repeatedAutomationExecuteBody = repeatedAutomationExecute.body as {
+    data: { executed: unknown[]; skipped: Array<{ reason: string }> };
+  };
+  assert.equal(repeatedAutomationExecuteBody.data.executed.length, 0);
+  assert.equal(repeatedAutomationExecuteBody.data.skipped.filter((skip) => skip.reason === "already_processed").length, 2);
+
+  const automationLifecyclePipelineRun = await prisma.pipelineRun.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      pipelineId: onboardingPipeline.id,
+      initiatedByType: "system",
+      initiatedById: "automation-test",
+      status: "pending",
+      inputPayload: { source: "automation-lifecycle-test" },
+      correlationId: "automation-lifecycle-test"
+    }
+  });
+  const automationLifecycleStage = await prisma.pipelineStage.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      pipelineId: onboardingPipeline.id,
+      name: "Automation lifecycle test",
+      position: 2,
+      assignedRoleId: pmAgentRole.id,
+      procedureId: onboardingProcedure.id,
+      requiredTools: ["companycore"],
+      requiredApprovals: [],
+      status: "active"
+    }
+  });
+  const automationLifecycleSourceEvent = await prisma.event.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      type: "automation_lifecycle_test",
+      source: "companycore",
+      actorType: "system",
+      actorId: "automation-test",
+      resourceType: "pipeline_run",
+      resourceId: automationLifecyclePipelineRun.id,
+      correlationId: "automation-lifecycle-test",
+      payload: {
+        pipelineRunId: automationLifecyclePipelineRun.id,
+        status: "ready"
+      }
+    }
+  });
+  const startLifecycleRule = await prisma.automationRule.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Start stage from automation proposal",
+      pipelineId: onboardingPipeline.id,
+      condition: { eventType: "automation_lifecycle_test", resourceId: automationLifecyclePipelineRun.id },
+      action: {
+        type: "start_stage",
+        pipelineRunId: automationLifecyclePipelineRun.id,
+        pipelineStageId: automationLifecycleStage.id,
+        assignedActorType: "agent",
+        assignedActorId: pmAgentRole.id,
+        inputPayload: { source: "automation" }
+      },
+      status: "active",
+      triggers: {
+        create: [{
+          workspaceId: ownerA.workspace.id,
+          sourceType: "system_event",
+          eventType: "automation_lifecycle_test",
+          status: "active"
+        }]
+      }
+    }
+  });
+  const invalidLifecycleRule = await prisma.automationRule.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Reject invalid completed stage proposal",
+      pipelineId: onboardingPipeline.id,
+      condition: { eventType: "automation_lifecycle_test", resourceId: automationLifecyclePipelineRun.id },
+      action: {
+        type: "complete_stage",
+        stageRunId: stageRun.id,
+        outputPayload: { result: "should-not-repeat" }
+      },
+      status: "active",
+      triggers: {
+        create: [{
+          workspaceId: ownerA.workspace.id,
+          sourceType: "system_event",
+          eventType: "automation_lifecycle_test",
+          status: "active"
+        }]
+      }
+    }
+  });
+  const automationLifecycleExecute = await request(`/v1/company-os/events/${automationLifecycleSourceEvent.id}/actions/evaluate-automation-rules`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      mode: "execute",
+      ruleIds: [startLifecycleRule.id, invalidLifecycleRule.id],
+      idempotencyKey: "automation-lifecycle-actions"
+    })
+  });
+  assert.equal(automationLifecycleExecute.status, 200);
+  const automationLifecycleExecuteBody = automationLifecycleExecute.body as {
+    data: {
+      executed: Array<{ ruleId: string; actionKind: string; stageRunId?: string; commandAuditLogId?: string }>;
+      skipped: Array<{ ruleId: string; actionKind: string; reason: string }>;
+      auditLogIds: string[];
+    };
+  };
+  const startedLifecycleExecution = automationLifecycleExecuteBody.data.executed.find((execution) => execution.actionKind === "start_stage");
+  assert.ok(startedLifecycleExecution);
+  assert.equal(startedLifecycleExecution.ruleId, startLifecycleRule.id);
+  assert.ok(startedLifecycleExecution.stageRunId);
+  assert.ok(startedLifecycleExecution.commandAuditLogId);
+  const automationStartedStageRun = await prisma.stageRun.findUniqueOrThrow({
+    where: { id: startedLifecycleExecution.stageRunId }
+  });
+  assert.equal(automationStartedStageRun.status, "running");
+  assert.equal(automationStartedStageRun.pipelineRunId, automationLifecyclePipelineRun.id);
+  const rejectedLifecycleExecution = automationLifecycleExecuteBody.data.skipped.find((skip) => skip.actionKind === "complete_stage");
+  assert.ok(rejectedLifecycleExecution);
+  assert.equal(rejectedLifecycleExecution.ruleId, invalidLifecycleRule.id);
+  assert.equal(rejectedLifecycleExecution.reason, "invalid_stage_transition");
+  await prisma.auditLog.findFirstOrThrow({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      action: "automation_rule.failed",
+      resourceId: automationLifecycleSourceEvent.id,
+      errorState: { path: ["reason"], equals: "invalid_stage_transition" }
+    }
+  });
+
+  const invalidCompanyOsCollection = await request("/v1/company-os/users", { headers: authA });
+  assert.equal(invalidCompanyOsCollection.status, 400);
+
+  const createdStandard = await request("/v1/company-os/standards", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      name: "UX evidence standard",
+      category: "ux",
+      description: "Every user-facing Company OS surface needs evidence-backed recovery states.",
+      checklistId: checklistTemplate.id,
+      validationMethod: "Browser proof, accessibility pass, and task evidence.",
+      ownerRoleId: humanOwnerRole.id
+    })
+  });
+  assert.equal(createdStandard.status, 201);
+  const createdStandardBody = createdStandard.body as {
+    data: {
+      id: string;
+      name: string;
+      category: string;
+      status: string;
+      version: number;
+      correlationId: string;
+      auditLogId: string;
+    };
+  };
+  assert.equal(createdStandardBody.data.name, "UX evidence standard");
+  assert.equal(createdStandardBody.data.category, "ux");
+  assert.equal(createdStandardBody.data.status, "active");
+  assert.equal(createdStandardBody.data.version, 1);
+  assert.ok(createdStandardBody.data.correlationId);
+  const createdStandardAudit = await prisma.auditLog.findUniqueOrThrow({
+    where: { id: createdStandardBody.data.auditLogId }
+  });
+  assert.equal(createdStandardAudit.action, "standard.created");
+  assert.equal(createdStandardAudit.resourceType, "standard");
+  const createdStandardEvent = await prisma.event.findFirstOrThrow({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      type: "standard_created",
+      resourceId: createdStandardBody.data.id,
+      correlationId: createdStandardBody.data.correlationId
+    }
+  });
+  assert.equal(createdStandardEvent.resourceType, "standard");
+
+  const readCreatedStandard = await request(`/v1/company-os/standards/${createdStandardBody.data.id}`, { headers: authA });
+  assert.equal(readCreatedStandard.status, 200);
+  assert.equal((readCreatedStandard.body as { data: { id: string; ownerRoleId: string | null } }).data.ownerRoleId, humanOwnerRole.id);
+
+  const updatedStandard = await request(`/v1/company-os/standards/${createdStandardBody.data.id}`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({
+      description: "Updated standard copy for the agent workbench.",
+      status: "paused"
+    })
+  });
+  assert.equal(updatedStandard.status, 200);
+  const updatedStandardBody = updatedStandard.body as {
+    data: { id: string; status: string; description: string; auditLogId: string; correlationId: string };
+  };
+  assert.equal(updatedStandardBody.data.status, "paused");
+  assert.equal(updatedStandardBody.data.description, "Updated standard copy for the agent workbench.");
+  const updatedStandardAudit = await prisma.auditLog.findUniqueOrThrow({
+    where: { id: updatedStandardBody.data.auditLogId }
+  });
+  assert.equal(updatedStandardAudit.action, "standard.updated");
+
+  const crossWorkspaceStandardUpdate = await request(`/v1/company-os/standards/${createdStandardBody.data.id}`, {
+    method: "PATCH",
+    headers: authB,
+    body: JSON.stringify({
+      description: "Workspace B must not mutate workspace A standards."
+    })
+  });
+  assert.equal(crossWorkspaceStandardUpdate.status, 404);
+
+  const archivedStandard = await request(`/v1/company-os/standards/${createdStandardBody.data.id}`, {
+    method: "DELETE",
+    headers: authA
+  });
+  assert.equal(archivedStandard.status, 200);
+  const archivedStandardBody = archivedStandard.body as {
+    data: { id: string; status: string; archived: boolean; auditLogId: string };
+  };
+  assert.equal(archivedStandardBody.data.status, "archived");
+  assert.equal(archivedStandardBody.data.archived, true);
+  const archivedStandardAudit = await prisma.auditLog.findUniqueOrThrow({
+    where: { id: archivedStandardBody.data.auditLogId }
+  });
+  assert.equal(archivedStandardAudit.action, "standard.archived");
+
+  const createdWorkflowDraft = await request("/v1/company-os/workflow-definitions/drafts", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      rootObjectType: "pipeline",
+      rootObjectId: onboardingPipeline.id,
+      name: "Client Onboarding Pipeline v2",
+      reason: "Add evidence preview before changing active workflow definitions.",
+      riskLevel: "high",
+      changeSet: {
+        purpose: "Move a client from lead to delivery kickoff with stronger evidence.",
+        stages: [{ clientId: "stage-kickoff", name: "Kickoff", position: 1 }]
+      },
+      idempotencyKey: "workflow-draft-proof-001",
+      sourceChannel: "api-test"
+    })
+  });
+  assert.equal(createdWorkflowDraft.status, 201);
+  const createdWorkflowDraftBody = createdWorkflowDraft.body as {
+    data: {
+      id: string;
+      rootObjectType: string;
+      rootObjectId: string;
+      status: string;
+      riskLevel: string;
+      baseVersion: number;
+      targetVersion: number;
+      auditLogId: string;
+      correlationId: string;
+    };
+  };
+  assert.equal(createdWorkflowDraftBody.data.rootObjectType, "pipeline");
+  assert.equal(createdWorkflowDraftBody.data.rootObjectId, onboardingPipeline.id);
+  assert.equal(createdWorkflowDraftBody.data.status, "draft");
+  assert.equal(createdWorkflowDraftBody.data.riskLevel, "high");
+  assert.equal(createdWorkflowDraftBody.data.baseVersion, 1);
+  assert.equal(createdWorkflowDraftBody.data.targetVersion, 2);
+  const createdWorkflowDraftAudit = await prisma.auditLog.findUniqueOrThrow({
+    where: { id: createdWorkflowDraftBody.data.auditLogId }
+  });
+  assert.equal(createdWorkflowDraftAudit.action, "workflow_definition_draft.created");
+  await prisma.event.findFirstOrThrow({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      type: "workflow_definition_draft_created",
+      resourceId: createdWorkflowDraftBody.data.id,
+      correlationId: createdWorkflowDraftBody.data.correlationId
+    }
+  });
+
+  const repeatedWorkflowDraft = await request("/v1/company-os/workflow-definitions/drafts", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      rootObjectType: "pipeline",
+      rootObjectId: onboardingPipeline.id,
+      name: "Client Onboarding Pipeline v2 duplicate request",
+      idempotencyKey: "workflow-draft-proof-001"
+    })
+  });
+  assert.equal(repeatedWorkflowDraft.status, 200);
+  assert.equal((repeatedWorkflowDraft.body as { data: { id: string } }).data.id, createdWorkflowDraftBody.data.id);
+
+  const listedWorkflowDrafts = await request("/v1/company-os/workflow-definitions/drafts?rootObjectType=pipeline&status=draft", {
+    headers: authA
+  });
+  assert.equal(listedWorkflowDrafts.status, 200);
+  const listedWorkflowDraftsBody = listedWorkflowDrafts.body as {
+    data: Array<{ id: string; rootObjectType: string; status: string }>;
+  };
+  assert.ok(listedWorkflowDraftsBody.data.some((draft) => (
+    draft.id === createdWorkflowDraftBody.data.id
+    && draft.rootObjectType === "pipeline"
+    && draft.status === "draft"
+  )));
+
+  const readWorkflowDraft = await request(`/v1/company-os/workflow-definitions/drafts/${createdWorkflowDraftBody.data.id}`, {
+    headers: authA
+  });
+  assert.equal(readWorkflowDraft.status, 200);
+  assert.equal((readWorkflowDraft.body as { data: { id: string } }).data.id, createdWorkflowDraftBody.data.id);
+
+  const crossWorkspaceWorkflowDraftRead = await request(`/v1/company-os/workflow-definitions/drafts/${createdWorkflowDraftBody.data.id}`, {
+    headers: authB
+  });
+  assert.equal(crossWorkspaceWorkflowDraftRead.status, 404);
+
+  const crossWorkspaceWorkflowDraftList = await request("/v1/company-os/workflow-definitions/drafts?rootObjectType=pipeline", {
+    headers: authB
+  });
+  assert.equal(crossWorkspaceWorkflowDraftList.status, 200);
+  assert.deepEqual((crossWorkspaceWorkflowDraftList.body as { data: unknown[] }).data, []);
+
+  const updatedWorkflowDraft = await request(`/v1/company-os/workflow-definitions/drafts/${createdWorkflowDraftBody.data.id}`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({
+      reason: "Preview active runtime and automation impact before activation.",
+      riskLevel: "medium"
+    })
+  });
+  assert.equal(updatedWorkflowDraft.status, 200);
+  const updatedWorkflowDraftBody = updatedWorkflowDraft.body as {
+    data: { id: string; riskLevel: string; auditLogId: string };
+  };
+  assert.equal(updatedWorkflowDraftBody.data.riskLevel, "medium");
+  const updatedWorkflowDraftAudit = await prisma.auditLog.findUniqueOrThrow({
+    where: { id: updatedWorkflowDraftBody.data.auditLogId }
+  });
+  assert.equal(updatedWorkflowDraftAudit.action, "workflow_definition_draft.updated");
+
+  const workflowDraftImpact = await request(`/v1/company-os/workflow-definitions/drafts/${createdWorkflowDraftBody.data.id}/actions/preview-impact`, {
+    method: "POST",
+    headers: authA
+  });
+  assert.equal(workflowDraftImpact.status, 200);
+  const workflowDraftImpactBody = workflowDraftImpact.body as {
+    data: {
+      id: string;
+      impactPreview: {
+        counts: { stages: number; pipelineRuns: number; activePipelineRuns: number; automationRules: number };
+        approvalRequired: boolean;
+        approvalReasons: string[];
+      };
+      auditLogId: string;
+      correlationId: string;
+    };
+  };
+  assert.equal(workflowDraftImpactBody.data.impactPreview.counts.stages, 2);
+  assert.equal(workflowDraftImpactBody.data.impactPreview.counts.pipelineRuns, 2);
+  assert.equal(workflowDraftImpactBody.data.impactPreview.counts.activePipelineRuns, 2);
+  assert.ok(workflowDraftImpactBody.data.impactPreview.approvalRequired);
+  assert.ok(workflowDraftImpactBody.data.impactPreview.approvalReasons.includes("pipeline definition is active"));
+  assert.ok(workflowDraftImpactBody.data.impactPreview.approvalReasons.includes("pipeline has active runtime work"));
+  const workflowDraftImpactAudit = await prisma.auditLog.findUniqueOrThrow({
+    where: { id: workflowDraftImpactBody.data.auditLogId }
+  });
+  assert.equal(workflowDraftImpactAudit.action, "workflow_definition_draft.previewed");
+  await prisma.event.findFirstOrThrow({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      type: "workflow_definition_draft_previewed",
+      resourceId: workflowDraftImpactBody.data.id,
+      correlationId: workflowDraftImpactBody.data.correlationId
+    }
+  });
+
+  const pipelineActivationWithoutApproval = await request(`/v1/company-os/workflow-definitions/drafts/${createdWorkflowDraftBody.data.id}/actions/activate`, {
+    method: "POST",
+    headers: authA
+  });
+  assert.equal(pipelineActivationWithoutApproval.status, 409);
+  assert.equal((pipelineActivationWithoutApproval.body as { error: string }).error, "workflow_definition_approval_required");
+
+  const pipelineActivationApprovalRequest = await request("/v1/company-os/approvals/request", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      requestedByType: "user",
+      requestedById: ownerAWorkspace.ownerUserId,
+      requestedForAction: "workflow_definition_draft.activate",
+      resourceType: "workflow_definition_draft",
+      resourceId: createdWorkflowDraftBody.data.id,
+      riskLevel: "medium",
+      inputPayload: {
+        rootObjectType: "pipeline",
+        rootObjectId: onboardingPipeline.id
+      }
+    })
+  });
+  assert.equal(pipelineActivationApprovalRequest.status, 201);
+  const pipelineActivationApprovalRequestBody = pipelineActivationApprovalRequest.body as {
+    data: { id: string };
+  };
+  const pipelineActivationApprovalDecision = await request(`/v1/company-os/approvals/${pipelineActivationApprovalRequestBody.data.id}/decision`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      decision: "approved",
+      decisionReason: "Pipeline version activation has previewed active runtime impact."
+    })
+  });
+  assert.equal(pipelineActivationApprovalDecision.status, 200);
+  const activatedPipelineDraft = await request(`/v1/company-os/workflow-definitions/drafts/${createdWorkflowDraftBody.data.id}/actions/activate`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      approvalId: pipelineActivationApprovalRequestBody.data.id,
+      sourceChannel: "api-test"
+    })
+  });
+  assert.equal(activatedPipelineDraft.status, 200);
+  const activatedPipelineDraftBody = activatedPipelineDraft.body as {
+    data: { activatedRootObjectId: string; previousRootObjectId: string; newVersion: number; auditLogId: string };
+  };
+  assert.equal(activatedPipelineDraftBody.data.previousRootObjectId, onboardingPipeline.id);
+  assert.notEqual(activatedPipelineDraftBody.data.activatedRootObjectId, onboardingPipeline.id);
+  assert.equal(activatedPipelineDraftBody.data.newVersion, 2);
+  const deprecatedPipeline = await prisma.pipeline.findUniqueOrThrow({
+    where: { id: onboardingPipeline.id }
+  });
+  assert.equal(deprecatedPipeline.status, "deprecated");
+  const activatedPipeline = await prisma.pipeline.findUniqueOrThrow({
+    where: { id: activatedPipelineDraftBody.data.activatedRootObjectId },
+    include: { stages: true }
+  });
+  assert.equal(activatedPipeline.status, "active");
+  assert.equal(activatedPipeline.version, 2);
+  assert.equal(activatedPipeline.familyId, deprecatedPipeline.familyId);
+  assert.ok(activatedPipeline.stages.length >= 1);
+  const activatedPipelineAudit = await prisma.auditLog.findUniqueOrThrow({
+    where: { id: activatedPipelineDraftBody.data.auditLogId }
+  });
+  assert.equal(activatedPipelineAudit.action, "workflow_definition_draft.activated");
+
+  const blockedActivePipelineArchive = await request(`/v1/company-os/workflow-definitions/pipeline/${activatedPipelineDraftBody.data.activatedRootObjectId}/actions/archive`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      reason: "Active versions require a migration or replacement plan before archive."
+    })
+  });
+  assert.equal(blockedActivePipelineArchive.status, 409);
+  assert.equal((blockedActivePipelineArchive.body as { error: string }).error, "workflow_archive_active_version_blocked");
+
+  const blockedRuntimePipelineArchive = await request(`/v1/company-os/workflow-definitions/pipeline/${onboardingPipeline.id}/actions/archive`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      reason: "Old versions with active runtime work still require migration before archive.",
+      idempotencyKey: "archive-deprecated-pipeline-v1-blocked",
+      sourceChannel: "api-test"
+    })
+  });
+  assert.equal(blockedRuntimePipelineArchive.status, 409);
+  assert.equal((blockedRuntimePipelineArchive.body as { error: string }).error, "workflow_archive_active_runtime_dependency");
+
+  const disposableHistoricalPipeline = await prisma.pipeline.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      processId: onboardingProcess.id,
+      name: "Disposable historical pipeline",
+      purpose: "Historical version archive proof.",
+      status: "deprecated",
+      version: 1,
+      riskLevel: "medium"
+    }
+  });
+
+  const archivedHistoricalPipeline = await request(`/v1/company-os/workflow-definitions/pipeline/${disposableHistoricalPipeline.id}/actions/archive`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      reason: "Archive deprecated disposable version after evidence exists.",
+      idempotencyKey: "archive-deprecated-pipeline-v1",
+      sourceChannel: "api-test"
+    })
+  });
+  assert.equal(archivedHistoricalPipeline.status, 200);
+  const archivedHistoricalPipelineBody = archivedHistoricalPipeline.body as {
+    data: {
+      rootObjectType: string;
+      rootObjectId: string;
+      status: string;
+      archived: boolean;
+      auditLogId: string;
+      correlationId: string;
+    };
+  };
+  assert.equal(archivedHistoricalPipelineBody.data.rootObjectType, "pipeline");
+  assert.equal(archivedHistoricalPipelineBody.data.rootObjectId, disposableHistoricalPipeline.id);
+  assert.equal(archivedHistoricalPipelineBody.data.status, "archived");
+  assert.equal(archivedHistoricalPipelineBody.data.archived, true);
+  const archivedPipeline = await prisma.pipeline.findUniqueOrThrow({
+    where: { id: disposableHistoricalPipeline.id }
+  });
+  assert.equal(archivedPipeline.status, "archived");
+  const archivedHistoricalPipelineAudit = await prisma.auditLog.findUniqueOrThrow({
+    where: { id: archivedHistoricalPipelineBody.data.auditLogId }
+  });
+  assert.equal(archivedHistoricalPipelineAudit.action, "workflow_definition_version.archived");
+  await prisma.event.findFirstOrThrow({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      type: "workflow_definition_version_archived",
+      resourceId: disposableHistoricalPipeline.id,
+      correlationId: archivedHistoricalPipelineBody.data.correlationId
+    }
+  });
+
+  const repeatedHistoricalPipelineArchive = await request(`/v1/company-os/workflow-definitions/pipeline/${disposableHistoricalPipeline.id}/actions/archive`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      reason: "Archive deprecated disposable version after evidence exists.",
+      idempotencyKey: "archive-deprecated-pipeline-v1",
+      sourceChannel: "api-test"
+    })
+  });
+  assert.equal(repeatedHistoricalPipelineArchive.status, 200);
+  const repeatedHistoricalPipelineArchiveBody = repeatedHistoricalPipelineArchive.body as {
+    data: { rootObjectId: string; idempotentReplay: boolean; auditLogId: string };
+  };
+  assert.equal(repeatedHistoricalPipelineArchiveBody.data.rootObjectId, disposableHistoricalPipeline.id);
+  assert.equal(repeatedHistoricalPipelineArchiveBody.data.idempotentReplay, true);
+  assert.equal(repeatedHistoricalPipelineArchiveBody.data.auditLogId, archivedHistoricalPipelineBody.data.auditLogId);
+
+  const blockedActiveRollbackDraft = await request(`/v1/company-os/workflow-definitions/pipeline/${activatedPipelineDraftBody.data.activatedRootObjectId}/actions/create-rollback-draft`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      reason: "Active versions cannot be rollback sources."
+    })
+  });
+  assert.equal(blockedActiveRollbackDraft.status, 409);
+  assert.equal((blockedActiveRollbackDraft.body as { error: string }).error, "workflow_rollback_source_active");
+
+  const rollbackDraftFromRenamedHistoricalPipeline = await request(`/v1/company-os/workflow-definitions/pipeline/${onboardingPipeline.id}/actions/create-rollback-draft`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      reason: "Prepare rollback to renamed pipeline v1 through normal draft activation.",
+      riskLevel: "medium",
+      idempotencyKey: "rollback-draft-renamed-pipeline-v1",
+      sourceChannel: "api-test"
+    })
+  });
+  assert.equal(rollbackDraftFromRenamedHistoricalPipeline.status, 201);
+  const rollbackDraftFromRenamedHistoricalPipelineBody = rollbackDraftFromRenamedHistoricalPipeline.body as {
+    data: {
+      rootObjectType: string;
+      rootObjectId: string;
+      status: string;
+      baseVersion: number;
+      targetVersion: number;
+      changeSet: { kind: string; rollbackSourceRootObjectId: string; rollbackSourceVersion: number };
+      rollbackSource: { rootObjectId: string; version: number; status: string };
+    };
+  };
+  assert.equal(rollbackDraftFromRenamedHistoricalPipelineBody.data.rootObjectType, "pipeline");
+  assert.equal(rollbackDraftFromRenamedHistoricalPipelineBody.data.rootObjectId, activatedPipelineDraftBody.data.activatedRootObjectId);
+  assert.equal(rollbackDraftFromRenamedHistoricalPipelineBody.data.status, "draft");
+  assert.equal(rollbackDraftFromRenamedHistoricalPipelineBody.data.baseVersion, 2);
+  assert.equal(rollbackDraftFromRenamedHistoricalPipelineBody.data.targetVersion, 3);
+  assert.equal(rollbackDraftFromRenamedHistoricalPipelineBody.data.changeSet.kind, "rollback_to_version");
+  assert.equal(rollbackDraftFromRenamedHistoricalPipelineBody.data.changeSet.rollbackSourceRootObjectId, onboardingPipeline.id);
+  assert.equal(rollbackDraftFromRenamedHistoricalPipelineBody.data.changeSet.rollbackSourceVersion, 1);
+  assert.equal(rollbackDraftFromRenamedHistoricalPipelineBody.data.rollbackSource.rootObjectId, onboardingPipeline.id);
+  assert.equal(rollbackDraftFromRenamedHistoricalPipelineBody.data.rollbackSource.version, 1);
+
+  const processWorkflowDraft = await request("/v1/company-os/workflow-definitions/drafts", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      rootObjectType: "process",
+      rootObjectId: onboardingProcess.id,
+      name: "Client onboarding",
+      reason: "Activate a process version after pipeline versioning is available.",
+      riskLevel: "medium",
+      changeSet: {
+        description: "Versioned client onboarding process with explicit activation evidence.",
+        maturityLevel: "managed",
+        relatedPolicies: ["Client-facing agent messages require approval"],
+        relatedMetrics: ["Client onboarding cycle time"]
+      },
+      idempotencyKey: "process-draft-activation-proof-001",
+      sourceChannel: "api-test"
+    })
+  });
+  assert.equal(processWorkflowDraft.status, 201);
+  const processWorkflowDraftBody = processWorkflowDraft.body as {
+    data: { id: string; rootObjectId: string; baseVersion: number; targetVersion: number };
+  };
+  assert.equal(processWorkflowDraftBody.data.rootObjectId, onboardingProcess.id);
+  assert.equal(processWorkflowDraftBody.data.baseVersion, 1);
+  assert.equal(processWorkflowDraftBody.data.targetVersion, 2);
+
+  const processWorkflowPreview = await request(`/v1/company-os/workflow-definitions/drafts/${processWorkflowDraftBody.data.id}/actions/preview-impact`, {
+    method: "POST",
+    headers: authA
+  });
+  assert.equal(processWorkflowPreview.status, 200);
+  const processWorkflowPreviewBody = processWorkflowPreview.body as {
+    data: { impactPreview: { counts: { pipelines: number; procedures: number; pipelineRuns: number }; approvalRequired: boolean } };
+  };
+  assert.ok(processWorkflowPreviewBody.data.impactPreview.counts.pipelines >= 1);
+  assert.ok(processWorkflowPreviewBody.data.impactPreview.counts.procedures >= 1);
+  assert.ok(processWorkflowPreviewBody.data.impactPreview.counts.pipelineRuns >= 1);
+  assert.equal(processWorkflowPreviewBody.data.impactPreview.approvalRequired, true);
+
+  const processActivationApprovalRequest = await request("/v1/company-os/approvals/request", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      requestedByType: "user",
+      requestedById: ownerAWorkspace.ownerUserId,
+      requestedForAction: "workflow_definition_draft.activate",
+      resourceType: "workflow_definition_draft",
+      resourceId: processWorkflowDraftBody.data.id,
+      riskLevel: "medium",
+      inputPayload: {
+        rootObjectType: "process",
+        rootObjectId: onboardingProcess.id
+      }
+    })
+  });
+  assert.equal(processActivationApprovalRequest.status, 201);
+  const processActivationApprovalRequestBody = processActivationApprovalRequest.body as {
+    data: { id: string };
+  };
+  const processActivationApprovalDecision = await request(`/v1/company-os/approvals/${processActivationApprovalRequestBody.data.id}/decision`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      decision: "approved",
+      decisionReason: "Process activation has a versioning migration and impact preview."
+    })
+  });
+  assert.equal(processActivationApprovalDecision.status, 200);
+  const activatedProcessDraft = await request(`/v1/company-os/workflow-definitions/drafts/${processWorkflowDraftBody.data.id}/actions/activate`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      approvalId: processActivationApprovalRequestBody.data.id,
+      sourceChannel: "api-test"
+    })
+  });
+  assert.equal(activatedProcessDraft.status, 200);
+  const activatedProcessDraftBody = activatedProcessDraft.body as {
+    data: { activatedRootObjectId: string; previousRootObjectId: string; newVersion: number; auditLogId: string };
+  };
+  assert.equal(activatedProcessDraftBody.data.previousRootObjectId, onboardingProcess.id);
+  assert.notEqual(activatedProcessDraftBody.data.activatedRootObjectId, onboardingProcess.id);
+  assert.equal(activatedProcessDraftBody.data.newVersion, 2);
+  const deprecatedProcess = await prisma.process.findUniqueOrThrow({
+    where: { id: onboardingProcess.id }
+  });
+  assert.equal(deprecatedProcess.status, "deprecated");
+  const activatedProcess = await prisma.process.findUniqueOrThrow({
+    where: { id: activatedProcessDraftBody.data.activatedRootObjectId }
+  });
+  assert.equal(activatedProcess.status, "active");
+  assert.equal(activatedProcess.version, 2);
+  const activatedProcessAudit = await prisma.auditLog.findUniqueOrThrow({
+    where: { id: activatedProcessDraftBody.data.auditLogId }
+  });
+  assert.equal(activatedProcessAudit.action, "workflow_definition_draft.activated");
+
+  const rollbackDraftFromHistoricalProcess = await request(`/v1/company-os/workflow-definitions/process/${onboardingProcess.id}/actions/create-rollback-draft`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      reason: "Prepare rollback to process v1 through normal draft activation.",
+      riskLevel: "medium",
+      idempotencyKey: "rollback-draft-process-v1",
+      sourceChannel: "api-test"
+    })
+  });
+  assert.equal(rollbackDraftFromHistoricalProcess.status, 201);
+  const rollbackDraftFromHistoricalProcessBody = rollbackDraftFromHistoricalProcess.body as {
+    data: {
+      id: string;
+      rootObjectType: string;
+      rootObjectId: string;
+      status: string;
+      baseVersion: number;
+      targetVersion: number;
+      changeSet: { kind: string; rollbackSourceRootObjectId: string; rollbackSourceVersion: number };
+      impactPreview: { approvalRequired: boolean };
+      rollbackSource: { rootObjectId: string; version: number; status: string };
+      auditLogId: string;
+      correlationId: string;
+    };
+  };
+  assert.equal(rollbackDraftFromHistoricalProcessBody.data.rootObjectType, "process");
+  assert.equal(rollbackDraftFromHistoricalProcessBody.data.rootObjectId, activatedProcessDraftBody.data.activatedRootObjectId);
+  assert.equal(rollbackDraftFromHistoricalProcessBody.data.status, "draft");
+  assert.equal(rollbackDraftFromHistoricalProcessBody.data.baseVersion, 2);
+  assert.equal(rollbackDraftFromHistoricalProcessBody.data.targetVersion, 3);
+  assert.equal(rollbackDraftFromHistoricalProcessBody.data.changeSet.kind, "rollback_to_version");
+  assert.equal(rollbackDraftFromHistoricalProcessBody.data.changeSet.rollbackSourceRootObjectId, onboardingProcess.id);
+  assert.equal(rollbackDraftFromHistoricalProcessBody.data.changeSet.rollbackSourceVersion, 1);
+  assert.equal(rollbackDraftFromHistoricalProcessBody.data.rollbackSource.rootObjectId, onboardingProcess.id);
+  assert.equal(rollbackDraftFromHistoricalProcessBody.data.rollbackSource.version, 1);
+  assert.ok(rollbackDraftFromHistoricalProcessBody.data.impactPreview.approvalRequired);
+  const rollbackDraftAudit = await prisma.auditLog.findUniqueOrThrow({
+    where: { id: rollbackDraftFromHistoricalProcessBody.data.auditLogId }
+  });
+  assert.equal(rollbackDraftAudit.action, "workflow_definition_rollback_draft.created");
+  await prisma.event.findFirstOrThrow({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      type: "workflow_definition_rollback_draft_created",
+      resourceId: rollbackDraftFromHistoricalProcessBody.data.id,
+      correlationId: rollbackDraftFromHistoricalProcessBody.data.correlationId
+    }
+  });
+
+  const repeatedRollbackDraftFromHistoricalProcess = await request(`/v1/company-os/workflow-definitions/process/${onboardingProcess.id}/actions/create-rollback-draft`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      reason: "Prepare rollback to process v1 through normal draft activation.",
+      riskLevel: "medium",
+      idempotencyKey: "rollback-draft-process-v1",
+      sourceChannel: "api-test"
+    })
+  });
+  assert.equal(repeatedRollbackDraftFromHistoricalProcess.status, 200);
+  assert.equal(
+    (repeatedRollbackDraftFromHistoricalProcess.body as { data: { id: string } }).data.id,
+    rollbackDraftFromHistoricalProcessBody.data.id
+  );
+
+  const procedureWorkflowDraft = await request("/v1/company-os/workflow-definitions/drafts", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      rootObjectType: "procedure",
+      rootObjectId: onboardingProcedure.id,
+      name: "Client Onboarding SOP",
+      reason: "Activate a versioned procedure draft with copied runtime-safe evidence.",
+      riskLevel: "medium",
+      changeSet: {
+        purpose: "Run client onboarding with stronger evidence and rollback notes.",
+        expectedResult: "Kickoff is ready with review evidence.",
+        requiredTools: ["companycore", "clickup"],
+        requiredPermissions: ["client:write", "task:write"],
+        steps: [
+          {
+            stepOrder: 1,
+            instruction: "Prepare kickoff plan and create follow-up tasks.",
+            stepType: "integration_call",
+            requiredToolAdapterId: clickUpAdapter.id,
+            validationRule: { evidenceRequired: true }
+          },
+          {
+            stepOrder: 2,
+            instruction: "Attach approval and rollback evidence to the client record.",
+            stepType: "human_review",
+            validationRule: { approvalRequired: true }
+          }
+        ]
+      },
+      idempotencyKey: "procedure-draft-activation-proof-001",
+      sourceChannel: "api-test"
+    })
+  });
+  assert.equal(procedureWorkflowDraft.status, 201);
+  const procedureWorkflowDraftBody = procedureWorkflowDraft.body as {
+    data: { id: string; rootObjectId: string; baseVersion: number; targetVersion: number };
+  };
+  assert.equal(procedureWorkflowDraftBody.data.rootObjectId, onboardingProcedure.id);
+  assert.equal(procedureWorkflowDraftBody.data.baseVersion, 1);
+  assert.equal(procedureWorkflowDraftBody.data.targetVersion, 2);
+
+  const procedureWorkflowPreview = await request(`/v1/company-os/workflow-definitions/drafts/${procedureWorkflowDraftBody.data.id}/actions/preview-impact`, {
+    method: "POST",
+    headers: authA
+  });
+  assert.equal(procedureWorkflowPreview.status, 200);
+  const procedureWorkflowPreviewBody = procedureWorkflowPreview.body as {
+    data: { impactPreview: { counts: { stages: number; stageRuns: number }; approvalRequired: boolean } };
+  };
+  assert.ok(procedureWorkflowPreviewBody.data.impactPreview.counts.stages >= 1);
+  assert.ok(procedureWorkflowPreviewBody.data.impactPreview.counts.stageRuns >= 1);
+  assert.equal(procedureWorkflowPreviewBody.data.impactPreview.approvalRequired, true);
+
+  const procedureActivationWithoutApproval = await request(`/v1/company-os/workflow-definitions/drafts/${procedureWorkflowDraftBody.data.id}/actions/activate`, {
+    method: "POST",
+    headers: authA
+  });
+  assert.equal(procedureActivationWithoutApproval.status, 409);
+  assert.equal((procedureActivationWithoutApproval.body as { error: string }).error, "workflow_definition_approval_required");
+
+  const procedureActivationApprovalRequest = await request("/v1/company-os/approvals/request", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      requestedByType: "user",
+      requestedById: ownerAWorkspace.ownerUserId,
+      requestedForAction: "workflow_definition_draft.activate",
+      resourceType: "workflow_definition_draft",
+      resourceId: procedureWorkflowDraftBody.data.id,
+      riskLevel: "medium",
+      inputPayload: {
+        rootObjectType: "procedure",
+        rootObjectId: onboardingProcedure.id
+      }
+    })
+  });
+  assert.equal(procedureActivationApprovalRequest.status, 201);
+  const procedureActivationApprovalRequestBody = procedureActivationApprovalRequest.body as {
+    data: { id: string };
+  };
+
+  const procedureActivationApprovalDecision = await request(`/v1/company-os/approvals/${procedureActivationApprovalRequestBody.data.id}/decision`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      decision: "approved",
+      decisionReason: "Procedure version activation has a preview and rollback candidate."
+    })
+  });
+  assert.equal(procedureActivationApprovalDecision.status, 200);
+
+  const activatedProcedureDraft = await request(`/v1/company-os/workflow-definitions/drafts/${procedureWorkflowDraftBody.data.id}/actions/activate`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      approvalId: procedureActivationApprovalRequestBody.data.id,
+      sourceChannel: "api-test"
+    })
+  });
+  assert.equal(activatedProcedureDraft.status, 200);
+  const activatedProcedureDraftBody = activatedProcedureDraft.body as {
+    data: {
+      status: string;
+      activatedRootObjectId: string;
+      previousRootObjectId: string;
+      previousVersion: number;
+      newVersion: number;
+      approvalId: string;
+      auditLogId: string;
+      correlationId: string;
+    };
+  };
+  assert.equal(activatedProcedureDraftBody.data.status, "active");
+  assert.equal(activatedProcedureDraftBody.data.previousRootObjectId, onboardingProcedure.id);
+  assert.notEqual(activatedProcedureDraftBody.data.activatedRootObjectId, onboardingProcedure.id);
+  assert.equal(activatedProcedureDraftBody.data.previousVersion, 1);
+  assert.equal(activatedProcedureDraftBody.data.newVersion, 2);
+  assert.equal(activatedProcedureDraftBody.data.approvalId, procedureActivationApprovalRequestBody.data.id);
+  const deprecatedProcedure = await prisma.procedure.findUniqueOrThrow({
+    where: { id: onboardingProcedure.id }
+  });
+  assert.equal(deprecatedProcedure.status, "deprecated");
+  const activatedProcedure = await prisma.procedure.findUniqueOrThrow({
+    where: { id: activatedProcedureDraftBody.data.activatedRootObjectId },
+    include: { steps: true }
+  });
+  assert.equal(activatedProcedure.status, "active");
+  assert.equal(activatedProcedure.version, 2);
+  assert.equal(activatedProcedure.steps.length, 2);
+  const activatedProcedureAudit = await prisma.auditLog.findUniqueOrThrow({
+    where: { id: activatedProcedureDraftBody.data.auditLogId }
+  });
+  assert.equal(activatedProcedureAudit.action, "workflow_definition_draft.activated");
+  await prisma.event.findFirstOrThrow({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      type: "workflow_definition_draft_activated",
+      resourceId: procedureWorkflowDraftBody.data.id,
+      correlationId: activatedProcedureDraftBody.data.correlationId
+    }
+  });
+
+  const repeatedProcedureActivation = await request(`/v1/company-os/workflow-definitions/drafts/${procedureWorkflowDraftBody.data.id}/actions/activate`, {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      approvalId: procedureActivationApprovalRequestBody.data.id
+    })
+  });
+  assert.equal(repeatedProcedureActivation.status, 409);
+  assert.equal((repeatedProcedureActivation.body as { error: string }).error, "workflow_definition_draft_not_activatable");
+
+  const crossWorkspaceWorkflowDraftUpdate = await request(`/v1/company-os/workflow-definitions/drafts/${createdWorkflowDraftBody.data.id}`, {
+    method: "PATCH",
+    headers: authB,
+    body: JSON.stringify({
+      reason: "Workspace B must not mutate workspace A workflow drafts."
+    })
+  });
+  assert.equal(crossWorkspaceWorkflowDraftUpdate.status, 404);
+
+  const missingWorkflowRootDraft = await request("/v1/company-os/workflow-definitions/drafts", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      rootObjectType: "pipeline",
+      rootObjectId: ownerB.workspace.id,
+      name: "Foreign workflow draft"
+    })
+  });
+  assert.equal(missingWorkflowRootDraft.status, 404);
+  assert.equal((missingWorkflowRootDraft.body as { error: string }).error, "workflow_root_not_found");
+
   const login = await request("/auth/login", {
     method: "POST",
     body: JSON.stringify({
@@ -186,12 +2109,185 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(invalidKey.status, 403);
   assert.equal((invalidKey.body as { error: string }).error, "invalid_api_key");
 
+  const agentKeyProfiles = await request("/v1/api-keys/profiles", { headers: authA });
+  assert.equal(agentKeyProfiles.status, 200);
+  const agentKeyProfilesBody = agentKeyProfiles.body as {
+    data: Array<{ id: string; scopes: string[]; riskLevel: string; recommendedFor: string[] }>;
+  };
+  const companyOsReaderProfile = agentKeyProfilesBody.data.find((profile) => profile.id === "mcp_company_os_reader");
+  assert.ok(companyOsReaderProfile);
+  assert.equal(companyOsReaderProfile.riskLevel, "low");
+  assert.ok(companyOsReaderProfile.scopes.includes("mcp:read"));
+  assert.ok(companyOsReaderProfile.scopes.includes("company-os:read"));
+  assert.ok(!companyOsReaderProfile.scopes.includes("company-os:definition:write"));
+  assert.ok(!companyOsReaderProfile.scopes.includes("company-os:workflow-definition:write"));
+  assert.ok(!companyOsReaderProfile.scopes.includes("company-os:workflow-definition:activate"));
+  assert.ok(!companyOsReaderProfile.scopes.includes("company-os:approval:request"));
+  assert.ok(!companyOsReaderProfile.scopes.includes("company-os:approval:decide"));
+  assert.ok(companyOsReaderProfile.recommendedFor.includes("CEO Agent"));
+  const mcpOperatorProfile = agentKeyProfilesBody.data.find((profile) => profile.id === "mcp_operator");
+  assert.ok(mcpOperatorProfile);
+  assert.ok(mcpOperatorProfile.scopes.includes("company-os:automation:execute"));
+
+  const createdProfileKey = await request("/v1/api-keys", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      name: "MCP Company OS reader",
+      profileId: "mcp_company_os_reader"
+    })
+  });
+  assert.equal(createdProfileKey.status, 201);
+  const createdProfileKeyBody = createdProfileKey.body as {
+    data: { key: string; profile: { id: string }; scopes: string[] };
+  };
+  assert.equal(createdProfileKeyBody.data.profile.id, "mcp_company_os_reader");
+  assert.ok(createdProfileKeyBody.data.scopes.includes("mcp:read"));
+  assert.ok(createdProfileKeyBody.data.scopes.includes("company-os:read"));
+  assert.ok(!createdProfileKeyBody.data.scopes.includes("company-os:definition:write"));
+  assert.ok(!createdProfileKeyBody.data.scopes.includes("company-os:workflow-definition:write"));
+  assert.ok(!createdProfileKeyBody.data.scopes.includes("company-os:workflow-definition:activate"));
+  assert.ok(!createdProfileKeyBody.data.scopes.includes("company-os:approval:request"));
+  assert.ok(!createdProfileKeyBody.data.scopes.includes("company-os:approval:decide"));
+  const profileKeyAuth = { "X-API-Key": createdProfileKeyBody.data.key };
+  const profileMcpManifest = await request("/v1/mcp/manifest", { headers: profileKeyAuth });
+  assert.equal(profileMcpManifest.status, 200);
+  const profileMcpManifestBody = profileMcpManifest.body as {
+    data: { tools: Array<{ path: string; capability: string }> };
+  };
+  assert.ok(profileMcpManifestBody.data.tools.some((tool) => tool.path === "/v1/company-os"));
+  assert.ok(!profileMcpManifestBody.data.tools.some((tool) => tool.capability === "company-os:definition:write"));
+  assert.ok(!profileMcpManifestBody.data.tools.some((tool) => tool.capability === "company-os:workflow-definition:write"));
+  assert.ok(!profileMcpManifestBody.data.tools.some((tool) => tool.capability === "company-os:workflow-definition:activate"));
+  assert.ok(!profileMcpManifestBody.data.tools.some((tool) => tool.capability === "company-os:approval:request"));
+  assert.ok(!profileMcpManifestBody.data.tools.some((tool) => tool.capability === "company-os:approval:decide"));
+  assert.ok(!profileMcpManifestBody.data.tools.some((tool) => tool.capability === "company-os:pipeline-run:write"));
+  assert.ok(!profileMcpManifestBody.data.tools.some((tool) => tool.capability === "company-os:stage-run:write"));
+  assert.ok(!profileMcpManifestBody.data.tools.some((tool) => tool.capability === "company-os:automation:execute"));
+  assert.ok(!profileMcpManifestBody.data.tools.some((tool) => tool.capability === "notes:write"));
+  const deniedProfileApprovalRequest = await request("/v1/company-os/approvals/request", {
+    method: "POST",
+    headers: profileKeyAuth,
+    body: JSON.stringify({
+      requestedByType: "agent",
+      requestedForAction: "drive.file.update",
+      resourceType: "stage_run",
+      riskLevel: "high"
+    })
+  });
+  assert.equal(deniedProfileApprovalRequest.status, 403);
+  assert.equal((deniedProfileApprovalRequest.body as { error: string }).error, "forbidden");
+  const deniedProfileStandardCreate = await request("/v1/company-os/standards", {
+    method: "POST",
+    headers: profileKeyAuth,
+    body: JSON.stringify({
+      name: "Read-only profile standard",
+      category: "governance"
+    })
+  });
+  assert.equal(deniedProfileStandardCreate.status, 403);
+  assert.equal((deniedProfileStandardCreate.body as { error: string }).error, "forbidden");
+  const deniedProfileWorkflowDraftCreate = await request("/v1/company-os/workflow-definitions/drafts", {
+    method: "POST",
+    headers: profileKeyAuth,
+    body: JSON.stringify({
+      rootObjectType: "pipeline",
+      rootObjectId: onboardingPipeline.id,
+      name: "Read-only profile workflow draft"
+    })
+  });
+  assert.equal(deniedProfileWorkflowDraftCreate.status, 403);
+  assert.equal((deniedProfileWorkflowDraftCreate.body as { error: string }).error, "forbidden");
+  const deniedProfileWorkflowDraftList = await request("/v1/company-os/workflow-definitions/drafts", {
+    headers: profileKeyAuth
+  });
+  assert.equal(deniedProfileWorkflowDraftList.status, 403);
+  assert.equal((deniedProfileWorkflowDraftList.body as { error: string }).error, "forbidden");
+  const deniedProfileWorkflowArchive = await request(`/v1/company-os/workflow-definitions/pipeline/${onboardingPipeline.id}/actions/archive`, {
+    method: "POST",
+    headers: profileKeyAuth,
+    body: JSON.stringify({
+      reason: "Read-only profile must not archive workflow definitions."
+    })
+  });
+  assert.equal(deniedProfileWorkflowArchive.status, 403);
+  assert.equal((deniedProfileWorkflowArchive.body as { error: string }).error, "forbidden");
+  const deniedProfileRollbackDraft = await request(`/v1/company-os/workflow-definitions/pipeline/${onboardingPipeline.id}/actions/create-rollback-draft`, {
+    method: "POST",
+    headers: profileKeyAuth,
+    body: JSON.stringify({
+      reason: "Read-only profile must not create rollback drafts."
+    })
+  });
+  assert.equal(deniedProfileRollbackDraft.status, 403);
+  assert.equal((deniedProfileRollbackDraft.body as { error: string }).error, "forbidden");
+  const deniedProfileApprovalDecision = await request(`/v1/company-os/approvals/${lifecycleApprovalRequestBody.data.id}/decision`, {
+    method: "POST",
+    headers: profileKeyAuth,
+    body: JSON.stringify({
+      decision: "approved",
+      decisionReason: "Read-only profile must not decide approvals."
+    })
+  });
+  assert.equal(deniedProfileApprovalDecision.status, 403);
+  assert.equal((deniedProfileApprovalDecision.body as { error: string }).error, "forbidden");
+  await runMcpBridgeSmoke(createdProfileKeyBody.data.key);
+
+  const createdOperatorProfileKey = await request("/v1/api-keys", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      name: "MCP supervised operator",
+      profileId: "mcp_operator"
+    })
+  });
+  assert.equal(createdOperatorProfileKey.status, 201);
+  const createdOperatorProfileKeyBody = createdOperatorProfileKey.body as {
+    data: { key: string; profile: { id: string }; scopes: string[] };
+  };
+  assert.equal(createdOperatorProfileKeyBody.data.profile.id, "mcp_operator");
+  assert.ok(createdOperatorProfileKeyBody.data.scopes.includes("company-os:stage-run:write"));
+  assert.ok(createdOperatorProfileKeyBody.data.scopes.includes("company-os:workflow-definition:write"));
+  assert.ok(createdOperatorProfileKeyBody.data.scopes.includes("company-os:workflow-definition:activate"));
+  await runMcpBridgeSmoke(createdOperatorProfileKeyBody.data.key, {
+    toolName: "companycore_post_company_os_stage_runs_by_id_actions_complete",
+    expectError: true,
+    expectedErrorCode: "mcp_tool_requires_supervision"
+  });
+  await runMcpBridgeSmoke(createdOperatorProfileKeyBody.data.key, {
+    toolName: "companycore_post_company_os_stage_runs_by_id_actions_complete",
+    commandMode: "supervised_operator",
+    arguments: {
+      id: stageRun.id,
+      body: {
+        outputPayload: {
+          result: "supervised-repeat"
+        },
+        approvalId: lifecycleApprovalRequestBody.data.id
+      }
+    },
+    expectError: true,
+    expectedStatus: 409,
+    expectedResponseError: "invalid_stage_transition"
+  });
+
+  const invalidProfileKey = await request("/v1/api-keys", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      name: "Bad MCP profile",
+      profileId: "missing_profile"
+    })
+  });
+  assert.equal(invalidProfileKey.status, 400);
+  assert.equal((invalidProfileKey.body as { error: string }).error, "invalid_api_key_profile");
+
   const createdScopedKey = await request("/v1/api-keys", {
     method: "POST",
     headers: authA,
     body: JSON.stringify({
       name: "Read-only notes agent",
-      scopes: ["connection:read", "notes:read", "agent-events:read"]
+      scopes: ["connection:read", "company-os:read", "mcp:read", "notes:read", "agent-events:read"]
     })
   });
   assert.equal(createdScopedKey.status, 201);
@@ -208,11 +2304,127 @@ test("CompanyCore v1 protected API flow", async () => {
     data: {
       scopeMode: string;
       capabilities: string[];
+      mcpManifest: {
+        tools: Array<{ name: string; path: string; capability: string; riskLevel: string }>;
+      };
     };
   };
   assert.equal(scopedConnectionBody.data.scopeMode, "scoped");
+  assert.ok(scopedConnectionBody.data.capabilities.includes("company-os:read"));
+  assert.ok(scopedConnectionBody.data.capabilities.includes("mcp:read"));
   assert.ok(scopedConnectionBody.data.capabilities.includes("notes:read"));
+  assert.ok(!scopedConnectionBody.data.capabilities.includes("company-os:definition:write"));
+  assert.ok(!scopedConnectionBody.data.capabilities.includes("company-os:workflow-definition:write"));
+  assert.ok(!scopedConnectionBody.data.capabilities.includes("company-os:workflow-definition:activate"));
   assert.ok(!scopedConnectionBody.data.capabilities.includes("notes:write"));
+  assert.ok(scopedConnectionBody.data.mcpManifest.tools.some((tool) => (
+    tool.path === "/v1/company-os"
+    && tool.capability === "company-os:read"
+    && tool.riskLevel === "read"
+  )));
+  assert.ok(!scopedConnectionBody.data.mcpManifest.tools.some((tool) => tool.capability === "notes:write"));
+  assert.ok(!scopedConnectionBody.data.mcpManifest.tools.some((tool) => tool.capability === "company-os:definition:write"));
+  assert.ok(!scopedConnectionBody.data.mcpManifest.tools.some((tool) => tool.capability === "company-os:workflow-definition:write"));
+  assert.ok(!scopedConnectionBody.data.mcpManifest.tools.some((tool) => tool.capability === "company-os:workflow-definition:activate"));
+
+  const scopedMcpManifest = await request("/v1/mcp/manifest", {
+    headers: scopedAuth
+  });
+  assert.equal(scopedMcpManifest.status, 200);
+  const scopedMcpManifestBody = scopedMcpManifest.body as {
+    data: {
+      auth: { workspaceScoped: boolean; capabilityScoped: boolean };
+      tools: Array<{ name: string; path: string; capability: string; requiresApproval: boolean }>;
+    };
+  };
+  assert.equal(scopedMcpManifestBody.data.auth.workspaceScoped, true);
+  assert.equal(scopedMcpManifestBody.data.auth.capabilityScoped, true);
+  assert.ok(scopedMcpManifestBody.data.tools.some((tool) => (
+    tool.name === "companycore_get_company_os"
+    && tool.path === "/v1/company-os"
+    && tool.capability === "company-os:read"
+    && tool.requiresApproval === false
+  )));
+
+  const scopedReadCompanyOs = await request("/v1/company-os/approvals", {
+    headers: scopedAuth
+  });
+  assert.equal(scopedReadCompanyOs.status, 200);
+
+  const deniedScopedApprovalRequest = await request("/v1/company-os/approvals/request", {
+    method: "POST",
+    headers: scopedAuth,
+    body: JSON.stringify({
+      requestedByType: "agent",
+      requestedForAction: "drive.file.update",
+      resourceType: "stage_run",
+      riskLevel: "high"
+    })
+  });
+  assert.equal(deniedScopedApprovalRequest.status, 403);
+  assert.equal((deniedScopedApprovalRequest.body as { error: string }).error, "forbidden");
+  const deniedScopedStandardArchive = await request(`/v1/company-os/standards/${createdStandardBody.data.id}`, {
+    method: "DELETE",
+    headers: scopedAuth
+  });
+  assert.equal(deniedScopedStandardArchive.status, 403);
+  assert.equal((deniedScopedStandardArchive.body as { error: string }).error, "forbidden");
+  const deniedScopedWorkflowDraftPreview = await request(`/v1/company-os/workflow-definitions/drafts/${createdWorkflowDraftBody.data.id}/actions/preview-impact`, {
+    method: "POST",
+    headers: scopedAuth
+  });
+  assert.equal(deniedScopedWorkflowDraftPreview.status, 403);
+  assert.equal((deniedScopedWorkflowDraftPreview.body as { error: string }).error, "forbidden");
+  const deniedScopedWorkflowDraftList = await request("/v1/company-os/workflow-definitions/drafts", {
+    headers: scopedAuth
+  });
+  assert.equal(deniedScopedWorkflowDraftList.status, 403);
+  assert.equal((deniedScopedWorkflowDraftList.body as { error: string }).error, "forbidden");
+  const deniedScopedWorkflowDraftActivation = await request(`/v1/company-os/workflow-definitions/drafts/${procedureWorkflowDraftBody.data.id}/actions/activate`, {
+    method: "POST",
+    headers: scopedAuth,
+    body: JSON.stringify({
+      approvalId: procedureActivationApprovalRequestBody.data.id
+    })
+  });
+  assert.equal(deniedScopedWorkflowDraftActivation.status, 403);
+  assert.equal((deniedScopedWorkflowDraftActivation.body as { error: string }).error, "forbidden");
+  const deniedScopedWorkflowArchive = await request(`/v1/company-os/workflow-definitions/pipeline/${onboardingPipeline.id}/actions/archive`, {
+    method: "POST",
+    headers: scopedAuth,
+    body: JSON.stringify({
+      reason: "Scoped read-only key must not archive workflow definitions."
+    })
+  });
+  assert.equal(deniedScopedWorkflowArchive.status, 403);
+  assert.equal((deniedScopedWorkflowArchive.body as { error: string }).error, "forbidden");
+  const deniedScopedRollbackDraft = await request(`/v1/company-os/workflow-definitions/pipeline/${onboardingPipeline.id}/actions/create-rollback-draft`, {
+    method: "POST",
+    headers: scopedAuth,
+    body: JSON.stringify({
+      reason: "Scoped read-only key must not create rollback drafts."
+    })
+  });
+  assert.equal(deniedScopedRollbackDraft.status, 403);
+  assert.equal((deniedScopedRollbackDraft.body as { error: string }).error, "forbidden");
+
+  const deniedScopedStageStart = await request(`/v1/company-os/pipeline-runs/${pipelineRun.id}/actions/start-stage`, {
+    method: "POST",
+    headers: scopedAuth,
+    body: JSON.stringify({
+      pipelineStageId: kickoffStage.id
+    })
+  });
+  assert.equal(deniedScopedStageStart.status, 403);
+  assert.equal((deniedScopedStageStart.body as { error: string }).error, "forbidden");
+
+  const deniedScopedAutomationEvaluation = await request(`/v1/company-os/events/${automationSourceEvent.id}/actions/evaluate-automation-rules`, {
+    method: "POST",
+    headers: scopedAuth,
+    body: JSON.stringify({ mode: "dry_run" })
+  });
+  assert.equal(deniedScopedAutomationEvaluation.status, 403);
+  assert.equal((deniedScopedAutomationEvaluation.body as { error: string }).error, "forbidden");
 
   const scopedReadNotes = await request("/v1/notes", {
     headers: scopedAuth
@@ -278,6 +2490,8 @@ test("CompanyCore v1 protected API flow", async () => {
         auth: { serviceHeader: string };
         routes: {
           projects: Array<{ method: string; path: string; capability: string }>;
+          companyOs: Array<{ method: string; path: string; capability: string }>;
+          mcp: Array<{ method: string; path: string; capability: string }>;
           goals: Array<{ method: string; path: string; capability: string }>;
           targets: Array<{ method: string; path: string; capability: string }>;
           tasks: Array<{ method: string; path: string; capability: string }>;
@@ -301,6 +2515,10 @@ test("CompanyCore v1 protected API flow", async () => {
         };
         errors: Record<string, string>;
         writeRules: string[];
+      };
+      mcpManifest: {
+        service: string;
+        tools: Array<{ name: string; path: string; capability: string; riskLevel: string; requiresApproval: boolean }>;
       };
       integrations: {
         clickup: { configured: boolean; active: boolean; config: unknown };
@@ -327,6 +2545,11 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(strategyArea.tables.some((table) => table.apiSlug === "targets" && table.tableName === "targets"));
   assert.ok(connectionBody.data.operatingModel.systemTables.includes("users"));
   assert.ok(connectionBody.data.capabilities.includes("connection:read"));
+  assert.ok(connectionBody.data.capabilities.includes("company-os:read"));
+  assert.ok(connectionBody.data.capabilities.includes("company-os:definition:write"));
+  assert.ok(connectionBody.data.capabilities.includes("company-os:workflow-definition:write"));
+  assert.ok(connectionBody.data.capabilities.includes("company-os:workflow-definition:activate"));
+  assert.ok(connectionBody.data.capabilities.includes("mcp:read"));
   assert.ok(connectionBody.data.capabilities.includes("operating-model:read"));
   assert.ok(connectionBody.data.capabilities.includes("operating-model:mappings:write"));
   assert.ok(connectionBody.data.capabilities.includes("google-drive:files:scope:write"));
@@ -361,6 +2584,151 @@ test("CompanyCore v1 protected API flow", async () => {
     route.method === "PATCH"
     && route.path === "/v1/google-drive/files/:id/description"
     && route.capability === "google-drive:files:write"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.companyOs.some((route) => (
+    route.method === "GET"
+    && route.path === "/v1/company-os/:collection/:id"
+    && route.capability === "company-os:read"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.companyOs.some((route) => (
+    route.method === "POST"
+    && route.path === "/v1/company-os/standards"
+    && route.capability === "company-os:definition:write"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.companyOs.some((route) => (
+    route.method === "DELETE"
+    && route.path === "/v1/company-os/standards/:id"
+    && route.capability === "company-os:definition:write"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.companyOs.some((route) => (
+    route.method === "GET"
+    && route.path === "/v1/company-os/workflow-definitions/drafts"
+    && route.capability === "company-os:workflow-definition:write"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.companyOs.some((route) => (
+    route.method === "GET"
+    && route.path === "/v1/company-os/workflow-definitions/drafts/:id"
+    && route.capability === "company-os:workflow-definition:write"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.companyOs.some((route) => (
+    route.method === "POST"
+    && route.path === "/v1/company-os/workflow-definitions/drafts"
+    && route.capability === "company-os:workflow-definition:write"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.companyOs.some((route) => (
+    route.method === "POST"
+    && route.path === "/v1/company-os/workflow-definitions/drafts/:id/actions/preview-impact"
+    && route.capability === "company-os:workflow-definition:write"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.companyOs.some((route) => (
+    route.method === "POST"
+    && route.path === "/v1/company-os/workflow-definitions/drafts/:id/actions/activate"
+    && route.capability === "company-os:workflow-definition:activate"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.companyOs.some((route) => (
+    route.method === "POST"
+    && route.path === "/v1/company-os/workflow-definitions/:rootObjectType/:rootObjectId/actions/archive"
+    && route.capability === "company-os:workflow-definition:activate"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.companyOs.some((route) => (
+    route.method === "POST"
+    && route.path === "/v1/company-os/workflow-definitions/:rootObjectType/:rootObjectId/actions/create-rollback-draft"
+    && route.capability === "company-os:workflow-definition:write"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.companyOs.some((route) => (
+    route.method === "POST"
+    && route.path === "/v1/company-os/pipeline-runs/:id/actions/start-stage"
+    && route.capability === "company-os:pipeline-run:write"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.companyOs.some((route) => (
+    route.method === "POST"
+    && route.path === "/v1/company-os/stage-runs/:id/actions/complete"
+    && route.capability === "company-os:stage-run:write"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.companyOs.some((route) => (
+    route.method === "POST"
+    && route.path === "/v1/company-os/events/:id/actions/evaluate-automation-rules"
+    && route.capability === "company-os:automation:execute"
+  )));
+  assert.ok(connectionBody.data.adapterManifest.routes.mcp.some((route) => (
+    route.method === "GET"
+    && route.path === "/v1/mcp/manifest"
+    && route.capability === "mcp:read"
+  )));
+  assert.equal(connectionBody.data.mcpManifest.service, "companycore");
+  assert.ok(connectionBody.data.mcpManifest.tools.some((tool) => (
+    tool.name === "companycore_get_mcp_manifest"
+    && tool.path === "/v1/mcp/manifest"
+    && tool.capability === "mcp:read"
+    && tool.riskLevel === "read"
+  )));
+  assert.ok(connectionBody.data.mcpManifest.tools.some((tool) => (
+    tool.name === "companycore_post_company_os_standards"
+    && tool.path === "/v1/company-os/standards"
+    && tool.capability === "company-os:definition:write"
+    && tool.riskLevel === "write"
+    && tool.requiresApproval === false
+  )));
+  assert.ok(connectionBody.data.mcpManifest.tools.some((tool) => (
+    tool.name === "companycore_delete_company_os_standards_by_id"
+    && tool.path === "/v1/company-os/standards/:id"
+    && tool.capability === "company-os:definition:write"
+    && tool.riskLevel === "destructive"
+    && tool.requiresApproval === true
+  )));
+  assert.ok(connectionBody.data.mcpManifest.tools.some((tool) => (
+    tool.name === "companycore_get_company_os_workflow_definitions_drafts"
+    && tool.path === "/v1/company-os/workflow-definitions/drafts"
+    && tool.capability === "company-os:workflow-definition:write"
+    && tool.riskLevel === "read"
+    && tool.requiresApproval === false
+  )));
+  assert.ok(connectionBody.data.mcpManifest.tools.some((tool) => (
+    tool.name === "companycore_post_company_os_workflow_definitions_drafts"
+    && tool.path === "/v1/company-os/workflow-definitions/drafts"
+    && tool.capability === "company-os:workflow-definition:write"
+    && tool.riskLevel === "write"
+    && tool.requiresApproval === false
+  )));
+  assert.ok(connectionBody.data.mcpManifest.tools.some((tool) => (
+    tool.name === "companycore_post_company_os_workflow_definitions_drafts_by_id_actions_preview_impact"
+    && tool.path === "/v1/company-os/workflow-definitions/drafts/:id/actions/preview-impact"
+    && tool.capability === "company-os:workflow-definition:write"
+    && tool.riskLevel === "write"
+    && tool.requiresApproval === false
+  )));
+  assert.ok(connectionBody.data.mcpManifest.tools.some((tool) => (
+    tool.name === "companycore_post_company_os_workflow_definitions_drafts_by_id_actions_activate"
+    && tool.path === "/v1/company-os/workflow-definitions/drafts/:id/actions/activate"
+    && tool.capability === "company-os:workflow-definition:activate"
+    && tool.riskLevel === "write"
+    && tool.requiresApproval === true
+  )));
+  assert.ok(connectionBody.data.mcpManifest.tools.some((tool) => (
+    tool.name === "companycore_post_company_os_workflow_definitions_by_rootObjectType_by_rootObjectId_actions_archive"
+    && tool.path === "/v1/company-os/workflow-definitions/:rootObjectType/:rootObjectId/actions/archive"
+    && tool.capability === "company-os:workflow-definition:activate"
+    && tool.riskLevel === "write"
+    && tool.requiresApproval === true
+  )));
+  assert.ok(connectionBody.data.mcpManifest.tools.some((tool) => (
+    tool.name === "companycore_post_company_os_workflow_definitions_by_rootObjectType_by_rootObjectId_actions_create_rollback_draft"
+    && tool.path === "/v1/company-os/workflow-definitions/:rootObjectType/:rootObjectId/actions/create-rollback-draft"
+    && tool.capability === "company-os:workflow-definition:write"
+    && tool.riskLevel === "write"
+    && tool.requiresApproval === false
+  )));
+  assert.ok(connectionBody.data.mcpManifest.tools.some((tool) => (
+    tool.name === "companycore_post_company_os_stage_runs_by_id_actions_complete"
+    && tool.path === "/v1/company-os/stage-runs/:id/actions/complete"
+    && tool.capability === "company-os:stage-run:write"
+    && tool.requiresApproval === true
+  )));
+  assert.ok(connectionBody.data.mcpManifest.tools.some((tool) => (
+    tool.name === "companycore_post_company_os_events_by_id_actions_evaluate_automation_rules"
+    && tool.path === "/v1/company-os/events/:id/actions/evaluate-automation-rules"
+    && tool.capability === "company-os:automation:execute"
+    && tool.requiresApproval === true
   )));
   const assetsArea = await prisma.operatingArea.findUnique({
     where: {
@@ -1486,6 +3854,32 @@ test("CompanyCore v1 protected API flow", async () => {
   let googleDriveListCallCount = 0;
   globalThis.fetch = (async (input: string | URL | Request) => {
     const url = new URL(String(input));
+    if (url.origin === "https://docs.googleapis.com") {
+      assert.ok(url.pathname === "/v1/documents/drive-doc-1" || url.pathname === "/v1/documents/drive-nested-doc-1");
+      const documentId = url.pathname.split("/").at(-1);
+      return new Response(JSON.stringify({
+        body: {
+          content: [{
+            paragraph: {
+              elements: [{
+                textRun: {
+                  content: `${documentId} imported content for search.\n`
+                }
+              }]
+            }
+          }]
+        }
+      }), { status: 200 });
+    }
+
+    if (url.origin === "https://sheets.googleapis.com") {
+      assert.equal(url.pathname, "/v4/spreadsheets/drive-sheet-1/values/A1%3AZ100");
+      return new Response(JSON.stringify({
+        range: "A1:Z100",
+        values: [["Metric", "Value"], ["Imported sheet", "indexed"]]
+      }), { status: 200 });
+    }
+
     assert.equal(url.origin, "https://www.googleapis.com");
     assert.ok(url.pathname === "/drive/v3/files" || url.pathname === "/drive/v3/files/drive-folder-root");
     assert.equal(url.searchParams.get("supportsAllDrives"), "true");
@@ -1570,12 +3964,21 @@ test("CompanyCore v1 protected API flow", async () => {
     });
     assert.equal(inspectDriveImport.status, 200);
     const inspectDriveImportBody = inspectDriveImport.body as {
-      data: { itemCount: number; createdCount: number; skippedCount: number; wouldCreateCount: number };
+      data: {
+        itemCount: number;
+        createdCount: number;
+        skippedCount: number;
+        wouldCreateCount: number;
+        contentRefreshedCount: number;
+        contentSkippedCount: number;
+      };
     };
     assert.equal(inspectDriveImportBody.data.itemCount, 5);
     assert.equal(inspectDriveImportBody.data.createdCount, 0);
     assert.equal(inspectDriveImportBody.data.skippedCount, 5);
     assert.equal(inspectDriveImportBody.data.wouldCreateCount, 4);
+    assert.equal(inspectDriveImportBody.data.contentRefreshedCount, 0);
+    assert.equal(inspectDriveImportBody.data.contentSkippedCount, 5);
     assert.equal(await prisma.googleDriveFile.count({ where: { workspaceId: ownerA.workspace.id } }), 2);
 
     const mergeDriveImport = await request("/v1/integration-settings/google_drive/import", {
@@ -1587,12 +3990,21 @@ test("CompanyCore v1 protected API flow", async () => {
     });
     assert.equal(mergeDriveImport.status, 200);
     const mergeDriveImportBody = mergeDriveImport.body as {
-      data: { itemCount: number; createdCount: number; updatedCount: number; skippedCount: number };
+      data: {
+        itemCount: number;
+        createdCount: number;
+        updatedCount: number;
+        skippedCount: number;
+        contentRefreshedCount: number;
+        contentSkippedCount: number;
+      };
     };
     assert.equal(mergeDriveImportBody.data.itemCount, 5);
     assert.equal(mergeDriveImportBody.data.createdCount, 4);
     assert.equal(mergeDriveImportBody.data.updatedCount, 1);
     assert.equal(mergeDriveImportBody.data.skippedCount, 0);
+    assert.equal(mergeDriveImportBody.data.contentRefreshedCount, 3);
+    assert.equal(mergeDriveImportBody.data.contentSkippedCount, 2);
 
     const repeatDriveImport = await request("/v1/integration-settings/google_drive/import", {
       method: "POST",
@@ -1603,11 +4015,19 @@ test("CompanyCore v1 protected API flow", async () => {
     });
     assert.equal(repeatDriveImport.status, 200);
     const repeatDriveImportBody = repeatDriveImport.body as {
-      data: { createdCount: number; updatedCount: number; wouldUpdateCount: number };
+      data: {
+        createdCount: number;
+        updatedCount: number;
+        wouldUpdateCount: number;
+        contentRefreshedCount: number;
+        contentSkippedCount: number;
+      };
     };
     assert.equal(repeatDriveImportBody.data.createdCount, 0);
     assert.equal(repeatDriveImportBody.data.updatedCount, 5);
     assert.equal(repeatDriveImportBody.data.wouldUpdateCount, 5);
+    assert.equal(repeatDriveImportBody.data.contentRefreshedCount, 3);
+    assert.equal(repeatDriveImportBody.data.contentSkippedCount, 2);
   } finally {
     globalThis.fetch = originalFetchBeforeGoogleDriveImport;
   }
@@ -1634,6 +4054,29 @@ test("CompanyCore v1 protected API flow", async () => {
     }
   });
   assert.equal(importedNestedDriveDoc?.parentExternalId, "drive-nested-folder");
+  const importedDriveSheet = await prisma.googleDriveFile.findUnique({
+    where: {
+      workspaceId_provider_externalId: {
+        workspaceId: ownerA.workspace.id,
+        provider: "google_drive",
+        externalId: "drive-sheet-1"
+      }
+    }
+  });
+  assert.ok(importedDriveDoc?.id);
+  assert.ok(importedDriveSheet?.id);
+  assert.ok(importedNestedDriveDoc?.id);
+  const importedContentSnapshots = await prisma.googleDriveContentSnapshot.findMany({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      googleDriveFileId: {
+        in: [importedDriveDoc.id, importedDriveSheet.id, importedNestedDriveDoc.id]
+      }
+    }
+  });
+  assert.equal(new Set(importedContentSnapshots.map((snapshot) => snapshot.googleDriveFileId)).size, 3);
+  assert.ok(importedContentSnapshots.some((snapshot) => snapshot.extractedText?.includes("drive-doc-1 imported content for search")));
+  assert.ok(importedContentSnapshots.some((snapshot) => snapshot.extractedText?.includes("Imported sheet | indexed")));
   const importedDriveRoot = await prisma.googleDriveFile.findUnique({
     where: {
       workspaceId_provider_externalId: {

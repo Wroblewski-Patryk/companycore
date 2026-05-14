@@ -1,5 +1,3079 @@
 # Web Console V2 Task Contracts
 
+## V2WEB-ARCH-001 Human-Agent Web Architecture Map
+
+- Task Type: research/planning
+- Current Stage: analysis
+- Status: DONE
+- Owner: Planner
+- Priority: P1
+- Operation Mode: ARCHITECT
+- Deliverable For This Stage: source-backed architecture-to-web analysis for a
+  human owner console that mirrors the same Company OS and MCP command surface
+  available to agents.
+- Goal: Stop treating the current UI as finished polish and define the next
+  product direction for giving the owner visibility and safe edit/action paths
+  over the same graph agents inspect through MCP.
+- Scope:
+  - `docs/architecture/system-architecture.md`
+  - `docs/architecture/tech-stack.md`
+  - `src/auth/capabilities.ts`
+  - `src/mcp/manifest.ts`
+  - `src/modules/company-os/company-os.routes.ts`
+  - `src/modules/operating-model/operating-model.routes.ts`
+  - `web/src/main.tsx`
+  - `web/src/react-route-kit.tsx`
+  - `docs/planning/human-agent-web-architecture-map.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/delivery-map.md`
+- Implementation Plan:
+  - Inspect the approved Company OS, operating-model, MCP, and React route-kit
+    contracts.
+  - Compare what agents can discover and call through MCP with what the owner
+    can currently inspect and operate through web.
+  - Identify gaps without proposing raw CRUD over command-protected runtime
+    objects.
+  - Select the smallest next web slice that increases human/agent parity while
+    reusing existing APIs.
+- Acceptance Criteria:
+  - [x] Analysis distinguishes verified current UI slices from product-quality
+    gaps.
+  - [x] Analysis maps architecture concepts to backend/API, MCP, and web
+    responsibilities.
+  - [x] Analysis names functional gaps and a prioritized next web slice.
+  - [x] Analysis avoids proposing direct database access or raw lifecycle CRUD.
+- Definition of Done:
+  - Source-backed planning artifact exists.
+  - Canonical queue points at the next executable slice.
+  - `git diff --check` passes.
+- Validation Evidence:
+  - Source review covered architecture docs, capability manifest, MCP manifest,
+    Company OS routes, operating-model routes, and current React route-kit/UI.
+  - `docs/planning/human-agent-web-architecture-map.md` created with
+    architecture-to-web mapping, gap table, and priority plan.
+- Result Report:
+  - Created the human-agent architecture map.
+  - Selected `V2WEB-AGENT-001 Agent Tool Surface Workbench` as the next
+    smallest safe implementation slice.
+  - No runtime code, backend route, database schema, or UI behavior was changed
+    in this analysis task.
+
+## V2WEB-AGENT-001 Agent Tool Surface Workbench
+
+- Task Type: frontend
+- Current Stage: verification
+- Status: DONE
+- Owner: Frontend Builder
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: owner-visible React workbench for the same MCP
+  tool surface agents receive.
+- Goal: Let the owner inspect agent authority before handing out or using MCP
+  credentials by showing tools, route families, capabilities, risk levels, and
+  approval/supervision flags in web.
+- Scope:
+  - `src/app.ts`
+  - `web/src/react-route-kit.tsx`
+  - `web/src/main.tsx`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/delivery-map.md`
+  - `.agents/state/module-confidence-ledger.md`
+  - `.agents/state/system-health.md`
+  - `.agents/state/requirements-verification-matrix.md`
+  - `.agents/state/quality-attribute-scenarios.md`
+  - `.agents/state/risk-register.md`
+- Implementation Plan:
+  - Reuse existing `/v1/connection` and `/v1/mcp/manifest`; do not add new
+    backend routes or schema.
+  - Add typed MCP manifest/tool models and a React route-kit state hook.
+  - Add `/react-agent-tools` to the backend React route allowlist.
+  - Render manifest summary, route-family cards, tool table, risk badges,
+    `requiresApproval` markers, guardrails, and auth/transport context.
+  - Add dashboard/shell navigation entry points to the workbench.
+- Acceptance Criteria:
+  - [x] `/react-agent-tools` renders from the backend React route allowlist.
+  - [x] The workbench reads `/v1/connection` and `/v1/mcp/manifest`.
+  - [x] Tools are grouped by route family and summarized by read/write/
+    destructive/supervised categories.
+  - [x] Tool rows show name, description, route, capability, risk, and
+    `requiresApproval` state.
+  - [x] The route uses existing APIs only; no backend schema change is added.
+- Definition of Done:
+  - [x] `npm run build` passes.
+  - [x] Render proof passes for `/react-agent-tools`.
+  - [x] Interaction proof passes for route-family filtering.
+  - [x] `git diff --check` passes.
+  - [x] Source-of-truth planning/state files are updated.
+- Validation Evidence:
+  - `npm run build`: passed.
+  - Browser plugin render proof against temporary static SPA server with mock
+    `/v1/connection` and `/v1/mcp/manifest`: passed.
+  - Render markers found: `MCP tools visible to agents`, `requires approval`,
+    `destructive`,
+    `companycore_post_company_os_stage_runs_by_id_actions_complete`, and
+    `All route families`.
+  - Interaction proof: selected the `company-os` route family; the stage-run
+    MCP tool remained visible and the project delete tool was hidden.
+  - Console health: no relevant browser errors or warnings in the proof tab.
+- Result Report:
+  - Added `McpManifest`, `McpTool`, and `AgentToolSurfaceState` types plus
+    `loadMcpManifest` and `useAgentToolSurfaceState` in the React route kit.
+  - Added `/react-agent-tools` workbench with summary metrics, route-family
+    cards, tool catalog table, guardrails, and current auth/transport context.
+  - Added `/react-agent-tools` to the backend React route allowlist and to
+    React shell/dashboard module navigation.
+  - No new backend API, database schema, or MCP bridge behavior was added.
+  - Next step: build the Company OS correlation timeline so event/audit/
+    approval/stage evidence reads as one human chain.
+
+## V2WEB-AGENT-002 Company OS Correlation Timeline
+
+- Task Type: frontend
+- Current Stage: verification
+- Status: DONE
+- Owner: Frontend Builder
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: human-readable Company OS evidence chain in the
+  cockpit, built from existing event and audit correlation data.
+- Goal: Let the owner inspect one correlated Company OS action chain without
+  jumping between recent event and audit tables.
+- Scope:
+  - `web/src/react-route-kit.tsx`
+  - `web/src/main.tsx`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/delivery-map.md`
+  - `.agents/state/module-confidence-ledger.md`
+  - `.agents/state/system-health.md`
+  - `.agents/state/requirements-verification-matrix.md`
+  - `.agents/state/quality-attribute-scenarios.md`
+  - `.agents/state/risk-register.md`
+  - `docs/planning/mvp-next-commits.md`
+- Implementation Plan:
+  - Reuse existing `/v1/company-os` recent `events` and `auditLogs`.
+  - Add typed correlation/resource fields to the React Company OS record type.
+  - Build correlation ID options from recent event/audit evidence.
+  - Render event and audit records in timestamp order with actor, resource,
+    kind, and safe payload preview.
+  - Keep this client-composed slice no-schema and no-new-route.
+- Acceptance Criteria:
+  - [x] Company OS cockpit shows a correlation timeline when recent evidence
+    has a shared `correlationId`.
+  - [x] Timeline includes both events and audit logs in timestamp order.
+  - [x] Timeline exposes actor, resource, record kind, timestamp, and payload
+    preview.
+  - [x] Empty/no-correlation state is explicit.
+  - [x] No backend route or database schema is added.
+- Definition of Done:
+  - [x] `npm run build` passes.
+  - [x] Render proof passes for `/react-company-os` with correlated evidence.
+  - [x] `git diff --check` passes.
+  - [x] Source-of-truth planning/state files are updated.
+- Validation Evidence:
+  - `npm run build`: passed.
+  - Render proof with temporary static SPA server and mock `/v1/company-os`
+    passed using Playwright fallback after the in-app Browser panel reported
+    no active browser pane.
+  - Proof markers found: `One evidence chain`, `corr-render-001`,
+    `stage_completed`, `stage_run.completed`, and `Evidence payload`.
+  - Console health: no relevant Playwright page errors or warnings.
+- Result Report:
+  - Added correlation/resource fields to `CompanyOsRecord`.
+  - Added `CompanyOsCorrelationTimeline` to `/react-company-os`.
+  - Timeline groups recent events and audit logs by `correlationId`, lets the
+    owner select a chain, and displays ordered event/audit evidence with
+    payload details.
+  - No backend route, database schema, or MCP behavior changed.
+
+## V2WEB-AGENT-003 Operating Graph Detail
+
+- Task Type: frontend
+- Current Stage: verification
+- Status: DONE
+- Owner: Frontend Builder
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: owner-readable operating graph detail inside
+  `/react-company-os`, composed from existing connection and Company OS reads.
+- Goal: Connect operating areas, provider tables, Company OS resources,
+  policies, risks, automations, and recent runs in one cockpit section without
+  adding backend/schema scope.
+- Scope:
+  - `web/src/react-route-kit.tsx`
+  - `web/src/main.tsx`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/delivery-map.md`
+  - `.agents/state/module-confidence-ledger.md`
+  - `.agents/state/system-health.md`
+  - `.agents/state/requirements-verification-matrix.md`
+  - `.agents/state/quality-attribute-scenarios.md`
+  - `.agents/state/risk-register.md`
+  - `docs/planning/mvp-next-commits.md`
+- Implementation Plan:
+  - Reuse existing `/v1/connection`, `/v1/company-os`, and
+    `/v1/company-os/:collection` reads.
+  - Extend the existing Company OS agent context loader with `resources` and
+    `risks`.
+  - Add an operating graph detail panel to `/react-company-os`.
+  - Show selected operating-area tables, provider table paths, resource links,
+    policies, risks, automation rules, and recent runtime nodes where existing
+    IDs and included relations allow it.
+  - Keep edits out of scope; no raw lifecycle CRUD or new backend contract.
+- Acceptance Criteria:
+  - [x] `/react-company-os` renders an `Operating graph detail` section.
+  - [x] The section shows selected operating-area tables and provider-owned
+    table paths from `/v1/connection`.
+  - [x] The section shows Company OS resources, policies, risks, automation
+    rules, and recent runs from existing Company OS collection reads.
+  - [x] The section labels known process, pipeline, stage, provider, resource,
+    or correlation relationships when records include them.
+  - [x] No backend route, schema, or lifecycle command behavior is changed.
+- Definition of Done:
+  - [x] `npm run build` passes.
+  - [x] Render proof passes for `/react-company-os` with graph markers.
+  - [x] `git diff --check` passes.
+  - [x] Source-of-truth planning/state files are updated.
+- Validation Evidence:
+  - `npm run build`: passed.
+  - One-process Node mock server plus Playwright render proof passed for
+    `/react-company-os`.
+  - Proof markers found: `Operating graph detail`, `Growth`, `ClickUp Tasks`,
+    `ClickUp Growth list`, `Supervised command policy`,
+    `Unreviewed automation execution`, `Evidence follow-up automation`,
+    `Agent web proof run`, and `corr-graph-001`.
+  - Console health: no relevant Playwright page errors or warnings.
+- Result Report:
+  - Added resource and risk records to the Company OS agent context loader.
+  - Added `CompanyOsOperatingGraphDetail` to `/react-company-os`.
+  - The panel now gives the owner one graph-oriented read of area/table,
+    provider, resource, guardrail, automation, runtime, and correlation context.
+  - No backend route, database schema, MCP behavior, or command behavior
+    changed.
+
+## V2WEB-AGENT-004 Workflow-Grade Command Panels
+
+- Task Type: frontend
+- Current Stage: verification
+- Status: DONE
+- Owner: Frontend Builder
+- Priority: P1
+- Operation Mode: ARCHITECT
+- Deliverable For This Stage: stronger owner-facing command context for
+  existing approval, stage lifecycle, and automation evaluator panels in
+  `/react-company-os`.
+- Goal: Make command execution less opaque by showing prerequisites, expected
+  result, recovery guidance, and proposal/effect evidence before or immediately
+  after owner actions.
+- Scope:
+  - `web/src/main.tsx`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/delivery-map.md`
+  - `.agents/state/module-confidence-ledger.md`
+  - `.agents/state/system-health.md`
+  - `.agents/state/requirements-verification-matrix.md`
+  - `.agents/state/quality-attribute-scenarios.md`
+  - `.agents/state/risk-register.md`
+  - `docs/planning/mvp-next-commits.md`
+- Implementation Plan:
+  - Reuse existing command routes; do not add backend routes, schema, or raw
+    runtime CRUD.
+  - Add reusable command preview cards for approval, stage lifecycle, and
+    automation context.
+  - Show selected prerequisites, expected result, and recovery guidance near
+    command forms.
+  - Expand automation result rendering with returned proposals, action kind,
+    approval requirement, risk, and evidence targets.
+  - Preserve local action feedback and existing command submit behavior.
+- Acceptance Criteria:
+  - [x] `/react-company-os` shows command readiness preview cards.
+  - [x] Approval, stage, and automation command areas show expected result and
+    recovery guidance.
+  - [x] Automation evaluation result keeps returned proposal/effect evidence
+    visible after dry-run.
+  - [x] No backend route, schema, MCP behavior, or lifecycle command behavior
+    changes.
+- Definition of Done:
+  - [x] `npm run build` passes.
+  - [x] Render proof passes for command preview markers.
+  - [x] Automation interaction proof passes for proposal/effect result output.
+  - [x] `git diff --check` passes.
+  - [x] Source-of-truth planning/state files are updated.
+- Validation Evidence:
+  - `npm run build`: passed.
+  - One-process Node mock server plus Playwright render/interation proof
+    passed for `/react-company-os`.
+  - Proof verified the page renders command readiness preview content, clicks
+    the automation `Evaluate` button, sends the expected POST to
+    `/v1/company-os/events/:id/actions/evaluate-automation-rules`, and then
+    renders `Returned automation actions`, `request_approval`, and
+    `Evidence target` with no relevant page console errors.
+  - `git diff --check`: passed with LF/CRLF warnings only.
+- Result Report:
+  - Added reusable command preview cards with prerequisite, expected-result,
+    and recovery-guidance sections.
+  - Added approval, stage lifecycle, and automation preview context above the
+    existing command forms.
+  - Expanded automation result UI with returned proposals, action kind,
+    approval requirement, risk, emitted events, and audit evidence targets.
+  - Fixed the automation dry-run UX so the returned proposal result remains
+    visible instead of being reset by an immediate cockpit refresh.
+  - No backend route, database schema, MCP behavior, or command behavior
+    changed.
+
+## V2WEB-AGENT-005 Definition Editing Contract Decision
+
+- Task Type: architecture/product
+- Current Stage: verification
+- Status: DONE
+- Owner: Planner
+- Priority: P1
+- Operation Mode: TESTER
+- Deliverable For This Stage: architecture decision that blocks casual raw CRUD
+  for Company OS definition objects and selects the first safe editor class.
+- Goal: Decide which Company OS definitions can gain scoped write contracts,
+  command routes, versioning, or approval before any process, pipeline,
+  procedure, policy, or automation-rule editor is built.
+- Scope:
+  - `docs/architecture/company-os-definition-editing-contract.md`
+  - `docs/architecture/README.md`
+  - `docs/architecture/architecture-source-of-truth.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/delivery-map.md`
+  - `.agents/state/module-confidence-ledger.md`
+  - `.agents/state/system-health.md`
+  - `.agents/state/requirements-verification-matrix.md`
+  - `.agents/state/quality-attribute-scenarios.md`
+  - `.agents/state/risk-register.md`
+  - `docs/planning/mvp-next-commits.md`
+- Implementation Plan:
+  - Review current Company OS definition models, read APIs, runtime command
+    boundaries, and architecture direction.
+  - Classify definition objects by write risk and required route shape.
+  - Document what can use scoped CRUD, what requires command routes, what needs
+    versioning/approval, and what must never be raw-edited.
+  - Select the next safe implementation slice.
+- Acceptance Criteria:
+  - [x] Architecture doc distinguishes definition objects from runtime evidence.
+  - [x] Architecture doc classifies write shapes for roles/standards,
+    workflow definitions, tools/capabilities, governance, and automation.
+  - [x] Architecture doc forbids raw runtime evidence editing.
+  - [x] Architecture doc selects the first safe editor class.
+  - [x] Canonical queue points at the next implementation slice.
+- Definition of Done:
+  - [x] Architecture source-of-truth files reference the new contract.
+  - [x] `git diff --check` passes.
+  - [x] Source-of-truth planning/state files are updated.
+- Validation Evidence:
+  - Source review covered Prisma Company OS definition/runtime models,
+    `/v1/company-os` read-only collection routes, existing lifecycle command
+    routes, `docs/API.md`, and `docs/architecture/system-architecture.md`.
+  - Added `docs/architecture/company-os-definition-editing-contract.md`.
+  - `git diff --check`: passed with LF/CRLF warnings only.
+- Result Report:
+  - Classified Company OS definition editing into six classes:
+    registry-like definitions, workflow definitions, execution tool
+    definitions, governance definitions, automation definitions, and runtime
+    evidence.
+  - Selected a narrow Class A editor as the first allowed implementation path,
+    such as `company_roles` or `standards`, after backend audited scoped write
+    routes exist.
+  - Confirmed workflow, governance, and automation editors need command routes,
+    approval/versioning, and impact/dry-run evidence before web editing.
+
+## V2WEB-AGENT-006 Class A Definition Editor Backend Contract
+
+- Task Type: backend/API
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: first audited scoped write contract for a
+  low-risk Class A Company OS definition object before any web editor.
+- Goal: Add a safe `standards` definition write surface that can be reflected
+  in web and MCP without opening broad raw CRUD over Company OS definitions.
+- Scope:
+  - `prisma/schema.prisma`
+  - `prisma/migrations/202605141_company_os_standard_definition_status/migration.sql`
+  - `src/auth/capabilities.ts`
+  - `src/mcp/manifest.ts`
+  - `src/modules/company-os/company-os.routes.ts`
+  - `src/tests/api.test.ts`
+  - `docs/API.md`
+  - `docs/DATABASE.md`
+  - `docs/architecture/company-os-definition-editing-contract.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/delivery-map.md`
+  - `.agents/state/module-confidence-ledger.md`
+  - `.agents/state/system-health.md`
+  - `.agents/state/requirements-verification-matrix.md`
+  - `.agents/state/quality-attribute-scenarios.md`
+  - `.agents/state/risk-register.md`
+  - `docs/planning/mvp-next-commits.md`
+- Implementation Plan:
+  - Select `standards` as the first Class A object because it is lower-risk
+    than role/permission editing.
+  - Add a `status` field and migration so archive behavior is soft and
+    relation-safe.
+  - Add `company-os:definition:write` and MCP/connection manifest routes.
+  - Add audited create, update, and archive routes for standards with
+    workspace-scoped relation checks.
+  - Cover owner success, cross-workspace denial, scoped service denial, audit
+    evidence, event evidence, and MCP manifest exposure in integration tests.
+- Acceptance Criteria:
+  - [x] Standards can be created, updated, read, and archived by an owner.
+  - [x] Optional owner role and checklist links are workspace-scoped.
+  - [x] Cross-workspace updates return `404`.
+  - [x] Scoped read-only service keys receive `403` for definition writes.
+  - [x] MCP/connection manifests expose the new capability only to keys that
+    have it, with destructive archive marked as requiring approval.
+  - [x] Runtime evidence and higher-risk definition objects remain outside
+    this editor contract.
+- Definition of Done:
+  - [x] `npx prisma generate` passes.
+  - [x] `npm run build` passes.
+  - [x] `npm test` passes against a disposable PostgreSQL database.
+  - [x] Test database/container cleanup is complete.
+  - [x] Source-of-truth planning, architecture, API, database, and state files
+    are updated.
+- Validation Evidence:
+  - `npx prisma generate`: passed.
+  - `npm run build`: passed.
+  - Host `npm test` without env failed before tests because this shell had no
+    `DATABASE_URL`; rerun with disposable PostgreSQL succeeded.
+  - Disposable PostgreSQL proof:
+    `DATABASE_URL=postgresql://companycore:companycore@localhost:55432/companycore_test?schema=public npm test`
+    passed, applying migration
+    `202605141_company_os_standard_definition_status` and passing
+    `dist/tests/api.test.js`.
+  - Cleanup: `docker rm -f companycore-test-postgres-v2web006` completed and
+    follow-up `docker ps -a --filter name=companycore-test-postgres-v2web006`
+    returned no container.
+  - Resource hygiene: final check found older route-smoke
+    `chrome-headless-shell` processes from earlier browser validation. Parent
+    `node scripts/route-smoke.mjs` processes and browser children were
+    terminated/attempted; remaining stale PIDs reported "no running task
+    instance" via `taskkill`. The pitfall is recorded in
+    `.codex/context/LEARNING_JOURNAL.md`.
+- Result Report:
+  - Added `status OperatingStatus @default(active)` to `Standard` plus the
+    production migration for soft archive behavior.
+  - Added `company-os:definition:write` and manifest entries for
+    `POST/PATCH/DELETE /v1/company-os/standards`.
+  - Added audited standard create/update/archive routes that emit
+    `standard_created`, `standard_updated`, and `standard_archived` events and
+    append corresponding audit logs with correlation IDs.
+  - Extended integration tests for owner success, readback, update, archive,
+    cross-workspace denial, read-only profile denial, scoped key denial, and
+    MCP manifest risk/approval metadata.
+  - Updated API, database, and architecture documentation so the implemented
+    backend contract is recoverable from source-of-truth files.
+
+## V2WEB-AGENT-007 Standards Definition Editor Web Surface
+
+- Task Type: frontend/backend-integration
+- Current Stage: verification
+- Status: DONE
+- Owner: Frontend Builder
+- Priority: P1
+- Operation Mode: ARCHITECT
+- Deliverable For This Stage: narrow owner web editor for the audited
+  `standards` definition write contract, with clean render proof closed by
+  V2WEB-AGENT-007R.
+- Goal: Reflect the first safe Class A Company OS definition editor in the web
+  console without opening broad raw CRUD over workflow, governance,
+  automation, approval, event, or audit-log objects.
+- Scope:
+  - `web/src/react-route-kit.tsx`
+  - `web/src/main.tsx`
+  - `public/react/assets/*`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/delivery-map.md`
+  - `.agents/state/module-confidence-ledger.md`
+  - `.agents/state/system-health.md`
+  - `.agents/state/requirements-verification-matrix.md`
+  - `.agents/state/quality-attribute-scenarios.md`
+  - `.agents/state/risk-register.md`
+  - `.codex/context/LEARNING_JOURNAL.md`
+  - `docs/planning/mvp-next-commits.md`
+- Implementation Plan:
+  - Add typed route-kit client functions for creating, updating, and
+    archiving standards through the audited backend routes.
+  - Extend Company OS records with standard relation and evidence fields used
+    by the editor.
+  - Add a `CompanyOsStandardsEditor` panel to `/react-company-os` that reuses
+    existing shell, table, notice, badge, and form patterns.
+  - Show loading, empty, error, success, archive, and capability-denied states
+    locally in the standards panel.
+  - Keep the panel scoped to `standards` only; do not add raw editors for
+    roles, workflows, governance, automation, runtime evidence, events, or
+    audit logs.
+- Acceptance Criteria:
+  - [x] `/react-company-os` contains a standards definition editor panel.
+  - [x] The panel reads `standards`, `company-roles`, and
+    `checklist-templates` through existing Company OS collection reads.
+  - [x] Owner sessions with `company-os:definition:write` can submit create,
+    update, and archive requests through the audited route-kit functions.
+  - [x] Sessions without `company-os:definition:write` see a local
+    capability-denied message and disabled editor controls.
+  - [x] The form exposes standard name, category, status, owner role,
+    checklist, description, and validation method.
+  - [x] Workflow, governance, automation, runtime evidence, events, and audit
+    logs remain read-only or command-only.
+  - [x] Rendered browser proof confirms the panel and create interaction in a
+    live route.
+- Definition of Done:
+  - [x] `npm run build` passes.
+  - [x] Static bundle/source marker check finds the new editor labels in
+    source and generated React assets.
+  - [x] `git diff --check` passes.
+  - [x] Browser proof passes without leaving validation browser, server, or
+    temporary profile resources behind.
+  - [x] Source-of-truth planning and state files record the partial
+    verification honestly.
+- Validation Evidence:
+  - `npm run build`: passed after adding the standards editor and after the
+    `Standard name` accessibility label refinement.
+  - Static marker check found `Definition editor`, `Audited Class A editor`,
+    `Create standard`, `Save standard`, and
+    `company-os:definition:write` in source/generated React output.
+  - `git diff --check`: passed with LF/CRLF warnings only.
+  - Playwright/Chrome render proof attempts reached the new route markers in
+    at least one Chromium run, but did not produce a clean, bounded PASS:
+    Firefox was not installed, system Chrome/Playwright runs timed out, and
+    one earlier isolated Chrome profile required cleanup. This is now split
+    into V2WEB-AGENT-007R rather than being hidden inside a DONE status.
+  - Follow-up Chrome dump-DOM proof with injected session also timed out.
+    Validation-specific Chrome child PIDs tied to
+    `%TEMP%\cc-standards-dump-U0vPUH` were terminated/attempted; Windows
+    reported two renderer PIDs as no running task instances, and the temporary
+    profile directory was removed successfully afterward.
+  - V2WEB-AGENT-007R later passed with Playwright Chromium after launching
+    with `--disable-crash-reporter` and
+    `--disable-features=Crashpad,CalculateNativeWinOcclusion`: rendered
+    `Definition editor`, `Audited Class A editor`, `Proof Standard`,
+    `Create standard`, `Standard created`, and `Render Proof Standard`; the
+    mocked `POST /v1/company-os/standards` was called; relevant browser console
+    issues were `0`.
+- Result Report:
+  - Added route-kit typed API clients:
+    `createCompanyOsStandard`, `updateCompanyOsStandard`, and
+    `archiveCompanyOsStandard`.
+  - Added `CompanyOsStandardsEditor` to the Company OS cockpit after the
+    operating graph detail, using the verified backend routes from
+    V2WEB-AGENT-006.
+  - Added local notices for capability denial and save/archive outcomes.
+  - Added form controls and table actions for standard definition creation,
+    update, and soft archive.
+  - Kept the editor scoped to Class A `standards`; higher-risk definition and
+    runtime evidence objects remain outside the write surface.
+
+## V2WEB-AGENT-007R Standards Editor Render Proof
+
+- Task Type: QA/frontend
+- Current Stage: verification
+- Status: DONE
+- Owner: QA/Test
+- Priority: P1
+- Operation Mode: TESTER
+- Deliverable For This Stage: clean rendered route proof for the standards
+  editor, including resource cleanup evidence.
+- Goal: Close the remaining verification gap for V2WEB-AGENT-007 before the
+  standards editor can move to DONE.
+- Scope:
+  - `/react-company-os`
+  - `web/src/main.tsx`
+  - generated `public/react/assets/*`
+  - local browser/server validation resources
+  - `.agents/state/system-health.md`
+  - `.agents/state/module-confidence-ledger.md`
+  - `.agents/state/requirements-verification-matrix.md`
+  - `.codex/context/TASK_BOARD.md`
+- Implementation Plan:
+  - Use a bounded mock `/v1` server or route-smoke path that serves the built
+    React bundle and returns owner data with
+    `company-os:definition:write`.
+  - Verify desktop render markers for `Definition editor`,
+    `Audited Class A editor`, `Proof Standard`, and `Create standard`.
+  - Verify one create interaction renders a local success notice and the
+    returned standard row.
+  - Re-check that no validation Chrome/Chromium/Playwright server or temporary
+    browser profile remains.
+- Acceptance Criteria:
+  - [x] Render proof passes for `/react-company-os`.
+  - [x] Create interaction proof passes through the mocked
+    `POST /v1/company-os/standards` route.
+  - [x] No relevant browser console errors are emitted.
+  - [x] Validation resources are closed and cleanup evidence is recorded.
+- Definition of Done:
+  - [x] V2WEB-AGENT-007 can be moved from `IMPLEMENTED_NOT_VERIFIED` to
+    `DONE`.
+  - [x] System health, module confidence, requirement matrix, and task board
+    are updated with evidence.
+- Result Report:
+  - Render proof passed for `/react-company-os` with a bounded mock `/v1`
+    server and Playwright Chromium.
+  - Verified desktop markers: `Definition editor`, `Audited Class A editor`,
+    `Proof Standard`, `Create standard`, `Standard created`, and
+    `Render Proof Standard`.
+  - Verified create interaction through mocked
+    `POST /v1/company-os/standards`; the returned standard row and success
+    notice remained visible.
+  - Relevant browser console issues: `0`.
+  - Cleanup proof found no matching validation Chrome/Node processes and no
+    validation-specific temp profiles/artifacts after the run.
+
+## V2WEB-AGENT-008 Versioned Workflow Definition Command Contract
+
+- Task Type: architecture/backend-design
+- Current Stage: verification
+- Status: DONE
+- Owner: Planner
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: canonical architecture contract for workflow
+  definition command/version/impact-preview behavior before any broader
+  definition editor.
+- Goal: Prevent process, pipeline, stage, procedure, and procedure-step editors
+  from becoming raw CRUD over active agent behavior.
+- Scope:
+  - `docs/architecture/company-os-workflow-definition-command-contract.md`
+  - `docs/architecture/company-os-definition-editing-contract.md`
+  - `docs/architecture/README.md`
+  - `docs/architecture/architecture-source-of-truth.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/delivery-map.md`
+  - `.agents/state/module-confidence-ledger.md`
+  - `.agents/state/system-health.md`
+  - `.agents/state/requirements-verification-matrix.md`
+  - `.agents/state/quality-attribute-scenarios.md`
+  - `.agents/state/risk-register.md`
+  - `.agents/core/project-memory-index.md`
+  - `docs/planning/mvp-next-commits.md`
+- Implementation Plan:
+  - Inspect current workflow definition models and Company OS read/command
+    routes.
+  - Define the future command surface for workflow definition drafts, impact
+    preview, approval request, activation, archive, and rollback.
+  - Define draft shape, activation rules, impact preview requirements, data
+    model direction, MCP exposure, and web editor gates.
+  - Link the new contract from architecture source-of-truth docs.
+  - Update planning and state ledgers with the completed decision.
+- Acceptance Criteria:
+  - [x] Contract explicitly covers `processes`, `pipelines`,
+    `pipeline_stages`, `procedures`, and `procedure_steps`.
+  - [x] Contract blocks generic raw CRUD over active workflow definitions.
+  - [x] Contract defines draft/update, impact preview, approval, activation,
+    archive, and rollback command families.
+  - [x] Contract defines approval/version/evidence/MCP expectations.
+  - [x] Architecture indexes link to the new source-of-truth file.
+- Definition of Done:
+  - [x] Source review is complete.
+  - [x] Architecture docs are updated.
+  - [x] Planning and state files are synchronized.
+  - [x] `git diff --check` passes.
+- Validation Evidence:
+  - Source review covered Prisma workflow definition models, Company OS
+    collection reads, existing lifecycle commands, API docs, and the definition
+    editing contract.
+  - Added
+    `docs/architecture/company-os-workflow-definition-command-contract.md`.
+  - Linked the contract from architecture reading order and required source of
+    truth files.
+- Result Report:
+  - Published the workflow definition command contract.
+  - Chose command grouping around workflow definition drafts instead of raw
+    per-table CRUD.
+  - Required impact preview before activation and approval for active
+    production-impacting changes.
+  - Required activation to create a new version and preserve runtime evidence.
+  - Kept workflow definition editors blocked until backend command routes and
+    tests exist.
+
+## V2WEB-AGENT-009 Workflow Definition Draft Backend Contract
+
+- Task Type: backend/API
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder
+- Priority: P1
+- Operation Mode: ARCHITECT
+- Deliverable For This Stage: audited backend draft and impact-preview command
+  slice for workflow definitions, with activation still blocked.
+- Goal: Let owners and supervised agents prepare workflow definition changes
+  safely before any process, pipeline, or procedure editor can mutate active
+  behavior.
+- Scope:
+  - `prisma/migrations/202605142_workflow_definition_drafts/migration.sql`
+  - `src/modules/company-os/workflow-definition-drafts.routes.ts`
+  - `src/modules/company-os/company-os.routes.ts`
+  - `src/auth/capabilities.ts`
+  - `src/auth/agent-key-profiles.ts`
+  - `src/mcp/manifest.ts`
+  - `src/tests/api.test.ts`
+  - `docs/API.md`
+  - `docs/DATABASE.md`
+  - `package.json`
+  - canonical planning and state files.
+- Implementation Plan:
+  - Add a workspace-scoped workflow definition draft table and root type enum.
+  - Add a dedicated capability and MCP manifest route exposure.
+  - Implement create, update, and impact-preview routes for process,
+    pipeline, and procedure roots.
+  - Preserve idempotency, cross-workspace denial, audit/event evidence, and
+    read-only scoped denial.
+  - Keep activation, rollback, and web editing out of this slice.
+- Acceptance Criteria:
+  - [x] Draft create stores root, version, change set, risk, actor, source,
+    and idempotency evidence.
+  - [x] Repeated create with the same workspace idempotency key returns the
+    original draft.
+  - [x] Draft update is workspace-scoped and audited.
+  - [x] Impact preview returns affected counts, changed fields, approval
+    requirement, approval reasons, duplicate-name risk, and target version.
+  - [x] Read-only profile/scoped keys cannot create or preview drafts.
+  - [x] MCP and connection manifests expose the write tools only when the
+    caller has `company-os:workflow-definition:write`.
+- Definition of Done:
+  - [x] Migration is applied in integration validation.
+  - [x] Backend build passes.
+  - [x] API integration test passes against disposable PostgreSQL.
+  - [x] API/database docs and source-of-truth ledgers are updated.
+  - [x] Temporary validation container and TypeScript trace artifacts are
+    removed.
+- Validation Evidence:
+  - `npm run build` passed.
+  - `npm test` passed against disposable PostgreSQL
+    `companycore-test-postgres-v2web009` on `localhost:55433`; migrations
+    applied through `202605142_workflow_definition_drafts`.
+  - The disposable validation container was removed.
+- Result Report:
+  - Added `workflow_definition_drafts` as the draft ledger for future
+    workflow definition editing.
+  - Added audited draft create/update/impact-preview command routes.
+  - Added `company-os:workflow-definition:write` to capability and MCP
+    manifests, including read-only denial coverage.
+  - Hardened server build by running TypeScript with an explicit Node stack
+    size because the expanded Prisma/Express/test graph exceeded the default
+    Windows process stack.
+  - Activation and web editing remain queued as V2WEB-AGENT-010.
+
+## V2WEB-AGENT-010 Workflow Definition Activation Backend Contract
+
+- Task Type: backend/architecture
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: approval-aware procedure activation command
+  before mutating broader workflow definitions.
+- Goal: Activate approved workflow definition drafts without raw CRUD,
+  preserving version evidence, rollback metadata, runtime safety, and
+  audit/event trails.
+- Scope:
+  - `docs/architecture/company-os-workflow-definition-command-contract.md`
+  - `src/modules/company-os/workflow-definition-drafts.routes.ts`
+  - Prisma workflow definition tables and migrations if schema support is
+    required.
+  - `src/tests/api.test.ts`
+  - `docs/API.md`
+  - `docs/DATABASE.md`
+- Implementation Plan:
+  - Inspect whether `processes`, `pipelines`, and `procedures` can support
+    true activated versions with their current unique constraints and
+    relations.
+  - If the current schema cannot represent activation safely, stop in
+    decision mode and document valid migration options.
+  - If safe, add activation route, approval validation, version mutation,
+    rollback metadata, audit/event evidence, MCP manifest exposure, and
+    integration tests.
+- Acceptance Criteria:
+  - [x] Activation refuses drafts without required approval evidence.
+  - [x] Activation does not mutate active workflow definitions unless the
+    versioning model is explicit and tested.
+  - [x] Activation emits audit/event evidence and records rollback context.
+  - [x] Cross-workspace and read-only callers fail closed.
+  - [x] Integration validation proves success and denial paths.
+- Definition of Done:
+  - [x] Architecture gap is resolved or explicitly escalated.
+  - [x] Backend implementation and tests pass, if implementation is approved.
+  - [x] API/database docs and canonical state are updated.
+- Result Report:
+  - Implemented activation for `procedure` drafts only in this initial slice
+    because procedures already support `workspaceId + name + version`.
+  - Process and pipeline activation initially failed closed until their
+    versioning schema changed; V2WEB-AGENT-011 later superseded that blocker
+    with explicit `workspaceId + name + version` root uniqueness.
+  - Activation validates approved workflow-draft approval, stale base version,
+    workspace-scoped relations, and step order.
+  - Activation deprecates the previous procedure, creates a new active
+    procedure version, copies or applies steps, marks the draft active, and
+    emits `workflow_definition_draft_activated` plus audit evidence with
+    rollback candidate context.
+  - `npm run build`, `npm test` against disposable PostgreSQL on
+    `localhost:55434`, and `git diff --check` passed. The disposable
+    validation container was removed.
+
+## V2WEB-AGENT-011 Process And Pipeline Workflow Versioning Migration Decision
+
+- Task Type: backend/architecture
+- Current Stage: verification
+- Status: DONE
+- Owner: Planner / Backend Builder
+- Priority: P1
+- Operation Mode: ARCHITECT
+- Deliverable For This Stage: process and pipeline versioning migration plus
+  activation support.
+- Goal: Remove the remaining activation blocker without weakening the
+  workflow definition command contract.
+- Scope:
+  - `prisma/schema.prisma`
+  - `prisma/migrations/*`
+  - `docs/architecture/company-os-workflow-definition-command-contract.md`
+  - `src/modules/company-os/workflow-definition-drafts.routes.ts`
+  - `src/tests/api.test.ts`
+  - API/database docs and canonical state files.
+- Implementation Plan:
+  - Inspect current `processes` and `pipelines` uniqueness and relation
+    constraints.
+  - Choose between unique constraint migration, dedicated version tables, or
+    keeping those root types blocked until a larger model migration.
+  - If implementation is safe, add migration, activation support, and tests.
+  - If implementation is not safe in this slice, record the decision and keep
+    fail-closed behavior.
+- Acceptance Criteria:
+  - [x] Process and pipeline activation path is either implemented with tests
+    or explicitly deferred with a source-of-truth reason.
+  - [x] No route performs raw mutation of active workflow definitions.
+  - [x] Runtime evidence preservation and rollback context are covered.
+- Definition of Done:
+  - [x] Decision is recorded in architecture/state docs.
+  - [x] If code changes, build and integration tests pass.
+  - [x] Canonical queue advances to the next safe slice.
+- Result Report:
+  - Added migration `202605143_workflow_root_version_uniqueness` and updated
+    Prisma schema so `processes` and `pipelines` use
+    `workspaceId + name + version` uniqueness.
+  - Extended workflow activation to `process` and `pipeline` drafts in
+    addition to `procedure` drafts.
+  - Pipeline activation deprecates the previous pipeline, creates a new active
+    version, and copies or applies pipeline stages.
+  - Process activation deprecates the previous process and creates a new
+    active process version.
+  - Integration tests now cover process, pipeline, and procedure activation,
+    required approval, stale-safe versioning behavior, MCP metadata, and
+    audit/event evidence.
+  - `npx prisma generate`, `npm run build`, `npm test` against disposable
+    PostgreSQL on `localhost:55436`, and `git diff --check` passed; the
+    disposable container was removed.
+
+## V2WEB-AGENT-012 Workflow Definition Draft Web Surface
+
+- Task Type: frontend/backend-integration
+- Current Stage: verification
+- Status: DONE
+- Owner: Frontend Builder
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: guarded owner web surface for workflow drafts,
+  impact preview, and activation status without broad raw editing.
+- Goal: Let the owner inspect and operate the workflow definition command
+  surface from `/react-company-os` with the same safeguards as MCP/API.
+- Scope:
+  - `web/src/main.tsx`
+  - `web/src/react-route-kit.tsx`
+  - `docs/ux/*` where reusable patterns are affected
+  - API/state docs if frontend behavior changes user-facing contract.
+- Implementation Plan:
+  - Add typed route-kit helpers for workflow draft create, preview, and
+    activate.
+  - Add a narrow cockpit panel that starts from existing process, pipeline,
+    and procedure records and shows preview/approval/activation states.
+  - Do not expose raw editing of child stage/step fields beyond a bounded
+    draft payload.
+  - Run build and browser render/interaction proof.
+- Acceptance Criteria:
+  - [x] Owner can create a draft from an existing workflow root.
+  - [x] Owner can preview impact and see approval reasons.
+  - [x] Activation controls are gated by capability and approval requirement.
+  - [x] Empty, loading, error, success, denied, and mobile states are covered.
+  - [x] Browser proof verifies render and one command interaction.
+- Definition of Done:
+  - [x] Build passes.
+  - [x] Browser proof passes with cleanup evidence.
+  - [x] State/docs are updated.
+- Result Report:
+  - Added typed route-kit clients for workflow draft create, impact preview,
+    and activation.
+  - Added a guarded `/react-company-os` workflow command surface for process,
+    pipeline, and procedure roots.
+  - The surface creates a draft from an existing root, previews runtime impact,
+    shows approval reasons, can request approval, and disables activation when
+    the capability or approved approval ID is missing.
+  - `npm run build` passed. Real-backend Playwright proof against a disposable
+    PostgreSQL database and `http://127.0.0.1:3101/react-company-os` verified
+    desktop render, create draft, impact preview, approval-required state,
+    mobile DOM render, and zero relevant console issues.
+
+## V2WEB-AGENT-013 Workflow Draft History And Resume Decision
+
+- Task Type: architecture/frontend-decision
+- Current Stage: planning
+- Status: DONE
+- Owner: Planner / Frontend Builder
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: decision on whether draft history/readback and
+  resume should precede archive/rollback commands.
+- Goal: Decide the next safe workflow cockpit slice after the first guarded
+  draft panel.
+- Scope:
+  - `docs/architecture/company-os-workflow-definition-command-contract.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.agents/state/*`
+- Decision:
+  - Implement draft history/readback and resume before archive/rollback UI.
+  - Reason: workflow drafts can be created by web, API, or MCP agents and may
+    require approval before activation. Without readback, an owner cannot
+    resume an interrupted command flow after reload or after an agent-created
+    draft.
+  - Constraint: the cockpit resume queue should show only `status=draft`
+    records. Activated drafts remain API history, not resumable work.
+- Acceptance Criteria:
+  - [x] Decision names the operator problem.
+  - [x] Decision selects the smallest safe next slice.
+  - [x] Decision explicitly defers archive/rollback.
+- Result Report:
+  - Selected V2WEB-AGENT-014 Workflow Draft Readback And Resume Slice.
+
+## V2WEB-AGENT-014 Workflow Draft Readback And Resume Slice
+
+- Task Type: frontend/backend-integration
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder / Frontend Builder
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: workspace-scoped draft readback and web resume
+  for in-progress workflow drafts.
+- Goal: Let owners resume existing workflow drafts in `/react-company-os`
+  without broad raw editing or exposing draft payloads to read-only sessions.
+- Scope:
+  - `src/modules/company-os/workflow-definition-drafts.routes.ts`
+  - `src/auth/capabilities.ts`
+  - `src/tests/api.test.ts`
+  - `web/src/react-route-kit.tsx`
+  - `web/src/main.tsx`
+  - API/database/architecture docs and canonical state.
+- Implementation Plan:
+  - Add guarded `GET` list/detail draft routes with root type, status, and
+    limit filters.
+  - Keep draft readback under `company-os:workflow-definition:write` because
+    draft payloads include proposed change sets and preview details.
+  - Add route-kit loading and cockpit `Recent drafts` resume controls scoped
+    to `status=draft`.
+  - Prove API capability behavior and rendered resume behavior.
+- Acceptance Criteria:
+  - [x] Owner can list and read workspace workflow drafts.
+  - [x] Cross-workspace draft detail returns `404` and foreign draft list is
+    empty.
+  - [x] Read-only profile/scoped keys cannot list workflow drafts.
+  - [x] Cockpit shows resumable `draft` records and reloads a selected draft.
+  - [x] Build, API test, render proof, and cleanup pass.
+- Result Report:
+  - Added `GET /v1/company-os/workflow-definitions/drafts` and
+    `GET /v1/company-os/workflow-definitions/drafts/:id`.
+  - Added route-kit draft loader and a `Recent drafts` resume panel in the
+    workflow command surface.
+  - Fixed capability route ordering so workflow draft readback is not captured
+    by generic Company OS collection reads.
+  - `npm run build` passed; `npm test` passed against disposable PostgreSQL on
+    `localhost:55438`; Playwright proof against
+    `http://127.0.0.1:3102/react-company-os` verified draft-only history,
+    resume click, and zero relevant console issues.
+
+## V2WEB-AGENT-015 Workflow Archive And Rollback Command Decision
+
+- Task Type: architecture/backend-decision
+- Current Stage: planning
+- Status: DONE
+- Owner: Planner / Backend Builder
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: smallest safe command contract for workflow
+  archive and rollback.
+- Goal: Decide how to add recovery commands without bypassing draft preview,
+  approval, activation, audit, event, and version evidence.
+- Scope:
+  - `docs/architecture/company-os-workflow-definition-command-contract.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `.agents/state/*`
+- Decision:
+  - Implement archive and rollback as phased command routes, not raw status
+    mutation.
+  - First archive slice: explicit
+    `POST /v1/company-os/workflow-definitions/:rootObjectType/:rootObjectId/actions/archive`
+    for inactive historical versions only.
+  - First rollback slice: explicit
+    `POST /v1/company-os/workflow-definitions/:rootObjectType/:rootObjectId/actions/create-rollback-draft`
+    that creates a rollback draft from the selected historical version and then
+    relies on existing impact preview and activation.
+  - Direct active archive and direct rollback execution remain deferred until a
+    migration/replacement plan is modeled and tested.
+- Acceptance Criteria:
+  - [x] Decision names allowed and deferred recovery behavior.
+  - [x] Decision preserves preview, approval, audit/event, stale-version, and
+    MCP supervision boundaries.
+  - [x] Next implementation task is narrow and executable.
+  - [x] Runtime code is not changed in this decision task.
+- Definition of Done:
+  - [x] Architecture contract records the command shape.
+  - [x] Canonical queues point to the next implementation slice.
+  - [x] `git diff --check` passes.
+- Result Report:
+  - Selected V2WEB-AGENT-016 Workflow Historical Version Archive Backend Slice.
+  - Rollback-draft creation remains the next likely backend slice after archive.
+
+## V2WEB-AGENT-016 Workflow Historical Version Archive Backend Slice
+
+- Task Type: backend/security
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder / QA-Test
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: first workflow recovery command for inactive
+  historical root versions.
+- Goal: Allow safe archive of inactive workflow root versions without hiding
+  active production behavior or bypassing workspace, capability, audit/event,
+  idempotency, and MCP supervision boundaries.
+- Scope:
+  - `src/modules/company-os/workflow-definition-drafts.routes.ts`
+  - `src/modules/company-os/company-os.routes.ts`
+  - `src/auth/capabilities.ts`
+  - `src/tests/api.test.ts`
+  - `docs/API.md`
+  - architecture/planning/state files.
+- Implementation Plan:
+  - Add explicit archive route under
+    `/v1/company-os/workflow-definitions/:rootObjectType/:rootObjectId/actions/archive`.
+  - Require `company-os:workflow-definition:activate` through adapter manifest
+    capability matching.
+  - Block active versions, already archived versions, and inactive versions
+    with active runtime dependencies.
+  - Emit event/audit evidence and support idempotent replay by command key.
+  - Extend integration tests for owner success, fail-closed states, read-only
+    denial, and MCP manifest metadata.
+- Acceptance Criteria:
+  - [x] Safe inactive historical workflow version can be archived.
+  - [x] Active workflow root archive returns `409`.
+  - [x] Inactive workflow root with active runtime dependencies returns `409`.
+  - [x] Idempotent replay returns the original archive evidence.
+  - [x] Read-only profile/scoped keys cannot archive workflow definitions.
+  - [x] Audit/event evidence and MCP manifest metadata are verified.
+  - [x] Build/test and cleanup pass.
+- Result Report:
+  - Added `POST /v1/company-os/workflow-definitions/:rootObjectType/:rootObjectId/actions/archive`.
+  - Added `workflow_definition_version.archived` audit evidence and
+    `workflow_definition_version_archived` event evidence.
+  - `npm run build` passed.
+  - `npm test` passed against disposable PostgreSQL on `localhost:55439`.
+  - The validation container was removed after the test run.
+  - Next slice: V2WEB-AGENT-017 Workflow Rollback Draft Backend Slice.
+
+## V2WEB-AGENT-017 Workflow Rollback Draft Backend Slice
+
+- Task Type: backend/security
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder / QA-Test
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: rollback-draft creation from a historical
+  workflow root version.
+- Goal: Let owners or supervised agents prepare rollback without bypassing
+  draft preview, approval, stale-version, audit, event, idempotency, and MCP
+  boundaries.
+- Scope:
+  - `src/modules/company-os/workflow-definition-drafts.routes.ts`
+  - `src/auth/capabilities.ts`
+  - `src/tests/api.test.ts`
+  - `docs/API.md`
+  - `docs/DATABASE.md`
+  - architecture/planning/state files.
+- Implementation Plan:
+  - Add explicit rollback-draft route under
+    `/v1/company-os/workflow-definitions/:rootObjectType/:rootObjectId/actions/create-rollback-draft`.
+  - Require `company-os:workflow-definition:write`.
+  - Block active rollback sources and missing active same-name target versions.
+  - Copy source root fields and children into `changeSet` with
+    `kind = rollback_to_version`.
+  - Generate impact preview and create a normal `workflow_definition_drafts`
+    row against the current active root.
+  - Extend integration tests for owner success, idempotency, fail-closed
+    states, read-only denial, audit/event evidence, and MCP manifest metadata.
+- Acceptance Criteria:
+  - [x] Historical root can create a rollback draft against the current active
+    same-name root.
+  - [x] Active source root returns `409`.
+  - [x] Repeated idempotency key returns the existing draft.
+  - [x] Read-only profile/scoped keys cannot create rollback drafts.
+  - [x] Audit/event evidence and MCP manifest metadata are verified.
+  - [x] Build/test and cleanup pass.
+- Result Report:
+  - Added `POST /v1/company-os/workflow-definitions/:rootObjectType/:rootObjectId/actions/create-rollback-draft`.
+  - Rollback drafts now store `changeSet.kind = rollback_to_version` and source
+    root/version metadata.
+  - `npm run build` passed.
+  - `npm test` passed against disposable PostgreSQL on `localhost:55440`.
+  - The validation container was removed after the test run.
+  - Next slice should move recovery controls into the web cockpit only after
+    the owner-facing UX states are designed.
+
+## V2WEB-AGENT-018 Workflow Recovery Controls Web Decision
+
+- Task Type: frontend/UX-decision
+- Current Stage: planning
+- Status: DONE
+- Owner: Planner / Frontend Builder
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: smallest safe owner-facing recovery UI.
+- Goal: Decide how archive and rollback-draft controls should enter
+  `/react-company-os` without mixing normal draft creation with recovery.
+- Scope:
+  - `docs/architecture/company-os-workflow-definition-command-contract.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.agents/state/*`
+- Decision:
+  - Add a dedicated `Recovery controls` panel inside the existing workflow
+    command surface.
+  - Keep normal draft create/preview/activate as the primary path.
+  - Show only inactive historical versions for recovery source selection.
+  - Expose archive and rollback-draft as separate commands with a required
+    recovery reason.
+  - A rollback-draft must load into the existing draft/preview/activation
+    panel rather than activating directly.
+- Acceptance Criteria:
+  - [x] Decision keeps recovery separate from normal draft creation.
+  - [x] Decision names visible states and blocked actions.
+  - [x] Decision selects a narrow implementation slice.
+- Result Report:
+  - Selected V2WEB-AGENT-019 Workflow Recovery Controls Web Surface.
+
+## V2WEB-AGENT-019 Workflow Recovery Controls Web Surface
+
+- Task Type: frontend/backend-integration
+- Current Stage: verification
+- Status: DONE
+- Owner: Frontend Builder / QA-Test
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: web controls for verified workflow archive and
+  rollback-draft commands.
+- Goal: Let owners trigger safe recovery commands from `/react-company-os`
+  while preserving backend command gates and draft activation flow.
+- Scope:
+  - `web/src/react-route-kit.tsx`
+  - `web/src/main.tsx`
+  - docs and canonical state.
+- Implementation Plan:
+  - Add route-kit clients for archive and rollback-draft commands.
+  - Add a `Recovery controls` panel scoped to inactive historical versions.
+  - Require a recovery reason and keep archive/rollback-draft as separate
+    actions.
+  - Load created rollback drafts into the existing preview/activation panel.
+  - Verify build, API regression suite, rendered rollback-draft interaction,
+    and cleanup.
+- Acceptance Criteria:
+  - [x] Recovery panel renders in the workflow command surface.
+  - [x] Archive action is available only when activation capability exists and
+    the selected historical version is not already archived.
+  - [x] Rollback draft action creates a draft and preserves existing preview /
+    approval / activation flow.
+  - [x] Build, test, rendered proof, and cleanup pass.
+- Result Report:
+  - Added typed archive and rollback-draft route-kit functions.
+  - Added `/react-company-os` recovery controls with historical version
+    selection, recovery reason, archive, and rollback-draft buttons.
+  - `npm run build` passed.
+  - `npm test` passed against disposable PostgreSQL on `localhost:55441`.
+  - Playwright proof against `http://127.0.0.1:3103/react-company-os` verified
+    `Recovery controls`, clicked `Rollback draft`, and observed
+    `Rollback draft created`; screenshot:
+    `C:\Users\wrobl\AppData\Local\Temp\companycore-v2web019-proof\workflow-recovery-controls-rollback-draft.png`.
+  - Render proof console captured pre-existing generic collection `404`s from
+    operating graph `/v1/{collection}` fetches; no new recovery endpoint failed.
+
+## V2WEB-AGENT-020 Workflow Version Lineage Decision
+
+- Task Type: architecture/data-decision
+- Current Stage: done
+- Status: DONE
+- Owner: Planner / Backend Builder
+- Priority: P1
+- Operation Mode: ARCHITECT
+- Deliverable For This Stage: decision on whether renamed-version rollback
+  needs explicit workflow root lineage before support is considered complete.
+- Goal: Remove name matching from rollback target selection so recovery remains
+  safe when owners rename process, pipeline, or procedure versions.
+- Scope:
+  - `docs/architecture/company-os-workflow-definition-command-contract.md`
+  - `.agents/state/decision-register.md`
+  - `.agents/state/risk-register.md`
+  - canonical queue files
+- Implementation Plan:
+  - Review the rollback-draft active target lookup and activation versioning
+    model.
+  - Decide between name matching, separate lineage tables, or root-local
+    lineage IDs.
+  - Select the smallest architecture-aligned implementation slice.
+- Acceptance Criteria:
+  - [x] Decision explicitly rejects mutable name matching as the long-term
+        rollback target mechanism.
+  - [x] Decision names how activation preserves lineage.
+  - [x] Follow-up implementation is concrete and testable.
+- Decision:
+  - Add root-local `family_id` lineage to process, pipeline, and procedure
+    roots.
+  - Activation must copy `family_id` from the previous root into the new active
+    root.
+  - Rollback-draft creation must resolve the active target by workspace, root
+    type, and `family_id`, not by name.
+- Definition of Done:
+  - Architecture contract updated.
+  - Decision register updated.
+  - Risk register updated or closed by implementation.
+- Validation Evidence:
+  - Source review found rollback target lookup still matched historical root
+    `name`.
+  - DEC-013 records the accepted lineage decision.
+- Result Report:
+  - Decision completed and immediately implemented in V2WEB-AGENT-021.
+
+## V2WEB-AGENT-021 Workflow Version Lineage Implementation
+
+- Task Type: backend/data
+- Current Stage: done
+- Status: DONE
+- Owner: Backend Builder / QA-Test
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: migration, activation copy, rollback lookup, and
+  regression proof for renamed-version rollback.
+- Goal: Let owners and supervised agents create rollback drafts from renamed
+  historical workflow versions without bypassing preview, approval, audit, or
+  activation gates.
+- Scope:
+  - `prisma/schema.prisma`
+  - `prisma/migrations/202605144_workflow_root_family_lineage/migration.sql`
+  - `src/modules/company-os/workflow-definition-drafts.routes.ts`
+  - `src/tests/api.test.ts`
+  - `docs/API.md`
+  - `docs/DATABASE.md`
+  - `docs/architecture/company-os-workflow-definition-command-contract.md`
+  - `.agents/state/*`
+  - `.codex/context/*`
+- Implementation Plan:
+  - Add `family_id` to process, pipeline, and procedure roots and backfill
+    existing rows to their root IDs.
+  - Copy root lineage during procedure, process, and pipeline activation raw
+    inserts.
+  - Replace rollback active target lookup by name with lookup by `family_id`.
+  - Add regression coverage for rollback from a renamed historical pipeline.
+  - Run generation, build, integration tests, diff check, and cleanup.
+- Acceptance Criteria:
+  - [x] Existing rows receive stable root lineage.
+  - [x] New active versions preserve previous root lineage.
+  - [x] Rollback-draft creation resolves active target by lineage.
+  - [x] Renamed historical pipeline rollback creates a normal draft against
+        the current active root.
+  - [x] Documentation and state files reflect the new source of truth.
+- Definition of Done:
+  - `npx prisma generate` passes.
+  - `npm run build` passes.
+  - `npm test` passes against disposable PostgreSQL.
+  - `git diff --check` passes.
+  - Disposable Docker resources are removed.
+- Validation Evidence:
+  - `npx prisma generate`: passed.
+  - `npm run build`: passed.
+  - `npm test` with
+    `postgresql://companycore:companycore@localhost:55442/companycore_test?schema=public`:
+    passed; migrations applied through
+    `202605144_workflow_root_family_lineage`.
+  - Integration test now asserts activated pipeline `familyId` matches the
+    historical root and that rollback draft from renamed pipeline v1 targets
+    the active v2 root with target version 3.
+  - `git diff --check`: passed with LF/CRLF normalization warnings only.
+  - Cleanup: removed `companycore-test-postgres-v2web021`; no
+    `chrome-headless-shell` validation process remained.
+- Result Report:
+  - Added stable workflow root lineage and closed renamed-version rollback
+    risk without direct rollback execution.
+  - Next step: V2WEB-AGENT-022 Company OS Collection Fetch Alignment for the
+    pre-existing generic collection `404`s seen in the recovery render proof.
+
+## V2WEB-AGENT-022 Company OS Collection Fetch Alignment
+
+- Task Type: frontend/reliability
+- Current Stage: done
+- Status: DONE
+- Owner: Frontend Builder / QA-Test
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: shared route-kit path fix and clean render
+  request proof for Company OS collection fetches.
+- Goal: Stop `/react-company-os` and shared table-record previews from
+  requesting generic `/v1/{collection}` routes for Company OS collection slugs.
+- Scope:
+  - `web/src/react-route-kit.tsx`
+  - `web/src/main.tsx`
+  - `.agents/state/*`
+  - `.codex/context/*`
+  - `docs/planning/*`
+- Implementation Plan:
+  - Add one shared helper that maps Company OS collection slugs to
+    `/v1/company-os/:collection`.
+  - Use the helper in table-record snapshot loading.
+  - Use the helper for displayed table API paths so the UI reflects the real
+    route.
+  - Verify build and rendered request behavior.
+- Acceptance Criteria:
+  - [x] Company OS table slugs no longer request generic `/v1/:slug` routes.
+  - [x] `/react-company-os` render proof has no generic Company OS requests.
+  - [x] Render proof has no 404s and no console errors under the mocked API.
+  - [x] UI path labels show `/v1/company-os/:collection` for Company OS
+        tables.
+- Definition of Done:
+  - `npm run build` passes.
+  - Render/request proof passes.
+  - Source-of-truth state files are updated.
+- Validation Evidence:
+  - `npm run build`: passed.
+  - Playwright mock render proof for `/react-company-os`: passed with
+    `badGeneric=[]`, `notFound=[]`, and `consoleErrors=[]`.
+  - Proof screenshot:
+    `C:\Users\wrobl\AppData\Local\Temp\companycore-v2web022-proof-final.png`.
+- Result Report:
+  - Added `tableRecordApiPath()` to route-kit and used it for table-record
+    snapshots plus visible table API labels.
+  - Closed KI-004.
+  - Next step: V2WEB-AGENT-023 Workflow Recovery End-To-End Activation Proof.
+
+## V2WEB-AGENT-023 Workflow Recovery End-To-End Activation Proof
+
+- Task Type: frontend/verification
+- Current Stage: done
+- Status: DONE
+- Owner: Frontend Builder / QA-Test
+- Priority: P1
+- Operation Mode: TESTER
+- Deliverable For This Stage: owner-cockpit proof that rollback recovery can
+  proceed through approval decision and activation without API-only steps.
+- Goal: Ensure recovery controls are usable as one coherent workflow, not just
+  isolated backend commands.
+- Scope:
+  - `web/src/main.tsx`
+  - `.agents/state/*`
+  - `.codex/context/*`
+  - `docs/planning/*`
+- Implementation Plan:
+  - Exercise the recovery UI from rollback draft creation to activation.
+  - Fix any local-state or missing-action defects that prevent the flow.
+  - Preserve existing backend command boundaries and audited approval decision
+    routes.
+  - Verify with build and Playwright interaction proof.
+- Acceptance Criteria:
+  - [x] Recovery panel can create a rollback draft.
+  - [x] Draft can be previewed and show approval requirement.
+  - [x] User can request approval from the workflow panel.
+  - [x] User can approve the requested approval through an audited UI action.
+  - [x] User can activate the draft with the approved approval ID.
+  - [x] No API-only step is required in the proof.
+- Definition of Done:
+  - `npm run build` passes.
+  - Rendered interaction proof passes.
+  - State and planning docs are updated.
+- Validation Evidence:
+  - `npm run build`: passed.
+  - Playwright mock interaction proof for `/react-company-os`: passed with
+    calls `rollback-draft`, `preview`, `request-approval`, `approve`, and
+    `activate:approval-recovery-1`.
+  - Proof reported `notFound=[]`, `consoleErrors=[]`, final draft `active`,
+    and final approval `approved`.
+  - Screenshot:
+    `C:\Users\wrobl\AppData\Local\Temp\companycore-v2web023-recovery-activation-proof.png`.
+- Result Report:
+  - Added inline `Approve requested approval` action in the workflow recovery
+    panel using the existing audited approval decision route.
+  - Removed premature parent reloads after approval request/decision so local
+    draft and approval state survive until activation.
+  - Next step: V2WEB-AGENT-024 real-backend proof if local Docker/database
+    access is available.
+
+## V2WEB-AGENT-024 Workflow Recovery Real Backend Proof
+
+- Task Type: verification
+- Current Stage: done
+- Status: DONE
+- Owner: QA-Test / Backend Builder
+- Priority: P1
+- Operation Mode: TESTER
+- Deliverable For This Stage: real-backend browser proof for the workflow
+  recovery activation path.
+- Goal: Confirm the recovery UI works against migrated PostgreSQL and actual
+  backend routes, not only mocked responses.
+- Scope:
+  - Docker Compose disposable stack
+  - `/react-company-os`
+  - workflow draft, approval, approval decision, and activation routes
+  - `.agents/state/*`
+  - `.codex/context/*`
+  - `docs/planning/*`
+- Implementation Plan:
+  - Start isolated Docker Compose project on a non-default backend port.
+  - Let the backend run migrations and seed data.
+  - Create a historical workflow version setup through backend commands.
+  - Use the real owner cockpit to create rollback draft, preview, request
+    approval, approve, and activate.
+  - Capture proof and clean up Compose resources.
+- Acceptance Criteria:
+  - [x] Disposable backend health is green.
+  - [x] `/react-company-os` is loaded with a real owner session.
+  - [x] Recovery flow calls real backend routes through the UI.
+  - [x] Activation succeeds and the UI shows success.
+  - [x] No browser console errors occur.
+  - [x] Compose containers, network, and volume are removed.
+- Definition of Done:
+  - Docker image build passes.
+  - Backend health passes.
+  - Browser proof passes.
+  - Compose cleanup passes.
+- Validation Evidence:
+  - `docker compose -p companycore-v2web024 up -d --build`: passed.
+  - `http://127.0.0.1:3104/health`: returned `status=ok`.
+  - Real-backend Playwright proof: passed with `consoleErrors=[]`.
+  - Proof screenshot:
+    `C:\Users\wrobl\AppData\Local\Temp\companycore-v2web024-real-backend-recovery-proof.png`.
+  - Cleanup: `docker compose -p companycore-v2web024 down -v` removed
+    backend, Postgres, network, and volume.
+- Result Report:
+  - Workflow recovery is verified locally through backend lineage, web
+    controls, approval decision, activation, mock UI proof, and real-backend
+    UI proof.
+  - No local Company OS workflow recovery task remains ready.
+
+## UXA-022 React Areas Canonical Switch Decision
+
+- Task Type: architecture/frontend-decision
+- Current Stage: done
+- Status: DONE
+- Owner: Planner
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: decision on whether `/react-areas` can replace
+  canonical `/areas` after relationship data parity, or whether explicit React
+  write controls are required first.
+- Goal: Avoid switching the owner to a React route before the canonical area
+  workflow's read, review, and scope-editing responsibilities are fully covered.
+- Scope:
+  - `public/app.js`
+  - `web/src/main.tsx`
+  - `web/src/react-route-kit.tsx`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+  - `docs/planning/mvp-next-commits.md`
+- Implementation Plan:
+  - Compare canonical `/areas` responsibilities with `/react-areas` after
+    UXA-021.
+  - Decide whether route replacement is safe now.
+  - If not safe, name the smallest missing parity slice.
+  - Do not change runtime routes in this decision task.
+- Acceptance Criteria:
+  - [x] Decision explicitly approves or rejects a canonical route switch.
+  - [x] Decision names remaining read/write/action parity gaps.
+  - [x] Next implementation task is concrete if the switch is rejected.
+  - [x] No runtime route switch is performed in this decision task.
+- Decision:
+  - Do not switch canonical `/areas` to `/react-areas` yet.
+  - `/react-areas` now has strong read parity after UXA-021: it loads
+    connection data, external provider mappings, and Google Drive files from
+    existing API contracts, then exposes metrics, filters, review queues, and
+    action links.
+  - Canonical `/areas` still owns write/action parity through bound scope
+    editors:
+    `PATCH /v1/operating-model/external-mappings/:id/scope` and
+    `PATCH /v1/google-drive/files/:id/scope`.
+  - Switching now would remove the operator's direct reassignment controls for
+    provider and Drive ownership from the canonical areas workflow.
+  - The next safe slice is UXA-023 React Areas Scope Assignment Controls.
+- Definition of Done:
+  - Source review is recorded.
+  - `git diff --check` passes.
+  - Canonical queue files agree on the next task.
+- Validation Evidence:
+  - Source review:
+    - `public/app.js` binds `[data-mapping-scope]` and `[data-drive-scope]`
+      controls to `updateExternalMappingScope` and `updateGoogleDriveFileScope`.
+    - `web/src/main.tsx` renders `/react-areas` read/filter/review queues and
+      links back to canonical routes, but does not yet expose equivalent
+      assignment controls.
+  - `git diff --check`: passed with LF/CRLF normalization warnings only.
+- Result Report:
+  - Decision: keep canonical `/areas` on the vanilla owner console for now.
+  - Reason: React has read/review parity, but not direct scope-assignment write
+    controls.
+  - Next step: UXA-023 React Areas Scope Assignment Controls.
+
+## UXA-023 React Areas Scope Assignment Controls
+
+- Task Type: frontend
+- Current Stage: done
+- Status: DONE
+- Owner: Frontend Builder
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: add provider mapping and Drive item
+  operating-area assignment controls to `/react-areas` using existing PATCH
+  endpoints and local action feedback.
+- Goal: Close the remaining `/areas` canonical switch blocker by giving the
+  React areas workbench direct, audited owner controls for scope reassignment.
+- Scope:
+  - `web/src/react-route-kit.tsx`
+  - `web/src/main.tsx`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+  - `docs/planning/mvp-next-commits.md`
+- Implementation Plan:
+  - Add React route-kit client functions for existing provider and Drive scope
+    PATCH routes.
+  - Add select controls in `/react-areas` review queues for assigning an
+    operating area.
+  - Use local pending/success/error feedback and reload the areas state after a
+    successful assignment.
+  - Preserve canonical `/areas` until this write parity is validated.
+- Acceptance Criteria:
+  - [x] Provider mapping rows can be assigned to an area from `/react-areas`.
+  - [x] Drive file/folder rows can be assigned to an area from `/react-areas`.
+  - [x] Successful assignment reloads React area data.
+  - [x] Errors are shown locally and do not expose raw backend errors.
+  - [x] No backend route or schema is added.
+- Definition of Done:
+  - `npm run build` passes.
+  - Focused `/react-areas` rendered/action check passes.
+  - `git diff --check` passes.
+  - Source-of-truth planning/state files are updated.
+- Validation Evidence:
+  - `npm run build`: passed.
+  - `docker compose up -d --build`: passed.
+  - `docker compose exec -T backend sh -lc "npm run prisma:migrate:deploy &&
+    npm run seed"`: passed.
+  - Focused Playwright action check: passed with local owner-session login,
+    controlled local provider/Drive fixtures, provider scope assignment,
+    Drive scope assignment, API readback for assigned `areaId`, zero console
+    errors, and no desktop/mobile horizontal overflow.
+  - `git diff --check`: passed with LF/CRLF normalization warnings only.
+- Result Report:
+  - Added React route-kit clients for existing provider and Drive scope PATCH
+    endpoints.
+  - Added assignment selects to provider and Drive review queues on
+    `/react-areas`.
+  - Added local success/error feedback and delayed reload after successful
+    assignment so feedback remains visible.
+  - Preserved backend routes, database schema, and canonical `/areas`.
+  - Next step: UXA-024 React Areas Canonical Switch Decision.
+
+## UXA-024 React Areas Canonical Switch Decision
+
+- Task Type: architecture/frontend-decision
+- Current Stage: done
+- Status: DONE
+- Owner: Planner
+- Priority: P1
+- Operation Mode: ARCHITECT
+- Deliverable For This Stage: decide whether `/react-areas` can now replace
+  canonical `/areas` after read, review, and scope-assignment parity.
+- Goal: Switch only if the React route preserves the operator's real area
+  workflow and does not remove setup or edit capabilities still owned by
+  vanilla routes.
+- Scope:
+  - `public/app.js`
+  - `src/app.ts`
+  - `web/src/main.tsx`
+  - `web/src/react-route-kit.tsx`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+  - `docs/planning/mvp-next-commits.md`
+- Implementation Plan:
+  - Compare canonical `/areas` with `/react-areas` after UXA-023.
+  - Decide whether direct canonical route replacement is safe.
+  - If safe, queue the smallest route-switch slice.
+  - If not safe, name the exact remaining parity gap.
+- Acceptance Criteria:
+  - [x] Decision explicitly approves or rejects the route switch.
+  - [x] Decision names remaining risks or the exact switch scope.
+  - [x] Next task is concrete and small.
+  - [x] No runtime route switch is performed in this decision task.
+- Definition of Done:
+  - Source review is recorded.
+  - `git diff --check` passes.
+  - Canonical queue files agree on the next task.
+- Decision:
+  - Do not switch canonical `/areas` to `/react-areas` yet.
+  - React now covers read/review and unassigned provider/Drive scope assignment
+    after UXA-023, but canonical `/areas` still owns operating-area lifecycle
+    and selected-area operational context.
+  - Remaining parity gaps:
+    - user-created operating area create/delete/reassign controls from
+      `createOperatingArea` and `deleteSelectedArea`;
+    - selected-area database table and record preview context from
+      `state.selectedAreaKey`, `state.databaseTables`, and
+      `loadDatabaseSnapshot`;
+    - reassignment controls for already assigned provider mappings and Drive
+      folders shown inside the selected area context.
+  - The next safe slice is UXA-025 React Areas Area Lifecycle Controls.
+- Validation Evidence:
+  - Source review:
+    - `public/app.js` still owns selected-area lifecycle and context through
+      `createOperatingArea`, `deleteSelectedArea`, `state.selectedAreaKey`,
+      `state.databaseTables`, `loadDatabaseSnapshot`, and selected-area scope
+      editors.
+    - `web/src/main.tsx` now renders area read/review signals and unassigned
+      provider/Drive assignment controls, but does not expose user-created area
+      lifecycle controls or selected-area record previews.
+  - `git diff --check`: passed with LF/CRLF normalization warnings only.
+- Result Report:
+  - Rejected the route switch for this iteration.
+  - Preserved canonical `/areas` unchanged.
+  - Queued UXA-025 as the next concrete parity slice.
+
+## UXA-025 React Areas Area Lifecycle Controls
+
+- Task Type: frontend
+- Current Stage: done
+- Status: DONE
+- Owner: Frontend Builder
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: add user-created operating area create/delete
+  controls to `/react-areas` using existing operating-model area endpoints.
+- Goal: Close the lifecycle parity gap that blocks replacing canonical
+  `/areas` with the React workbench.
+- Scope:
+  - `web/src/react-route-kit.tsx`
+  - `web/src/main.tsx`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+  - `docs/planning/mvp-next-commits.md`
+- Implementation Plan:
+  - Confirm the existing create/delete area API contract before editing.
+  - Add typed React route-kit client helpers for area create/delete only if the
+    existing endpoints already support the required lifecycle operations.
+  - Add compact create and delete/reassign controls to `/react-areas`, with
+    system areas protected from deletion.
+  - Show local loading, success, and recovery feedback near the action.
+  - Refresh the workbench after successful lifecycle actions.
+- Acceptance Criteria:
+  - [x] A user-created operating area can be created from `/react-areas`.
+  - [x] A user-created operating area can be deleted with a safe reassignment
+    target.
+  - [x] System areas cannot be deleted from the React UI.
+  - [x] Existing backend routes and database schema are reused.
+  - [x] Runtime route switch is not included in this implementation slice.
+- Definition of Done:
+  - `npm run build` passes.
+  - Focused signed-in `/react-areas` lifecycle check passes.
+  - `git diff --check` passes.
+  - Canonical queue files are updated.
+- Validation Evidence:
+  - `npm run build`: passed.
+  - `docker compose up -d --build`: passed.
+  - `docker compose exec -T backend sh -lc "npm run prisma:migrate:deploy && npm run seed"`:
+    passed.
+  - Focused Playwright lifecycle smoke: created a unique user area, verified it
+    through `/v1/operating-model/areas`, deleted it through the React UI with
+    reassignment, confirmed it disappeared from the API, confirmed system areas
+    expose no delete button, checked desktop/mobile overflow, and captured zero
+    console issues.
+  - `git diff --check`: passed with LF/CRLF normalization warnings only.
+- Result Report:
+  - Added React route-kit helpers for `POST /v1/operating-model/areas` and
+    `DELETE /v1/operating-model/areas/:id`.
+  - Added a `/react-areas` lifecycle panel for creating user-created operating
+    areas and deleting them with safe reassignment.
+  - Preserved canonical `/areas`, backend routes, and database schema.
+
+## UXA-026 React Areas Selected Context Parity Decision
+
+- Task Type: architecture/frontend-decision
+- Current Stage: done
+- Status: DONE
+- Owner: Planner
+- Priority: P1
+- Operation Mode: ARCHITECT
+- Deliverable For This Stage: decide the smallest safe data/UI slice for
+  selected-area context parity in `/react-areas`.
+- Goal: Close the next blocker before canonical `/areas` can be replaced:
+  selected-area record previews and reassignment controls for already assigned
+  provider/Drive items.
+- Scope:
+  - `public/app.js`
+  - `web/src/main.tsx`
+  - `web/src/react-route-kit.tsx`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+  - `docs/planning/mvp-next-commits.md`
+- Implementation Plan:
+  - Compare canonical selected-area context with the current React workbench.
+  - Identify whether existing endpoints already expose table record preview
+    evidence and assigned provider/Drive reassignment data.
+  - Queue the smallest implementation slice without switching canonical routes.
+- Acceptance Criteria:
+  - [x] Decision names the exact next parity gap and source contract.
+  - [x] No new backend route is proposed if existing APIs cover the slice.
+  - [x] Next task is concrete, small, and verifiable.
+  - [x] Canonical `/areas` remains unchanged.
+- Definition of Done:
+  - Source review is recorded.
+  - `git diff --check` passes.
+  - Canonical queue files agree on the next task.
+- Decision:
+  - Do not add a new selected-area backend route yet.
+  - The canonical `/areas` selected context composes existing data contracts:
+    `/v1/operating-model` for areas/tables/mappings, `/v1/google-drive/files`
+    for Drive ownership, and typed table routes `/v1/{apiSlug}` for record
+    previews.
+  - The next smallest safe implementation slice is UXA-027 React Areas
+    Selected Context Data Hook: load per-table record previews in the React
+    route kit and render a selected-area context panel with table counts,
+    record previews, assigned Drive items, and assigned provider mappings.
+  - Reassignment controls for already assigned provider/Drive items can follow
+    after the selected context exists; the existing PATCH scope endpoints
+    remain the source contract for that later write slice.
+- Validation Evidence:
+  - Source review:
+    - `public/app.js` uses `loadDatabaseSnapshot` to fetch `/v1/${table.apiSlug}`
+      for every operating table after `/v1/operating-model` loads.
+    - `public/app.js` selected context combines `state.selectedAreaKey`,
+      table record counts, Drive files, provider mappings, and compact record
+      previews.
+    - `web/src/react-route-kit.tsx` already loads connection, provider
+      mappings, and Drive files for `/react-areas`; it does not yet load table
+      records.
+  - `git diff --check`: passed with LF/CRLF normalization warnings only.
+- Result Report:
+  - Selected existing typed table APIs as the record preview source contract.
+  - Preserved canonical `/areas`, backend routes, and database schema.
+  - Queued UXA-027 as the next concrete implementation slice.
+
+## UXA-027 React Areas Selected Context Data Hook
+
+- Task Type: frontend
+- Current Stage: done
+- Status: DONE
+- Owner: Frontend Builder
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: load selected table record previews in the React
+  route kit and render selected-area context in `/react-areas`.
+- Goal: Bring React `/react-areas` closer to canonical `/areas` parity by
+  showing the operator what records, tables, Drive items, and provider mappings
+  belong to the selected operating area.
+- Scope:
+  - `web/src/react-route-kit.tsx`
+  - `web/src/main.tsx`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+  - `docs/planning/mvp-next-commits.md`
+- Implementation Plan:
+  - Add a typed route-kit loader that fetches records for operating table
+    `apiSlug` values using existing `/v1/{apiSlug}` routes.
+  - Include the table record snapshot in `AreasWorkbenchState`.
+  - Add selected-area state and a context panel in `/react-areas`.
+  - Render table counts, record previews, assigned provider mappings, and
+    assigned Drive items without adding write controls yet.
+- Acceptance Criteria:
+  - [x] `/react-areas` loads table record previews through existing typed table
+    endpoints.
+  - [x] Selecting an area shows table counts, record previews, assigned Drive
+    items, and assigned provider mappings.
+  - [x] No new backend route or schema change is added.
+  - [x] Canonical `/areas` remains unchanged.
+- Definition of Done:
+  - `npm run build` passes.
+  - Focused signed-in `/react-areas` selected-context smoke passes.
+  - `git diff --check` passes.
+  - Canonical queue files are updated.
+- Validation Evidence:
+  - `npm run build`: passed.
+  - `docker compose up -d --build`: passed.
+  - `docker compose exec -T backend sh -lc "npm run prisma:migrate:deploy && npm run seed"`:
+    passed.
+  - Focused Playwright selected-context smoke: verified `/react-areas` renders
+    selected context, table/record/Drive/provider metrics, table and record
+    panels, 12 inspect-area options, selectable area state, no desktop/mobile
+    horizontal overflow, and zero console issues.
+  - `git diff --check`: passed with LF/CRLF normalization warnings only.
+- Result Report:
+  - Added capability-filtered table record snapshot loading in the React route
+    kit using existing `/v1/{apiSlug}` routes.
+  - Added a selected-area context panel to `/react-areas`.
+  - Preserved canonical `/areas`, backend routes, and database schema.
+
+## UXA-028 React Areas Assigned Scope Reassignment Controls
+
+- Task Type: frontend
+- Current Stage: done
+- Status: DONE
+- Owner: Frontend Builder
+- Priority: P1
+- Operation Mode: TESTER
+- Deliverable For This Stage: add reassignment controls for already assigned
+  provider mappings and Drive items in the `/react-areas` selected context.
+- Goal: Close the remaining selected-context write parity gap before any
+  canonical `/areas` route switch decision.
+- Scope:
+  - `web/src/main.tsx`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+  - `docs/planning/mvp-next-commits.md`
+- Implementation Plan:
+  - Reuse existing React scope assignment handlers and PATCH endpoint helpers.
+  - Add compact operating-area select controls to assigned provider mappings
+    and assigned Drive items inside selected context.
+  - Preserve read-only record previews and do not switch canonical routes.
+  - Verify reassignment through API readback and rendered refresh.
+- Acceptance Criteria:
+  - [x] Already assigned provider mappings can be reassigned from selected
+    context.
+  - [x] Already assigned Drive items can be reassigned from selected context.
+  - [x] Existing PATCH endpoints are reused.
+  - [x] No new backend route or schema change is added.
+  - [x] Canonical `/areas` remains unchanged.
+- Definition of Done:
+  - `npm run build` passes.
+  - Focused signed-in `/react-areas` reassignment smoke passes.
+  - `git diff --check` passes.
+  - Canonical queue files are updated.
+- Validation Evidence:
+  - `npm run build`: passed.
+  - `docker compose up -d --build`: passed.
+  - `docker compose exec -T backend sh -lc "npm run prisma:migrate:deploy && npm run seed"`:
+    passed.
+  - Focused Playwright reassignment smoke: moved an assigned provider mapping
+    and an assigned Drive item from selected context to another operating area,
+    verified both through API readback, restored fixtures to the source area,
+    checked desktop/mobile overflow, and captured zero console issues.
+  - `git diff --check`: passed with LF/CRLF normalization warnings only.
+- Result Report:
+  - Added operating-area reassignment selects to assigned provider mappings and
+    assigned Drive items in selected context.
+  - Reused existing React assignment handlers and PATCH scope endpoint helpers.
+  - Preserved canonical `/areas`, backend routes, and database schema.
+
+## UXA-029 React Areas Canonical Route Switch Decision
+
+- Task Type: architecture/frontend-decision
+- Current Stage: done
+- Status: DONE
+- Owner: Planner
+- Priority: P1
+- Operation Mode: ARCHITECT
+- Deliverable For This Stage: decide whether `/react-areas` can replace
+  canonical `/areas` after read, lifecycle, selected context, and reassignment
+  parity.
+- Goal: Switch only if React now preserves the operator's real area workflow
+  without losing setup, lifecycle, record preview, or scope editing capability.
+- Scope:
+  - `public/app.js`
+  - `src/app.ts`
+  - `web/src/main.tsx`
+  - `web/src/react-route-kit.tsx`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+  - `docs/planning/mvp-next-commits.md`
+- Implementation Plan:
+  - Compare canonical `/areas` with `/react-areas` after UXA-028.
+  - Decide whether a direct route replacement is safe.
+  - If safe, queue the smallest route allowlist/switch slice.
+  - If not safe, name the remaining parity blocker precisely.
+- Acceptance Criteria:
+  - [x] Decision explicitly approves or rejects the route switch.
+  - [x] Decision names remaining risks or the exact switch scope.
+  - [x] Next task is concrete and small.
+  - [x] No runtime route switch is performed in this decision task.
+- Definition of Done:
+  - Source review is recorded.
+  - `git diff --check` passes.
+  - Canonical queue files agree on the next task.
+- Decision:
+  - Approve switching canonical `/areas` to the React areas workbench.
+  - React now covers the required operator workflow: area read/review signals,
+    unassigned scope assignment, user-created area create/delete with
+    reassignment, selected-area table/record/Drive/provider context, and
+    reassignment controls for already assigned provider/Drive items.
+  - The switch must be the smallest route slice only: serve React for `/areas`,
+    keep `/react-areas` as a parallel alias, and update React route detection so
+    both paths render the same workbench.
+  - Do not remove vanilla area implementation code in this slice; preserving it
+    keeps rollback simple while canonical traffic moves to React.
+- Validation Evidence:
+  - Source review:
+    - `src/app.ts` currently serves `/areas` through `webAppRoutes` and
+      `/react-areas` through `reactAppRoutes`.
+    - `web/src/main.tsx` currently renders `ReactAreasApp` only for
+      `/react-areas`.
+    - UXA-025 through UXA-028 added and validated lifecycle, selected context,
+      record previews, and assigned scope reassignment parity.
+  - `git diff --check`: passed with LF/CRLF normalization warnings only.
+- Result Report:
+  - Approved the canonical route switch.
+  - Preserved rollback by keeping `/react-areas` alias and not deleting vanilla
+    implementation code.
+  - Queued UXA-030 as the route-switch implementation slice.
+
+## UXA-030 React Areas Canonical Route Switch
+
+- Task Type: frontend/routing
+- Current Stage: done
+- Status: DONE
+- Owner: Frontend Builder
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: serve React areas workbench at canonical
+  `/areas` while preserving `/react-areas` as an alias.
+- Goal: Make the validated React areas workbench the canonical operating-area
+  route without broad deletion or unrelated route changes.
+- Scope:
+  - `src/app.ts`
+  - `web/src/main.tsx`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+  - `docs/planning/mvp-next-commits.md`
+- Implementation Plan:
+  - Move `/areas` from vanilla web route handling to React route handling.
+  - Render `ReactAreasApp` for both `/areas` and `/react-areas`.
+  - Keep the `/react-areas` alias for comparison and rollback.
+  - Verify signed-out and signed-in `/areas` plus `/react-areas`.
+- Acceptance Criteria:
+  - [x] `/areas` serves the React areas workbench.
+  - [x] `/react-areas` still serves the React areas workbench.
+  - [x] No unrelated canonical routes are switched.
+  - [x] Vanilla implementation code is not deleted.
+- Definition of Done:
+  - `npm run build` passes.
+  - Focused signed-out and signed-in `/areas` route smoke passes.
+  - Focused `/react-areas` alias smoke passes.
+  - `git diff --check` passes.
+  - Canonical queue files are updated.
+- Validation Evidence:
+  - `npm run build`: passed.
+  - `docker compose up -d --build`: passed.
+  - `docker compose exec -T backend sh -lc "npm run prisma:migrate:deploy && npm run seed"`:
+    passed.
+  - Focused Playwright route-switch smoke: verified signed-out `/areas` owner
+    session state, signed-in `/areas` React workbench, signed-in
+    `/react-areas` alias, selected context, lifecycle panel, React document
+    title, no desktop/mobile overflow, and zero console issues.
+  - `git diff --check`: passed with LF/CRLF normalization warnings only.
+- Result Report:
+  - Moved `/areas` from vanilla web route handling to React route handling.
+  - Rendered `ReactAreasApp` for both `/areas` and `/react-areas`.
+  - Preserved `/react-areas` as an alias and kept vanilla implementation code
+    in place for rollback.
+
+## UXA-031 V1 Architecture Completion Audit
+
+- Task Type: architecture/release-readiness
+- Current Stage: done
+- Status: DONE
+- Owner: Planner
+- Priority: P1
+- Operation Mode: ARCHITECT
+- Deliverable For This Stage: audit the current V1 implementation against the
+  approved Company OS architecture and identify whether any architecture-derived
+  V1 blockers remain.
+- Goal: Establish whether this workstream can honestly report that all
+  architecture-derived V1 steps are complete, or name the exact remaining
+  blocker before that claim is made.
+- Scope:
+  - `docs/architecture/system-architecture.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+- Implementation Plan:
+  - Compare completed CCOS, MCP, AGRUN, and UXA slices against the current
+    architecture and V1 readiness docs.
+  - Separate completed work, blocked external dependencies, and true local V1
+    blockers.
+  - If no local V1 blockers remain, record the completion statement and next
+    release-readiness action.
+  - If a blocker remains, queue exactly one small implementation task.
+- Acceptance Criteria:
+  - [x] Audit lists completed architecture-derived V1 capabilities.
+  - [x] Audit lists external blockers separately from local implementation
+    blockers.
+  - [x] Audit states whether "all architecture-derived local V1 steps are
+    complete" is currently true.
+  - [x] Next task is concrete and small.
+- Definition of Done:
+  - Source review is recorded.
+  - `git diff --check` passes.
+  - Canonical state files agree on the next task.
+- Validation Evidence:
+  - Source review covered `docs/architecture/system-architecture.md`,
+    `.codex/context/PROJECT_STATE.md`, `.codex/context/TASK_BOARD.md`,
+    `.agents/state/current-focus.md`, `.agents/state/known-issues.md`,
+    `docs/planning/mvp-next-commits.md`,
+    `docs/operations/v1-release-readiness.md`,
+    `docs/operations/v1-operator-handoff.md`, `package.json`, Prisma models,
+    route definitions, and React route ownership.
+  - Published `docs/planning/v1-architecture-control-map.md` as the unified V1
+    control map.
+  - `git diff --check`: passed with LF/CRLF normalization warnings only.
+- Result Report:
+  - Local architecture-derived V1 implementation is substantially complete for
+    the approved Company OS, MCP, ClickUp, operating-model, owner UI, and
+    agent-access scope.
+  - Remaining V1 issues are external blockers or project-control follow-up,
+    not unimplemented local runtime subsystems.
+  - Queued `V1CTRL-001 Function Coverage Ledger` as the next concrete step to
+    prevent future circular work.
+
+## V1CTRL-001 Function Coverage Ledger
+
+- Task Type: architecture/release-readiness
+- Current Stage: done
+- Status: DONE
+- Owner: Planner
+- Priority: P1
+- Operation Mode: TESTER
+- Deliverable For This Stage: create a module-by-module function coverage
+  ledger that classifies API, UI, MCP, integration, operations, and docs
+  surfaces by implementation and evidence status.
+- Goal: Give future agents a confidence index so follow-up tasks come from
+  verified gaps instead of repeated ad hoc fixes.
+- Scope:
+  - `docs/operations/v1-function-coverage-ledger.csv`
+  - `docs/planning/v1-architecture-control-map.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+- Implementation Plan:
+  - Use `docs/governance/function-coverage-ledger-standard.md`.
+  - List major V1 modules and surfaces.
+  - Classify each as implemented, verified, needs evidence, partial, blocked,
+    or deferred.
+  - Derive only one next task from real `V1_BLOCKER` or evidence gaps.
+- Acceptance Criteria:
+  - [x] Ledger exists under `docs/operations/`.
+  - [x] Ledger separates local gaps, evidence gaps, external blockers, and V2
+    deferrals.
+  - [x] `TASK_BOARD` and `mvp-next-commits` use the ledger as the next source
+    of executable work.
+  - [x] No runtime code is changed.
+- Definition of Done:
+  - Ledger follows the repository standard.
+  - `git diff --check` passes.
+  - Canonical state files agree on the next task.
+- Validation Evidence:
+  - Reviewed `docs/governance/function-coverage-ledger-standard.md`,
+    architecture docs, Prisma schema/model groups, API route ownership,
+    React/static route ownership, MCP bridge scripts, integration services,
+    tests, operations docs, and canonical state files.
+  - Added `docs/operations/v1-code-surface-index.md`,
+    `docs/operations/v1-function-coverage-ledger.csv`, and
+    `docs/operations/v1-function-coverage-audit.md`.
+  - `git diff --check`: passed with LF/CRLF normalization warnings only.
+- Result Report:
+  - Created the code-surface index, function coverage ledger, and human-readable
+    audit report needed to inspect full V1 implementation coverage.
+  - Classified implemented, evidence-missing, externally blocked, and V2
+    deferred capabilities across API, UI, MCP, integrations, operations,
+    documentation, security, and agent surfaces.
+  - Queued `V1CTRL-002 Canonical Queue Cleanup` as the next small control task
+    so future work starts from the ledger instead of stale historical queues.
+
+## V1CTRL-002 Canonical Queue Cleanup
+
+- Task Type: planning/source-of-truth
+- Current Stage: done
+- Status: DONE
+- Owner: Planner
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: reduce active queue noise and align
+  `NOW`/`NEXT` with the coverage-ledger-derived work stream.
+- Goal: Prevent old completed tasks, external blockers, and future V2 ideas
+  from being mistaken for active V1 implementation work.
+- Scope:
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/operations/v1-project-control-system.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+  - `docs/planning/v1-architecture-control-map.md`
+- Implementation Plan:
+  - Make the active queue small and explicit.
+  - Keep blocked external work in `Blocked`, not `NOW`.
+  - Move ledger-derived evidence tasks into the next executable lane.
+  - Preserve historical completed task evidence without making it look active.
+- Acceptance Criteria:
+  - [x] `NOW` and `NEXT` contain only the current small executable queue.
+  - [x] External blockers remain visible but are not mixed into active work.
+  - [x] The next evidence tasks come from
+    `docs/operations/v1-function-coverage-ledger.csv`.
+  - [x] No runtime code is changed.
+- Definition of Done:
+  - Canonical queue files agree on one next task.
+  - Historical task evidence remains discoverable.
+  - `git diff --check` passes.
+- Validation Evidence:
+  - Converted `docs/planning/mvp-next-commits.md` to an explicit active queue
+    plus historical archive sections.
+  - Added `docs/operations/v1-project-control-system.md` so future agents can
+    classify implemented work, evidence gaps, local gaps, external blockers,
+    V2 expansion, and historical evidence before coding.
+  - `git diff --check`: passed with LF/CRLF normalization warnings only.
+- Result Report:
+  - The active queue now points to `V1EVID-001` as the next executable proof
+    task after this cleanup.
+  - Historical completed tasks remain in the planning file but are no longer
+    presented as active `NOW` work.
+  - The control system now explains how to avoid looped work by verifying
+    ledger gaps before creating implementation tasks.
+
+## V1EVID-001 Company OS Lifecycle Trace Smoke
+
+- Task Type: verification/evidence
+- Current Stage: verification
+- Status: DONE
+- Owner: QA/Test
+- Priority: P1
+- Operation Mode: TESTER
+- Deliverable For This Stage: one repeatable local trace that exercises
+  Company OS approval, stage lifecycle, automation evaluation, event readback,
+  and audit readback.
+- Process Self-Audit:
+  - Analyze current state: V1CTRL-002 queued V1EVID-001 from the function
+    coverage ledger; Company OS command routes already existed but needed one
+    current local trace.
+  - Select one priority objective: only the Company OS lifecycle evidence gap
+    was selected.
+  - Plan implementation: add a focused smoke script that uses existing HTTP
+    command routes and readback APIs, then update evidence ledgers.
+  - Execute implementation: added
+    `scripts/company-os-lifecycle-trace-smoke.mjs` and
+    `npm run company-os:trace-smoke`.
+  - Verify and test: build passed; local Docker migrations, seed, and trace
+    smoke passed.
+  - Self-review: no Company OS runtime behavior, schema, or architecture
+    contract was changed; the first smoke failure was fixed in the smoke rule
+    by matching stable event type instead of an unstable payload field.
+  - Update documentation and knowledge: function ledger, module confidence,
+    requirements, quality scenarios, risk register, project state, task board,
+    system health, and next steps were updated.
+- Goal: Convert the highest-risk implemented-but-needs-evidence Company OS
+  rows in `docs/operations/v1-function-coverage-ledger.csv` into current
+  behavior proof before opening broad V2 work.
+- Scope:
+  - existing `src/modules/company-os/` routes and command behavior
+  - existing integration tests or a new focused smoke test if needed
+  - `docs/operations/v1-function-coverage-ledger.csv`
+  - `.agents/state/system-health.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+- Implementation Plan:
+  - Reuse existing Company OS lifecycle APIs and test helpers where possible.
+  - Create or run a focused trace for approval request/decision, stage
+    start/validate/complete, automation evaluator, event readback, and audit
+    readback.
+  - Update ledger rows from evidence-missing to current local evidence when
+    the trace passes.
+  - Create a narrow implementation task only if the trace exposes a real
+    defect.
+- Acceptance Criteria:
+  - [x] Trace proves approval lifecycle read/write behavior.
+  - [x] Trace proves stage lifecycle transition behavior.
+  - [x] Trace proves automation evaluator behavior or records a precise defect.
+  - [x] Trace proves event and audit readback for the lifecycle action chain.
+  - [x] Ledger and system health are updated with evidence.
+- Definition of Done:
+  - [x] Relevant validation command passes or the precise failing defect is logged.
+  - [x] No unrelated runtime changes are made.
+  - [x] Canonical state files agree on the next task after the trace.
+- Validation Evidence:
+  - `npm run build`: passed.
+  - `docker compose up -d --build backend`: passed.
+  - `docker compose exec -T backend sh -lc "npm run prisma:migrate:deploy &&
+    npm run seed && npm run company-os:trace-smoke"`:
+    passed.
+  - Trace summary: `v1evid-1778458446081`, workspace
+    `d05e2919-ba00-4c34-a065-7e6126bc2c06`, approval
+    `006e46a1-f5a9-453a-9803-f77c705dcd4a`, pipeline run
+    `56a67d17-5535-4b3c-9663-d27eb5968ab0`, stage run
+    `ce70b2ee-faca-4406-8bc8-b137df1f1feb`, automation rule
+    `325fadde-ce79-4d3b-a49c-2540f60969d4`, `eventCount=8`,
+    `auditLogCount=7`.
+  - Event types verified: `approval_requested`, `approval_approved`,
+    `stage_started`, `stage_validated`, `stage_completed`,
+    `v1_lifecycle_followup_needed`.
+  - Audit actions verified: `approval.requested`, `stage_run.completed`,
+    `automation_rule.matched`.
+- Result Report:
+  - Added a repeatable focused Company OS lifecycle trace smoke.
+  - Confirmed approval, stage, automation, event, and audit evidence through
+    the existing HTTP API boundary and local Docker Postgres runtime.
+  - Updated canonical evidence and state files.
+  - Next step: V1EVID-002 Operating Model Registry Lifecycle Smoke.
+
+## V1EVID-002 Operating Model Registry Lifecycle Smoke
+
+- Task Type: verification/evidence
+- Current Stage: verification
+- Status: DONE
+- Owner: QA/Test
+- Priority: P1
+- Operation Mode: BUILDER
+- Deliverable For This Stage: one repeatable local Docker trace that exercises
+  operating folder, storage location, knowledge root, and automation
+  definition lifecycle APIs.
+- Process Self-Audit:
+  - Analyze current state: V1EVID-001 closed the Company OS lifecycle evidence
+    gap; the active function ledger still listed operating-model registry
+    lifecycle rows as needing current local evidence.
+  - Select one priority objective: only the registry lifecycle evidence gap was
+    selected.
+  - Plan implementation: add a focused smoke script that uses existing
+    operating-model HTTP routes and verifies aggregate readback plus
+    cross-workspace deny behavior.
+  - Execute implementation: added
+    `scripts/operating-model-registry-lifecycle-smoke.mjs` and
+    `npm run operating-model:registry-smoke`.
+  - Verify and test: build passed; local Docker migrations, seed, and registry
+    smoke passed.
+  - Self-review: no operating-model runtime behavior, schema, or architecture
+    contract was changed; the smoke reuses existing API routes.
+  - Update documentation and knowledge: function ledger, module confidence,
+    requirements, quality scenarios, risk register, project state, task board,
+    system health, and next steps were updated.
+- Goal: Convert operating model registry lifecycle evidence rows in
+  `docs/operations/v1-function-coverage-ledger.csv` into current local proof.
+- Scope:
+  - existing `src/modules/operating-model/operating-model.routes.ts` behavior
+  - `scripts/operating-model-registry-lifecycle-smoke.mjs`
+  - `package.json`
+  - `docs/operations/v1-function-coverage-ledger.csv`
+  - `.agents/state/*`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+- Acceptance Criteria:
+  - [x] Trace proves folder create/read/update/delete.
+  - [x] Trace proves storage location create/read/update/delete.
+  - [x] Trace proves knowledge root create/read/update/delete.
+  - [x] Trace proves automation definition create/read/update/delete.
+  - [x] Trace proves aggregate readback and cross-workspace deny behavior.
+  - [x] Ledger and system health are updated with evidence.
+- Definition of Done:
+  - [x] Relevant validation command passes.
+  - [x] No unrelated runtime changes are made.
+  - [x] Canonical state files agree on the next task after the trace.
+- Validation Evidence:
+  - `npm run build`: passed.
+  - `git diff --check`: passed with LF/CRLF normalization warnings only.
+  - `docker compose up -d --build backend`: passed.
+  - `docker compose exec -T backend sh -lc "npm run prisma:migrate:deploy &&
+    npm run seed && npm run operating-model:registry-smoke"`: passed.
+  - Trace summary: `v1evid-om-1778459014284`, workspace
+    `736c3ec6-ab45-4a58-9f6a-627a4e9325f4`, area
+    `da140d91-bfe0-410c-affa-fb20688c4210`, folder
+    `39e88db5-260f-43e4-bbf7-12738a1db57b`, storage
+    `2b7c0a1c-e458-4e6f-8309-a8035ce26725`, knowledge root
+    `8c95d04b-610d-458c-8b9a-4f9779f2d1a8`, automation definition
+    `107737b7-a273-4897-8b48-84abeac9c48f`.
+  - Verified operations: `folder:create/read/update/delete`,
+    `storage-location:create/read/update/delete`,
+    `knowledge-root:create/read/update/delete`,
+    `automation-definition:create/read/update/delete`, aggregate readback,
+    deleted-resource `404` readback, and cross-workspace deny.
+- Result Report:
+  - Added a repeatable focused operating-model registry lifecycle smoke.
+  - Confirmed registry lifecycle APIs through the existing HTTP API boundary
+    and local Docker Postgres runtime.
+  - Updated canonical evidence and state files.
+  - Next step: V2PLAN-001 V2 Product Lane Selection.
+
+## V2PLAN-001 V2 Product Lane Selection
+
+- Task Type: planning
+- Current Stage: planning
+- Status: DONE
+- Owner: Planner
+- Priority: P1
+- Operation Mode: ARCHITECT
+- Mission ID: V2PLAN
+- Mission Status: VERIFIED
+- Coverage Ledger Rows: DOCS-002, DOCS-004, SEC-003, MCP-001, MCP-002,
+  CCOS-API-001, AUTO-001
+- Requirement Rows: REQ-V2-001, REQ-CCOS-005
+- Quality Scenario Rows: QA-V2-001, QA-CCOS-003
+- Risk Rows: RISK-V2-001, RISK-CCOS-003
+- Deliverable For This Stage: select one deliberate V2 lane after local V1
+  evidence closure and publish the next executable task without changing
+  runtime behavior.
+- Process Self-Audit:
+  - Analyze current state: `.codex/context/TASK_BOARD.md`,
+    `docs/planning/mvp-next-commits.md`, `.agents/state/next-steps.md`,
+    `.agents/state/module-confidence-ledger.md`, and
+    `.codex/context/PROJECT_STATE.md` all show V1EVID-001 and V1EVID-002 as
+    verified with no active local V1 evidence task remaining.
+  - Select one priority objective: choose the next product lane and prevent
+    broad V2 work from reopening completed V1 runtime scope.
+  - Plan implementation: update delivery map, active queues, decision record,
+    and planning evidence only.
+  - Execute implementation: selected Agent-First Company OS as the V2 lane and
+    queued V2AGENT-001 as an MCP/HTTP command-surface audit.
+  - Verify and test: source-of-truth inspection and `git diff --check`.
+  - Self-review: no runtime, API, schema, UI, deployment, or architecture
+    ownership changes were introduced.
+  - Update documentation and knowledge: delivery map, task board,
+    next-commits, next steps, project state, current focus, open decisions,
+    requirements, quality scenarios, risk register, and this task contract.
+- Mission Block:
+  - Mission objective: turn the post-V1 state into one selected V2 lane.
+  - Release objective advanced: V1 remains scoped and verified locally while
+    V2 starts from a command-bound agent lane.
+  - Included slices: lane selection, active queue update, delivery-map update,
+    requirement/risk/quality rows.
+  - Explicit exclusions: no code, schema, API, UI, deployment, provider, or MCP
+    runtime changes.
+  - Stop conditions: any new runtime behavior or external credential-dependent
+    work.
+  - Handoff expectation: future agents start with V2AGENT-001.
+- Goal: Choose the next deliberate V2 product lane after local V1 evidence gaps
+  are closed.
+- Scope:
+  - `.agents/state/delivery-map.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `.agents/state/next-steps.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.agents/state/current-focus.md`
+  - `docs/planning/open-decisions.md`
+  - `.agents/state/requirements-verification-matrix.md`
+  - `.agents/state/quality-attribute-scenarios.md`
+  - `.agents/state/risk-register.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+- Decision:
+  - Selected lane: Agent-First Company OS.
+  - Rationale: the freshest local V1 proof is the policy-bound Company OS
+    command path plus MCP bridge direction. The next safe expansion is to map
+    existing HTTP lifecycle commands, capabilities, events, audit logs, and MCP
+    manifest coverage before adding new agent behavior.
+  - Deferred lanes: Operational Cockpit until command coverage is mapped;
+    Provider Adapter Expansion until external credentials or a non-credential
+    design slice is selected; Data Quality And Coverage remains a maintenance
+    rule for every slice rather than a separate feature lane.
+- Acceptance Criteria:
+  - [x] One V2 lane is selected.
+  - [x] Active queue no longer points at V2PLAN-001.
+  - [x] Next task is a scoped analysis task, not broad implementation.
+  - [x] External blockers remain separate from local V1 completion.
+  - [x] Requirement, quality, and risk state files record the decision.
+- Definition of Done:
+  - [x] Source-of-truth docs agree on the selected V2 lane.
+  - [x] No runtime behavior changed.
+  - [x] The next executable task is visible in the canonical queue.
+  - [x] `DEFINITION_OF_DONE.md` and `INTEGRATION_CHECKLIST.md` were reviewed.
+- Validation Evidence:
+  - Source-of-truth inspection: V1EVID-001 and V1EVID-002 are in Done; no
+    active local V1 evidence tasks remain.
+  - `git diff --check`: passed with LF/CRLF normalization warnings only.
+  - Code/runtime validation: not applicable; planning-only task.
+- Result Report:
+  - Selected Agent-First Company OS as the next V2 lane.
+  - Updated the delivery map and active queues.
+  - Added V2 planning requirement, quality, and risk rows.
+  - Next step: V2AGENT-001 Agent-First Company OS MCP Command Surface Audit.
+
+## V2AGENT-001 Agent-First Company OS MCP Command Surface Audit
+
+- Task Type: research/analysis
+- Current Stage: analysis
+- Status: DONE
+- Owner: Planner
+- Priority: P1
+- Operation Mode: BUILDER
+- Mission ID: V2AGENT
+- Mission Status: VERIFIED
+- Coverage Ledger Rows: MCP-001, MCP-002, CONN-001, CCOS-API-001,
+  APPROVAL-001, STAGE-001, AUTO-001, AUDIT-001, SEC-003
+- Deliverable For This Stage: command-surface audit that maps existing Company
+  OS HTTP lifecycle commands to MCP manifest/tool coverage, capability gates,
+  event/audit proof, and documentation gaps.
+- Goal: Select the first safe Agent-First Company OS implementation slice
+  without adding runtime behavior before the command surface is mapped.
+- Scope:
+  - `src/modules/company-os/company-os.routes.ts`
+  - `src/modules/mcp/mcp.routes.ts`
+  - `src/mcp/manifest.ts`
+  - `src/auth/capabilities.ts`
+  - `scripts/companycore-mcp-server.mjs`
+  - `docs/API.md`
+  - `docs/operations/mcp-agent-runtime-setup.md`
+  - `.agents/state/delivery-map.md`
+  - `.agents/state/module-confidence-ledger.md`
+  - `docs/operations/v1-function-coverage-ledger.csv`
+- Acceptance Criteria:
+  - [x] Existing Company OS lifecycle command routes are inventoried.
+  - [x] Each route is classified as MCP-exposed, HTTP-only, unsafe to expose,
+    or documentation-only.
+  - [x] Required capability, event, audit, and approval evidence is named.
+  - [x] First implementation slice is selected only if existing evidence shows
+    it can stay inside the approved HTTP policy boundary.
+  - [x] No runtime behavior changes are made during the audit.
+- Validation Evidence:
+  - Source review covered Company OS routes, MCP manifest generation,
+    capability routes, MCP bridge behavior, profile scopes, API docs, MCP
+    runtime docs, API tests, and the V1 function coverage ledger.
+  - Published
+    `docs/operations/v2-agent-company-os-command-surface-audit.md`.
+  - Found `V2AGENT-GAP-001`: `mcp_company_os_reader` is documented as
+    read-only but includes approval request and decision write scopes.
+- Result Report:
+  - Existing Company OS lifecycle commands are already command-shaped and
+    MCP-discoverable through the adapter manifest.
+  - Risky tools are marked `requiresApproval` in the manifest, but the stdio
+    bridge treats that as metadata and forwards calls when the key has scope.
+  - First safe implementation slice is V2AGENT-002, correcting the read-only
+    MCP Company OS reader profile before broader agent command work.
+
+## V2AGENT-002 MCP Company OS Reader Least-Privilege Correction
+
+- Task Type: fix/security
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder
+- Priority: P1
+- Operation Mode: BUILDER
+- Mission ID: V2AGENT
+- Mission Status: VERIFIED
+- Requirement Rows: REQ-MCP-001
+- Quality Scenario Rows: QA-MCP-001
+- Risk Rows: RISK-MCP-001
+- Deliverable For This Stage: remove approval write scopes from the read-only
+  MCP Company OS reader profile and verify the profile cannot see or call
+  approval write tools.
+- Goal: Make the documented read-only MCP Company OS reader profile actually
+  read-only before broader Agent-First Company OS command work.
+- Scope:
+  - `src/auth/agent-key-profiles.ts`
+  - `src/tests/api.test.ts`
+  - `docs/operations/v2-agent-company-os-command-surface-audit.md`
+  - canonical state files and planning queue
+- Acceptance Criteria:
+  - [x] `mcp_company_os_reader` does not include
+    `company-os:approval:request`.
+  - [x] `mcp_company_os_reader` does not include
+    `company-os:approval:decide`.
+  - [x] Profile-created reader key manifest omits approval write tools.
+  - [x] Profile-created reader key direct approval request returns `403`.
+  - [x] `mcp_operator` remains the supervised profile for risky command tools.
+- Validation Evidence:
+  - `npm run build`: passed.
+  - `docker compose up -d --build backend`: passed.
+  - `docker compose exec -T backend sh -lc "npm run prisma:migrate:deploy &&
+    node --test dist/tests/api.test.js"`: passed.
+  - The API test verifies profile scopes, profile-created key scopes, MCP
+    manifest filtering, direct approval request `403`, and direct approval
+    decision `403`.
+- Result Report:
+  - Removed approval write scopes from `mcp_company_os_reader`.
+  - Added regression assertions around profile scopes, MCP manifest exposure,
+    and route denial.
+  - Updated MCP command-surface audit, requirements, quality scenarios, risk,
+    module confidence, system health, project state, and queues.
+  - Next step: V2AGENT-003 Approval-Aware MCP Command Flow Design.
+
+## V2AGENT-003 Approval-Aware MCP Command Flow Design
+
+- Task Type: design/security
+- Current Stage: planning
+- Status: DONE
+- Owner: Security
+- Priority: P1
+- Operation Mode: ARCHITECT
+- Mission ID: V2AGENT
+- Mission Status: VERIFIED
+- Requirement Rows: REQ-MCP-002
+- Risk Rows: RISK-MCP-002
+- Deliverable For This Stage: design how MCP tools marked `requiresApproval`
+  should be handled before unsupervised agent use.
+- Goal: Prevent risky MCP command execution from relying on manifest metadata
+  alone.
+- Scope:
+  - `src/mcp/manifest.ts`
+  - `scripts/companycore-mcp-server.mjs`
+  - `docs/API.md`
+  - `docs/operations/companycore-mcp-bridge.md`
+  - `docs/operations/mcp-agent-runtime-setup.md`
+  - `docs/operations/v2-agent-company-os-command-surface-audit.md`
+- Acceptance Criteria:
+  - [x] Decide whether risky tools remain supervised-only or require an
+    approval reference/token before forwarding.
+  - [x] Define required evidence before and after risky tool calls.
+  - [x] Define bridge behavior for tools with `requiresApproval`.
+  - [x] Select the next implementation slice or explicitly defer runtime
+    changes.
+- Decision:
+  - MCP tools with `requiresApproval: true` must fail closed by default in the
+    stdio bridge.
+  - Safe read tools continue to call the HTTP API.
+  - Risky tools are supervised-only unless a future approved autonomous design
+    exists.
+  - The HTTP API remains the source of approval, transition, event, and audit
+    truth.
+- Validation Evidence:
+  - Added `docs/operations/approval-aware-mcp-command-flow.md`.
+  - Updated MCP bridge and runtime setup docs to point to the approved flow.
+  - Updated API docs to classify `requiresApproval` tools as supervised-only
+    until the bridge guard is implemented and verified.
+  - `git diff --check`: passed with LF/CRLF normalization warnings only.
+- Result Report:
+  - Closed the design gap found in V2AGENT-001.
+  - Added REQ-MCP-003 and QA-MCP-002 for the implementation proof.
+  - Next step: V2AGENT-004 MCP Requires-Approval Bridge Guard.
+
+## V2AGENT-004 MCP Requires-Approval Bridge Guard
+
+- Task Type: fix/security
+- Current Stage: verification
+- Status: DONE
+- Owner: Backend Builder
+- Priority: P1
+- Operation Mode: BUILDER
+- Mission ID: V2AGENT
+- Mission Status: VERIFIED
+- Requirement Rows: REQ-MCP-003
+- Quality Scenario Rows: QA-MCP-002
+- Risk Rows: RISK-MCP-002
+- Deliverable For This Stage: make the stdio MCP bridge fail closed by default
+  for tools whose manifest entry has `requiresApproval: true`.
+- Goal: Prevent risky MCP tool calls from being forwarded just because a
+  high-scope key has the route capability.
+- Scope:
+  - `scripts/companycore-mcp-server.mjs`
+  - `scripts/companycore-mcp-smoke.mjs`
+  - `docs/operations/approval-aware-mcp-command-flow.md`
+  - `docs/operations/companycore-mcp-bridge.md`
+  - `docs/operations/mcp-agent-runtime-setup.md`
+  - relevant tests/state files
+- Acceptance Criteria:
+  - [x] Safe read MCP smoke still passes.
+  - [x] Default risky `requiresApproval` tool call returns a structured blocked
+    result without forwarding the HTTP request.
+  - [x] Supervised override is explicit and documented.
+  - [x] Regression evidence is recorded.
+- Validation Evidence:
+  - `npm run build`: passed.
+  - `node scripts/companycore-mcp-server.mjs --print-config`: passed and
+    reported default `commandMode: "read_only"`.
+  - `docker compose up -d --build backend`: passed.
+  - `docker compose exec -T backend sh -lc "npm run prisma:migrate:deploy &&
+    node --test dist/tests/api.test.js"`: passed.
+  - The API test runs one safe `companycore_get_company_os` MCP smoke and one
+    expected-error smoke for
+    `companycore_post_company_os_stage_runs_by_id_actions_complete`, verifying
+    `mcp_tool_requires_supervision` in default mode.
+- Result Report:
+  - Added the default fail-closed guard to the stdio MCP bridge.
+  - Extended the MCP smoke harness with expected-error checks.
+  - Preserved safe read calls through the HTTP API.
+  - Updated state files and planning queues.
+  - Next step: V2AGENT-005 Supervised Operator MCP Smoke Harness.
+
+## V2AGENT-005 Supervised Operator MCP Smoke Harness
+
+- Task Type: verification/security
+- Current Stage: verification
+- Status: DONE
+- Owner: QA/Test
+- Priority: P1
+- Operation Mode: TESTER
+- Mission ID: V2AGENT
+- Mission Status: VERIFIED
+- Deliverable For This Stage: add or document a controlled smoke path for
+  `COMPANYCORE_MCP_COMMAND_MODE=supervised_operator`.
+- Goal: Prove supervised mode deliberately forwards a controlled risky MCP
+  command only under explicit operator configuration.
+- Scope:
+  - `scripts/companycore-mcp-smoke.mjs`
+  - `src/tests/api.test.ts`
+  - `docs/operations/approval-aware-mcp-command-flow.md`
+  - `docs/operations/companycore-mcp-bridge.md`
+  - canonical state files
+- Acceptance Criteria:
+  - [x] Smoke path sets `COMPANYCORE_MCP_COMMAND_MODE=supervised_operator`
+    explicitly.
+  - [x] Smoke uses a controlled high-scope key and disposable Company OS data.
+  - [x] Smoke proves default mode blocks the same tool.
+  - [x] Smoke proves supervised mode forwards or reaches HTTP validation as
+    designed.
+- Validation Evidence:
+  - `npm run build`: passed.
+  - `docker compose up -d --build backend`: passed.
+  - `docker compose exec -T backend sh -lc "npm run prisma:migrate:deploy &&
+    node --test dist/tests/api.test.js"`: passed.
+  - The Docker API test creates an `mcp_operator` key, proves default mode
+    blocks
+    `companycore_post_company_os_stage_runs_by_id_actions_complete` with
+    `mcp_tool_requires_supervision`, then reruns the same tool with
+    `COMPANYCORE_MCP_COMMAND_MODE=supervised_operator` and verifies the call
+    reaches HTTP validation as `409 invalid_stage_transition` on controlled
+    disposable test data.
+- Result Report:
+  - Extended the MCP smoke harness with expected HTTP status and response-error
+    checks.
+  - Added a supervised-operator MCP smoke regression to the protected API flow.
+  - Preserved the default fail-closed guard for risky MCP tools.
+  - Updated MCP bridge and approval-flow documentation plus canonical state
+    ledgers.
+
+## V2AGENT-006 Agent Command Queue Cockpit Slice
+
+- Task Type: frontend
+- Current Stage: verification
+- Status: DONE
+- Owner: Frontend Builder
+- Priority: P1
+- Operation Mode: BUILDER
+- Mission ID: V2AGENT
+- Mission Status: VERIFIED
+- Requirement Rows: REQ-V2-001, REQ-CCOS-005
+- Quality Scenario Rows: QA-V2-001, QA-CCOS-003
+- Risk Rows: RISK-V2-001, RISK-CCOS-003
+- Deliverable For This Stage: add an agent command queue view to the existing
+  Company OS cockpit using already-loaded Company OS context.
+- Goal: Make the next policy-bound agent actions visible to the owner before
+  adding any new autonomous command behavior.
+- Scope:
+  - `web/src/main.tsx`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/delivery-map.md`
+  - `.agents/state/system-health.md`
+- Acceptance Criteria:
+  - [x] Company OS cockpit shows an agent command queue derived from pending
+    approvals, blocked or failed stage runs, active automation rules, and
+    approval-enforcing policies.
+  - [x] Queue items make the risk, current blocker, and next owner action
+    scannable without introducing new backend routes.
+  - [x] Existing lifecycle controls remain unchanged.
+  - [x] Focused rendered check passes.
+- Validation Evidence:
+  - `npm run build`: passed.
+  - Focused rendered check: passed with a temporary static SPA server,
+    mock `/v1` Company OS endpoints, injected owner session token, and system
+    Chrome `--headless=new --dump-dom --virtual-time-budget=5000`.
+  - Rendered markers verified: `Company OS cockpit`, `Agent command queue`,
+    `Owner-gated next actions`, `agent.proposed_action`, blocked-stage
+    recovery guidance, and automation dry-run guidance.
+  - Cleanup: validation-owned port `4192` was released; Docker was not
+    running. Headless cleanup was attempted; Windows reported some
+    `chrome-headless-shell` PIDs as not terminable because no running task
+    instance existed, and a separate non-CompanyCore route-smoke parent was
+    left untouched.
+- Result Report:
+  - Added `AgentCommandQueueItem`, `agentCommandQueue`, and
+    `AgentCommandQueue` to the existing React Company OS cockpit.
+  - Queue items are derived from already-loaded approvals, stage runs,
+    automation rules, and policies.
+  - No backend route, schema, or command behavior changed.
+  - V2AGENT-006R completed the focused rendered UI proof.
+
+## V2AGENT-006R Agent Command Queue Render Proof
+
+- Task Type: verification
+- Current Stage: verification
+- Status: DONE
+- Owner: QA/Test
+- Priority: P1
+- Operation Mode: TESTER
+- Mission ID: V2AGENT
+- Mission Status: VERIFIED
+- Requirement Rows: REQ-V2-001
+- Quality Scenario Rows: QA-V2-001
+- Risk Rows: RISK-V2-001
+- Deliverable For This Stage: prove `/react-company-os` renders the new agent
+  command queue without relying on the timed-out Playwright harness.
+- Goal: Close the rendered evidence gap left by V2AGENT-006.
+- Scope:
+  - temporary local validation server only
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - canonical state files
+- Acceptance Criteria:
+  - [x] Render proof loads `/react-company-os`.
+  - [x] Render proof injects an owner session and mock Company OS data.
+  - [x] Render proof verifies the agent command queue and owner-gated action
+    markers.
+  - [x] No backend, schema, or production data is mutated.
+- Validation Evidence:
+  - System Chrome `--headless=new --dump-dom --virtual-time-budget=5000`
+    against a temporary static SPA server with mock `/v1` endpoints: passed.
+  - Verified markers: `Company OS cockpit`, `Agent command queue`,
+    `Owner-gated next actions`, `agent.proposed_action`, blocked-stage
+    recovery guidance, and automation dry-run guidance.
+  - Cleanup: temporary script, Chrome profile, static server, checked ports
+    `4193..4195`, checked Docker, and checked `chrome-headless-shell`.
+- Result Report:
+  - Replaced the failing Playwright proof path with a deterministic Chrome
+    dump-DOM proof for this focused signed-in UI state.
+  - V2AGENT-006 is now verified.
+
+## UXA-021 React Areas Relationship Data Hook
+
+- Task Type: frontend
+- Current Stage: done
+- Status: DONE
+- Owner: Frontend Builder
+- Priority: P1
+- Operation Mode: TESTER
+- Deliverable For This Stage: `/react-areas` loads existing provider mapping
+  and Google Drive file data through the React route kit, then exposes real
+  mapping counts and review queues without adding backend APIs.
+- Process Self-Audit:
+  - Analyze current state: UXA-020 confirmed existing
+    `/v1/operating-model/external-mappings` and `/v1/google-drive/files`
+    routes are the approved data contracts.
+  - Select exactly one priority task: UXA-021 only.
+  - Plan implementation: add typed React loaders/state, enrich area rows and
+    signals, and keep canonical `/areas` plus `/relationships` unchanged.
+  - Execute implementation: added typed route-kit loaders/state and enriched
+    `/react-areas` with real relationship evidence.
+  - Verify and test: build, Docker rebuild/seed, focused rendered checks, and
+    diff check passed.
+  - Self-review: no backend route, schema, or canonical route switch was mixed
+    into this frontend slice.
+  - Update documentation and knowledge: task board, project state, next steps,
+    system health, and this contract updated.
+- Goal: Move `/react-areas` closer to canonical area parity by showing real
+  provider mapping and Drive ownership evidence from existing API contracts.
+- Scope:
+  - `web/src/react-route-kit.tsx`
+  - `web/src/main.tsx`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+  - `docs/planning/mvp-next-commits.md`
+- Implementation Plan:
+  - Add typed `ExternalContainerMapping` and `GoogleDriveFileRecord` loaders
+    that call the existing endpoints with the owner session token.
+  - Load connection, external mappings, and Drive files in parallel inside
+    `useAreasWorkbenchState`.
+  - Enrich area rows with provider mapping counts, Drive folder/file counts,
+    unmapped provider counts, and unmapped Drive counts.
+  - Add compact review queues to `/react-areas` that link back to current
+    canonical owner action routes.
+  - Preserve canonical vanilla routes and avoid backend changes.
+- Acceptance Criteria:
+  - [x] `/react-areas` state uses existing external mapping and Drive file
+    endpoints.
+  - [x] Area metrics include real provider mapping and Drive file/folder counts.
+  - [x] `/react-areas` shows provider and Drive review queues from live API
+    data.
+  - [x] No backend route or schema is added.
+  - [x] Build and focused rendered checks pass.
+- Definition of Done:
+  - `npm run build` passes.
+  - Focused `/react-areas` rendered check passes for signed-out and signed-in
+    paths.
+  - Desktop and mobile checks have no horizontal overflow.
+  - `git diff --check` passes.
+  - Source-of-truth planning/state files are updated.
+- Validation Evidence:
+  - `npm run build`: passed.
+  - `docker compose up -d --build`: passed.
+  - `docker compose exec -T backend sh -lc "npm run prisma:migrate:deploy &&
+    npm run seed"`: passed.
+  - Focused Playwright route check: passed for signed-out `/react-areas`,
+    signed-in `/react-areas`, provider/Drive signals, provider/Drive review
+    queues, 12 area rows, desktop/mobile no horizontal overflow, and zero
+    console errors.
+  - `git diff --check`: passed with LF/CRLF normalization warnings only.
+- Result Report:
+  - Added typed React route-kit loaders for
+    `/v1/operating-model/external-mappings` and `/v1/google-drive/files`.
+  - `useAreasWorkbenchState` now loads connection, external mappings, and
+    Drive files in parallel.
+  - `/react-areas` now shows real provider mapping counts, Drive item counts,
+    relationship review signal cards, and provider/Drive queues for records
+    missing operating-area ownership.
+  - Preserved backend contracts and canonical vanilla owner action routes.
+  - Next step: UXA-022 React Areas Canonical Switch Decision.
+
+
+## UXA-020 React Areas Data Contract Gap Decision
+
+- Task Type: architecture/frontend-decision
+- Current Stage: done
+- Deliverable For This Stage: decision on whether `/react-areas` needs a new
+  backend read API before parity work continues.
+- Goal: Avoid inventing a duplicate backend contract if existing
+  operating-model and Drive endpoints already expose the mapping data needed
+  for React areas parity.
+- Scope:
+  - `public/app.js`
+  - `src/modules/operating-model/operating-model.routes.ts`
+  - `src/modules/google-drive/google-drive.routes.ts`
+  - `web/src/react-route-kit.tsx`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+  - `docs/planning/mvp-next-commits.md`
+- Decision:
+  - Do not create a new dedicated React areas read API yet.
+  - Existing backend contracts already expose the required read surfaces:
+    `/v1/operating-model/external-mappings` for provider mappings and
+    `/v1/google-drive/files` for Drive file/folder ownership.
+  - The current gap is frontend data composition: `/react-areas` loads
+    `/v1/connection` only, while the vanilla `/areas` and `/relationships`
+    surfaces also load operating-model mappings and Drive files.
+  - The next implementation slice should add route-kit loaders/state for
+    external mappings and Drive files, then enrich `/react-areas` with real
+    mapping counts and review queues.
+- Implementation Plan:
+  - Inspect vanilla data flow for mapping and Drive ownership signals.
+  - Confirm existing backend routes and capabilities cover read needs.
+  - Record a no-new-API decision.
+  - Queue a small frontend implementation slice that reuses existing routes.
+- Acceptance Criteria:
+  - [x] Decision states whether a new API is approved.
+  - [x] Existing endpoint reuse path is named.
+  - [x] Next task has a concrete implementation scope.
+  - [x] No backend route is added in this decision task.
+- Validation Evidence:
+  - Source review:
+    - `public/app.js` loads `/v1/operating-model`, `/v1/google-drive/files`,
+      and uses `externalMappings` plus Drive folders for relationships and
+      area context.
+    - `src/modules/operating-model/operating-model.routes.ts` exposes
+      `GET /v1/operating-model/external-mappings`.
+    - Existing tests and API docs already reference operating-model and Drive
+      scope routes.
+  - `git diff --check`: passed with LF/CRLF normalization warnings only.
+- Result Report:
+  - Decision: no new backend read API for React areas yet.
+  - Reason: existing operating-model and Google Drive read endpoints are the
+    correct source of truth.
+  - Next step: UXA-021 React Areas Relationship Data Hook.
+
+## UXA-016 React Route Shell Extraction
+
+- Task Type: refactor/frontend
+- Current Stage: done
+- Operation Mode: BUILDER
+- Deliverable For This Stage: shared React route kit for existing parallel
+  React workbenches without changing route behavior.
+- Process Self-Audit:
+  - Analyze current state: `web/src/main.tsx` owned route-specific logic plus
+    shared connection types, API loaders, route state hooks, shell, notices,
+    metric cards, and data table primitives.
+  - Select exactly one priority task: UXA-016 only.
+  - Plan implementation: extract shared code into a reusable module and keep
+    current route rendering intact.
+  - Execute implementation: added `web/src/react-route-kit.tsx` and delegated
+    existing route helpers/primitives from `main.tsx`.
+  - Verify and test: `npm run build` passed; targeted Playwright signed-out
+    route smoke passed against Vite base `/react`.
+  - Self-review: no route switch, UX redesign, or new workbench was mixed into
+    this refactor.
+  - Update documentation and knowledge: task board, next commits, next steps,
+    project state, and this contract updated.
+- Goal: Reduce `web/src/main.tsx` growth before adding another React
+  workbench, so future Company OS and agent-facing screens can reuse the same
+  route state and shell primitives.
+- Scope:
+  - `web/src/main.tsx`
+  - `web/src/react-route-kit.tsx`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+- Implementation Plan:
+  - Add a shared React route kit for connection/task types, API loaders, route
+    state hooks, provider metrics, shell, notices, metric cards, and data
+    table primitive.
+  - Delegate existing `main.tsx` shared helpers to the route kit.
+  - Preserve `/react-dashboard`, `/react-tasks`, and `/react-integrations`
+    behavior.
+  - Run the React build gate and diff check.
+- Acceptance Criteria:
+  - Shared React route helpers exist outside `main.tsx`.
+  - Existing React routes still build.
+  - No canonical route is switched.
+  - No new workbench behavior is introduced.
+- Definition of Done:
+  - `npm run build` passes.
+  - Targeted signed-out React route smoke passes.
+  - `git diff --check` passes.
+  - Source-of-truth planning/state files are updated.
+- Result Report:
+  - Added `web/src/react-route-kit.tsx`.
+  - Delegated dashboard/tasks/integrations state hooks, connection metrics,
+    provider status, company-area filtering, shell, local notice, data table,
+    and metric card primitives from `main.tsx`.
+  - Preserved existing React routes and visual behavior.
+  - `npm run build` passed.
+  - Targeted Playwright signed-out smoke passed for `/react-dashboard`,
+    `/react-tasks`, and `/react-integrations` through Vite dev server base
+    `/react`.
+
+## UXA-015 React Canonical Route Switch Readiness
+
+- Task Type: planning/frontend
+- Current Stage: done
+- Operation Mode: BUILDER
+- Deliverable For This Stage: canonical route switch readiness decision after
+  two parallel React workbench migrations.
+- Process Self-Audit:
+  - Analyze current state: `/react-tasks` and `/react-integrations` are live
+    and validated as parallel React workbenches; canonical vanilla routes still
+    own full setup/editor affordances.
+  - Select exactly one priority task: UXA-015 only.
+  - Plan implementation: compare React route parity against canonical route
+    responsibilities and choose the next safe migration step.
+  - Execute implementation: recorded the decision and activated UXA-016.
+  - Verify and test: documentation consistency and source-of-truth queue
+    alignment are the validation surface for this planning task.
+  - Self-review: confirmed that switching canonical routes now would trade
+    proven setup/editor depth for visual polish before parity is complete.
+  - Update documentation and knowledge: task board, next commits, next steps,
+    project state, and this contract updated.
+- Goal: Decide whether CompanyCore can safely point a canonical route to React
+  now, or whether the React migration needs a shared-shell refactor first.
+- Scope:
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+- Implementation Plan:
+  - Review UXA-012 and UXA-014 evidence.
+  - Compare React read/orientation parity with canonical route setup/editor
+    responsibilities.
+  - Record route-switch decision and activate the next safe task.
+- Acceptance Criteria:
+  - Decision is explicit and testable.
+  - Decision explains why a canonical route is or is not switched now.
+  - Next executable task is activated in canonical queue files.
+- Definition of Done:
+  - Planning/state files agree on the decision and next task.
+  - `git diff --check` passes.
+- Result Report:
+  - Decision: do not switch a canonical route to React yet.
+  - Rationale: `/react-tasks` and `/react-integrations` prove the React
+    read/orientation workbench pattern, but the vanilla canonical routes still
+    own broader setup/editor affordances. Switching now would be premature.
+  - Next task: UXA-016 React Route Shell Extraction, to reduce
+    `web/src/main.tsx` growth and prepare cleaner future migrations.
+
 ## UXA-014 React Integration Map Workbench Route
 
 - Task Type: frontend
@@ -2909,6 +5983,165 @@
     `npm test` passed.
   - Playwright smoke verified desktop `/tasks-adapter` route rendering,
     active navigation, task rows, summary stats, and dashboard module links.
+
+## UXA-019 React Areas Mapping Parity Slice
+
+- Task Type: frontend
+- Current Stage: done
+- Deliverable For This Stage: mapping/action parity signals on
+  `/react-areas`, without replacing canonical `/areas`.
+- Goal: Move the React areas workbench closer to canonical parity by exposing
+  provider scope, Drive folder scope, and ClickUp execution-scope signals with
+  explicit links to the current owner actions.
+- Scope:
+  - `web/src/main.tsx`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+- Implementation Plan:
+  - Inspect the current `/v1/connection` data available to React areas.
+  - Add mapping signal cards using existing area/table/provider, ClickUp, Drive,
+    and capability data.
+  - Link each signal to the current canonical action surface:
+    `/relationships`, `/settings/drive`, `/settings`, and `/areas`.
+  - Preserve canonical `/areas` and avoid adding backend endpoints in this
+    slice.
+  - Validate build, Docker runtime, signed-in `/react-areas`, desktop/mobile
+    overflow, and integration tests.
+- Acceptance Criteria:
+  - [x] `/react-areas` shows provider scope mapping signal.
+  - [x] `/react-areas` shows Drive folder scope signal.
+  - [x] `/react-areas` shows ClickUp execution scope signal.
+  - [x] Signals link to existing canonical owner actions.
+  - [x] No canonical route replacement is performed.
+  - [x] Desktop and mobile render without horizontal overflow.
+- Definition of Done:
+  - `npm run build`, Docker rebuild, Docker seed, targeted Playwright route
+    checks, Docker migration/test gate, and `git diff --check` pass.
+  - Project state, task board, next-steps, system health, and next-commits docs
+    are updated.
+- Result Report:
+  - Added mapping parity signal cards to `/react-areas`.
+  - Preserved canonical `/areas` and all existing vanilla mapping/editing
+    routes.
+  - `npm run build` passed.
+  - Docker rebuild, seed, signed-in Playwright checks, desktop/mobile overflow
+    checks, and Docker migration/test gate passed.
+
+## UXA-018 React Canonical Route Switch Decision
+
+- Task Type: architecture/frontend-decision
+- Current Stage: done
+- Deliverable For This Stage: canonical route switch decision after three
+  parallel React workbenches.
+- Goal: Decide whether `/react-areas`, `/react-tasks`, or
+  `/react-integrations` can safely replace the matching canonical vanilla
+  route now, or whether another parity slice is required first.
+- Scope:
+  - `public/app.js`
+  - `web/src/main.tsx`
+  - `web/src/react-route-kit.tsx`
+  - `docs/planning/web-console-v2-task-contracts.md`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+  - `docs/planning/mvp-next-commits.md`
+- Decision:
+  - Do not switch any canonical vanilla route to React yet.
+  - `/react-tasks` has strong read/filter parity, but canonical task work still
+    depends on `/data/tasks` for create/update/archive.
+  - `/react-integrations` has strong readiness and coverage parity, but
+    canonical integration management still depends on `/settings`,
+    `/settings/drive`, `/relationships`, and scope-editing controls.
+  - `/react-areas` has strong read/coverage parity, but canonical `/areas`
+    still owns operating-area selection context and provider/Drive scope
+    mapping affordances through shared vanilla state.
+  - The next safe slice is a focused React areas parity task that adds
+    relationship/provider scope signals and explicit links to current mapping
+    actions before any route replacement.
+- Implementation Plan:
+  - Compare each React workbench to its canonical vanilla counterpart.
+  - Identify missing action and setup ownership for each candidate.
+  - Record the no-switch decision and the reason in planning/state docs.
+  - Queue the smallest parity slice that can move one route closer to
+    replacement without breaking current owner workflows.
+- Acceptance Criteria:
+  - [x] Decision names whether a canonical route switch is approved.
+  - [x] Decision evaluates `/react-tasks`, `/react-integrations`, and
+    `/react-areas`.
+  - [x] Decision records missing parity risks.
+  - [x] Next task is a concrete small implementation slice.
+  - [x] No runtime route switch is performed in this decision task.
+- Validation Evidence:
+  - Source review:
+    - `public/app.js` still owns typed data editors, provider setup,
+      relationship review, Drive setup/import, and scope-editing controls.
+    - `web/src/main.tsx` owns React read/filter workbench surfaces for tasks,
+      integrations, Company OS, and areas.
+  - `git diff --check`: pending final check.
+- Result Report:
+  - Decision: keep `/tasks-adapter`, `/settings/integrations`, and `/areas`
+    canonical for now.
+  - Reason: React routes are safe read/inspection workbenches, but canonical
+    owner workflows still depend on vanilla edit/setup/mapping controls.
+  - Next step: UXA-019 React Areas Mapping Parity Slice.
+
+## UXA-017 React Workbench Third Route Candidate
+
+- Task Type: frontend
+- Current Stage: done
+- Deliverable For This Stage: parallel React `/react-areas` workbench backed
+  by existing owner connection data.
+- Goal: Prove the shared React route kit can support a third dense management
+  route before making any canonical route switch decision.
+- Scope:
+  - `web/src/react-route-kit.tsx`
+  - `web/src/main.tsx`
+  - `src/app.ts`
+  - `.codex/context/PROJECT_STATE.md`
+  - `.codex/context/TASK_BOARD.md`
+  - `.agents/state/current-focus.md`
+  - `.agents/state/next-steps.md`
+  - `.agents/state/system-health.md`
+  - `docs/planning/mvp-next-commits.md`
+  - `docs/planning/web-console-v2-task-contracts.md`
+- Implementation Plan:
+  - Add a route-kit state hook for operating-area workbench loading.
+  - Add `/react-areas` to the backend static React route allowlist.
+  - Build a React operating-area surface with signed-out, loading, error, and
+    ready states.
+  - Reuse shared Shell, MetricCard, LocalNotice, and DataTable primitives.
+  - Verify signed-out and signed-in route rendering, desktop/mobile overflow,
+    build, Docker runtime, and integration tests.
+- Acceptance Criteria:
+  - `/react-areas` renders through the backend route allowlist.
+  - Signed-out state routes the owner to login.
+  - Signed-in state reads live `/v1/connection` data.
+  - The page exposes operating-area metrics, readiness, filters, coverage
+    cards, and a table of area/table/provider ownership.
+  - The current vanilla `/areas` route remains available.
+  - Desktop and mobile render without horizontal overflow or route-level
+    console/API failures.
+- Definition of Done:
+  - `npm run build`, Docker rebuild, targeted Playwright route checks, Docker
+    migration/test gate, and `git diff --check` pass.
+  - Project state, task board, next-steps, system health, and next-commits docs
+    are updated.
+- Result Report:
+  - Added `/react-areas` as a parallel React operating-area workbench.
+  - Added `useAreasWorkbenchState` to the shared React route kit.
+  - Added route-level signed-out/loading/error/ready states, metrics,
+    readiness notice, coverage cards, filters, and table rendering.
+  - Preserved canonical vanilla `/areas`.
+  - `npm run build` passed.
+  - Docker rebuild, seed, signed-out/signed-in Playwright checks, desktop and
+    mobile overflow checks, and Docker migration/test gate passed.
 
 ## V2WEB-004 Dedicated Operating Areas View
 

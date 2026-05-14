@@ -34,6 +34,23 @@ This is not a component inventory. It is a screen and flow pattern catalog.
 - Tablet: combine summary cards with richer previews.
 - Desktop: use width for comparison, trends, and secondary context.
 
+### Company City Map
+
+- Purpose: orient the user inside the whole company as a strategic value
+  ecosystem, not a generic dashboard.
+- Current project-specific spec:
+  `docs/ux/company-city-dashboard-v3-spec.md`.
+- Use when: the screen needs to show company areas, responsibility, value
+  flow, unassigned `GENERAL` intake, integrations, tasks, decisions, and
+  automation readiness together.
+- Mobile: compress the map into an overview, district switcher, or progressive
+  drill-down; do not force tiny labels on a full city canvas.
+- Tablet: pair the selected district with a command panel when space allows.
+- Desktop: use the full cinematic city canvas with persistent navigation,
+  right-side command brief, and a bottom value-journey strip.
+- Avoid: flat node graphs, generic bento dashboards, map labels that obscure
+  the view, and game-like rewards that are not backed by real company state.
+
 ### Form Heavy Workflow
 
 - Purpose: creation, editing, onboarding, settings, or checkout.

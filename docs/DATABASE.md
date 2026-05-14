@@ -24,6 +24,72 @@ integration fields such as `external_id` and `source` where relevant.
 - `agents`: AI agents such as Paperclip/Jarvis workers.
 - `agent_logs`: logs emitted by agents.
 - `events`: append-style system events for important changes.
+- `company_roles`: human, agent, and system roles with responsibilities,
+  permissions, allowed tools, escalation targets, and default policies.
+- `processes`: durable company processes owned by roles and mapped to
+  departments/categories, maturity, policy references, and metric references.
+- `pipelines`: reusable workflow definitions linked to processes, owners,
+  trigger types, input/output schemas, automation flags, status, version, and
+  risk.
+- `pipeline_stages`: ordered pipeline stages; the original CRM-compatible
+  stage table now also supports pipeline ownership, expected input/output,
+  entry/exit conditions, role assignment, procedure links, required tools,
+  approval hints, duration, failure strategy, retry policy, and validated
+  `OperatingStatus`.
+- `procedures`: standard operating procedures linked to processes, pipeline
+  stages, tools, permissions, expected result, owner role, and quality
+  standard.
+- `procedure_steps`: ordered SOP steps for manual, automated, agent,
+  human-review, and integration-call work.
+- `standards`: versioned quality standards for operations, code, UX,
+  documentation, security, task structure, Drive structure, and agent prompts,
+  including `OperatingStatus` for soft archive behavior.
+- `resources`: provider-neutral resources such as ClickUp tasks, Drive files,
+  folders, GitHub repos, database tables, documents, automations, prompts, and
+  API endpoints.
+- `tool_adapters`: workspace-scoped integration adapter definitions for
+  ClickUp, Google Drive, Gmail, GitHub, Coolify, n8n, and custom providers.
+- `integration_capabilities`: provider-neutral adapter capabilities with
+  required permissions, schemas, risk, approval, and audit flags.
+- `pipeline_runs`: concrete pipeline executions with initiating actor,
+  current stage, input/output payloads, linked task/document IDs, optional
+  client/project links, status, timestamps, error state, and correlation ID.
+- `stage_runs`: concrete execution records for pipeline stages, including
+  assigned actor, logs, validation result, approval status, input/output, and
+  timestamps.
+- `approvals`: approval requests for risky user, agent, system, or integration
+  actions, with approver role/user, risk level, decision reason, expiry, and
+  optional run/stage-run links.
+- `checklist_templates`: reusable completion checklist definitions for tasks,
+  pipeline stages, procedures, pipeline runs, and stage runs.
+- `checklist_items`: ordered checklist template items with required/optional
+  flags and verification type.
+- `acceptance_criteria`: target-specific completion criteria with validation
+  status, verifier, evidence, and optional run/stage-run links.
+- `audit_logs`: append-style action evidence with actor, resource, tool
+  adapter, input, output, approval, errors, run links, and correlation ID.
+- `policies`: policy-driven rules with severity, enforcement mode, escalation
+  role, and optional process/procedure links.
+- `metrics`: KPI definitions with measurement type, unit, target/current
+  values, calculation metadata, owner, and process/pipeline links.
+- `risks`: process and pipeline risk records.
+- `controls`: controls that reduce risks through approvals, tests, snapshots,
+  permission limits, validation gates, and rollback plans.
+- `knowledge_items`: company knowledge linked to processes, pipelines,
+  projects, clients, agents, and external document sources.
+- `decision_logs`: structured decisions with context, options, chosen option,
+  reason, consequences, and review date.
+- `automation_rules`: condition/action rules that can launch or escalate
+  Company OS workflows.
+- `triggers`: manual, schedule, webhook, provider-event, agent-decision, and
+  system-event trigger records.
+- `artifacts`: concrete work outputs such as reports, documents, branches,
+  pull requests, pages, graphics, prompts, contracts, and invoices.
+- `dependencies`: dependencies between resources and runtime or business
+  entities.
+- `business_functions`: LuckySparrow department/business-function catalog with
+  accountable roles.
+- `stakeholders`: client, internal, partner, vendor, and other stakeholders.
 - `api_keys`: workspace-scoped service credentials for agents and automations.
 - `integration_settings`: workspace-scoped provider configuration and protected
   secret material, starting with ClickUp.
@@ -67,18 +133,18 @@ The approved business areas are fixed catalog values owned by CompanyCore:
 
 | Area | Example current/future tables |
 | --- | --- |
-| Strategy and governance | `goals`, `targets`, future governance policies |
+| Strategy and governance | `goals`, `targets`, `policies`, `metrics`, `risks`, `controls` |
 | Projects and delivery | `projects`, future milestones/releases |
-| Tasks and workflow | `task_lists`, `tasks`, `pipeline_stages`, future statuses/checklists |
-| Sales and CRM | `clients`, `deals`, `interactions` |
+| Tasks and workflow | `task_lists`, `tasks`, `pipelines`, `pipeline_stages`, `pipeline_runs`, `stage_runs`, `checklist_templates`, `checklist_items`, `acceptance_criteria`, future statuses/checklists |
+| Sales and CRM | `clients`, `deals`, `interactions`, `stakeholders` |
 | Marketing and growth | future campaigns, experiments, channels |
 | Finance and billing | future invoices, expenses, subscriptions |
-| People and roles | future teammates, responsibilities, role maps |
-| Operations and administration | future vendors, assets, procedures |
-| Knowledge and decisions | `notes`, `decisions`, future docs index |
-| Assets and storage | future file/storage objects and media references |
-| Automations and integrations | `integration_settings`, future automations |
-| AI agents and observability | `agents`, `agent_logs`, `events` |
+| People and roles | `company_roles`, future teammates, responsibilities, role maps |
+| Operations and administration | `procedures`, `procedure_steps`, `approvals`, `dependencies`, `business_functions`, future vendors and assets |
+| Knowledge and decisions | `notes`, `decisions`, `decision_logs`, `knowledge_items`, `standards`, future docs index |
+| Assets and storage | `resources`, `artifacts`, future file/storage objects and media references |
+| Automations and integrations | `tool_adapters`, `integration_capabilities`, `automation_rules`, `triggers`, `integration_settings`, future automations |
+| AI agents and observability | `agents`, `agent_logs`, `events`, `audit_logs` |
 
 System tables remain outside the 12 business areas:
 
@@ -110,6 +176,22 @@ Registry tables:
   other durable knowledge base root for a workspace/folder/table.
 - `automation_definitions`: workspace/folder/table-scoped automations and
   provider triggers.
+- `processes`, `pipelines`, `procedures`, `company_roles`, `resources`,
+  `tool_adapters`, and `integration_capabilities`: Company OS foundation
+  records used to describe what the company does, how work flows, how stages
+  are performed, who or what is accountable, what resources are touched, and
+  which tool capabilities are allowed.
+- `pipeline_runs`, `stage_runs`, `approvals`, `checklist_templates`,
+  `checklist_items`, `acceptance_criteria`, and `audit_logs`: Company OS
+  runtime evidence records used to prove what happened, who or what acted,
+  which approval or checklist applied, and how events correlate across a
+  workflow.
+- `policies`, `metrics`, `risks`, `controls`, `knowledge_items`,
+  `decision_logs`, `automation_rules`, `triggers`, `artifacts`,
+  `dependencies`, `business_functions`, and `stakeholders`: Company OS
+  governance intelligence records used to make agent behavior policy-driven,
+  measurable, risk-aware, explainable, and tied to real business functions and
+  stakeholders.
 
 The operating model API exposes these registry records through
 `/v1/operating-model`. Storage locations, knowledge roots, and automation
@@ -124,12 +206,16 @@ Implemented first-party table assignments:
 
 | Area | Tables |
 | --- | --- |
-| Strategy and governance | `goals`, `targets` |
+| Strategy and governance | `goals`, `targets`, `policies`, `metrics`, `risks`, `controls` |
 | Projects and delivery | `projects` |
-| Tasks and workflow | `task_lists`, `tasks`, `pipeline_stages` |
-| Sales and CRM | `clients`, `deals`, `interactions` |
-| Knowledge and decisions | `notes`, `decisions` |
-| AI agents and observability | `agents`, `agent_logs`, `events` |
+| Tasks and workflow | `task_lists`, `tasks`, `pipelines`, `pipeline_stages`, `pipeline_runs`, `stage_runs`, `workflow_definition_drafts`, `checklist_templates`, `checklist_items`, `acceptance_criteria` |
+| Sales and CRM | `clients`, `deals`, `interactions`, `stakeholders` |
+| People and roles | `company_roles` |
+| Operations and administration | `procedures`, `procedure_steps`, `approvals`, `dependencies`, `business_functions` |
+| Knowledge and decisions | `notes`, `decisions`, `decision_logs`, `knowledge_items`, `standards` |
+| Assets and storage | `resources`, `artifacts` |
+| Automations and integrations | `tool_adapters`, `integration_capabilities`, `automation_rules`, `triggers` |
+| AI agents and observability | `agents`, `agent_logs`, `events`, `audit_logs` |
 
 The remaining approved areas are created even when they do not yet have
 first-party tables, so future finance, people, marketing, operations, storage,
@@ -185,6 +271,35 @@ All business tables include `workspace_id` for v1 workspace isolation:
 - `tasks`
 - `clients`
 - `pipeline_stages`
+- `processes`
+- `pipelines`
+- `procedures`
+- `procedure_steps`
+- `company_roles`
+- `resources`
+- `tool_adapters`
+- `integration_capabilities`
+- `standards`
+- `pipeline_runs`
+- `stage_runs`
+- `workflow_definition_drafts`
+- `approvals`
+- `checklist_templates`
+- `checklist_items`
+- `acceptance_criteria`
+- `audit_logs`
+- `policies`
+- `metrics`
+- `risks`
+- `controls`
+- `knowledge_items`
+- `decision_logs`
+- `automation_rules`
+- `triggers`
+- `artifacts`
+- `dependencies`
+- `business_functions`
+- `stakeholders`
 - `deals`
 - `interactions`
 - `notes`
@@ -209,6 +324,57 @@ All business tables include `workspace_id` for v1 workspace isolation:
 Protected reads and writes must filter by the active `workspace_id`. If the
 request cannot resolve a workspace from a user session/token or service API key,
 the request must fail closed.
+
+## Workflow Definition Drafts
+
+`workflow_definition_drafts` is the persistence ledger for planned workflow
+definition changes before activation. It is intentionally implemented through
+the command routes in `docs/API.md` rather than Prisma model delegates so the
+active workflow definition tables stay protected from generic raw editing.
+
+Key fields:
+
+- `workspace_id`: workspace isolation boundary.
+- `root_object_type`: `process`, `pipeline`, or `procedure`.
+- `root_object_id`: optional existing definition being revised.
+- `name`, `reason`, `risk_level`, `status`: human review metadata.
+- `base_version` and `target_version`: version planning before activation.
+- `change_set`: proposed definition changes.
+- `impact_preview`: generated affected-count and approval-reason summary.
+- `idempotency_key`: optional workspace-scoped create deduplication key.
+- `actor_type`, `actor_id`, `source_channel`: command provenance.
+
+Draft create/update/preview commands must emit audit logs and events. The
+table does not mutate processes, pipelines, procedures, stages, or procedure
+steps by itself.
+
+Draft list/readback is available through guarded workflow-definition routes
+for operators and agents that already have `company-os:workflow-definition:write`.
+The readback surface is intentionally not exposed through generic
+`/v1/company-os/:collection` reads because draft `change_set` and
+`impact_preview` payloads are command metadata, not ordinary read-only company
+records.
+
+The current activation command supports `process`, `pipeline`, and
+`procedure` drafts. `processes`, `pipelines`, and `procedures` use
+`workspace_id + name + version` uniqueness so activation can mark the previous
+root `deprecated`, create a new active version, and copy/apply child pipeline
+stages or procedure steps without overwriting historical runtime evidence.
+They also persist `family_id` on each root row and copy it during activation,
+which gives workflow recovery a stable version lineage independent of display
+name changes.
+
+Historical workflow archive is also command-shaped. It updates the selected
+process, pipeline, or procedure root `status` to `archived` only through the
+guarded workflow-definition archive command, and blocks active roots or roots
+with active non-terminal runtime dependencies.
+
+Rollback-draft creation stores planned rollback as another
+`workflow_definition_drafts` row. The rollback source root ID and version are
+recorded in `change_set` with `kind = "rollback_to_version"`; activation still
+uses the current active root as `root_object_id` and normal base/target version
+checks. The active rollback target is resolved through the root `family_id`,
+not through the mutable workflow name.
 
 ## User And Workspace Tables
 
@@ -246,6 +412,16 @@ transaction.
 - workspace from `SEED_WORKSPACE_NAME`
 - local workspace API key from `SEED_API_KEY`
 - default pipeline stages
+- Company OS Stage 1 foundation records:
+  - Human Owner plus CEO, CTO, Project Manager, Developer, QA,
+    Documentation, Sales, and Finance agent roles
+  - ClickUp, Google Drive, GitHub, Coolify, and n8n tool adapters with
+    provider-neutral capabilities
+  - the first seven LuckySparrow pipelines:
+    Feature Development, Client Onboarding, Content Production, Agent Task
+    Execution, Integration Onboarding, Documentation Update, and Deployment
+  - matching processes, SOP procedures, procedure steps, pipeline stages, and
+    provider-neutral pipeline resources
 
 This seed path is acceptable for local development and intentional first-owner
 bootstrap. It must not become a permanent production admin shortcut. Production

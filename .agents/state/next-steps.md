@@ -1,23 +1,25 @@
 # Next Steps
 
-Last updated: 2026-05-08
+Last updated: 2026-05-14
 
 ## NOW
 
-UXA-015 React Canonical Route Switch Readiness is ready. After UXA-014, decide
-whether a React route can safely become canonical or whether remaining
-adapter/editor affordances need another slice.
+No local Company OS workflow recovery task is currently ready. The next active
+work is external/target-environment validation listed under `LATER`, unless a
+new product slice is selected.
 
 ## NEXT
 
-UXA-016 React Route Shell Extraction. If UXA-015 keeps migration parallel,
-extract shared React route helpers before adding a third workbench so
-`web/src/main.tsx` does not keep growing as a monolith.
+V2WEB-AGENT-024 is complete. Workflow recovery has backend lineage, web
+controls, clean collection fetches, mock UI proof, and real-backend UI proof
+against a disposable Docker Compose stack.
 
 ## LATER
 
-1. AGRUN-007 Google Drive Owner Consent And First Import, blocked until real
-   OAuth credentials and owner consent are available.
+1. AGRUN-007 Google Drive Owner Consent And First Import, local patch verified;
+   deploy the patched backend/web bundle, then rerun production folder
+   discovery and first selected-folder import smoke with the connected owner
+   account.
 2. AGRUN-010 Upstream Agent Source Merge Execution, blocked until upstream
    write access or an approved fork/PR route exists.
 

@@ -34,6 +34,109 @@ of rediscovering them.
 
 ## Entries
 
+### 2026-05-14 - Company City Strategic Map
+- Type: visual_direction
+- Context: The user approved the generated dashboard direction showing a
+  cinematic-realistic company city/campus map with classic architecture,
+  visible districts, a `GENERAL` intake core, command brief, and value journey.
+- Decision: Use `Company City Map` as the canonical UX/UI direction for the
+  logged-in dashboard and future high-level company-map surfaces. The product
+  should feel like a light strategy game where the user builds and steers a
+  company-city, while remaining a serious human/AI operational system.
+- Reuse when: Designing dashboard, operating-area map, department overview,
+  integration map, task/decision command views, onboarding into company
+  structure, and responsive web/native mobile equivalents.
+- Avoid when: Building dense record editors, security-sensitive credential
+  forms, or table-first CRUD surfaces where cinematic imagery would obscure
+  the primary action; keep those screens calmer but connected to district
+  identity and command context.
+- Evidence: User selected the generated Company City dashboard direction on
+  2026-05-14 and requested the decision be saved as the UX/UI development
+  direction, including web desktop/tablet/mobile and native mobile/tablet.
+
+### 2026-05-14 - Light Strategy Gamification
+- Type: reusable_pattern
+- Context: The Company City direction should be more engaging than a standard
+  OS/dashboard while still managing real company data, tasks, integrations,
+  automations, and workflows.
+- Decision: Use light gamification only when it represents real progress:
+  district readiness, value-flow stage progress, verified milestones,
+  automation readiness, unassigned GENERAL cleanup, and completed operating
+  missions. The game layer must make work clearer, not noisier.
+- Reuse when: Showing progress, onboarding users through company setup,
+  motivating cleanup/routing/proof tasks, or summarizing improvement across
+  departments.
+- Avoid when: The metric cannot be traced to real evidence, creates pressure
+  without business value, or distracts from decisions, permissions, security,
+  money, or customer-impacting work.
+- Evidence: User requested a strategic-game feel for creating a company like a
+  city and asked to add light gamification to make the application more
+  attractive.
+
+### 2026-05-14 - Company City Dashboard V2 Target
+- Type: reusable_pattern
+- Context: After accepting the Company City direction, the user requested a
+  clearer Dashboard V2 target and a table-like inventory of elements to prevent
+  future drift between generated images and implementation.
+- Decision: Use `docs/ux/company-city-dashboard-v3-spec.md` and
+  `docs/ux/assets/company-city-dashboard-v2-target.png` as the current
+  dashboard target. Implementation must follow the corrected structure in the
+  spec: `GENERAL` as area `00`, exactly 12 numbered operating districts, a
+  right `Command Brief`, bottom `Value Journey`, and subtle status strip.
+- Reuse when: Building or reviewing the logged-in dashboard, company map,
+  area overview, shared shell, command brief, value journey, status strip, or
+  responsive dashboard adaptations.
+- Avoid when: A later accepted visual target supersedes this one; record the
+  replacement in the same spec rather than leaving conflicting chat notes.
+- Evidence: UXD-002 Dashboard V2 target capture on 2026-05-14.
+
+### 2026-05-14 - Company City Dashboard V3 Department Model
+- Type: visual_direction
+- Context: The user provided the canonical department list:
+  `00 Ogolny`, `01 Strategia`, `02 Produkt`, `03 Sprzedaz`, `04 Operacje`,
+  `05 Relacje`, `06 Kadry`, `07 Finanse`, `08 Zasoby`, `09 Technologia`,
+  `10 Prawo`, `11 Innowacje`, `12 Zarzadzanie`.
+- Decision: Dashboard V3 supersedes the earlier value-chain department labels.
+  The city map must use the user's universal company department model and keep
+  sales/delivery/automation concepts as workflows or objects inside those
+  departments where appropriate.
+- Reuse when: Prompting or implementing the Company City dashboard, area map,
+  department markers, navigation, and department drill-downs.
+- Avoid when: A future accepted department taxonomy supersedes this model.
+- Evidence: Dashboard V3 and `12 Zarzadzanie` department targets captured on
+  2026-05-14.
+
+### 2026-05-14 - Zarzadzanie Department Drill-Down
+- Type: reusable_pattern
+- Context: The user requested a preview of department `12 Zarzadzanie` after
+  refining the dashboard to the canonical department model.
+- Decision: Department drill-downs should combine a cinematic district context
+  panel with real operational workbench sections and a contextual right panel.
+  For `12 Zarzadzanie`, the canonical sections are strategic decisions, risks
+  and controls, management rhythm, management panel, and a relationship map to
+  related departments.
+- Reuse when: Designing other department detail views from the Company City map.
+- Avoid when: A detail route is a narrow CRUD editor; keep those calmer but
+  preserve department identity and command context.
+- Evidence:
+  `docs/ux/assets/company-city-management-department-v1-target.png`.
+
+### 2026-05-09 - React Canonical Route Switch Gate
+- Type: ux_learning
+- Context: `/react-tasks`, `/react-integrations`, and `/react-areas` now prove
+  the shared React route kit can support dense management surfaces, but the
+  vanilla owner console still owns several setup, edit, and mapping actions.
+- Decision: Do not switch canonical vanilla routes to React until the target
+  React route owns or intentionally routes all critical actions from the
+  matching vanilla surface. Read/filter parity is not enough for replacement.
+- Reuse when: Deciding whether a React preview route can replace a canonical
+  owner-console route.
+- Avoid when: A route is explicitly read-only by product design and has no
+  owner action parity requirement.
+- Evidence: UXA-018 keeps `/tasks-adapter`, `/settings/integrations`, and
+  `/areas` canonical because React counterparts lack typed CRUD,
+  provider/Drive setup, relationship review, or mapping controls.
+
 ### 2026-05-09 - React Integration Map Workbench
 - Type: reusable_pattern
 - Context: React migration needs a second real workbench that helps owners

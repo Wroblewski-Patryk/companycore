@@ -3,11 +3,383 @@
 Keep this file short and execution-focused. The active queue must stay
 synchronized with `.codex/context/TASK_BOARD.md`.
 
-## NOW
+## Active Queue
 
-- [ ] UXA-015 React Canonical Route Switch Readiness:
+### NOW
+
+No local Company OS workflow recovery task is currently ready. The next active
+work is external/target-environment validation listed under `BLOCKED`, unless
+a new product slice is selected.
+
+### NEXT
+V2WEB-AGENT-024 is complete. Workflow recovery has backend lineage, web
+controls, clean collection fetches, mock UI proof, and real-backend UI proof.
+External blockers stay listed below.
+
+### BLOCKED
+
+- [ ] AGRUN-007 Google Drive Owner Consent And First Import:
+      blocked until real OAuth credentials and owner consent are available.
+- [ ] AGRUN-010 Upstream Agent Source Merge Execution:
+      blocked until upstream write access or an approved fork/PR route exists.
+- [ ] KI-002 GitHub-to-Coolify Auto-Deploy Proof:
+      blocked until deploy automation evidence can be produced with approved
+      provider or VPS access.
+
+## Historical Completed Queue
+
+The section below is retained as execution evidence. It is not the active
+queue. Future work must start from `Active Queue`, `.codex/context/TASK_BOARD.md`,
+and `docs/operations/v1-function-coverage-ledger.csv`.
+
+- [x] V2WEB-AGENT-015 Workflow Archive And Rollback Command Decision:
+      selected phased recovery commands. Archive should first support inactive
+      historical workflow versions by explicit root type/root ID; rollback
+      should first create a rollback draft that flows through existing preview
+      and activation.
+- [x] V2WEB-AGENT-016 Workflow Historical Version Archive Backend Slice:
+      added the first workflow recovery command for inactive historical root
+      versions, with active-version and active-runtime-dependency blocking,
+      idempotent replay, audit/event evidence, read-only denial, and MCP
+      manifest metadata. `npm test` passed on disposable PostgreSQL
+      `localhost:55439`.
+- [x] V2WEB-AGENT-017 Workflow Rollback Draft Backend Slice:
+      added rollback-draft creation from historical workflow roots without
+      direct rollback execution. The route generates impact preview, records
+      rollback source metadata in the draft change set, emits audit/event
+      evidence, denies read-only sessions, and is idempotent. `npm test`
+      passed on disposable PostgreSQL `localhost:55440`.
+- [x] V2WEB-AGENT-018 Workflow Recovery Controls Web Decision:
+      selected a dedicated `Recovery controls` panel inside the existing
+      workflow command surface, keeping recovery separate from normal draft
+      creation.
+- [x] V2WEB-AGENT-019 Workflow Recovery Controls Web Surface:
+      added route-kit clients and `/react-company-os` recovery controls for
+      archive and rollback-draft commands. `npm run build` passed; `npm test`
+      passed on disposable PostgreSQL `localhost:55441`; Playwright proof
+      verified rollback-draft interaction on `http://127.0.0.1:3103`.
+- [x] V2WEB-AGENT-020 Workflow Version Lineage Decision:
+      decided that rollback across renamed workflow versions requires explicit
+      root lineage rather than name matching.
+- [x] V2WEB-AGENT-021 Workflow Version Lineage Implementation:
+      added `family_id` lineage to process, pipeline, and procedure roots,
+      copied it during activation, and resolved rollback-draft active targets
+      by family. `npx prisma generate`, `npm run build`, and `npm test` passed
+      against disposable PostgreSQL on `localhost:55442`.
+- [x] V2WEB-AGENT-022 Company OS Collection Fetch Alignment:
+      changed shared table-record path resolution so Company OS collection
+      slugs use `/v1/company-os/:collection` instead of generic `/v1/:slug`.
+      `npm run build` passed; Playwright mock render proof verified
+      `/react-company-os` with `badGeneric=[]`, `notFound=[]`, and
+      `consoleErrors=[]`.
+- [x] V2WEB-AGENT-023 Workflow Recovery End-To-End Activation Proof:
+      added an inline audited approval decision action to the workflow command
+      panel and kept local recovery state intact until activation. `npm run
+      build` passed; Playwright proof verified rollback draft, preview,
+      approval request, approval decision, and activation with calls
+      `rollback-draft`, `preview`, `request-approval`, `approve`, and
+      `activate:approval-recovery-1`.
+- [x] V2WEB-AGENT-024 Workflow Recovery Real Backend Proof:
+      repeated the rollback recovery journey against a disposable Docker
+      Compose backend on `http://127.0.0.1:3104`. The proof used a migrated and
+      seeded PostgreSQL stack, created a historical version setup, then used
+      `/react-company-os` for rollback draft, preview, approval request,
+      approval decision, and activation. Console errors were `[]`; screenshot:
+      `C:\Users\wrobl\AppData\Local\Temp\companycore-v2web024-real-backend-recovery-proof.png`.
+
+- [x] V2PLAN-001 V2 Product Lane Selection:
+      selected Agent-First Company OS as the next deliberate V2 lane after
+      V1EVID-001 and V1EVID-002 closed local V1 evidence gaps. Updated
+      `.agents/state/delivery-map.md` and canonical queues so the next task is
+      an MCP/HTTP command-surface audit, not broad feature work.
+- [x] V2AGENT-001 Agent-First Company OS MCP Command Surface Audit:
+      published `docs/operations/v2-agent-company-os-command-surface-audit.md`,
+      mapping existing Company OS lifecycle commands to MCP exposure,
+      capabilities, evidence, and risks. The audit found
+      `mcp_company_os_reader` has approval write scopes despite being
+      documented as read-only, so V2AGENT-002 is the next safe slice.
+- [x] V2AGENT-002 MCP Company OS Reader Least-Privilege Correction:
+      removed approval write scopes from `mcp_company_os_reader` and added
+      regression assertions that profile-created reader keys omit approval,
+      stage, and automation write tools from the MCP manifest and receive
+      `403` for approval request/decision calls. `npm run build` and Docker
+      `node --test dist/tests/api.test.js` passed.
+- [x] V2AGENT-003 Approval-Aware MCP Command Flow Design:
+      added `docs/operations/approval-aware-mcp-command-flow.md`, defining
+      fail-closed default bridge behavior for `requiresApproval` tools,
+      supervised-only execution mode, evidence requirements, and V2AGENT-004
+      as the next implementation slice.
+- [x] V2AGENT-004 MCP Requires-Approval Bridge Guard:
+      added the default fail-closed guard in
+      `scripts/companycore-mcp-server.mjs`, extended the MCP smoke harness for
+      expected blocked calls, and verified safe-read pass plus
+      `mcp_tool_requires_supervision` blocked risky-tool behavior in the Docker
+      API test gate.
+- [x] V2AGENT-005 Supervised Operator MCP Smoke Harness:
+      extended `scripts/companycore-mcp-smoke.mjs` with expected HTTP status
+      and response-error checks, then added Docker API evidence that an
+      `mcp_operator` key still gets `mcp_tool_requires_supervision` by default
+      and only reaches HTTP validation when
+      `COMPANYCORE_MCP_COMMAND_MODE=supervised_operator` is explicit.
+- [x] V2AGENT-006 Agent Command Queue Cockpit Slice:
+      added an agent command queue to `/react-company-os` from already-loaded
+      approvals, stage runs, automation rules, and policies. `npm run build`
+      passed; V2AGENT-006R closed rendered proof.
+- [x] V2AGENT-006R Agent Command Queue Render Proof:
+      verified `/react-company-os` with a temporary static SPA server, mock
+      `/v1` Company OS endpoints, injected owner session, and system Chrome
+      `--headless=new --dump-dom --virtual-time-budget=5000`.
+- [x] V2WEB-ARCH-001 Human-Agent Web Architecture Map:
+      added `docs/planning/human-agent-web-architecture-map.md`, mapping the
+      approved Company OS and MCP architecture into web responsibilities and
+      selecting Agent Tool Surface Workbench as the first human-agent UI
+      bridge.
+- [x] V2WEB-AGENT-001 Agent Tool Surface Workbench:
+      added `/react-agent-tools`, typed MCP manifest loading, route-family
+      grouping, risk/supervision badges, guardrails, and current
+      auth/transport context using existing `/v1/connection` and
+      `/v1/mcp/manifest`. `npm run build` and Browser plugin render/filter
+      proof passed.
+- [x] V2WEB-AGENT-002 Company OS Correlation Timeline:
+      added a client-composed correlation timeline to `/react-company-os`
+      using existing recent event and audit log `correlationId` data from
+      `/v1/company-os`. `npm run build` and Playwright fallback render proof
+      passed.
+- [x] V2WEB-AGENT-003 Operating Graph Detail:
+      added an operating graph detail panel to `/react-company-os`, connecting
+      selected operating-area tables, provider table paths, Company OS
+      resources, policies, risks, automation rules, recent runs, and
+      correlation evidence from existing read contracts. `npm run build` and
+      Playwright render proof passed.
+- [x] V2WEB-AGENT-004 Workflow-Grade Command Panels:
+      added approval, stage lifecycle, and automation command preview cards
+      with prerequisites, expected result, recovery guidance, and automation
+      proposal/effect evidence. Fixed automation dry-run result visibility.
+      `npm run build` and Playwright render/interaction proof passed.
+- [x] V2WEB-AGENT-005 Definition Editing Contract Decision:
+      added `docs/architecture/company-os-definition-editing-contract.md`,
+      classifying which Company OS definition objects can use scoped CRUD,
+      command routes, versioning, approval, or no raw editing. The first
+      allowed editor path is a low-risk Class A object such as `standards` or
+      `company_roles`, after audited backend write routes exist.
+- [x] V2WEB-AGENT-006 Class A Definition Editor Backend Contract:
+      added `company-os:definition:write`, audited
+      `POST/PATCH/DELETE /v1/company-os/standards`, soft archive status for
+      standards, MCP manifest exposure with destructive archive supervision,
+      and integration coverage for owner success, cross-workspace denial,
+      read-only scoped denial, audit/event evidence, and manifest metadata.
+      `npx prisma generate`, `npm run build`, and `npm test` against a
+      disposable PostgreSQL database passed.
+- [x] V2WEB-AGENT-007 Standards Definition Editor Web Surface:
+      implemented the narrow `/react-company-os` standards editor using the
+      audited backend routes, local capability-denied/save/archive notices,
+      standard relation reads, and generated React bundle output. `npm run
+      build`, static marker checks, and `git diff --check` passed.
+- [x] V2WEB-AGENT-007R Standards Editor Render Proof:
+      Playwright Chromium proof rendered `/react-company-os`, verified
+      `Definition editor`, `Audited Class A editor`, `Proof Standard`,
+      `Create standard`, `Standard created`, and `Render Proof Standard`,
+      confirmed mocked `POST /v1/company-os/standards`, and reported zero
+      relevant browser console issues with cleanup checks passing.
+- [x] V2WEB-AGENT-008 Versioned Workflow Definition Command Contract:
+      added
+      `docs/architecture/company-os-workflow-definition-command-contract.md`,
+      defining workflow draft/update, impact preview, approval, activation,
+      archive, rollback, versioning, runtime evidence preservation, MCP
+      exposure, and web-editor gates before any process/pipeline/procedure
+      editor can ship.
+- [x] V2WEB-AGENT-009 Workflow Definition Draft Backend Contract:
+      added migration `202605142_workflow_definition_drafts`,
+      `company-os:workflow-definition:write`, audited draft create/update and
+      impact-preview routes, MCP manifest exposure, API/database docs, and
+      integration coverage for owner success, idempotency, cross-workspace
+      denial, read-only denial, audit/event evidence, and manifest metadata.
+      `npm run build` and `npm test` against disposable PostgreSQL on
+      `localhost:55433` passed; the disposable container was removed.
+- [x] V2WEB-AGENT-010 Workflow Definition Activation Backend Contract:
+      added supervised activation route
+      `POST /v1/company-os/workflow-definitions/drafts/:id/actions/activate`
+      initially for procedure drafts, guarded by
+      `company-os:workflow-definition:activate`, approved draft validation,
+      stale-version rejection, previous-version deprecation, new active
+      procedure version creation, procedure step copy/apply, audit/event
+      evidence, MCP manifest supervision metadata, and denial coverage.
+      `npm run build`, `npm test` against disposable PostgreSQL on
+      `localhost:55434`, and `git diff --check` passed; the disposable
+      container was removed.
+- [x] V2WEB-AGENT-011 Process And Pipeline Workflow Versioning Migration
+      Decision: added migration
+      `202605143_workflow_root_version_uniqueness`, changed process/pipeline
+      uniqueness to `workspaceId + name + version`, and extended workflow
+      activation to process and pipeline drafts. Pipeline activation copies or
+      applies stages; process activation creates a new active process version.
+      Integration tests now cover process, pipeline, and procedure activation.
+      `npx prisma generate`, `npm run build`, `npm test` against disposable
+      PostgreSQL on `localhost:55436`, and `git diff --check` passed; the
+      disposable container was removed.
+- [x] V2WEB-AGENT-012 Workflow Definition Draft Web Surface:
+      added typed route-kit clients for workflow draft create, impact preview,
+      and activation, then added a guarded `/react-company-os` panel for
+      process, pipeline, and procedure roots. The panel creates a draft from an
+      existing root, previews runtime impact, shows approval reasons, supports
+      approval request, and gates activation on
+      `company-os:workflow-definition:activate` plus approved approval ID when
+      required. `npm run build` passed; real-backend Playwright proof on
+      `http://127.0.0.1:3101/react-company-os` verified desktop render, create
+      draft, impact preview, approval-required state, mobile DOM render, and
+      zero relevant console issues.
+- [x] V2WEB-AGENT-013 Workflow Draft History And Resume Decision:
+      selected draft readback/resume before archive/rollback because web/API/MCP
+      draft creation needs an owner-visible way to resume interrupted command
+      flows after reload or agent handoff.
+- [x] V2WEB-AGENT-014 Workflow Draft Readback And Resume Slice:
+      added guarded workflow draft list/detail routes, route-kit loader, and a
+      `/react-company-os` `Recent drafts` resume panel scoped to `status=draft`.
+      API tests prove owner readback, cross-workspace isolation, read-only
+      denial, and manifest exposure. `npm run build`, `npm test` against
+      disposable PostgreSQL on `localhost:55438`, and Playwright resume proof
+      against `http://127.0.0.1:3102/react-company-os` passed.
+- [x] UXD-001 Company City UX Direction Decision:
+      captured the user-approved cinematic-realistic Company City Map direction
+      as canonical UX memory. Future dashboard and high-level map surfaces
+      should treat the company as a strategic city/value ecosystem with
+      `GENERAL` as the central intake district, 12 connected departments, a
+      command brief, value journey, responsive web/mobile behavior, and light
+      evidence-backed gamification.
+- [x] UXD-002 Company City Dashboard V2 Target Spec:
+      generated and saved the current Dashboard V2 visual target, then added
+      `docs/ux/company-city-dashboard-v3-spec.md` with a zone table, operating
+      district model, shared component inventory, responsive rules,
+      interaction rules, visual rules, and known reference corrections so
+      future UI work has a stable source of truth.
+- [x] UXD-003 Company City Dashboard V3 Department Model:
+      refined the Dashboard target around the user's canonical department list
+      and saved `docs/ux/assets/company-city-dashboard-v3-target.png` plus the
+      first drill-down target
+      `docs/ux/assets/company-city-management-department-v1-target.png` for
+      `12 Zarzadzanie`.
+- [x] V1CLOSE-001 V1 Achievement And External Blocker Handoff:
+      added `docs/operations/v1-achievement-and-blocker-handoff.md` and
+      `docs/planning/v1-closure-task-contracts.md`, making the V1 achievement
+      boundary and remaining external blockers recoverable from repository
+      state.
+- [x] V1EVID-001 Company OS Lifecycle Trace Smoke:
+      added `scripts/company-os-lifecycle-trace-smoke.mjs` and
+      `npm run company-os:trace-smoke`, then ran the local Docker command
+      `docker compose exec -T backend sh -lc "npm run prisma:migrate:deploy &&
+      npm run seed && npm run company-os:trace-smoke"`.
+      Trace `v1evid-1778458446081` verified approval request/decision, stage
+      start/validate/complete, automation dry-run/execute, `/v1/events`
+      readback, `/v1/company-os/audit-logs/:id` readback, `eventCount=8`, and
+      `auditLogCount=7`.
+- [x] V1EVID-002 Operating Model Registry Lifecycle Smoke:
+      added `scripts/operating-model-registry-lifecycle-smoke.mjs` and
+      `npm run operating-model:registry-smoke`, then ran
+      `docker compose exec -T backend sh -lc "npm run prisma:migrate:deploy &&
+      npm run seed && npm run operating-model:registry-smoke"`.
+      Trace `v1evid-om-1778459014284` verified folder, storage location,
+      knowledge root, and automation definition create/read/update/delete,
+      `/v1/operating-model` aggregate readback, deleted-resource `404`
+      readback, and cross-workspace deny checks.
+- [x] MCP-004 Dynamic MCP Profile UI Loading:
+      owner console now loads backend canonical MCP key profiles from
+      `/v1/api-keys/profiles`, keeps static presets only as fallback data, and
+      creates unchanged profile keys with `profileId`.
+- [x] MCP-005 MCP Bridge Runtime Smoke Harness:
+      added `npm run mcp:smoke`, a repeatable stdio bridge smoke that verifies
+      `initialize`, `tools/list`, and a safe `companycore_get_company_os`
+      `tools/call`; integration tests run it with a real profile-created MCP
+      key.
+- [x] MCP-006 MCP Agent Runtime Setup Guide:
+      added profile-to-runtime setup documentation for Codex, Paperclip-style,
+      and generic MCP-compatible agents, including secret handling, smoke
+      checks, prompt contract, and failure recovery.
+- [x] MCP-003 MCP Agent Key Profiles:
+      added canonical backend MCP key profiles, owner-only
+      `/v1/api-keys/profiles`, `profileId` creation support, current MCP/Drive
+      scopes in owner-console presets, and profile coverage in integration
+      tests.
+- [x] MCP-002 CompanyCore MCP Bridge Server:
+      added the first thin stdio MCP bridge server. It reads
+      `/v1/mcp/manifest`, exposes CompanyCore routes through `tools/list`, and
+      calls the HTTP API through `tools/call` using a workspace-scoped service
+      key.
+- [x] MCP-001 MCP Bridge Manifest Foundation:
+      expose a capability-scoped `/v1/mcp/manifest` tool catalog and include
+      the same MCP-friendly manifest in `/v1/connection`, so agent runtimes can
+      wrap CompanyCore routes as MCP tools without bypassing API policies,
+      approvals, events, or audit logs.
+- [x] CCOS-001 Company OS Stage 1 Data Foundation:
+      audit current architecture/data/integration state, then add the
+      workspace-scoped data foundation for processes, pipelines, enriched
+      pipeline stages, procedures, procedure steps, company roles, resources,
+      tool adapters, integration capabilities, standards, LuckySparrow seed
+      data, targeted relation tests, and architecture/database docs.
+- [x] CCOS-002 Company OS Stage 2 Runtime Evidence Foundation:
+      add pipeline runs, stage runs, approvals, checklists, acceptance
+      criteria, audit log, and event correlation using the CCOS-001 foundation.
+- [x] CCOS-003 Company OS Stage 3 Governance Intelligence Foundation:
+      add policy, metric/KPI, risk, control, knowledge item, decision log,
+      automation rule, trigger, artifact, dependency, business function, and
+      stakeholder foundations.
+- [x] CCOS-004 Company OS Read API Surface:
+      expose Stage 1-3 Company OS records through a scoped read-only API,
+      add the `company-os:read` capability and connection-manifest routes,
+      and cover owner/scoped-service access in integration tests.
+- [x] CCOS-005 Company OS Dashboard Surface:
+      added `/react-company-os` as the first React cockpit on
+      `/v1/company-os`, with definition/runtime/governance metrics, attention
+      queues, adapter health, and recent evidence.
+- [x] CCOS-006 Company OS Collection Drill-Down:
+      added read-only `/react-company-os` collection previews for pipelines,
+      approvals, audit logs, risks, and tool adapters through
+      `/v1/company-os/:collection`.
+- [x] CCOS-007 Company OS Collection Detail Route:
+      added selected-record inspection inside `/react-company-os`, backed by
+      `/v1/company-os/:collection/:id`, with local idle/loading/error states,
+      readable key fields, and capped raw API evidence while keeping lifecycle
+      writes closed.
+- [x] CCOS-008 Company OS Agent Context Panel:
+      added a read-only MCP-oriented agent operating packet inside
+      `/react-company-os`, loading `/v1/tasks` plus Company OS pipelines,
+      procedures, tool adapters, policies, acceptance criteria, and approvals
+      through existing API routes.
+- [x] CCOS-009 Company OS Approval Lifecycle Design:
+      documented command-shaped approval request and approval decision routes,
+      fail-closed lifecycle rules, event/audit requirements, and future
+      pipeline/stage action direction without exposing raw table mutations.
+- [x] CCOS-010 Company OS Approval Lifecycle Backend:
+      implemented `POST /v1/company-os/approvals/request` and
+      `POST /v1/company-os/approvals/:id/decision` with capability gates,
+      workspace checks, event/audit evidence, MCP manifest exposure, and
+      integration tests.
+- [x] CCOS-011 Company OS Approval UI Actions:
+      added owner-facing request approval and approve/reject controls in
+      `/react-company-os`, using the command-shaped backend routes with local
+      action feedback and context refresh.
+- [x] CCOS-012 Company OS Pipeline Stage Lifecycle Design:
+      documented command-shaped start, block, validate, and complete stage
+      routes with approval references, acceptance criteria gates, event names,
+      audit actions, and invalid-transition failure rules.
+- [x] CCOS-013 Company OS Stage Lifecycle Backend:
+      implemented audited start-stage, block, validate, and complete stage
+      lifecycle routes with capability gates, approval checks, acceptance
+      criteria validation, event/audit evidence, and MCP manifest exposure.
+- [x] CCOS-014 Company OS Stage Lifecycle UI Actions:
+      added owner-facing start, block, validate, and complete controls to
+      `/react-company-os` using shared React route-kit clients and the audited
+      lifecycle command routes.
+- [x] UXA-016 React Route Shell Extraction:
+      extract shared React route helpers before adding a third workbench so
+      `web/src/main.tsx` does not keep growing as a monolith.
+      Added `web/src/react-route-kit.tsx` for shared route state hooks, API
+      loaders, shell, notices, metrics, and table primitives while preserving
+      existing React route behavior.
+- [x] UXA-015 React Canonical Route Switch Readiness:
       after UXA-014, decide whether a React route can safely become canonical
       or whether remaining adapter/editor affordances need another slice.
+      Decision: do not switch canonical routes yet; extract the shared React
+      shell and primitives before the next workbench migration.
 - [x] UXA-014 React Integration Map Workbench Route:
       migrate the integration map overview into a parallel React workbench
       route using live `/v1/connection` data, DaisyUI primitives, and clear
@@ -269,12 +641,96 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] CCV1-059 GitHub Auto-Deploy Capability Audit
 - [x] CCV1-060 V1 Operator Handoff
 
-## NEXT
+## Historical Mixed Queue
 
-- [ ] UXA-016 React Route Shell Extraction:
-      if UXA-015 keeps migration parallel, extract shared React route helpers
-      before adding a third workbench so `web/src/main.tsx` does not keep
-      growing as a monolith.
+- [x] CCOS-015 Company OS Automation Rule Execution Design:
+      design how automation rules and triggers observe Company OS lifecycle
+      events and request approved follow-up actions without bypassing policy,
+      approval, event, or audit boundaries.
+- [x] CCOS-016 Company OS Automation Rule Evaluator Backend:
+      implement the first command-shaped automation evaluator route that
+      evaluates an existing Company OS event against active triggers/rules,
+      supports dry-run versus execute mode, and records fail-closed event/audit
+      evidence without raw table mutation.
+- [x] CCOS-017 Company OS Automation Evaluator UI Actions:
+      expose owner-facing dry-run and execute controls for the audited
+      automation evaluator inside `/react-company-os`, including local
+      feedback and context refresh, without adding raw automation table
+      mutation.
+- [x] CCOS-018 Company OS Automation Lifecycle Helper Reuse Design:
+      design how the automation evaluator should reuse stage lifecycle command
+      logic for start, block, validate, and complete proposals without
+      duplicating transition checks or bypassing approval/audit/event behavior.
+- [x] CCOS-019 Company OS Stage Lifecycle Command Service Extraction:
+      extract the existing stage lifecycle route logic into shared internal
+      command functions while preserving current HTTP behavior, stable errors,
+      events, audit logs, and tests.
+- [x] CCOS-020 Company OS Automation Lifecycle Proposal Execution:
+      enable automation evaluator lifecycle proposals to call the shared stage
+      lifecycle command functions while preserving idempotency, approval
+      checks, stable errors, events, audit logs, and fail-closed evidence.
+- [x] UXA-017 React Workbench Third Route Candidate:
+      migrate the next workbench only after UXA-016 reduces React route
+      duplication and verifies existing routes still render.
+- [x] UXA-018 React Canonical Route Switch Decision:
+      decide whether `/react-areas`, `/react-tasks`, or `/react-integrations`
+      can safely replace the matching canonical vanilla route, or whether
+      another parity slice is required first.
+- [x] UXA-019 React Areas Mapping Parity Slice:
+      add relationship/provider scope signals and explicit current-action
+      links to `/react-areas` so the React areas workbench moves closer to
+      canonical `/areas` parity without replacing it yet.
+- [x] UXA-020 React Areas Data Contract Gap Decision:
+      decide whether React areas should gain a dedicated read API for provider
+      mappings and Drive folder ownership before any canonical `/areas`
+      replacement work.
+- [x] UXA-021 React Areas Relationship Data Hook:
+      reuse existing operating-model external mappings and Google Drive file
+      endpoints in the React route kit, then enrich `/react-areas` with real
+      mapping counts and review queues.
+- [x] UXA-022 React Areas Canonical Switch Decision:
+      decide whether `/react-areas` can replace canonical `/areas` after
+      relationship data parity, or whether explicit React write controls are
+      required first.
+- [x] UXA-023 React Areas Scope Assignment Controls:
+      add provider mapping and Drive item operating-area assignment controls to
+      `/react-areas` using existing PATCH endpoints and local action feedback.
+- [x] UXA-024 React Areas Canonical Switch Decision:
+      decide whether `/react-areas` can now replace canonical `/areas` after
+      read, review, and scope-assignment parity.
+- [x] UXA-025 React Areas Area Lifecycle Controls:
+      add user-created operating area create/delete controls to `/react-areas`
+      using existing operating-model area endpoints before any canonical route
+      switch.
+- [x] UXA-026 React Areas Selected Context Parity Decision:
+      decide the smallest safe selected-area context parity slice for
+      `/react-areas`, including record previews and reassignment controls for
+      already assigned provider/Drive items.
+- [x] UXA-027 React Areas Selected Context Data Hook:
+      load selected table record previews in the React route kit through
+      existing `/v1/{apiSlug}` endpoints and render selected-area context in
+      `/react-areas`.
+- [x] UXA-028 React Areas Assigned Scope Reassignment Controls:
+      add reassignment controls for already assigned provider mappings and
+      Drive items in the `/react-areas` selected context.
+- [x] UXA-029 React Areas Canonical Route Switch Decision:
+      decide whether `/react-areas` can replace canonical `/areas` after
+      read, lifecycle, selected context, and reassignment parity.
+- [x] UXA-030 React Areas Canonical Route Switch:
+      serve the validated React areas workbench at canonical `/areas` while
+      preserving `/react-areas` as an alias.
+- [x] UXA-031 V1 Architecture Completion Audit:
+      audit the current V1 implementation against the approved Company OS
+      architecture and identify whether architecture-derived local V1 blockers
+      remain.
+- [x] V1CTRL-001 Function Coverage Ledger:
+      create a module-by-module confidence ledger for API, UI, MCP,
+      integration, operations, and docs surfaces so future work is derived from
+      verified gaps instead of ad hoc fixes.
+- [x] V1CTRL-002 Canonical Queue Cleanup:
+      reduce active queue noise and align `NOW`/`NEXT` with the function
+      coverage ledger so old completed tasks, external blockers, and future V2
+      ideas are not mistaken for active implementation work.
 - [x] AGRUN-005 Scoped Agent Key Owner UI:
       expose scoped agent key creation, copy-once raw key display, rotation or
       deactivation, and capability presets in `/settings/api`.
@@ -325,7 +781,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
       docs, or update the note so manual rollover remains the explicit approved
       path.
 
-## PIPELINE
+## Historical Pipeline Archive
 
 - [x] 74. AGRUN-002 Service Key Scope Enforcement
 - [x] 75. AGRUN-003 Machine-Readable Agent Contract
@@ -424,7 +880,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [x] 38. CCV1-060 V1 Operator Handoff
 
 
-## GROUP QUEUE
+## Historical Group Queue
 
 - [x] CCV1-A (docs and planning): CCV1-001, CCV1-002, CCV1-005
 - [x] CCV1-B (workspace and auth): CCV1-011, CCV1-012, CCV1-013, CCV1-007

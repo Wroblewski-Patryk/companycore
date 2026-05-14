@@ -186,19 +186,25 @@ Owner-managed adapter keys:
 
 ```http
 GET /v1/api-keys
+GET /v1/api-keys/profiles
 POST /v1/api-keys
 PATCH /v1/api-keys/:id
 GET /api-keys
+GET /api-keys/profiles
 POST /api-keys
 PATCH /api-keys/:id
 ```
+
+The owner console loads `GET /v1/api-keys/profiles` as the canonical source
+for MCP agent key presets. Static frontend presets are only a signed-out or
+profile-load fallback.
 
 `POST /v1/api-keys` is owner-only and returns the raw API key exactly once:
 
 ```json
 {
-  "name": "Jarvan adapter",
-  "scopes": ["adapter:jarvan"]
+  "name": "MCP Company OS reader",
+  "profileId": "mcp_company_os_reader"
 }
 ```
 
@@ -567,6 +573,786 @@ paths, methods, expected capabilities, payload field hints, safe error
 behavior, and write rules without exposing secrets. `data.capabilities` is
 filtered to the authenticated key's effective capabilities unless the key is in
 documented broad compatibility mode.
+
+`data.mcpManifest` is the MCP-friendly projection of the same route contract.
+It is not a direct database protocol. MCP servers should wrap the advertised
+HTTP routes as tools and preserve CompanyCore authentication, workspace
+scoping, validation, approval, event, and audit behavior.
+
+## MCP Manifest
+
+MCP clients and bridge servers can read a filtered tool catalog directly:
+
+```http
+GET /v1/mcp/manifest
+GET /mcp/manifest
+```
+
+Required capability:
+
+```text
+mcp:read
+```
+
+Safe response shape:
+
+```json
+{
+  "data": {
+    "schemaVersion": "2026-05-09",
+    "service": "companycore",
+    "transport": {
+      "preferred": "stdio-or-http-bridge",
+      "upstreamProtocol": "Model Context Protocol",
+      "backendAccess": "CompanyCore HTTP API"
+    },
+    "auth": {
+      "type": "api_key",
+      "header": "X-API-Key",
+      "workspaceScoped": true,
+      "capabilityScoped": true
+    },
+    "guardrails": [
+      "MCP tools must call CompanyCore HTTP routes instead of reading PostgreSQL directly."
+    ],
+    "tools": [
+      {
+        "name": "companycore_get_company_os",
+        "title": "GET /v1/company-os",
+        "method": "GET",
+        "path": "/v1/company-os",
+        "capability": "company-os:read",
+        "riskLevel": "read",
+        "requiresApproval": false,
+        "inputSchema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "query": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": []
+        }
+      }
+    ]
+  }
+}
+```
+
+Owners can also create a least-privilege MCP key from a canonical profile:
+
+```json
+{
+  "name": "MCP Company OS reader",
+  "profileId": "mcp_company_os_reader"
+}
+```
+
+If `scopes` is provided with `profileId`, the explicit scopes are used. If
+`scopes` is omitted, CompanyCore uses the selected profile's scopes.
+
+Implemented MCP-oriented profiles:
+
+| Profile | Risk | Intended use |
+| --- | --- | --- |
+| `mcp_company_os_reader` | low | Read-only Company OS, operating model, and event context. |
+| `mcp_knowledge_reader` | low | Read-only notes, decisions, Drive files, and Company OS knowledge context. |
+| `mcp_memory_writer` | medium | Write notes, decisions, and agent logs while reading company context. |
+| `mcp_event_worker` | medium | Read and acknowledge assigned agent events, then report logs. |
+| `mcp_operator` | high | Human-supervised operational agent with broad business write and safe integration lifecycle scopes. |
+
+The returned tools are filtered by the authenticated key's effective
+capabilities. A scoped key with only `mcp:read` and `company-os:read` will see
+Company OS read tools, but not note-writing, Drive-writing, integration
+maintenance, or destructive lifecycle tools.
+
+MCP direction:
+
+- CompanyCore remains the source of truth and policy/audit boundary.
+- MCP is the preferred agent tool interface above the HTTP API.
+- MCP servers should be thin bridge processes that call CompanyCore routes.
+- MCP tools must never bypass the API by reading PostgreSQL or provider tokens
+  directly.
+- Future risky tools should become explicit lifecycle actions with approval
+  requirements before autonomous MCP use.
+- Tools marked `requiresApproval` are supervised-only by design until the
+  bridge guard in `docs/operations/approval-aware-mcp-command-flow.md` is
+  implemented and validated.
+
+The first local stdio bridge is available as:
+
+```bash
+npm run mcp:server
+```
+
+It reads `COMPANYCORE_BASE_URL` and `COMPANYCORE_API_KEY`, discovers tools from
+`/v1/mcp/manifest`, implements `initialize`, `ping`, `tools/list`, and
+`tools/call`, and calls CompanyCore HTTP routes on behalf of the MCP client.
+The repeatable smoke command is:
+
+```bash
+npm run mcp:smoke
+```
+
+Operational setup and smoke instructions live in
+`docs/operations/companycore-mcp-bridge.md`. Runtime setup snippets for Codex,
+Paperclip, and generic MCP-compatible agents live in
+`docs/operations/mcp-agent-runtime-setup.md`.
+
+## Company OS
+
+Company OS records are exposed through a mostly read-oriented,
+workspace-scoped API surface for dashboards, agents, and future workbenches.
+Collection reads are guarded by `company-os:read`. Runtime writes remain
+command-oriented. Low-risk Class A definition edits are exposed only through
+explicit audited routes, starting with `standards`.
+
+```http
+GET /v1/company-os
+GET /v1/company-os/:collection
+GET /v1/company-os/:collection/:id
+GET /company-os
+GET /company-os/:collection
+GET /company-os/:collection/:id
+```
+
+`GET /v1/company-os` returns a cockpit snapshot:
+
+```json
+{
+  "data": {
+    "service": "company-os",
+    "workspaceId": "uuid",
+    "counts": {
+      "definitions": {
+        "processes": 1,
+        "pipelines": 7,
+        "pipelineStages": 60,
+        "procedures": 7,
+        "toolAdapters": 2
+      },
+      "runtime": {
+        "pipelineRuns": 1,
+        "stageRuns": 1,
+        "approvals": 1,
+        "auditLogs": 1,
+        "events": 12
+      },
+      "governance": {
+        "policies": 1,
+        "risks": 1,
+        "controls": 1,
+        "automationRules": 1,
+        "businessFunctions": 12
+      }
+    },
+    "attention": {
+      "pendingApprovals": [],
+      "blockedPipelineRuns": [],
+      "failedStageRuns": [],
+      "highRisks": [],
+      "unhealthyAdapters": []
+    },
+    "recent": {
+      "pipelineRuns": [],
+      "approvals": [],
+      "auditLogs": [],
+      "events": []
+    },
+    "collections": ["processes", "pipelines", "approvals"]
+  }
+}
+```
+
+Allowed collections:
+
+- `processes`
+- `pipelines`
+- `pipeline-stages`
+- `procedures`
+- `procedure-steps`
+- `company-roles`
+- `resources`
+- `tool-adapters`
+- `integration-capabilities`
+- `standards`
+- `pipeline-runs`
+- `stage-runs`
+- `approvals`
+- `checklist-templates`
+- `checklist-items`
+- `acceptance-criteria`
+- `audit-logs`
+- `policies`
+- `metrics`
+- `risks`
+- `controls`
+- `knowledge-items`
+- `decision-logs`
+- `automation-rules`
+- `triggers`
+- `artifacts`
+- `dependencies`
+- `business-functions`
+- `stakeholders`
+
+List routes accept an optional `limit` query parameter from `1` to `100`.
+Invalid collection names return `validation_error`; missing records return
+`not_found` without leaking cross-workspace existence.
+
+### Company OS Standard Definition Commands
+
+The first Class A definition write contract is an audited `standards` surface.
+It is intentionally narrower than a raw Company OS table editor.
+
+```http
+POST /v1/company-os/standards
+PATCH /v1/company-os/standards/:id
+DELETE /v1/company-os/standards/:id
+```
+
+Required capability:
+
+```text
+company-os:definition:write
+```
+
+Create body:
+
+```json
+{
+  "name": "UX evidence standard",
+  "category": "ux",
+  "description": "Every user-facing Company OS surface needs evidence-backed recovery states.",
+  "checklistId": "uuid",
+  "validationMethod": "Browser proof, accessibility pass, and task evidence.",
+  "ownerRoleId": "uuid",
+  "status": "active"
+}
+```
+
+Behavior:
+
+- derive workspace from auth
+- validate optional `ownerRoleId` and `checklistId` inside the same workspace
+- create or update only `standards`
+- archive standards through `DELETE` by setting `status` to `archived`
+- emit `standard_created`, `standard_updated`, or `standard_archived`
+- append `standard.created`, `standard.updated`, or `standard.archived` audit
+  evidence with a correlation ID
+- keep workflow definitions, governance definitions, automation definitions,
+  and runtime evidence out of this low-risk editor contract
+
+`POST` and `PATCH` appear as MCP write tools when the caller has
+`company-os:definition:write`. `DELETE` appears as a destructive MCP tool and
+requires explicit approval/supervision.
+
+### Company OS Workflow Definition Draft Commands
+
+Workflow definitions use a draft and impact-preview command surface instead
+of raw CRUD over active processes, pipelines, procedures, stages, or procedure
+steps.
+
+```http
+GET /v1/company-os/workflow-definitions/drafts
+GET /v1/company-os/workflow-definitions/drafts/:id
+POST /v1/company-os/workflow-definitions/drafts
+PATCH /v1/company-os/workflow-definitions/drafts/:id
+POST /v1/company-os/workflow-definitions/drafts/:id/actions/preview-impact
+POST /v1/company-os/workflow-definitions/drafts/:id/actions/activate
+```
+
+Required capability:
+
+```text
+company-os:workflow-definition:write
+```
+
+Activation requires:
+
+```text
+company-os:workflow-definition:activate
+```
+
+Create body:
+
+```json
+{
+  "rootObjectType": "pipeline",
+  "rootObjectId": "uuid",
+  "name": "Client Onboarding Pipeline v2",
+  "reason": "Add evidence preview before changing active workflow definitions.",
+  "riskLevel": "high",
+  "changeSet": {
+    "purpose": "Move a client from lead to delivery kickoff with stronger evidence."
+  },
+  "idempotencyKey": "workflow-draft-proof-001",
+  "sourceChannel": "api"
+}
+```
+
+Behavior:
+
+- derive workspace from auth and reject cross-workspace root references
+- support draft roots for `process`, `pipeline`, and `procedure`
+- list and read drafts for sessions with
+  `company-os:workflow-definition:write`, including `rootObjectType`,
+  `status`, and `limit` filters on the list route
+- store `baseVersion`, `targetVersion`, `changeSet`, risk, actor, source
+  channel, and idempotency key in `workflow_definition_drafts`
+- return the existing draft on repeated create with the same workspace
+  idempotency key
+- update draft metadata/change set through `PATCH`
+- generate impact previews with affected counts, changed fields, duplicate
+  name risk, approval requirement, approval reasons, and target version
+- emit `workflow_definition_draft_created`,
+  `workflow_definition_draft_updated`, or
+  `workflow_definition_draft_previewed`
+- append matching audit evidence with a correlation ID
+
+Draft create/update/preview do not activate workflow definitions. Rollback,
+archive, and generic process/pipeline activation remain separate command
+contracts.
+
+Activation body:
+
+```json
+{
+  "approvalId": "uuid",
+  "sourceChannel": "api"
+}
+```
+
+Current activation behavior:
+
+- `process`, `pipeline`, and `procedure` drafts activate by creating a new
+  active root version
+- `processes`, `pipelines`, and `procedures` use
+  `workspaceId + name + version` uniqueness for activated versions
+- activated versions preserve `familyId`, so rollback can resolve the current
+  active target even when the visible workflow name changes between versions
+- stale drafts are rejected when the active root version no longer matches
+  `baseVersion`
+- activation requires an approved `approval` whose `resourceType` is
+  `workflow_definition_draft` and whose `resourceId` is the draft ID whenever
+  preview marks approval required
+- activation sets the previous root version to `deprecated`, creates a new
+  active root version, copies or applies pipeline stages/procedure steps when
+  relevant, updates the draft to `active`, and emits
+  `workflow_definition_draft_activated` plus
+  `workflow_definition_draft.activated` audit evidence
+- the response includes previous/new version IDs, rollback candidate context,
+  approval ID, impact preview, correlation ID, and audit log ID
+
+Archive historical version:
+
+```http
+POST /v1/company-os/workflow-definitions/:rootObjectType/:rootObjectId/actions/archive
+```
+
+Required capability: `company-os:workflow-definition:activate`.
+
+Archive body:
+
+```json
+{
+  "reason": "Archive deprecated v1 after v2 activation evidence exists.",
+  "idempotencyKey": "archive-deprecated-pipeline-v1",
+  "sourceChannel": "api"
+}
+```
+
+Current archive behavior:
+
+- `rootObjectType` must be `process`, `pipeline`, or `procedure`
+- the target root must belong to the caller workspace
+- active versions return `409 workflow_archive_active_version_blocked`
+- inactive versions with active non-terminal runtime dependencies return
+  `409 workflow_archive_active_runtime_dependency`
+- already archived versions return `409 workflow_archive_already_archived`
+  unless the same idempotency key is replayed
+- safe inactive historical versions are set to `archived`
+- the command emits `workflow_definition_version_archived` plus
+  `workflow_definition_version.archived` audit evidence
+
+Rollback is still a separate future command. The approved recovery direction is
+to create rollback drafts from historical versions so rollback still flows
+through preview and activation.
+
+Create rollback draft:
+
+```http
+POST /v1/company-os/workflow-definitions/:rootObjectType/:rootObjectId/actions/create-rollback-draft
+```
+
+Required capability: `company-os:workflow-definition:write`.
+
+Rollback-draft body:
+
+```json
+{
+  "reason": "Prepare rollback to process v1 through normal draft activation.",
+  "riskLevel": "medium",
+  "idempotencyKey": "rollback-draft-process-v1",
+  "sourceChannel": "api"
+}
+```
+
+Current rollback-draft behavior:
+
+- `rootObjectType` must be `process`, `pipeline`, or `procedure`
+- the source root must be a non-active historical version in the caller
+  workspace
+- the current active version is resolved by matching workspace, root type, and
+  `familyId`; if no active version exists, the route returns
+  `409 workflow_rollback_active_version_not_found`
+- active source versions return `409 workflow_rollback_source_active`
+- the route creates a `workflow_definition_drafts` row against the current
+  active root with `changeSet.kind = "rollback_to_version"`
+- the draft stores rollback source root/version metadata in the change set,
+  generates an impact preview, and emits
+  `workflow_definition_rollback_draft_created` plus
+  `workflow_definition_rollback_draft.created` audit evidence
+- activation remains a separate existing command, so rollback does not bypass
+  preview, approval, stale-version, audit, or event gates
+
+### Company OS Lifecycle Commands
+
+The first Company OS write surface is command-oriented instead of raw table
+CRUD. MCP tools, UI affordances, policy checks, events, and audit logs must
+stay aligned around these lifecycle routes.
+
+#### Request Approval
+
+```http
+POST /v1/company-os/approvals/request
+```
+
+Required capability:
+
+```text
+company-os:approval:request
+```
+
+Request body:
+
+```json
+{
+  "requestedByType": "agent",
+  "requestedById": "agent-or-user-or-integration-id",
+  "requestedForAction": "drive.file.update",
+  "resourceType": "google_drive_file",
+  "resourceId": "external-or-companycore-id",
+  "riskLevel": "high",
+  "approverRoleId": "uuid",
+  "pipelineRunId": "uuid",
+  "stageRunId": "uuid",
+  "expiresAt": "2026-05-10T12:00:00.000Z",
+  "inputPayload": {
+    "reason": "Agent needs permission to update a client-facing document."
+  }
+}
+```
+
+Behavior:
+
+- derive workspace from auth
+- validate risk, actor, resource, and optional run links
+- create a pending `approval`
+- emit `approval_requested`
+- append `approval.requested` audit evidence
+- return the created approval and correlation ID
+
+#### Decide Approval
+
+```http
+POST /v1/company-os/approvals/:id/decision
+```
+
+Required capability:
+
+```text
+company-os:approval:decide
+```
+
+Request body:
+
+```json
+{
+  "decision": "approved",
+  "decisionReason": "Scope and rollback plan are acceptable."
+}
+```
+
+Allowed decisions:
+
+- `approved`
+- `rejected`
+
+Behavior:
+
+- require a pending, non-expired approval in the caller workspace
+- set status, decision reason, approver user when available, and decision time
+- emit `approval_approved` or `approval_rejected`
+- append `approval.decided` audit evidence
+- refuse already-decided approvals instead of silently overwriting decisions
+
+#### Pipeline And Stage Commands
+
+Pipeline and stage writes follow the same command shape:
+
+```http
+POST /v1/company-os/pipeline-runs/:id/actions/start-stage
+POST /v1/company-os/stage-runs/:id/actions/complete
+POST /v1/company-os/stage-runs/:id/actions/block
+POST /v1/company-os/stage-runs/:id/actions/validate
+```
+
+These routes require an `approvalId` when policy, risk, stage definition, tool
+capability, or integration capability says approval is required. They emit
+events and audit logs with a shared correlation ID.
+
+##### Start Stage
+
+```http
+POST /v1/company-os/pipeline-runs/:id/actions/start-stage
+```
+
+Required capability:
+
+```text
+company-os:pipeline-run:write
+```
+
+Request body:
+
+```json
+{
+  "pipelineStageId": "uuid",
+  "assignedActorType": "agent",
+  "assignedActorId": "agent-or-user-id",
+  "approvalId": "uuid",
+  "inputPayload": {
+    "taskId": "uuid"
+  }
+}
+```
+
+Behavior:
+
+- require pipeline run in caller workspace
+- require stage belongs to the pipeline definition
+- create or resume a stage run for the selected stage
+- set pipeline run status to `running` and current stage to the selected stage
+- emit `stage_started`
+- append `stage_run.started` audit evidence
+
+##### Block Stage
+
+```http
+POST /v1/company-os/stage-runs/:id/actions/block
+```
+
+Required capability:
+
+```text
+company-os:stage-run:write
+```
+
+Request body:
+
+```json
+{
+  "reason": "Waiting for client approval.",
+  "approvalId": "uuid",
+  "errorState": {
+    "code": "client_input_missing"
+  }
+}
+```
+
+Behavior:
+
+- require stage run in caller workspace
+- mark stage run `blocked`
+- append the block reason to stage logs
+- set parent pipeline run `blocked` unless it is already terminal
+- emit `stage_blocked`
+- append `stage_run.blocked` audit evidence
+
+##### Validate Stage
+
+```http
+POST /v1/company-os/stage-runs/:id/actions/validate
+```
+
+Required capability:
+
+```text
+company-os:stage-run:write
+```
+
+Request body:
+
+```json
+{
+  "validationStatus": "passed",
+  "validationResult": {
+    "summary": "QA checklist passed."
+  },
+  "acceptanceCriteria": [
+    {
+      "id": "uuid",
+      "validationStatus": "passed",
+      "evidence": {
+        "testRun": "local"
+      }
+    }
+  ]
+}
+```
+
+Behavior:
+
+- update stage validation result
+- update acceptance criteria evidence in the same workspace and stage run
+- emit `stage_validated`
+- append `stage_run.validated` audit evidence
+- do not complete the stage automatically
+
+##### Complete Stage
+
+```http
+POST /v1/company-os/stage-runs/:id/actions/complete
+```
+
+Required capability:
+
+```text
+company-os:stage-run:write
+```
+
+Request body:
+
+```json
+{
+  "approvalId": "uuid",
+  "outputPayload": {
+    "result": "Ready for next stage."
+  },
+  "validationResult": {
+    "summary": "Required checks passed."
+  }
+}
+```
+
+Behavior:
+
+- require current stage run status to be `running` or `blocked`
+- require all required acceptance criteria to be `passed` or `waived`
+- require approved approval when policy, risk, stage definition, or tool
+  capability requires approval
+- mark stage run `completed`
+- keep parent pipeline run active for the next orchestration command
+- emit `stage_completed`
+- append `stage_run.completed` audit evidence
+
+Invalid transitions should return `409` with a stable error code such as
+`invalid_stage_transition`, `active_stage_run_exists`, `approval_required`,
+`approval_not_approved`, or `acceptance_criteria_incomplete`.
+
+#### Automation Rule Execution Direction
+
+Automation rules and triggers are read through the Company OS collection API,
+but execution must use command-shaped routes. The first backend evaluator route
+is:
+
+```http
+POST /v1/company-os/events/:id/actions/evaluate-automation-rules
+```
+
+Required capability:
+
+```text
+company-os:automation:execute
+```
+
+Request body:
+
+```json
+{
+  "ruleIds": ["uuid"],
+  "mode": "execute",
+  "idempotencyKey": "optional-client-key",
+  "context": {
+    "reason": "Evaluate follow-up work for a completed stage."
+  }
+}
+```
+
+Allowed modes:
+
+- `dry_run`: evaluate active rules and return proposed actions without writes
+- `execute`: evaluate active rules and execute only approved, allowlisted
+  action proposals through existing lifecycle commands
+
+Behavior:
+
+- derive workspace from auth
+- require the source event in the caller workspace
+- match active triggers and active automation rules for the source event
+- evaluate declarative rule conditions against the normalized event and
+  related Company OS records
+- produce a structured action proposal instead of executing arbitrary code
+- require approval for risky or externally visible actions before execution
+- create approval requests, informational events, or stage lifecycle command
+  executions through the shared command functions
+- emit `automation_rule_matched`, `automation_action_proposed`, or
+  `automation_rule_failed`
+- append `automation_rule.matched`, `automation_rule.action_proposed`, or
+  `automation_rule.failed` audit evidence
+- return matched rule IDs, proposed actions, approval requirements, emitted
+  event IDs, audit log IDs, and fail-closed reasons
+
+Allowed action kinds:
+
+- `request_approval`
+- `start_stage`
+- `block_stage`
+- `validate_stage`
+- `complete_stage`
+- `emit_event`
+
+Automation routes must not accept raw database patches, provider-specific API
+calls, or arbitrary script bodies. Reprocessing the same event/rule/action
+target must be idempotency-safe and must not duplicate approvals or repeated
+stage transitions.
+
+Implemented execution behavior:
+
+- `request_approval`: creates a pending approval, `approval_requested` event,
+  and `approval.requested` audit evidence
+- `emit_event`: emits the configured informational event
+- `start_stage`, `block_stage`, `validate_stage`, and `complete_stage`:
+  call the shared stage lifecycle command functions; command rejections become
+  `automation_rule_failed` evidence with the stable lifecycle error
+
+Lifecycle action enablement plan:
+
+- stage lifecycle route handlers call shared internal command functions instead
+  of keeping transition logic inside Express handlers
+- the automation evaluator calls those shared command functions after writing
+  automation-level proposal evidence
+- lifecycle action inputs from automation rules must map to the same request
+  body fields used by the HTTP command routes
+- automation-level evidence must be written before command execution, while
+  command-specific evidence remains owned by the shared lifecycle service
+- if the shared command returns a stable conflict error such as
+  `approval_required`, `invalid_stage_transition`, or
+  `acceptance_criteria_incomplete`, the evaluator returns a skipped action with
+  the same fail-closed reason instead of retrying through a different path
 
 ## Agent CRUD Rollout Policy
 

@@ -3,11 +3,13 @@ import type { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../../db/prisma";
 import { apiKeyPrefix, generateApiKey, hashApiKey } from "../../auth/api-key";
+import { agentKeyProfiles, findAgentKeyProfile } from "../../auth/agent-key-profiles";
 import { asyncHandler } from "../../middleware/async-handler";
 
 const createApiKeySchema = z.object({
   name: z.string().min(1),
-  scopes: z.array(z.string().min(1)).optional()
+  scopes: z.array(z.string().min(1)).optional(),
+  profileId: z.string().min(1).optional()
 }).strict();
 
 const updateApiKeySchema = z.object({
@@ -61,12 +63,26 @@ apiKeysRouter.get("/", asyncHandler(async (req, res) => {
   res.json({ data: records.map(safeApiKey) });
 }));
 
+apiKeysRouter.get("/profiles", asyncHandler(async (req, res) => {
+  if (!requireOwner(req, res)) {
+    return;
+  }
+
+  res.json({ data: agentKeyProfiles });
+}));
+
 apiKeysRouter.post("/", asyncHandler(async (req, res) => {
   if (!requireOwner(req, res)) {
     return;
   }
 
   const input = createApiKeySchema.parse(req.body);
+  const profile = findAgentKeyProfile(input.profileId);
+  if (input.profileId && !profile) {
+    return res.status(400).json({ error: "invalid_api_key_profile" });
+  }
+
+  const scopes = input.scopes ?? profile?.scopes ?? [];
   const rawKey = generateApiKey();
   const record = await prisma.apiKey.create({
     data: {
@@ -75,7 +91,7 @@ apiKeysRouter.post("/", asyncHandler(async (req, res) => {
       key: null,
       keyHash: hashApiKey(rawKey),
       keyPrefix: apiKeyPrefix(rawKey),
-      scopes: input.scopes ?? [],
+      scopes,
       active: true
     }
   });
@@ -83,6 +99,11 @@ apiKeysRouter.post("/", asyncHandler(async (req, res) => {
   res.status(201).json({
     data: {
       ...safeApiKey(record),
+      profile: profile ? {
+        id: profile.id,
+        label: profile.label,
+        riskLevel: profile.riskLevel
+      } : null,
       key: rawKey
     }
   });

@@ -50,7 +50,11 @@ Every meaningful UI change should preserve or improve:
 ## CompanyCore Management UI Principles
 
 CompanyCore is an owner console for understanding and steering a company. The
-UI must help the user answer three questions quickly:
+approved 2026-05-14 visual metaphor is a cinematic-realistic Company City Map:
+the company is a strategic city/value ecosystem, `GENERAL` is the central
+intake and orchestration district, and the 12 company departments are connected
+operational districts in the value journey. The UI must help the user answer
+three questions quickly:
 
 - What matters now?
 - What is blocked or needs review?
@@ -59,6 +63,22 @@ UI must help the user answer three questions quickly:
 Every dashboard, workbench, settings, and integration surface should make those
 answers visible before secondary exploration. Dense management screens should
 feel calm and operational, not promotional.
+
+The city metaphor should be used most strongly on the logged-in dashboard,
+operating-area overview, and high-level relationship/integration maps. Detail
+workbenches may become quieter and more table/list driven, but they should
+retain district identity, value-flow context, and command-brief language.
+
+Light gamification is allowed when it reflects real company state: district
+readiness, value-flow progress, verified milestones, automation unlocks,
+mission completion, and health signals. Do not add fake scores, arbitrary
+badges, or decorative rewards that are not backed by real tasks, evidence,
+integrations, or operating progress.
+
+Responsive rule: desktop web may show the full city canvas with side command
+briefs; tablet should balance map plus selected context; mobile web and native
+mobile should compress the city into an overview, district switcher, or
+progressive drill-down rather than forcing a tiny unreadable map.
 
 ## Iconography
 

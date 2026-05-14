@@ -3,6 +3,7 @@ import { adapterManifest, capabilities, effectiveCapabilities, scopesAreBroad } 
 import { prisma } from "../../db/prisma";
 import { googleDriveSecretStatus } from "../../integrations/integration-settings.service";
 import { asyncHandler } from "../../middleware/async-handler";
+import { createMcpManifest } from "../../mcp/manifest";
 import { ensureOperatingModelForWorkspace } from "../../operating-model/catalog";
 
 export const connectionRouter = Router();
@@ -109,6 +110,7 @@ connectionRouter.get("/", asyncHandler(async (req, res) => {
       capabilities: effectiveCapabilities(req.auth!.scopes),
       scopeMode: scopesAreBroad(req.auth!.scopes ?? []) ? "broad" : "scoped",
       adapterManifest,
+      mcpManifest: createMcpManifest(req.auth!.scopes),
       integrations: {
         clickup: {
           configured: Boolean(clickUp?.secretCiphertext),

@@ -9,6 +9,7 @@ import { agentsRouter } from "./modules/agents/agents.routes";
 import { apiKeysRouter } from "./modules/api-keys/api-keys.routes";
 import { authRouter } from "./modules/auth/auth.routes";
 import { clientsRouter } from "./modules/clients/clients.routes";
+import { companyOsRouter } from "./modules/company-os/company-os.routes";
 import { connectionRouter } from "./modules/connection/connection.routes";
 import { dealsRouter } from "./modules/deals/deals.routes";
 import { decisionsRouter } from "./modules/decisions/decisions.routes";
@@ -16,6 +17,7 @@ import { eventsRouter } from "./modules/events/events.routes";
 import { goalsRouter } from "./modules/goals/goals.routes";
 import { googleDriveRouter } from "./modules/google-drive/google-drive.routes";
 import { integrationSettingsRouter } from "./modules/integration-settings/integration-settings.routes";
+import { mcpRouter } from "./modules/mcp/mcp.routes";
 import { notesRouter } from "./modules/notes/notes.routes";
 import { operatingModelRouter } from "./modules/operating-model/operating-model.routes";
 import { pipelineStagesRouter } from "./modules/pipeline-stages/pipeline-stages.routes";
@@ -29,7 +31,9 @@ import { interactionsRouter } from "./modules/interactions/interactions.routes";
 
 function mountProtectedRoutes(router: Router) {
   router.use("/projects", projectsRouter);
+  router.use("/company-os", companyOsRouter);
   router.use("/connection", connectionRouter);
+  router.use("/mcp", mcpRouter);
   router.use("/operating-model", operatingModelRouter);
   router.use("/goals", goalsRouter);
   router.use("/google-drive", googleDriveRouter);
@@ -61,7 +65,6 @@ const webAppRoutes = [
   "/dashboard",
   "/data",
   "/data/:table",
-  "/areas",
   "/relationships",
   "/tasks-adapter",
   "/pipeline",
@@ -73,6 +76,10 @@ const webAppRoutes = [
 ];
 
 const reactAppRoutes = [
+  "/areas",
+  "/react-agent-tools",
+  "/react-company-os",
+  "/react-areas",
   "/react-dashboard",
   "/react-integrations",
   "/react-tasks"

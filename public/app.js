@@ -1,5 +1,7 @@
 const privateRoutes = new Set(["/dashboard", "/data", "/areas", "/relationships", "/tasks-adapter", "/pipeline", "/settings", "/settings/account", "/settings/integrations", "/settings/drive", "/settings/api"]);
 const publicRoutes = new Set(["/", "/auth/login", "/auth/register"]);
+const pendingPrivatePathKey = "companycorePendingPrivatePath";
+const apiRequestTimeoutMs = 20_000;
 
 const state = {
   ownerToken: sessionStorage.getItem("companycoreOwnerToken") || "",
@@ -8,6 +10,7 @@ const state = {
   capabilities: [],
   adapterManifest: null,
   apiKeys: [],
+  agentKeyProfiles: [],
   lastRawApiKey: null,
   mobileMenuOpen: false,
   clickup: {
@@ -89,13 +92,16 @@ const state = {
   }
 };
 
-const agentKeyPresets = [
+const fallbackAgentKeyPresets = [
   {
     id: "read_only",
-    label: "Read-only agent",
-    description: "Discovery plus read access for core records and Drive metadata.",
+    label: "MCP Company OS reader",
+    description: "MCP discovery plus read-only access for Company OS, core records, events, and Drive metadata.",
     scopes: [
       "connection:read",
+      "mcp:read",
+      "company-os:read",
+      "operating-model:read",
       "projects:read",
       "goals:read",
       "targets:read",
@@ -107,16 +113,20 @@ const agentKeyPresets = [
       "interactions:read",
       "notes:read",
       "decisions:read",
-      "google-drive:read",
+      "google-drive:files:read",
+      "events:read",
       "agent-events:read"
     ]
   },
   {
     id: "memory_writer",
-    label: "Memory writer",
-    description: "Read company context and write notes, decisions, and agent logs.",
+    label: "MCP memory writer",
+    description: "MCP access to read company context and write notes, decisions, and agent logs.",
     scopes: [
       "connection:read",
+      "mcp:read",
+      "company-os:read",
+      "operating-model:read",
       "projects:read",
       "goals:read",
       "targets:read",
@@ -134,21 +144,29 @@ const agentKeyPresets = [
   },
   {
     id: "event_consumer",
-    label: "Event consumer",
-    description: "Minimal event inbox client that can read and acknowledge assigned work.",
+    label: "MCP event worker",
+    description: "Minimal MCP event inbox client that can read and acknowledge assigned work.",
     scopes: [
       "connection:read",
+      "mcp:read",
+      "company-os:read",
+      "tasks:read",
       "agent-events:read",
       "agent-events:ack",
-      "agent-logs:write"
+      "agent-logs:read",
+      "agent-logs:write",
+      "events:read"
     ]
   },
   {
     id: "operator",
-    label: "Operator",
-    description: "Broad operational agent for controlled create/update workflows.",
+    label: "MCP operator",
+    description: "Broad MCP operational agent for controlled create/update workflows.",
     scopes: [
       "connection:read",
+      "mcp:read",
+      "company-os:read",
+      "operating-model:read",
       "projects:read",
       "projects:write",
       "goals:read",
@@ -171,11 +189,15 @@ const agentKeyPresets = [
       "notes:write",
       "decisions:read",
       "decisions:write",
-      "google-drive:read",
-      "google-drive:write",
+      "google-drive:files:read",
+      "google-drive:files:write",
+      "google-drive:files:scope:write",
+      "google-drive:docs:write",
+      "google-drive:sheets:write",
       "agent-logs:write",
       "agent-events:read",
-      "agent-events:ack"
+      "agent-events:ack",
+      "events:read"
     ]
   }
 ];
@@ -457,6 +479,10 @@ function normalizedPath(pathname = window.location.pathname) {
   return trimmed || "/";
 }
 
+function currentRouteTarget() {
+  return `${window.location.pathname}${window.location.search}${window.location.hash}`;
+}
+
 function dataTableSlugFromPath(pathname = window.location.pathname) {
   const match = normalizedPath(pathname).match(/^\/data\/([^/]+)$/);
   return match ? decodeURIComponent(match[1]) : "";
@@ -631,7 +657,9 @@ function updateChrome() {
 
 function navigate(path, { replace = false, hash = "" } = {}) {
   const nextPath = normalizedPath(path);
-  const nextUrl = `${nextPath}${hash}`;
+  const nextUrl = path.includes("?") || path.includes("#")
+    ? path
+    : `${nextPath}${hash}`;
   if (replace) {
     window.history.replaceState({}, "", nextUrl);
   } else {
@@ -658,6 +686,10 @@ function renderRoute() {
   }
 
   if ((privateRoutes.has(path) || dataWorkbench) && !isSignedIn()) {
+    const target = currentRouteTarget();
+    if (target !== "/auth/login" && target !== "/auth/register") {
+      sessionStorage.setItem(pendingPrivatePathKey, target);
+    }
     window.history.replaceState({}, "", "/auth/login");
     path = "/auth/login";
     showResult("Sign in to continue.", "error");
@@ -4593,6 +4625,9 @@ async function saveGoogleDriveFolderSelection() {
 
 function friendlyError(error) {
   const message = error?.message || "Something went wrong.";
+  if (error?.name === "AbortError") {
+    return "The request timed out. Refresh and try again.";
+  }
   const copy = {
     email_already_registered: "This email already has a CompanyCore account.",
     invalid_credentials: "Email or password is incorrect.",
@@ -4627,13 +4662,16 @@ function isAuthSessionError(error) {
 }
 
 async function api(path, options = {}) {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), options.timeoutMs ?? apiRequestTimeoutMs);
   const response = await fetch(`${API_ORIGIN}${path}`, {
     ...options,
+    signal: controller.signal,
     headers: {
       ...authHeaders(),
       ...(options.headers || {})
     }
-  });
+  }).finally(() => window.clearTimeout(timeout));
 
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
@@ -4643,11 +4681,14 @@ async function api(path, options = {}) {
 }
 
 async function authRequest(path, payload) {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), apiRequestTimeoutMs);
   const response = await fetch(`${API_ORIGIN}${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
+    body: JSON.stringify(payload),
+    signal: controller.signal
+  }).finally(() => window.clearTimeout(timeout));
   const body = await response.json().catch(() => ({}));
 
   if (!response.ok) {
@@ -4923,19 +4964,54 @@ function renderApiWorkbench() {
   }
 }
 
+function profileToAgentKeyPreset(profile) {
+  const riskLabel = profile.riskLevel ? ` Risk: ${profile.riskLevel}.` : "";
+  const recommendedFor = Array.isArray(profile.recommendedFor) && profile.recommendedFor.length > 0
+    ? ` Recommended for: ${profile.recommendedFor.join(", ")}.`
+    : "";
+  return {
+    id: profile.id,
+    label: profile.label,
+    description: `${profile.description || "Backend-managed MCP agent key profile."}${riskLabel}${recommendedFor}`,
+    scopes: Array.isArray(profile.scopes) ? profile.scopes : []
+  };
+}
+
+function currentAgentKeyPresets() {
+  const backendProfiles = Array.isArray(state.agentKeyProfiles)
+    ? state.agentKeyProfiles.map(profileToAgentKeyPreset)
+    : [];
+  return backendProfiles.length > 0 ? backendProfiles : fallbackAgentKeyPresets;
+}
+
+function selectedAgentKeyProfileId() {
+  const selectedId = agentKeyPreset.value;
+  return state.agentKeyProfiles.some((profile) => profile.id === selectedId) ? selectedId : "";
+}
+
+function scopesMatch(left, right) {
+  const normalize = (items) => [...new Set(items || [])].sort();
+  const normalizedLeft = normalize(left);
+  const normalizedRight = normalize(right);
+  return normalizedLeft.length === normalizedRight.length
+    && normalizedLeft.every((scope, index) => scope === normalizedRight[index]);
+}
+
 function setupAgentKeyPresets() {
+  const presets = currentAgentKeyPresets();
   agentKeyPreset.innerHTML = "";
-  for (const preset of agentKeyPresets) {
+  for (const preset of presets) {
     const option = document.createElement("option");
     option.value = preset.id;
     option.textContent = preset.label;
     agentKeyPreset.append(option);
   }
-  applyAgentKeyPreset(agentKeyPresets[0]?.id || "");
+  applyAgentKeyPreset(presets[0]?.id || "");
 }
 
 function applyAgentKeyPreset(presetId) {
-  const preset = agentKeyPresets.find((item) => item.id === presetId) || agentKeyPresets[0];
+  const presets = currentAgentKeyPresets();
+  const preset = presets.find((item) => item.id === presetId) || presets[0];
   if (!preset) {
     return;
   }
@@ -5042,11 +5118,36 @@ async function loadApiKeys() {
   renderAgentKeys();
 }
 
-async function createAgentKey({ name, scopes }) {
+async function loadAgentKeyProfiles() {
+  if (!isSignedIn()) {
+    state.agentKeyProfiles = [];
+    setupAgentKeyPresets();
+    return;
+  }
+
+  try {
+    const response = await api("/v1/api-keys/profiles");
+    state.agentKeyProfiles = response.data || [];
+  } catch (error) {
+    state.agentKeyProfiles = [];
+    setAgentKeyStatus(`Using local fallback presets. ${friendlyError(error)}`, "error");
+  }
+  setupAgentKeyPresets();
+}
+
+async function createAgentKey({ name, scopes, profileId }) {
+  const payload = { name };
+  if (profileId) {
+    payload.profileId = profileId;
+  }
+  if (Array.isArray(scopes) && scopes.length > 0) {
+    payload.scopes = scopes;
+  }
+
   const response = await api("/v1/api-keys", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, scopes })
+    body: JSON.stringify(payload)
   });
   state.lastRawApiKey = response.data.key;
   await loadApiKeys();
@@ -5199,12 +5300,75 @@ function setConnected(connection) {
 async function loadConnection() {
   const connection = await api("/v1/connection");
   setConnected(connection);
-  await Promise.all([
+  const results = await Promise.allSettled([
     loadOperatingModel(),
     loadGoogleDriveFiles(),
     loadTasks(),
+    loadAgentKeyProfiles(),
     loadApiKeys()
   ]);
+  const failed = results.filter((result) => result.status === "rejected");
+  if (failed.length > 0) {
+    showResult(`${failed.length} startup read${failed.length === 1 ? "" : "s"} could not load. Core owner session is active.`, "error");
+  }
+}
+
+async function completeGoogleDriveOAuthFromCurrentUrl() {
+  if (normalizedPath() !== "/settings/drive") {
+    return false;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const error = params.get("error");
+  if (error) {
+    reportAction(googleDriveActionStatus, `Google consent failed: ${error}`, "error");
+    window.history.replaceState({}, "", "/settings/drive");
+    return true;
+  }
+
+  const code = params.get("code");
+  if (!code) {
+    return false;
+  }
+
+  setBusy(true);
+  setLocalStatus(googleDriveActionStatus, "Saving Google Drive OAuth callback...", "pending");
+  try {
+    const folderIds = parseIdList(fields.googleDriveFolderIds.value);
+    await api("/v1/integration-settings/google_drive/oauth/exchange", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        code,
+        redirectUri: `${window.location.origin}/settings/drive`,
+        active: fields.googleDriveActive.checked,
+        config: {
+          selectedFolderIds: folderIds,
+          rootFolderIds: folderIds,
+          importMode: fields.googleDriveImportMode.value || "merge",
+          syncMode: "two_way"
+        }
+      })
+    });
+    window.history.replaceState({}, "", "/settings/drive");
+    await loadConnection();
+    await discoverGoogleDriveFolders();
+    reportAction(googleDriveActionStatus, "Google Drive OAuth connection saved. Select folders, save selection, then import.", "success");
+    return true;
+  } catch (callbackError) {
+    reportAction(googleDriveActionStatus, friendlyError(callbackError), "error");
+    return false;
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function openPostAuthTarget(defaultPath = "/dashboard") {
+  const pendingPath = sessionStorage.getItem(pendingPrivatePathKey);
+  sessionStorage.removeItem(pendingPrivatePathKey);
+  const target = pendingPath && pendingPath.startsWith("/") ? pendingPath : defaultPath;
+  navigate(target, { replace: true });
+  await completeGoogleDriveOAuthFromCurrentUrl();
 }
 
 function renderWorkspaces(workspaces, selectedId = "") {
@@ -5591,6 +5755,7 @@ logoutButton.addEventListener("click", () => {
   state.capabilities = [];
   state.adapterManifest = null;
   state.apiKeys = [];
+  state.agentKeyProfiles = [];
   state.lastRawApiKey = null;
   state.clickup.configured = false;
   state.clickup.active = false;
@@ -5633,6 +5798,7 @@ logoutButton.addEventListener("click", () => {
   state.tableWorkbench.source = "";
   state.tableWorkbench.selectedId = "";
   state.tableWorkbench.newDraft = false;
+  setupAgentKeyPresets();
   renderAgentKeys();
   renderTasks();
   renderGoogleDriveFiles();
@@ -5754,6 +5920,7 @@ refreshAgentKeysButton.addEventListener("click", async () => {
   setBusy(true);
   try {
     state.lastRawApiKey = null;
+    await loadAgentKeyProfiles();
     await loadApiKeys();
     setAgentKeyStatus("Service keys refreshed.");
   } catch (error) {
@@ -5778,7 +5945,14 @@ agentKeyForm.addEventListener("submit", async (event) => {
 
   setBusy(true);
   try {
-    await createAgentKey({ name, scopes });
+    const preset = currentAgentKeyPresets().find((item) => item.id === agentKeyPreset.value);
+    const profileId = selectedAgentKeyProfileId();
+    const useProfileScopes = profileId && scopesMatch(scopes, preset?.scopes || []);
+    await createAgentKey({
+      name,
+      profileId: useProfileScopes ? profileId : undefined,
+      scopes: useProfileScopes ? undefined : scopes
+    });
     agentKeyName.value = "";
     applyAgentKeyPreset(agentKeyPreset.value);
     setAgentKeyStatus("Scoped service key created. Copy the raw key before leaving this screen.", "success");
@@ -5841,7 +6015,7 @@ loginForm.addEventListener("submit", async (event) => {
     applyAuthPayload(response);
     await loadConnection();
     reportAction(loginStatus, "Signed in. Opening dashboard.", "success");
-    navigate("/dashboard", { replace: true });
+    await openPostAuthTarget("/dashboard");
   } catch (error) {
     reportAction(loginStatus, friendlyError(error), "error");
   } finally {
@@ -5865,7 +6039,7 @@ registerForm.addEventListener("submit", async (event) => {
     applyAuthPayload(response);
     await loadConnection();
     reportAction(registerStatus, "Workspace created. Opening dashboard.", "success");
-    navigate("/dashboard", { replace: true });
+    await openPostAuthTarget("/dashboard");
   } catch (error) {
     reportAction(registerStatus, friendlyError(error), "error");
   } finally {
@@ -6145,10 +6319,13 @@ renderRoute();
 if (state.ownerToken) {
   loadConnection().then(() => {
     renderRoute();
+    return completeGoogleDriveOAuthFromCurrentUrl();
   }).catch((error) => {
     if (isAuthSessionError(error)) {
       sessionStorage.removeItem("companycoreOwnerToken");
       state.ownerToken = "";
+      state.agentKeyProfiles = [];
+      setupAgentKeyPresets();
       setClickUpEnabled(false);
       setGoogleDriveEnabled(false);
       showResult("Sign in again to refresh your workspace session.", "error");

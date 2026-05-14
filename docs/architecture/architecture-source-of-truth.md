@@ -63,6 +63,8 @@ At minimum, keep these files aligned:
 
 - `docs/architecture/system-architecture.md`
 - `docs/architecture/tech-stack.md`
+- `docs/architecture/company-os-definition-editing-contract.md`
+- `docs/architecture/company-os-workflow-definition-command-contract.md`
 - `docs/ARCHITECTURE.md`
 - `docs/DATABASE.md`
 - `docs/API.md`

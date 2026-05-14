@@ -8,6 +8,9 @@ No active decisions.
 
 ## Resolved Decisions
 
+- 2026-05-11: After V1EVID-001 and V1EVID-002 closed the local V1 evidence
+  gaps, Agent-First Company OS is the selected next V2 lane. The next task is
+  an MCP/HTTP command-surface audit before adding any new runtime behavior.
 - 2026-05-02: CompanyCore v1 has no GUI.
 - 2026-05-02: PostgreSQL is the source of truth.
 - 2026-05-02: Backend API is the only supported access layer.

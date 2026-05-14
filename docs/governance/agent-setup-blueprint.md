@@ -71,7 +71,8 @@ Every role follows `docs/governance/autonomous-engineering-loop.md`.
 ## Guardrails
 
 - No coding without an executable plan item.
-- No iteration without process self-audit, operation mode, and one-task scope.
+- No iteration without process self-audit, operation mode, and one bounded
+  mission objective.
 - No silent architecture changes. Propose them first.
 - Do not leave resolved architecture truth only in planning files.
 - No large mixed commits.

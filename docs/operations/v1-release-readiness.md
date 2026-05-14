@@ -1,6 +1,6 @@
 # CompanyCore v1 Release Readiness
 
-Last updated: 2026-05-03
+Last updated: 2026-05-11
 
 ## Verdict
 
@@ -8,6 +8,11 @@ CompanyCore v1 is achieved for the approved operating slice: owner setup,
 workspace-scoped API, ClickUp import/live sync/write-back, Jarvis read
 integration, Paperclip event consumption, and clean sync data hygiene are
 deployed and smoke tested.
+
+The local architecture-derived V1 evidence set is also complete. V1EVID-001
+proved the Company OS lifecycle trace in Docker, and V1EVID-002 proved the
+operating-model registry lifecycle trace in Docker. The consolidated handoff is
+`docs/operations/v1-achievement-and-blocker-handoff.md`.
 
 The only tracked residual blocker is not a runtime v1 feature blocker:
 GitHub-to-Coolify auto-deploy webhook administration remains blocked by missing

@@ -1,6 +1,6 @@
 # Regression Log
 
-Last updated: 2026-05-08
+Last updated: 2026-05-09
 
 ## Active Regressions
 
@@ -17,3 +17,9 @@ Last updated: 2026-05-08
 
 - Monitor future deploys: do not claim reliable auto-deploy until a
   push-to-running-image smoke is recorded in `docs/operations/post-deploy-smoke.md`.
+- Monitor future Company OS lifecycle slices: stage writes are now available
+  only as command routes with approval, acceptance criteria, event, and audit
+  checks; do not add raw `stage_runs` or `pipeline_runs` status patching.
+- Monitor future automation slices: automation rules must observe normalized
+  events and call approval/lifecycle command paths; do not add provider-direct
+  calls, arbitrary script execution, or duplicate approval/stage transitions.

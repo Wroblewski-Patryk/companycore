@@ -1,6 +1,6 @@
 # CompanyCore V1 Operator Handoff
 
-Last updated: 2026-05-08
+Last updated: 2026-05-11
 
 ## Verdict
 
@@ -9,6 +9,10 @@ runtime scope.
 
 The system is ready for normal owner usage and for Jarvis/Paperclip to consume
 CompanyCore as the company operational source of truth.
+
+The local architecture-derived V1 evidence set is complete as of 2026-05-11.
+See `docs/operations/v1-achievement-and-blocker-handoff.md` for the concise
+achievement boundary and external blocker list.
 
 ## Runtime Scope Accepted
 
@@ -78,6 +82,9 @@ CompanyCore as the company operational source of truth.
   `71f3eb3b063ea68226a1736c727c52882b33f27a`.
 - 2026-05-08 public `app.js` marker check confirmed typed editor surfaces for
   Notes, Projects, Clients, Task Lists, and Tasks.
+- 2026-05-11 public no-secret smoke returned `200` for CompanyCore `/health`,
+  CompanyCore `/v1/health`, CompanyCore web root, Paperclip `/api/health`, and
+  Jarvis `/health`.
 
 ## Data State
 

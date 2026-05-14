@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { OperatingStatus } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "../../db/prisma";
 import { asyncHandler } from "../../middleware/async-handler";
@@ -7,7 +8,7 @@ import { createEvent } from "../events/event.service";
 const createPipelineStageSchema = z.object({
   name: z.string().min(1),
   position: z.coerce.number().int().optional(),
-  status: z.string().min(1).optional(),
+  status: z.nativeEnum(OperatingStatus).optional(),
   externalId: z.string().min(1).optional(),
   source: z.string().min(1).optional()
 }).strict();

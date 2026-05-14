@@ -25,6 +25,9 @@ source of truth, and the HTTP API is the supported integration access layer.
 - External tools must not write directly to PostgreSQL.
 - Paperclip, Jarvis, n8n, future dashboard clients, and other agents must use
   the API.
+- MCP is the preferred agent tool interface above the API. MCP servers should
+  wrap CompanyCore HTTP routes and inherit the same workspace, capability,
+  validation, approval, event, and audit boundaries.
 - Significant state changes should emit events.
 - Schema changes must use migrations before production data becomes valuable.
 
@@ -47,8 +50,11 @@ advanced RBAC, organization administration, and a full CRM UI are out of scope.
 ## Core Data Areas
 
 - Strategy and delivery: projects, goals, targets, task lists, tasks.
-- Shared pipelines: reusable workflow/status stages that can be used by any
-  department.
+- Company OS foundation: processes, pipelines, pipeline stages, procedures,
+  procedure steps, company roles, provider-neutral resources, tool adapters,
+  integration capabilities, and quality standards.
+- Shared pipelines: reusable workflow definitions and ordered workflow/status
+  stages that can be used by any department.
 - CRM and sales: clients, deals, interactions, and CRM usage of shared
   pipelines where needed.
 - Knowledge: notes, decisions.
@@ -102,6 +108,350 @@ The approved company operating areas are:
 Pipelines are a shared workflow capability, not a Sales/CRM-owned module. CRM
 can use pipeline stages for deals, but the same pipeline concept must remain
 available to other operating areas when their workflows need staged movement.
+The approved Company OS model now separates:
+
+```text
+Process -> Pipeline -> PipelineStage -> Procedure -> ProcedureStep
+```
+
+Processes describe stable company work such as sales, onboarding, feature
+development, documentation, deployment, and agent task execution. Pipelines
+describe the cross-department flow from input to outcome. Stages describe the
+ordered state and handoff conditions inside a pipeline. Procedures and steps
+describe how a stage is executed, including expected input/output, validation,
+tools, rollback instructions, and approval needs.
+
+`company_roles` is the role catalog for humans, agents, and system actors.
+Every important process and pipeline should have exactly one accountable role
+through the owner/default-owner relationship before automation is enabled.
+Agents must operate through role responsibilities, permissions, allowed tools,
+default policies, and escalation targets rather than raw provider access.
+
+`tool_adapters` and `integration_capabilities` are the provider-neutral
+adapter layer. Processes and pipelines should depend on capabilities such as
+`create_task`, `read_file`, or `deploy_app`, not on direct ClickUp, Drive,
+GitHub, or Coolify API calls. Provider-specific code remains in
+`src/integrations/<provider>/`, while the database records expose connection
+state, auth type, health, config schema, rate-limit metadata, permission
+requirements, approval needs, and audit requirements.
+
+`resources` is the universal resource index for externally or internally
+addressable objects: ClickUp tasks, Drive files/folders, GitHub repos, database
+tables, clients, projects, documents, prompts, automations, and API endpoints.
+Resources can be owned by roles and linked back to projects and processes so
+agents can reason about what they are touching before they act.
+
+Runtime evidence for the Company OS is represented as:
+
+```text
+PipelineRun -> StageRun -> Approval / AcceptanceCriterion / AuditLog
+Event(correlation_id) observes the same workflow
+```
+
+`pipeline_runs` are concrete executions of a pipeline, for example a client
+onboarding or deployment. They record initiating actor, input/output payloads,
+linked task/document IDs, optional client/project links, current stage, status,
+timestamps, error state, and a workspace-unique `correlation_id`.
+
+`stage_runs` record the execution of a specific stage inside a pipeline run.
+They include assigned actor, input/output, logs, validation result, approval
+status, and timestamps. A stage definition can exist without a run; a stage run
+is the auditable fact that work started, blocked, failed, or completed.
+
+`approvals` protect risky agent, system, integration, and human-triggered
+actions. They capture who requested the action, what resource/action is being
+requested, risk level, approver role or user, decision status, decision reason,
+expiry, and optional run/stage-run links.
+
+`checklist_templates`, `checklist_items`, and `acceptance_criteria` define and
+track completion evidence. Templates are reusable. Acceptance criteria are
+attached to a concrete target and hold validation status, verifier, timestamp,
+and evidence payload.
+
+`audit_logs` are append-style records for important actions. They store actor,
+resource, tool adapter, input, output, approval reference, error state, run
+links, and `correlation_id`. They complement `events`: events are the
+observable stream, while audit logs are the durable action evidence.
+
+Governance intelligence is represented as:
+
+```text
+Policy + Metric + Risk + Control + KnowledgeItem + DecisionLog
+AutomationRule + Trigger + Artifact + Dependency
+BusinessFunction + Stakeholder
+```
+
+Policies define what agents, processes, pipelines, tools, resources, or
+departments may do and how enforcement happens: warning, block, approval, or
+log-only. Metrics and KPIs define how CompanyCore measures whether the company
+and its agents are operating well. Risks capture what can go wrong. Controls
+capture how the risk is reduced, verified, and owned.
+
+Knowledge items are the durable knowledge index for process, pipeline,
+project, client, agent, and document context. Decision logs are richer than
+the earlier lightweight `decisions` table: they record context, options
+considered, chosen option, reason, consequences, and review date.
+
+Automation rules and triggers are separate from provider-specific webhooks.
+Triggers describe why a workflow starts. Automation rules describe the
+condition/action contract that should run or escalate work. Artifacts record
+work outputs, and dependencies connect resources or entities so agents can
+see blockers before acting.
+
+Business functions are the approved LuckySparrow departments and operating
+functions. Stakeholders provide the broader client, vendor, partner, internal,
+or other people map beyond CRM clients.
+
+The supported API entrypoint for this graph is `/v1/company-os`. It exposes a
+cockpit snapshot plus allowlisted collection reads for Stage 1-3 Company OS
+records through `company-os:read`. Writes must be lifecycle-specific routes
+with policy, approval, acceptance criteria, event, and audit behavior rather
+than raw table CRUD.
+
+### Company OS Approval Lifecycle
+
+Company OS writes must be command-oriented. The first approved write direction
+is not raw CRUD over `approvals`, `pipeline_runs`, `stage_runs`, or
+`audit_logs`; it is a small set of lifecycle commands that preserve policy,
+approval, event, and audit boundaries:
+
+```text
+Agent/User/System -> lifecycle command -> policy check -> approval gate
+  -> state transition -> event -> audit log -> optional MCP tool result
+```
+
+The initial lifecycle command set should be:
+
+1. Request approval: create a pending approval for a proposed action.
+2. Decide approval: approve or reject a pending approval exactly once.
+3. Start or update pipeline/stage execution: future commands that must require
+   an approval reference when risk or policy requires one.
+4. Validate or close execution evidence: future commands that record validation
+   and acceptance criteria evidence before completion.
+
+Approval requests are for agents, integrations, users, and system processes
+that need permission to perform a risky action. The route should create an
+`approval_requested` event and an `approval.requested` audit log entry with one
+correlation ID. It must derive `workspace_id` from auth, never from the client.
+
+Approval decisions are human- or accountable-role actions. The route should
+only operate on `pending` approvals that have not expired. The decision should
+set `status`, `decision_reason`, `approver_user_id` when available, and
+`decided_at`; then emit `approval_approved` or `approval_rejected` plus an
+`approval.decided` audit log entry with the same correlation ID. Decisions must
+be idempotency-safe by refusing to decide an already-decided approval.
+
+Lifecycle commands that execute work must fail closed when:
+
+- the caller lacks the route capability
+- the target record is outside the caller workspace
+- the approval is missing, rejected, expired, or linked to a different resource
+- a blocking policy applies
+- the requested transition is invalid for the current status
+
+MCP servers should expose these commands only from the CompanyCore manifest.
+They must not implement separate approval state transitions or bypass
+CompanyCore policy checks.
+
+### Company OS Pipeline And Stage Lifecycle
+
+Pipeline and stage execution writes must use lifecycle commands over
+`pipeline_runs` and `stage_runs`. They must not expose raw status patching,
+because status transitions also change current stage, approval state,
+validation evidence, events, and audit logs.
+
+The stage lifecycle command set is:
+
+1. Start stage: create or resume a `stage_run` for a stage in a running
+   pipeline run and set `pipeline_runs.current_stage_id`.
+2. Block stage: mark a stage run as blocked with a reason, optional approval
+   request reference, and recovery hint.
+3. Complete stage: mark a stage run as completed only when required approval
+   and acceptance criteria are satisfied.
+4. Validate stage: write validation result and acceptance criteria evidence
+   without completing the stage automatically.
+5. Complete pipeline run: a later command should close a pipeline run only
+   when all required stage runs and acceptance criteria have completed or been
+   explicitly skipped.
+
+The first implementation slice exposes stage-level commands:
+
+```text
+POST /v1/company-os/pipeline-runs/:id/actions/start-stage
+POST /v1/company-os/stage-runs/:id/actions/block
+POST /v1/company-os/stage-runs/:id/actions/validate
+POST /v1/company-os/stage-runs/:id/actions/complete
+```
+
+`start-stage` should accept a `pipelineStageId`, optional input payload, and
+optional assignment actor. It should fail if the stage is not part of the
+pipeline definition, if another active stage run already blocks progression, or
+if a required approval policy applies and no approved approval reference is
+provided.
+
+`block` should accept a reason, optional error state, and optional
+`approvalId`. It should set `stage_runs.status = blocked`, append the block to
+`stage_runs.logs`, and set the parent `pipeline_runs.status = blocked` unless
+the pipeline has already failed or completed.
+
+`validate` should accept validation status, evidence, and optional acceptance
+criterion IDs. It should update `stage_runs.validation_result` and matching
+`acceptance_criteria` records. It must not mark the stage complete by itself.
+
+`complete` should accept output payload, validation summary, and optional
+`approvalId`. It should require:
+
+- current stage run status is `running` or `blocked`
+- every required acceptance criterion for the stage run is `passed` or
+  explicitly `waived`
+- approval is approved when the stage definition, tool capability, risk, or
+  active policy requires approval
+- approval belongs to the same workspace and the same stage or pipeline run
+
+Every command must emit a specific event and append an audit log with one
+correlation ID:
+
+| Command | Event | Audit action |
+| --- | --- | --- |
+| start stage | `stage_started` | `stage_run.started` |
+| block stage | `stage_blocked` | `stage_run.blocked` |
+| validate stage | `stage_validated` | `stage_run.validated` |
+| complete stage | `stage_completed` | `stage_run.completed` |
+| complete pipeline | `pipeline_completed` | `pipeline_run.completed` |
+
+Invalid transitions must return conflict-style errors instead of silently
+overwriting execution history. Automation rules may observe these events, but
+automation execution must remain a later slice.
+
+### Company OS Automation Rule Execution
+
+Automation rules are event observers and action requesters. They must not be a
+parallel workflow engine that mutates `pipeline_runs`, `stage_runs`,
+`approvals`, provider resources, or audit records directly. The approved
+execution direction is:
+
+```text
+Event -> trigger match -> automation rule condition evaluation
+  -> policy/risk/capability check -> action proposal
+  -> approval request or lifecycle command -> event + audit evidence
+```
+
+The event stream is the input boundary. A rule may match events by
+`event_type`, actor, resource, pipeline, stage, provider, metadata, or
+correlation ID. Provider webhooks such as ClickUp status changes and Drive file
+changes must first become normalized CompanyCore events, then automation rules
+can observe those events. Rules must not call provider APIs directly from
+trigger matching.
+
+`automation_rules.condition` is a declarative JSON condition. It should support
+small, explicit predicates before any broad expression language is introduced:
+
+- event type equals one of an allowlisted set
+- event payload path equals, contains, or exists
+- event age or stage age crosses a configured threshold
+- related resource, pipeline, or stage has a required status
+- related policy, risk, or control requires approval
+
+`automation_rules.action` is a declarative action proposal. The first approved
+action kinds are:
+
+- `request_approval`: create a pending approval for a risky follow-up action
+- `start_stage`: call the stage lifecycle start command
+- `block_stage`: call the stage lifecycle block command
+- `validate_stage`: call the stage lifecycle validate command
+- `complete_stage`: call the stage lifecycle complete command
+- `emit_event`: write an informational system event when no state transition
+  should happen yet
+
+Risky or externally visible actions must request approval before execution when
+the matched policy, risk level, stage definition, tool capability, or
+integration capability requires it. Automation execution must use the same
+command routes and helper contracts as UI and MCP tools; it must never patch
+raw statuses or bypass approval validation.
+
+Automation execution must be idempotency-safe. A matched rule should derive a
+stable execution key from workspace ID, rule ID, source event ID, action kind,
+and target resource/run/stage ID. Reprocessing the same source event with the
+same rule and target must return the existing event/audit evidence or a
+conflict-style no-op instead of creating duplicate approvals or repeated stage
+transitions.
+
+Every rule evaluation must leave evidence:
+
+| Outcome | Event | Audit action |
+| --- | --- | --- |
+| rule matched | `automation_rule_matched` | `automation_rule.matched` |
+| action proposed | `automation_action_proposed` | `automation_rule.action_proposed` |
+| approval requested | `approval_requested` | `approval.requested` |
+| lifecycle command executed | command-specific event | command-specific audit action |
+| no rule matched | optional `automation_no_match` for debug modes only | optional `automation_rule.no_match` |
+| rule failed | `automation_rule_failed` | `automation_rule.failed` |
+
+The current implementation evaluates a single existing event against active
+rules and executes `request_approval`, `emit_event`, and stage lifecycle action
+proposals. Lifecycle actions such as `start_stage`, `block_stage`,
+`validate_stage`, and `complete_stage` call shared lifecycle command functions;
+command rejections produce `automation_rule_failed` evidence with the same
+stable fail-closed reason. Scheduled scanning, provider-specific webhook
+fan-out, retries, backoff, and a separate worker tier remain later slices.
+
+#### Automation Lifecycle Helper Reuse
+
+Automation must not reimplement lifecycle transitions inside the evaluator.
+Stage lifecycle behavior lives in a shared internal command service used by
+both:
+
+- HTTP route handlers such as
+  `POST /v1/company-os/stage-runs/:id/actions/complete`
+- automation evaluator actions such as `complete_stage`
+
+The shared service should own validation and mutation in one place:
+
+```text
+HTTP route or automation evaluator
+  -> parse and authorize caller-specific input
+  -> call shared lifecycle command service
+  -> service validates workspace, status, approval, criteria, and policy
+  -> service writes state transition, event, and audit evidence
+  -> caller returns the service result
+```
+
+The shared lifecycle service should expose internal functions with explicit
+inputs instead of Express request objects:
+
+- `startStageCommand({ workspaceId, actor, pipelineRunId, input })`
+- `blockStageCommand({ workspaceId, actor, stageRunId, input })`
+- `validateStageCommand({ workspaceId, actor, stageRunId, input })`
+- `completeStageCommand({ workspaceId, actor, stageRunId, input })`
+
+These functions must preserve the existing HTTP route behavior, response
+payloads, event names, audit actions, and stable error codes. They must not
+accept `workspaceId` from external request bodies. They must accept an actor
+object derived by the caller, so automation can act as `system` or `agent`
+while still recording the original source event and rule ID in audit input.
+
+Automation evaluator lifecycle execution maps to the shared service:
+
+- `start_stage` maps to `startStageCommand`
+- `block_stage` maps to `blockStageCommand`
+- `validate_stage` maps to `validateStageCommand`
+- `complete_stage` maps to `completeStageCommand`
+
+Each evaluator call creates automation-level evidence
+(`automation_rule_matched` and `automation_action_proposed`) before calling the
+stage lifecycle service. The lifecycle service then creates command-specific
+evidence such as `stage_completed` and `stage_run.completed`. Both evidence
+chains include correlation metadata, and automation-level audit input records
+the source event ID, rule ID, action kind, and idempotency key.
+
+The extraction was behavior-preserving before lifecycle automation was enabled.
+Future slices should extend automation breadth by adding new command-shaped
+actions, not by patching workflow state directly inside the evaluator.
+
+MCP agents may request evaluation through manifest-exposed CompanyCore routes
+only when their service key has the automation capability. They must receive a
+structured result containing the matched rule IDs, proposed action, approval
+requirement, emitted event IDs, audit log IDs, and any fail-closed reason.
 
 For each workspace, the operating model should make the following resources
 addressable through one consistent scope:
@@ -139,6 +489,7 @@ metadata.
 - `src/config/`: runtime configuration.
 - `src/db/`: Prisma client boundary.
 - `src/health/`: public health endpoint.
+- `src/mcp/`: MCP-friendly route/tool manifest projection for bridge servers.
 - `src/middleware/`: shared Express middleware and error handling.
 - `src/modules/*`: domain route modules and business behavior.
 - `src/integrations/<provider>/`: provider-specific API clients, mappers, sync
@@ -149,6 +500,28 @@ metadata.
 Route modules should not call external provider APIs directly. They should call
 integration services that read workspace-owned settings and normalize provider
 data into CompanyCore models.
+
+## MCP Agent Tooling
+
+CompanyCore should be optimized for MCP consumption without making MCP the
+database boundary. The target architecture is:
+
+```text
+Agent runtime -> MCP server -> CompanyCore HTTP API -> policies/approvals/events/audit -> PostgreSQL
+```
+
+`GET /v1/mcp/manifest` is the first bridge contract. It projects the
+capability-scoped HTTP route manifest into MCP-friendly tool definitions,
+including tool names, route paths, capability requirements, risk level,
+approval hints, and JSON input schemas. The same manifest is also included in
+`GET /v1/connection` so agents can discover one connection and then decide
+whether to operate through HTTP directly or through an MCP bridge.
+
+MCP servers must stay thin. They should not read Prisma models directly, should
+not load integration secrets, and should not implement separate business rules.
+Their job is to expose the CompanyCore API as ergonomic tools for agents while
+CompanyCore keeps ownership of validation, permissions, event emission,
+approval gates, audit logs, and provider adapter behavior.
 
 ## Integration Architecture
 
