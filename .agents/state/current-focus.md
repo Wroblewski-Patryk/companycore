@@ -4,15 +4,15 @@ Last updated: 2026-05-14
 
 ## Active Focus
 
-ACF-UX-001 is now complete. The API settings surface and React Company OS
-cockpit were hardened for mobile overflow and focus accessibility. Signed-in
-Playwright fallback checked `/settings/api` and `/react-company-os` at desktop
-`1440x960` and mobile `390x844`; all checks reported
-`horizontalOverflow=false`, `unnamedFocusableCount=0`, no console
-warnings/errors, and no relevant failed requests. `npm test` passed against
-disposable PostgreSQL on `localhost:55451`. The next active finish task is
-ACF-SEC-001 production secret/CORS hardening, followed by ACF-DOC-001 ledger
-reconciliation and ACF-PROD-001 operating-model data completion.
+ACF-SEC-001 is now complete. Production runtime configuration fails closed
+when required security secrets are missing or still use committed development
+placeholder values, and production CORS is restricted to
+`COMPANYCORE_ALLOWED_ORIGINS` or the documented CompanyCore web/API domains.
+`npm test` passed against disposable PostgreSQL on `localhost:55452`, including
+missing-secret, placeholder-secret, CORS allow/deny, and existing protected API
+flow coverage. The next active finish task is ACF-DOC-001 ledger
+reconciliation, followed by ACF-PROD-001 operating-model data completion and
+ACF-UX-002 Company City dashboard implementation or supersession.
 
 CompanyCore v1 runtime is accepted and live for the approved owner, ClickUp,
 Jarvis, Paperclip, workspace API, and agent CRUD scope. The current focus has
@@ -119,9 +119,9 @@ No local Company OS workflow recovery task remains ready.
 ## Current System Objective
 
 Optimize for source-of-truth clarity, no regression, correct owner workflows,
-and application completion. The immediate objective is ACF-UX-001: remove
-freshly observed mobile overflow and focus/accessibility defects before adding
-new feature scope.
+and application completion. The immediate objective is ACF-DOC-001: reconcile
+stale coverage and audit ledger rows so future agents do not reopen completed
+Drive or finish-queue blockers.
 
 ## Current Delivery Stage
 

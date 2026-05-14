@@ -26,6 +26,12 @@
 - Integration secrets must be encrypted at rest, must not be logged, and must
   not be returned in API responses.
 - Raw provider/backend errors must not be exposed directly to API clients.
+- Production runtime must not silently fall back to development auth,
+  integration-encryption, or API-key hashing secrets. Missing or placeholder
+  production secret values fail startup before the HTTP service is accepted as
+  healthy.
+- Production CORS is restricted to the approved CompanyCore web/API origins or
+  the explicit `COMPANYCORE_ALLOWED_ORIGINS` allowlist.
 
 ## API Error Safety
 

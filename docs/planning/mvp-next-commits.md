@@ -7,15 +7,12 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] ACF-SEC-001 Production Secret And CORS Hardening:
-      fail production startup when required secret env vars are absent and
-      decide or restrict production CORS.
-
-### NEXT
-
 - [ ] ACF-DOC-001 Coverage Ledger Reconciliation:
       sync stale Drive/import and application-completion audit rows across
       active ledgers and source-of-truth files.
+
+### NEXT
+
 - [ ] ACF-PROD-001 Operating Model Data Completion Decision:
       decide whether empty production projects, storage locations, knowledge
       roots, and automation definitions need seed/import work or explicit
@@ -35,6 +32,12 @@ The section below is retained as execution evidence. It is not the active
 queue. Future work must start from `Active Queue`, `.codex/context/TASK_BOARD.md`,
 and `docs/operations/v1-function-coverage-ledger.csv`.
 
+- [x] ACF-SEC-001 Production Secret And CORS Hardening:
+      production now fails closed when required secret env vars are absent or
+      still use committed development placeholder values; production CORS is
+      restricted to `COMPANYCORE_ALLOWED_ORIGINS` or the documented
+      CompanyCore web/API domains. `npm test` passed against disposable
+      PostgreSQL on `localhost:55452`.
 - [x] ACF-UX-001 Mobile Overflow And Focus Accessibility Fix:
       `/settings/api` and `/react-company-os` passed signed-in desktop/mobile
       Playwright fallback checks with `horizontalOverflow=false`,

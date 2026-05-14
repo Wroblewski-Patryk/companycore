@@ -6,7 +6,6 @@ Last updated: 2026-05-14
 
 | ID | Severity | Area | Summary | Owner | Status | Next action |
 | --- | --- | --- | --- | --- | --- | --- |
-| KI-006 | P1 | Security configuration | `src/config/env.ts` still falls back to development secrets when production secrets are missing, and Express CORS is currently open. | Backend + Security | OPEN | Execute ACF-SEC-001: fail closed for production secrets and restrict CORS through explicit configuration. |
 | KI-007 | P1 | Product data completeness | Production `/v1/operating-model` has 13 areas and 26 external mappings but `0` storage locations, `0` knowledge roots, `0` automation definitions, and `/v1/projects` returns `0` while tasks exist. | Product + Backend | OPEN | Execute ACF-PROD-001 to decide, seed, import, or explicitly defer these owner-facing operating model records. |
 | KI-002 | P2 | Release automation | GitHub-to-Coolify auto-deploy is not proven as reliable; manual VPS backend rollover remains the approved path. | Ops/Release | MONITORING | Record a push-to-running-image smoke before claiming auto-deploy is reliable. |
 | KI-003 | P2 | Source handoff | Paperclip and OpenJarvis validated source changes could not be pushed upstream because GitHub returned `403`. | Ops/Release | BLOCKED | Resume AGRUN-010 after write access or an approved fork/PR route exists. |
@@ -34,3 +33,7 @@ Last updated: 2026-05-14
   `/react-company-os` reported `horizontalOverflow=false`,
   `unnamedFocusableCount=0`, no console warnings/errors, and no relevant failed
   requests.
+- KI-006 production secret and CORS hardening: closed by ACF-SEC-001 on
+  2026-05-14. `npm test` against disposable PostgreSQL on `localhost:55452`
+  verified missing-secret failure, development-placeholder rejection,
+  production CORS allow/deny behavior, and the existing protected API flow.

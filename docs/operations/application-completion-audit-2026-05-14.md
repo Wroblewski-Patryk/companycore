@@ -151,3 +151,11 @@ still a known P2 gap. Rollback pointers are current after the hotfix deploy.
   and mobile `390x844` with `horizontalOverflow=false`,
   `unnamedFocusableCount=0`, no console warnings/errors, and no relevant failed
   requests. Evidence is recorded in `docs/planning/acf-ux-001-task-contract.md`.
+- 2026-05-14: ACF-SEC-001 closed ACF-005 and ACF-006. Production env loading
+  now fails closed when required secrets are missing or still use committed
+  development placeholder values, and production CORS is restricted to
+  `COMPANYCORE_ALLOWED_ORIGINS` or the documented CompanyCore web/API domains.
+  `npm test` passed against disposable PostgreSQL on `localhost:55452`,
+  including missing-secret, placeholder-secret, CORS allow/deny, and existing
+  protected API flow coverage. Evidence is recorded in
+  `docs/planning/acf-sec-001-task-contract.md`.

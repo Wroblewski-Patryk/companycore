@@ -209,6 +209,143 @@ async function runMcpBridgeSmoke(apiKey: string, options: {
   assert.ok(summary.toolCount > 0);
 }
 
+async function runNodeScript(script: string, envOverrides: NodeJS.ProcessEnv = {}) {
+  const childEnv: NodeJS.ProcessEnv = {
+    ...process.env,
+    ...envOverrides
+  };
+  for (const [key, value] of Object.entries(envOverrides)) {
+    if (value === undefined) {
+      delete childEnv[key];
+    }
+  }
+
+  const child = spawn(process.execPath, ["--input-type=module", "-e", script], {
+    cwd: process.cwd(),
+    env: childEnv,
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+
+  let stdout = "";
+  let stderr = "";
+  child.stdout.on("data", (chunk) => {
+    stdout += chunk.toString();
+  });
+  child.stderr.on("data", (chunk) => {
+    stderr += chunk.toString();
+  });
+
+  const exitCode = await new Promise<number | null>((resolve, reject) => {
+    child.on("error", reject);
+    child.on("close", resolve);
+  });
+
+  return { exitCode, stdout, stderr };
+}
+
+test("production environment validation fails closed when required secrets are missing", async () => {
+  const result = await runNodeScript(`
+    try {
+      await import("./dist/config/env.js");
+      console.error("expected production env import to fail");
+      process.exit(1);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.log(message);
+      if (!message.includes("AUTH_TOKEN_SECRET")) {
+        process.exit(1);
+      }
+    }
+  `, {
+    NODE_ENV: "production",
+    DATABASE_URL: "postgresql://companycore:companycore@localhost:5432/companycore?schema=public",
+    AUTH_TOKEN_SECRET: undefined,
+    INTEGRATION_SECRET_KEY: "production-integration-secret-for-tests",
+    API_KEY_HASH_SECRET: "production-api-key-hash-secret-for-tests"
+  });
+
+  assert.equal(result.exitCode, 0, `stdout:\n${result.stdout}\nstderr:\n${result.stderr}`);
+  assert.match(result.stdout, /Missing required production environment variable: AUTH_TOKEN_SECRET/);
+});
+
+test("production environment validation rejects committed development secret placeholders", async () => {
+  const result = await runNodeScript(`
+    try {
+      await import("./dist/config/env.js");
+      console.error("expected production env import to reject placeholder secret");
+      process.exit(1);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.log(message);
+      if (!message.includes("Unsafe production environment variable value: AUTH_TOKEN_SECRET")) {
+        process.exit(1);
+      }
+    }
+  `, {
+    NODE_ENV: "production",
+    DATABASE_URL: "postgresql://companycore:companycore@localhost:5432/companycore?schema=public",
+    AUTH_TOKEN_SECRET: "dev-companycore-auth-secret-change-me",
+    INTEGRATION_SECRET_KEY: "production-integration-secret-for-tests",
+    API_KEY_HASH_SECRET: "production-api-key-hash-secret-for-tests"
+  });
+
+  assert.equal(result.exitCode, 0, `stdout:\n${result.stdout}\nstderr:\n${result.stderr}`);
+  assert.match(result.stdout, /Unsafe production environment variable value: AUTH_TOKEN_SECRET/);
+});
+
+test("production CORS allows approved origins and rejects unknown browser origins", async () => {
+  const result = await runNodeScript(`
+    const { createApp } = await import("./dist/app.js");
+    const server = createApp().listen(0);
+    await new Promise((resolve) => server.once("listening", resolve));
+    const { port } = server.address();
+    const baseUrl = "http://127.0.0.1:" + port;
+    const headers = {
+      "Access-Control-Request-Method": "GET"
+    };
+    const allowed = await fetch(baseUrl + "/health", {
+      method: "OPTIONS",
+      headers: {
+        ...headers,
+        Origin: "https://companycore.luckysparrow.ch"
+      }
+    });
+    const denied = await fetch(baseUrl + "/health", {
+      method: "OPTIONS",
+      headers: {
+        ...headers,
+        Origin: "https://unknown-origin.example"
+      }
+    });
+    console.log(JSON.stringify({
+      allowedStatus: allowed.status,
+      allowedOrigin: allowed.headers.get("access-control-allow-origin"),
+      deniedStatus: denied.status,
+      deniedOrigin: denied.headers.get("access-control-allow-origin")
+    }));
+    await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+  `, {
+    NODE_ENV: "production",
+    DATABASE_URL: "postgresql://companycore:companycore@localhost:5432/companycore?schema=public",
+    AUTH_TOKEN_SECRET: "production-auth-token-secret-for-tests",
+    INTEGRATION_SECRET_KEY: "production-integration-secret-for-tests",
+    API_KEY_HASH_SECRET: "production-api-key-hash-secret-for-tests",
+    COMPANYCORE_ALLOWED_ORIGINS: "https://companycore.luckysparrow.ch"
+  });
+
+  assert.equal(result.exitCode, 0, `stdout:\n${result.stdout}\nstderr:\n${result.stderr}`);
+  const summary = JSON.parse(result.stdout) as {
+    allowedStatus: number;
+    allowedOrigin: string | null;
+    deniedStatus: number;
+    deniedOrigin: string | null;
+  };
+  assert.equal(summary.allowedStatus, 204);
+  assert.equal(summary.allowedOrigin, "https://companycore.luckysparrow.ch");
+  assert.equal(summary.deniedStatus, 403);
+  assert.equal(summary.deniedOrigin, null);
+});
+
 before(async () => {
   await resetDatabase();
   const app = createApp();

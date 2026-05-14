@@ -2,13 +2,6 @@
 
 ## Ready
 
-- ACF-SEC-001 Production Secret And CORS Hardening
-  - Stage: planning
-  - Owner: Security + Backend Builder
-  - Priority: P1
-  - Source: `docs/operations/application-completion-audit-2026-05-14.md`
-  - Goal: fail production startup when required secrets are missing and decide
-    or restrict production CORS.
 - ACF-DOC-001 Coverage Ledger Reconciliation
   - Stage: planning
   - Owner: Planner + Product Docs
@@ -58,6 +51,13 @@ No active local implementation task is currently in progress.
   auto-deploy webhook administration task.
 
 ## Done
+
+- ACF-SEC-001 Production Secret And CORS Hardening.
+  - Evidence: `npm run build` passed; `npm test` passed against disposable
+    PostgreSQL on `localhost:55452`, including missing production secret
+    rejection, development placeholder secret rejection, production CORS
+    allow/deny behavior, and the existing protected API flow.
+  - Task contract: `docs/planning/acf-sec-001-task-contract.md`.
 
 - ACF-UX-001 Mobile Overflow And Focus Accessibility Fix.
   - Evidence: `npm run build` passed; signed-in Playwright fallback checked

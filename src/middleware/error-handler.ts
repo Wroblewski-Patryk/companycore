@@ -14,6 +14,12 @@ export function errorHandler(
     });
   }
 
+  if (error.message === "cors_origin_not_allowed") {
+    return res.status(403).json({
+      error: "cors_origin_not_allowed"
+    });
+  }
+
   console.error(error);
 
   return res.status(500).json({

@@ -6,6 +6,7 @@ Last updated: 2026-05-14
 
 | Check | Command or method | Result | Evidence | Notes |
 | --- | --- | --- | --- | --- |
+| security/runtime config | `npm run build`; `npm test` with `DATABASE_URL=postgresql://companycore:companycore@localhost:55452/companycore?schema=public` | PASS | 2026-05-14 ACF-SEC-001 | Verified missing production secret rejection, development placeholder secret rejection, production CORS allow/deny behavior, and existing protected API flow. Disposable PostgreSQL `companycore-sec-postgres` was removed after validation. |
 | lint | Not configured | NOT APPLICABLE | `.codex/context/PROJECT_STATE.md` validation commands | Project has no lint script. |
 | typecheck | `npm run build` | PASS (latest recorded) | `docs/operations/v1-operator-handoff.md`; recent V2WEB task evidence in `.codex/context/PROJECT_STATE.md` | Build is the project typecheck gate. |
 | tests | `docker compose exec -T backend sh -lc "npm run prisma:migrate:deploy && node --test 'dist/tests/**/*.test.js'"` | PASS | 2026-05-08 UXA-002 | Direct host `npm test` still requires a host-reachable `DATABASE_URL`; compose Postgres is internal only, so the integration test was run inside the backend container. |

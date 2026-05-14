@@ -54,7 +54,15 @@ Current foundation secrets:
 - `AUTH_TOKEN_SECRET`
 - `API_KEY_HASH_SECRET`
 - `INTEGRATION_SECRET_KEY`
+- `COMPANYCORE_ALLOWED_ORIGINS` as a comma-separated allowlist for browser
+  CORS. Production defaults to
+  `https://companycore.luckysparrow.ch,https://api.companycore.luckysparrow.ch`
+  when the value is omitted.
 - optional `PORT`
+
+Production startup fails closed when `DATABASE_URL`, `AUTH_TOKEN_SECRET`,
+`API_KEY_HASH_SECRET`, or `INTEGRATION_SECRET_KEY` is missing, or when one of
+the secret values still uses the committed development placeholder pattern.
 
 v1 service credentials:
 

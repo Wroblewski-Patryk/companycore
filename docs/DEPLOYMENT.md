@@ -58,6 +58,11 @@ Required environment values:
 - `AUTH_TOKEN_SECRET`
 - `API_KEY_HASH_SECRET`
 - `INTEGRATION_SECRET_KEY`
+- `COMPANYCORE_ALLOWED_ORIGINS` if the production browser allowlist differs
+  from `https://companycore.luckysparrow.ch,https://api.companycore.luckysparrow.ch`
+
+Production startup fails when required secrets are missing or still use the
+committed development placeholder values.
 
 Map domains to the `backend` service on container port `3000`.
 The backend serves the owner console from `/` on the web domain. The

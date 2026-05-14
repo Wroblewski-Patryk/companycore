@@ -2,6 +2,7 @@ import cors from "cors";
 import express, { Router } from "express";
 import path from "path";
 import { requireApiKey } from "./auth/api-key.middleware";
+import { env } from "./config/env";
 import { errorHandler } from "./middleware/error-handler";
 import { agentLogsRouter } from "./modules/agent-logs/agent-logs.routes";
 import { agentEventsRouter } from "./modules/agent-events/agent-events.routes";
@@ -85,12 +86,30 @@ const reactAppRoutes = [
   "/react-tasks"
 ];
 
+function createCorsMiddleware() {
+  if (env.nodeEnv !== "production") {
+    return cors();
+  }
+
+  const allowedOrigins = new Set(env.corsAllowedOrigins);
+  return cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.has(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error("cors_origin_not_allowed"));
+    }
+  });
+}
+
 export function createApp() {
   const app = express();
   const publicRoot = path.join(process.cwd(), "public");
   const staticFiles = express.static(publicRoot);
 
-  app.use(cors());
+  app.use(createCorsMiddleware());
   app.use("/v1/webhooks/clickup", express.raw({ type: "application/json", limit: "1mb" }), clickUpWebhooksRouter);
   app.use(express.json({ limit: "1mb" }));
   app.get("/", (req, res, next) => {

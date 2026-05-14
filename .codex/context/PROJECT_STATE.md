@@ -284,10 +284,10 @@ Last updated: 2026-05-14
 - Main active objective: close audit-derived finish blockers in priority order
   so the web and agent Company OS can reach product-quality v1 without hiding
   UX, security, data, documentation, or deployment gaps.
-- Top blockers: mobile overflow/focus accessibility on production owner
-  routes, production secret and CORS hardening, coverage-ledger reconciliation,
-  operating-model data completeness, upstream Paperclip/OpenJarvis source
-  merge permissions, and GitHub-to-Coolify auto-deploy proof.
+- Top blockers: coverage-ledger reconciliation, operating-model data
+  completeness, Company City dashboard implementation or supersession,
+  maintainability hotspots, upstream Paperclip/OpenJarvis source merge
+  permissions, and GitHub-to-Coolify auto-deploy proof.
 - Success criteria for this phase: APP-AUDIT-001 findings are represented in
   the canonical queue, ACF-UX-001 and ACF-SEC-001 have evidence-backed closure,
   stale Drive blockers are removed from active ledgers, and new product work
@@ -295,19 +295,26 @@ Last updated: 2026-05-14
   deferred.
 
 ## Autonomous Iteration State
-- Current iteration: APP-AUDIT-001 Application Completion Audit completed.
-- Current operation mode: TESTER
-- Last completed iteration: APP-AUDIT-001 Application Completion Audit.
-- Last completed task: audited build, integration tests, protected production
-  APIs, production owner routes, architecture/doc state, security config,
-  maintainability hotspots, and data completeness.
-- Current task status: audit complete and finish queue accepted; next
-  implementation task is ACF-UX-001 Mobile Overflow And Focus Accessibility
-  Fix.
-- Next required mode: BUILDER; execute ACF-UX-001 before unrelated broad
+- Current iteration: ACF-SEC-001 Production Secret And CORS Hardening completed.
+- Current operation mode: BUILDER
+- Last completed iteration: ACF-SEC-001 Production Secret And CORS Hardening.
+- Last completed task: production secret validation, production CORS
+  restriction, focused fail-closed tests, and deployment/security docs.
+- Current task status: ACF-SEC-001 verified; next implementation task is
+  ACF-DOC-001 Coverage Ledger Reconciliation.
+- Next required mode: BUILDER; execute ACF-DOC-001 before unrelated broad
   product work.
 
 ## Recent Progress
+
+- 2026-05-14: Completed ACF-SEC-001 Production Secret And CORS Hardening.
+  Production now fails closed when `DATABASE_URL`, `AUTH_TOKEN_SECRET`,
+  `API_KEY_HASH_SECRET`, or `INTEGRATION_SECRET_KEY` is missing in production,
+  and rejects committed development placeholder secret values. Production CORS
+  is restricted to `COMPANYCORE_ALLOWED_ORIGINS` or the documented CompanyCore
+  web/API domains. `npm run build` passed; `npm test` passed against
+  disposable PostgreSQL on `localhost:55452`, including missing-secret,
+  placeholder-secret, CORS allow/deny, and existing protected API flow tests.
 
 - 2026-05-14: Completed ACF-UX-001 Mobile Overflow And Focus Accessibility
   Fix. Added responsive containment for long API paths, capability tokens,

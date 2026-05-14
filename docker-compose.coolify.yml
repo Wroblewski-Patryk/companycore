@@ -23,6 +23,10 @@ services:
       PORT: 3000
       DATABASE_URL: postgresql://companycore:${SERVICE_PASSWORD_POSTGRES}@postgres:5432/companycore?schema=public
       SEED_API_KEY: ${SERVICE_PASSWORD_API_KEY}
+      AUTH_TOKEN_SECRET: ${AUTH_TOKEN_SECRET}
+      API_KEY_HASH_SECRET: ${API_KEY_HASH_SECRET}
+      INTEGRATION_SECRET_KEY: ${INTEGRATION_SECRET_KEY}
+      COMPANYCORE_ALLOWED_ORIGINS: "${COMPANYCORE_ALLOWED_ORIGINS:-https://companycore.luckysparrow.ch,https://api.companycore.luckysparrow.ch}"
       SERVICE_URL_BACKEND_3000: ${SERVICE_URL_BACKEND_3000}
     expose:
       - "3000"
