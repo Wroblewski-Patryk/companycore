@@ -7,6 +7,11 @@
   --border: #d9dde5;
   --accent: #2364d2;
   --accent-hover: #1b54b4;
+  --shell-bg: #101722;
+  --shell-panel: #172231;
+  --shell-border: rgba(255, 255, 255, 0.1);
+  --shell-text: #f4f7fb;
+  --shell-muted: #9facbd;
   --success: #16845b;
   --danger: #bd2b2b;
   --soft: #eef3fb;
@@ -67,32 +72,34 @@ a {
 
 .is-signed-in .app-shell {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
+  grid-template-columns: 304px minmax(0, 1fr);
 }
 
 .sidebar {
   position: sticky;
   top: 0;
   display: grid;
-  grid-template-rows: auto auto minmax(140px, 0.6fr) minmax(0, 1fr) auto;
-  gap: 18px;
+  grid-template-rows: auto auto minmax(150px, 0.72fr) minmax(0, 1fr) auto;
+  gap: 14px;
   height: 100vh;
-  padding: 22px 18px;
-  border-right: 1px solid var(--border);
-  background: #ffffff;
+  padding: 18px 16px;
+  border-right: 1px solid var(--shell-border);
+  background: var(--shell-bg);
+  color: var(--shell-text);
 }
 
 .sidebar-brand {
   align-items: flex-start;
-  padding: 4px 2px 14px;
-  border-bottom: 1px solid var(--border);
+  padding: 4px 2px 12px;
+  border-bottom: 1px solid var(--shell-border);
+  color: var(--shell-text);
 }
 
 .sidebar-brand small {
   display: block;
   max-width: 190px;
   margin-top: 3px;
-  color: var(--muted);
+  color: var(--shell-muted);
   font-size: 12px;
   font-weight: 800;
   overflow: hidden;
@@ -103,8 +110,10 @@ a {
 .sidebar-workspace {
   display: grid;
   gap: 10px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--border);
+  padding: 12px;
+  border: 1px solid var(--shell-border);
+  border-radius: 8px;
+  background: var(--shell-panel);
 }
 
 .sidebar-workspace-header,
@@ -119,7 +128,7 @@ a {
 .sidebar-workspace label,
 .sidebar-workspace-header label {
   margin: 0;
-  color: #7b8494;
+  color: var(--shell-muted);
   font-size: 11px;
   font-weight: 900;
   letter-spacing: 0;
@@ -129,6 +138,9 @@ a {
 .sidebar-workspace select,
 .sidebar-workspace input {
   min-height: 40px;
+  border-color: rgba(255, 255, 255, 0.14);
+  background: #0d131d;
+  color: var(--shell-text);
   font-size: 13px;
   font-weight: 800;
 }
@@ -137,9 +149,9 @@ a {
   display: grid;
   gap: 10px;
   padding: 10px;
-  border: 1px solid #d5e0f1;
+  border: 1px solid var(--shell-border);
   border-radius: 8px;
-  background: #fbfcfe;
+  background: #0d131d;
 }
 
 .sidebar-workspace-create label {
@@ -157,14 +169,16 @@ a {
   align-content: start;
   gap: 8px;
   min-height: 0;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--border);
+  padding: 12px;
+  border: 1px solid var(--shell-border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
 }
 
 .sidebar-area-nav-title p {
   margin: 0;
   padding: 0 2px;
-  color: #7b8494;
+  color: var(--shell-muted);
   font-size: 11px;
   font-weight: 900;
   letter-spacing: 0;
@@ -172,7 +186,7 @@ a {
 }
 
 .sidebar-area-nav-title a {
-  color: var(--accent);
+  color: #8db5ff;
   font-size: 12px;
   font-weight: 900;
   text-decoration: none;
@@ -192,12 +206,12 @@ a {
 }
 
 .sidebar-area-list details[open] {
-  border-color: #d5e0f1;
-  background: #fbfcfe;
+  border-color: rgba(141, 181, 255, 0.32);
+  background: rgba(141, 181, 255, 0.08);
 }
 
 .sidebar-area-list details.is-active {
-  border-color: #b7cae8;
+  border-color: rgba(141, 181, 255, 0.48);
   box-shadow: inset 3px 0 0 var(--accent);
 }
 
@@ -208,7 +222,7 @@ a {
   gap: 8px;
   min-height: 38px;
   padding: 8px 10px;
-  color: #344054;
+  color: var(--shell-text);
   cursor: pointer;
   font-size: 13px;
   font-weight: 900;
@@ -234,7 +248,14 @@ a {
 }
 
 .sidebar-area-count {
-  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  min-height: 22px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--shell-muted);
   font-size: 11px;
   font-weight: 900;
 }
@@ -250,19 +271,19 @@ a {
   min-height: 32px;
   padding: 6px 8px;
   background: transparent;
-  color: #344054;
+  color: var(--shell-muted);
   font-size: 12px;
 }
 
 .sidebar-area-links button:hover {
-  background: var(--soft);
-  color: var(--accent);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--shell-text);
 }
 
 .side-nav {
   display: grid;
   align-content: start;
-  gap: 16px;
+  gap: 12px;
   min-height: 0;
   padding-right: 2px;
   overflow: auto;
@@ -276,7 +297,7 @@ a {
 .side-nav-section p {
   margin: 0 0 2px;
   padding: 0 12px;
-  color: #7b8494;
+  color: var(--shell-muted);
   font-size: 11px;
   font-weight: 900;
   letter-spacing: 0;
@@ -286,22 +307,30 @@ a {
 .side-nav a {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 42px;
+  gap: 11px;
+  min-height: 40px;
   padding: 10px 12px;
   border-radius: 8px;
   border: 1px solid transparent;
-  color: #344054;
+  color: #d9e3ef;
   font-size: 14px;
   font-weight: 900;
   text-decoration: none;
 }
 
+.side-nav a i {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  color: #8db5ff;
+  font-size: 18px;
+}
+
 .side-nav a:hover,
 .side-nav a.active {
-  border-color: #d5e0f1;
-  background: var(--soft);
-  color: var(--accent);
+  border-color: rgba(141, 181, 255, 0.32);
+  background: rgba(141, 181, 255, 0.12);
+  color: var(--shell-text);
 }
 
 .side-nav a.active {
@@ -314,15 +343,19 @@ a {
   gap: 10px;
   margin-top: auto;
   padding: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--shell-border);
   border-radius: 8px;
-  background: #fbfcfe;
-  color: var(--muted);
+  background: var(--shell-panel);
+  color: var(--shell-muted);
   font-size: 13px;
   font-weight: 900;
 }
 
 .mobile-sidebar-backdrop {
+  display: none;
+}
+
+.view[data-view="/dashboard"] .page-title {
   display: none;
 }
 
@@ -335,14 +368,14 @@ a {
   top: 0;
   z-index: 9;
   display: grid;
-  grid-template-columns: minmax(190px, 260px) minmax(320px, 520px) auto;
+  grid-template-columns: minmax(170px, 240px) minmax(280px, 1fr) minmax(230px, auto) auto;
   align-items: center;
-  gap: 18px;
-  min-height: 84px;
-  padding: 16px 28px;
+  gap: 14px;
+  min-height: 72px;
+  padding: 12px 24px;
   border-bottom: 1px solid var(--border);
-  background: rgba(246, 247, 249, 0.94);
-  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(10px);
 }
 
 .topbar-route-context {
@@ -352,7 +385,7 @@ a {
 .workspace-topbar h1 {
   overflow: hidden;
   margin: 0;
-  font-size: 24px;
+  font-size: 22px;
   line-height: 1.12;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -369,7 +402,7 @@ a {
 
 .module-switcher label {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   color: var(--muted);
   font-size: 12px;
   font-weight: 900;
@@ -377,11 +410,37 @@ a {
 
 .module-switcher input {
   width: 100%;
-  min-height: 46px;
+  min-height: 42px;
   margin: 0;
   border-color: #c9d2e3;
   background: #ffffff;
   box-shadow: 0 1px 0 rgba(20, 23, 31, 0.02);
+}
+
+.topbar-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.topbar-status span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+  max-width: 180px;
+  padding: 4px 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #f8fafc;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .module-results {
@@ -481,6 +540,14 @@ a {
   display: flex;
   align-items: center;
   gap: 10px;
+  justify-content: flex-end;
+  white-space: nowrap;
+}
+
+.topbar-actions .button-link,
+.topbar-actions .link-button {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .compact {
@@ -3994,7 +4061,7 @@ button.danger:hover {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     gap: 10px;
-    min-height: 70px;
+    min-height: 64px;
     padding: 12px 16px;
   }
 
@@ -4008,6 +4075,10 @@ button.danger:hover {
   }
 
   .module-switcher {
+    display: none;
+  }
+
+  .topbar-status {
     display: none;
   }
 
@@ -4235,6 +4306,29 @@ button.danger:hover {
 
   .metrics {
     grid-template-columns: repeat(2, minmax(120px, 1fr));
+  }
+}
+
+@media (min-width: 861px) and (max-width: 1180px) {
+  .is-signed-in .app-shell {
+    grid-template-columns: 248px minmax(0, 1fr);
+  }
+
+  .sidebar {
+    padding: 16px 12px;
+  }
+
+  .workspace-topbar {
+    grid-template-columns: minmax(150px, 220px) minmax(260px, 1fr) auto;
+  }
+
+  .topbar-status {
+    grid-column: 2 / 4;
+  }
+
+  .topbar-actions {
+    grid-column: 3;
+    grid-row: 1;
   }
 }
 

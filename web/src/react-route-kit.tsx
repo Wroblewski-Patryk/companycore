@@ -1705,25 +1705,29 @@ export function Shell({
 }) {
   return (
     <main className="min-h-screen overflow-x-hidden bg-base-200 text-base-content" data-theme="companycore">
-      <header className="border-b border-base-300 bg-base-100">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+      <header className="border-b border-base-300 bg-neutral text-neutral-content">
+        <div className="mx-auto grid w-full max-w-7xl gap-4 px-4 py-4 lg:grid-cols-[minmax(220px,0.7fr)_minmax(0,1fr)_auto] lg:items-center sm:px-5">
           <a className="flex min-w-0 items-center gap-3 font-black no-underline" href="/dashboard">
-            <span className="grid h-9 w-9 place-items-center rounded-company bg-neutral text-sm text-neutral-content">CC</span>
+            <span className="grid h-9 w-9 place-items-center rounded-company bg-primary text-sm text-primary-content">CC</span>
             <span className="min-w-0">
               CompanyCore
-              <small className="block truncate text-xs font-black text-company-muted">
+              <small className="block truncate text-xs font-black text-neutral-content/70">
                 {connection?.workspace.name || appLabel}
               </small>
             </span>
           </a>
-          <nav className="flex min-w-0 flex-wrap gap-2" aria-label="CompanyCore navigation">
-            <a className="btn btn-ghost btn-sm" href="/dashboard">Dashboard</a>
-            <a className="btn btn-ghost btn-sm" href="/areas">Operating areas</a>
-            <a className="btn btn-ghost btn-sm" href="/relationships">Relationships</a>
-            <a className="btn btn-ghost btn-sm" href="/settings/integrations">Integrations</a>
-            <a className="btn btn-ghost btn-sm" href="/settings/api">API settings</a>
-            <a className="btn btn-primary btn-sm" href="/react-agent-tools">Agent tools</a>
+          <nav className="flex min-w-0 flex-wrap gap-2" aria-label="CompanyCore command navigation">
+            <a className="btn btn-ghost btn-sm text-neutral-content hover:bg-white/10" href="/dashboard">Company map</a>
+            <a className="btn btn-ghost btn-sm text-neutral-content hover:bg-white/10" href="/areas">Areas</a>
+            <a className="btn btn-ghost btn-sm text-neutral-content hover:bg-white/10" href="/relationships">Relations</a>
+            <a className="btn btn-ghost btn-sm text-neutral-content hover:bg-white/10" href="/settings/integrations">Integrations</a>
+            <a className="btn btn-ghost btn-sm text-neutral-content hover:bg-white/10" href="/settings/api">Agent access</a>
+            <a className="btn btn-primary btn-sm" href="/react-agent-tools">MCP tools</a>
           </nav>
+          <div className="flex flex-wrap gap-2 text-xs font-black text-neutral-content/75" aria-label="React shell status">
+            <span>{connection ? "Healthy" : "Signed out"}</span>
+            <span>{connection ? `${connectionMetrics(connection).areas} areas` : appLabel}</span>
+          </div>
         </div>
       </header>
       {children}

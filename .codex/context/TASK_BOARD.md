@@ -59,6 +59,20 @@ No active local implementation task is currently in progress.
 
 ## Done
 
+- ACF-UX-003 Authenticated Shell Usability Repair.
+  - Evidence: sidebar IA now uses company-management lanes (`Command`,
+    `Company areas`, `Workbenches`, `Integrations & agents`, `Workspace`);
+    the topbar is a compact command bar with command search and desktop
+    status; dashboard duplicate page title is removed; React route header
+    language now matches the canonical CompanyCore shell. `node --check
+    public/app.js`, `npm run build`, and `npm test` passed against disposable
+    PostgreSQL on `localhost:55467`. Playwright fallback verified desktop
+    `1366x900`, tablet `834x1112`, and mobile `390x844` with no horizontal
+    overflow, no console issues, no failed requests, mobile drawer open, and
+    final mobile/tablet topbar height `65px`.
+  - Task contract:
+    `docs/planning/acf-ux-003-shell-usability-repair-task-contract.md`.
+
 - PROD-HOTFIX-001 Coolify Restart Loop API Key Hash Fallback.
   - Evidence: public health returned `503` after deploy and local production
     config import reproduced the likely restart-loop condition when

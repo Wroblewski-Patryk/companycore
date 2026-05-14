@@ -4,16 +4,16 @@ Last updated: 2026-05-14
 
 ## NOW
 
-1. ACF-MAINT-002 Additional Hotspot Modularization.
-   - Continue reducing delivery risk in the remaining large web/API/test
-     hotspots now that the first dashboard shell implementation path is
-     verified.
+1. V2VIS-002 Route Frame Convergence Audit.
+   - Use the repaired ACF-UX-003 shell pattern to decide the next route
+     convergence slice, especially React routes that still use a header-only
+     shell instead of the full company rail.
 
 ## NEXT
 
-1. V2VIS-002 Route Frame Convergence Audit.
-   - Audit which private routes should adopt the dashboard frame patterns next,
-     without starting Company City gamification or native mobile work.
+1. ACF-MAINT-002 Additional Hotspot Modularization.
+   - Continue reducing delivery risk in the remaining large web/API/test
+     hotspots after the next shell convergence slice is selected.
 
 ## LATER
 

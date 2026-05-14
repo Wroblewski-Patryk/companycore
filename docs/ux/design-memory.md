@@ -90,6 +90,28 @@ of rediscovering them.
   screenshot artifacts from
   `C:\Users\wrobl\AppData\Local\Temp\companycore-full-audit-20260514-180653`.
 
+### 2026-05-14 - Company Command Rail Repair
+- Type: reusable_pattern
+- Context: ACF-UX-003 repaired the shell after user feedback that the sidebar
+  and floating header were not useful enough for company management.
+- Decision: The current pre-V2 authenticated shell uses a dark company command
+  rail with lanes for `Command`, `Company areas`, `Workbenches`,
+  `Integrations & agents`, and `Workspace`. The topbar is a compact command
+  bar with route context, command search, status on desktop, and a one-row
+  mobile/tablet layout. The dashboard page title is suppressed because the
+  shell title already provides route context and the company map should start
+  the first viewport.
+- Reuse when: Refining sidebar IA, migrating React routes into the canonical
+  shell, adding status/attention signals, or reviewing whether a new private
+  route helps the owner act on company work.
+- Avoid when: Adding route-local nav bars, duplicated page titles, broad
+  directory menus, or mobile headers that push the first command surface below
+  the fold.
+- Evidence: ACF-UX-003 `npm test` passed against disposable PostgreSQL on
+  `localhost:55467`; Playwright fallback verified desktop `1366x900`,
+  tablet `834x1112`, and mobile `390x844` with no horizontal overflow, no
+  console issues, mobile drawer open, and mobile topbar height `65px`.
+
 ### 2026-05-14 - Company City Strategic Map
 - Type: visual_direction
 - Context: The user approved the generated dashboard direction showing a

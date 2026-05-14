@@ -136,6 +136,17 @@ Last updated: 2026-05-14
   mobile `390x844` with 13 area cards, 4 status pills, no overflow, no
   clipped cards, no console issues, no failed requests, map click to
   `/areas?area=main-general`, and `/relationships` still loading.
+- 2026-05-14: ACF-UX-003 repaired the authenticated shell after user feedback
+  that the sidebar and floating header were not useful enough. The vanilla
+  sidebar now uses company-management lanes (`Command`, `Company areas`,
+  `Workbenches`, `Integrations & agents`, `Workspace`), the topbar is a
+  compact command bar with command search and desktop status, the duplicated
+  dashboard page title is suppressed, and the React route header language is
+  aligned with the same CompanyCore shell model. `node --check public/app.js`,
+  `npm run build`, and `npm test` passed against disposable PostgreSQL on
+  `localhost:55467`; Playwright fallback verified desktop, tablet, and mobile
+  with no overflow, no console issues, no failed requests, and mobile/tablet
+  topbar height `65px`.
 - 2026-05-14: PROD-HOTFIX-001 addressed the Coolify restart-loop risk after
   production began requiring a separate `API_KEY_HASH_SECRET`. Runtime config
   now preserves the previous production-compatible fallback to the required

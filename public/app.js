@@ -285,6 +285,10 @@ const workspaceCreateName = document.querySelector("#workspaceCreateName");
 const workspaceCreateCancel = document.querySelector("#workspaceCreateCancel");
 const workspaceSwitchStatus = document.querySelector("#workspaceSwitchStatus");
 const sidebarAreaList = document.querySelector("#sidebarAreaList");
+const topbarHealthDot = document.querySelector("#topbarHealthDot");
+const topbarHealthText = document.querySelector("#topbarHealthText");
+const topbarWorkspaceText = document.querySelector("#topbarWorkspaceText");
+const topbarAgentText = document.querySelector("#topbarAgentText");
 const clickupWorkspaceLabel = document.querySelector("#clickupWorkspaceLabel");
 const clickupActionStatus = document.querySelector("#clickupActionStatus");
 const workspaceNameLabel = document.querySelector("#workspaceNameLabel");
@@ -455,32 +459,32 @@ const fields = {
 };
 
 const routeLabels = {
-  "/dashboard": "Dashboard",
-  "/data": "Data",
-  "/areas": "Operating areas",
-  "/relationships": "Relationships",
-  "/tasks-adapter": "Tasks & adapters",
-  "/pipeline": "Pipeline",
+  "/dashboard": "Company map",
+  "/data": "Company data",
+  "/areas": "Areas & resources",
+  "/relationships": "Relationship review",
+  "/tasks-adapter": "Tasks & delivery",
+  "/pipeline": "Pipeline / CRM",
   "/settings/account": "Account",
-  "/settings/integrations": "Integrations",
-  "/settings": "ClickUp adapter",
+  "/settings/integrations": "Integration health",
+  "/settings": "ClickUp bridge",
   "/settings/drive": "Google Drive",
-  "/settings/api": "API settings",
-  "/react-agent-tools": "Agent tools"
+  "/settings/api": "Agent access",
+  "/react-agent-tools": "MCP tools"
 };
 
 const moduleRoutes = [
-  { path: "/dashboard", label: "Dashboard", group: "Command", keywords: "home overview summary next action attention" },
-  { path: "/areas", label: "Operating areas", group: "Operate", keywords: "departments areas tables records mapping workspace" },
-  { path: "/relationships", label: "Relationships", group: "Operate", keywords: "review queue provider drive unmapped correction relations" },
-  { path: "/data", label: "Data", group: "Operate", keywords: "database records tables crud modules workbench" },
-  { path: "/tasks-adapter", label: "Tasks & adapters", group: "Operate", keywords: "tasks clickup lists priority status due sync" },
-  { path: "/pipeline", label: "Pipeline", group: "Operate", keywords: "shared pipelines workflow stages clients deals interactions sales crm departments" },
-  { path: "/settings/integrations", label: "Integration map", group: "Integrations", keywords: "data map modules sources tables drive clickup api" },
-  { path: "/settings", label: "ClickUp adapter", group: "Integrations", keywords: "clickup token workspace lists sync import" },
-  { path: "/settings/drive", label: "Google Drive", group: "Integrations", keywords: "drive folders files oauth import reconcile scan" },
-  { path: "/settings/api", label: "API settings", group: "Integrations", keywords: "api routes manifest agents service keys capabilities" },
-  { path: "/react-agent-tools", label: "Agent tools", group: "Integrations", keywords: "mcp tools manifest capabilities agent authority approval risk", external: true },
+  { path: "/dashboard", label: "Company map", group: "Command", keywords: "home overview summary next action attention map brief" },
+  { path: "/areas", label: "Areas & resources", group: "Workbenches", keywords: "departments areas tables records mapping workspace resources" },
+  { path: "/relationships", label: "Relationship review", group: "Workbenches", keywords: "review queue provider drive unmapped correction relations graph" },
+  { path: "/data", label: "Company data", group: "Workbenches", keywords: "database records tables crud modules workbench" },
+  { path: "/tasks-adapter", label: "Tasks & delivery", group: "Workbenches", keywords: "tasks clickup lists priority status due sync delivery" },
+  { path: "/pipeline", label: "Pipeline / CRM", group: "Workbenches", keywords: "shared pipelines workflow stages clients deals interactions sales crm departments" },
+  { path: "/settings/integrations", label: "Integration health", group: "Integrations & agents", keywords: "data map modules sources tables drive clickup api health" },
+  { path: "/settings", label: "ClickUp bridge", group: "Integrations & agents", keywords: "clickup token workspace lists sync import" },
+  { path: "/settings/drive", label: "Google Drive", group: "Integrations & agents", keywords: "drive folders files oauth import reconcile scan" },
+  { path: "/settings/api", label: "Agent access", group: "Integrations & agents", keywords: "api routes manifest agents service keys capabilities safety" },
+  { path: "/react-agent-tools", label: "MCP tools", group: "Integrations & agents", keywords: "mcp tools manifest capabilities agent authority approval risk", external: true },
   { path: "/settings/account", label: "Account", group: "Workspace", keywords: "owner workspace readiness login account" }
 ];
 
@@ -796,7 +800,7 @@ function renderRoute() {
     routeTitle.textContent = isDataWorkbenchPath(path) ? "Data" : routeLabels[path] || "CompanyCore";
   }
   if (workspaceEyebrow) {
-    workspaceEyebrow.textContent = isSignedIn() ? "Current module" : "Private workspace";
+    workspaceEyebrow.textContent = isSignedIn() ? "Company command" : "Private workspace";
   }
   document.body.dataset.route = path;
   renderConnectionState();
@@ -5007,7 +5011,7 @@ function renderSidebarAreaList() {
     title.textContent = area.name;
     const count = document.createElement("span");
     count.className = "sidebar-area-count";
-    count.textContent = `${totalResources} items`;
+    count.textContent = totalResources > 0 ? `${totalResources}` : "empty";
     summary.append(title, count);
 
     const links = document.createElement("div");
@@ -5024,7 +5028,7 @@ function renderSidebarAreaList() {
       button.type = "button";
       button.dataset.path = path;
       button.dataset.areaKey = area.key;
-      button.textContent = `${label}: ${area.resources?.[key] || 0}`;
+      button.textContent = `${label} · ${area.resources?.[key] || 0}`;
       button.setAttribute("aria-label", `Open ${label.toLowerCase()} for ${area.name}`);
       button.addEventListener("click", () => {
         state.selectedAreaKey = area.key;
@@ -5122,7 +5126,23 @@ function renderConnectionState() {
     sidebarStatusDot.className = connected ? "dot ok" : "dot muted";
   }
   if (sidebarStatusText) {
-    sidebarStatusText.textContent = connected ? "Connected" : "Not connected";
+    sidebarStatusText.textContent = connected ? "Workspace online" : "Not connected";
+  }
+  if (topbarHealthDot) {
+    topbarHealthDot.className = connected ? "dot ok" : "dot muted";
+  }
+  if (topbarHealthText) {
+    topbarHealthText.textContent = connected ? "Healthy" : "Offline";
+  }
+  if (topbarWorkspaceText) {
+    topbarWorkspaceText.textContent = connected ? state.workspace.name : "No workspace";
+  }
+  if (topbarAgentText) {
+    const tools = state.mcpManifest?.tools?.length || 0;
+    const keys = state.apiKeys?.filter((key) => key.active).length || 0;
+    topbarAgentText.textContent = connected
+      ? `${tools} MCP tools · ${keys} active keys`
+      : "Agents not loaded";
   }
   if (sidebarWorkspaceName) {
     sidebarWorkspaceName.textContent = connected ? state.workspace.name : "Workspace";
@@ -5130,7 +5150,7 @@ function renderConnectionState() {
   renderWorkspaceSwitcher();
   renderSidebarAreaList();
   if (workspaceEyebrow) {
-    workspaceEyebrow.textContent = connected ? "Current module" : "Private workspace";
+    workspaceEyebrow.textContent = connected ? "Company command" : "Private workspace";
   }
 
   workspaceLabel.textContent = connected

@@ -30,8 +30,8 @@
         </a>
         <section class="sidebar-workspace" aria-label="Workspace selector">
           <div class="sidebar-workspace-header">
-            <label for="workspaceSwitcher">Workspace</label>
-            <button type="button" class="secondary compact" id="workspaceCreateToggle">New</button>
+            <label for="workspaceSwitcher">Active workspace</label>
+            <button type="button" class="secondary compact" id="workspaceCreateToggle">Create</button>
           </div>
           <select id="workspaceSwitcher" aria-label="Switch workspace"></select>
           <form class="sidebar-workspace-create" id="workspaceCreateForm" hidden>
@@ -48,35 +48,35 @@
         </section>
         <section class="sidebar-area-nav" aria-label="Operating area resources">
           <div class="sidebar-area-nav-title">
-            <p>Areas</p>
-            <a href="/areas" data-link>Manage</a>
+            <p>Company areas</p>
+            <a href="/areas" data-link>Open map</a>
           </div>
           <div class="sidebar-area-list" id="sidebarAreaList"></div>
         </section>
         <nav class="side-nav" aria-label="Workspace navigation">
           <section class="side-nav-section" aria-label="Command">
             <p>Command</p>
-            <a href="/dashboard" data-link data-nav="/dashboard">Dashboard</a>
+            <a href="/dashboard" data-link data-nav="/dashboard"><i class="ph-bold ph-map-trifold" aria-hidden="true"></i><span>Company map</span></a>
           </section>
-          <section class="side-nav-section" aria-label="Operate">
-            <p>Operate</p>
-            <a href="/areas" data-link data-nav="/areas">Operating areas</a>
-            <a href="/relationships" data-link data-nav="/relationships">Relationships</a>
-            <a href="/data" data-link data-nav="/data">Data</a>
-            <a href="/tasks-adapter" data-link data-nav="/tasks-adapter">Tasks & adapters</a>
-            <a href="/pipeline" data-link data-nav="/pipeline">Pipeline</a>
+          <section class="side-nav-section" aria-label="Company workbenches">
+            <p>Workbenches</p>
+            <a href="/areas" data-link data-nav="/areas"><i class="ph-bold ph-buildings" aria-hidden="true"></i><span>Areas & resources</span></a>
+            <a href="/relationships" data-link data-nav="/relationships"><i class="ph-bold ph-graph" aria-hidden="true"></i><span>Relationship review</span></a>
+            <a href="/data" data-link data-nav="/data"><i class="ph-bold ph-database" aria-hidden="true"></i><span>Company data</span></a>
+            <a href="/tasks-adapter" data-link data-nav="/tasks-adapter"><i class="ph-bold ph-list-checks" aria-hidden="true"></i><span>Tasks & delivery</span></a>
+            <a href="/pipeline" data-link data-nav="/pipeline"><i class="ph-bold ph-flow-arrow" aria-hidden="true"></i><span>Pipeline / CRM</span></a>
           </section>
-          <section class="side-nav-section" aria-label="Integrations">
-            <p>Integrations</p>
-            <a href="/settings/integrations" data-link data-nav="/settings/integrations">Integration map</a>
-            <a href="/settings" data-link data-nav="/settings">ClickUp adapter</a>
-            <a href="/settings/drive" data-link data-nav="/settings/drive">Google Drive</a>
-            <a href="/settings/api" data-link data-nav="/settings/api">API settings</a>
-            <a href="/react-agent-tools" data-nav="/react-agent-tools">Agent tools</a>
+          <section class="side-nav-section" aria-label="Integrations and agents">
+            <p>Integrations & agents</p>
+            <a href="/settings/integrations" data-link data-nav="/settings/integrations"><i class="ph-bold ph-plugs-connected" aria-hidden="true"></i><span>Integration health</span></a>
+            <a href="/settings" data-link data-nav="/settings"><i class="ph-bold ph-kanban" aria-hidden="true"></i><span>ClickUp bridge</span></a>
+            <a href="/settings/drive" data-link data-nav="/settings/drive"><i class="ph-bold ph-cloud" aria-hidden="true"></i><span>Google Drive</span></a>
+            <a href="/settings/api" data-link data-nav="/settings/api"><i class="ph-bold ph-key" aria-hidden="true"></i><span>Agent access</span></a>
+            <a href="/react-agent-tools" data-nav="/react-agent-tools"><i class="ph-bold ph-robot" aria-hidden="true"></i><span>MCP tools</span></a>
           </section>
           <section class="side-nav-section" aria-label="Workspace">
             <p>Workspace</p>
-            <a href="/settings/account" data-link data-nav="/settings/account">Account</a>
+            <a href="/settings/account" data-link data-nav="/settings/account"><i class="ph-bold ph-user-circle" aria-hidden="true"></i><span>Account & readiness</span></a>
           </section>
         </nav>
         <div class="sidebar-status">
@@ -90,18 +90,22 @@
         <header class="workspace-topbar" data-private>
           <button type="button" class="secondary mobile-menu-button" id="mobileMenuButton" aria-expanded="false">Menu</button>
           <div class="topbar-route-context">
-            <p class="label" id="workspaceEyebrow">Private workspace</p>
+            <p class="label" id="workspaceEyebrow">Company command</p>
             <h1 id="routeTitle">Dashboard</h1>
           </div>
           <div class="module-switcher" id="moduleSwitcher">
-            <label for="moduleSearch">Jump to module</label>
-            <input id="moduleSearch" type="search" autocomplete="off" placeholder="Search modules..." aria-controls="moduleResults" aria-expanded="false">
+            <label for="moduleSearch">Command search</label>
+            <input id="moduleSearch" type="search" autocomplete="off" placeholder="Find areas, workbenches, integrations, agent tools..." aria-controls="moduleResults" aria-expanded="false">
             <div class="module-results" id="moduleResults" role="listbox" hidden></div>
           </div>
+          <div class="topbar-status" aria-label="Workspace health">
+            <span><span class="dot muted" id="topbarHealthDot"></span><strong id="topbarHealthText">Offline</strong></span>
+            <span id="topbarWorkspaceText">No workspace</span>
+            <span id="topbarAgentText">Agents not loaded</span>
+          </div>
           <div class="topbar-actions">
-            <a class="button-link secondary compact" href="/settings/account" data-link>Account</a>
-            <a class="button-link secondary compact" href="/settings/api" data-link>API</a>
-            <a class="button-link secondary compact" href="/react-agent-tools">Agent tools</a>
+            <a class="button-link secondary compact" href="/settings/api" data-link>Agent keys</a>
+            <a class="button-link compact" href="/react-agent-tools">MCP tools</a>
             <button type="button" class="link-button compact" id="logoutButton">Sign out</button>
           </div>
         </header>
