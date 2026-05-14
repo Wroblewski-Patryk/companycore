@@ -9,7 +9,9 @@ Last updated: 2026-05-14
 - Commercial model: Internal operational infrastructure.
 - Current phase: v1 local and production evidence complete for the approved
   runtime plus Agent-First Company OS command surface; Google Drive owner
-  import is complete for the numbered department roots.
+  import is complete for the numbered department roots; application completion
+  audit found UX, security, data-completeness, documentation, maintainability,
+  and deployment-proof finish work before the product can be called complete.
 
 ## Product Decisions (Confirmed)
 - 2026-05-07: CRM and pipelines are separate domain concepts. Pipelines are a
@@ -112,6 +114,18 @@ Last updated: 2026-05-14
   prerequisite, expected-result, recovery-guidance, and proposal/effect context
   to the existing `/react-company-os` approval, stage lifecycle, and automation
   evaluator panels without changing backend command contracts.
+- 2026-05-14: APP-AUDIT-001 completed a full application completion audit.
+  `npm run build` passed, `npm test` passed against a disposable PostgreSQL
+  database with all migrations applied, protected production API samples
+  verified `/v1/connection`, `/v1/mcp/manifest`, `/v1/company-os`,
+  `/v1/google-drive/files`, `/v1/operating-model`, `/v1/tasks`,
+  `/v1/projects`, `/v1/notes`, and `/v1/agent-events`, and production
+  Playwright route checks found no route errors, failed requests, or console
+  errors across 12 owner routes. The audit also found P1 finish blockers:
+  mobile horizontal overflow on `/settings/api` and `/react-company-os`,
+  unnamed focusables in the dense vanilla owner shell, production development
+  secret fallbacks, open CORS, stale coverage ledgers, operating-model data
+  gaps, and large maintainability hotspots.
 - 2026-05-14: `V2WEB-AGENT-005 Definition Editing Contract Decision` added
   `docs/architecture/company-os-definition-editing-contract.md`, classifying
   Company OS definition editing risk and selecting low-risk Class A definitions
@@ -267,32 +281,31 @@ Last updated: 2026-05-14
   Postgres volume.
 
 ## Current Focus
-- Main active objective: keep v1 post-release handoff clean, keep external
-  blockers explicit, and advance the selected Agent-First Company OS V2 lane
-  without reopening completed runtime scope.
-- Top blockers: real Google OAuth credentials and owner consent are required
-  for the first Drive import proof; upstream Paperclip/OpenJarvis source merge
-  execution is blocked by external GitHub write access or an approved fork/PR
-  route; auto-deploy remains unverified and manual VPS backend rollover remains
-  the approved release path.
-- Success criteria for this phase: source-of-truth docs and `.agents/state/*`
-  agree on the accepted v1 runtime boundary, local V1 evidence gaps are closed,
-  external blockers remain explicit, and the next executable task audits the
-  agent command surface before any new runtime behavior is added.
+- Main active objective: close audit-derived finish blockers in priority order
+  so the web and agent Company OS can reach product-quality v1 without hiding
+  UX, security, data, documentation, or deployment gaps.
+- Top blockers: mobile overflow/focus accessibility on production owner
+  routes, production secret and CORS hardening, coverage-ledger reconciliation,
+  operating-model data completeness, upstream Paperclip/OpenJarvis source
+  merge permissions, and GitHub-to-Coolify auto-deploy proof.
+- Success criteria for this phase: APP-AUDIT-001 findings are represented in
+  the canonical queue, ACF-UX-001 and ACF-SEC-001 have evidence-backed closure,
+  stale Drive blockers are removed from active ledgers, and new product work
+  does not start before the P1 audit blockers are either fixed or explicitly
+  deferred.
 
 ## Autonomous Iteration State
-- Current iteration: V2WEB-AGENT-019 Workflow Recovery Controls Web Surface
-  completed.
-- Current operation mode: BUILDER
-- Last completed iteration: V2WEB-AGENT-019 Workflow Recovery Controls Web
-  Surface.
-- Last completed task: added owner-facing recovery controls for archive and
-  rollback-draft commands in `/react-company-os`.
-- Current task status: workflow draft create, preview, activation, readback,
-  web resume, inactive historical-version archive, and rollback-draft creation
-  are verified; owner-facing recovery controls are implemented and verified.
-- Next required mode: BUILDER; decide V2WEB-AGENT-020 workflow version lineage
-  before supporting rollback across renamed workflow versions.
+- Current iteration: APP-AUDIT-001 Application Completion Audit completed.
+- Current operation mode: TESTER
+- Last completed iteration: APP-AUDIT-001 Application Completion Audit.
+- Last completed task: audited build, integration tests, protected production
+  APIs, production owner routes, architecture/doc state, security config,
+  maintainability hotspots, and data completeness.
+- Current task status: audit complete and finish queue accepted; next
+  implementation task is ACF-UX-001 Mobile Overflow And Focus Accessibility
+  Fix.
+- Next required mode: BUILDER; execute ACF-UX-001 before unrelated broad
+  product work.
 
 ## Recent Progress
 
@@ -590,9 +603,9 @@ Last updated: 2026-05-14
   aggregate readback, deleted-resource `404` readback, and cross-workspace
   deny checks. The function coverage ledger, module confidence ledger,
   requirements matrix, quality scenarios, risk register, task board, and next
-  steps were updated. No active local V1 evidence tasks remain; external
-  blockers remain Google Drive owner consent/import, upstream source merge
-  permissions, and deploy automation proof.
+  steps were updated. No active local V1 evidence tasks remain; later
+  production evidence closed Google Drive owner consent/import, while upstream
+  source merge permissions and deploy automation proof remain open.
 
 - 2026-05-11: Completed V1EVID-001 Company OS Lifecycle Trace Smoke. Added
   `scripts/company-os-lifecycle-trace-smoke.mjs` and
@@ -1120,9 +1133,9 @@ Last updated: 2026-05-14
   boundary, blocked work, and canonical queue pointers. Updated
   `docs/planning/mvp-execution-plan.md` to historical/implemented status and
   refreshed `docs/planning/planning-catalog-index.md` so AGRUN is classified
-  as external-blocked, V2WEB is recorded through V2WEB-049, and Google Drive v2
-  is external-blocked on owner consent/import proof. Validation passed:
-  `git diff --check` and source-of-truth review.
+  against then-current external blockers, V2WEB is recorded through V2WEB-049,
+  and Google Drive v2 owner consent/import proof was still pending at that
+  time. Validation passed: `git diff --check` and source-of-truth review.
 - 2026-05-08: Completed CCV1-064 Historical Checklist Closure. Marked stale
   unchecked AGCRUD planning criteria as complete because AGCRUD-001 through
   AGCRUD-006 are done, and updated the old CCV1-009 contract from blocked to

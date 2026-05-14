@@ -96,7 +96,7 @@ provider consent, or repository access.
 
 | ID | Area | Status | Why it is external | Resume condition |
 | --- | --- | --- | --- | --- |
-| AGRUN-007 | Google Drive owner consent and first import | Blocked | Real OAuth credentials and an owner consent action are required. | Credentials and owner action are available, then run first selected-folder import and agent readback smoke. |
+| AGRUN-007 | Google Drive owner consent and first import | Closed | Production owner OAuth and selected-root import were completed on 2026-05-14. | Keep protected Drive import/readback smoke in release validation when Drive contracts change. |
 | AGRUN-010 | Paperclip/OpenJarvis upstream source merge | Blocked | Branch pushes failed with GitHub `403`. | Upstream write access or approved fork/PR route exists. |
 | KI-002 | GitHub-to-Coolify auto-deploy proof | Monitoring/P2 | Available tools do not expose webhook administration and local `gh` is unavailable. | A push-to-running-image smoke or approved deploy automation tool exists. |
 
@@ -136,7 +136,7 @@ missing runtime subsystem:
 | Stage lifecycle | Implemented and extracted into shared command functions. | `src/modules/company-os/company-os.routes.ts` |
 | Automation evaluator | Implemented for event-based rule evaluation, proposal evidence, approval requests, emitted events, and lifecycle proposals. | `src/modules/company-os/company-os.routes.ts`, `docs/architecture/system-architecture.md` |
 | ClickUp adapter | Implemented native adapter, webhooks, inbox retry, maintenance, write-back, comments bridge. | `src/integrations/clickup/`, `src/modules/clickup-*`, `docs/operations/v1-release-readiness.md` |
-| Google Drive adapter foundation | Implemented foundation, but first real owner consent/import is externally blocked. | `src/modules/google-drive/`, `src/integrations/google-drive/`, `docs/operations/google-drive-owner-setup.md` |
+| Google Drive adapter foundation | Implemented and proven with production owner consent/import for the numbered department roots. | `src/modules/google-drive/`, `src/integrations/google-drive/`, `docs/operations/google-drive-owner-setup.md`, `docs/operations/agent-runtime-coverage-ledger.csv` |
 | Operating model registry | Implemented with areas, folders, tables, resources, mappings, storage, knowledge roots, automations. | `prisma/schema.prisma`, `src/modules/operating-model/`, `src/operating-model/catalog.ts` |
 | Owner UI | Implemented hybrid owner console plus React routes; `/areas` is now React canonical. | `public/`, `web/src/main.tsx`, `web/src/react-route-kit.tsx`, `src/app.ts` |
 | Business record editing | Implemented for notes, projects, clients, task lists, and tasks; generic read surfaces exist. | `public/app.js`, `src/modules/*`, `docs/planning/mvp-next-commits.md` |

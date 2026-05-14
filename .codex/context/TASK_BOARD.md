@@ -2,8 +2,28 @@
 
 ## Ready
 
-No local Company OS workflow recovery task is currently ready. External or
-target-environment tasks remain below.
+- ACF-UX-001 Mobile Overflow And Focus Accessibility Fix
+  - Stage: implementation
+  - Owner: Frontend Builder + QA/Test
+  - Priority: P1
+  - Source: `docs/operations/application-completion-audit-2026-05-14.md`
+  - Goal: fix mobile horizontal overflow on `/settings/api` and
+    `/react-company-os`, then reduce unnamed focusable controls in the vanilla
+    owner shell.
+- ACF-SEC-001 Production Secret And CORS Hardening
+  - Stage: planning
+  - Owner: Security + Backend Builder
+  - Priority: P1
+  - Source: `docs/operations/application-completion-audit-2026-05-14.md`
+  - Goal: fail production startup when required secrets are missing and decide
+    or restrict production CORS.
+- ACF-DOC-001 Coverage Ledger Reconciliation
+  - Stage: planning
+  - Owner: Planner + Product Docs
+  - Priority: P1
+  - Source: `docs/operations/application-completion-audit-2026-05-14.md`
+  - Goal: refresh stale Drive and completion audit rows so future agents do
+    not reopen completed blockers.
 
 ## In Progress
 
@@ -46,6 +66,14 @@ No active local implementation task is currently in progress.
   auto-deploy webhook administration task.
 
 ## Done
+
+- APP-AUDIT-001 Application Completion Audit Bundle.
+  - Evidence: `npm run build` passed; `npm test` passed against disposable
+    PostgreSQL on `localhost:55450`; production protected API sample passed;
+    production signed-in Playwright route audit covered 12 routes at desktop
+    and mobile with no failed requests or console warnings/errors. Findings
+    and finish queue are recorded in
+    `docs/operations/application-completion-audit-2026-05-14.md`.
 
 - PROD-HOTFIX-001 Owner Console Snapshot Routing.
   - Evidence: production now runs commit

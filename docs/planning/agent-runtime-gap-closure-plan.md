@@ -17,8 +17,8 @@ derived from `.codex/context/TASK_BOARD.md`, `docs/planning/mvp-next-commits.md`
   console does not yet guide scoped agent key creation and rotation.
 - Agent event read paths are production-smoked, but positive ack behavior still
   needs a controlled pending-event smoke.
-- Google Drive is implemented server-side, but real owner OAuth consent and a
-  first selected-folder import still need target-environment evidence.
+- Google Drive is implemented server-side, and 2026-05-14 production evidence
+  verified owner OAuth consent plus selected numbered-root import.
 - Deeper web-console editing surfaces remain intentionally deferred until the
   API and security foundation is solid.
 - Release automation remains a P2 reliability gap because the latest deployed
@@ -33,8 +33,7 @@ derived from `.codex/context/TASK_BOARD.md`, `docs/planning/mvp-next-commits.md`
 3. Add a repeatable agent training/smoke script.
 4. Add owner UI for scoped key creation and rotation.
 5. Verify positive agent-event ack behavior.
-6. Run Google Drive owner consent/import when credentials and owner action are
-   available.
+6. Keep Google Drive import/readback smoke in future Drive contract changes.
 7. Continue web-console editing slices.
 8. Improve deploy automation.
 9. Retry blocked upstream source merges when access is available.
@@ -398,10 +397,10 @@ only read an empty event queue.
 ## AGRUN-007 Google Drive Owner Consent And First Import
 
 - Task Type: release/verification
-- Current Stage: planning
+- Current Stage: done
 - Deliverable For This Stage: target-environment proof for real Google Drive
   OAuth consent and selected-folder import.
-- Status: BLOCKED
+- Status: DONE
 - Owner: Ops/Release
 - Priority: P1
 - Coverage Ledger Rows: AGRUN-COV-006
@@ -422,12 +421,13 @@ imported Drive metadata/content through CompanyCore.
 
 ### Implementation Plan
 
-1. Wait for approved Google OAuth credentials and owner consent.
-2. Connect Drive through the owner console.
-3. Import a selected non-sensitive folder with `inspect_only`, then approved
-   `merge`.
-4. Verify `/v1/google-drive/files` and content read through a service key.
-5. Record residual risks and cleanup if a smoke folder was used.
+1. Approved Google OAuth credentials and owner consent were provided.
+2. Drive was connected through the owner console.
+3. The numbered department root folders `00`-`12` were selected, imported, and
+   mapped to operating areas.
+4. `/v1/google-drive/files` and descendant scope readback were verified through
+   protected production access.
+5. Residual risks were moved to future freshness/content-quality work.
 
 ### Acceptance Criteria
 
@@ -443,6 +443,13 @@ imported Drive metadata/content through CompanyCore.
 - Any test folder/content used for smoke is documented or cleaned up.
 
 ### Result Report
+
+- 2026-05-14 production evidence closed AGRUN-007. Production ran commit
+  `c5878d95a47f17745f65689c08e9e317a6465777`; OAuth was active; protected
+  Google Drive smoke passed; owner folder discovery returned 172 folders; 13
+  numbered roots (`00`-`12`) were selected/imported/mapped; readback returned
+  748 Drive items, 171 folders, `unassignedCount=0`, and descendant scope
+  `mismatches=[]`.
 
 - Blocked until real Google OAuth/owner action is available.
 

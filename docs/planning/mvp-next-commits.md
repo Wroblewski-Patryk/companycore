@@ -7,14 +7,24 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-No local Company OS workflow recovery task is currently ready. Google Drive
-production deployment, folder-root selection, import, and department scoping
-are verified.
+- [ ] ACF-UX-001 Mobile Overflow And Focus Accessibility Fix:
+      fix mobile horizontal overflow on `/settings/api` and
+      `/react-company-os`, reduce unnamed focusable controls in the vanilla
+      owner shell, and verify the signed-in desktop/mobile route audit stays
+      clean.
 
 ### NEXT
-V2WEB-AGENT-024 is complete. Workflow recovery has backend lineage, web
-controls, clean collection fetches, mock UI proof, and real-backend UI proof.
-External blockers stay listed below.
+
+- [ ] ACF-SEC-001 Production Secret And CORS Hardening:
+      fail production startup when required secret env vars are absent and
+      decide or restrict production CORS.
+- [ ] ACF-DOC-001 Coverage Ledger Reconciliation:
+      sync stale Drive/import and application-completion audit rows across
+      active ledgers and source-of-truth files.
+- [ ] ACF-PROD-001 Operating Model Data Completion Decision:
+      decide whether empty production projects, storage locations, knowledge
+      roots, and automation definitions need seed/import work or explicit
+      accepted deferral.
 
 ### BLOCKED
 
@@ -743,10 +753,10 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       create a controlled pending agent event, read it through a target service
       key, acknowledge it, verify it no longer appears as pending, and record
       production smoke evidence.
-- [ ] AGRUN-007 Google Drive Owner Consent And First Import:
-      blocked until real OAuth credentials and owner consent are available;
-      then connect Drive, import a selected folder, and prove agent file
-      readback through CompanyCore.
+- [x] AGRUN-007 Google Drive Owner Consent And First Import:
+      production evidence verified active OAuth, selected numbered-root import,
+      748 Drive items, 171 folders, `unassignedCount=0`, and descendant scope
+      `mismatches=[]`.
 - [x] AGRUN-008 Route-Level Business Editing Surfaces:
       closed by evidence reconciliation; the typed editor workbenches for
       Notes, Projects, Clients, Task Lists, and Tasks are present locally and
@@ -793,7 +803,7 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
 - [x] 76. AGRUN-004 Reusable Agent Training Smoke
 - [x] 77. AGRUN-005 Scoped Agent Key Owner UI
 - [x] 78. AGRUN-006 Agent Event Ack Positive Smoke
-- [ ] 79. AGRUN-007 Google Drive Owner Consent And First Import
+- [x] 79. AGRUN-007 Google Drive Owner Consent And First Import
 - [x] 80. AGRUN-008 Route-Level Business Editing Surfaces
 - [x] 81. AGRUN-009 Deploy Automation Reliability
 - [ ] 82. AGRUN-010 Upstream Agent Source Merge Execution

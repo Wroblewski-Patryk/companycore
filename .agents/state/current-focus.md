@@ -4,6 +4,17 @@ Last updated: 2026-05-14
 
 ## Active Focus
 
+APP-AUDIT-001 is now complete. The full application completion audit is
+recorded in `docs/operations/application-completion-audit-2026-05-14.md`.
+The audit verified that build, disposable-database integration tests,
+production health, protected production API reads, and signed-in production UI
+route loads are healthy, while identifying the next finish queue:
+ACF-UX-001 mobile overflow/accessibility, ACF-SEC-001 production secret/CORS
+hardening, ACF-DOC-001 ledger reconciliation, ACF-PROD-001 operating-model
+data completion, ACF-UX-002 Company City dashboard implementation or
+supersession, ACF-MAINT-001 modularization, ACF-OPS-001 auto-deploy proof, and
+ACF-QA-001 validation gate hardening.
+
 CompanyCore v1 runtime is accepted and live for the approved owner, ClickUp,
 Jarvis, Paperclip, workspace API, and agent CRUD scope. The current focus has
 expanded to the Company OS data foundation requested on 2026-05-09 while
@@ -109,8 +120,9 @@ No local Company OS workflow recovery task remains ready.
 ## Current System Objective
 
 Optimize for source-of-truth clarity, no regression, correct owner workflows,
-local V1 evidence closure, and UX polish that makes the console answer what
-matters now, what is blocked, and what the next action is.
+and application completion. The immediate objective is ACF-UX-001: remove
+freshly observed mobile overflow and focus/accessibility defects before adding
+new feature scope.
 
 ## Current Delivery Stage
 
@@ -324,8 +336,9 @@ setup snippets for Paperclip, Codex, and future MCP-compatible agents in
 - Keep source-of-truth docs in English.
 - Reuse existing `.codex/context`, planning, governance, and architecture
   systems.
-- Do not mark Google Drive owner consent/import complete until real OAuth
-  credentials, owner consent, and target-environment import evidence exist.
+- Google Drive owner consent/import is complete for the numbered department
+  roots as of 2026-05-14; keep future Drive work focused on freshness,
+  content-quality, and operating-model surfacing evidence.
 - Do not mark upstream Paperclip/OpenJarvis merge execution complete until
   write access or an approved fork/PR route exists.
 - Treat GitHub-to-Coolify auto-deploy as a P2 release-automation evidence item,
