@@ -5138,11 +5138,13 @@ function agentKeyRowElement(key) {
     rotateButton.type = "button";
     rotateButton.className = "secondary compact";
     rotateButton.textContent = "Rotate";
+    rotateButton.setAttribute("aria-label", `Rotate service key ${key.name}`);
     rotateButton.addEventListener("click", () => rotateAgentKey(key));
     const deactivateButton = document.createElement("button");
     deactivateButton.type = "button";
     deactivateButton.className = "secondary compact danger-action";
     deactivateButton.textContent = "Deactivate";
+    deactivateButton.setAttribute("aria-label", `Deactivate service key ${key.name}`);
     deactivateButton.addEventListener("click", () => deactivateAgentKey(key));
     actions.append(rotateButton, deactivateButton);
   } else {

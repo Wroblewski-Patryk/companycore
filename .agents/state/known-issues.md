@@ -6,7 +6,6 @@ Last updated: 2026-05-14
 
 | ID | Severity | Area | Summary | Owner | Status | Next action |
 | --- | --- | --- | --- | --- | --- | --- |
-| KI-005 | P1 | Web UX | Production audit found mobile horizontal overflow on `/settings/api` and `/react-company-os`, plus unnamed focusable controls in the dense vanilla owner shell. | Frontend + QA | OPEN | Execute ACF-UX-001 with desktop/mobile Playwright proof and focus-name checks. |
 | KI-006 | P1 | Security configuration | `src/config/env.ts` still falls back to development secrets when production secrets are missing, and Express CORS is currently open. | Backend + Security | OPEN | Execute ACF-SEC-001: fail closed for production secrets and restrict CORS through explicit configuration. |
 | KI-007 | P1 | Product data completeness | Production `/v1/operating-model` has 13 areas and 26 external mappings but `0` storage locations, `0` knowledge roots, `0` automation definitions, and `/v1/projects` returns `0` while tasks exist. | Product + Backend | OPEN | Execute ACF-PROD-001 to decide, seed, import, or explicitly defer these owner-facing operating model records. |
 | KI-002 | P2 | Release automation | GitHub-to-Coolify auto-deploy is not proven as reliable; manual VPS backend rollover remains the approved path. | Ops/Release | MONITORING | Record a push-to-running-image smoke before claiming auto-deploy is reliable. |
@@ -30,3 +29,8 @@ Last updated: 2026-05-14
   V2WEB-AGENT-022 on 2026-05-14. Shared table-record path resolution now sends
   Company OS collection slugs to `/v1/company-os/:collection`; mock render
   proof reported `badGeneric=[]`, `notFound=[]`, and `consoleErrors=[]`.
+- KI-005 mobile overflow and focus accessibility: closed by ACF-UX-001 on
+  2026-05-14. Desktop/mobile Playwright fallback checks for `/settings/api` and
+  `/react-company-os` reported `horizontalOverflow=false`,
+  `unnamedFocusableCount=0`, no console warnings/errors, and no relevant failed
+  requests.

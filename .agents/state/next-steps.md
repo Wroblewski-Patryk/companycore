@@ -4,19 +4,15 @@ Last updated: 2026-05-14
 
 ## NOW
 
-1. ACF-UX-001 Mobile Overflow And Focus Accessibility Fix.
-   - Fix mobile horizontal overflow on `/settings/api` and `/react-company-os`.
-   - Reduce unnamed focusable controls in the vanilla owner shell.
-   - Verify with production-like Playwright desktop/mobile checks.
-
-## NEXT
-
 1. ACF-SEC-001 Production Secret And CORS Hardening.
    - Add production required-secret validation.
    - Decide or restrict production CORS.
-2. ACF-DOC-001 Coverage Ledger Reconciliation.
+
+## NEXT
+
+1. ACF-DOC-001 Coverage Ledger Reconciliation.
    - Refresh stale Drive import and finish-audit ledger rows.
-3. ACF-PROD-001 Operating Model Data Completion Decision.
+2. ACF-PROD-001 Operating Model Data Completion Decision.
    - Decide whether projects, storage locations, knowledge roots, and
      automation definitions need production seed/import or accepted deferral.
 

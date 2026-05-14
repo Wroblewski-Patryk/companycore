@@ -143,3 +143,11 @@ still a known P2 gap. Rollback pointers are current after the hotfix deploy.
   evidence shows it is complete for the selected department roots.
 - Do not enable unsupervised agent write modes without a fresh AI/security
   red-team pass.
+
+## Closure Updates
+
+- 2026-05-14: ACF-UX-001 closed ACF-001 through ACF-003 for the target routes.
+  `/settings/api` and `/react-company-os` were checked at desktop `1440x960`
+  and mobile `390x844` with `horizontalOverflow=false`,
+  `unnamedFocusableCount=0`, no console warnings/errors, and no relevant failed
+  requests. Evidence is recorded in `docs/planning/acf-ux-001-task-contract.md`.

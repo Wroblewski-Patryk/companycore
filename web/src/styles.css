@@ -47,7 +47,33 @@
 
 body {
   margin: 0;
+  max-width: 100%;
+  overflow-x: hidden;
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+#root {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+main,
+section,
+article,
+aside,
+header,
+form,
+label {
+  min-width: 0;
+}
+
+.grid,
+.grid > *,
+.flex,
+.flex > *,
+.rounded-company,
+.rounded-lg {
+  min-width: 0;
 }
 
 .card,
@@ -56,8 +82,56 @@ body {
 }
 
 .react-table-shell {
+  display: block;
   width: 100%;
   max-width: 100%;
+  min-width: 0;
+  overscroll-behavior-x: contain;
+}
+
+.btn,
+.badge,
+.alert,
+.select,
+.input,
+.textarea {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.btn,
+.badge {
+  height: auto;
+  min-height: var(--size, 2rem);
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.alert {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.table {
+  width: max-content;
+  max-width: none;
+}
+
+.table th,
+.table td {
+  max-width: min(34rem, 72vw);
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+@media (max-width: 640px) {
+  .min-w-52,
+  .min-w-64 {
+    min-width: 0;
+  }
+
+  .table {
+    min-width: 34rem;
+  }
 }
 
 .eyebrow {

@@ -309,6 +309,18 @@ Last updated: 2026-05-14
 
 ## Recent Progress
 
+- 2026-05-14: Completed ACF-UX-001 Mobile Overflow And Focus Accessibility
+  Fix. Added responsive containment for long API paths, capability tokens,
+  buttons, badges, React grids, and table shells; added explicit accessible
+  names for dense API/Company OS controls; refreshed the generated React
+  assets. Browser plugin validation was attempted first but no active Codex
+  browser pane was available, so Playwright fallback was used. Signed-in checks
+  for `/settings/api` and `/react-company-os` at desktop `1440x960` and mobile
+  `390x844` reported `horizontalOverflow=false`,
+  `unnamedFocusableCount=0`, no console warnings/errors, and no relevant failed
+  requests. `npm test` passed against disposable PostgreSQL on
+  `localhost:55451`.
+
 - 2026-05-14: Completed V2WEB-AGENT-006 Class A Definition Editor Backend
   Contract. Added `status` to `standards`, migration
   `202605141_company_os_standard_definition_status`,

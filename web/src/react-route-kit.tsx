@@ -1704,19 +1704,19 @@ export function Shell({
   appLabel?: string;
 }) {
   return (
-    <main className="min-h-screen bg-base-200 text-base-content" data-theme="companycore">
+    <main className="min-h-screen overflow-x-hidden bg-base-200 text-base-content" data-theme="companycore">
       <header className="border-b border-base-300 bg-base-100">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
-          <a className="flex items-center gap-3 font-black no-underline" href="/dashboard">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <a className="flex min-w-0 items-center gap-3 font-black no-underline" href="/dashboard">
             <span className="grid h-9 w-9 place-items-center rounded-company bg-neutral text-sm text-neutral-content">CC</span>
-            <span>
+            <span className="min-w-0">
               CompanyCore
-              <small className="block text-xs font-black text-company-muted">
+              <small className="block truncate text-xs font-black text-company-muted">
                 {connection?.workspace.name || appLabel}
               </small>
             </span>
           </a>
-          <nav className="flex flex-wrap gap-2" aria-label="React dashboard navigation">
+          <nav className="flex min-w-0 flex-wrap gap-2" aria-label="React dashboard navigation">
             <a className="btn btn-ghost btn-sm" href="/dashboard">Current dashboard</a>
             <a className="btn btn-ghost btn-sm" href="/react-dashboard">React dashboard</a>
             <a className="btn btn-ghost btn-sm" href="/react-company-os">Company OS</a>
@@ -1794,7 +1794,7 @@ export function DataTable<Row extends { id: string }>({
   }
 
   return (
-    <div className="react-table-shell overflow-x-auto rounded-company border border-base-300 bg-base-100">
+    <div className="react-table-shell max-w-full overflow-x-auto rounded-company border border-base-300 bg-base-100">
       <table className="table table-zebra table-pin-rows min-w-[640px]">
         <thead>
           <tr>

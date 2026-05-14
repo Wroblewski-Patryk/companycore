@@ -7,17 +7,12 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] ACF-UX-001 Mobile Overflow And Focus Accessibility Fix:
-      fix mobile horizontal overflow on `/settings/api` and
-      `/react-company-os`, reduce unnamed focusable controls in the vanilla
-      owner shell, and verify the signed-in desktop/mobile route audit stays
-      clean.
-
-### NEXT
-
 - [ ] ACF-SEC-001 Production Secret And CORS Hardening:
       fail production startup when required secret env vars are absent and
       decide or restrict production CORS.
+
+### NEXT
+
 - [ ] ACF-DOC-001 Coverage Ledger Reconciliation:
       sync stale Drive/import and application-completion audit rows across
       active ledgers and source-of-truth files.
@@ -40,6 +35,12 @@ The section below is retained as execution evidence. It is not the active
 queue. Future work must start from `Active Queue`, `.codex/context/TASK_BOARD.md`,
 and `docs/operations/v1-function-coverage-ledger.csv`.
 
+- [x] ACF-UX-001 Mobile Overflow And Focus Accessibility Fix:
+      `/settings/api` and `/react-company-os` passed signed-in desktop/mobile
+      Playwright fallback checks with `horizontalOverflow=false`,
+      `unnamedFocusableCount=0`, no console warnings/errors, and no relevant
+      failed requests; `npm test` passed against disposable PostgreSQL on
+      `localhost:55451`.
 - [x] AGRUN-007 Google Drive Owner Consent And First Import:
       production runs `c5878d95a47f17745f65689c08e9e317a6465777`; OAuth is
       active; discovery found 172 folders; 13 numbered department root folders

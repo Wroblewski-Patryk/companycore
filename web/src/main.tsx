@@ -3814,6 +3814,7 @@ function CompanyOsWorkflowDraftPanel({
                 className="textarea textarea-bordered min-h-24"
                 disabled={!canWriteWorkflow || Boolean(pendingAction)}
                 maxLength={2000}
+                aria-label="Workflow draft reason"
                 onChange={(event) => setReason(event.target.value)}
                 value={reason}
               />
@@ -3920,6 +3921,7 @@ function CompanyOsWorkflowDraftPanel({
                       className="textarea textarea-bordered min-h-20 text-sm"
                       disabled={Boolean(pendingAction)}
                       maxLength={2000}
+                      aria-label="Workflow recovery reason"
                       onChange={(event) => setRecoveryReason(event.target.value)}
                       value={recoveryReason}
                     />
@@ -3990,6 +3992,7 @@ function CompanyOsWorkflowDraftPanel({
               <input
                 className="input input-bordered"
                 disabled={!draft || Boolean(pendingAction)}
+                aria-label="Approved approval ID"
                 onChange={(event) => setApprovalId(event.target.value)}
                 placeholder={previewNeedsApproval ? "Required after approval decision" : "Optional"}
                 value={approvalId}
@@ -4237,6 +4240,7 @@ function CompanyOsStandardsEditor({
                 className="input input-bordered"
                 disabled={!canWriteDefinitions || Boolean(pendingAction)}
                 maxLength={200}
+                aria-label="Standard name"
                 onChange={(event) => setDraft({ ...draft, name: event.target.value })}
                 placeholder="Company OS execution standard"
                 value={draft.name}
@@ -4305,6 +4309,7 @@ function CompanyOsStandardsEditor({
                 className="textarea textarea-bordered min-h-24"
                 disabled={!canWriteDefinitions || Boolean(pendingAction)}
                 maxLength={2000}
+                aria-label="Standard description"
                 onChange={(event) => setDraft({ ...draft, description: event.target.value })}
                 placeholder="What this standard governs"
                 value={draft.description}
@@ -4317,6 +4322,7 @@ function CompanyOsStandardsEditor({
                 className="textarea textarea-bordered min-h-24"
                 disabled={!canWriteDefinitions || Boolean(pendingAction)}
                 maxLength={2000}
+                aria-label="Standard validation method"
                 onChange={(event) => setDraft({ ...draft, validationMethod: event.target.value })}
                 placeholder="Evidence expected before the standard is satisfied"
                 value={draft.validationMethod}
@@ -4914,6 +4920,7 @@ function CompanyOsAgentContextPanel({ onChanged }: { onChanged: () => void }) {
                 <span className="label-text text-xs font-black">Reason</span>
                 <textarea
                   className="textarea textarea-bordered min-h-20"
+                  aria-label="Stage block reason"
                   value={stageDraft.blockReason}
                   onChange={(event) => setStageDraft((current) => ({ ...current, blockReason: event.target.value }))}
                 />
@@ -4983,6 +4990,7 @@ function CompanyOsAgentContextPanel({ onChanged }: { onChanged: () => void }) {
                 <span className="label-text text-xs font-black">Evidence</span>
                 <textarea
                   className="textarea textarea-bordered min-h-20"
+                  aria-label="Stage validation evidence"
                   value={stageDraft.evidenceNote}
                   onChange={(event) => setStageDraft((current) => ({ ...current, evidenceNote: event.target.value }))}
                 />
@@ -5024,6 +5032,7 @@ function CompanyOsAgentContextPanel({ onChanged }: { onChanged: () => void }) {
                 <span className="label-text text-xs font-black">Output</span>
                 <textarea
                   className="textarea textarea-bordered min-h-20"
+                  aria-label="Stage completion summary"
                   value={stageDraft.outputSummary}
                   onChange={(event) => setStageDraft((current) => ({ ...current, outputSummary: event.target.value }))}
                 />
@@ -5078,6 +5087,7 @@ function CompanyOsAgentContextPanel({ onChanged }: { onChanged: () => void }) {
               <span className="label-text text-xs font-black">Rule IDs</span>
               <input
                 className="input input-bordered input-sm"
+                aria-label="Automation rule IDs"
                 placeholder="Optional, comma-separated"
                 value={automationDraft.ruleIds}
                 onChange={(event) => setAutomationDraft((current) => ({ ...current, ruleIds: event.target.value }))}
@@ -5087,6 +5097,7 @@ function CompanyOsAgentContextPanel({ onChanged }: { onChanged: () => void }) {
               <span className="label-text text-xs font-black">Idempotency key</span>
               <input
                 className="input input-bordered input-sm"
+                aria-label="Automation idempotency key"
                 placeholder="Optional for execute"
                 value={automationDraft.idempotencyKey}
                 onChange={(event) => setAutomationDraft((current) => ({ ...current, idempotencyKey: event.target.value }))}
@@ -5099,6 +5110,7 @@ function CompanyOsAgentContextPanel({ onChanged }: { onChanged: () => void }) {
               <span className="label-text text-xs font-black">Context reason</span>
               <textarea
                 className="textarea textarea-bordered min-h-20"
+                aria-label="Automation evaluation reason"
                 value={automationDraft.reason}
                 onChange={(event) => setAutomationDraft((current) => ({ ...current, reason: event.target.value }))}
               />
@@ -5176,6 +5188,7 @@ function CompanyOsAgentContextPanel({ onChanged }: { onChanged: () => void }) {
                 <input
                   className="input input-bordered input-sm"
                   required
+                  aria-label="Approval requested action"
                   value={approvalDraft.requestedForAction}
                   onChange={(event) => setApprovalDraft((current) => ({ ...current, requestedForAction: event.target.value }))}
                 />
@@ -5185,6 +5198,7 @@ function CompanyOsAgentContextPanel({ onChanged }: { onChanged: () => void }) {
                 <input
                   className="input input-bordered input-sm"
                   required
+                  aria-label="Approval resource type"
                   value={approvalDraft.resourceType}
                   onChange={(event) => setApprovalDraft((current) => ({ ...current, resourceType: event.target.value }))}
                 />
@@ -5207,11 +5221,12 @@ function CompanyOsAgentContextPanel({ onChanged }: { onChanged: () => void }) {
               </label>
               <label className="form-control">
                 <span className="label-text text-xs font-black">Reason</span>
-                <textarea
-                  className="textarea textarea-bordered min-h-24"
-                  value={approvalDraft.reason}
-                  onChange={(event) => setApprovalDraft((current) => ({ ...current, reason: event.target.value }))}
-                />
+              <textarea
+                className="textarea textarea-bordered min-h-24"
+                aria-label="Approval request reason"
+                value={approvalDraft.reason}
+                onChange={(event) => setApprovalDraft((current) => ({ ...current, reason: event.target.value }))}
+              />
               </label>
               <button className="btn btn-primary btn-sm w-fit" type="submit" disabled={pendingAction === "request"}>
                 {pendingAction === "request" ? "Requesting" : "Request approval"}
@@ -5624,6 +5639,7 @@ function CompanyOsCollectionDrilldown({
         <button
           className={record.id === selectedRecordId ? "btn btn-primary btn-xs" : "btn btn-outline btn-xs"}
           type="button"
+          aria-label={`${record.id === selectedRecordId ? "Selected" : "Open"} ${recordTitle(record)}`}
           onClick={() => onSelectRecord(record.id)}
         >
           {record.id === selectedRecordId ? "Selected" : "Open"}

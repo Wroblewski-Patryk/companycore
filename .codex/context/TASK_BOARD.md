@@ -2,14 +2,6 @@
 
 ## Ready
 
-- ACF-UX-001 Mobile Overflow And Focus Accessibility Fix
-  - Stage: implementation
-  - Owner: Frontend Builder + QA/Test
-  - Priority: P1
-  - Source: `docs/operations/application-completion-audit-2026-05-14.md`
-  - Goal: fix mobile horizontal overflow on `/settings/api` and
-    `/react-company-os`, then reduce unnamed focusable controls in the vanilla
-    owner shell.
 - ACF-SEC-001 Production Secret And CORS Hardening
   - Stage: planning
   - Owner: Security + Backend Builder
@@ -66,6 +58,14 @@ No active local implementation task is currently in progress.
   auto-deploy webhook administration task.
 
 ## Done
+
+- ACF-UX-001 Mobile Overflow And Focus Accessibility Fix.
+  - Evidence: `npm run build` passed; signed-in Playwright fallback checked
+    `/settings/api` and `/react-company-os` at desktop `1440x960` and mobile
+    `390x844` with `horizontalOverflow=false`, `unnamedFocusableCount=0`, no
+    console warnings/errors, and no relevant failed requests; `npm test`
+    passed against disposable PostgreSQL on `localhost:55451`.
+  - Task contract: `docs/planning/acf-ux-001-task-contract.md`.
 
 - APP-AUDIT-001 Application Completion Audit Bundle.
   - Evidence: `npm run build` passed; `npm test` passed against disposable

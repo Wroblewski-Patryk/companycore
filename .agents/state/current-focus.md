@@ -4,16 +4,15 @@ Last updated: 2026-05-14
 
 ## Active Focus
 
-APP-AUDIT-001 is now complete. The full application completion audit is
-recorded in `docs/operations/application-completion-audit-2026-05-14.md`.
-The audit verified that build, disposable-database integration tests,
-production health, protected production API reads, and signed-in production UI
-route loads are healthy, while identifying the next finish queue:
-ACF-UX-001 mobile overflow/accessibility, ACF-SEC-001 production secret/CORS
-hardening, ACF-DOC-001 ledger reconciliation, ACF-PROD-001 operating-model
-data completion, ACF-UX-002 Company City dashboard implementation or
-supersession, ACF-MAINT-001 modularization, ACF-OPS-001 auto-deploy proof, and
-ACF-QA-001 validation gate hardening.
+ACF-UX-001 is now complete. The API settings surface and React Company OS
+cockpit were hardened for mobile overflow and focus accessibility. Signed-in
+Playwright fallback checked `/settings/api` and `/react-company-os` at desktop
+`1440x960` and mobile `390x844`; all checks reported
+`horizontalOverflow=false`, `unnamedFocusableCount=0`, no console
+warnings/errors, and no relevant failed requests. `npm test` passed against
+disposable PostgreSQL on `localhost:55451`. The next active finish task is
+ACF-SEC-001 production secret/CORS hardening, followed by ACF-DOC-001 ledger
+reconciliation and ACF-PROD-001 operating-model data completion.
 
 CompanyCore v1 runtime is accepted and live for the approved owner, ClickUp,
 Jarvis, Paperclip, workspace API, and agent CRUD scope. The current focus has
