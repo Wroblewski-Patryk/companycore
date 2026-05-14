@@ -293,6 +293,30 @@ test("production environment validation rejects committed development secret pla
   assert.match(result.stdout, /Unsafe production environment variable value: AUTH_TOKEN_SECRET/);
 });
 
+test("production environment validation keeps API key hash fallback compatible", async () => {
+  const result = await runNodeScript(`
+    const { env } = await import("./dist/config/env.js");
+    console.log(JSON.stringify({
+      apiKeyHashSecret: env.apiKeyHashSecret,
+      authTokenSecret: env.authTokenSecret
+    }));
+  `, {
+    NODE_ENV: "production",
+    DATABASE_URL: "postgresql://companycore:companycore@localhost:5432/companycore?schema=public",
+    AUTH_TOKEN_SECRET: "production-auth-token-secret-for-tests",
+    INTEGRATION_SECRET_KEY: "production-integration-secret-for-tests",
+    API_KEY_HASH_SECRET: undefined
+  });
+
+  assert.equal(result.exitCode, 0, `stdout:\n${result.stdout}\nstderr:\n${result.stderr}`);
+  const summary = JSON.parse(result.stdout) as {
+    apiKeyHashSecret: string;
+    authTokenSecret: string;
+  };
+  assert.equal(summary.apiKeyHashSecret, "production-auth-token-secret-for-tests");
+  assert.equal(summary.authTokenSecret, "production-auth-token-secret-for-tests");
+});
+
 test("production CORS allows approved origins and rejects unknown browser origins", async () => {
   const result = await runNodeScript(`
     const { createApp } = await import("./dist/app.js");

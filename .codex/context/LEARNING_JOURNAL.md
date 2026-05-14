@@ -356,3 +356,23 @@ fixes for this repository.
 - Evidence: V2WEB-AGENT-014 `npm test` initially exposed the read-only `200`;
   after reordering specific route entries and adding assertions, `npm test`
   passed against disposable PostgreSQL on `localhost:55438`.
+
+### 2026-05-14 - Preserve production secret compatibility during fail-closed hardening
+- Context: ACF-SEC-001 made production startup fail closed for missing required
+  secrets. After a later deploy, public health returned `503` and the app was
+  reported as restart-looping in Coolify.
+- Symptom: Local production config import failed when `AUTH_TOKEN_SECRET` and
+  `INTEGRATION_SECRET_KEY` were present but `API_KEY_HASH_SECRET` was omitted.
+- Root cause: Older production deployments used `AUTH_TOKEN_SECRET` as the API
+  key hash fallback. Requiring a new separate hash secret without a deployment
+  migration step can break startup and may invalidate existing service keys if
+  operators set a different value during incident response.
+- Guardrail: Security hardening that changes required production env must
+  either preserve the previous runtime fallback or include an explicit
+  deployment migration step before the commit is auto-deployed.
+- Preferred pattern: Keep `API_KEY_HASH_SECRET` recommended for separation,
+  but allow fallback to the already required non-placeholder
+  `AUTH_TOKEN_SECRET` until operators intentionally rotate service keys.
+- Evidence: PROD-HOTFIX-001 added a regression test for production import
+  without `API_KEY_HASH_SECRET`; `npm test` passed against disposable
+  PostgreSQL on `localhost:55466`.

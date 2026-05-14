@@ -56,7 +56,8 @@ Required environment values:
 - `SERVICE_PASSWORD_POSTGRES`
 - `SERVICE_PASSWORD_API_KEY`
 - `AUTH_TOKEN_SECRET`
-- `API_KEY_HASH_SECRET`
+- `API_KEY_HASH_SECRET` is recommended. If omitted, production falls back to
+  `AUTH_TOKEN_SECRET` to preserve existing service API key hashes.
 - `INTEGRATION_SECRET_KEY`
 - `COMPANYCORE_ALLOWED_ORIGINS` if the production browser allowlist differs
   from `https://companycore.luckysparrow.ch,https://api.companycore.luckysparrow.ch`

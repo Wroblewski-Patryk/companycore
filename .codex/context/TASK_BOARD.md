@@ -59,6 +59,16 @@ No active local implementation task is currently in progress.
 
 ## Done
 
+- PROD-HOTFIX-001 Coolify Restart Loop API Key Hash Fallback.
+  - Evidence: public health returned `503` after deploy and local production
+    config import reproduced the likely restart-loop condition when
+    `API_KEY_HASH_SECRET` was omitted. `src/config/env.ts` now falls back to
+    required non-placeholder `AUTH_TOKEN_SECRET` for API key hashing when the
+    separate hash secret is not configured. `git diff --check`,
+    `npm run build`, and `npm test` passed against disposable PostgreSQL on
+    `localhost:55466`, including a new production fallback regression test.
+  - Task contract: `docs/planning/prod-hotfix-001-task-contract.md`.
+
 - ACF-PROD-001 Operating Model Data Completion Decision.
   - Result: accepted deferral for fake seed data. Empty projects, storage
     locations, knowledge roots, and automation definitions are valid

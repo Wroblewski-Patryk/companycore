@@ -72,9 +72,9 @@ export const env = {
   ),
   apiKeyHashSecret: requireProductionSecret(
     "API_KEY_HASH_SECRET",
-    process.env.NODE_ENV === "production"
+    process.env.AUTH_TOKEN_SECRET ?? (process.env.NODE_ENV === "production"
       ? undefined
-      : process.env.AUTH_TOKEN_SECRET ?? "dev-companycore-auth-secret-change-me"
+      : "dev-companycore-auth-secret-change-me")
   ),
   corsAllowedOrigins: getCorsAllowedOrigins()
 };

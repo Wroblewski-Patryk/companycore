@@ -52,7 +52,9 @@ Current foundation secrets:
 - `SERVICE_PASSWORD_POSTGRES`
 - `SERVICE_PASSWORD_API_KEY` or `SEED_API_KEY`
 - `AUTH_TOKEN_SECRET`
-- `API_KEY_HASH_SECRET`
+- `API_KEY_HASH_SECRET` is recommended for secret separation. If omitted,
+  production falls back to `AUTH_TOKEN_SECRET` for backward compatibility with
+  existing service API key hashes.
 - `INTEGRATION_SECRET_KEY`
 - `COMPANYCORE_ALLOWED_ORIGINS` as a comma-separated allowlist for browser
   CORS. Production defaults to
@@ -60,9 +62,9 @@ Current foundation secrets:
   when the value is omitted.
 - optional `PORT`
 
-Production startup fails closed when `DATABASE_URL`, `AUTH_TOKEN_SECRET`,
-`API_KEY_HASH_SECRET`, or `INTEGRATION_SECRET_KEY` is missing, or when one of
-the secret values still uses the committed development placeholder pattern.
+Production startup fails closed when `DATABASE_URL`, `AUTH_TOKEN_SECRET`, or
+`INTEGRATION_SECRET_KEY` is missing, or when any configured secret or fallback
+secret still uses the committed development placeholder pattern.
 
 v1 service credentials:
 
