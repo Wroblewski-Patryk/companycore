@@ -1,6 +1,6 @@
 # Project Memory Index
 
-Last updated: 2026-05-14
+Last updated: 2026-05-15
 
 ## Purpose
 
@@ -71,6 +71,14 @@ continue from repository files alone:
   collection fetch paths, V2WEB-AGENT-023 proved the full UI recovery flow
   through inline approval decision and activation, and V2WEB-AGENT-024 repeated
   that flow against a migrated Docker Compose backend.
+- `docs/architecture/organizational-architecture-bridge.md`: accepted
+  long-term AI-first CompanyCore direction. As of 2026-05-15, CompanyCore is
+  intended to become an organizational operating system and graph that connects
+  humans, AI agents, vertical hierarchy, horizontal APQC-style process flow,
+  MECE responsibility ownership, PAEI behavior profiles, governance, workflows,
+  knowledge, resources, KPIs, audit, decisions, web/mobile clients, MCP, and
+  Paperclip. Future work must reuse existing Company OS and operating-model
+  tables before adding duplicate target-named tables.
 - `docs/architecture/relationship-graph-audit-2026-05-14.md`: current
   relationship graph source audit for the pre-V2 web/backend/MCP foundation.
   Relationship APIs and UI must distinguish direct database edges,

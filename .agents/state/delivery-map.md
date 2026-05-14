@@ -1,6 +1,6 @@
 # Delivery Map
 
-Last updated: 2026-05-14
+Last updated: 2026-05-15
 
 ## Current Product Target
 
@@ -26,6 +26,7 @@ Last updated: 2026-05-14
 | SRC-003 | UX | `docs/ux/` | Interface and quality rules | active |
 | SRC-004 | release control | `docs/planning/v1-architecture-control-map.md`, `docs/operations/v1-project-control-system.md` | V1 boundary, external blockers, and post-V1 lane options | active |
 | SRC-005 | evidence | `docs/operations/v1-function-coverage-ledger.csv`, `.agents/state/module-confidence-ledger.md` | Verified V1 local evidence and remaining target proof notes | active |
+| SRC-006 | architecture | `docs/architecture/organizational-architecture-bridge.md` | Long-term AI-first organizational operating-system bridge across hierarchy, process, responsibilities, governance, knowledge, execution, resources, metrics, MCP, web, mobile, and Paperclip | active |
 
 ## Module / Journey Map
 
@@ -37,6 +38,7 @@ Last updated: 2026-05-14
 | CCORE-DM-004 | Provider Adapter Expansion | Google Drive and future providers through ToolAdapter and IntegrationCapability | provider APIs, OAuth, API, DB, owner UI, ops | partially verified / candidate | Google Drive foundation and AGRUN-007 owner consent/import are verified in production; future provider work remains candidate scope | Improve Drive freshness/content-quality proof or select a new provider task only after current ACF P1 blockers are closed or explicitly deferred. |
 | CCORE-DM-005 | Data Quality And Coverage | Keep coverage ledgers, code-surface index, and queues current | docs, ledger, tests, smokes | verified for current V1 pass | V1CTRL-001, V1CTRL-002, V1EVID-001, V1EVID-002 | Maintain during each future V2 slice rather than creating a separate feature lane. |
 | CCORE-DM-006 | Application Completion Finish Queue | Audit-derived finish work across UX, security, data completeness, docs, maintainability, and deployment proof | docs, UI, API, config, tests, production smokes | in progress | `docs/operations/application-completion-audit-2026-05-14.md`; `docs/planning/application-completion-audit-task-contract.md`; ACF-UX-001 closure evidence; ACF-SEC-001 closure evidence; ACF-DOC-001 reconciliation evidence; ACF-PROD-001 data decision; WEBFOUND-007 relationship audit; WEBFOUND-008A relationship graph API; WEBFOUND-008B graph-backed relationship workbench; WEBFOUND-009 integration readiness dashboard; WEBFOUND-010 MCP key workspace clarity; WEBFOUND-011 agent tool surface shell access; WEBFOUND-012 AI-ready smoke pack; WEBFOUND-013 V2 UX readiness gate; WEBFOUND-014 V2 visual implementation plan; ACF-MAINT-001 relationship workbench module split; V2VIS-001 dashboard Company map frame proof | WEBFOUND queue, first maintainability split, and first dashboard frame are complete. Continue ACF-MAINT-002 or audit route-frame convergence as the next bounded slice. |
+| CCORE-DM-007 | Organizational Architecture Bridge | Long-term CompanyCore operating-system direction connecting vertical hierarchy, horizontal APQC-style processes, MECE responsibility, PAEI profiles, governance, knowledge, execution, resources, KPIs, audit, decisions, MCP, web, mobile, and Paperclip | architecture docs, database concept map, future schema/API/MCP/UI tasks | accepted direction / implementation gaps remain | `docs/architecture/organizational-architecture-bridge.md`; DEC-015; ORG-ARCH-001 | Future work should verify current Company OS coverage first, then add scoped process-domain, responsibility, PAEI, governance-rule, organizational-graph, Paperclip, or mobile slices through explicit task contracts. |
 
 ## Visual Slice Map
 

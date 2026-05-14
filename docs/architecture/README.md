@@ -30,9 +30,10 @@ Those belong elsewhere:
 1. `architecture-source-of-truth.md`
 2. `system-architecture.md`
 3. `tech-stack.md`
-4. `company-os-definition-editing-contract.md`
-5. `company-os-workflow-definition-command-contract.md`
-6. any project-specific architecture or ADR files added later
+4. `organizational-architecture-bridge.md`
+5. `company-os-definition-editing-contract.md`
+6. `company-os-workflow-definition-command-contract.md`
+7. any project-specific architecture or ADR files added later
 
 ## Architecture Rules
 

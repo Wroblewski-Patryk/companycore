@@ -4,6 +4,11 @@ CompanyCore is the operational core for LuckySparrow. It stores company
 projects, goals, targets, tasks, CRM context, decisions, notes, AI agent
 metadata, agent logs, integration state, and system events. PostgreSQL is the
 source of truth, and the HTTP API is the supported integration access layer.
+The long-term direction is an AI-first organizational operating system that
+connects humans, agents, processes, tasks, governance, memory, workflows,
+knowledge, KPIs, resources, and decisions into one organizational graph. The
+accepted bridge direction is documented in
+`docs/architecture/organizational-architecture-bridge.md`.
 
 ## Main Runtime Surfaces
 
@@ -72,6 +77,20 @@ foundation target.
 - AI operations: agents, agent logs.
 - Platform state: events, users, workspaces, workspace-scoped API keys,
   integration settings.
+
+The target organizational bridge adds these cross-cutting dimensions without
+replacing the existing Company OS model:
+
+- vertical role hierarchy and escalation:
+  `Patryk -> AssistantAI -> Directors -> Managers -> TeamLeaders -> Workers`
+- APQC-style process domains over the existing process and pipeline graph
+- MECE responsibility ownership for important processes, resources, KPIs,
+  tools, and governance rules
+- PAEI behavioral profiles for roles and agents
+- knowledge sources spanning Drive, docs, Markdown/Obsidian roots, snapshots,
+  embeddings, and decision memory
+- web, future mobile, and MCP as first-class clients over the same API,
+  permission, approval, audit, and event boundaries
 
 ## ClickUp-Shaped Operating Model
 

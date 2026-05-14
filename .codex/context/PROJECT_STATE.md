@@ -195,6 +195,15 @@ Last updated: 2026-05-15
   prerequisite, expected-result, recovery-guidance, and proposal/effect context
   to the existing `/react-company-os` approval, stage lifecycle, and automation
   evaluator panels without changing backend command contracts.
+- 2026-05-15: ORG-ARCH-001 recorded the user's long-term Organizational
+  Architecture Bridge direction. CompanyCore is now explicitly documented as
+  an AI-first organizational operating system target that connects people,
+  agents, vertical hierarchy, horizontal APQC-style process flow, MECE
+  responsibilities, PAEI behavioral profiles, governance, workflows, knowledge,
+  resources, KPIs, audit, decisions, web/mobile clients, MCP, and Paperclip
+  through one organizational graph. The source-of-truth architecture file is
+  `docs/architecture/organizational-architecture-bridge.md`; schema work must
+  reuse current Company OS and operating-model tables before adding new tables.
 - 2026-05-15: V2VIS-003 completed the first route-body UX polish cycle after
   shared route-frame convergence. The canonical `/areas` route now uses an
   area command summary, review/coverage command cards, earlier filters,
@@ -2591,6 +2600,7 @@ Last updated: 2026-05-15
 - `docs/architecture/system-architecture.md`
 - `docs/architecture/tech-stack.md`
 - `docs/architecture/architecture-source-of-truth.md`
+- `docs/architecture/organizational-architecture-bridge.md`
 - `docs/engineering/local-development.md`
 - `docs/engineering/testing.md`
 - `docs/governance/working-agreements.md`

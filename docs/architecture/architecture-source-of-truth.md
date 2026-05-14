@@ -63,6 +63,7 @@ At minimum, keep these files aligned:
 
 - `docs/architecture/system-architecture.md`
 - `docs/architecture/tech-stack.md`
+- `docs/architecture/organizational-architecture-bridge.md`
 - `docs/architecture/company-os-definition-editing-contract.md`
 - `docs/architecture/company-os-workflow-definition-command-contract.md`
 - `docs/architecture/web-and-mcp-foundation-before-v2.md`
@@ -114,6 +115,13 @@ The approved v1 direction is:
   `docs/architecture/web-and-mcp-foundation-before-v2.md`: workspace selection,
   operating-area/resource navigation, relationship/integration clarity, and
   MCP workspace-safe usability
+- CompanyCore's long-term product architecture is an AI-first organizational
+  operating system where vertical hierarchy and horizontal processes coexist.
+  The accepted direction is recorded in
+  `docs/architecture/organizational-architecture-bridge.md` and must guide
+  future schema, MCP, web, mobile, Paperclip, governance, knowledge, KPI, and
+  organizational graph work without bypassing scoped task contracts or existing
+  Company OS boundaries.
 
 ## Implementation Contract
 

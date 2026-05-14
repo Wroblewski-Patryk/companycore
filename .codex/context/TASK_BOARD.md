@@ -81,6 +81,15 @@ No active local implementation task is currently in progress.
   - Task contract:
     `docs/planning/v2vis-003-areas-route-body-polish-task-contract.md`.
 
+- ORG-ARCH-001 Organizational Architecture Bridge Memory Update.
+  - Evidence: added
+    `docs/architecture/organizational-architecture-bridge.md`, linked it from
+    architecture source-of-truth docs, mapped the user's target concepts to the
+    current database model in `docs/DATABASE.md`, and recorded DEC-015,
+    CCORE-DM-007, and REQ-ORG-ARCH-001. `git diff --check` passed.
+  - Task contract:
+    `docs/planning/org-arch-001-organizational-architecture-bridge-task-contract.md`.
+
 - V2VIS-002 Route Frame Convergence And Usability Repair.
   - Evidence: published `docs/ux/route-frame-usability-audit-2026-05-15.md`
     with 100 route-frame findings; added the vanilla route command strip;

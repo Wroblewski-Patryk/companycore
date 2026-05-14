@@ -97,6 +97,33 @@ integration fields such as `external_id` and `source` where relevant.
 - `google_drive_content_snapshots`: extracted searchable text, summary,
   preview, and scan state for Drive files.
 
+## Organizational Bridge Concept Map
+
+The accepted product direction includes a user-facing target vocabulary for the
+organizational operating system. Implementation should reuse the current schema
+first, then add migrations only for real gaps:
+
+| Target concept | Current or preferred table/model |
+| --- | --- |
+| `departments` | `operating_areas`, `business_functions` |
+| `agents` | `agents` |
+| `agent_roles` | `company_roles` |
+| `process_domains` | future taxonomy linked to `processes` |
+| `responsibilities` | `company_roles`, `business_functions`, future explicit responsibility rows |
+| `governance_rules` | `policies`, `controls`, `risks`, approvals |
+| `workflows` | `processes`, `pipelines`, `workflow_definition_drafts` |
+| `workflow_steps` | `pipeline_stages`, `procedures`, `procedure_steps`, `stage_runs` |
+| `permissions` | API key scopes, capabilities, `integration_capabilities`, future role permissions |
+| `tools` | `tool_adapters`, `integration_capabilities`, MCP manifest tools |
+| `knowledge_sources` | `knowledge_roots`, `knowledge_items`, `google_drive_files`, content snapshots |
+| `kpis` | `metrics` |
+| `audit_logs` | `audit_logs` |
+| `decision_logs` | `decision_logs`, legacy `decisions` |
+
+Do not create duplicate tables for these concepts until an approved task proves
+the existing model cannot express the required ownership, workflow, governance,
+or MCP behavior.
+
 ## Operating Registry
 
 The schema includes a registry that keeps business areas, folders, tables, API
