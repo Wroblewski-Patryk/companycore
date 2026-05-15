@@ -73,6 +73,19 @@ No task is actively in progress.
 
 ## Done
 
+- PAPERCLIP-ARCH-001 Paperclip Company-Building Architecture Direction.
+  - Evidence: `docs/architecture/organizational-architecture-bridge.md` now
+    records Paperclip as a supervised external company-building execution
+    agent over CompanyCore, with the minimal loop `business plan / owner
+    intent -> knowledge and operating graph -> gap and task analysis -> work
+    items -> execution -> feedback/evidence/next gaps`.
+    `docs/architecture/system-architecture.md` now defines agent-facing
+    Knowledge, Tools, Access, and Audit layers over the existing API/MCP
+    boundary.
+  - Validation: `git diff --check` passed.
+  - Task contract:
+    `docs/planning/paperclip-company-building-architecture-task-contract.md`.
+
 - V1PROD-002 Deploy V1 canonical web layer and rerun parity.
   - Evidence: commit `ff5e04192db93a53280fab58bcd8f47cba30f554` was pushed to
     `origin/codex/companycore-local-port-3102` and deployed through the
