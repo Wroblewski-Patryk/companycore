@@ -4,28 +4,29 @@ Last updated: 2026-05-15
 
 ## NOW
 
-1. V1PROD-002 Deploy V1 canonical web layer and rerun parity.
-   - Commit and deploy the current V1 canonical web layer.
-   - Confirm public web/API `/health` report the deployed commit.
-   - Recapture public home/login/register screenshots plus authenticated
-     dashboard and selected-area screenshots against
-     `docs/ux/v1-production-canonical-discrepancy-audit-2026-05-15.md`.
-2. REACT-WEB-002 ClickUp setup React workflow.
+1. REACT-WEB-002 ClickUp setup React workflow.
    - Use the new `web/src/app-route-registry.ts` and shared React shell.
    - Rebuild ClickUp token discovery, workspace/list selection, save, and
      maintenance run controls inside the unified V1 settings module instead
      of keeping `/settings` as a ClickUp-only route.
-3. REACT-WEB-003 Google Drive OAuth/folder-selection React workflow.
+2. REACT-WEB-003 Google Drive OAuth/folder-selection React workflow.
    - Use the same route registry and shell foundation.
    - Rebuild `/settings/drive` as a tab-aware unified settings entry for OAuth
      client save, authorize URL, authorization-code exchange, folder
      discovery, folder selection, import, mapping, and reconcile as React
      components against the existing Google Drive integration routes.
-4. V1SETTINGS-002 Unified settings React implementation.
+3. V1SETTINGS-002 Unified settings React implementation.
    - Use `docs/ux/v1-settings-canonical-spec-2026-05-15.md` plus the desktop
-     and mobile canonical targets to converge General, Integrations,
-     Knowledge, Tools, API, MCP, and Access & audit into one `/settings`
-     module.
+     and mobile canonical targets to converge General, Connections, Agent
+     access, and MCP into one simple `/settings` module. Keep sync, import,
+     mapping, review queues, and large tool catalogs outside the first
+     settings view.
+4. V1 authenticated production screenshot parity.
+   - Use a valid owner browser session to capture `/dashboard` and
+     `/areas?area=01-strategia&view=overview` on production.
+   - Compare against canonical desktop/tablet/mobile targets and record
+     remaining mismatches before calling private production visual parity
+     verified.
 
 ## NEXT
 

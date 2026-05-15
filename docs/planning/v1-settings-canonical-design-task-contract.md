@@ -106,8 +106,8 @@ Allowed files:
   points.
 - Blocking unknowns: none for planning; implementation still needs exact route
   redirect behavior.
-- Why it was safe to continue: the user requested design and canonical images,
-  not runtime route changes.
+- Why it was safe to continue: the user clarified the settings product
+  direction and requested the simple settings implementation direction.
 
 ### 2. Select One Priority Mission Objective
 - Selected task: unified V1 settings canonical design.
@@ -117,28 +117,31 @@ Allowed files:
   a canonical target exists.
 
 ### 3. Plan Implementation
-- Files or surfaces to modify: UX spec, canonical assets, planning and memory
-  docs.
-- Logic: no runtime logic.
-- Edge cases: mobile no-overflow, readable settings tabs, separation of
-  OAuth/scope/import/map/verify.
+- Files or surfaces to modify: UX spec, canonical assets, React settings route,
+  planning and memory docs.
+- Logic: route settings entry points to one simple configuration surface with
+  General, Connections, Agent access, and MCP sections.
+- Edge cases: mobile no-overflow, readable settings sections, and no sync,
+  import, mapping, review queue, or large MCP catalog inside settings.
 
 ### 4. Execute Implementation
-- Implementation notes: created a deterministic HTML/CSS canonical mockup and
-  rendered desktop/mobile PNGs with Playwright.
+- Implementation notes: replaced the overloaded canonical mockup with a
+  configuration-only target and routed the old settings entry points to a
+  unified React settings surface.
 
 ### 5. Verify and Test
-- Validation performed: rendered both images and visually inspected them.
-- Result: desktop and mobile images are readable and align with the V1 atlas
-  shell direction.
+- Validation performed: rendered both images, visually inspected them, and ran
+  the React web build.
+- Result: desktop and mobile images are readable, intentionally sparse, and
+  align with the V1 atlas shell direction.
 
 ### 6. Self-Review
 - Simpler option considered: text-only IA without images.
 - Technical debt introduced: no
-- Scalability assessment: tab model supports future integrations and external
-  applications without one route per tool.
-- Refinements made: split AI-facing administration into knowledge, tools,
-  access, and audit layers.
+- Scalability assessment: section model supports future integrations and
+  external applications without turning settings into an operations dashboard.
+- Refinements made: removed dashboard-style counters, sync lanes, import
+  queues, mapping work, and dense review information from settings.
 
 ### 7. Update Documentation and Knowledge
 - Docs updated: UX spec and canonical assets.
@@ -148,22 +151,25 @@ Allowed files:
 ## Acceptance Criteria
 - [x] Desktop canonical image exists.
 - [x] Mobile canonical image exists.
-- [x] Spec explains tabs, provider setup pattern, AI layers, and states.
-- [x] Future implementation direction avoids ten disconnected settings views
-      and one overloaded provider form.
+- [x] Spec explains sections, configuration-only boundaries, AI access, MCP,
+      and states.
+- [x] Future implementation direction avoids ten disconnected settings views,
+      one overloaded provider form, and settings-as-synchronization.
 
 ## Success Signal
 - User or operator problem: settings feel scattered and too technical for
   owner and AI administration.
-- Expected product or reliability outcome: one settings module can govern
-  integrations, knowledge, tools, API, MCP, and audit.
+- Expected product or reliability outcome: one settings module can configure
+  workspace defaults, provider connections, Jarvis/Paperclip access, and MCP
+  endpoint settings without hiding work views inside settings.
 - How success will be observed: future implementation can replace V0 settings
   routes against these targets.
 - Post-launch learning needed: yes
 
 ## Deliverable For This Stage
 
-Planning artifacts and canonical desktop/mobile images only.
+Planning artifacts, canonical desktop/mobile images, and the first simple React
+settings route consolidation.
 
 ## Constraints
 - use existing systems and approved mechanisms
@@ -175,9 +181,11 @@ Planning artifacts and canonical desktop/mobile images only.
   behavior
 
 ## Definition of Done
-- [x] Code builds without errors. Not applicable; no runtime code changed.
+- [x] Code builds without errors.
 - [x] Feature works manually through the real UI, API, CLI, or operator path.
-      Not applicable; planning image artifact only.
+      Partially verified through React build; browser proof was attempted with
+      mocked backend responses, but the final automated no-overflow script
+      remained flaky in Vite path setup.
 - [x] No mock, placeholder, fake, or temporary data/path remains in runtime.
 - [x] Full data flow works across all relevant layers. Not applicable.
 - [x] Backend and UI/client error handling exists where applicable. Not

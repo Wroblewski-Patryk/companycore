@@ -40,6 +40,60 @@ Use this file to record the minimum checks after each deploy.
 
 ## Evidence
 
+- Timestamp: 2026-05-15 21:50 +02:00
+- Environment: production VPS Docker backend
+- Purpose: V1PROD-002 V1 canonical web skeleton deployment.
+- Deployment:
+  - Manual VPS backend rollover to commit
+    `ff5e04192db93a53280fab58bcd8f47cba30f554`.
+  - Runtime image: `rnqqkhl3o3dut4qv56mlxly2_backend:ff5e041`.
+  - Running backend container:
+    `backend-rnqqkhl3o3dut4qv56mlxly2-manual-ff5e041`.
+  - Previous backend container retained stopped as rollback:
+    `backend-rnqqkhl3o3dut4qv56mlxly2-manual-b716f02-previous-ff5e041`.
+  - Production Postgres container
+    `postgres-rnqqkhl3o3dut4qv56mlxly2-152944834285` remained running and
+    healthy.
+- Local/source checks:
+  - `npm run validate`: passed before commit.
+  - `git diff --check`: passed before commit.
+  - `npm run test:api`: not run because local Docker commands timed out in
+    this desktop session; this release changed the React web layer and UX
+    documentation, not migrations or backend API contracts.
+  - Commit pushed to `origin/codex/companycore-local-port-3102`.
+- Rollover checks:
+  - Docker image build from the local `git archive` for `ff5e041` passed.
+  - Canary container started from the new image and returned local `/health`
+    with the expected build commit before traffic rollover.
+  - Final routed container returned local `/health` with the expected build
+    commit before the previous backend was stopped and renamed as rollback.
+- Public smoke:
+  - `GET https://companycore.luckysparrow.ch/health` returned `200` with
+    build commit `ff5e04192db93a53280fab58bcd8f47cba30f554`.
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `200` with
+    the same build commit.
+  - `GET https://companycore.luckysparrow.ch/` returned `200` and now serves
+    the V1 public home instead of redirecting to login.
+  - `GET https://companycore.luckysparrow.ch/dashboard` returned the React
+    shell for signed-out users, which redirects in-browser to `/auth/login`.
+- Production screenshot proof:
+  - Captured desktop and mobile screenshots for `/`, `/auth/login`,
+    `/auth/register`, signed-out `/dashboard`, and signed-out
+    `/areas?area=01-strategia&view=overview`.
+  - Evidence directory:
+    `docs/ux/evidence/production-v1-ff5e041-2026-05-15/`.
+  - Public home, login, and registration rendered with no horizontal overflow,
+    no console errors, and no failed requests.
+  - Signed-out private routes redirected to `/auth/login` with no horizontal
+    overflow and no console errors. Playwright recorded one aborted
+    `Phosphor-Bold.woff2` request during the redirect, matching the earlier
+    redirect-only behavior and not causing visible layout failure.
+- Residual risk:
+  - Authenticated production dashboard and selected-area visual parity still
+    needs an owner-session screenshot pass. This deployment proves the
+    skeleton, public entry, auth pages, build metadata, signed-out redirect
+    behavior, and production route ownership.
+
 - Timestamp: 2026-05-15 18:05 +02:00
 - Environment: production VPS Docker backend
 - Purpose: V1AUTH-001 owner auth redirect flow.

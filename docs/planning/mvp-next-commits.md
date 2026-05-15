@@ -7,10 +7,6 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] V1PROD-002 Deploy V1 canonical web layer and rerun parity:
-      commit, push, deploy, confirm production health reports the deployed
-      commit, then recapture public and authenticated screenshots against
-      `docs/ux/v1-production-canonical-discrepancy-audit-2026-05-15.md`.
 - [ ] REACT-WEB-002 ClickUp setup React workflow:
       rebuild ClickUp token discovery, workspace/list selection, save, and
       maintenance run controls inside the unified V1 settings module instead
@@ -24,8 +20,9 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [ ] V1SETTINGS-002 Unified settings React implementation:
       implement the canonical `/settings` module from
       `docs/ux/v1-settings-canonical-spec-2026-05-15.md`, then route old
-      settings entry points into General, Integrations, Knowledge, Tools, API,
-      MCP, or Access & audit once verified.
+      settings entry points into General, Connections, Agent access, or MCP
+      once verified. Sync, import, mapping, review queues, and large tool
+      catalogs must stay outside the first settings view.
 ### NEXT
 
 - [ ] AGRUN-010 Upstream Agent Source Merge Execution:
@@ -108,13 +105,20 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       local V1 canonical targets because the current V1 web layer is not
       deployed. Discrepancy register:
       `docs/ux/v1-production-canonical-discrepancy-audit-2026-05-15.md`.
+- [x] V1PROD-002 Deploy V1 Canonical Web Layer:
+      deployed commit `ff5e04192db93a53280fab58bcd8f47cba30f554` to
+      production through the manual VPS rollover path. Public web/API health
+      now report the deployed commit and image
+      `rnqqkhl3o3dut4qv56mlxly2_backend:ff5e041`; production `/` renders the
+      V1 public home; login/register render the V1 public auth layout; signed
+      out dashboard/area routes redirect to login. Screenshot proof:
+      `docs/ux/evidence/production-v1-ff5e041-2026-05-15/`.
 - [x] V1SETTINGS-001 Unified V1 Settings Canonical Design:
       published the unified settings IA and desktop/mobile canonical targets
-      for one settings module spanning General, Integrations, Knowledge, Tools,
-      API, MCP, and Access & audit. Provider setup uses
-      `Connect -> Scope -> Import / Sync -> Map -> Verify`, and AI-facing
-      administration separates Knowledge from Tools with Access and Audit as
-      safety layers. Targets:
+      for one simple settings module spanning General, Connections, Agent
+      access, and MCP. Settings are configuration only; sync, import, mapping,
+      review queues, and large tool catalogs belong in dedicated work views.
+      Targets:
       `docs/ux/assets/companycore-v1-settings-desktop-canonical.png` and
       `docs/ux/assets/companycore-v1-settings-mobile-canonical.png`.
 - [x] UX100-W03 Relationship/Data Provenance And AI Safety Labels:

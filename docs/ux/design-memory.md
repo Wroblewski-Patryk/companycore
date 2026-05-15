@@ -41,16 +41,15 @@ of rediscovering them.
   Paperclip, and future AI/application access without scattering each tool
   into a separate view or mixing OAuth, imports, mapping, and permissions into
   one form.
-- Decision: Treat settings as one owner and AI administration center with
-  top-level tabs for General, Integrations, Knowledge, Tools, API, MCP, and
-  Access & audit. Provider setup should follow
-  `Connect -> Scope -> Import / Sync -> Map -> Verify`. AI-facing
-  administration must separate `Knowledge` from `Tools`, with `Access` and
-  `Audit` visible as supporting safety layers.
+- Decision: Treat settings as a calm configuration surface, not an operations
+  dashboard. Use four simple sections: General, Connections, Agent access, and
+  MCP. Settings may save provider connection choices and create scoped agent
+  keys, but import, sync, mapping, review queues, large MCP catalogs, and
+  operational metrics must live in dedicated work views.
 - Reuse when: Rebuilding `/settings`, `/settings/integrations`,
-  `/settings/drive`, `/settings/api`, `/react-agent-tools`, ClickUp setup,
-  Drive setup, service-key workflows, or future Paperclip/Jarvis access
-  screens.
+  `/settings/drive`, `/settings/api`, `/react-agent-tools`, ClickUp
+  connection setup, Drive connection setup, service-key workflows, or future
+  Paperclip/Jarvis access screens.
 - Avoid when: A route is a narrow record editor, table browser, or selected
   area capability view where the settings tab model would hide the immediate
   owner task.

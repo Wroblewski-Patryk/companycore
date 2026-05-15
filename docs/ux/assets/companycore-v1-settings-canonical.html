@@ -7,92 +7,76 @@
   <style>
     :root {
       --ink: #071225;
-      --muted: #51617a;
-      --soft: #eef5fb;
+      --muted: #54647c;
       --line: #cfdced;
       --blue: #2563df;
       --green: #0f9b70;
       --amber: #b77904;
       --nav: #07162b;
-      --nav-2: #102542;
+      --surface: #f3f8fd;
       --panel: #ffffff;
-      --panel-2: #f7fbff;
-      --radius: 8px;
+      --soft: #f7fbff;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-
     * { box-sizing: border-box; }
     body {
       margin: 0;
       color: var(--ink);
-      background:
-        radial-gradient(circle at 78% 82%, rgba(15, 155, 112, 0.12), transparent 28rem),
-        linear-gradient(180deg, #f8fbff 0%, #e9f1f8 100%);
+      background: linear-gradient(180deg, #f8fbff 0%, #eaf2f9 100%);
       font-weight: 700;
     }
-
     .desktop {
       width: 1365px;
-      min-height: 1000px;
+      min-height: 920px;
       display: grid;
       grid-template-columns: 232px 1fr;
-      background: #edf4fb;
+      background: var(--surface);
     }
-
     .sidebar {
-      background: linear-gradient(180deg, var(--nav) 0%, #06101f 100%);
+      background: linear-gradient(180deg, var(--nav), #06101f);
       color: #eaf3ff;
       padding: 14px;
       display: flex;
       flex-direction: column;
       gap: 14px;
     }
-
     .brand {
       display: grid;
       grid-template-columns: 38px 1fr;
       gap: 12px;
       align-items: center;
       padding-bottom: 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.12);
+      border-bottom: 1px solid rgba(255,255,255,.12);
     }
-
     .mark {
       width: 38px;
       height: 38px;
       border-radius: 8px;
       background: linear-gradient(135deg, #1d64c8, #0f9b70);
     }
-
-    .brand strong, .brand small { display: block; }
-    .brand small { color: #9fb1ca; font-size: 12px; }
-
+    .brand small { display: block; color: #9fb1ca; font-size: 12px; }
     .nav-title {
-      margin: 2px 6px 0;
+      margin: 4px 6px 0;
       color: #9fb1ca;
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: .03em;
     }
-
     .nav-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      min-height: 34px;
+      min-height: 36px;
       padding: 8px 10px;
       border-radius: 7px;
       color: #dfeaff;
       font-size: 13px;
     }
-
     .nav-item.active {
-      border: 1px solid rgba(89, 142, 255, .68);
-      background: rgba(86, 127, 196, .25);
+      border: 1px solid rgba(89,142,255,.68);
+      background: rgba(86,127,196,.25);
       color: white;
     }
-
     .dot {
       width: 10px;
       height: 10px;
@@ -101,7 +85,6 @@
       margin-right: 8px;
       background: #97a8bd;
     }
-
     .dot.green { background: var(--green); }
     .dot.amber { background: var(--amber); }
     .pill-dark {
@@ -114,85 +97,41 @@
       color: #bdcae0;
       font-size: 11px;
     }
-
-    .subnav {
-      display: grid;
-      gap: 4px;
-      margin-left: 28px;
-      font-size: 12px;
-      color: #aebbd0;
-    }
-
-    .subnav span {
-      padding: 6px 8px;
-      border-radius: 6px;
-    }
-
-    .subnav .selected {
-      background: #15315d;
-      color: white;
-    }
-
     .sidebar-bottom {
       margin-top: auto;
       display: grid;
       gap: 10px;
-      border-top: 1px solid rgba(255,255,255,0.12);
+      border-top: 1px solid rgba(255,255,255,.12);
       padding-top: 12px;
     }
-
     .workspace-link, .owner-card {
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.055);
       border-radius: 7px;
       padding: 12px;
     }
-
-    .main {
-      min-width: 0;
-      display: grid;
-      grid-template-rows: 70px 1fr;
-    }
-
+    .main { display: grid; grid-template-rows: 70px 1fr; min-width: 0; }
     .topbar {
-      background: rgba(255,255,255,.82);
+      background: rgba(255,255,255,.86);
       border-bottom: 1px solid var(--line);
       display: grid;
-      grid-template-columns: 1fr 400px auto;
-      align-items: center;
+      grid-template-columns: 1fr 390px auto;
       gap: 18px;
+      align-items: center;
       padding: 0 22px;
     }
-
-    .breadcrumb {
-      color: #53637b;
-      font-size: 14px;
-    }
-
+    .breadcrumb { color: #53637b; font-size: 14px; }
     .search {
       border: 1px solid var(--line);
-      background: #f4f8fd;
+      background: #f6f9fe;
       border-radius: 8px;
       height: 44px;
       color: #7a8799;
       display: flex;
       align-items: center;
-      padding: 0 22px;
+      padding: 0 18px;
       font-size: 13px;
     }
-
-    .status-cluster {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-      font-size: 12px;
-      white-space: nowrap;
-    }
-
-    .status-cluster b:nth-child(1) { color: var(--blue); }
-    .status-cluster b:nth-child(2) { color: var(--green); }
-    .status-cluster b:nth-child(3) { color: #c76400; }
-
     .avatar {
       width: 40px;
       height: 40px;
@@ -200,53 +139,40 @@
       border-radius: 8px;
       background: #f7fbff;
     }
-
     .content {
-      padding: 16px;
+      padding: 18px;
       display: grid;
       gap: 16px;
       align-content: start;
     }
-
-    .settings-hero {
-      background:
-        radial-gradient(circle at 72% 15%, rgba(15,155,112,.13), transparent 17rem),
-        linear-gradient(135deg, #fbfdff, #f3f8fd);
+    .hero, .panel {
       border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 18px;
-      display: grid;
-      grid-template-columns: 1fr 420px;
-      gap: 18px;
-      box-shadow: 0 18px 44px rgba(36, 55, 82, .08);
+      border-radius: 8px;
+      background: rgba(255,255,255,.9);
+      box-shadow: 0 18px 44px rgba(36,55,82,.07);
     }
-
+    .hero {
+      padding: 22px;
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 20px;
+      background:
+        radial-gradient(circle at 82% 18%, rgba(15,155,112,.12), transparent 18rem),
+        linear-gradient(135deg, #ffffff, #f5faff);
+    }
     .eyebrow {
+      margin: 0 0 7px;
+      color: #536782;
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: .03em;
-      color: #536782;
-      margin: 0 0 6px;
     }
-
     h1, h2, h3, p { margin: 0; }
-    h1 {
-      font-size: 46px;
-      line-height: .98;
-      letter-spacing: 0;
-    }
-
-    h2 { font-size: 20px; line-height: 1.12; }
-    h3 { font-size: 15px; line-height: 1.2; }
-    p { color: var(--muted); font-size: 13px; line-height: 1.55; }
-
-    .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 16px;
-    }
-
+    h1 { font-size: 42px; line-height: 1; letter-spacing: 0; }
+    h2 { font-size: 22px; line-height: 1.15; }
+    h3 { font-size: 16px; line-height: 1.2; }
+    p { color: var(--muted); font-size: 13px; line-height: 1.58; }
+    .button-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
     .btn {
       min-height: 40px;
       border-radius: 7px;
@@ -255,123 +181,59 @@
       padding: 0 14px;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
       color: var(--ink);
       font-size: 13px;
       font-weight: 900;
     }
-
-    .btn.primary {
-      border-color: var(--blue);
-      background: var(--blue);
-      color: white;
-    }
-
-    .metric-grid {
+    .btn.primary { border-color: var(--blue); background: var(--blue); color: white; }
+    .quiet-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,.76);
+      padding: 14px;
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
       gap: 10px;
     }
-
-    .metric {
-      min-height: 68px;
-      border: 1px solid var(--line);
-      border-radius: 7px;
-      background: rgba(255,255,255,.72);
-      padding: 12px;
-    }
-
-    .metric strong {
-      display: block;
-      font-size: 24px;
-      line-height: 1;
-    }
-
-    .metric span {
-      display: block;
-      margin-top: 5px;
-      color: var(--muted);
-      font-size: 11px;
-      text-transform: uppercase;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 8px;
-      overflow: hidden;
-      padding: 2px 0;
-    }
-
     .tab {
       border: 1px solid var(--line);
-      border-radius: 999px;
-      background: rgba(255,255,255,.78);
-      color: #40516a;
-      padding: 10px 14px;
-      font-size: 12px;
-      white-space: nowrap;
+      border-radius: 8px;
+      background: #fff;
+      padding: 14px;
+      display: grid;
+      gap: 4px;
+      min-height: 72px;
     }
-
     .tab.active {
       border-color: #8bb2ff;
-      background: #eaf2ff;
+      background: #eef6ff;
       color: var(--blue);
     }
-
-    .settings-grid {
+    .tab span { color: var(--muted); font-size: 12px; }
+    .settings-body {
       display: grid;
-      grid-template-columns: 310px 1fr 254px;
+      grid-template-columns: 275px 1fr;
       gap: 16px;
       align-items: start;
     }
-
-    .panel {
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: rgba(255,255,255,.88);
-      box-shadow: 0 18px 44px rgba(36, 55, 82, .07);
-      overflow: hidden;
-    }
-
-    .panel-body {
-      padding: 16px;
-      display: grid;
-      gap: 14px;
-    }
-
-    .connector {
+    .panel-body { padding: 18px; display: grid; gap: 14px; }
+    .section-menu { display: grid; gap: 8px; }
+    .menu-item {
       border: 1px solid var(--line);
       border-radius: 7px;
-      background: #f8fbff;
-      padding: 13px;
-      display: grid;
-      gap: 8px;
-    }
-
-    .connector.active {
-      border-color: #8bb2ff;
-      background: #eef6ff;
-    }
-
-    .connector-top {
+      background: var(--soft);
+      padding: 12px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
       gap: 10px;
+      align-items: center;
+      font-size: 13px;
     }
-
-    .icon {
-      width: 33px;
-      height: 33px;
-      border: 1px solid #bdd2ec;
-      border-radius: 8px;
-      display: inline-grid;
-      place-items: center;
-      background: white;
-      color: var(--blue);
-      flex: none;
-    }
-
+    .menu-item.active { border-color: #8bb2ff; background: #eef6ff; color: var(--blue); }
     .badge {
       display: inline-flex;
       align-items: center;
@@ -384,138 +246,40 @@
       font-weight: 900;
       white-space: nowrap;
     }
-
     .badge.green { background: #ddf5ea; color: #087456; }
     .badge.amber { background: #fff2d2; color: #8a5a00; }
-    .badge.blue { background: #e6efff; color: #165ed6; }
-
-    .stepper {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 8px;
-    }
-
-    .step {
-      min-height: 78px;
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .card {
       border: 1px solid var(--line);
-      border-radius: 7px;
-      background: #f9fcff;
-      padding: 10px;
-      display: grid;
-      align-content: start;
-      gap: 5px;
-      position: relative;
-    }
-
-    .step.done { border-color: #a5dcc8; background: #f0fbf6; }
-    .step.current { border-color: #8bb2ff; background: #eef6ff; }
-    .step strong { font-size: 12px; }
-    .step small { color: var(--muted); font-size: 10px; line-height: 1.35; }
-
-    .split {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .scope-list {
-      display: grid;
-      gap: 8px;
-    }
-
-    .scope-row {
-      border: 1px solid var(--line);
-      border-radius: 7px;
+      border-radius: 8px;
       background: #fbfdff;
-      padding: 11px;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .mini-map {
-      min-height: 228px;
-      border: 1px solid var(--line);
-      border-radius: 7px;
-      background:
-        linear-gradient(90deg, rgba(37,99,223,.05) 1px, transparent 1px),
-        linear-gradient(0deg, rgba(37,99,223,.05) 1px, transparent 1px),
-        #fbfdff;
-      background-size: 28px 28px;
-      padding: 14px;
-      position: relative;
-    }
-
-    .node {
-      position: absolute;
-      border: 1px solid #bfd2e8;
-      background: rgba(255,255,255,.94);
-      border-radius: 999px;
-      display: grid;
-      place-items: center;
-      text-align: center;
-      font-size: 11px;
-      color: #40516a;
-    }
-
-    .node strong { color: var(--ink); }
-    .n0 { width: 84px; height: 84px; left: 96px; top: 72px; }
-    .n1 { width: 64px; height: 64px; left: 36px; top: 38px; }
-    .n2 { width: 64px; height: 64px; right: 28px; top: 34px; }
-    .n3 { width: 64px; height: 64px; left: 34px; bottom: 24px; }
-    .n4 { width: 64px; height: 64px; right: 36px; bottom: 26px; }
-
-    .rail-list {
+      padding: 15px;
       display: grid;
       gap: 10px;
     }
-
-    .rail-card {
+    .field {
       border: 1px solid var(--line);
       border-radius: 7px;
-      background: #f8fbff;
+      background: white;
+      min-height: 44px;
       padding: 12px;
-      display: grid;
-      gap: 6px;
-    }
-
-    .table {
-      display: grid;
-      border-top: 1px solid var(--line);
-    }
-
-    .row {
-      display: grid;
-      grid-template-columns: 1fr 160px 120px 110px;
+      display: flex;
+      justify-content: space-between;
       gap: 12px;
-      min-height: 54px;
       align-items: center;
-      border-bottom: 1px solid var(--line);
-      padding: 10px 14px;
-      font-size: 12px;
+      color: #273852;
+      font-size: 13px;
     }
-
-    .row.header {
-      min-height: 38px;
-      color: #5c6b83;
-      text-transform: uppercase;
-      font-size: 10px;
-      background: #f5f9fd;
-    }
-
-    .mobile {
-      width: 390px;
-      min-height: 1420px;
-      background: linear-gradient(180deg, #f8fbff, #eaf2fa);
-      display: none;
-    }
+    .small-list { display: grid; gap: 8px; }
+    .mobile { display: none; }
 
     @media (max-width: 600px) {
-      body { background: #eaf2fa; }
       .desktop { display: none; }
       .mobile {
         display: block;
+        width: 390px;
+        min-height: 1180px;
+        background: linear-gradient(180deg, #f8fbff, #eaf2fa);
       }
       .mobile-top {
         height: 70px;
@@ -526,6 +290,7 @@
         align-items: center;
         padding: 0 14px;
       }
+      .mobile-brand { text-align: center; font-size: 16px; }
       .mobile-orb {
         width: 44px;
         height: 44px;
@@ -533,66 +298,29 @@
         border: 1px solid var(--line);
         background: #f6fbff;
       }
-      .mobile-brand {
-        text-align: center;
-        font-size: 16px;
-      }
-      .mobile-brand .dot {
-        margin-left: 6px;
-        margin-right: 0;
-        width: 8px;
-        height: 8px;
-      }
       .mobile-content {
-        padding: 18px 14px 42px;
+        padding: 18px 14px 40px;
         display: grid;
         gap: 14px;
       }
-      .mobile h1 {
-        font-size: 38px;
-      }
-      .mobile .settings-hero {
+      .mobile .hero {
         display: grid;
         grid-template-columns: 1fr;
-        padding: 14px;
+        padding: 16px;
       }
-      .mobile .metric-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
+      .mobile h1 { font-size: 36px; }
       .mobile .tabs {
+        display: flex;
         overflow-x: auto;
         padding-bottom: 2px;
       }
-      .mobile .settings-grid {
-        display: grid;
+      .mobile .tab {
+        min-width: 138px;
+      }
+      .mobile .settings-body,
+      .mobile .grid2 {
         grid-template-columns: 1fr;
       }
-      .mobile .stepper {
-        display: flex;
-        overflow-x: auto;
-        padding-bottom: 4px;
-      }
-      .mobile .step {
-        min-width: 120px;
-      }
-      .mobile .split {
-        grid-template-columns: 1fr;
-      }
-      .mobile .row {
-        grid-template-columns: 1fr;
-        gap: 4px;
-      }
-      .mobile .row.header {
-        display: none;
-      }
-      .mobile .mini-map {
-        min-height: 190px;
-      }
-      .mobile .n0 { left: 128px; top: 54px; }
-      .mobile .n1 { left: 34px; top: 28px; }
-      .mobile .n2 { right: 28px; top: 28px; }
-      .mobile .n3 { left: 50px; bottom: 22px; }
-      .mobile .n4 { right: 44px; bottom: 22px; }
     }
   </style>
 </head>
@@ -603,15 +331,10 @@
         <div class="mark"></div>
         <div><strong>LuckySparrow</strong><small>Company Atlas</small></div>
       </div>
-      <div class="nav-item active">Company Atlas</div>
+      <div class="nav-item">Company Atlas</div>
       <div class="nav-title">Dzialy</div>
       <div class="nav-item"><span><span class="dot amber"></span>00 Ogolny</span><span class="pill-dark">0</span></div>
       <div class="nav-item"><span><span class="dot green"></span>01 Strategia</span><span class="pill-dark">9</span></div>
-      <div class="subnav">
-        <span>Overview</span>
-        <span>Knowledge</span>
-        <span>AI</span>
-      </div>
       <div class="nav-item"><span><span class="dot green"></span>02 Produkt</span><span class="pill-dark">1</span></div>
       <div class="nav-item"><span><span class="dot"></span>03 Sprzedaz</span><span class="pill-dark">0</span></div>
       <div class="nav-item"><span><span class="dot"></span>04 Operacje</span><span class="pill-dark">0</span></div>
@@ -631,151 +354,79 @@
     <main class="main">
       <div class="topbar">
         <div class="breadcrumb">LuckySparrow / Settings</div>
-        <div class="search">Search setting, integration, tool, scope...</div>
-        <div class="status-cluster">
-          <b>2 integrations</b>
-          <b>Jarvis ready</b>
-          <b>3 reviews</b>
-          <div class="avatar"></div>
-        </div>
+        <div class="search">Search setting or agent access...</div>
+        <div class="avatar"></div>
       </div>
       <div class="content">
-        <section class="settings-hero">
+        <section class="hero">
           <div>
-            <p class="eyebrow">Workspace command center</p>
-            <h1>Settings for humans and AI agents</h1>
-            <p style="margin-top:12px;max-width:680px;">One clean place to control application defaults, provider connections, trusted knowledge, callable tools, API keys, MCP visibility, and approval safety before Paperclip or Jarvis acts.</p>
-            <div class="hero-actions">
-              <span class="btn primary">Review integration scope</span>
-              <span class="btn">Create agent profile</span>
+            <p class="eyebrow">Workspace settings</p>
+            <h1>Simple configuration for you and AI.</h1>
+            <p style="margin-top:12px;max-width:680px;">Connect providers, issue scoped access for Jarvis and Paperclip, and keep risky tools approval-first. Synchronization, imports, mapping, and review queues live outside settings.</p>
+            <div class="button-row">
+              <span class="btn primary">Connect Paperclip</span>
+              <span class="btn">Connect Jarvis</span>
             </div>
           </div>
-          <div class="metric-grid">
-            <div class="metric"><strong>748</strong><span>knowledge items</span></div>
-            <div class="metric"><strong>42</strong><span>MCP tools</span></div>
-            <div class="metric"><strong>2</strong><span>providers</span></div>
-            <div class="metric"><strong>3</strong><span>guarded actions</span></div>
+          <div class="quiet-box">
+            <p class="eyebrow">Current posture</p>
+            <h3>Settings are for configuration only.</h3>
+            <p>No import tables, no sync queues, no operational dashboards here.</p>
           </div>
         </section>
-
-        <nav class="tabs" aria-label="Settings tabs">
-          <span class="tab">General</span>
-          <span class="tab active">Integrations</span>
-          <span class="tab">Knowledge</span>
-          <span class="tab">Tools</span>
-          <span class="tab">API</span>
-          <span class="tab">MCP</span>
-          <span class="tab">Access & audit</span>
+        <nav class="tabs" aria-label="Settings sections">
+          <div class="tab"><strong>General</strong><span>Workspace defaults</span></div>
+          <div class="tab active"><strong>Connections</strong><span>ClickUp and Drive</span></div>
+          <div class="tab"><strong>Agent access</strong><span>Jarvis and Paperclip</span></div>
+          <div class="tab"><strong>MCP</strong><span>Tool endpoint</span></div>
         </nav>
-
-        <section class="settings-grid">
+        <section class="settings-body">
           <aside class="panel">
             <div class="panel-body">
-              <div>
-                <p class="eyebrow">Integration layers</p>
-                <h2>Connect, then expose safely</h2>
+              <p class="eyebrow">Sections</p>
+              <div class="section-menu">
+                <div class="menu-item active"><span>Connections</span><span class="badge green">2</span></div>
+                <div class="menu-item"><span>Agent keys</span><span class="badge amber">1 missing</span></div>
+                <div class="menu-item"><span>MCP endpoint</span><span class="badge green">ready</span></div>
+                <div class="menu-item"><span>Safety defaults</span><span class="badge green">on</span></div>
               </div>
-              <article class="connector">
-                <div class="connector-top">
-                  <div style="display:flex;gap:10px;align-items:center;"><span class="icon">CU</span><h3>ClickUp</h3></div>
-                  <span class="badge amber">review</span>
-                </div>
-                <p>Task lists, execution pressure, provider-owned task evidence.</p>
-                <span class="badge">3 selected lists</span>
-              </article>
-              <article class="connector active">
-                <div class="connector-top">
-                  <div style="display:flex;gap:10px;align-items:center;"><span class="icon">GD</span><h3>Google Drive</h3></div>
-                  <span class="badge green">active</span>
-                </div>
-                <p>Trusted knowledge roots, folder imports, area ownership, freshness checks.</p>
-                <span class="badge blue">13 selected roots</span>
-              </article>
-              <article class="connector">
-                <div class="connector-top">
-                  <div style="display:flex;gap:10px;align-items:center;"><span class="icon">AI</span><h3>Agent runtime</h3></div>
-                  <span class="badge green">guarded</span>
-                </div>
-                <p>Jarvis can read. Paperclip profiles wait for scoped keys and tool policy.</p>
-              </article>
             </div>
           </aside>
-
           <section class="panel">
             <div class="panel-body">
-              <div class="connector-top">
-                <div>
-                  <p class="eyebrow">Google Drive setup lane</p>
-                  <h2>Knowledge bridge without one giant form</h2>
-                  <p>Each step owns a different decision: credentials, trusted roots, import, area mapping, and proof.</p>
-                </div>
-                <span class="badge green">OAuth active</span>
+              <div>
+                <p class="eyebrow">Connections</p>
+                <h2>Only connection settings. Work happens elsewhere.</h2>
+                <p>Use this section to save provider access. After connecting, open the dedicated work views for import, sync, mapping, or task review.</p>
               </div>
-              <div class="stepper">
-                <div class="step done"><strong>1 Connect</strong><small>OAuth client and owner consent</small></div>
-                <div class="step current"><strong>2 Scope</strong><small>Select root folders for company knowledge</small></div>
-                <div class="step"><strong>3 Import</strong><small>Refresh Docs, Sheets, and files</small></div>
-                <div class="step"><strong>4 Map</strong><small>Assign items to 00-12 areas</small></div>
-                <div class="step"><strong>5 Verify</strong><small>AI-readable proof and freshness</small></div>
+              <div class="grid2">
+                <article class="card">
+                  <div class="field"><strong>Google Drive</strong><span class="badge green">connected</span></div>
+                  <p>Used as the trusted knowledge source for Jarvis, Paperclip, and area context.</p>
+                  <div class="button-row"><span class="btn primary">Configure connection</span><span class="btn">Open knowledge view</span></div>
+                </article>
+                <article class="card">
+                  <div class="field"><strong>ClickUp</strong><span class="badge amber">needs setup</span></div>
+                  <p>Used as the task provider for execution handoff and future tool actions.</p>
+                  <div class="button-row"><span class="btn primary">Configure connection</span><span class="btn">Open tasks</span></div>
+                </article>
               </div>
-              <div class="split">
-                <div class="scope-list">
-                  <div>
-                    <p class="eyebrow">Selected knowledge roots</p>
-                    <h3>Drive folders that agents may use as context</h3>
-                  </div>
-                  <div class="scope-row"><div><strong>12 Zarzadzanie</strong><p>Owner management docs and planning</p></div><span class="badge green">imported</span></div>
-                  <div class="scope-row"><div><strong>01 Strategia</strong><p>Goals, decisions, playbooks</p></div><span class="badge green">mapped</span></div>
-                  <div class="scope-row"><div><strong>02 Produkt</strong><p>Roadmaps and product notes</p></div><span class="badge amber">review</span></div>
-                </div>
-                <div class="mini-map">
-                  <p class="eyebrow">Area ownership map</p>
-                  <div class="node n0"><strong>00</strong><br>Inbox</div>
-                  <div class="node n1"><strong>01</strong><br>Strategy</div>
-                  <div class="node n2"><strong>02</strong><br>Product</div>
-                  <div class="node n3"><strong>09</strong><br>Tech</div>
-                  <div class="node n4"><strong>12</strong><br>Manage</div>
-                </div>
+              <div class="grid2">
+                <article class="card">
+                  <p class="eyebrow">Jarvis</p>
+                  <h3>Read-safe assistant</h3>
+                  <p>Recommended profile: reader first, operator only after approval rules are checked.</p>
+                  <div class="field"><span>Service key</span><span class="badge green">active</span></div>
+                </article>
+                <article class="card">
+                  <p class="eyebrow">Paperclip</p>
+                  <h3>Company management assistant</h3>
+                  <p>Create a scoped key and choose which knowledge and tools it can use.</p>
+                  <div class="field"><span>Service key</span><span class="badge amber">create</span></div>
+                </article>
               </div>
-            </div>
-            <div class="table">
-              <div class="row header"><span>Queue</span><span>Layer</span><span>Status</span><span>Action</span></div>
-              <div class="row"><strong>Unmapped Drive items</strong><span>Knowledge</span><span class="badge amber">3 review</span><span class="badge blue">Map</span></div>
-              <div class="row"><strong>ClickUp execution lists</strong><span>Tools</span><span class="badge amber">needs scope</span><span class="badge blue">Configure</span></div>
-              <div class="row"><strong>Paperclip operator key</strong><span>API / MCP</span><span class="badge">not issued</span><span class="badge blue">Create</span></div>
             </div>
           </section>
-
-          <aside class="panel">
-            <div class="panel-body">
-              <div>
-                <p class="eyebrow">AI readiness</p>
-                <h2>Knowledge + tools + approval</h2>
-              </div>
-              <div class="rail-list">
-                <article class="rail-card">
-                  <span class="badge green">Knowledge</span>
-                  <h3>Trusted corpus ready</h3>
-                  <p>Drive proof is readable by owner and can be scoped per area before agent use.</p>
-                </article>
-                <article class="rail-card">
-                  <span class="badge amber">Tools</span>
-                  <h3>Callable actions need profiles</h3>
-                  <p>Expose read, write, and supervised actions as separate agent tool lanes.</p>
-                </article>
-                <article class="rail-card">
-                  <span class="badge blue">MCP</span>
-                  <h3>Manifest inspection</h3>
-                  <p>Every tool should show route, capability, risk level, and approval requirement.</p>
-                </article>
-                <article class="rail-card">
-                  <span class="badge">Audit</span>
-                  <h3>Owner trace</h3>
-                  <p>Agent reads, imports, mappings, and commands need visible evidence and rollback notes.</p>
-                </article>
-              </div>
-            </div>
-          </aside>
         </section>
       </div>
     </main>
@@ -788,93 +439,60 @@
       <div class="mobile-orb"></div>
     </div>
     <div class="mobile-content">
-      <section class="settings-hero">
+      <section class="hero">
         <div>
           <p class="eyebrow">Workspace settings</p>
-          <h1>AI-ready settings</h1>
-          <p style="margin-top:10px;">Control integrations, knowledge, tools, API keys, and MCP visibility without mixing every setup step on one screen.</p>
-          <div class="hero-actions">
-            <span class="btn primary">Review scope</span>
-            <span class="btn">Agent key</span>
+          <h1>Simple AI settings</h1>
+          <p style="margin-top:10px;">Connect providers and agent access. Sync, import, and mapping stay outside settings.</p>
+          <div class="button-row">
+            <span class="btn primary">Paperclip</span>
+            <span class="btn">Jarvis</span>
           </div>
         </div>
-        <div class="metric-grid">
-          <div class="metric"><strong>748</strong><span>knowledge</span></div>
-          <div class="metric"><strong>42</strong><span>tools</span></div>
-          <div class="metric"><strong>2</strong><span>providers</span></div>
-          <div class="metric"><strong>3</strong><span>reviews</span></div>
+        <div class="quiet-box">
+          <h3>Configuration only</h3>
+          <p>No queues or operational dashboards here.</p>
         </div>
       </section>
-      <nav class="tabs" aria-label="Settings tabs">
-        <span class="tab">General</span>
-        <span class="tab active">Integrations</span>
-        <span class="tab">Knowledge</span>
-        <span class="tab">Tools</span>
-        <span class="tab">API</span>
-        <span class="tab">MCP</span>
+      <nav class="tabs" aria-label="Settings sections">
+        <div class="tab"><strong>General</strong><span>Defaults</span></div>
+        <div class="tab active"><strong>Connections</strong><span>Drive, ClickUp</span></div>
+        <div class="tab"><strong>Agents</strong><span>Keys</span></div>
+        <div class="tab"><strong>MCP</strong><span>Tools</span></div>
       </nav>
-      <section class="settings-grid">
+      <section class="settings-body">
         <aside class="panel">
           <div class="panel-body">
-            <p class="eyebrow">Integration layers</p>
-            <article class="connector active">
-              <div class="connector-top">
-                <div style="display:flex;gap:10px;align-items:center;"><span class="icon">GD</span><h3>Google Drive</h3></div>
-                <span class="badge green">active</span>
-              </div>
-              <p>Trusted knowledge roots, folder imports, area ownership, freshness checks.</p>
-            </article>
-            <article class="connector">
-              <div class="connector-top">
-                <div style="display:flex;gap:10px;align-items:center;"><span class="icon">CU</span><h3>ClickUp</h3></div>
-                <span class="badge amber">review</span>
-              </div>
-              <p>Task lists and execution pressure for humans and agents.</p>
-            </article>
+            <p class="eyebrow">Sections</p>
+            <div class="section-menu">
+              <div class="menu-item active"><span>Connections</span><span class="badge green">2</span></div>
+              <div class="menu-item"><span>Agent keys</span><span class="badge amber">1 missing</span></div>
+              <div class="menu-item"><span>MCP endpoint</span><span class="badge green">ready</span></div>
+            </div>
           </div>
         </aside>
         <section class="panel">
           <div class="panel-body">
             <div>
-              <p class="eyebrow">Google Drive setup lane</p>
-              <h2>Knowledge bridge</h2>
-              <p>Credentials, scope, import, map, and verify stay as separate steps.</p>
+              <p class="eyebrow">Connections</p>
+              <h2>Only connection settings.</h2>
+              <p>After connecting, open dedicated work views for import, sync, mapping, or review.</p>
             </div>
-            <div class="stepper">
-              <div class="step done"><strong>Connect</strong><small>OAuth ready</small></div>
-              <div class="step current"><strong>Scope</strong><small>13 roots selected</small></div>
-              <div class="step"><strong>Import</strong><small>Refresh files</small></div>
-              <div class="step"><strong>Map</strong><small>Assign areas</small></div>
-              <div class="step"><strong>Verify</strong><small>AI proof</small></div>
-            </div>
-            <div class="scope-list">
-              <div class="scope-row"><div><strong>12 Zarzadzanie</strong><p>Owner management docs</p></div><span class="badge green">imported</span></div>
-              <div class="scope-row"><div><strong>01 Strategia</strong><p>Goals and decisions</p></div><span class="badge green">mapped</span></div>
-              <div class="scope-row"><div><strong>02 Produkt</strong><p>Roadmaps</p></div><span class="badge amber">review</span></div>
-            </div>
-            <div class="mini-map">
-              <p class="eyebrow">Area ownership</p>
-              <div class="node n0"><strong>00</strong><br>Inbox</div>
-              <div class="node n1"><strong>01</strong><br>Strategy</div>
-              <div class="node n2"><strong>02</strong><br>Product</div>
-              <div class="node n3"><strong>09</strong><br>Tech</div>
-              <div class="node n4"><strong>12</strong><br>Manage</div>
-            </div>
-          </div>
-        </section>
-        <aside class="panel">
-          <div class="panel-body">
-            <p class="eyebrow">AI readiness</p>
-            <div class="rail-card"><span class="badge green">Knowledge</span><h3>Trusted corpus ready</h3><p>Drive proof can be scoped per area.</p></div>
-            <div class="rail-card"><span class="badge amber">Tools</span><h3>Profiles needed</h3><p>Paperclip waits for a scoped operator key.</p></div>
-            <div class="rail-card"><span class="badge blue">MCP</span><h3>Manifest visible</h3><p>Routes, risk, and approval gates remain inspectable.</p></div>
-          </div>
-        </aside>
-        <section class="panel">
-          <div class="table">
-            <div class="row"><strong>Unmapped Drive items</strong><span>Knowledge</span><span class="badge amber">3 review</span><span class="badge blue">Map</span></div>
-            <div class="row"><strong>ClickUp execution lists</strong><span>Tools</span><span class="badge amber">needs scope</span><span class="badge blue">Configure</span></div>
-            <div class="row"><strong>Paperclip operator key</strong><span>API / MCP</span><span class="badge">not issued</span><span class="badge blue">Create</span></div>
+            <article class="card">
+              <div class="field"><strong>Google Drive</strong><span class="badge green">connected</span></div>
+              <p>Trusted knowledge source for Jarvis and Paperclip.</p>
+              <div class="button-row"><span class="btn primary">Configure</span></div>
+            </article>
+            <article class="card">
+              <div class="field"><strong>ClickUp</strong><span class="badge amber">needs setup</span></div>
+              <p>Task provider for execution handoff and future tool actions.</p>
+              <div class="button-row"><span class="btn primary">Configure</span></div>
+            </article>
+            <article class="card">
+              <div class="field"><strong>Paperclip key</strong><span class="badge amber">create</span></div>
+              <p>Create a scoped key and choose a safe profile.</p>
+              <div class="button-row"><span class="btn primary">Create key</span></div>
+            </article>
           </div>
         </section>
       </section>

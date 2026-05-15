@@ -2,13 +2,6 @@
 
 ## Ready
 
-- V1PROD-002 Deploy V1 canonical web layer and rerun parity.
-  - Stage: release
-  - Owner: Frontend Builder + Ops/Release
-  - Priority: P0
-  - Goal: commit, push, deploy, and smoke the V1 canonical web layer so
-    production matches `/`, `/auth/login`, `/auth/register`, `/dashboard`, and
-    `/areas?area=:areaKey&view=:viewId` canonical targets.
 - REACT-WEB-002 ClickUp setup React workflow.
   - Stage: planning
   - Owner: Frontend Builder + Backend Builder
@@ -27,9 +20,10 @@
   - Owner: Frontend Builder + Backend Builder
   - Priority: P1
   - Source: `docs/ux/v1-settings-canonical-spec-2026-05-15.md`
-  - Goal: implement the canonical `/settings` module with tabs for General,
-    Integrations, Knowledge, Tools, API, MCP, and Access & audit, then route
-    old settings entry points into the relevant tabs once verified.
+  - Goal: implement the canonical `/settings` module with simple sections for
+    General, Connections, Agent access, and MCP, then route old settings entry
+    points into those sections once verified. Sync, import, mapping, and large
+    tool catalogs must stay outside the first settings view.
 ## In Progress
 
 No task is actively in progress.
@@ -78,6 +72,27 @@ No task is actively in progress.
   auto-deploy webhook administration task.
 
 ## Done
+
+- V1PROD-002 Deploy V1 canonical web layer and rerun parity.
+  - Evidence: commit `ff5e04192db93a53280fab58bcd8f47cba30f554` was pushed to
+    `origin/codex/companycore-local-port-3102` and deployed through the
+    approved manual VPS rollover path. Public web/API `/health` report
+    `ff5e04192db93a53280fab58bcd8f47cba30f554` and image
+    `rnqqkhl3o3dut4qv56mlxly2_backend:ff5e041`. Production `/` now serves the
+    V1 public home; `/auth/login` and `/auth/register` serve V1 public auth
+    layouts; signed-out `/dashboard` and selected-area routes redirect to
+    login.
+  - Validation: `npm run validate`, `git diff --check`, Docker image build,
+    canary local health, public web/API health, and production Playwright
+    desktop/mobile screenshot proof passed. `npm run test:api` was not run
+    because local Docker commands timed out; no migration or backend API
+    contract changed in this release.
+  - Evidence directory:
+    `docs/ux/evidence/production-v1-ff5e041-2026-05-15/`.
+  - Task contract:
+    `docs/planning/v1-production-canonical-deploy-task-contract.md`.
+  - Residual risk: authenticated production dashboard and selected-area visual
+    parity still needs an owner-session screenshot pass.
 
 - V1PROD-001 Production Canonical Parity Audit.
   - Evidence: production screenshots and route report were captured under
@@ -171,11 +186,10 @@ No task is actively in progress.
     `docs/planning/v1-web-five-canonical-surfaces-task-contract.md`.
 
 - V1SETTINGS-001 Unified V1 Settings Canonical Design.
-  - Evidence: the settings IA now separates General, Integrations, Knowledge,
-    Tools, API, MCP, and Access & audit. Provider setup uses
-    `Connect -> Scope -> Import / Sync -> Map -> Verify`, and AI-facing
-    administration separates Knowledge from Tools with Access and Audit as
-    safety layers.
+  - Evidence: the settings IA now uses simple sections for General,
+    Connections, Agent access, and MCP. Settings are explicitly configuration
+    only; sync, import, mapping, review queues, and large tool catalogs belong
+    in dedicated work views.
   - Canonical images:
     `docs/ux/assets/companycore-v1-settings-desktop-canonical.png` and
     `docs/ux/assets/companycore-v1-settings-mobile-canonical.png`.

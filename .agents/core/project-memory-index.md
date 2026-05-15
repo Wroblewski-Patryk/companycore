@@ -78,7 +78,13 @@ continue from repository files alone:
   MECE responsibility ownership, PAEI behavior profiles, governance, workflows,
   knowledge, resources, KPIs, audit, decisions, web/mobile clients, MCP, and
   Paperclip. Future work must reuse existing Company OS and operating-model
-  tables before adding duplicate target-named tables.
+  tables before adding duplicate target-named tables. As of 2026-05-15,
+  Paperclip's minimum company-building direction is also recorded there:
+  CompanyCore remains a non-embedded-AI operating app, while external agents use
+  API/MCP layers for Intent, Knowledge, Planning and orchestration, Tools,
+  Access and autonomy, and Audit and feedback. Future Paperclip work should
+  first close the business-plan/context-to-task loop through existing
+  knowledge, task, ClickUp, MCP, event, approval, and audit foundations.
 - `docs/architecture/web-layer-react-ownership.md`: current web route
   ownership contract. As of 2026-05-15, user-facing web routes are React-owned
   and served from the Vite bundle in `public/react/index.html`. The legacy
@@ -103,14 +109,18 @@ continue from repository files alone:
   update this index when route maturity or production parity changes.
 - `docs/ux/v1-production-canonical-discrepancy-audit-2026-05-15.md`: current
   production-to-canonical discrepancy register for the five V1 web surfaces.
-  It records the deployed screenshots, root/auth mismatches, signed-out private
-  redirect evidence, and the required V1PROD-002 release/rerun step.
+  It records the original deployed screenshots, root/auth mismatches,
+  signed-out private redirect evidence, and the V1PROD-002 post-deploy update.
+  Production now runs `ff5e041`; public/signed-out skeleton parity is proven,
+  while authenticated dashboard and selected-area screenshot parity remains
+  the open private-route proof.
 - `docs/ux/v1-settings-canonical-spec-2026-05-15.md`: current canonical
   planning target for the unified V1 settings module. It defines `/settings`
-  as the future settings entry with tab-aware entries for integrations, Drive,
-  API, and MCP; provider setup uses `Connect -> Scope -> Import / Sync -> Map
-  -> Verify`; AI-facing administration separates Knowledge, Tools, Access, and
-  Audit. The desktop/mobile target images are
+  as a simple configuration surface with section-aware entries for General,
+  Connections, Agent access, and MCP. Settings must not contain sync/import
+  queues, folder mapping, relationship review, large MCP catalogs, or
+  dashboard-style metrics; those belong in dedicated work views. The
+  desktop/mobile target images are
   `docs/ux/assets/companycore-v1-settings-desktop-canonical.png` and
   `docs/ux/assets/companycore-v1-settings-mobile-canonical.png`.
 - `docs/architecture/relationship-graph-audit-2026-05-14.md`: current

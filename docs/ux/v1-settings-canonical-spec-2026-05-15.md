@@ -7,15 +7,15 @@ Task: `V1SETTINGS-001`
 ## Purpose
 
 This spec defines the canonical V1 direction for the private settings module.
-Settings should become one owner and AI administration center instead of a set
-of separate provider pages.
+Settings should become a simple configuration surface instead of a dense
+dashboard, synchronization workbench, or provider-operation center.
 
 The owner outcome is:
 
 ```text
-I can control application defaults, integrations, trusted knowledge, callable
-tools, API keys, MCP visibility, and approval safety from one calm settings
-surface before Jarvis, Paperclip, or future applications use CompanyCore.
+I can connect CompanyCore to the tools I use, create safe access for Jarvis and
+Paperclip, and understand where to change each setting without seeing import
+queues, sync tables, mapping debt, or operational dashboards.
 ```
 
 ## Canonical Images
@@ -36,87 +36,73 @@ The current route set should converge into one settings module:
 
 - `/settings` should become the canonical settings entry route.
 - `/settings/integrations`, `/settings/drive`, `/settings/api`, and
-  `/react-agent-tools` should become tab-aware or section-aware entry points
-  into the same settings module.
-- Legacy provider-shaped routes should remain only as redirects or temporary
-  compatibility paths until references are cleaned.
+  `/react-agent-tools` should become section-aware entry points into the same
+  simple settings module.
+- Synchronization, import, mapping, verification, and review queues must move
+  to dedicated work views. They must not be presented as settings.
 
 ## Information Architecture
 
-Top-level settings tabs:
+Top-level settings sections:
 
-| Tab | Purpose |
+| Section | Purpose |
 | --- | --- |
-| General | Workspace identity, owner preferences, application defaults, locale, safe defaults. |
-| Integrations | Provider readiness and setup lanes for ClickUp and Google Drive. |
-| Knowledge | Trusted sources, Drive roots, imports, area ownership, freshness, proof quality. |
-| Tools | Callable agent/application tools, tool profiles, risk tiers, approval behavior. |
-| API | Service keys, profiles, rotation, least-privilege access, active clients. |
-| MCP | Manifest visibility, transport details, tool catalog, guardrails, external app readiness. |
-| Access & audit | Owner approvals, agent activity, import history, mapping changes, key use evidence. |
+| General | Workspace identity, default area, language, owner-safe defaults. |
+| Connections | Save and edit provider connection settings for Google Drive and ClickUp. |
+| Agent access | Create and manage scoped keys for Jarvis, Paperclip, and future apps. |
+| MCP | Show the endpoint, manifest status, and high-level tool safety posture. |
 
 ## Layer Model
 
-Settings should separate two AI-facing layers:
+Settings should expose AI configuration through two plain ideas:
 
-- `Knowledge`: what the agent or future app can know.
-- `Tools`: what the agent or future app can do.
+- `Knowledge access`: which connected sources the agent can use.
+- `Tool access`: which CompanyCore actions the agent can call.
 
-The implementation should also keep two supporting layers visible:
+Two supporting ideas stay visible but quiet:
 
-- `Access`: who or what can use the knowledge and tools.
-- `Audit`: what happened, when, under which key/profile, and whether owner
-  approval was required.
+- `Profile`: reader, operator, or supervised access.
+- `Approval`: write/destructive actions stay owner-approved by default.
 
-This prevents a provider form from mixing OAuth, imports, mapping, API keys,
-MCP routes, and permissions in one dense screen.
+Detailed audit trails belong in an audit or activity view, not in the first
+settings screen.
 
-## Integration Setup Pattern
+## What Settings Must Not Contain
 
-Each provider should use the same step lane:
+Settings must not contain:
 
-```text
-Connect -> Scope -> Import / Sync -> Map -> Verify
-```
+- import progress;
+- sync queues;
+- folder or task mapping workbenches;
+- relationship review tables;
+- large MCP tool catalogs;
+- operational metrics that belong to dashboard, area, task, knowledge, or
+  sync views.
 
-For Google Drive:
-
-- `Connect`: OAuth client readiness and owner consent.
-- `Scope`: selected root folders that become trusted knowledge candidates.
-- `Import`: Docs, Sheets, files, folders, and change reconciliation.
-- `Map`: assign imported items to operating areas.
-- `Verify`: freshness, readable content, AI-safe proof, and unmapped debt.
-
-For ClickUp:
-
-- `Connect`: token or future OAuth readiness.
-- `Scope`: workspaces, spaces, folders, lists.
-- `Import / Sync`: task and execution evidence refresh.
-- `Map`: assign lists/tasks to operating areas and workflows.
-- `Verify`: task pressure, ownership, stale sync, and agent-safe action status.
+Settings may link to those views after a connection is configured.
 
 ## Desktop Layout
 
 - Reuse the private V1 atlas shell and dark area sidebar.
-- Use a compact top command bar with settings breadcrumb, search, and status
-  cluster.
-- Show a settings hero that explains the owner/AI purpose and exposes high
-  signal metrics: knowledge items, MCP tools, providers, guarded actions.
-- Place the top-level settings tabs below the hero.
-- Use a three-column body for integration-heavy settings:
-  - left: integration layer list and provider cards;
-  - center: selected provider setup lane with stepper, scope list, area map,
-    and review queue;
-  - right: AI readiness rail for knowledge, tools, MCP, and audit.
+- Use a compact top command bar with settings breadcrumb and search.
+- Show a short settings intro that states the rule:
+  settings are for configuration only.
+- Use four simple section cards: General, Connections, Agent access, MCP.
+- Use a two-column body on desktop:
+  - left: section list and status;
+  - right: the selected section's small set of controls.
+- Prefer one primary action per card.
+- Use links to dedicated work views for imports, sync, mapping, task review,
+  and MCP tool inspection.
 
 ## Mobile Layout
 
 - Use the existing mobile private topbar pattern.
-- Stack the hero, horizontal settings tabs, provider cards, selected setup
-  lane, AI readiness, and review queue.
-- Keep tabs horizontally scrollable.
-- Keep provider steps horizontally scrollable instead of compressing labels.
-- Do not require the user to inspect a tiny full desktop settings grid.
+- Stack intro, horizontal section cards, section list, then the selected
+  controls.
+- Keep sections horizontally scrollable when needed.
+- Keep every setting card short enough to read in one phone viewport.
+- Do not show dense tables or operational workbenches.
 - No horizontal overflow.
 
 ## States
@@ -126,17 +112,19 @@ Every implemented tab must define:
 - `loading`: local skeleton or notice for the selected tab only.
 - `empty`: honest missing setup state with one next action.
 - `error`: user-language recovery message, not raw backend/provider error.
-- `success`: saved, imported, mapped, or key-created confirmation near the
-  action that produced it.
-- `review`: scoped warnings for unmapped knowledge, stale sync, broad keys,
-  missing approval gates, and unverified MCP exposure.
+- `success`: saved connection, updated default, or key-created confirmation
+  near the action that produced it.
+- `review`: scoped warnings for missing connection, broad key profile, or
+  disabled approval gate.
 
 ## Quality Bar
 
-- Settings should feel like an operating control room, not an admin dump.
-- The first read must answer what is connected, what agents can know, what
-  agents can do, and what still needs owner review.
-- Provider setup must be split by decision type, not by one giant form.
+- Settings should feel like a calm configuration room, not an admin dump and
+  not an operations dashboard.
+- The first read must answer where to change workspace defaults, provider
+  connections, agent keys, and MCP endpoint settings.
+- Provider setup must stay simple: save connection and choose basic scope.
+  Deep sync/import/mapping belongs elsewhere.
 - Agent access must stay least-privilege and visibly guarded.
-- No fake readiness metrics, placeholder integrations, or invented provider
-  data may be shown in implementation.
+- No fake readiness metrics, placeholder integrations, invented provider data,
+  or decorative counters may be shown in implementation.

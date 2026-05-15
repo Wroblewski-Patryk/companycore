@@ -49,7 +49,7 @@ V0 means:
 
 | View | Route Direction | Status | Canonical Source | Desktop Target | Mobile Target | User Question Answered | Evidence |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Unified Settings | `/settings` with tab-aware entries for integrations, Drive, API, and MCP | `V1 planned canonical` | `docs/ux/v1-settings-canonical-spec-2026-05-15.md` | `docs/ux/assets/companycore-v1-settings-desktop-canonical.png` | `docs/ux/assets/companycore-v1-settings-mobile-canonical.png` | What is connected, what can AI know, what can AI do, and what still needs owner review? | `docs/planning/v1-settings-canonical-design-task-contract.md` |
+| Unified Settings | `/settings` with section-aware entries for connections, agent access, and MCP | `V1 planned canonical` | `docs/ux/v1-settings-canonical-spec-2026-05-15.md` | `docs/ux/assets/companycore-v1-settings-desktop-canonical.png` | `docs/ux/assets/companycore-v1-settings-mobile-canonical.png` | Where do I change provider connections, Jarvis/Paperclip access, and MCP endpoint settings without entering sync/import work? | `docs/planning/v1-settings-canonical-design-task-contract.md` |
 
 ## Active Route Index
 
@@ -68,10 +68,10 @@ V0 means:
 | `/pipeline` | `V0 rebuild` | Sales/operations workflow pressure tied to areas and decisions. | Rebuild as V1 workflow/pipeline capability. |
 | `/settings/integrations` | `V0 rebuild` | Tab-aware entry into unified settings `Integrations`, showing provider readiness by area and workflow. | Rebuild, do not leave as provider directory. |
 | `/react-integrations` | `V0 compatibility` | Alias to integration readiness. | Remove after references are cleaned. |
-| `/settings` | `V0 rebuild` | Canonical unified settings entry with tabs for General, Integrations, Knowledge, Tools, API, MCP, and Access & audit. | Rebuild as one settings module, not ClickUp-only setup. |
-| `/settings/drive` | `V0 rebuild` | Tab-aware entry into unified settings `Integrations` or `Knowledge`, focused on Drive connect, scope, import, map, and verify. | Rebuild as clean React setup/knowledge flow. |
-| `/settings/api` | `V1 foundation` | Tab-aware entry into unified settings `API`, preserving owner/AI least-privilege safety. | Keep safety model, polish into unified settings workflow. |
-| `/react-agent-tools` | `V1 foundation` | Tab-aware entry into unified settings `MCP` or `Tools`, preserving manifest inspection and safe agent delegation. | Keep MCP foundation, polish into unified settings workflow. |
+| `/settings` | `V0 rebuild` | Canonical unified settings entry with sections for General, Connections, Agent access, and MCP. | Rebuild as one simple settings module, not ClickUp-only setup and not a sync dashboard. |
+| `/settings/drive` | `V0 rebuild` | Section-aware entry into unified settings `Connections`, focused on Drive connection settings only. | Keep import, folder mapping, and sync in dedicated work views. |
+| `/settings/api` | `V1 foundation` | Section-aware entry into unified settings `Agent access`, preserving owner/AI least-privilege safety. | Keep safety model, simplify into Jarvis/Paperclip key setup. |
+| `/react-agent-tools` | `V1 foundation` | Section-aware entry into unified settings `MCP`, preserving endpoint and safety posture while linking to full catalog. | Keep large MCP catalog outside the first settings view. |
 | `/react-company-os` | `V1 foundation` | Company OS command/evidence cockpit. | Keep, contextualize from selected areas. |
 | `/settings/account` | `V0 rebuild` | Quiet workspace/account/admin settings. | Rebuild after core owner journeys. |
 | `/auth/login` | `V1 canonical` | Owner entry into Company Atlas on the public layout. | Keep and extend only inside public auth shell. |
@@ -153,8 +153,8 @@ V1 status:
 1. Deepen selected-area `knowledge` view.
 2. Deepen selected-area `tasks` view.
 3. Rebuild `/settings` as the unified V1 settings module, using the canonical
-   settings desktop/mobile targets and tab-aware entries for Drive, ClickUp,
-   API, and MCP.
+   settings desktop/mobile targets and section-aware entries for Drive,
+   ClickUp, API/agent access, and MCP.
 4. Rebuild `/tasks-adapter` as V1 execution-pressure capability.
 5. Rebuild `/relationships` as V1 area provenance and confidence review.
 6. Rebuild ClickUp setup inside unified settings rather than as the root
@@ -175,17 +175,16 @@ are editing code.
 
 Latest audit: `docs/ux/v1-production-canonical-discrepancy-audit-2026-05-15.md`.
 
-Status on 2026-05-15: `blocked by deploy drift`.
+Status on 2026-05-15: `public and signed-out skeleton deployed`.
 
-Production web/API health reported `build.commit="b716f02"` while the current
-V1 canonical web implementation exists in the local `9b575e2` working tree.
-The production root still redirects to `/auth/login`, so it does not yet match
-the V1 public home canonical target. Production login and registration also
-use the older auth layout. Private dashboard and selected-area canonical views
-could only be checked as signed-out redirects during this audit because no
-production owner browser session was available.
+Production web/API health now reports
+`build.commit="ff5e04192db93a53280fab58bcd8f47cba30f554"` and image
+`rnqqkhl3o3dut4qv56mlxly2_backend:ff5e041`. The production root serves the V1
+public home, and production login/registration use the V1 public layout.
+Desktop/mobile screenshot proof is in
+`docs/ux/evidence/production-v1-ff5e041-2026-05-15/`.
 
-The next required parity step is to commit and deploy the V1 canonical web
-layer, confirm production health reports the deployed commit, then recapture
-desktop/mobile public screenshots and authenticated desktop/tablet/mobile
-private screenshots.
+Private dashboard and selected-area canonical views were checked only as
+signed-out redirects in this pass because no production owner browser session
+was available. The remaining parity step is authenticated production
+desktop/tablet/mobile screenshots for `/dashboard` and selected-area detail.

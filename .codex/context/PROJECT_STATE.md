@@ -225,6 +225,15 @@ Last updated: 2026-05-15
   `aria-current`, and mobile density was tightened for a faster CEO scan.
   `npm run build:web`, `npm run validate`, and `git diff --check` passed.
   Playwright fallback refreshed proof screenshots in `docs/ux/evidence/`.
+- 2026-05-15: Paperclip company-building architecture direction is accepted as
+  a minimal architecture layer over existing CompanyCore systems. CompanyCore
+  remains a non-embedded-AI operating app; external agents such as Paperclip use
+  CompanyCore through API/MCP. Agent-facing functionality is organized as
+  Intent, Knowledge, Planning and orchestration, Tools, Access and autonomy,
+  and Audit and feedback. The first implementation direction is to let agents
+  review business-plan/company context, inspect ClickUp and CompanyCore task
+  state, identify missing work, propose or create scoped tasks, and feed back
+  evidence through CompanyCore without direct DB or provider-token access.
 - 2026-05-15: V1WEB-002 organized the V1 web layer into five canonical
   surfaces. `/` is now public home, `/auth/login` and `/auth/register` share
   the public layout, `/dashboard` remains the authenticated Company Atlas, and
@@ -242,6 +251,17 @@ Last updated: 2026-05-15
   unverified until a valid owner session is used after the V1 deploy. Evidence:
   `docs/ux/v1-production-canonical-discrepancy-audit-2026-05-15.md` and
   `docs/ux/evidence/production-compare-2026-05-15/`.
+- 2026-05-15: V1PROD-002 deployed the V1 canonical web skeleton to production
+  through the approved manual VPS rollover path. Public web/API health now
+  report `build.commit="ff5e04192db93a53280fab58bcd8f47cba30f554"` and image
+  `rnqqkhl3o3dut4qv56mlxly2_backend:ff5e041`. Production `/` serves the V1
+  public home, `/auth/login` and `/auth/register` serve the V1 public auth
+  layout, and signed-out private dashboard/area routes redirect to login.
+  Previous container `backend-rnqqkhl3o3dut4qv56mlxly2-manual-b716f02` is
+  retained stopped as rollback. Screenshot proof:
+  `docs/ux/evidence/production-v1-ff5e041-2026-05-15/`. Authenticated
+  dashboard and selected-area production parity still needs an owner-session
+  screenshot pass.
 - 2026-05-14: Production now runs owner-console snapshot routing hotfix commit
   `a7557120b8ea4630a0b32097e66ba0d4bb012b1b`. The vanilla web shell routes
   implemented table snapshots to their correct API paths, sends Company OS

@@ -232,6 +232,63 @@ Target behavior:
 - AI agents can see the CompanyCore-to-Paperclip context through MCP.
 - Handoffs leave audit/event evidence and do not require direct DB access.
 
+## Paperclip Company-Building Operating Model
+
+Paperclip's long-term role is a supervised company-building execution agent.
+CompanyCore itself does not need an embedded AI brain for this direction:
+external AI agents may use CompanyCore as the business operating layer through
+HTTP APIs and MCP tools.
+
+The minimum operating loop is:
+
+```text
+Business plan / owner intent
+  -> CompanyCore knowledge and operating graph
+  -> gap and task analysis
+  -> ClickUp or CompanyCore work items
+  -> owner or agent execution
+  -> status, feedback, evidence, and next gaps
+```
+
+Paperclip should first help the owner by reading the business plan, current
+CompanyCore context, imported knowledge, ClickUp task state, decisions, and
+operating-area responsibilities; then it should identify missing work, propose
+or create scoped tasks, and continue only through approved CompanyCore tools.
+
+For this purpose, agent-facing functionality is organized into these logical
+layers:
+
+| Layer | Purpose | Current foundation |
+| --- | --- | --- |
+| Intent | What the company is trying to build now: business plan, priorities, owner decisions, and active operating-area goals. | goals, decisions, decision logs, operating areas, planning docs imported as knowledge |
+| Knowledge | What Paperclip may know: trusted sources, document snapshots, task/context reads, decisions, standards, and operating graph context. | knowledge roots, knowledge items, Google Drive files/content snapshots, Company OS reads, relationship graph |
+| Planning and orchestration | How gaps become executable work and follow-up tasks. | tasks, task lists, processes, pipelines, agent events, ClickUp sync |
+| Tools | What Paperclip may do through CompanyCore: create/update work items, report status, request approvals, create or update provider documents where allowed. | MCP manifest, HTTP command routes, tool adapters, integration capabilities |
+| Access and autonomy | Which agent profile can use which knowledge and tools, at which risk level, and when owner approval is required. | service API keys, scopes, capabilities, risk levels, approval requirements |
+| Audit and feedback | What happened, why, under which key/profile, and what the result teaches the next planning pass. | events, audit logs, approvals, agent event outbox, correlation IDs |
+
+Provider integrations must be classified by capability, not by provider. The
+same provider can serve several layers: Google Drive can be a knowledge source
+when reading Docs or Sheets and a tool when creating or updating them; ClickUp
+can be knowledge when reading task state and a tool when creating tasks,
+comments, or status updates.
+
+The first Paperclip-ready implementation direction should therefore be narrow:
+
+1. expose business-plan and company-context knowledge through existing
+   CompanyCore read APIs or MCP tools;
+2. expose ClickUp and CompanyCore task state as planning input;
+3. let Paperclip propose missing tasks before broad autonomous execution;
+4. allow task creation or status reporting only through scoped CompanyCore
+   tools;
+5. require owner approval for high-risk external writes, workflow activation,
+   destructive actions, or broad provider mutations.
+
+This model is a direction for future implementation, not approval for broad new
+tables or direct provider access. Future slices should first verify the current
+knowledge, task, and MCP surfaces, then add the smallest missing API or MCP
+tool needed to close one planning-to-task loop.
+
 ## Implementation Guardrails
 
 - Do not add duplicate tables when existing Company OS or operating-model

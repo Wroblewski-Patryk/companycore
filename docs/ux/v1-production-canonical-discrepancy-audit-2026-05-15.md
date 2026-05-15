@@ -50,14 +50,33 @@ web layer already defines the corrected route ownership and visual targets:
 private dashboard/area views remain behind owner auth. Production still runs
 an older build, so the next parity action is release, not a redesign.
 
+## Post-Deploy Update
+
+V1PROD-002 deployed commit `ff5e04192db93a53280fab58bcd8f47cba30f554` to
+production. Public web/API health now report that commit and image
+`rnqqkhl3o3dut4qv56mlxly2_backend:ff5e041`.
+
+Resolved:
+
+- `V1PROD-001`: `/` now serves the V1 public home.
+- `V1PROD-002`: `/auth/login` now serves the V1 public auth layout.
+- `V1PROD-003`: `/auth/register` now serves the V1 public registration layout.
+- `V1PROD-006`: production build drift is resolved for the deployed skeleton.
+
+Still open:
+
+- `V1PROD-004`: authenticated dashboard parity needs an owner-session
+  screenshot pass.
+- `V1PROD-005`: authenticated selected-area parity needs an owner-session
+  screenshot pass.
+- `V1PROD-007`: redirect-only aborted `Phosphor-Bold.woff2` requests still
+  appear on signed-out private redirects, with no console error or visible
+  layout failure.
+
 ## Next Verification Pass
 
-1. Commit and deploy the current V1 canonical web working tree.
-2. Confirm public web and API `/health` report the deployed commit.
-3. Capture fresh production desktop/mobile screenshots for public home, login,
-   and registration.
-4. Capture authenticated production desktop/tablet/mobile screenshots for
+1. Capture authenticated production desktop/tablet/mobile screenshots for
    `/dashboard` and `/areas?area=01-strategia&view=overview`.
-5. Compare fresh production evidence against the canonical assets and update
+2. Compare fresh production evidence against the canonical assets and update
    this audit from `blocked by deploy drift` to `pass` or a concrete visual
    mismatch list.

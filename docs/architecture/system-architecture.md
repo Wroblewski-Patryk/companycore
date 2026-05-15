@@ -91,6 +91,9 @@ replacing the existing Company OS model:
   embeddings, and decision memory
 - web, future mobile, and MCP as first-class clients over the same API,
   permission, approval, audit, and event boundaries
+- Paperclip as a supervised external company-building execution agent that
+  uses CompanyCore knowledge, task context, and scoped tools through the same
+  API/MCP boundaries rather than direct database or provider access
 
 ## ClickUp-Shaped Operating Model
 
@@ -552,6 +555,24 @@ not load integration secrets, and should not implement separate business rules.
 Their job is to expose the CompanyCore API as ergonomic tools for agents while
 CompanyCore keeps ownership of validation, permissions, event emission,
 approval gates, audit logs, and provider adapter behavior.
+
+Agent-facing functionality should be exposed as logical layers rather than as
+provider-specific shortcuts:
+
+- knowledge: what an agent may read, search, and cite from CompanyCore,
+  imported Drive/Docs/Sheets snapshots, decisions, standards, task state, and
+  operating graph context;
+- tools: what an agent may execute, such as task creation, status reporting,
+  approval requests, document writes, or provider actions routed through
+  CompanyCore command APIs;
+- access: which service key, profile, scope, risk level, and approval policy
+  allows the knowledge or tool use;
+- audit: which event, audit log, correlation ID, and feedback signal proves
+  the action or read path.
+
+This keeps future Paperclip, Jarvis, and other agents focused on CompanyCore's
+business operating graph instead of raw ClickUp, Google Drive, or database
+contracts.
 
 ## Integration Architecture
 
