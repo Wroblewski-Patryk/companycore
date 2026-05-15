@@ -124,6 +124,12 @@ Jarvis and provide an evidence-backed deploy and smoke plan for the required
     `unknown`.
   - production logs showed Docs 500 root cause:
     stored Google Drive OAuth secret could not be decrypted.
+  - after deploy, public `/health` and `/v1/health` returned build commit
+    `669c1c8`, protected Google Drive smoke passed, and a protected content
+    refresh returned controlled `401 integration_invalid_token`.
+  - a Coolify recovery probe found only the current `INTEGRATION_SECRET_KEY`
+    candidate, and it does not decrypt existing Google Drive or ClickUp
+    integration secrets.
 
 ### 6. Self-Review
 - Simpler option considered: keep Sheets `spreadsheets.create` and move the file
@@ -234,6 +240,8 @@ plus smoke plan.
 - How tested: build, validate, diff check; production health/log inspection.
 - What is incomplete: real Jarvis-to-CompanyCore Docs/Sheets smoke is blocked
   by production `integration_invalid_token`.
-- Next steps: restore the matching production integration secret or complete
-  owner Google OAuth re-consent, then hand exact smoke to Jarvis agent.
+- Next steps: restore the matching historical production integration secret if
+  available, or complete owner Google OAuth re-consent after saving OAuth client
+  credentials under the current runtime secret; then hand exact smoke to
+  Jarvis agent.
 - Decisions made: Jarvis remains forbidden from direct Google API writes.

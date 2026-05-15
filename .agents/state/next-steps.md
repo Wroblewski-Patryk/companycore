@@ -8,6 +8,9 @@ Last updated: 2026-05-15
    - Restore the matching production `INTEGRATION_SECRET_KEY` for the existing
      encrypted Google Drive OAuth material, or complete owner Google Drive
      OAuth re-consent from `/settings/drive`.
+   - A recovery probe found only the current Coolify `INTEGRATION_SECRET_KEY`
+     candidate, and it does not decrypt existing Google Drive or ClickUp
+     integration secrets.
    - Rerun CompanyCore protected content refresh and Jarvis Docs/Sheets
      creation/readback smoke before resuming unrelated work.
 

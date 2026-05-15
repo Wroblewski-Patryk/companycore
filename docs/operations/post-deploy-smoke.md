@@ -72,6 +72,11 @@ Use this file to record the minimum checks after each deploy.
     returned `401 integration_invalid_token`; this confirms the previous raw
     Docs 500 is now fail-closed but the stored Google OAuth secret is not
     usable with the current integration secret.
+  - A recovery probe checked Coolify application environment records for
+    `INTEGRATION_SECRET_KEY` candidates. Only the current candidate was
+    available, and it does not decrypt the existing Google Drive or ClickUp
+    integration ciphertext. Temporary probe scripts were removed from the VPS
+    and Coolify container.
 - OpenJarvis checks:
   - Local targeted OpenJarvis tests passed:
     `tests/tools/test_companycore_tool.py::test_companycore_google_doc_create_uses_real_drive_route`,
