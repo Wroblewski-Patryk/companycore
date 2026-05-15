@@ -22,17 +22,12 @@ Last updated: 2026-05-15
    - Build metadata restoration is implemented locally; after deploy, compare
      public `/health` `build.commit` with the pushed commit before claiming
      auto-deploy proof.
-3. V1AREA-001 Area-first dashboard implementation.
-   - Ready task contract:
-     `docs/planning/v1-area-first-pixel-perfect-task-contract.md`.
-   - Implementation plan:
-     `docs/planning/v1-area-first-pixel-perfect-implementation-plan.md`.
-   - Canonical desktop/mobile references:
-     `docs/ux/assets/companycore-v1-area-first-dashboard-desktop-canonical.png`
-     and
-     `docs/ux/assets/companycore-v1-area-first-dashboard-mobile-canonical.png`.
-   - Readiness review:
-     `docs/ux/v1-area-first-web-readiness-review-2026-05-15.md`.
+3. V1AREA follow-up verification and route convergence.
+   - First unblock the host API gate by setting a valid local `DATABASE_URL`
+     and running `npm run test:api` for the new `/dashboard` routing.
+   - Then decide whether V1AREA-002 should converge `/areas` route body into
+     the same area capability model or perform a tighter pixel-parity pass
+     against the current desktop/mobile canonical images.
 
 ## LATER
 

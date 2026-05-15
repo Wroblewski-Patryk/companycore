@@ -18,9 +18,18 @@ Polished executive atlas canonical target:
 Area-first atlas canonical target:
 `docs/ux/assets/companycore-v1-area-first-atlas-canonical.png`
 
-As of this pass, the area-first atlas is the strongest canonical V1
-implementation candidate because it solves the main navigation problem: the
-user navigates the company, not application modules.
+Area-first desktop layout target:
+`docs/ux/assets/companycore-v1-area-first-dashboard-desktop-canonical.png`
+
+Area-first mobile layout target:
+`docs/ux/assets/companycore-v1-area-first-dashboard-mobile-canonical.png`
+
+These two images are the current canonical desktop and mobile layout references
+for the V1 area-first dashboard.
+
+As of this pass, the desktop and mobile area-first dashboard images are the
+strongest canonical V1 implementation references because they solve the main
+navigation problem: the user navigates the company, not application modules.
 
 ## Intent
 
@@ -100,19 +109,19 @@ navigation is the organization, not the application modules.
 | Group | Sidebar Item | Destination | Purpose |
 | --- | --- | --- | --- |
 | Command | Company Atlas | `/dashboard` | Whole-company overview and priority |
-| Areas | 00 General | `/areas?area=main-general` | Intake, workspace, triage, unassigned ownership |
-| Areas | 01 Strategy | `/areas?area=strategy-governance` | Goals, governance, strategic workflows |
-| Areas | 02 Projects | `/areas?area=projects-delivery` | Delivery portfolio and project work |
-| Areas | 03 Tasks | `/areas?area=tasks-workflow` | Task execution and workflow pressure |
-| Areas | 04 Sales | `/areas?area=sales-crm` | CRM, deals, client pipeline |
-| Areas | 05 Marketing | `/areas?area=marketing-growth` | Growth, campaigns, content flow |
-| Areas | 06 Finance | `/areas?area=finance-billing` | Billing, finance, commercial controls |
-| Areas | 07 People | `/areas?area=people-roles` | Roles, responsibility, PAEI, team structure |
-| Areas | 08 Operations | `/areas?area=operations-admin` | Admin, operations, reliability |
-| Areas | 09 Knowledge | `/areas?area=knowledge-decisions` | Knowledge, decisions, learning |
-| Areas | 10 Assets | `/areas?area=assets-storage` | Storage, resources, repositories, files |
-| Areas | 11 Automations | `/areas?area=automations-integrations` | Integrations, automation rules, tools |
-| Areas | 12 AI Agents | `/areas?area=ai-agents-observability` | Jarvis, Paperclip, Codex, MCP, audit |
+| Areas | 00 Ogolny | `/areas?area=00-ogolny` | Intake, workspace, triage, unassigned ownership |
+| Areas | 01 Strategia | `/areas?area=01-strategia` | Goals, governance, strategic workflows |
+| Areas | 02 Produkt | `/areas?area=02-produkt` | Product direction, delivery, roadmap |
+| Areas | 03 Sprzedaz | `/areas?area=03-sprzedaz` | CRM, deals, sales pipeline |
+| Areas | 04 Operacje | `/areas?area=04-operacje` | Operating reliability, admin, delivery support |
+| Areas | 05 Relacje | `/areas?area=05-relacje` | Clients, partners, relationship graph |
+| Areas | 06 Kadry | `/areas?area=06-kadry` | People, roles, responsibility, PAEI |
+| Areas | 07 Finanse | `/areas?area=07-finanse` | Billing, finance, commercial controls |
+| Areas | 08 Zasoby | `/areas?area=08-zasoby` | Assets, storage, resources, repositories, files |
+| Areas | 09 Technologia | `/areas?area=09-technologia` | Systems, integrations, tooling, API/MCP surface |
+| Areas | 10 Prawo | `/areas?area=10-prawo` | Legal, compliance, policies, controls |
+| Areas | 11 Innowacje | `/areas?area=11-innowacje` | Experiments, improvements, new capabilities |
+| Areas | 12 Zarzadzanie | `/areas?area=12-zarzadzanie` | Management, AI agents, audit, governance rhythm |
 | System | Workspace Settings | `/settings/account` | Account, workspace, safety settings |
 
 ### Secondary Links
@@ -162,6 +171,113 @@ available:
 | Decisions | approvals, risks, controls, open decisions | governance review queue |
 | AI | agent permissions, safe actions, handoff state | Jarvis can summarize, Paperclip waiting |
 
+### Sidebar Expanded Area Example
+
+The sidebar should allow exactly one expanded area at a time on desktop. This
+keeps navigation area-first while showing the useful views available in a
+department.
+
+Example expanded row:
+
+```text
+LuckySparrow
+  Dzialy
+    00 Ogolny
+    01 Strategia
+      Overview
+      Goals
+      Workflows
+      Tasks
+      Knowledge
+      Resources
+      Decisions
+      AI
+      + Add view
+    02 Produkt
+    ...
+```
+
+Rules:
+
+- Expanded subviews are contextual shortcuts into the selected area only.
+- The subview list should use small text and a thin left rail so it does not
+  become a second large menu.
+- `+ Add view` opens an area-scoped configuration flow for future custom
+  views, not a global app-builder.
+- Mobile should not show nested sidebar subviews by default; it should use an
+  area selector plus horizontal capability tabs.
+
+### Top Header Simplification
+
+The top title/search bar should be quieter than previous concepts.
+
+Desktop header:
+
+- Left: current workspace and view label, for example `LuckySparrow / Company
+  Atlas`.
+- Center: one compact command search.
+- Right: one quiet status sentence or pill group with at most three signals.
+- Primary action appears in the selected-area panel, not always in the global
+  header.
+
+Mobile header:
+
+- One row only: menu, `LuckySparrow`, search icon, status dot.
+- Area title appears below as part of the content, not crammed into the topbar.
+
+Avoid:
+
+- four or more header pills
+- large title plus subtitle plus search plus CTA in one row
+- multiple global actions that compete with area actions
+
+The canonical desktop target follows this by using:
+
+```text
+LuckySparrow / Company Atlas
+Search area, process, resource...
+13 areas / 87% ownership / 2 decisions
+settings/filter icon
+```
+
+The canonical mobile target follows this by using:
+
+```text
+menu icon | LuckySparrow + online dot | search icon | guarded status
+```
+
+No mobile page should inherit the full desktop header.
+
+### Area-First User Paths
+
+These are the paths the UI must support before deeper custom screens are
+designed.
+
+| Path | User Intent | UI Sequence | Backend Sources |
+| --- | --- | --- | --- |
+| Company pulse | See the whole company state | Atlas -> area status -> right rail priority | `/v1/connection`, relationships, tasks, Drive, MCP manifest |
+| Area triage | Understand one department | Sidebar area -> Overview tab -> signals and right rail | operating areas, table records, relationships |
+| Strategic planning | Work inside `01 Strategia` | `01 Strategia` -> Goals -> Workflows -> Decisions | goals, targets, Company OS processes/pipelines, decisions |
+| Delivery check | See work pressure | area -> Tasks -> task filters/status | tasks, task lists, ClickUp mappings |
+| Knowledge review | Validate context for AI | area -> Knowledge -> Drive/resources/provenance | Google Drive files, resources, knowledge items |
+| Ownership cleanup | Close MECE gaps | area -> Resources/Decisions -> owner assignment | operating model, resources, company roles, decisions |
+| AI handoff | Delegate safely | area -> AI -> safe read/write capabilities -> approval | API keys, MCP manifest, approvals, audit logs |
+| Custom area view | Add a useful area-specific view | area -> `+ Add view` -> choose source and layout | future view config, existing tables/routes |
+
+### Component Map For Implementation
+
+| Component | Responsibility |
+| --- | --- |
+| `CompanyShell` | Desktop/mobile shell, workspace, sidebar/drawer, content slots |
+| `AreaSidebar` | 00-12 area list, selected state, one expanded area, status dots |
+| `AreaSubnav` | Overview/Goals/Workflows/Tasks/Knowledge/Resources/Decisions/AI |
+| `CommandSearch` | Cross-area search and jump; replaces header clutter |
+| `CompanyAtlasBoard` | Central 00+12 visual map with selected area and status |
+| `AreaOverviewPanel` | Selected area summary, signals, primary action |
+| `AreaCapabilityPanel` | Tab content shell for each capability |
+| `DecisionRail` | Today/priorities/AI/proof for selected area and global blockers |
+| `ProgressivePath` | Overview -> Area -> Capability -> Record -> Evidence -> AI action |
+
 ### Area Page Anatomy
 
 - `AreaHeader`: area name, owner/accountability, APQC lens, readiness,
@@ -206,6 +322,18 @@ available:
   they should be reached from workspace/system controls or area-context links,
   not from a large primary sidebar module list.
 
+### Desktop And Mobile Canonical Differences
+
+| Concern | Desktop | Mobile |
+| --- | --- | --- |
+| Navigation | Persistent area sidebar with one expanded area | Topbar + horizontal area selector + bottom quick nav |
+| Area subviews | Nested under expanded sidebar area and repeated as tabs in content | Horizontal capability tabs in selected area card |
+| Atlas | Large radial map plus selected-area panel | Compact mini-map preview focused on selected area |
+| Header | Breadcrumb, search, quiet status cluster | One compact app bar, no big search input |
+| Right rail | Persistent `Today` rail | `Today` list below selected area content |
+| Progressive path | Full bottom strip | Short breadcrumb text and bottom nav |
+| Primary action | Area panel action | Area card action or Today row |
+
 ## Refined CEO Direction
 
 After auditing the first generated concept, the approved direction should move
@@ -245,23 +373,22 @@ This direction is not a decorative city map. It is a calm management atlas that
 lets the owner start from the whole company and progressively drill into one
 area, process, resource, or AI handoff.
 
-This APQC executive atlas is the preferred V1 canonical direction as of
-2026-05-15. Earlier generated images remain useful as stepping stones, but the
-implementation should use the atlas as the main visual source unless the user
-approves a different final concept.
+This APQC executive atlas was the structural turning point for the V1
+direction. Earlier generated images remain useful as stepping stones, but the
+implementation should use the current desktop/mobile area-first dashboard
+references as the main visual source.
 
 The polished executive atlas is the art-direction pass over this structure. It
 should preserve the same information model while adding enough premium product
 character to make CompanyCore feel like an exceptional management surface, not
 a default dashboard.
 
-As of the latest design pass, this polished executive atlas is the strongest
-canonical V1 visual candidate. It should be the primary implementation target
-after user approval.
+The polished executive atlas remains a useful visual-polish reference, but it
+is not the primary implementation target.
 
-The area-first atlas supersedes this only for navigation structure: keep the
-polished visual quality, but move commands into the selected area instead of
-keeping global module rows in the sidebar.
+The area-first desktop/mobile references supersede it for implementation:
+keep the polished visual quality where useful, but build the area-first
+sidebar, selected-area tabs, simplified header, and mobile-specific layout.
 
 ### Central Model
 

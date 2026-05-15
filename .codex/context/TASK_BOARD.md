@@ -2,31 +2,7 @@
 
 ## Ready
 
-- V1AREA-001 Area-First Dashboard Pixel-Perfect Implementation.
-  - Stage: planning -> implementation
-  - Owner: Frontend Builder + QA/Test
-  - Priority: P1
-  - Status: READY
-  - Source:
-    `docs/planning/v1-area-first-pixel-perfect-task-contract.md`
-  - Goal: implement the V1 area-first Company Atlas dashboard from the
-    canonical desktop and mobile references, starting with the shared
-    area-first shell, selected-area state, and responsive layout frame.
-  - Canonical images:
-    `docs/ux/assets/companycore-v1-area-first-dashboard-desktop-canonical.png`
-    and
-    `docs/ux/assets/companycore-v1-area-first-dashboard-mobile-canonical.png`.
-  - Implementation plan:
-    `docs/planning/v1-area-first-pixel-perfect-implementation-plan.md`.
-  - Readiness review:
-    `docs/ux/v1-area-first-web-readiness-review-2026-05-15.md`.
-  - First slice: `CompanyShell`, `AreaSidebar`, `MobileAppBar`,
-    `CommandSearch`, `StatusCluster`, `ProgressivePath`, display-name adapter
-    for 00-12 areas, and selected-area state. Do not implement every
-    capability tab in the first commit.
-  - Validation expectation: desktop `1366x900`, tablet `834x1112`, mobile
-    `390x844`, `npm run build`, `npm run validate`, and `npm run test:api`
-    when local PostgreSQL/Docker is available.
+No ready implementation task is queued.
 
 ## In Progress
 
@@ -96,6 +72,38 @@ No active implementation task is in progress.
   auto-deploy webhook administration task.
 
 ## Done
+
+- V1AREA-001 Area-First Dashboard Pixel-Perfect Implementation.
+  - Evidence: `/dashboard` now serves the React V1 area-first Company Atlas
+    view. The implementation adds a dashboard-local area-first shell with
+    canonical 00-12 LuckySparrow areas, expanded `01 Strategia`, area
+    capability tabs, quiet command/search/status header, CSS/SVG atlas board,
+    selected-area state, right `Today` decision rail, progressive path,
+    mobile app bar, mobile company summary, horizontal area selector, and
+    five-item mobile bottom nav. The view derives area labels/status/table
+    counts, integration readiness, capabilities, workspace, and MCP scope from
+    `/v1/connection` instead of static UI records.
+  - Changed files: `src/app.ts`, `web/src/main.tsx`, `web/src/styles.css`,
+    generated `public/react/*`, and screenshot evidence in
+    `docs/ux/evidence/`.
+  - Validation: `npm run check:public-js`, `npm run build:server`,
+    `npm run build:web`, `npm run validate`, and `git diff --check` passed.
+    Playwright fallback verified the built `/dashboard` route with a
+    controlled owner session and mocked `/v1/connection` at desktop
+    `1366x900`, tablet `834x1112`, and mobile `390x844`: no horizontal
+    overflow, no console/page errors, 13 area rows, 12 orbit nodes plus
+    center, selected `01 Strategia`, `Goals` tab switching, hidden desktop
+    mobile controls, mobile summary present, desktop sidebar hidden on
+    tablet/mobile, and five mobile nav items. Screenshots:
+    `docs/ux/evidence/v1-area-dashboard-desktop-1366x900.png`,
+    `docs/ux/evidence/v1-area-dashboard-tablet-834x1112.png`, and
+    `docs/ux/evidence/v1-area-dashboard-mobile-390x844.png`.
+  - Residual validation gap: `npm run test:api` rebuilt successfully but
+    stopped at `prisma migrate deploy` because local `DATABASE_URL` is not set.
+    A database-backed API regression run remains required before a release
+    commit or deployment claim.
+  - Task contract:
+    `docs/planning/v1-area-first-pixel-perfect-task-contract.md`.
 
 - V2GD-010 Google Sheet Parent Folder Creation.
   - Evidence: deployed commit `669c1c8` to production through manual VPS

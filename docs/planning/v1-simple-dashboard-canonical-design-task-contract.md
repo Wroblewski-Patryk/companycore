@@ -66,6 +66,8 @@ Create a canonical V1 design artifact and implementation plan for a simple, intu
   - `docs/ux/assets/companycore-v1-apqc-executive-atlas-canonical.png`
   - `docs/ux/assets/companycore-v1-executive-atlas-awwwards-canonical.png`
   - `docs/ux/assets/companycore-v1-area-first-atlas-canonical.png`
+  - `docs/ux/assets/companycore-v1-area-first-dashboard-desktop-canonical.png`
+  - `docs/ux/assets/companycore-v1-area-first-dashboard-mobile-canonical.png`
 - Source inputs:
   - `public/index.html`
   - `public/app.js`
@@ -195,7 +197,7 @@ A design contract, canonical V1 UX spec, and generated dashboard image only.
 ## Validation Evidence
 - Tests: `git diff --check` passed.
 - Manual checks: source review of current web shell and route surfaces; visual
-  review of `docs/ux/assets/companycore-v1-area-first-atlas-canonical.png`.
+  review of the current desktop/mobile canonical implementation references.
 - Screenshots/logs: generated canonical concept images under `docs/ux/assets/`.
 - High-risk checks: no runtime files changed
 - Coverage ledger updated: not applicable

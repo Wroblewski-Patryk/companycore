@@ -92,6 +92,17 @@ Last updated: 2026-05-15
   `401 integration_invalid_token`, so owner OAuth re-consent or restoration of
   the matching `INTEGRATION_SECRET_KEY` is required before Jarvis can complete
   the two-file Docs/Sheets creation/readback scenario.
+- 2026-05-15: V1AREA-001 implemented the V1 area-first Company Atlas on
+  `/dashboard` through the React web layer. The route now uses the canonical
+  00-12 LuckySparrow area model, expanded selected-area subviews, capability
+  tabs, quiet command/search/status header, CSS/SVG atlas board, right
+  decision rail, progressive path, and mobile-specific summary/selector/bottom
+  navigation. `npm run check:public-js`, `npm run build:server`, `npm run
+  build:web`, `npm run validate`, and `git diff --check` passed. Playwright
+  fallback verified built `/dashboard` at desktop `1366x900`, tablet
+  `834x1112`, and mobile `390x844` with no overflow and no console/page
+  errors; evidence screenshots are in `docs/ux/evidence/`. Host
+  `npm run test:api` remains pending because local `DATABASE_URL` is unset.
 - 2026-05-14: Production now runs owner-console snapshot routing hotfix commit
   `a7557120b8ea4630a0b32097e66ba0d4bb012b1b`. The vanilla web shell routes
   implemented table snapshots to their correct API paths, sends Company OS

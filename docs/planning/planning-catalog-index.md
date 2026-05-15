@@ -36,6 +36,9 @@ Canonical queue sources should still remain:
 | `docs/planning/agent-crud-api-rollout-plan.md` | implemented | `AGCRUD-001..AGCRUD-006` | Completed and deployed agent CRUD rollout. |
 | `docs/planning/web-console-v2-task-contracts.md` | implemented | `V2WEB-001..V2WEB-049` | Historical completed web-console slices, including typed business editors and route/context polish. |
 | `docs/ux/companycore-v1-ux-ui-audit.md` | implemented | `UXA-001..UXA-007` | Completed UX/UI audit implementation wave for owner-console polish after v1 runtime acceptance; future UX work must be queued separately. |
+| `docs/planning/v1-area-first-pixel-perfect-task-contract.md` | implemented | `V1AREA-001` | Runtime implementation is partially verified: `/dashboard` now serves the React area-first Company Atlas; database-backed `test:api` still needs local `DATABASE_URL`. |
+| `docs/planning/v1-area-first-pixel-perfect-implementation-plan.md` | implemented | `V1AREA-001` | First implementation slice delivered the shell/frame foundation, data adapter, desktop/mobile dashboard, and screenshot evidence. Future V1AREA-002 should be queued separately. |
+| `docs/planning/v1-area-first-dashboard-implementation-paths.md` | implemented | `V1AREA-001` | User paths informed the implemented dashboard; deeper area route convergence remains future work. |
 | `docs/planning/google-drive-v2-task-contracts.md` | implemented | `V2GD-001..V2GD-012`, `AGRUN-007` | Server-side Google Drive v2, consent guidance, and production owner consent/import proof are delivered. |
 | `docs/NEXT_STEPS.md` | implemented | v1 handoff | Human-readable next-step summary only; canonical execution remains in task board, agent state, and next commits. |
 

@@ -50,7 +50,8 @@ Every meaningful UI change should preserve or improve:
 ## CompanyCore Management UI Principles
 
 CompanyCore is an owner console for understanding and steering a company. The
-approved 2026-05-14 visual metaphor is a cinematic-realistic Company City Map:
+approved 2026-05-14 long-term visual metaphor is a cinematic-realistic Company
+City Map:
 the company is a strategic city/value ecosystem, `GENERAL` is the central
 intake and orchestration district, and the 12 company departments are connected
 operational districts in the value journey. The UI must help the user answer
@@ -80,26 +81,74 @@ briefs; tablet should balance map plus selected context; mobile web and native
 mobile should compress the city into an overview, district switcher, or
 progressive drill-down rather than forcing a tiny unreadable map.
 
+### V1 Area-First Direction
+
+As of 2026-05-15, the accepted V1 dashboard and shell direction is the
+area-first Company Atlas. It supersedes module-first navigation for V1 web
+implementation while preserving the Company City idea as a later V2 visual
+layer.
+
+V1 navigation should express the company first:
+
+```text
+LuckySparrow
+  Dzialy
+    00 Ogolny
+    01 Strategia
+    02 Produkt
+    03 Sprzedaz
+    04 Operacje
+    05 Relacje
+    06 Kadry
+    07 Finanse
+    08 Zasoby
+    09 Technologia
+    10 Prawo
+    11 Innowacje
+    12 Zarzadzanie
+```
+
+Capabilities such as goals, workflows, tasks, knowledge, resources, decisions,
+and AI should be area-scoped views, not primary global sidebar modules. The
+canonical V1 desktop and mobile references are:
+
+- `docs/ux/assets/companycore-v1-area-first-dashboard-desktop-canonical.png`
+- `docs/ux/assets/companycore-v1-area-first-dashboard-mobile-canonical.png`
+
+The product should guide the user through:
+
+```text
+Overview -> Area -> Capability -> Record -> Evidence -> AI action
+```
+
+This is the V1 progressive-disclosure model. It keeps the surface calm for a
+CEO while still exposing backend capability when the user drills into an area.
+
 ## Authenticated Shell Contract
 
 All private web routes should converge on one CompanyCore shell rather than
 separate vanilla and React navigation models. Before V2 Company City visuals,
-the shell should be a clear operating console: workspace selection, operating
-areas, resource families, integration relationships, and MCP readiness. The
-shell must make workspace, active route, active company area or workbench
-family, command pressure, and health visible without making every route build
-its own product chrome.
+the shell should be a clear area-first operating console: workspace selection,
+the 00-12 operating areas, selected-area capability tabs, area-scoped command
+pressure, and AI/MCP readiness. The shell must make workspace, selected area,
+selected capability, command pressure, and health visible without making every
+route build its own product chrome.
 
-Canonical shell zones:
+Canonical V1 shell zones:
 
-- `CompanySidebar`: command/company/workbench/integration/workspace navigation.
-- `TopCommandBar`: command search, create/action launch, attention, account.
-- `CommandBriefPanel`: contextual next action, blockers, decisions, risks,
-  integration state, and agent-ready actions.
-- `CompanyAreaSwitcher`: `00 Ogolny` plus the 12 departments, usually as
-  active/pinned areas plus a switcher instead of a permanent full list.
-- `StatusStrip`: quiet workspace health, sync freshness, environment, and
-  agent/integration readiness.
+- `AreaSidebar`: `Company Atlas`, `00 Ogolny`, and the 12 LuckySparrow
+  departments, with exactly one expanded area on desktop.
+- `AreaSubnav`: selected-area views such as Overview, Goals, Workflows, Tasks,
+  Knowledge, Resources, Decisions, AI, and `+ Add view`.
+- `TopCommandBar`: quiet breadcrumb, one command search, and a compact status
+  cluster.
+- `CompanyAtlasBoard`: code-native 00+12 area map with status dots, selected
+  area, and APQC/process lens.
+- `AreaOverviewPanel`: selected-area health, signals, primary action, AI
+  readiness, and MECE note.
+- `DecisionRail`: Today priorities, owner decisions, agent handoff, and proof.
+- `ProgressivePath`: Overview -> Area -> Capability -> Record -> Evidence ->
+  AI action.
 
 Responsive behavior:
 
@@ -111,11 +160,11 @@ Responsive behavior:
   core destinations, command brief before broad stats, and map as overview or
   district switcher instead of a tiny full canvas.
 
-The sidebar should not remain a generic route directory. It should express the
-operating model: Workspace selector, Operating Areas, Workbenches, Integrations
-& Relationships, AI/MCP, and Workspace settings. Badges and readiness signals
-must come from real product state. Do not introduce a second route-local shell
-for React surfaces.
+The sidebar should not remain a generic route directory. For V1 it should
+express the operating model as a company area list. Workflows, Knowledge,
+Agents, and other capabilities should appear inside the selected area, not as
+competing global destinations. Badges and readiness signals must come from real
+product state. Do not introduce a second route-local shell for React surfaces.
 
 ## Iconography
 

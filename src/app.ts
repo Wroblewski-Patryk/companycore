@@ -67,7 +67,6 @@ const webAppRoutes = [
   "/",
   "/auth/login",
   "/auth/register",
-  "/dashboard",
   "/data",
   "/data/:table",
   "/relationships",
@@ -81,6 +80,7 @@ const webAppRoutes = [
 ];
 
 const reactAppRoutes = [
+  "/dashboard",
   "/areas",
   "/react-agent-tools",
   "/react-company-os",

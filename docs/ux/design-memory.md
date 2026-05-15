@@ -53,7 +53,10 @@ of rediscovering them.
 - Evidence:
   `docs/ux/v1-simple-dashboard-canonical-spec-2026-05-15.md`,
   `docs/ux/v1-simple-dashboard-canonical-audit-2026-05-15.md`, and
-  `docs/ux/assets/companycore-v1-area-first-atlas-canonical.png`.
+  the current canonical desktop/mobile references:
+  `docs/ux/assets/companycore-v1-area-first-dashboard-desktop-canonical.png`
+  and
+  `docs/ux/assets/companycore-v1-area-first-dashboard-mobile-canonical.png`.
 
 ### 2026-05-14 - Relationship Confidence Badges
 - Type: reusable_pattern

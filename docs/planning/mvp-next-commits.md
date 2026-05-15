@@ -7,9 +7,9 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-No active ready UX100 implementation wave remains after UX100-W05.
-V1UX-CANON-001 is complete as a planning artifact; runtime implementation of
-the area-first atlas should begin only as a separate scoped code task.
+Restore Google Drive OAuth usability for Jarvis remains the active P0 blocker.
+The V1 area-first dashboard shell has been implemented, but its host API gate
+still needs a local `DATABASE_URL` before `npm run test:api` can complete.
 
 ### NEXT
 
@@ -20,10 +20,10 @@ the area-first atlas should begin only as a separate scoped code task.
       build metadata restoration is implemented locally; compare public
       `/health` `build.commit` with the pushed commit before claiming
       auto-deploy proof.
-- [ ] V1UX-CANON-002 Area-first dashboard implementation task:
-      scope the code slice from
-      `docs/ux/assets/companycore-v1-area-first-atlas-canonical.png` only
-      after accepting it as the V1 implementation target.
+- [ ] V1AREA follow-up verification and route convergence:
+      run `npm run test:api` with a valid local `DATABASE_URL`, then scope
+      V1AREA-002 for `/areas` route convergence or a tighter desktop/mobile
+      pixel-parity pass.
 
 ### DEFERRED TO V2
 
@@ -49,9 +49,22 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       published the V1 area-first Company Atlas direction, sitemap,
       component boundaries, Tailwind/DaisyUI style rules, pixel-perfect
       implementation plan, and generated canonical concept images. The
-      preferred target is
-      `docs/ux/assets/companycore-v1-area-first-atlas-canonical.png`.
+      current desktop/mobile implementation targets are
+      `docs/ux/assets/companycore-v1-area-first-dashboard-desktop-canonical.png`
+      and
+      `docs/ux/assets/companycore-v1-area-first-dashboard-mobile-canonical.png`.
       `git diff --check` and manual image review passed.
+- [x] V1AREA-001 Area-First Dashboard Pixel-Perfect Implementation:
+      `/dashboard` now serves the React area-first Company Atlas shell with
+      canonical 00-12 LuckySparrow areas, expanded `01 Strategia`, area
+      capability tabs, CSS/SVG atlas board, right decision rail, progressive
+      path, mobile summary, horizontal area selector, and five-item mobile
+      bottom nav. `npm run check:public-js`, `npm run build:server`, `npm run
+      build:web`, `npm run validate`, and `git diff --check` passed.
+      Playwright fallback verified desktop `1366x900`, tablet `834x1112`,
+      and mobile `390x844` screenshots in `docs/ux/evidence/` with no
+      overflow and no console/page errors. `npm run test:api` is still
+      pending because host `DATABASE_URL` was unset.
 - [x] UX100-W03 Relationship/Data Provenance And AI Safety Labels:
       added existing-state-derived provenance and AI readiness labels to
       relationship graph rows, review rows, data modules, table context cards,

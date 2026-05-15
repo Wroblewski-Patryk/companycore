@@ -1423,6 +1423,773 @@ function MigrationTable() {
   );
 }
 
+type AreaStatus = "ready" | "review" | "blocked" | "empty";
+
+type CanonicalArea = {
+  key: string;
+  label: string;
+  shortLabel: string;
+  lens: string;
+  icon: string;
+};
+
+type AreaViewState = CanonicalArea & {
+  backendArea?: OperatingArea;
+  tableCount: number;
+  status: AreaStatus;
+  statusLabel: string;
+  detail: string;
+  href: string;
+};
+
+type AreaCapability = {
+  id: string;
+  label: string;
+  icon: string;
+  href: string;
+};
+
+const canonicalAreas: CanonicalArea[] = [
+  { key: "00-ogolny", label: "00 Ogolny", shortLabel: "00", lens: "Workspace", icon: "ph-compass" },
+  { key: "01-strategia", label: "01 Strategia", shortLabel: "01", lens: "Govern", icon: "ph-target" },
+  { key: "02-produkt", label: "02 Produkt", shortLabel: "02", lens: "Build", icon: "ph-cube" },
+  { key: "03-sprzedaz", label: "03 Sprzedaz", shortLabel: "03", lens: "Sell", icon: "ph-handshake" },
+  { key: "04-operacje", label: "04 Operacje", shortLabel: "04", lens: "Deliver", icon: "ph-gear-six" },
+  { key: "05-relacje", label: "05 Relacje", shortLabel: "05", lens: "Relationships", icon: "ph-git-branch" },
+  { key: "06-kadry", label: "06 Kadry", shortLabel: "06", lens: "People", icon: "ph-users-three" },
+  { key: "07-finanse", label: "07 Finanse", shortLabel: "07", lens: "Control", icon: "ph-chart-line-up" },
+  { key: "08-zasoby", label: "08 Zasoby", shortLabel: "08", lens: "Support", icon: "ph-archive" },
+  { key: "09-technologia", label: "09 Technologia", shortLabel: "09", lens: "Automate", icon: "ph-cpu" },
+  { key: "10-prawo", label: "10 Prawo", shortLabel: "10", lens: "Guard", icon: "ph-scales" },
+  { key: "11-innowacje", label: "11 Innowacje", shortLabel: "11", lens: "Learn", icon: "ph-sparkle" },
+  { key: "12-zarzadzanie", label: "12 Zarzadzanie", shortLabel: "12", lens: "Manage", icon: "ph-crown" }
+];
+
+const areaCapabilities: AreaCapability[] = [
+  { id: "overview", label: "Overview", icon: "ph-gauge", href: "/areas" },
+  { id: "goals", label: "Goals", icon: "ph-target", href: "/data/targets" },
+  { id: "workflows", label: "Workflows", icon: "ph-flow-arrow", href: "/react-company-os" },
+  { id: "tasks", label: "Tasks", icon: "ph-list-checks", href: "/react-tasks" },
+  { id: "knowledge", label: "Knowledge", icon: "ph-books", href: "/settings/drive" },
+  { id: "resources", label: "Resources", icon: "ph-database", href: "/areas" },
+  { id: "decisions", label: "Decisions", icon: "ph-seal-check", href: "/react-company-os" },
+  { id: "ai", label: "AI", icon: "ph-robot", href: "/react-agent-tools" }
+];
+
+function areaKeyCandidates(area: OperatingArea) {
+  return [
+    area.key,
+    area.name,
+    area.description || ""
+  ].map((value) => value.toLowerCase());
+}
+
+function findBackendArea(connection: ConnectionData, canonical: CanonicalArea) {
+  const canonicalNumber = canonical.shortLabel;
+  const canonicalName = canonical.label.replace(/^\d+\s+/, "").toLowerCase();
+  return connection.operatingModel.areas.find((area) => {
+    const candidates = areaKeyCandidates(area);
+    return candidates.some((candidate) => (
+      candidate.includes(canonical.key)
+      || candidate.startsWith(canonicalNumber)
+      || candidate.includes(canonicalName)
+      || (canonical.key === "00-ogolny" && candidate.includes("main-general"))
+    ));
+  });
+}
+
+function areaStatus(area?: OperatingArea): AreaStatus {
+  if (!area) {
+    return "empty";
+  }
+  const tables = area.tables?.length || 0;
+  if (tables === 0) {
+    return "review";
+  }
+  return "ready";
+}
+
+function areaStatusLabel(status: AreaStatus) {
+  return {
+    ready: "Ready",
+    review: "Review",
+    blocked: "Blocked",
+    empty: "Empty"
+  }[status];
+}
+
+function buildAreaViewState(connection: ConnectionData): AreaViewState[] {
+  return canonicalAreas.map((canonical) => {
+    const backendArea = findBackendArea(connection, canonical);
+    const status = areaStatus(backendArea);
+    const tableCount = backendArea?.tables?.length || 0;
+    const detail = backendArea?.description
+      || (status === "empty"
+        ? "Area exists in the V1 operating map, but no backend area match is visible yet."
+        : `${tableCount} linked table${tableCount === 1 ? "" : "s"} in the current workspace.`);
+
+    return {
+      ...canonical,
+      backendArea,
+      tableCount,
+      status,
+      statusLabel: areaStatusLabel(status),
+      detail,
+      href: `/areas?area=${canonical.key}`
+    };
+  });
+}
+
+function areaStatusClass(status: AreaStatus) {
+  return {
+    ready: "is-ready",
+    review: "is-review",
+    blocked: "is-blocked",
+    empty: "is-empty"
+  }[status];
+}
+
+function areaToneClass(status: AreaStatus) {
+  return {
+    ready: "text-success",
+    review: "text-warning",
+    blocked: "text-error",
+    empty: "text-company-muted"
+  }[status];
+}
+
+function areaHref(area: AreaViewState, capabilityId = "overview") {
+  return `${area.href}&view=${capabilityId}`;
+}
+
+function ownershipCoverage(areas: AreaViewState[]) {
+  const available = areas.filter((area) => area.status !== "empty").length;
+  return Math.round((available / areas.length) * 100);
+}
+
+function reviewCount(areas: AreaViewState[]) {
+  return areas.filter((area) => area.status === "review" || area.status === "empty").length;
+}
+
+function DashboardStatePanel({ state, onRetry }: { state: DashboardState; onRetry: () => void }) {
+  return (
+    <main className="atlas-shell atlas-shell-signed-out" data-theme="companycore">
+      <section className="atlas-state-panel">
+        <span className="atlas-brand-mark">CC</span>
+        <StatePanel state={state} onRetry={onRetry} />
+      </section>
+    </main>
+  );
+}
+
+function AreaSidebar({
+  areas,
+  selectedArea,
+  activeCapability,
+  onSelectArea,
+  onSelectCapability
+}: {
+  areas: AreaViewState[];
+  selectedArea: AreaViewState;
+  activeCapability: string;
+  onSelectArea: (key: string) => void;
+  onSelectCapability: (capability: string) => void;
+}) {
+  return (
+    <aside className="area-sidebar" aria-label="LuckySparrow company areas">
+      <a className="area-sidebar-brand" href="/dashboard">
+        <span className="atlas-brand-mark">LS</span>
+        <span>
+          <strong>LuckySparrow</strong>
+          <small>Company Atlas</small>
+        </span>
+      </a>
+
+      <nav className="area-sidebar-nav" aria-label="Dzialy">
+        <a className="area-atlas-link is-active" href="/dashboard">
+          <i className="ph-bold ph-map-trifold" aria-hidden="true"></i>
+          <span>Company Atlas</span>
+        </a>
+        <p className="area-sidebar-kicker">Dzialy</p>
+        {areas.map((area) => {
+          const selected = area.key === selectedArea.key;
+          return (
+            <section className="area-sidebar-section" key={area.key}>
+              <button
+                className={`area-sidebar-row ${selected ? "is-selected" : ""}`}
+                type="button"
+                onClick={() => onSelectArea(area.key)}
+                aria-expanded={selected}
+              >
+                <span className={`area-status-dot ${areaStatusClass(area.status)}`} aria-hidden="true"></span>
+                <span className="area-sidebar-label">{area.label}</span>
+                <span className="area-sidebar-count">{area.tableCount}</span>
+              </button>
+              {selected ? (
+                <div className="area-sidebar-subnav" aria-label={`${area.label} views`}>
+                  {areaCapabilities.map((capability) => (
+                    <button
+                      className={activeCapability === capability.id ? "is-active" : ""}
+                      type="button"
+                      key={capability.id}
+                      onClick={() => onSelectCapability(capability.id)}
+                    >
+                      {capability.label}
+                    </button>
+                  ))}
+                  <button type="button" onClick={() => onSelectCapability("add-view")}>+ Add view</button>
+                </div>
+              ) : null}
+            </section>
+          );
+        })}
+      </nav>
+
+      <a className="area-sidebar-system" href="/settings/account">
+        <i className="ph-bold ph-sliders-horizontal" aria-hidden="true"></i>
+        <span>Workspace settings</span>
+      </a>
+    </aside>
+  );
+}
+
+function MobileAppBar({ workspaceName }: { workspaceName: string }) {
+  return (
+    <header className="mobile-atlas-appbar">
+      <a className="mobile-icon-link" href="/dashboard" aria-label="Open atlas">
+        <i className="ph-bold ph-list" aria-hidden="true"></i>
+      </a>
+      <div className="mobile-appbar-title">
+        <strong>LuckySparrow</strong>
+        <span>{workspaceName}</span>
+      </div>
+      <a className="mobile-icon-link" href="/settings/api" aria-label="Search and agent access">
+        <i className="ph-bold ph-magnifying-glass" aria-hidden="true"></i>
+      </a>
+      <span className="mobile-guarded-status">Guarded</span>
+    </header>
+  );
+}
+
+function DashboardHeader({
+  connection,
+  areas,
+  selectedArea
+}: {
+  connection: ConnectionData;
+  areas: AreaViewState[];
+  selectedArea: AreaViewState;
+}) {
+  const coverage = ownershipCoverage(areas);
+  const decisions = reviewCount(areas);
+  return (
+    <header className="atlas-header">
+      <div>
+        <p>LuckySparrow / Company Atlas</p>
+        <h1>{selectedArea.label}</h1>
+      </div>
+      <label className="atlas-search">
+        <i className="ph-bold ph-magnifying-glass" aria-hidden="true"></i>
+        <input type="search" placeholder="Search area, process, resource..." aria-label="Search area, process, resource" />
+      </label>
+      <div className="atlas-status-cluster" aria-label="Workspace status">
+        <span>{areas.length} areas</span>
+        <span>{coverage}% ownership</span>
+        <span>{decisions} decisions</span>
+      </div>
+      <a className="atlas-icon-button" href="/settings/account" aria-label="Workspace settings">
+        <i className="ph-bold ph-faders-horizontal" aria-hidden="true"></i>
+      </a>
+      <span className="atlas-header-workspace">{connection.workspace.name}</span>
+    </header>
+  );
+}
+
+function MobileAreaSelector({
+  areas,
+  selectedArea,
+  onSelectArea
+}: {
+  areas: AreaViewState[];
+  selectedArea: AreaViewState;
+  onSelectArea: (key: string) => void;
+}) {
+  return (
+    <nav className="mobile-area-selector" aria-label="Dzialy">
+      {areas.map((area) => (
+        <button
+          className={area.key === selectedArea.key ? "is-selected" : ""}
+          type="button"
+          key={area.key}
+          onClick={() => onSelectArea(area.key)}
+        >
+          <span className={`area-status-dot ${areaStatusClass(area.status)}`} aria-hidden="true"></span>
+          {area.shortLabel}
+        </button>
+      ))}
+    </nav>
+  );
+}
+
+function MobileCompanySummary({
+  areas,
+  connection
+}: {
+  areas: AreaViewState[];
+  connection: ConnectionData;
+}) {
+  const coverage = ownershipCoverage(areas);
+  const decisions = reviewCount(areas);
+  return (
+    <section className="mobile-company-summary" aria-label="Company Atlas summary">
+      <div className="mobile-summary-heading">
+        <div>
+          <h1>Company Atlas</h1>
+          <p>Area-first company control</p>
+        </div>
+        <a href="/areas">Open priority <i className="ph-bold ph-caret-right" aria-hidden="true"></i></a>
+      </div>
+      <div className="mobile-summary-metrics">
+        <span>
+          <i className="ph-bold ph-squares-four" aria-hidden="true"></i>
+          <strong>{areas.length}</strong>
+          <small>areas</small>
+        </span>
+        <span>
+          <i className="ph-bold ph-shield-check" aria-hidden="true"></i>
+          <strong>{coverage}%</strong>
+          <small>ownership</small>
+        </span>
+        <span>
+          <i className="ph-bold ph-clock" aria-hidden="true"></i>
+          <strong>{decisions}</strong>
+          <small>decisions</small>
+        </span>
+        <span>
+          <i className="ph-bold ph-robot" aria-hidden="true"></i>
+          <strong>AI</strong>
+          <small>{connection.mcpManifest ? "guarded" : "review"}</small>
+        </span>
+      </div>
+    </section>
+  );
+}
+
+function AtlasNode({
+  area,
+  selected,
+  index,
+  onSelectArea
+}: {
+  area: AreaViewState;
+  selected: boolean;
+  index: number;
+  onSelectArea: (key: string) => void;
+}) {
+  const style = { "--node-index": index } as React.CSSProperties;
+  return (
+    <button
+      className={`atlas-node ${selected ? "is-selected" : ""} ${areaStatusClass(area.status)}`}
+      style={style}
+      type="button"
+      onClick={() => onSelectArea(area.key)}
+      aria-label={`Select ${area.label}`}
+    >
+      <span>{area.shortLabel}</span>
+      <small>{area.label.replace(/^\d+\s+/, "")}</small>
+    </button>
+  );
+}
+
+function CompanyAtlasBoard({
+  areas,
+  selectedArea,
+  onSelectArea
+}: {
+  areas: AreaViewState[];
+  selectedArea: AreaViewState;
+  onSelectArea: (key: string) => void;
+}) {
+  const orbitAreas = areas.filter((area) => area.key !== "00-ogolny");
+  const general = areas.find((area) => area.key === "00-ogolny") || areas[0];
+  return (
+    <section className="atlas-board" aria-label="Company operating atlas">
+      <div className="atlas-board-topline">
+        <div>
+          <p className="atlas-kicker">APQC lens</p>
+          <h2>Company operating map</h2>
+        </div>
+        <div className="atlas-lens-row" aria-label="Process lens">
+          {["All", "Govern", "Build", "Sell", "Deliver", "Learn", "Automate"].map((lens) => (
+            <button className={lens === selectedArea.lens || lens === "All" ? "is-active" : ""} type="button" key={lens}>{lens}</button>
+          ))}
+        </div>
+      </div>
+      <div className="atlas-orbit">
+        <span className="atlas-ring atlas-ring-one" aria-hidden="true"></span>
+        <span className="atlas-ring atlas-ring-two" aria-hidden="true"></span>
+        <span className="atlas-connector vertical" aria-hidden="true"></span>
+        <span className="atlas-connector horizontal" aria-hidden="true"></span>
+        <button className={`atlas-core ${general.key === selectedArea.key ? "is-selected" : ""}`} type="button" onClick={() => onSelectArea(general.key)}>
+          <i className={`ph-bold ${general.icon}`} aria-hidden="true"></i>
+          <strong>{general.label}</strong>
+          <span>{general.statusLabel}</span>
+        </button>
+        {orbitAreas.map((area, index) => (
+          <AtlasNode
+            area={area}
+            index={index}
+            key={area.key}
+            selected={area.key === selectedArea.key}
+            onSelectArea={onSelectArea}
+          />
+        ))}
+      </div>
+      <div className="atlas-legend" aria-label="Atlas legend">
+        <span><i className="area-status-dot is-ready"></i> Ready</span>
+        <span><i className="area-status-dot is-review"></i> Review</span>
+        <span><i className="area-status-dot is-empty"></i> Empty accepted</span>
+      </div>
+    </section>
+  );
+}
+
+function CapabilityTabs({
+  activeCapability,
+  onSelectCapability
+}: {
+  activeCapability: string;
+  onSelectCapability: (capability: string) => void;
+}) {
+  return (
+    <nav className="area-capability-tabs" aria-label="Area capabilities">
+      {areaCapabilities.map((capability) => (
+        <button
+          className={activeCapability === capability.id ? "is-active" : ""}
+          type="button"
+          key={capability.id}
+          onClick={() => onSelectCapability(capability.id)}
+        >
+          <i className={`ph-bold ${capability.icon}`} aria-hidden="true"></i>
+          {capability.label}
+        </button>
+      ))}
+      <button
+        className={activeCapability === "add-view" ? "is-active" : ""}
+        type="button"
+        onClick={() => onSelectCapability("add-view")}
+      >
+        + Add view
+      </button>
+    </nav>
+  );
+}
+
+function capabilityContent(area: AreaViewState, capabilityId: string, connection: ConnectionData) {
+  const clickUpReady = connection.integrations.clickup.configured;
+  const driveReady = connection.integrations.googleDrive.configured;
+  const tables = area.backendArea?.tables || [];
+  const capability = areaCapabilities.find((item) => item.id === capabilityId);
+
+  if (capabilityId === "ai") {
+    return {
+      title: "AI handoff readiness",
+      detail: connection.mcpManifest
+        ? "MCP context is visible to the owner. Use supervised command surfaces for risky actions."
+        : "Agent handoff should stay read-only until MCP manifest and API key scope are reviewed.",
+      primary: { label: "Open agent tools", href: "/react-agent-tools" },
+      metrics: [
+        ["Capabilities", `${connection.capabilities.length}`],
+        ["MCP", connection.mcpManifest ? "Visible" : "Review"],
+        ["Scope", connection.scopeMode || "owner"]
+      ]
+    };
+  }
+
+  if (capabilityId === "knowledge") {
+    return {
+      title: "Knowledge and proof",
+      detail: driveReady
+        ? "Google Drive is configured. Area knowledge can be reviewed from Drive mappings and imported files."
+        : "Connect or refresh Drive before treating knowledge coverage as complete.",
+      primary: { label: "Open Drive", href: "/settings/drive" },
+      metrics: [
+        ["Drive", driveReady ? "Active" : "Review"],
+        ["Folders", `${connectionMetrics(connection).selectedDriveFolders}`],
+        ["Area tables", `${tables.length}`]
+      ]
+    };
+  }
+
+  if (capabilityId === "tasks") {
+    return {
+      title: "Execution pressure",
+      detail: clickUpReady
+        ? "ClickUp is configured. Task pressure can be inspected from the task workbench."
+        : "Task visibility is limited until ClickUp lists are selected.",
+      primary: { label: "Open tasks", href: "/react-tasks" },
+      metrics: [
+        ["ClickUp", clickUpReady ? "Active" : "Review"],
+        ["Lists", `${connectionMetrics(connection).selectedLists}`],
+        ["Area", area.statusLabel]
+      ]
+    };
+  }
+
+  if (capabilityId === "workflows" || capabilityId === "decisions" || capabilityId === "goals") {
+    return {
+      title: capabilityId === "goals" ? "Goals and success signals" : capabilityId === "decisions" ? "Decisions and governance" : "Workflows and operating rhythm",
+      detail: "Use Company OS records for process, approval, risk, audit, and workflow evidence. This dashboard keeps the area context first, then links into the deeper workbench.",
+      primary: { label: capabilityId === "goals" ? "Open targets" : "Open Company OS", href: capabilityId === "goals" ? "/data/targets" : "/react-company-os" },
+      metrics: [
+        ["Area", area.lens],
+        ["Tables", `${tables.length}`],
+        ["Status", area.statusLabel]
+      ]
+    };
+  }
+
+  if (capabilityId === "resources") {
+    return {
+      title: "Resources and ownership",
+      detail: tables.length > 0
+        ? `${area.label} has ${tables.length} linked resource table${tables.length === 1 ? "" : "s"} in the operating model.`
+        : "No linked resource tables are visible for this area yet. Keep this as an accepted empty state until real ownership is added.",
+      primary: { label: "Open area resources", href: area.href },
+      metrics: [
+        ["Tables", `${tables.length}`],
+        ["Backend", area.backendArea ? "Matched" : "Missing"],
+        ["MECE", area.status === "ready" ? "Clear" : "Review"]
+      ]
+    };
+  }
+
+  if (capabilityId === "add-view") {
+    return {
+      title: "Area view configuration",
+      detail: "Custom views should be added only after a backend view-config contract exists. For now this surface records the intended area-scoped entry point.",
+      primary: { label: "Review plan", href: "/react-company-os" },
+      metrics: [
+        ["Mode", "Planned"],
+        ["Scope", area.shortLabel],
+        ["Storage", "Not created"]
+      ]
+    };
+  }
+
+  return {
+    title: capability?.label || "Overview",
+    detail: area.detail,
+    primary: { label: "Open area", href: areaHref(area, capabilityId) },
+    metrics: [
+      ["Status", area.statusLabel],
+      ["Tables", `${tables.length}`],
+      ["Lens", area.lens]
+    ]
+  };
+}
+
+function AreaOverviewPanel({
+  area,
+  activeCapability,
+  connection,
+  onSelectCapability
+}: {
+  area: AreaViewState;
+  activeCapability: string;
+  connection: ConnectionData;
+  onSelectCapability: (capability: string) => void;
+}) {
+  const content = capabilityContent(area, activeCapability, connection);
+  return (
+    <section className="area-overview-panel">
+      <div className="area-panel-title">
+        <span className={`area-panel-icon ${areaToneClass(area.status)}`}>
+          <i className={`ph-bold ${area.icon}`} aria-hidden="true"></i>
+        </span>
+        <div>
+          <p className="atlas-kicker">{area.lens} area</p>
+          <h2>{area.label}</h2>
+          <span className={`area-panel-status ${areaStatusClass(area.status)}`}>{area.statusLabel}</span>
+        </div>
+      </div>
+      <CapabilityTabs activeCapability={activeCapability} onSelectCapability={onSelectCapability} />
+      <article className="area-capability-card">
+        <div>
+          <p className="atlas-kicker">{activeCapability.replace("-", " ")}</p>
+          <h3>{content.title}</h3>
+          <p>{content.detail}</p>
+        </div>
+        <div className="area-capability-metrics">
+          {content.metrics.map(([label, value]) => (
+            <span key={label}>
+              <small>{label}</small>
+              <strong>{value}</strong>
+            </span>
+          ))}
+        </div>
+        <div className="area-capability-actions">
+          <a className="atlas-primary-action" href={content.primary.href}>{content.primary.label}</a>
+          <a className="atlas-secondary-action" href="/relationships">Review links</a>
+        </div>
+      </article>
+      <div className="mece-note">
+        <i className="ph-bold ph-tree-structure" aria-hidden="true"></i>
+        <span>MECE ownership: each resource should resolve to one area before AI write actions.</span>
+      </div>
+    </section>
+  );
+}
+
+function DecisionRail({
+  connection,
+  areas,
+  selectedArea
+}: {
+  connection: ConnectionData;
+  areas: AreaViewState[];
+  selectedArea: AreaViewState;
+}) {
+  const missingClickUp = !connection.integrations.clickup.configured;
+  const missingDrive = !connection.integrations.googleDrive.configured;
+  const reviewAreas = reviewCount(areas);
+  const items = [
+    {
+      title: selectedArea.status === "ready" ? `${selectedArea.label} ready for review` : `${selectedArea.label} needs owner review`,
+      detail: selectedArea.detail,
+      href: selectedArea.href,
+      icon: selectedArea.icon
+    },
+    {
+      title: missingDrive ? "Knowledge source needs Drive" : "Knowledge source connected",
+      detail: missingDrive ? "Connect or refresh Drive before AI summarizes area knowledge." : "Drive context is available for mapped area evidence.",
+      href: "/settings/drive",
+      icon: "ph-cloud"
+    },
+    {
+      title: missingClickUp ? "Execution source needs ClickUp" : "Execution source connected",
+      detail: missingClickUp ? "Task pressure is partial until selected ClickUp lists are configured." : "Task workbench can inspect execution state.",
+      href: "/react-tasks",
+      icon: "ph-list-checks"
+    },
+    {
+      title: `${reviewAreas} area decision${reviewAreas === 1 ? "" : "s"}`,
+      detail: "Empty or review areas stay visible so the owner and AI do not assume full coverage.",
+      href: "/areas",
+      icon: "ph-seal-warning"
+    }
+  ];
+
+  return (
+    <aside className="decision-rail" aria-label="Today priorities">
+      <div>
+        <p className="atlas-kicker">Today</p>
+        <h2>Decide, delegate, prove</h2>
+      </div>
+      <div className="decision-list">
+        {items.map((item) => (
+          <a className="decision-item" href={item.href} key={item.title}>
+            <i className={`ph-bold ${item.icon}`} aria-hidden="true"></i>
+            <span>
+              <strong>{item.title}</strong>
+              <small>{item.detail}</small>
+            </span>
+          </a>
+        ))}
+      </div>
+      <div className="decision-proof">
+        <span>Sources</span>
+        <strong>/v1/connection</strong>
+        <strong>Operating model</strong>
+        <strong>MCP scope</strong>
+      </div>
+    </aside>
+  );
+}
+
+function ProgressivePath({ activeCapability }: { activeCapability: string }) {
+  const steps = ["Overview", "Area", "Capability", "Record", "Evidence", "AI action"];
+  return (
+    <nav className="progressive-path" aria-label="Progressive path">
+      {steps.map((step, index) => (
+        <span className={index <= 2 || activeCapability === "ai" ? "is-active" : ""} key={step}>
+          {step}
+        </span>
+      ))}
+    </nav>
+  );
+}
+
+function MobileBottomNav({
+  activeCapability,
+  onSelectCapability
+}: {
+  activeCapability: string;
+  onSelectCapability: (capability: string) => void;
+}) {
+  const items = [
+    { id: "overview", label: "Atlas", icon: "ph-map-trifold" },
+    { id: "resources", label: "Area", icon: "ph-buildings" },
+    { id: "tasks", label: "Tasks", icon: "ph-list-checks" },
+    { id: "knowledge", label: "Knowledge", icon: "ph-books" },
+    { id: "ai", label: "AI", icon: "ph-robot" }
+  ];
+
+  return (
+    <nav className="mobile-bottom-nav" aria-label="Mobile dashboard navigation">
+      {items.map((item) => (
+        <button
+          className={activeCapability === item.id ? "is-active" : ""}
+          type="button"
+          key={item.id}
+          onClick={() => onSelectCapability(item.id)}
+        >
+          <i className={`ph-bold ${item.icon}`} aria-hidden="true"></i>
+          <span>{item.label}</span>
+        </button>
+      ))}
+    </nav>
+  );
+}
+
+function AreaFirstDashboard({ connection }: { connection: ConnectionData }) {
+  const areas = useMemo(() => buildAreaViewState(connection), [connection]);
+  const initialArea = areas.find((area) => area.key === "01-strategia") || areas[0];
+  const [selectedAreaKey, setSelectedAreaKey] = useState(initialArea.key);
+  const [activeCapability, setActiveCapability] = useState("overview");
+  const selectedArea = areas.find((area) => area.key === selectedAreaKey) || initialArea;
+
+  return (
+    <main className="atlas-shell" data-theme="companycore">
+      <AreaSidebar
+        areas={areas}
+        selectedArea={selectedArea}
+        activeCapability={activeCapability}
+        onSelectArea={setSelectedAreaKey}
+        onSelectCapability={setActiveCapability}
+      />
+      <section className="atlas-workspace">
+        <MobileAppBar workspaceName={connection.workspace.name} />
+        <MobileCompanySummary areas={areas} connection={connection} />
+        <DashboardHeader connection={connection} areas={areas} selectedArea={selectedArea} />
+        <MobileAreaSelector areas={areas} selectedArea={selectedArea} onSelectArea={setSelectedAreaKey} />
+        <section className="atlas-content-grid">
+          <CompanyAtlasBoard areas={areas} selectedArea={selectedArea} onSelectArea={setSelectedAreaKey} />
+          <AreaOverviewPanel
+            area={selectedArea}
+            activeCapability={activeCapability}
+            connection={connection}
+            onSelectCapability={setActiveCapability}
+          />
+          <DecisionRail connection={connection} areas={areas} selectedArea={selectedArea} />
+        </section>
+        <ProgressivePath activeCapability={activeCapability} />
+      </section>
+      <MobileBottomNav activeCapability={activeCapability} onSelectCapability={setActiveCapability} />
+    </main>
+  );
+}
+
 function TasksStatePanel({ state, onRetry }: { state: TasksWorkbenchState; onRetry: () => void }) {
   if (state.status === "ready") {
     return null;
@@ -6516,21 +7283,7 @@ function AgentToolSurfaceWorkbench({ connection, manifest }: { connection: Conne
 }
 
 function ReadyDashboard({ connection }: { connection: ConnectionData }) {
-  const items = useMemo(() => attentionItems(connection), [connection]);
-
-  return (
-    <Shell connection={connection}>
-      <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-8 xl:grid-cols-[1.4fr_0.8fr]">
-        <CommandPanel connection={connection} />
-        <AttentionQueue items={items} />
-      </section>
-      <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-10">
-        <ModuleLauncher />
-        <WorkbenchPreview connection={connection} />
-        <MigrationTable />
-      </section>
-    </Shell>
-  );
+  return <AreaFirstDashboard connection={connection} />;
 }
 
 function ReactDashboardApp() {
@@ -6540,11 +7293,7 @@ function ReactDashboardApp() {
     return <ReadyDashboard connection={dashboardState.connection} />;
   }
 
-  return (
-    <Shell>
-      <StatePanel state={dashboardState} onRetry={reload} />
-    </Shell>
-  );
+  return <DashboardStatePanel state={dashboardState} onRetry={reload} />;
 }
 
 function ReactTasksApp() {
@@ -6631,7 +7380,7 @@ function ReactApp() {
     return <ReactIntegrationsApp />;
   }
 
-  document.title = "CompanyCore React Dashboard";
+  document.title = "CompanyCore Company Atlas";
   return <ReactDashboardApp />;
 }
 
