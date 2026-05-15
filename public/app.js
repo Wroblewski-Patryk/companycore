@@ -264,6 +264,12 @@ const selectAllListsButton = document.querySelector("#selectAllListsButton");
 const clearListsButton = document.querySelector("#clearListsButton");
 const workspaceSelect = document.querySelector("#workspaceSelect");
 const connectionStatus = document.querySelector("#connectionStatus");
+const dashboardDecisionTitle = document.querySelector("#dashboardDecisionTitle");
+const dashboardDecisionDetail = document.querySelector("#dashboardDecisionDetail");
+const dashboardDecisionPrimary = document.querySelector("#dashboardDecisionPrimary");
+const dashboardDecisionSecondary = document.querySelector("#dashboardDecisionSecondary");
+const dashboardDecisionMetrics = document.querySelector("#dashboardDecisionMetrics");
+const dashboardDecisionList = document.querySelector("#dashboardDecisionList");
 const commandPriorityTitle = document.querySelector("#commandPriorityTitle");
 const commandPriorityDetail = document.querySelector("#commandPriorityDetail");
 const commandPrimaryAction = document.querySelector("#commandPrimaryAction");
@@ -1558,9 +1564,102 @@ function renderDashboardCommandCenter() {
     }
   }
 
+  renderDashboardDecisionBoard(signals, items, { areas, tables, mappings, driveItems, clickUpLists });
   renderOperationalCockpit(signals, items, { areas, tables, mappings, pipelineRecords: signals.pipelineRecords });
   renderCompanyMapFrame(signals, items, { areas, tables, mappings, driveItems, clickUpLists });
   nextActionText.textContent = nextActionCopy(items, signals);
+}
+
+function renderDashboardDecisionBoard(signals, items, counts) {
+  if (!dashboardDecisionTitle || !dashboardDecisionDetail || !dashboardDecisionMetrics || !dashboardDecisionList) {
+    return;
+  }
+
+  const priority = dashboardPriority(items, signals);
+  const graphSummary = state.relationshipGraph.summary || {};
+  const reviewCount = signals.unmappedProviderMappings.length
+    + signals.unassignedDriveFolders.length
+    + state.relationshipGraph.reviewItems.length;
+  const mcpTools = Array.isArray(state.mcpManifest?.tools) ? state.mcpManifest.tools.length : 0;
+  const activeKeys = state.apiKeys.filter((key) => key.active).length;
+  const scopedKeys = state.apiKeys.filter((key) => key.active && Array.isArray(key.scopes) && key.scopes.length > 0).length;
+  const hasRelationshipTool = Array.isArray(state.mcpManifest?.tools)
+    && state.mcpManifest.tools.some((tool) => tool.capability === "relationships:read");
+  const agentTone = scopedKeys > 0 && hasRelationshipTool ? "ready" : activeKeys > 0 || mcpTools > 0 ? "attention" : "blocked";
+  const agentValue = scopedKeys > 0 && hasRelationshipTool
+    ? "Safe handoff ready"
+    : mcpTools > 0
+      ? "Review agent access"
+      : "No MCP manifest";
+  const integrationReady = integrationReadinessItems().filter((item) => item.status === "ready").length;
+  const metricCards = [
+    {
+      label: "Blockers",
+      value: `${items.length}`,
+      detail: reviewCount > 0 ? `${reviewCount} mapping or graph reviews` : "No urgent review debt",
+      href: items[0]?.href || "/relationships",
+      tone: items.length > 0 ? "attention" : "ready"
+    },
+    {
+      label: "Next action",
+      value: priority.action,
+      detail: priority.title,
+      href: priority.href,
+      tone: items.length > 0 ? "attention" : "ready"
+    },
+    {
+      label: "AI readiness",
+      value: agentValue,
+      detail: `${scopedKeys}/${activeKeys} scoped keys, ${mcpTools} tools`,
+      href: "/settings/api",
+      tone: agentTone
+    },
+    {
+      label: "Company context",
+      value: `${counts.areas || 0} areas`,
+      detail: `${counts.driveItems || 0} Drive items, ${state.tasks.length} tasks, ${Number(graphSummary.edges || 0)} edges`,
+      href: "/areas",
+      tone: counts.areas > 0 ? "ready" : "blocked"
+    }
+  ];
+
+  dashboardDecisionTitle.textContent = priority.title;
+  dashboardDecisionDetail.textContent = priority.detail;
+  dashboardDecisionPrimary.href = priority.href;
+  dashboardDecisionPrimary.textContent = priority.action;
+  dashboardDecisionSecondary.href = priority.secondaryHref;
+  dashboardDecisionSecondary.textContent = priority.secondaryAction;
+
+  dashboardDecisionMetrics.innerHTML = metricCards.map((metric) => `
+    <a class="dashboard-decision-metric is-${escapeHtml(metric.tone)}" href="${escapeHtml(metric.href)}" data-link>
+      <span>${escapeHtml(metric.label)}</span>
+      <strong>${escapeHtml(metric.value)}</strong>
+      <small>${escapeHtml(metric.detail)}</small>
+    </a>
+  `).join("");
+  bindInlineNavigation(dashboardDecisionMetrics);
+
+  const topItems = items.slice(0, 3);
+  dashboardDecisionList.innerHTML = topItems.length > 0
+    ? topItems.map((item) => `
+      <a class="dashboard-decision-item" href="${escapeHtml(item.href)}" data-link>
+        <span class="ui-icon" aria-hidden="true"><i class="ph-bold ${escapeHtml(item.icon || "ph-warning-circle")}"></i></span>
+        <span>
+          <strong>${escapeHtml(item.title)}</strong>
+          <small>${escapeHtml(item.detail)}</small>
+        </span>
+      </a>
+    `).join("")
+    : `
+      <a class="dashboard-decision-item is-clear" href="/areas" data-link>
+        <span class="ui-icon" aria-hidden="true"><i class="ph-bold ph-check-circle"></i></span>
+        <span>
+          <strong>${isSignedIn() ? "No urgent blockers" : "Owner session required"}</strong>
+          <small>${isSignedIn() ? `${integrationReady}/4 readiness lanes are fully ready. Keep improving company context from areas.` : "Sign in to load current blockers and readiness."}</small>
+        </span>
+      </a>
+    `;
+  bindInlineNavigation(dashboardDecisionList);
 }
 
 function renderOperationalCockpit(signals, items, counts) {

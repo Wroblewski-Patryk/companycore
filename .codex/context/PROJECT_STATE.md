@@ -2591,6 +2591,15 @@ Last updated: 2026-05-15
   app, owner operating-cockpit promise, and AI/MCP safety direction. UX100-W01
   Dashboard Command Brief And Mobile First Viewport is now the next ready
   implementation wave.
+- 2026-05-15: Completed UX100-W01 by adding a dashboard owner decision board
+  above the Company map. The board derives priority, blocker count, next
+  action, AI readiness, company context, and top blockers from existing
+  workspace state. `npm run check:public-js`, `npm run validate`, `git diff
+  --check`, and `npm run test:api` passed against disposable PostgreSQL on
+  `localhost:55474`; Playwright verified `/dashboard` on desktop, tablet, and
+  mobile with four decision metrics, at least one decision item, 13 map cards,
+  no overflow, no console issues, no failed requests, and zero unnamed visible
+  controls.
 - 2026-05-06: Deployed the Agent CRUD API rollout to production with manual
   VPS backend rollover. The running backend container is
   `backend-rnqqkhl3o3dut4qv56mlxly2-manual-bf59b2f`, image

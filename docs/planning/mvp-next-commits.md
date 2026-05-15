@@ -7,16 +7,15 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] UX100-W01 Dashboard Command Brief And Mobile First Viewport:
-      implement the first UX100 wave by making the dashboard first viewport
-      answer owner priority, blockers, next action, and AI readiness across
-      desktop, tablet, and mobile.
+- [ ] UX100-W02 Shell Decision Brief And Mobile Quick Actions:
+      extend the dashboard decision-board model into a shared route decision
+      brief and mobile quick actions without creating a third shell model.
 
 ### NEXT
 
-- [ ] UX100-W02 Shell Decision Brief And Mobile Quick Actions:
-      add a persistent route decision brief pattern and mobile quick actions
-      after the dashboard pilot proves the model.
+- [ ] UX100-W03 Relationship/Data Provenance And AI Safety Labels:
+      improve trust by making source provenance and AI-safe context visible in
+      relationship and data surfaces.
 - [ ] AGRUN-010 Upstream Agent Source Merge Execution:
       still blocked until upstream write access or an approved fork/PR route
       exists.
@@ -204,6 +203,15 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       integrations, Drive, API, MCP tools, Company OS, account, auth, errors,
       performance, and governance. Activated UX100-W01 as the next ready
       implementation wave.
+- [x] UX100-W01 Dashboard Command Brief And Mobile First Viewport:
+      added a dashboard owner decision board above the Company map, deriving
+      owner priority, blockers, next action, AI readiness, company context, and
+      top blockers from existing workspace state. `npm run check:public-js`,
+      `npm run validate`, `git diff --check`, and `npm run test:api` passed
+      against disposable PostgreSQL on `localhost:55474`; Playwright verified
+      `/dashboard` at desktop, tablet, and mobile with four decision metrics,
+      at least one decision item, 13 map cards, no overflow, no console
+      issues, no failed requests, and zero unnamed visible controls.
 - [x] ACF-SEC-001 Production Secret And CORS Hardening:
       production now fails closed when required secret env vars are absent or
       still use committed development placeholder values; production CORS is

@@ -959,3 +959,20 @@ of rediscovering them.
   `/settings/drive`, verified desktop `1366x900`, tablet `834x1112`, and
   mobile `390x844` with four command cards, stable anchors, no overflow, no
   console issues, no failed requests, and zero unnamed visible controls.
+
+### 2026-05-15 - Dashboard Owner Decision Board
+- Type: implemented_layout_pattern
+- Context: The post-login dashboard must feel like a company operating cockpit,
+  not a directory of modules or a passive metrics page.
+- Decision: Place an owner decision board above the map. It must show one
+  state-derived priority, primary/secondary actions, four compact decision
+  metrics, and the top blocker list. AI/MCP readiness belongs in the first
+  dashboard viewport when agent handoff is part of the product promise.
+- Reuse when: A major owner entry route needs to answer what matters now, what
+  is blocked, what to do next, and whether AI can safely help.
+- Avoid when: A narrow workbench already has a route-local command summary and
+  adding another decision board would hide the primary table/form.
+- Evidence: UX100-W01 added the dashboard decision board and verified desktop,
+  tablet, and mobile with four decision metrics, at least one decision item,
+  13 area cards, no horizontal overflow, no console issues, no failed requests,
+  and zero unnamed visible controls.

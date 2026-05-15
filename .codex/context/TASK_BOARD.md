@@ -2,14 +2,14 @@
 
 ## Ready
 
-- UX100-W01 Dashboard Command Brief And Mobile First Viewport
+- UX100-W02 Shell Decision Brief And Mobile Quick Actions
   - Stage: planning
   - Owner: Frontend Builder + QA/Test
   - Priority: P1
   - Source: `docs/ux/web-app-ux100-audit-and-execution-plan-2026-05-15.md`
-  - Goal: implement the first UX100 wave by making the dashboard first
-    viewport answer owner priority, blockers, next action, and AI readiness
-    across desktop, tablet, and mobile.
+  - Goal: extend the dashboard decision-board model into a shared route
+    decision brief and mobile quick actions without creating a third shell
+    model.
 
 ## In Progress
 
@@ -59,6 +59,21 @@ No active local implementation task is currently in progress.
   auto-deploy webhook administration task.
 
 ## Done
+
+- UX100-W01 Dashboard Command Brief And Mobile First Viewport.
+  - Evidence: added a dashboard owner decision board above the Company map,
+    deriving priority, blocker count, next action, AI readiness, company
+    context, and top blockers from existing workspace state. `npm run
+    check:public-js`, `npm run validate`, `git diff --check`, and `npm run
+    test:api` passed against disposable PostgreSQL on `localhost:55474`.
+    Playwright fallback verified `/dashboard` on `http://127.0.0.1:3120` at
+    desktop `1366x900`, tablet `834x1112`, and mobile `390x844` with four
+    decision metrics, at least one decision item, 13 map cards, no horizontal
+    overflow, no console issues, no failed requests, and zero unnamed visible
+    controls. Validation server, database, and headless browser processes were
+    cleaned up.
+  - Task contract:
+    `docs/planning/ux100-w01-dashboard-command-brief-task-contract.md`.
 
 - UX100-001 Web App UX100 Audit Atlas And Execution Plan.
   - Evidence: published

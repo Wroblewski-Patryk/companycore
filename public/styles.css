@@ -1010,6 +1010,156 @@ h4 {
   margin-bottom: 20px;
 }
 
+.dashboard-decision-board {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(380px, 1.05fr);
+  gap: 18px;
+  align-items: stretch;
+  margin-bottom: 20px;
+  padding: 22px;
+  border: 1px solid #cbd8ea;
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(45, 108, 223, 0.09), rgba(29, 136, 91, 0.05)),
+    #ffffff;
+  box-shadow: 0 16px 34px rgba(35, 48, 73, 0.08);
+}
+
+.dashboard-decision-main {
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.dashboard-decision-main h2 {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.dashboard-decision-main p {
+  max-width: 720px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.dashboard-decision-actions {
+  margin-top: 6px;
+}
+
+.dashboard-decision-side {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+  min-width: 0;
+}
+
+.dashboard-decision-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.dashboard-decision-metric {
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  min-height: 104px;
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.dashboard-decision-metric:hover,
+.dashboard-decision-metric:focus-visible,
+.dashboard-decision-item:hover,
+.dashboard-decision-item:focus-visible {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px rgba(45, 108, 223, 0.12);
+  outline: none;
+}
+
+.dashboard-decision-metric span,
+.dashboard-decision-metric small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.dashboard-decision-metric span {
+  text-transform: uppercase;
+}
+
+.dashboard-decision-metric strong {
+  overflow-wrap: anywhere;
+  font-size: 16px;
+  line-height: 1.12;
+}
+
+.dashboard-decision-metric.is-ready {
+  border-color: #b7ddc3;
+  background: #f6fbf8;
+}
+
+.dashboard-decision-metric.is-attention {
+  border-color: #ead395;
+  background: #fffaf0;
+}
+
+.dashboard-decision-metric.is-blocked {
+  border-color: #f0c0be;
+  background: #fff7f6;
+}
+
+.dashboard-decision-list {
+  display: grid;
+  gap: 8px;
+}
+
+.dashboard-decision-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #dbe4f0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.dashboard-decision-item span:last-child {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.dashboard-decision-item strong,
+.dashboard-decision-item small {
+  overflow-wrap: anywhere;
+}
+
+.dashboard-decision-item strong {
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.dashboard-decision-item small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 .company-map-frame {
   display: grid;
   gap: 18px;
@@ -4435,6 +4585,8 @@ button.danger:hover {
   .dashboard-grid,
   .settings-grid,
   .auth-grid,
+  .dashboard-decision-board,
+  .dashboard-decision-metrics,
   .company-map-head,
   .company-map-layout,
   .dashboard-command-layout,
@@ -4459,6 +4611,19 @@ button.danger:hover {
 
   .view[data-view="/dashboard"] .page-title {
     margin-bottom: 12px;
+  }
+
+  .dashboard-decision-board {
+    gap: 14px;
+    padding: 18px;
+  }
+
+  .dashboard-decision-main h2 {
+    font-size: 24px;
+  }
+
+  .dashboard-decision-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .auth-grid {
@@ -4664,6 +4829,19 @@ button.danger:hover {
 }
 
 @media (max-width: 460px) {
+  .dashboard-decision-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-decision-metric {
+    min-height: auto;
+    padding: 9px;
+  }
+
+  .dashboard-decision-actions .button-link {
+    width: 100%;
+  }
+
   .api-command-grid,
   .drive-command-grid {
     grid-template-columns: 1fr;

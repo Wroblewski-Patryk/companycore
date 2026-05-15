@@ -4,16 +4,15 @@ Last updated: 2026-05-15
 
 ## NOW
 
-1. UX100-W01 Dashboard Command Brief And Mobile First Viewport.
-   - Implement the first UX100 wave by making the dashboard first viewport
-     answer owner priority, blockers, next action, and AI readiness across
-     desktop, tablet, and mobile.
+1. UX100-W02 Shell Decision Brief And Mobile Quick Actions.
+   - Extend the dashboard decision-board model into a shared route decision
+     brief and mobile quick actions without creating a third shell model.
 
 ## NEXT
 
-1. UX100-W02 Shell Decision Brief And Mobile Quick Actions.
-   - Add a persistent route decision brief pattern and mobile quick actions
-     after the dashboard pilot proves the model.
+1. UX100-W03 Relationship/Data Provenance And AI Safety Labels.
+   - Improve trust by making source provenance and AI-safe context visible in
+     relationship and data surfaces.
 2. AGRUN-010 Upstream Agent Source Merge Execution.
    - Blocked until upstream write access or an approved fork/PR route exists.
 3. Restore build commit/image metadata in production health.
