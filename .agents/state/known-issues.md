@@ -21,6 +21,12 @@ Last updated: 2026-05-15
 - 2026-05-15: ACF-OPS-002 restored source-level build metadata wiring and
   regression coverage. The release-automation proof gap remains accepted until
   the next deployed runtime is checked through public `/health`.
+- 2026-05-15: Post-push public smoke after `ec82a1a` returned `200` for
+  `https://api.companycore.luckysparrow.ch/health`,
+  `https://api.companycore.luckysparrow.ch/v1/health`, and
+  `https://companycore.luckysparrow.ch/`, but both API health endpoints still
+  reported `build.commit="unknown"` and `build.image="unknown"`. Treat this as
+  uptime evidence only, not push-to-running-image proof.
 
 ## Recently Closed Issues
 
