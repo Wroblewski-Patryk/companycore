@@ -118,7 +118,7 @@ export function createApp() {
   app.use(express.json({ limit: "1mb" }));
   app.get("/", (req, res, next) => {
     if (!isApiHost(req.headers.host)) {
-      next();
+      res.sendFile(path.join(publicRoot, "react", "index.html"));
       return;
     }
 
