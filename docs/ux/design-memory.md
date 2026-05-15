@@ -133,6 +133,28 @@ of rediscovering them.
   and mobile `390x844` with no overflow, no console issues, no failed
   requests, and zero unnamed visible controls.
 
+### 2026-05-15 - Shell Decision Brief And Mobile Quick Actions
+- Type: reusable_pattern
+- Context: UX100-W02 extends the W01 dashboard decision-board model across the
+  authenticated route frame without adding a second shell.
+- Decision: The shared route command strip should be allowed to derive its
+  title, matter text, blocked/review signal, and tone from current workspace
+  state. Mobile and tablet users should get an explicit five-action rail for
+  `Map`, `Brief`, `Data`, `Tasks`, and `Settings` immediately below the route
+  brief, while desktop keeps the existing command strip and sidebar/topbar.
+- Reuse when: Adding route-level state signals, improving mobile first
+  viewport usefulness, or making a dense private route answer what matters now
+  before the route body begins.
+- Avoid when: The action would create another shell model, duplicate the
+  sidebar, or add route-local mobile navigation unrelated to the shared owner
+  intent vocabulary.
+- Evidence: UX100-W02 passed `npm run check:public-js`, `npm run validate`,
+  `git diff --check`, and `npm run test:api` against portable PostgreSQL on
+  `localhost:55475`. Playwright fallback against a local QA server verified
+  six private routes at desktop, tablet, and mobile with no overflow, no
+  console issues, no failed requests, route decision signals present, hidden
+  desktop quick rail, and visible five-action mobile/tablet quick rail.
+
 ### 2026-05-15 - Route Body Command Summary
 - Type: reusable_pattern
 - Context: V2VIS-003 polished `/areas` after route-frame convergence showed

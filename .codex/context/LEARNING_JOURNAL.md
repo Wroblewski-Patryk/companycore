@@ -376,3 +376,28 @@ fixes for this repository.
 - Evidence: PROD-HOTFIX-001 added a regression test for production import
   without `API_KEY_HASH_SECRET`; `npm test` passed against disposable
   PostgreSQL on `localhost:55466`.
+
+### 2026-05-15 - Treat Docker Desktop CLI hangs as an environment blocker, not a test result
+- Context: UX100-W02 needed the standard disposable PostgreSQL API gate after
+  frontend shell changes.
+- Symptom: `docker run`, `docker ps`, and `docker version` hung until command
+  timeout. Windows reported `com.docker.service` as stopped, `Start-Service`
+  could not start it from the Codex session, and a Docker Desktop CLI
+  shutdown/restart attempt still left `docker version` timing out.
+- Root cause: Local Docker Desktop/CLI was unavailable even though the
+  `docker-desktop` WSL distribution was listed as running. The repository
+  validation did not have a reachable PostgreSQL instance for Prisma migrate.
+- Guardrail: Do not mark API or integrated UI tasks `DONE` when Docker is in
+  this state until an equivalent reachable PostgreSQL is available. Record
+  `PARTIAL` or `BLOCKED` during the gap, clean up validation-owned CLI,
+  server, and browser processes, then finish the gate once a database is
+  restored.
+- Preferred pattern: Run `docker version --format '{{.Server.Version}}'`
+  before starting a disposable database when Docker health is uncertain. If it
+  hangs, stop validation-owned `docker` CLI processes and avoid repeated
+  container commands. A portable PostgreSQL binary in `.tmp` is an acceptable
+  local fallback for `npm run test:api` when disk space allows it.
+- Evidence: UX100-W02 initially failed at Prisma migrate because no PostgreSQL
+  was reachable on `localhost:55475`. After freeing validation artifacts and
+  starting portable PostgreSQL on the same port, `npm run test:api` passed and
+  W02 was marked verified.

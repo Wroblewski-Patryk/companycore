@@ -7,15 +7,15 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] UX100-W02 Shell Decision Brief And Mobile Quick Actions:
-      extend the dashboard decision-board model into a shared route decision
-      brief and mobile quick actions without creating a third shell model.
-
-### NEXT
-
 - [ ] UX100-W03 Relationship/Data Provenance And AI Safety Labels:
       improve trust by making source provenance and AI-safe context visible in
       relationship and data surfaces.
+
+### NEXT
+
+- [ ] UX100-W04 Tasks/Pipeline Operating Pressure Summaries:
+      make delivery and pipeline pressure visible from real state after W03
+      provenance labels are verified.
 - [ ] AGRUN-010 Upstream Agent Source Merge Execution:
       still blocked until upstream write access or an approved fork/PR route
       exists.
@@ -212,6 +212,16 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       `/dashboard` at desktop, tablet, and mobile with four decision metrics,
       at least one decision item, 13 map cards, no overflow, no console
       issues, no failed requests, and zero unnamed visible controls.
+- [x] UX100-W02 Shell Decision Brief And Mobile Quick Actions:
+      extended the existing route command strip with state-derived route
+      decision signals and added a five-action mobile/tablet quick rail for
+      Map, Brief, Data, Tasks, and Settings. `npm run check:public-js`,
+      `npm run validate`, `git diff --check`, and `npm run test:api` passed
+      against portable PostgreSQL on `localhost:55475`; Playwright verified
+      six private routes at desktop, tablet, and mobile with no overflow, no
+      console issues, no failed requests, route decision signals present,
+      hidden desktop quick rail, visible tablet/mobile quick rail, and zero
+      unnamed visible controls.
 - [x] ACF-SEC-001 Production Secret And CORS Hardening:
       production now fails closed when required secret env vars are absent or
       still use committed development placeholder values; production CORS is

@@ -2,14 +2,13 @@
 
 ## Ready
 
-- UX100-W02 Shell Decision Brief And Mobile Quick Actions
+- UX100-W03 Relationship/Data Provenance And AI Safety Labels
   - Stage: planning
   - Owner: Frontend Builder + QA/Test
   - Priority: P1
   - Source: `docs/ux/web-app-ux100-audit-and-execution-plan-2026-05-15.md`
-  - Goal: extend the dashboard decision-board model into a shared route
-    decision brief and mobile quick actions without creating a third shell
-    model.
+  - Goal: improve trust by making source provenance and AI-safe context visible
+    in relationship and data surfaces.
 
 ## In Progress
 
@@ -59,6 +58,24 @@ No active local implementation task is currently in progress.
   auto-deploy webhook administration task.
 
 ## Done
+
+- UX100-W02 Shell Decision Brief And Mobile Quick Actions.
+  - Evidence: extended the existing authenticated route command strip with
+    state-derived route decision titles, what-matters text, blocked/review
+    signal, and tone; added a shared five-action mobile/tablet quick rail for
+    Map, Brief, Data, Tasks, and Settings without creating a second shell.
+    `npm run check:public-js`, `npm run validate`, `git diff --check`, and
+    `npm run test:api` passed against portable PostgreSQL on
+    `localhost:55475`. Playwright fallback verified `/dashboard`, `/areas`,
+    `/relationships`, `/data/tasks`, `/settings/api`, and `/settings/drive`
+    on `http://127.0.0.1:3121` at desktop `1366x900`, tablet `834x1112`,
+    and mobile `390x844` with route command titles/signals/tones, hidden
+    desktop quick rail, visible five-action tablet/mobile quick rail, no
+    horizontal overflow, no console issues, no failed requests, and zero
+    unnamed visible controls. Validation server, portable database, and
+    headless browser processes were cleaned up.
+  - Task contract:
+    `docs/planning/ux100-w02-shell-decision-brief-task-contract.md`.
 
 - UX100-W01 Dashboard Command Brief And Mobile First Viewport.
   - Evidence: added a dashboard owner decision board above the Company map,

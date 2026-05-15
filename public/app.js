@@ -302,6 +302,7 @@ const routeCommandMatter = document.querySelector("#routeCommandMatter");
 const routeCommandBlocked = document.querySelector("#routeCommandBlocked");
 const routeCommandDot = document.querySelector("#routeCommandDot");
 const routeCommandActions = document.querySelector("#routeCommandActions");
+const mobileQuickActions = document.querySelector("#mobileQuickActions");
 const clickupWorkspaceLabel = document.querySelector("#clickupWorkspaceLabel");
 const clickupActionStatus = document.querySelector("#clickupActionStatus");
 const workspaceNameLabel = document.querySelector("#workspaceNameLabel");
@@ -525,6 +526,17 @@ const routeCommandMeta = {
       { label: "Review relationships", href: "/relationships", secondary: true }
     ]
   },
+  "/areas": {
+    family: "Areas",
+    title: "Areas & resources",
+    matter: "Review operating-area ownership, resource coverage, provider mappings, and Drive assignments before routing work to people or agents.",
+    blocked: "Unassigned provider mappings or Drive folders should be moved into the right area.",
+    tone: "attention",
+    actions: [
+      { label: "Review mappings", href: "/areas#areaMappings" },
+      { label: "Relationships", href: "/relationships", secondary: true }
+    ]
+  },
   "/data": {
     family: "Workbench",
     title: "Company data",
@@ -636,6 +648,14 @@ const routeCommandMeta = {
     ]
   }
 };
+
+const mobileQuickActionItems = [
+  { label: "Map", href: "/dashboard", icon: "ph-map-trifold", match: (path) => path === "/dashboard" && window.location.hash !== "#dashboardDecisionBoard" },
+  { label: "Brief", href: "/dashboard#dashboardDecisionBoard", icon: "ph-gauge", match: (path) => path === "/dashboard" && window.location.hash === "#dashboardDecisionBoard" },
+  { label: "Data", href: "/data", icon: "ph-database", match: (path) => path === "/data" || isDataWorkbenchPath(path) },
+  { label: "Tasks", href: "/tasks-adapter", icon: "ph-check-square", match: (path) => path === "/tasks-adapter" },
+  { label: "Settings", href: "/settings/integrations", icon: "ph-sliders-horizontal", match: (path) => path.startsWith("/settings") || path === "/react-agent-tools" }
+];
 
 const dataModuleCatalog = [
   { slug: "projects", label: "Projects", group: "Strategy and delivery", href: "/data/projects", description: "Project containers for delivery work and roadmap context." },
@@ -915,6 +935,143 @@ function routeCommandKey(path) {
   return isDataWorkbenchPath(path) ? "/data-table" : path;
 }
 
+function routeDecisionSignal(path, meta) {
+  if (!isSignedIn()) {
+    return {
+      title: meta.title,
+      matter: "Sign in to load the current workspace signal.",
+      blocked: "Owner session is required before this route can guide work.",
+      tone: "blocked"
+    };
+  }
+
+  const signals = dashboardSignals();
+  const relationshipReviews = signals.unmappedProviderMappings.length
+    + signals.unassignedDriveFolders.length
+    + state.relationshipGraph.reviewItems.length;
+  const activeKeys = state.apiKeys.filter((key) => key.active).length;
+  const scopedKeys = state.apiKeys.filter((key) => key.active && Array.isArray(key.scopes) && key.scopes.length > 0).length;
+  const mcpTools = Array.isArray(state.mcpManifest?.tools) ? state.mcpManifest.tools.length : 0;
+  const route = routeCommandKey(path);
+  const areaCount = state.operatingModel.areas.length;
+  const tableCount = state.operatingModel.areas.flatMap((area) => area.tables || []).length;
+  const driveFoldersToReview = signals.unassignedDriveFolders.length;
+  const openTaskCount = signals.openTasks.length;
+  const dueSoonCount = signals.dueSoonTasks.length;
+
+  if (route === "/dashboard") {
+    const items = dashboardAttentionItems(signals);
+    return {
+      title: items.length > 0 ? "Review the top company blocker" : "Workspace command brief is clear",
+      matter: items[0]?.detail || `${areaCount} operating areas, ${state.tasks.length} tasks, and ${mcpTools} MCP tools are available from this workspace.`,
+      blocked: items.length > 0 ? `${items.length} dashboard signal${items.length === 1 ? "" : "s"} need owner review.` : "No urgent dashboard blockers are visible.",
+      tone: items.length > 0 ? "attention" : "ready"
+    };
+  }
+
+  if (route === "/areas") {
+    const resourceCount = state.areaInventory.reduce((total, area) => total + (area.resources || []).reduce((sum, resource) => sum + Number(resource.count || 0), 0), 0);
+    return {
+      title: relationshipReviews > 0 ? "Triage ownership and area scope" : "Area ownership looks ready",
+      matter: `${areaCount} areas organize ${resourceCount} tracked resources across tables, providers, and Drive.`,
+      blocked: relationshipReviews > 0 ? `${relationshipReviews} relationships or folders still need area review.` : "No area review debt is currently surfaced.",
+      tone: relationshipReviews > 0 ? "attention" : "ready"
+    };
+  }
+
+  if (route === "/relationships") {
+    const edgeCount = Number(state.relationshipGraph.summary?.edges || state.relationshipGraph.edges.length || 0);
+    return {
+      title: relationshipReviews > 0 ? "Review relationship confidence" : "Relationship graph is ready to inspect",
+      matter: `${edgeCount} graph edges are available across direct, provider, inferred, and review states.`,
+      blocked: relationshipReviews > 0 ? `${relationshipReviews} links need review before agents should rely on them.` : "No relationship review queue is active.",
+      tone: relationshipReviews > 0 ? "attention" : "ready"
+    };
+  }
+
+  if (route === "/data" || route === "/data-table") {
+    const recordCount = totalDatabaseRecords();
+    return {
+      title: recordCount > 0 ? "Inspect operational records" : "Create or import useful company records",
+      matter: `${tableCount} tables expose ${recordCount} records through the current operating model.`,
+      blocked: recordCount > 0 ? "Check ownership and provenance before making record changes." : "Empty tables are accepted only when the route explains the owner path.",
+      tone: recordCount > 0 ? "review" : "attention"
+    };
+  }
+
+  if (route === "/tasks-adapter") {
+    return {
+      title: dueSoonCount > 0 ? "Delivery pressure needs review" : "Task workbench is ready",
+      matter: `${openTaskCount} open tasks, ${dueSoonCount} due soon, ${(state.clickup.config.listIds || []).length} ClickUp Lists selected.`,
+      blocked: state.clickup.configured ? "Refresh ClickUp when task data looks stale or list coverage changes." : "ClickUp is not configured, so delivery sync is blocked.",
+      tone: dueSoonCount > 0 || !state.clickup.configured ? "attention" : "ready"
+    };
+  }
+
+  if (route === "/pipeline") {
+    return {
+      title: signals.pipelineRecords > 0 ? "Review cross-department flow" : "Pipeline data is still light",
+      matter: `${signals.pipelineStageRecords} stages and ${signals.pipelineUsageRecords} CRM usage records are available.`,
+      blocked: signals.pipelineRecords > 0 ? "Check ownership before relying on pipeline context." : "Pipeline remains useful only after real CRM records or stages exist.",
+      tone: signals.pipelineRecords > 0 ? "review" : "attention"
+    };
+  }
+
+  if (route === "/settings/integrations") {
+    const readyCount = integrationReadinessItems().filter((item) => item.status === "ready").length;
+    return {
+      title: readyCount >= 3 ? "Integration foundation is mostly ready" : "Integration readiness needs setup",
+      matter: `${readyCount}/4 readiness lanes are marked ready from provider, relationship, and agent state.`,
+      blocked: readyCount >= 3 ? "Review degraded lanes before expanding automation." : "Disconnected or unproven lanes reduce agent usefulness.",
+      tone: readyCount >= 3 ? "ready" : "attention"
+    };
+  }
+
+  if (route === "/settings") {
+    return {
+      title: state.clickup.configured ? "ClickUp bridge is configured" : "Connect ClickUp before task sync",
+      matter: `${(state.clickup.config.listIds || []).length} Lists selected; connection is ${state.clickup.active ? "active" : "inactive"}.`,
+      blocked: state.clickup.configured ? "Refresh and sync after changing selected Lists." : "Missing ClickUp token or workspace blocks task import.",
+      tone: state.clickup.configured && state.clickup.active ? "ready" : "attention"
+    };
+  }
+
+  if (route === "/settings/drive") {
+    return {
+      title: state.googleDrive.oauthTokenConfigured ? "Drive resources are available" : "Connect Drive before importing resources",
+      matter: `${state.googleDrive.files.length} Drive items imported; ${driveFoldersToReview} folders need area review.`,
+      blocked: state.googleDrive.oauthTokenConfigured ? "Reconcile Drive when folder ownership or content quality changes." : "Missing Drive OAuth consent blocks file import.",
+      tone: driveFoldersToReview > 0 || !state.googleDrive.oauthTokenConfigured ? "attention" : "ready"
+    };
+  }
+
+  if (route === "/settings/api" || route === "/react-agent-tools") {
+    return {
+      title: scopedKeys > 0 ? "Agent access is ready to review" : "Scope agent access before handoff",
+      matter: `${scopedKeys}/${activeKeys} active keys are scoped; ${mcpTools} MCP tools are visible to eligible agents.`,
+      blocked: scopedKeys > 0 ? "Review supervised tools before giving an agent write authority." : "No scoped active key is ready for safe MCP use.",
+      tone: scopedKeys > 0 ? "review" : "attention"
+    };
+  }
+
+  return {
+    title: meta.title,
+    matter: meta.matter,
+    blocked: meta.blocked,
+    tone: meta.tone
+  };
+}
+
+function routeCommandToneClass(tone) {
+  if (tone === "blocked" || tone === "attention") {
+    return "warn";
+  }
+  if (tone === "review") {
+    return "ok";
+  }
+  return "ok";
+}
+
 function renderRouteCommandStrip(path) {
   if (!routeCommandStrip) {
     return;
@@ -922,25 +1079,28 @@ function renderRouteCommandStrip(path) {
   const signedIn = isSignedIn();
   routeCommandStrip.hidden = !signedIn;
   if (!signedIn) {
+    renderMobileQuickActions(path);
     return;
   }
 
   const meta = routeCommandMeta[routeCommandKey(path)] || routeCommandDefaults;
+  const signal = routeDecisionSignal(path, meta);
   if (routeCommandFamily) {
     routeCommandFamily.textContent = meta.family;
   }
   if (routeCommandTitle) {
-    routeCommandTitle.textContent = meta.title;
+    routeCommandTitle.textContent = signal.title;
   }
   if (routeCommandMatter) {
-    routeCommandMatter.textContent = meta.matter;
+    routeCommandMatter.textContent = signal.matter;
   }
   if (routeCommandBlocked) {
-    routeCommandBlocked.textContent = meta.blocked;
+    routeCommandBlocked.textContent = signal.blocked;
   }
   if (routeCommandDot) {
-    routeCommandDot.className = `dot ${meta.tone === "attention" ? "warn" : meta.tone === "review" ? "ok" : "ok"}`;
+    routeCommandDot.className = `dot ${routeCommandToneClass(signal.tone)}`;
   }
+  routeCommandStrip.dataset.tone = signal.tone;
   if (routeCommandActions) {
     routeCommandActions.replaceChildren();
     for (const action of meta.actions || []) {
@@ -952,11 +1112,44 @@ function renderRouteCommandStrip(path) {
         link.dataset.link = "";
         link.addEventListener("click", (event) => {
           event.preventDefault();
-          navigate(new URL(link.href).pathname);
+          const url = new URL(link.href);
+          navigate(`${url.pathname}${url.search}`, { hash: url.hash });
         });
       }
       routeCommandActions.append(link);
     }
+  }
+  renderMobileQuickActions(path);
+}
+
+function renderMobileQuickActions(path = normalizedPath()) {
+  if (!mobileQuickActions) {
+    return;
+  }
+  const signedIn = isSignedIn();
+  mobileQuickActions.hidden = !signedIn;
+  mobileQuickActions.replaceChildren();
+  if (!signedIn) {
+    return;
+  }
+
+  for (const item of mobileQuickActionItems) {
+    const link = document.createElement("a");
+    const url = new URL(item.href, window.location.origin);
+    const isActive = item.match(path);
+    link.className = `mobile-quick-action${isActive ? " active" : ""}`;
+    link.href = `${url.pathname}${url.search}${url.hash}`;
+    link.dataset.link = "";
+    link.setAttribute("aria-current", isActive ? "page" : "false");
+    link.innerHTML = `
+      <span class="ui-icon" aria-hidden="true"><i class="ph-bold ${item.icon}"></i></span>
+      <span>${item.label}</span>
+    `;
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      navigate(`${url.pathname}${url.search}`, { hash: url.hash });
+    });
+    mobileQuickActions.append(link);
   }
 }
 
@@ -5415,6 +5608,7 @@ function renderConnectionState() {
   if (workspaceEyebrow) {
     workspaceEyebrow.textContent = connected ? "Company command" : "Private workspace";
   }
+  renderRouteCommandStrip(normalizedPath());
 
   workspaceLabel.textContent = connected
     ? `${state.workspace.name} workspace`
