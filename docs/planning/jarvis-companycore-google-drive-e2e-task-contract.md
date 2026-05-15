@@ -134,6 +134,16 @@ Jarvis and provide an evidence-backed deploy and smoke plan for the required
     `12. Zarzadzanie` with externalId
     `1U1GMpy0erVETPDA9ciRb7l1gVbSJfaff`, and received
     `401 integration_invalid_token` for both required file creations.
+  - commit `fb6aca9` was deployed to production; public `/health` and
+    `/v1/health` report `fb6aca9`.
+  - the deployed reconnect fix allows Google Drive OAuth URL generation and
+    code exchange to proceed even when old ciphertext cannot be decrypted.
+  - the current Jarvis container key was registered in CompanyCore without
+    exposing the raw key, and protected Google Drive smoke passes with that
+    Jarvis key.
+  - required Doc/Sheet write smoke with the Jarvis key still returns
+    `401 integration_invalid_token`, so the remaining blocker is owner Google
+    OAuth re-consent rather than CompanyCore contract or Jarvis key wiring.
 
 ### 6. Self-Review
 - Simpler option considered: keep Sheets `spreadsheets.create` and move the file
@@ -246,8 +256,6 @@ plus smoke plan.
 - How tested: build, validate, diff check; production health/log inspection.
 - What is incomplete: real Jarvis-to-CompanyCore Docs/Sheets smoke is blocked
   by production `integration_invalid_token`.
-- Next steps: restore the matching historical production integration secret if
-  available, or complete owner Google OAuth re-consent after saving OAuth client
-  credentials under the current runtime secret; then hand exact smoke to
-  Jarvis agent.
+- Next steps: complete owner Google OAuth re-consent from `/settings/drive`,
+  then hand exact smoke to Jarvis agent.
 - Decisions made: Jarvis remains forbidden from direct Google API writes.

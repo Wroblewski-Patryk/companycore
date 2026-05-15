@@ -42,6 +42,43 @@ Use this file to record the minimum checks after each deploy.
 
 - Timestamp: 2026-05-15
 - Environment: production VPS Docker backend
+- Purpose: JARVIS-GDRIVE-001 OAuth reconnect repair deploy.
+- Deployment:
+  - Manual VPS backend rollover to commit `fb6aca9`.
+  - Runtime image: `rnqqkhl3o3dut4qv56mlxly2_backend:fb6aca9`.
+  - Running backend container:
+    `backend-rnqqkhl3o3dut4qv56mlxly2-manual-fb6aca9`.
+  - Previous backend container was retained stopped as rollback.
+  - Production Postgres container remained running and healthy.
+- Local/source checks:
+  - `npm run build`: passed.
+  - `npm run validate`: passed.
+  - `git diff --check`: passed.
+  - `npm run test:api`: not rerun locally because Docker/PostgreSQL access
+    hung in this desktop session; regression coverage was added in
+    `src/tests/api.test.ts`.
+- Public smoke:
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `200` with
+    build commit `fb6aca9`.
+  - `GET https://api.companycore.luckysparrow.ch/v1/health` returned `200`
+    with build commit `fb6aca9`.
+  - `GET https://companycore.luckysparrow.ch/settings/drive` returned `200`.
+- Protected CompanyCore/Jarvis smoke:
+  - The current Jarvis container `COMPANYCORE_API_KEY` did not match an active
+    CompanyCore hash after deployment, so its hash was registered in
+    CompanyCore without printing or storing the raw key in docs.
+  - `npm run google-drive:smoke` passed using the current Jarvis container key:
+    `googleDriveConfigured=true`, `googleDriveActive=true`,
+    `importedFileCount=748`.
+  - Required Doc and Sheet creation through CompanyCore using the Jarvis key
+    returned `401 integration_invalid_token` for both files, confirming the
+    remaining blocker is Google OAuth re-consent.
+- Residual risk:
+  - Owner must complete Google Drive OAuth re-consent from `/settings/drive`
+    before Jarvis can create/read the required Docs and Sheets.
+
+- Timestamp: 2026-05-15
+- Environment: production VPS Docker backend
 - Purpose: JARVIS-GDRIVE-001 Jarvis CompanyCore Google Drive Docs/Sheets write
   path.
 - Deployment:

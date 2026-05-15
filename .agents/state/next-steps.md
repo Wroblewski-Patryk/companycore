@@ -5,14 +5,12 @@ Last updated: 2026-05-15
 ## NOW
 
 1. Restore Google Drive OAuth usability for Jarvis.
-   - Restore the matching production `INTEGRATION_SECRET_KEY` for the existing
-     encrypted Google Drive OAuth material, or complete owner Google Drive
-     OAuth re-consent from `/settings/drive`.
-   - A recovery probe found only the current Coolify `INTEGRATION_SECRET_KEY`
-     candidate, and it does not decrypt existing Google Drive or ClickUp
-     integration secrets.
-   - Rerun CompanyCore protected content refresh and Jarvis Docs/Sheets
-     creation/readback smoke before resuming unrelated work.
+   - Commit `fb6aca9` is deployed and lets `/settings/drive` repair OAuth even
+     when old Google Drive ciphertext cannot be decrypted.
+   - The current Jarvis container key is registered in CompanyCore and passes
+     protected Google Drive smoke.
+   - Complete owner Google Drive OAuth re-consent from `/settings/drive`, then
+     rerun Jarvis Docs/Sheets creation/readback smoke.
 
 ## NEXT
 
