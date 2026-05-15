@@ -420,4 +420,6 @@ fixes for this repository.
   by `Stop-Process -Force` only for the validation run.
 - Evidence: UX100-W03 found four leftover `chrome-headless-shell` processes
   after Playwright proof, stopped them, and a follow-up check returned no
-  remaining validation-owned browser processes.
+  remaining validation-owned browser processes. UX100-W05 repeated the same
+  cleanup pattern after Company OS/MCP proof and again confirmed no
+  `chrome-headless-shell` or pg-lite `postgres` processes remained.
