@@ -4,13 +4,19 @@ Last updated: 2026-05-15
 
 ## NOW
 
-No ready local implementation task is currently queued.
+1. UX100-W01 Dashboard Command Brief And Mobile First Viewport.
+   - Implement the first UX100 wave by making the dashboard first viewport
+     answer owner priority, blockers, next action, and AI readiness across
+     desktop, tablet, and mobile.
 
 ## NEXT
 
-1. AGRUN-010 Upstream Agent Source Merge Execution.
+1. UX100-W02 Shell Decision Brief And Mobile Quick Actions.
+   - Add a persistent route decision brief pattern and mobile quick actions
+     after the dashboard pilot proves the model.
+2. AGRUN-010 Upstream Agent Source Merge Execution.
    - Blocked until upstream write access or an approved fork/PR route exists.
-2. Restore build commit/image metadata in production health.
+3. Restore build commit/image metadata in production health.
    - Future deployability improvement so push-to-running-image proof can be
      captured without privileged Coolify inspection.
 

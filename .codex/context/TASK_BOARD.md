@@ -2,8 +2,14 @@
 
 ## Ready
 
-No ready local implementation task is currently queued. The remaining known
-work is blocked on external upstream write access or future product decisions.
+- UX100-W01 Dashboard Command Brief And Mobile First Viewport
+  - Stage: planning
+  - Owner: Frontend Builder + QA/Test
+  - Priority: P1
+  - Source: `docs/ux/web-app-ux100-audit-and-execution-plan-2026-05-15.md`
+  - Goal: implement the first UX100 wave by making the dashboard first
+    viewport answer owner priority, blockers, next action, and AI readiness
+    across desktop, tablet, and mobile.
 
 ## In Progress
 
@@ -53,6 +59,17 @@ No active local implementation task is currently in progress.
   auto-deploy webhook administration task.
 
 ## Done
+
+- UX100-001 Web App UX100 Audit Atlas And Execution Plan.
+  - Evidence: published
+    `docs/ux/web-app-ux100-audit-and-execution-plan-2026-05-15.md` with 100
+    cross-app UX audit findings and 100 execution steps mapped to owner,
+    company-operation, and AI/MCP safety outcomes. Selected the first
+    implementation waves UX100-W01 through UX100-W05 and activated UX100-W01
+    as the next ready task. `git diff --check` and row-count sanity checks
+    passed.
+  - Task contract:
+    `docs/planning/ux100-001-web-app-audit-atlas-task-contract.md`.
 
 - ACF-OPS-001 Auto-Deploy Proof Or Manual Path Acceptance Refresh.
   - Evidence: latest pushed commit was `ece93b1`; public web and API

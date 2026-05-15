@@ -7,10 +7,16 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-No ready local implementation task is currently queued.
+- [ ] UX100-W01 Dashboard Command Brief And Mobile First Viewport:
+      implement the first UX100 wave by making the dashboard first viewport
+      answer owner priority, blockers, next action, and AI readiness across
+      desktop, tablet, and mobile.
 
 ### NEXT
 
+- [ ] UX100-W02 Shell Decision Brief And Mobile Quick Actions:
+      add a persistent route decision brief pattern and mobile quick actions
+      after the dashboard pilot proves the model.
 - [ ] AGRUN-010 Upstream Agent Source Merge Execution:
       still blocked until upstream write access or an approved fork/PR route
       exists.
@@ -191,6 +197,13 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       GitHub-to-Coolify auto-deploy remains unverified, while manual
       VPS/Coolify backend rollover remains the accepted release path until
       comparable commit/image metadata or equivalent Coolify evidence exists.
+- [x] UX100-001 Web App UX100 Audit Atlas And Execution Plan:
+      published `docs/ux/web-app-ux100-audit-and-execution-plan-2026-05-15.md`
+      with 100 cross-app UX audit findings and 100 execution steps covering
+      shell, dashboard, areas, relationships, data, tasks, pipeline,
+      integrations, Drive, API, MCP tools, Company OS, account, auth, errors,
+      performance, and governance. Activated UX100-W01 as the next ready
+      implementation wave.
 - [x] ACF-SEC-001 Production Secret And CORS Hardening:
       production now fails closed when required secret env vars are absent or
       still use committed development placeholder values; production CORS is

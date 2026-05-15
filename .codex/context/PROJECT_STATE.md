@@ -2585,6 +2585,12 @@ Last updated: 2026-05-15
   `build.image="unknown"`. Auto-deploy therefore remains unverified, and
   manual VPS/Coolify backend rollover remains the accepted release path until
   comparable build metadata or equivalent Coolify evidence is available.
+- 2026-05-15: Completed UX100-001 by publishing
+  `docs/ux/web-app-ux100-audit-and-execution-plan-2026-05-15.md` with 100
+  cross-app UX audit findings and 100 execution steps based on the current web
+  app, owner operating-cockpit promise, and AI/MCP safety direction. UX100-W01
+  Dashboard Command Brief And Mobile First Viewport is now the next ready
+  implementation wave.
 - 2026-05-06: Deployed the Agent CRUD API rollout to production with manual
   VPS backend rollover. The running backend container is
   `backend-rnqqkhl3o3dut4qv56mlxly2-manual-bf59b2f`, image
