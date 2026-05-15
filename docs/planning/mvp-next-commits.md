@@ -7,12 +7,6 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] V1PROD-003 Authenticated V1 production parity and selected-area data
-      match:
-      deploy the validated area matcher fix, confirm public `/health` reports
-      the deployed commit, and rerun authenticated production desktop/mobile
-      screenshots for `/dashboard` and
-      `/areas?area=01-strategia&view=overview`.
 - [ ] REACT-WEB-002 ClickUp setup React workflow:
       rebuild ClickUp token discovery, workspace/list selection, save, and
       maintenance run controls inside the unified V1 settings module instead
@@ -119,6 +113,17 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       V1 public home; login/register render the V1 public auth layout; signed
       out dashboard/area routes redirect to login. Screenshot proof:
       `docs/ux/evidence/production-v1-ff5e041-2026-05-15/`.
+- [x] V1PROD-003 Authenticated V1 Production Parity:
+      deployed commit `1dafe910ff612e027b686f09e2a488600f6e60d4` to
+      production through the manual VPS rollover path. Public web/API health
+      report image `rnqqkhl3o3dut4qv56mlxly2_backend:1dafe91`. Authenticated
+      production Playwright proof verified `/dashboard`,
+      `/areas?area=01-strategia&view=overview`, and
+      `/areas?area=01-strategia&view=ai` on desktop/mobile with no overflow,
+      no console errors, no failed requests, and no empty unmatched-area state.
+      `01 Strategia` now resolves backend context with `8 TABLES`, Drive
+      evidence, and provider mappings. Screenshot proof:
+      `docs/ux/evidence/production-auth-v1-1dafe91-2026-05-15/`.
 - [x] V1SETTINGS-001 Unified V1 Settings Canonical Design:
       published the unified settings IA and desktop/mobile canonical targets
       for one minimal settings module spanning Integrations, Agent keys, and

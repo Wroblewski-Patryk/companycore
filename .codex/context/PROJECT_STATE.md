@@ -2874,6 +2874,19 @@ Last updated: 2026-05-15
   backend operating model. `npm run validate` and `git diff --check` passed;
   production deploy and final owner-session rerun are tracked by
   `docs/planning/v1-production-authenticated-parity-task-contract.md`.
+- 2026-05-15: V1PROD-003 was deployed to production at commit
+  `1dafe910ff612e027b686f09e2a488600f6e60d4` through the accepted manual VPS
+  rollover path. Public web/API `/health` report image
+  `rnqqkhl3o3dut4qv56mlxly2_backend:1dafe91`; running backend container is
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-1dafe91`, with
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-ff5e041-previous-1dafe91` retained
+  stopped for rollback. Authenticated production Playwright proof verified
+  `/dashboard`, `/areas?area=01-strategia&view=overview`, and
+  `/areas?area=01-strategia&view=ai` on desktop/mobile with no horizontal
+  overflow, no console errors, no failed requests, and no empty unmatched-area
+  state. `01 Strategia` now resolves backend context with `8 TABLES`, Drive
+  evidence, and provider mappings. Evidence:
+  `docs/ux/evidence/production-auth-v1-1dafe91-2026-05-15/`.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

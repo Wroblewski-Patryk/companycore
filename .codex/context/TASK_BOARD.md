@@ -26,16 +26,7 @@
     and large tool catalogs must stay outside the first settings view.
 ## In Progress
 
-- V1PROD-003 Authenticated V1 production parity and selected-area data match.
-  - Stage: release
-  - Owner: Frontend Builder + Ops/Release
-  - Priority: P0
-  - Source:
-    `docs/planning/v1-production-authenticated-parity-task-contract.md`
-  - Goal: deploy and verify the authenticated V1 dashboard plus selected-area
-    detail route so production `/areas?area=01-strategia&view=overview`
-    resolves backend `strategy-governance` context instead of the empty
-    unmatched-area state.
+No task is actively in progress.
 
 ## Blocked
 
@@ -81,6 +72,25 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- V1PROD-003 Authenticated V1 production parity and selected-area data match.
+  - Evidence: commit `1dafe910ff612e027b686f09e2a488600f6e60d4`
+    was pushed and deployed through the accepted manual VPS rollover path.
+    Public web/API `/health` report image
+    `rnqqkhl3o3dut4qv56mlxly2_backend:1dafe91`. Authenticated production
+    Playwright proof verified `/dashboard`,
+    `/areas?area=01-strategia&view=overview`, and
+    `/areas?area=01-strategia&view=ai` on desktop/mobile with no horizontal
+    overflow, no console errors, no failed requests, and no empty unmatched
+    backend-area state. `01 Strategia` now resolves backend operating context
+    with `8 TABLES`, Drive evidence, and provider mappings.
+  - Validation: `npm run validate`, `git diff --check`, VPS Docker image
+    build, canary health, final routed container health, public web/API health,
+    and authenticated production screenshot proof passed.
+  - Evidence directory:
+    `docs/ux/evidence/production-auth-v1-1dafe91-2026-05-15/`.
+  - Task contract:
+    `docs/planning/v1-production-authenticated-parity-task-contract.md`.
 
 - PAPERCLIP-ARCH-001 Paperclip Company-Building Architecture Direction.
   - Evidence: `docs/architecture/organizational-architecture-bridge.md` now

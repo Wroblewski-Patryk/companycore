@@ -40,6 +40,51 @@ Use this file to record the minimum checks after each deploy.
 
 ## Evidence
 
+- Timestamp: 2026-05-15 22:30 +02:00
+- Environment: production VPS Docker backend
+- Purpose: V1PROD-003 authenticated V1 production parity and selected-area data
+  match.
+- Deployment:
+  - Manual VPS backend rollover to commit
+    `1dafe910ff612e027b686f09e2a488600f6e60d4`.
+  - Runtime image: `rnqqkhl3o3dut4qv56mlxly2_backend:1dafe91`.
+  - Running backend container:
+    `backend-rnqqkhl3o3dut4qv56mlxly2-manual-1dafe91`.
+  - Previous backend container retained stopped as rollback:
+    `backend-rnqqkhl3o3dut4qv56mlxly2-manual-ff5e041-previous-1dafe91`.
+  - Production Postgres container
+    `postgres-rnqqkhl3o3dut4qv56mlxly2-152944834285` remained running.
+- Local/source checks:
+  - `npm run validate`: passed before commit.
+  - `git diff --check`: passed before commit.
+  - Commit pushed to `origin/codex/companycore-local-port-3102`.
+- Rollover checks:
+  - Docker image build from the local `git archive` for `1dafe91` passed.
+  - Canary container started from the new image and returned local `/health`
+    with the expected build commit before traffic rollover.
+  - Final routed container returned local `/health` with the expected build
+    commit.
+- Public smoke:
+  - `GET https://companycore.luckysparrow.ch/health` returned `200` with
+    build commit `1dafe910ff612e027b686f09e2a488600f6e60d4`.
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `200` with
+    the same build commit.
+- Authenticated production screenshot proof:
+  - Captured desktop and mobile screenshots for `/dashboard`,
+    `/areas?area=01-strategia&view=overview`, and
+    `/areas?area=01-strategia&view=ai`.
+  - Evidence directory:
+    `docs/ux/evidence/production-auth-v1-1dafe91-2026-05-15/`.
+  - Playwright proof reported no horizontal overflow, no console errors, and
+    no failed requests.
+  - `01 Strategia` no longer shows the empty unmatched backend-area state. It
+    resolves backend context with `8 TABLES`, Drive evidence, and provider
+    mappings.
+- Residual risk:
+  - Deeper per-capability create/edit/filter UX remains future work. This
+    release verifies the authenticated V1 skeleton and selected-area backend
+    context parity only.
+
 - Timestamp: 2026-05-15 21:50 +02:00
 - Environment: production VPS Docker backend
 - Purpose: V1PROD-002 V1 canonical web skeleton deployment.

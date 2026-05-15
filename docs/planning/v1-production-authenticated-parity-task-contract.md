@@ -75,4 +75,25 @@ unmatched area state.
 
 ## Result Report
 
-Pending final production redeploy and screenshot rerun.
+Completed on 2026-05-15.
+
+- Commit deployed:
+  `1dafe910ff612e027b686f09e2a488600f6e60d4`.
+- Runtime image:
+  `rnqqkhl3o3dut4qv56mlxly2_backend:1dafe91`.
+- Running backend container:
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-1dafe91`.
+- Rollback container retained stopped:
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-ff5e041-previous-1dafe91`.
+- Validation:
+  `npm run validate`, `git diff --check`, VPS Docker image build, canary
+  health, final routed container health, public web/API health, and
+  authenticated production Playwright proof passed.
+- Evidence:
+  `docs/ux/evidence/production-auth-v1-1dafe91-2026-05-15/`.
+- Result:
+  `/dashboard` renders the V1 Company Atlas after owner login.
+  `/areas?area=01-strategia&view=overview` and
+  `/areas?area=01-strategia&view=ai` render the canonical selected-area view
+  with backend context, `8 TABLES`, Drive evidence, and provider mappings
+  instead of the empty unmatched-area state.
