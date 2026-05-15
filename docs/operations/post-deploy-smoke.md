@@ -40,6 +40,50 @@ Use this file to record the minimum checks after each deploy.
 
 ## Evidence
 
+- Timestamp: 2026-05-15 23:10 +02:00
+- Environment: production VPS Docker backend
+- Purpose: V1 area operating-room layer depth.
+- Deployment:
+  - Manual VPS backend rollover to commit
+    `95927f61724444fdb7555f538624762eb13f5794`.
+  - Runtime image: `rnqqkhl3o3dut4qv56mlxly2_backend:95927f6`.
+  - Running backend container:
+    `backend-rnqqkhl3o3dut4qv56mlxly2-manual-95927f6`.
+  - Previous backend container retained stopped as rollback:
+    `backend-rnqqkhl3o3dut4qv56mlxly2-manual-1dafe91-previous-95927f6`.
+- Local/source checks:
+  - `npm run build:web`: passed.
+  - `npm run validate`: passed.
+  - `git diff --check`: passed for the area operating-room slice.
+  - Commit pushed to `origin/codex/companycore-local-port-3102`.
+- Rollover checks:
+  - Docker image build from the local `git archive` for `95927f6` passed.
+  - Canary container started from the new image and returned local `/health`
+    with the expected build commit before traffic rollover.
+  - Final routed container returned local `/health` with the expected build
+    commit.
+- Public smoke:
+  - `GET https://companycore.luckysparrow.ch/health` returned `200` with
+    build commit `95927f61724444fdb7555f538624762eb13f5794`.
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `200` with
+    the same build commit.
+- Authenticated production screenshot proof:
+  - Captured desktop and mobile screenshots for
+    `/areas?area=01-strategia&view=overview`,
+    `/areas?area=01-strategia&view=goals`,
+    `/areas?area=01-strategia&view=workflows`, and
+    `/areas?area=01-strategia&view=knowledge`.
+  - Evidence directory:
+    `docs/ux/evidence/production-area-operating-room-95927f6-2026-05-15/`.
+  - Playwright proof reported no horizontal overflow, no console errors, no
+    failed requests, and verified operating graph, layer context,
+    tables/records, Drive knowledge tree, and backend table markers.
+- Residual risk:
+  - Goals/workflows/tasks records are only as complete as the existing backend
+    table snapshots. A future backend/content slice should connect concrete
+    goal-target-metric-workflow-task relationships instead of relying only on
+    table and source grouping.
+
 - Timestamp: 2026-05-15 22:30 +02:00
 - Environment: production VPS Docker backend
 - Purpose: V1PROD-003 authenticated V1 production parity and selected-area data

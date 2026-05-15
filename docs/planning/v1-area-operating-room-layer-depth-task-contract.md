@@ -65,4 +65,23 @@ then drill into the right layer without losing context.
 
 ## Result Report
 
-Pending production screenshot proof.
+Completed on 2026-05-15.
+
+- Commit deployed:
+  `95927f61724444fdb7555f538624762eb13f5794`.
+- Runtime image:
+  `rnqqkhl3o3dut4qv56mlxly2_backend:95927f6`.
+- Running backend container:
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-95927f6`.
+- Validation:
+  `npm run build:web`, `npm run validate`, `git diff --check`, VPS Docker
+  image build, canary health, final routed container health, public web/API
+  health, and authenticated production Playwright proof passed.
+- Evidence:
+  `docs/ux/evidence/production-area-operating-room-95927f6-2026-05-15/`.
+- Result:
+  The selected-area V1 view now includes a reusable operating graph, active
+  layer context, tables/records panel, and Drive knowledge tree derived from
+  `AreaDetailContext`. Production proof covered overview, goals, workflows,
+  and knowledge tabs on desktop and mobile with no horizontal overflow,
+  console errors, failed requests, or missing graph/layer/tree markers.
