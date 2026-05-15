@@ -92,9 +92,12 @@ No active implementation task is in progress.
     controlled owner session and mocked `/v1/connection` at desktop
     `1366x900`, tablet `834x1112`, and mobile `390x844`: no horizontal
     overflow, no console/page errors, 13 area rows, 12 orbit nodes plus
-    center, selected `01 Strategia`, `Goals` tab switching, hidden desktop
-    mobile controls, mobile summary present, desktop sidebar hidden on
-    tablet/mobile, and five mobile nav items. Screenshots:
+    center, selected `01 Strategia`, hidden desktop mobile controls, mobile
+    summary present, desktop sidebar hidden on tablet/mobile, and five mobile
+    nav items. A follow-up fidelity pass flattened the desktop topbar to the
+    canonical 71px bar, converted the atlas to circular icon nodes, moved the
+    content row to the first viewport, and reduced the mobile orbit density.
+    Screenshots:
     `docs/ux/evidence/v1-area-dashboard-desktop-1366x900.png`,
     `docs/ux/evidence/v1-area-dashboard-tablet-834x1112.png`, and
     `docs/ux/evidence/v1-area-dashboard-mobile-390x844.png`.

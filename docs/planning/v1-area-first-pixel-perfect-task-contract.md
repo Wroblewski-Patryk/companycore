@@ -205,9 +205,15 @@ Planning and implementation contract for a future coding task.
   - `docs/ux/evidence/v1-area-dashboard-mobile-390x844.png`
 - High-risk checks: Playwright fallback verified built `/dashboard` with a
   controlled owner session and mocked `/v1/connection`; no overflow, no
-  console/page errors, 13 area rows, 12 orbit nodes, selected `01 Strategia`,
-  `Goals` and `AI` capability switching, desktop/mobile visibility rules, and
-  five mobile nav items.
+  console/page errors, 13 area rows, 12 orbit nodes plus center, selected
+  `01 Strategia`, desktop/mobile visibility rules, and five mobile nav items.
+- 2026-05-15 fidelity pass: the implementation was tightened toward the
+  accepted desktop/mobile canon by flattening the desktop topbar, switching the
+  atlas map to circular icon nodes, reducing the first-viewport vertical drift,
+  making area capability tabs underline-based, and shrinking the mobile orbit
+  so the fixed mobile nav no longer visually fights the map. Browser plugin
+  navigation worked, but its screenshot/snapshot returned blank/black in this
+  local session; Playwright fallback supplied the visual evidence.
 - Coverage ledger updated: not applicable.
 - Module confidence ledger updated: yes, `V1AREA-001`.
 - Requirements matrix updated: yes, `REQ-V1AREA-001`.
@@ -301,4 +307,8 @@ Validation summary:
   `npm run build:web`, `npm run validate`, `git diff --check`.
 - Passed: Playwright fallback visual/interaction proof at desktop/tablet/mobile
   with no overflow or console/page errors.
+- Passed: 2026-05-15 follow-up fidelity proof at desktop `1366x900` and mobile
+  `390x844`: no overflow, no console/page errors, canonical 71px desktop
+  topbar, first content row starting at 87px, visible progressive path in the
+  first desktop viewport, and five mobile nav items.
 - Not completed: `npm run test:api` because local `DATABASE_URL` is unset.

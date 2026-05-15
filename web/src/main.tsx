@@ -1568,7 +1568,7 @@ function ownershipCoverage(areas: AreaViewState[]) {
 }
 
 function reviewCount(areas: AreaViewState[]) {
-  return areas.filter((area) => area.status === "review" || area.status === "empty").length;
+  return areas.filter((area) => area.status === "review").length;
 }
 
 function DashboardStatePanel({ state, onRetry }: { state: DashboardState; onRetry: () => void }) {
@@ -1795,6 +1795,8 @@ function AtlasNode({
       onClick={() => onSelectArea(area.key)}
       aria-label={`Select ${area.label}`}
     >
+      <i className={`ph-bold ${area.icon}`} aria-hidden="true"></i>
+      <em className={`area-status-dot ${areaStatusClass(area.status)}`} aria-hidden="true"></em>
       <span>{area.shortLabel}</span>
       <small>{area.label.replace(/^\d+\s+/, "")}</small>
     </button>
