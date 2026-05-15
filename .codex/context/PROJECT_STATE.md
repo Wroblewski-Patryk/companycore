@@ -2656,6 +2656,16 @@ Last updated: 2026-05-15
   passed against portable PostgreSQL on `localhost:55475`, including a
   production `/health` regression test for safe Coolify metadata. Public
   push-to-running-image proof still requires the next deployment smoke.
+- 2026-05-15: Completed V1UX-CANON-001 by publishing the simpler V1
+  area-first Company Atlas direction before any V2 Company City or gamified
+  runtime work. The canonical spec, audit, and generated visual targets live in
+  `docs/ux/v1-simple-dashboard-canonical-spec-2026-05-15.md`,
+  `docs/ux/v1-simple-dashboard-canonical-audit-2026-05-15.md`, and
+  `docs/ux/assets/companycore-v1-area-first-atlas-canonical.png`. The selected
+  V1 mental model is workspace -> Company Atlas -> `00 General` and 12
+  operating areas -> area capability tabs for overview, goals, workflows,
+  tasks, knowledge, resources, decisions, and AI. This is a planning artifact;
+  runtime code remains a separate scoped implementation task.
 - 2026-05-06: Deployed the Agent CRUD API rollout to production with manual
   VPS backend rollover. The running backend container is
   `backend-rnqqkhl3o3dut4qv56mlxly2-manual-bf59b2f`, image

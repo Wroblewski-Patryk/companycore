@@ -5,6 +5,8 @@ Last updated: 2026-05-15
 ## NOW
 
 No active ready UX100 implementation wave remains after UX100-W05.
+V1UX-CANON-001 is complete as a planning artifact; runtime implementation of
+the area-first atlas should begin only as a separate scoped code task.
 
 ## NEXT
 
@@ -14,6 +16,10 @@ No active ready UX100 implementation wave remains after UX100-W05.
    - Build metadata restoration is implemented locally; after deploy, compare
      public `/health` `build.commit` with the pushed commit before claiming
      auto-deploy proof.
+3. V1UX-CANON-002 Area-first dashboard implementation task.
+   - Ready to scope after accepting
+     `docs/ux/assets/companycore-v1-area-first-atlas-canonical.png` as the V1
+     implementation target.
 
 ## LATER
 

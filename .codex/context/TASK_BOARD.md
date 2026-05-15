@@ -55,10 +55,28 @@ No active local implementation task is currently in progress.
   - Source: `docs/planning/acf-ops-002-build-metadata-health-task-contract.md`
   - Goal: compare public `/health` `build.commit` with the pushed commit after
     deployment before claiming auto-deploy proof.
+- V1UX-CANON-002 Area-first dashboard implementation task.
+  - Stage: planning
+  - Owner: Frontend Builder + UX
+  - Priority: P1
+  - Source: `docs/ux/v1-simple-dashboard-canonical-spec-2026-05-15.md`
+  - Goal: scope a separate runtime implementation slice from
+    `docs/ux/assets/companycore-v1-area-first-atlas-canonical.png` after the
+    area-first V1 target is accepted.
 - Upstream OpenJarvis/Paperclip source merge execution and blocked GitHub
   auto-deploy webhook administration task.
 
 ## Done
+
+- V1UX-CANON-001 Simple V1 Dashboard Canonical Design.
+  - Evidence: published the V1 area-first Company Atlas direction, current UI
+    audit, sitemap, component boundaries, Tailwind/DaisyUI style rules,
+    pixel-perfect implementation plan, and generated canonical concept images.
+    The strongest V1 implementation target is
+    `docs/ux/assets/companycore-v1-area-first-atlas-canonical.png`. `git diff
+    --check` and manual image review passed.
+  - Task contract:
+    `docs/planning/v1-simple-dashboard-canonical-design-task-contract.md`.
 
 - ACF-OPS-002 Build Metadata Health Restoration.
   - Evidence: restored source-level production build metadata wiring by

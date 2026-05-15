@@ -34,6 +34,27 @@ of rediscovering them.
 
 ## Entries
 
+### 2026-05-15 - V1 Area-First Company Atlas
+- Type: visual_direction
+- Context: V1UX-CANON-001 simplified the near-term owner panel before V2
+  Company City work. The user wants CompanyCore to become useful and intuitive
+  for web/backend/MCP first, with V2 game-like visuals deferred.
+- Decision: V1 should use an area-first Company Atlas. The sidebar starts from
+  workspace context, `Company Atlas`, `00 General`, and the 12 operating
+  areas. Tools such as goals, workflows, tasks, knowledge, resources,
+  decisions, and AI become tabs inside the selected area instead of permanent
+  global sidebar rows.
+- Reuse when: Implementing the V1 dashboard, authenticated shell IA, area
+  detail pages, dashboard first viewport, mobile/tablet navigation, or future
+  route consolidation before V2 visuals.
+- Avoid when: Building narrow setup forms, credential flows, or dense table
+  editors where the existing route command summary is enough and an atlas
+  would hide the primary action.
+- Evidence:
+  `docs/ux/v1-simple-dashboard-canonical-spec-2026-05-15.md`,
+  `docs/ux/v1-simple-dashboard-canonical-audit-2026-05-15.md`, and
+  `docs/ux/assets/companycore-v1-area-first-atlas-canonical.png`.
+
 ### 2026-05-14 - Relationship Confidence Badges
 - Type: reusable_pattern
 - Context: WEBFOUND-008B upgraded `/relationships` from raw provider/Drive

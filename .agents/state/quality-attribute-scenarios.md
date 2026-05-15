@@ -1,6 +1,6 @@
 # Quality Attribute Scenarios
 
-Last updated: 2026-05-14
+Last updated: 2026-05-15
 
 | ID | Attribute | Scenario | Measure | Verification | Linked Requirements | Status | Last Updated |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -56,6 +56,7 @@ Last updated: 2026-05-14
 | QA-APP-AUDIT-003 | security/reliability | Production must not boot with unsafe secret defaults or open browser-origin exposure. | Missing or placeholder production secrets fail before startup; approved browser origins receive CORS headers and unknown browser origins are denied without broad `Access-Control-Allow-Origin`. | ACF-SEC-001 `npm test` against disposable PostgreSQL on `localhost:55452` verified missing secret rejection, development placeholder rejection, production CORS allow/deny behavior, and the existing protected API flow. | REQ-APP-AUDIT-003 | verified | 2026-05-14 |
 | QA-APP-AUDIT-004 | maintainability/process | Future agents can continue from current evidence without reopening completed Drive import blockers. | Active source-of-truth files distinguish verified Drive OAuth/first import from remaining target-safe Drive content/write/freshness samples. | ACF-DOC-001 source review and targeted search reconciled stale blocker wording after AGRUN-007. | REQ-APP-AUDIT-004 | verified | 2026-05-14 |
 | QA-ACF-OPS-002 | reliability/observability | A deployed runtime can identify its source revision through public health without exposing secrets. | `/health` reports a non-secret commit value from explicit metadata or Coolify `SOURCE_COMMIT`, plus a safe image/container identifier when available. | ACF-OPS-002 `npm run build`, `git diff --check`, and `npm run test:api` passed with a production health regression test for Coolify metadata. | REQ-ACF-OPS-002 | verified | 2026-05-15 |
+| QA-V1UX-CANON-001 | usability/IA/process | V1 design work produces one implementation target instead of another broad UX wish list. | The canonical spec names the selected V1 mental model, navigation hierarchy, component boundaries, style rules, responsive proof plan, and generated image target. | V1UX-CANON-001 source review, manual image review of `docs/ux/assets/companycore-v1-area-first-atlas-canonical.png`, and `git diff --check` passed. | REQ-V1UX-CANON-001 | verified | 2026-05-15 |
 
 Scenario shape:
 

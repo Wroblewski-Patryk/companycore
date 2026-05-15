@@ -8,6 +8,8 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 ### NOW
 
 No active ready UX100 implementation wave remains after UX100-W05.
+V1UX-CANON-001 is complete as a planning artifact; runtime implementation of
+the area-first atlas should begin only as a separate scoped code task.
 
 ### NEXT
 
@@ -18,6 +20,10 @@ No active ready UX100 implementation wave remains after UX100-W05.
       build metadata restoration is implemented locally; compare public
       `/health` `build.commit` with the pushed commit before claiming
       auto-deploy proof.
+- [ ] V1UX-CANON-002 Area-first dashboard implementation task:
+      scope the code slice from
+      `docs/ux/assets/companycore-v1-area-first-atlas-canonical.png` only
+      after accepting it as the V1 implementation target.
 
 ### DEFERRED TO V2
 
@@ -39,6 +45,13 @@ The section below is retained as execution evidence. It is not the active
 queue. Future work must start from `Active Queue`, `.codex/context/TASK_BOARD.md`,
 and `docs/operations/v1-function-coverage-ledger.csv`.
 
+- [x] V1UX-CANON-001 Simple V1 Dashboard Canonical Design:
+      published the V1 area-first Company Atlas direction, sitemap,
+      component boundaries, Tailwind/DaisyUI style rules, pixel-perfect
+      implementation plan, and generated canonical concept images. The
+      preferred target is
+      `docs/ux/assets/companycore-v1-area-first-atlas-canonical.png`.
+      `git diff --check` and manual image review passed.
 - [x] UX100-W03 Relationship/Data Provenance And AI Safety Labels:
       added existing-state-derived provenance and AI readiness labels to
       relationship graph rows, review rows, data modules, table context cards,
