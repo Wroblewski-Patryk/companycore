@@ -1259,6 +1259,346 @@ label {
   font-weight: 950;
 }
 
+.area-operating-map,
+.area-layer-workbench {
+  display: grid;
+  gap: 0.72rem;
+  border: 1px solid rgb(216 225 238 / 0.82);
+  border-radius: 8px;
+  background: rgb(248 250 252 / 0.74);
+  padding: 0.82rem;
+}
+
+.area-operating-map-header,
+.area-layer-summary {
+  display: grid;
+  gap: 0.72rem;
+}
+
+@media (min-width: 780px) {
+  .area-operating-map-header,
+  .area-layer-summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+}
+
+.area-operating-map-header h3,
+.area-layer-summary h3,
+.area-layer-panel-title h3 {
+  margin: 0;
+  color: #071225;
+  font-size: 0.98rem;
+  font-weight: 950;
+  line-height: 1.2;
+}
+
+.area-layer-summary p {
+  max-width: 52rem;
+  margin: 0.28rem 0 0;
+  color: #51627f;
+  font-size: 0.76rem;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.area-operating-map-header > span {
+  width: fit-content;
+  border: 1px solid #d8e1ee;
+  border-radius: 999px;
+  background: #ffffff;
+  padding: 0.28rem 0.55rem;
+  color: #2364d2;
+  font-size: 0.66rem;
+  font-weight: 950;
+}
+
+.area-operating-map-track {
+  display: grid;
+  gap: 0.5rem;
+}
+
+@media (min-width: 980px) {
+  .area-operating-map-track {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.area-operating-node {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.52rem;
+  min-width: 0;
+  border: 1px solid rgb(216 225 238 / 0.88);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 0.68rem;
+  text-align: left;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.area-operating-node:hover,
+.area-operating-node:focus-visible,
+.area-operating-node.is-active {
+  border-color: rgb(35 100 210 / 0.34);
+  box-shadow: 0 14px 30px rgb(7 18 37 / 0.07);
+  transform: translateY(-1px);
+}
+
+.area-operating-node i {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 999px;
+  background: rgb(35 100 210 / 0.1);
+  color: #2364d2;
+}
+
+.area-operating-node strong,
+.area-operating-node small {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.area-operating-node strong {
+  color: #071225;
+  font-size: 0.78rem;
+  font-weight: 950;
+  line-height: 1.18;
+}
+
+.area-operating-node small {
+  margin-top: 0.2rem;
+  color: #51627f;
+  font-size: 0.62rem;
+  font-weight: 680;
+  line-height: 1.38;
+}
+
+.area-operating-node em {
+  border-radius: 999px;
+  background: rgb(35 100 210 / 0.1);
+  padding: 0.18rem 0.42rem;
+  color: #2364d2;
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 950;
+}
+
+.area-node-green i,
+.area-node-green em {
+  background: rgb(22 132 91 / 0.1);
+  color: #16845b;
+}
+
+.area-node-amber i,
+.area-node-amber em {
+  background: rgb(184 119 0 / 0.13);
+  color: #8a5a00;
+}
+
+.area-node-red i,
+.area-node-red em {
+  background: rgb(194 65 61 / 0.1);
+  color: #c2413d;
+}
+
+.area-operating-node b {
+  display: none;
+}
+
+@media (min-width: 980px) {
+  .area-operating-node b {
+    position: absolute;
+    top: 1.58rem;
+    right: -0.5rem;
+    z-index: 1;
+    display: block;
+    width: 0.5rem;
+    border-top: 1px solid rgb(35 100 210 / 0.24);
+  }
+}
+
+.area-layer-counters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.42rem;
+}
+
+.area-layer-counters span {
+  min-width: 4.4rem;
+  border: 1px solid #d8e1ee;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 0.48rem 0.56rem;
+}
+
+.area-layer-counters small,
+.area-layer-counters strong {
+  display: block;
+}
+
+.area-layer-counters small {
+  color: #51627f;
+  font-size: 0.58rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.area-layer-counters strong {
+  margin-top: 0.12rem;
+  color: #071225;
+  font-size: 1rem;
+  font-weight: 950;
+}
+
+.area-layer-grid {
+  display: grid;
+  gap: 0.7rem;
+}
+
+@media (min-width: 900px) {
+  .area-layer-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(17rem, 0.82fr);
+  }
+}
+
+.area-data-layer-panel,
+.area-knowledge-tree-panel {
+  min-width: 0;
+  border: 1px solid rgb(216 225 238 / 0.82);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 0.72rem;
+}
+
+.area-layer-panel-title {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.62rem;
+}
+
+.area-layer-panel-title i {
+  color: #2364d2;
+}
+
+.area-layer-panel-title span {
+  border: 1px solid #d8e1ee;
+  border-radius: 999px;
+  background: #f8fafc;
+  padding: 0.16rem 0.42rem;
+  color: #51627f;
+  font-size: 0.62rem;
+  font-weight: 950;
+}
+
+.area-layer-empty {
+  margin: 0;
+  color: #51627f;
+  font-size: 0.74rem;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.area-data-layer-list,
+.area-knowledge-tree {
+  display: grid;
+  gap: 0.42rem;
+}
+
+.area-data-layer-list a {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  border-top: 1px solid rgb(216 225 238 / 0.74);
+  padding-top: 0.48rem;
+  color: #071225;
+  text-decoration: none;
+}
+
+.area-data-layer-list a:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.area-data-layer-list strong,
+.area-data-layer-list small,
+.area-data-layer-list em,
+.area-knowledge-tree strong,
+.area-knowledge-tree small {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.area-data-layer-list strong,
+.area-knowledge-tree strong {
+  color: #071225;
+  font-size: 0.74rem;
+  font-weight: 920;
+  line-height: 1.24;
+}
+
+.area-data-layer-list small,
+.area-knowledge-tree small {
+  margin-top: 0.13rem;
+  color: #51627f;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.area-data-layer-list em {
+  align-self: start;
+  border: 1px solid rgb(216 225 238 / 0.82);
+  border-radius: 999px;
+  padding: 0.16rem 0.42rem;
+  color: #2364d2;
+  font-size: 0.58rem;
+  font-style: normal;
+  font-weight: 950;
+}
+
+.area-knowledge-tree-item {
+  display: grid;
+  gap: 0.32rem;
+}
+
+.area-knowledge-tree-item > a,
+.area-knowledge-tree-item > span {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.46rem;
+  margin-left: calc(var(--tree-depth, 0) * 0.72rem);
+  border-top: 1px solid rgb(216 225 238 / 0.72);
+  padding-top: 0.42rem;
+  color: #071225;
+  text-decoration: none;
+}
+
+.area-knowledge-tree > .area-knowledge-tree-item:first-child > a,
+.area-knowledge-tree > .area-knowledge-tree-item:first-child > span {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.area-knowledge-tree-item i {
+  color: #2364d2;
+  font-size: 0.98rem;
+}
+
+.area-knowledge-tree-children {
+  display: grid;
+  gap: 0.32rem;
+}
+
 .area-capability-board {
   display: grid;
   gap: 0.78rem;

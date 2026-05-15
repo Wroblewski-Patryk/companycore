@@ -260,6 +260,25 @@ type AreaCapabilityBoardData = {
   }>;
 };
 
+type AreaLayerInsight = {
+  id: string;
+  label: string;
+  detail: string;
+  icon: string;
+  count: number;
+  tone: "blue" | "green" | "amber" | "red";
+  tableSlugs: string[];
+};
+
+type AreaKnowledgeTreeNode = {
+  id: string;
+  name: string;
+  detail: string;
+  href?: string | null;
+  isFolder: boolean;
+  children: AreaKnowledgeTreeNode[];
+};
+
 type CompanyOsDrilldown = {
   id: CompanyOsCollectionName;
   label: string;
@@ -2110,6 +2129,122 @@ function areaCapabilityMcpItems(connection: ConnectionData, capabilityId: string
   }));
 }
 
+function areaLayerInsights(context: AreaDetailContext): AreaLayerInsight[] {
+  const layerDefinitions: Array<Omit<AreaLayerInsight, "count">> = [
+    {
+      id: "goals",
+      label: "Goals + targets",
+      detail: "Strategic intent, target values, success metrics, and standards visible for this department.",
+      icon: "ph-target",
+      tone: "green",
+      tableSlugs: areaCapabilitySlugs("goals")
+    },
+    {
+      id: "workflows",
+      label: "Workflows",
+      detail: "Processes, pipelines, procedures, dependencies, runs, and automation rhythm.",
+      icon: "ph-flow-arrow",
+      tone: "blue",
+      tableSlugs: areaCapabilitySlugs("workflows")
+    },
+    {
+      id: "tasks",
+      label: "Tasks",
+      detail: "Execution pressure from task records, task lists, pipeline runs, and acceptance criteria.",
+      icon: "ph-list-checks",
+      tone: "amber",
+      tableSlugs: areaCapabilitySlugs("tasks")
+    },
+    {
+      id: "knowledge",
+      label: "Knowledge",
+      detail: "Drive folders, docs, sheets, notes, artifacts, and proof sources connected to this area.",
+      icon: "ph-books",
+      tone: "green",
+      tableSlugs: areaCapabilitySlugs("knowledge")
+    },
+    {
+      id: "sources",
+      label: "Sources",
+      detail: "Backend tables, provider containers, and synced files that explain where the view comes from.",
+      icon: "ph-plugs-connected",
+      tone: "blue",
+      tableSlugs: []
+    }
+  ];
+
+  return layerDefinitions.map((layer) => {
+    const tableCount = layer.tableSlugs.length === 0
+      ? context.tables.length
+      : context.tables.filter((table) => layer.tableSlugs.includes(table.apiSlug)).length;
+    const recordCount = layer.tableSlugs.length === 0
+      ? context.tableRecordRows.length + context.providerMappings.length + context.driveItems.length
+      : context.tableRecordRows.filter((row) => layer.tableSlugs.includes(row.apiSlug)).length;
+    const count = layer.id === "knowledge"
+      ? recordCount + context.driveItems.length
+      : layer.id === "sources"
+        ? recordCount
+        : recordCount || tableCount;
+    return { ...layer, count };
+  });
+}
+
+function tableSourceLabel(table: NonNullable<OperatingArea["tables"]>[number]) {
+  if (table.source === "clickup") {
+    return "ClickUp";
+  }
+  return table.source || "CompanyCore";
+}
+
+function tableRecordCount(context: AreaDetailContext, apiSlug: string) {
+  return context.tableRecordRows.filter((row) => row.apiSlug === apiSlug).length;
+}
+
+function layerTables(context: AreaDetailContext, layerId: string) {
+  if (layerId === "sources") {
+    return context.tables;
+  }
+  return areaCapabilityTables(context, layerId);
+}
+
+function buildKnowledgeTree(driveItems: GoogleDriveFileRecord[], limit = 28): AreaKnowledgeTreeNode[] {
+  const visibleItems = driveItems.slice(0, limit);
+  const nodes = new Map<string, AreaKnowledgeTreeNode>();
+
+  visibleItems.forEach((file) => {
+    nodes.set(file.externalId, {
+      id: file.externalId,
+      name: file.name,
+      detail: file.isFolder ? "Folder" : file.mimeType.split("/").pop() || file.mimeType,
+      href: file.webViewLink,
+      isFolder: file.isFolder,
+      children: []
+    });
+  });
+
+  const roots: AreaKnowledgeTreeNode[] = [];
+  visibleItems.forEach((file) => {
+    const node = nodes.get(file.externalId);
+    if (!node) {
+      return;
+    }
+    const parent = file.parentExternalId ? nodes.get(file.parentExternalId) : undefined;
+    if (parent) {
+      parent.children.push(node);
+    } else {
+      roots.push(node);
+    }
+  });
+
+  const sortTree = (items: AreaKnowledgeTreeNode[]) => {
+    items.sort((left, right) => Number(right.isFolder) - Number(left.isFolder) || left.name.localeCompare(right.name));
+    items.forEach((item) => sortTree(item.children));
+  };
+  sortTree(roots);
+
+  return roots;
+}
+
 function areaCapabilityBoardData(
   area: AreaViewState,
   capabilityId: string,
@@ -3845,12 +3980,14 @@ function AreaCapabilityFocus({
   area,
   activeCapability,
   context,
-  connection
+  connection,
+  onSelectCapability
 }: {
   area: AreaViewState;
   activeCapability: string;
   context: AreaDetailContext;
   connection: ConnectionData;
+  onSelectCapability: (capability: string) => void;
 }) {
   const content = capabilityContent(area, activeCapability, connection, context);
   const board = areaCapabilityBoardData(area, activeCapability, context, connection);
@@ -3875,8 +4012,171 @@ function AreaCapabilityFocus({
           <strong>{context.tableRecordsCount}</strong>
         </span>
       </div>
+      <AreaOperatingMap
+        activeCapability={activeCapability}
+        context={context}
+        onSelectCapability={onSelectCapability}
+      />
+      <AreaLayerWorkbench activeCapability={activeCapability} context={context} />
       <AreaCapabilityBoard board={board} />
     </section>
+  );
+}
+
+function AreaOperatingMap({
+  activeCapability,
+  context,
+  onSelectCapability
+}: {
+  activeCapability: string;
+  context: AreaDetailContext;
+  onSelectCapability: (capability: string) => void;
+}) {
+  const insights = areaLayerInsights(context);
+
+  return (
+    <section className="area-operating-map" aria-label="Area operating map">
+      <div className="area-operating-map-header">
+        <div>
+          <p className="atlas-kicker">Operating graph</p>
+          <h3>Goals to workflows to tasks to knowledge to sources</h3>
+        </div>
+        <span>{context.tables.length} tables</span>
+      </div>
+      <div className="area-operating-map-track">
+        {insights.map((insight, index) => (
+          <button
+            className={`area-operating-node area-node-${insight.tone} ${activeCapability === insight.id ? "is-active" : ""}`}
+            type="button"
+            onClick={() => onSelectCapability(insight.id)}
+            key={insight.id}
+            aria-current={activeCapability === insight.id ? "step" : undefined}
+          >
+            <i className={`ph-bold ${insight.icon}`} aria-hidden="true"></i>
+            <span>
+              <strong>{insight.label}</strong>
+              <small>{insight.detail}</small>
+            </span>
+            <em>{insight.count}</em>
+            {index < insights.length - 1 ? <b aria-hidden="true"></b> : null}
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function AreaLayerWorkbench({
+  activeCapability,
+  context
+}: {
+  activeCapability: string;
+  context: AreaDetailContext;
+}) {
+  const tables = layerTables(context, activeCapability);
+  const knowledgeTree = buildKnowledgeTree(context.driveItems);
+  const activeLayer = areaLayerInsights(context).find((layer) => layer.id === activeCapability);
+
+  return (
+    <section className="area-layer-workbench" aria-label="Area layer workbench">
+      <div className="area-layer-summary">
+        <div>
+          <p className="atlas-kicker">Layer context</p>
+          <h3>{activeLayer?.label || "Overview"} as a working layer</h3>
+          <p>{activeLayer?.detail || "The overview connects all department layers into one scan."}</p>
+        </div>
+        <div className="area-layer-counters">
+          <span><small>Tables</small><strong>{tables.length}</strong></span>
+          <span><small>Records</small><strong>{activeCapability === "sources" ? context.tableRecordsCount : areaCapabilityRecords(context, activeCapability, 99).length}</strong></span>
+          <span><small>Drive</small><strong>{context.driveItems.length}</strong></span>
+        </div>
+      </div>
+      <div className="area-layer-grid">
+        <AreaDataLayerPanel context={context} tables={tables} />
+        <AreaKnowledgeTreePanel tree={knowledgeTree} driveItems={context.driveItems} />
+      </div>
+    </section>
+  );
+}
+
+function AreaDataLayerPanel({
+  context,
+  tables
+}: {
+  context: AreaDetailContext;
+  tables: NonNullable<OperatingArea["tables"]>;
+}) {
+  return (
+    <article className="area-data-layer-panel">
+      <div className="area-layer-panel-title">
+        <i className="ph-bold ph-database" aria-hidden="true"></i>
+        <h3>Tables and records</h3>
+        <span>{tables.length}</span>
+      </div>
+      {tables.length === 0 ? (
+        <p className="area-layer-empty">No backend table is connected to this layer yet.</p>
+      ) : (
+        <div className="area-data-layer-list">
+          {tables.slice(0, 8).map((table) => (
+            <a href={`/data/${table.apiSlug}`} key={table.id}>
+              <span>
+                <strong>{table.name}</strong>
+                <small>{tableSourceLabel(table)} / {sharedTableRecordApiPath(table.apiSlug)}</small>
+              </span>
+              <em>{tableRecordCount(context, table.apiSlug)} records</em>
+            </a>
+          ))}
+        </div>
+      )}
+    </article>
+  );
+}
+
+function AreaKnowledgeTreePanel({
+  tree,
+  driveItems
+}: {
+  tree: AreaKnowledgeTreeNode[];
+  driveItems: GoogleDriveFileRecord[];
+}) {
+  return (
+    <article className="area-knowledge-tree-panel">
+      <div className="area-layer-panel-title">
+        <i className="ph-bold ph-folder-open" aria-hidden="true"></i>
+        <h3>Knowledge tree</h3>
+        <span>{driveItems.length}</span>
+      </div>
+      {tree.length === 0 ? (
+        <p className="area-layer-empty">No Drive files are synced to this department yet.</p>
+      ) : (
+        <div className="area-knowledge-tree">
+          {tree.map((node) => <AreaKnowledgeTreeItem node={node} key={node.id} depth={0} />)}
+        </div>
+      )}
+    </article>
+  );
+}
+
+function AreaKnowledgeTreeItem({ node, depth }: { node: AreaKnowledgeTreeNode; depth: number }) {
+  const content = (
+    <>
+      <i className={`ph-bold ${node.isFolder ? "ph-folder" : "ph-file-text"}`} aria-hidden="true"></i>
+      <span>
+        <strong>{node.name}</strong>
+        <small>{node.detail}</small>
+      </span>
+    </>
+  );
+
+  return (
+    <div className="area-knowledge-tree-item" style={{ "--tree-depth": depth } as React.CSSProperties}>
+      {node.href ? <a href={node.href} target="_blank" rel="noreferrer">{content}</a> : <span>{content}</span>}
+      {node.children.length > 0 ? (
+        <div className="area-knowledge-tree-children">
+          {node.children.map((child) => <AreaKnowledgeTreeItem node={child} key={child.id} depth={depth + 1} />)}
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -4140,6 +4440,7 @@ function AreaDetailView({
               activeCapability={activeCapability}
               context={context}
               connection={connection}
+              onSelectCapability={selectCapability}
             />
             <AreaEvidenceGrid context={context} />
           </div>
@@ -8329,6 +8630,18 @@ type PipelineBundle = {
   interactions: Array<Record<string, unknown>>;
 };
 
+type SettingsIntegrationId = "clickup" | "google_drive";
+
+type IntegrationSettingRecord = {
+  id: string;
+  provider: SettingsIntegrationId;
+  config?: Record<string, unknown>;
+  active: boolean;
+  secretConfigured?: boolean;
+  oauthClientConfigured?: boolean;
+  oauthTokenConfigured?: boolean;
+};
+
 type PrivateLoadState<T> =
   | { status: "signed-out" }
   | { status: "loading" }
@@ -8830,6 +9143,26 @@ const settingsTabs: Array<{ id: SettingsTabId; label: string }> = [
   { id: "mcp", label: "MCP" }
 ];
 
+const settingsIntegrations: Array<{
+  id: SettingsIntegrationId;
+  label: string;
+  purpose: string;
+  providerName: "clickup" | "googleDrive";
+}> = [
+  {
+    id: "clickup",
+    label: "ClickUp",
+    purpose: "Tasks, spaces, folders, lists, webhooks, and task sync.",
+    providerName: "clickup"
+  },
+  {
+    id: "google_drive",
+    label: "Google Drive",
+    purpose: "Knowledge files, folder scope, OAuth, and Drive change sync.",
+    providerName: "googleDrive"
+  }
+];
+
 function initialSettingsTab(): SettingsTabId {
   const path = window.location.pathname;
   if (path.includes("/settings/api")) {
@@ -8844,50 +9177,94 @@ function initialSettingsTab(): SettingsTabId {
   return "connections";
 }
 
+function listFromForm(value: FormDataEntryValue | null) {
+  return String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function listToInput(config: Record<string, unknown> | undefined, key: string) {
+  const value = config?.[key];
+  return Array.isArray(value) ? value.filter((item) => typeof item === "string").join(", ") : "";
+}
+
+function stringFromConfig(config: Record<string, unknown> | undefined, key: string, fallback = "") {
+  const value = config?.[key];
+  return typeof value === "string" ? value : fallback;
+}
+
 function UnifiedSettingsRoute() {
   const [activeTab, setActiveTab] = useState<SettingsTabId>(() => initialSettingsTab());
+  const [activeIntegration, setActiveIntegration] = useState<SettingsIntegrationId>(() => (
+    window.location.pathname.includes("/settings/drive") ? "google_drive" : "clickup"
+  ));
   const [createdKey, setCreatedKey] = useState<string | null>(null);
   const [settingsNotice, setSettingsNotice] = useState<{ tone: NoticeTone; title: string; detail: string } | null>(null);
   const [state, reload] = usePrivateLoader(async () => {
-    const [connection, keys, profiles] = await Promise.all([
+    const [connection, keys, profiles, clickupSetting, driveSetting] = await Promise.all([
       ownerApi<ConnectionData>("/v1/connection"),
       ownerApi<ApiKeyRecord[]>("/v1/api-keys").catch(() => []),
-      ownerApi<AgentKeyProfile[]>("/v1/api-keys/profiles").catch(() => [])
+      ownerApi<AgentKeyProfile[]>("/v1/api-keys/profiles").catch(() => []),
+      ownerApi<IntegrationSettingRecord>("/v1/integration-settings/clickup").catch(() => null),
+      ownerApi<IntegrationSettingRecord>("/v1/integration-settings/google_drive").catch(() => null)
     ]);
-    return { connection, keys, profiles };
+    return { connection, keys, profiles, integrationSettings: { clickup: clickupSetting, google_drive: driveSetting } };
   });
 
-  async function saveClickUp(event: React.FormEvent<HTMLFormElement>) {
+  async function saveIntegration(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const token = String(form.get("token") || "").trim();
-    await ownerApi("/v1/integration-settings/clickup", {
-      method: "PUT",
-      body: JSON.stringify({ token, active: true, config: {} })
-    });
-    setSettingsNotice({ tone: "success", title: "ClickUp saved", detail: "The API token was stored for this workspace." });
-    event.currentTarget.reset();
-    reload();
-  }
+    const provider = String(form.get("provider") || activeIntegration) as SettingsIntegrationId;
+    const active = form.get("active") === "on";
+    const syncMode = String(form.get("syncMode") || "pull") as "pull" | "two_way";
+    const importMode = String(form.get("importMode") || "merge");
 
-  async function saveGoogleDrive(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const clientId = String(form.get("clientId") || "").trim();
-    const clientSecret = String(form.get("clientSecret") || "").trim();
-    await ownerApi("/v1/integration-settings/google_drive", {
-      method: "PUT",
-      body: JSON.stringify({
-        oauthClient: {
-          clientId,
-          ...(clientSecret ? { clientSecret } : {})
-        },
-        active: true,
-        config: {}
-      })
-    });
-    setSettingsNotice({ tone: "success", title: "Google Drive saved", detail: "The OAuth client was stored for this workspace." });
-    event.currentTarget.reset();
+    if (provider === "clickup") {
+      const token = String(form.get("token") || "").trim();
+      const teamId = String(form.get("teamId") || "").trim();
+      await ownerApi("/v1/integration-settings/clickup", {
+        method: "PUT",
+        body: JSON.stringify({
+          ...(token ? { token } : {}),
+          active,
+          config: {
+            ...(teamId ? { teamId } : {}),
+            spaceIds: listFromForm(form.get("spaceIds")),
+            folderIds: listFromForm(form.get("folderIds")),
+            listIds: listFromForm(form.get("listIds")),
+            syncMode,
+            importMode
+          }
+        })
+      });
+      setSettingsNotice({ tone: "success", title: "ClickUp saved", detail: "Credentials and sync preferences were saved for this workspace." });
+    } else {
+      const clientId = String(form.get("clientId") || "").trim();
+      const clientSecret = String(form.get("clientSecret") || "").trim();
+      const changesPageToken = String(form.get("changesPageToken") || "").trim();
+      await ownerApi("/v1/integration-settings/google_drive", {
+        method: "PUT",
+        body: JSON.stringify({
+          ...(clientId ? {
+            oauthClient: {
+              clientId,
+              ...(clientSecret ? { clientSecret } : {})
+            }
+          } : {}),
+          active,
+          config: {
+            rootFolderIds: listFromForm(form.get("rootFolderIds")),
+            sharedDriveIds: listFromForm(form.get("sharedDriveIds")),
+            selectedFolderIds: listFromForm(form.get("selectedFolderIds")),
+            syncMode,
+            importMode,
+            ...(changesPageToken ? { changesPageToken } : {})
+          }
+        })
+      });
+      setSettingsNotice({ tone: "success", title: "Google Drive saved", detail: "OAuth client and sync preferences were saved for this workspace." });
+    }
     reload();
   }
 
@@ -8911,19 +9288,23 @@ function UnifiedSettingsRoute() {
 
   return (
     <PrivateStateGate state={state} title="Settings" detail="CompanyCore is loading simple workspace settings." onRetry={reload}>
-      {({ connection, keys, profiles }) => {
+      {({ connection, keys, profiles, integrationSettings }) => {
         const clickup = connection.integrations.clickup;
         const drive = connection.integrations.googleDrive;
         const activeKeys = keys.filter((key) => key.active);
         const readerProfile = profiles.find((profile) => profile.id.includes("reader")) || profiles[0];
+        const selectedMeta = settingsIntegrations.find((integration) => integration.id === activeIntegration) || settingsIntegrations[0];
+        const selectedState = connection.integrations[selectedMeta.providerName];
+        const selectedSetting = integrationSettings[activeIntegration] || null;
+        const selectedConfig = selectedSetting?.config || selectedState.config || {};
 
         return (
           <Shell connection={connection} appLabel="Settings">
-            <section className="mx-auto grid w-full max-w-3xl gap-5 px-5 py-8">
+            <section className="mx-auto grid w-full max-w-5xl gap-5 px-5 py-8">
               <section className="grid gap-2">
                 <p className="eyebrow">Settings</p>
-                <h1 className="text-3xl font-black leading-tight">Connection settings</h1>
-                <p className="text-sm leading-6 text-company-muted">Enter credentials, save, then run sync from a separate work view.</p>
+                <h1 className="text-3xl font-black leading-tight">Integration settings</h1>
+                <p className="text-sm leading-6 text-company-muted">Choose a connector, save its credentials, and set the small sync policy that the backend already supports.</p>
               </section>
 
               <nav className="flex flex-wrap gap-2" aria-label="Settings sections">
@@ -8942,36 +9323,121 @@ function UnifiedSettingsRoute() {
               {settingsNotice ? <LocalNotice tone={settingsNotice.tone} title={settingsNotice.title} detail={settingsNotice.detail} /> : null}
 
               {activeTab === "connections" ? (
-                <section className="grid gap-4">
-                  <form className="rounded-company border border-base-300 bg-base-100 p-4 shadow-sm" onSubmit={saveClickUp}>
-                    <div className="grid gap-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <h2 className="text-xl font-black">ClickUp</h2>
-                        <span className="text-xs text-company-muted">{clickup.configured ? "Saved" : "Not saved"}</span>
-                      </div>
-                      <label className="form-control">
-                        <span className="label-text font-bold">API token</span>
-                        <input className="input input-bordered" name="token" type="password" autoComplete="off" placeholder="pk_..." required={!clickup.configured} />
-                      </label>
-                      <button className="btn btn-primary w-fit" type="submit">Save ClickUp</button>
-                    </div>
-                  </form>
+                <section className="grid gap-4 lg:grid-cols-[18rem_1fr] lg:items-start">
+                  <aside className="grid gap-2">
+                    {settingsIntegrations.map((integration) => {
+                      const providerState = connection.integrations[integration.providerName];
+                      return (
+                        <button
+                          className={`rounded-company border p-4 text-left transition ${activeIntegration === integration.id ? "border-primary bg-primary/5" : "border-base-300 bg-base-100 hover:border-primary/50"}`}
+                          type="button"
+                          onClick={() => setActiveIntegration(integration.id)}
+                          key={integration.id}
+                        >
+                          <span className="block text-sm font-black">{integration.label}</span>
+                          <span className="mt-1 block text-xs leading-5 text-company-muted">{integration.purpose}</span>
+                          <span className="mt-3 block text-xs font-bold text-company-muted">{providerState.configured || providerState.oauthClientConfigured ? "Configured" : "Needs credentials"}</span>
+                        </button>
+                      );
+                    })}
+                  </aside>
 
-                  <form className="rounded-company border border-base-300 bg-base-100 p-4 shadow-sm" onSubmit={saveGoogleDrive}>
-                    <div className="grid gap-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <h2 className="text-xl font-black">Google Drive</h2>
-                        <span className="text-xs text-company-muted">{drive.oauthClientConfigured ? "Saved" : "Not saved"}</span>
+                  <form className="rounded-company border border-base-300 bg-base-100 p-5 shadow-sm" onSubmit={saveIntegration}>
+                    <input type="hidden" name="provider" value={activeIntegration} />
+                    <div className="grid gap-5">
+                      <div className="grid gap-1">
+                        <h2 className="text-2xl font-black">{selectedMeta.label}</h2>
+                        <p className="text-sm leading-6 text-company-muted">{selectedMeta.purpose}</p>
                       </div>
-                      <label className="form-control">
-                        <span className="label-text font-bold">Client ID</span>
-                        <input className="input input-bordered" name="clientId" autoComplete="off" placeholder="Google OAuth client ID" required={!drive.oauthClientConfigured} />
+
+                      <label className="flex items-center justify-between gap-3 rounded-company border border-base-300 bg-base-200/40 px-4 py-3 text-sm font-bold">
+                        <span>Integration active</span>
+                        <input className="toggle toggle-primary" name="active" type="checkbox" defaultChecked={selectedSetting?.active ?? selectedState.active ?? true} />
                       </label>
-                      <label className="form-control">
-                        <span className="label-text font-bold">Client secret</span>
-                        <input className="input input-bordered" name="clientSecret" type="password" autoComplete="off" placeholder="Google OAuth client secret" />
-                      </label>
-                      <button className="btn btn-primary w-fit" type="submit">Save Google Drive</button>
+
+                      {activeIntegration === "clickup" ? (
+                        <div className="grid gap-4">
+                          <label className="form-control">
+                            <span className="label-text font-bold">API token</span>
+                            <input className="input input-bordered" name="token" type="password" autoComplete="off" placeholder={clickup.configured ? "Leave empty to keep saved token" : "pk_..."} required={!clickup.configured} />
+                          </label>
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <label className="form-control">
+                              <span className="label-text font-bold">Workspace / team ID</span>
+                              <input className="input input-bordered" name="teamId" defaultValue={stringFromConfig(selectedConfig, "teamId")} placeholder="ClickUp team ID" />
+                            </label>
+                            <label className="form-control">
+                              <span className="label-text font-bold">List IDs</span>
+                              <input className="input input-bordered" name="listIds" defaultValue={listToInput(selectedConfig, "listIds")} placeholder="Comma-separated list IDs" />
+                            </label>
+                            <label className="form-control">
+                              <span className="label-text font-bold">Space IDs</span>
+                              <input className="input input-bordered" name="spaceIds" defaultValue={listToInput(selectedConfig, "spaceIds")} placeholder="Optional, comma-separated" />
+                            </label>
+                            <label className="form-control">
+                              <span className="label-text font-bold">Folder IDs</span>
+                              <input className="input input-bordered" name="folderIds" defaultValue={listToInput(selectedConfig, "folderIds")} placeholder="Optional, comma-separated" />
+                            </label>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid gap-4">
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <label className="form-control">
+                              <span className="label-text font-bold">Client ID</span>
+                              <input className="input input-bordered" name="clientId" autoComplete="off" placeholder={drive.oauthClientConfigured ? "Leave empty to keep saved client" : "Google OAuth client ID"} required={!drive.oauthClientConfigured} />
+                            </label>
+                            <label className="form-control">
+                              <span className="label-text font-bold">Client secret</span>
+                              <input className="input input-bordered" name="clientSecret" type="password" autoComplete="off" placeholder="Google OAuth client secret" />
+                            </label>
+                            <label className="form-control">
+                              <span className="label-text font-bold">Root folder IDs</span>
+                              <input className="input input-bordered" name="rootFolderIds" defaultValue={listToInput(selectedConfig, "rootFolderIds")} placeholder="Comma-separated folder IDs" />
+                            </label>
+                            <label className="form-control">
+                              <span className="label-text font-bold">Selected folder IDs</span>
+                              <input className="input input-bordered" name="selectedFolderIds" defaultValue={listToInput(selectedConfig, "selectedFolderIds")} placeholder="Comma-separated folder IDs" />
+                            </label>
+                            <label className="form-control">
+                              <span className="label-text font-bold">Shared drive IDs</span>
+                              <input className="input input-bordered" name="sharedDriveIds" defaultValue={listToInput(selectedConfig, "sharedDriveIds")} placeholder="Optional, comma-separated" />
+                            </label>
+                            <label className="form-control">
+                              <span className="label-text font-bold">Changes page token</span>
+                              <input className="input input-bordered" name="changesPageToken" defaultValue={stringFromConfig(selectedConfig, "changesPageToken")} placeholder="Optional Drive page token" />
+                            </label>
+                          </div>
+                        </div>
+                      )}
+
+                      <section className="grid gap-3 border-t border-base-300 pt-4">
+                        <h3 className="text-base font-black">Sync policy</h3>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <label className="form-control">
+                            <span className="label-text font-bold">Sync mode</span>
+                            <select className="select select-bordered" name="syncMode" defaultValue={stringFromConfig(selectedConfig, "syncMode", "pull")}>
+                              <option value="pull">Pull into CompanyCore</option>
+                              <option value="two_way">Two-way</option>
+                            </select>
+                          </label>
+                          <label className="form-control">
+                            <span className="label-text font-bold">Import mode</span>
+                            <select className="select select-bordered" name="importMode" defaultValue={stringFromConfig(selectedConfig, "importMode", "merge")}>
+                              <option value="merge">Merge</option>
+                              <option value="skip_existing">Skip existing</option>
+                              {activeIntegration === "clickup" ? <option value="replace_selected_lists">Replace selected lists</option> : null}
+                              {activeIntegration === "google_drive" ? <option value="replace_selected_folders">Replace selected folders</option> : null}
+                              <option value="inspect_only">Inspect only</option>
+                            </select>
+                          </label>
+                        </div>
+                        <p className="text-xs leading-5 text-company-muted">This saves the policy only. Running import, reconcile, mapping, and review stays in the dedicated integration work views.</p>
+                      </section>
+
+                      <div className="flex flex-wrap gap-2">
+                        <button className="btn btn-primary" type="submit">Save {selectedMeta.label}</button>
+                      </div>
                     </div>
                   </form>
                 </section>
