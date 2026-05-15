@@ -120,6 +120,12 @@ Last updated: 2026-05-15
   React build now emits `public/react/assets/index-wbA5Pvhk.js` and
   `public/react/assets/index-B1Wcb5DB.css`; release/deploy proof is still
   separate from this local visual pass.
+- 2026-05-15: V1AREA-001 premium parity rollout was pushed to `main` and
+  deployed through the approved manual VPS backend path after public health
+  still reported `79d8d0e`. Public web and API `/health` report
+  `build.commit="1acb709"` and image
+  `rnqqkhl3o3dut4qv56mlxly2_backend:1acb709`. Public `/dashboard` serves
+  `index-wbA5Pvhk.js` and `index-B1Wcb5DB.css`.
 - 2026-05-15: V1AREA-001 production rollover updated CompanyCore from
   `fb6aca9` to `df99969` through the approved manual VPS backend path after
   Coolify redeploy left the public runtime on the old image. Public web and

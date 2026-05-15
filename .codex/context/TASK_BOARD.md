@@ -66,6 +66,14 @@ No active implementation task is in progress.
 
 ## Done
 
+- V1AREA-001 premium production manual rollover to `1acb709`.
+  - Evidence: after pushing the premium Company Atlas polish, public health
+    still reported `79d8d0e`, so the approved archive-based manual VPS rollover
+    built `rnqqkhl3o3dut4qv56mlxly2_backend:1acb709`, started
+    `backend-rnqqkhl3o3dut4qv56mlxly2-manual-1acb709`, verified public
+    web/API `/health` with `build.commit="1acb709"`, and verified public
+    `/dashboard` serves `index-wbA5Pvhk.js` plus `index-B1Wcb5DB.css`.
+
 - V1AREA-001 production manual rollover to `df99969`.
   - Evidence: Coolify redeploy did not update the running image; public
     `/health` still reported `fb6aca9`. The approved archive-based manual VPS

@@ -5,19 +5,19 @@ Document the safe rollback path for production deploys.
 ## Current V1 Rollback Pointer
 
 - Current exposed production backend image from public `/health`:
-  `rnqqkhl3o3dut4qv56mlxly2_backend:df99969`.
+  `rnqqkhl3o3dut4qv56mlxly2_backend:1acb709`.
 - Current exposed production build commit from public `/health`:
-  `df99969`.
+  `1acb709`.
 - VPS container inventory:
   - Running backend:
-    `backend-rnqqkhl3o3dut4qv56mlxly2-manual-df99969`.
+    `backend-rnqqkhl3o3dut4qv56mlxly2-manual-1acb709`.
   - Running Postgres:
     `postgres-rnqqkhl3o3dut4qv56mlxly2-140735959479`.
 - Previous verified rollback container retained after the 2026-05-15 manual
   rollover:
-  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-fb6aca9-previous-df99969`.
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-79d8d0e-previous-1acb709`.
 - Previous verified rollback image:
-  `rnqqkhl3o3dut4qv56mlxly2_backend:fb6aca9`.
+  `rnqqkhl3o3dut4qv56mlxly2_backend:79d8d0e`.
 - Production Postgres container/volume must be preserved during rollback.
 
 ## Rollback Triggers

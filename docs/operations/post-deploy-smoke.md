@@ -40,6 +40,37 @@ Use this file to record the minimum checks after each deploy.
 
 ## Evidence
 
+- Timestamp: 2026-05-15 17:19 +02:00
+- Environment: production VPS Docker backend
+- Purpose: V1AREA-001 premium Company Atlas visual parity rollout.
+- Deployment:
+  - Manual VPS backend rollover to commit `1acb709592d9d6601c2d8278e26736dacf9e0692`.
+  - Runtime image: `rnqqkhl3o3dut4qv56mlxly2_backend:1acb709`.
+  - Running backend container:
+    `backend-rnqqkhl3o3dut4qv56mlxly2-manual-1acb709`.
+  - Previous backend container retained stopped as rollback:
+    `backend-rnqqkhl3o3dut4qv56mlxly2-manual-79d8d0e-previous-1acb709`.
+  - Production Postgres container
+    `postgres-rnqqkhl3o3dut4qv56mlxly2-140735959479` remained running and
+    healthy.
+- Local/source checks:
+  - `npm run validate`: passed before rollover.
+  - `git diff --check`: passed before commit.
+  - Docker image build from local `git archive`: passed and emitted
+    `index-wbA5Pvhk.js` plus `index-B1Wcb5DB.css`.
+- Public smoke:
+  - `GET https://companycore.luckysparrow.ch/health` returned `200` with
+    build commit `1acb709`.
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `200` with
+    build commit `1acb709`.
+  - `GET https://companycore.luckysparrow.ch/dashboard` returned `200` and
+    served `index-wbA5Pvhk.js` plus `index-B1Wcb5DB.css`.
+- Deployment-path verdict:
+  - GitHub push reached `origin/main`, but public health still reported
+    `79d8d0e` before manual rollover. Manual VPS rollover remains the accepted
+    release path until GitHub-to-Coolify auto-deploy is proven with matching
+    public build metadata.
+
 - Timestamp: 2026-05-15 16:23 +02:00
 - Environment: production VPS Docker backend
 - Purpose: V1AREA-001 production update after Coolify redeploy left the public
