@@ -7,24 +7,55 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] REACT-WEB-002 ClickUp setup React workflow:
-      rebuild ClickUp token discovery, workspace/list selection, save, and
-      maintenance run controls inside the unified V1 settings module instead
-      of keeping `/settings` as a ClickUp-only route.
-- [ ] REACT-WEB-003 Google Drive OAuth/folder-selection React workflow:
-      rebuild `/settings/drive` as a tab-aware unified settings entry for
-      OAuth client save, authorize URL,
-      authorization-code exchange, folder discovery, folder selection, import,
-      and reconcile controls as React components using existing backend
-      contracts.
-- [ ] V1SETTINGS-002 Unified settings React implementation:
-      implement the canonical `/settings` module from
-      `docs/ux/v1-settings-canonical-spec-2026-05-15.md`, then route old
-      settings entry points into Integrations, Agent keys, or MCP once
-      verified. Sync, import, mapping, badges, counters, review queues, and
-      large tool catalogs must stay outside the first settings view.
+- [ ] V1DATA-001 Evidence browser V1 workbench:
+      `/operations` and `/tasks-adapter` are locally verified V1 command
+      surfaces. Convert `/data` and `/data/:table` from V0 rebuild into a V1
+      evidence browser tied to departments, tables, and agent-readable context.
 ### NEXT
 
+- [ ] V1OPS-002 Production operations cockpit smoke:
+      after the next deploy, compare public `/health` build metadata with the
+      pushed commit and run authenticated `/operations`, `/tasks-adapter`, AOG,
+      and settings smoke.
+- [ ] Deepen the next V1 capability from `/operations`:
+      choose one route-level slice that already has backend contracts, with
+      preferred order `data` table evidence browser, then `relationships`
+      provenance review.
+- [ ] Use the CompanyCore business module map during upcoming product intake:
+      `docs/architecture/companycore-business-module-map.md` now classifies
+      future work as native core, provider-backed, future adapter, or derived
+      view. Apply it before settings, Drive, ClickUp, CRM, pipeline,
+      knowledge, resource, or agent slices so new UI/API/MCP/provider work
+      scales from the company operating model rather than provider-led screens.
+- [ ] Use the CompanyCore global business flow during upcoming CRM, marketing,
+      delivery, finance, support, feedback, graph, dashboard, or AI-agent
+      intake:
+      `docs/architecture/companycore-global-business-flow.md` defines the
+      13-stage flow from strategic intent through brand, demand, discovery,
+      offer, delivery, acceptance, payment, support, feedback, and improvement.
+      Start with read models and visualization before write behavior.
+- [ ] Use the department management systems architecture before generating or
+      implementing department views:
+      `docs/architecture/department-management-systems-architecture.md`,
+      `docs/ux/v1-department-management-systems-view-map.md`, and
+      `docs/ux/v1-department-system-prompt-pack.md` define each 00-12 area as
+      a scalable management system with subsystems, shared components, and
+      Paperclip/AI packets. Generate one department spec at a time.
+- [ ] AOG-BE-002 Target metric relation:
+      add optional `Target.metricId` after AOG-BE-001 proves the target/metric
+      read model, preserving existing `Target.metric` text compatibility.
+- [ ] AOG-BE-003 Goal/workflow bridge:
+      add the minimal durable connection between goals/targets and
+      process/pipeline roots after the read model proves ownership.
+- [ ] AOG-BE-004 Workflow task link normalization:
+      normalize runtime workflow-to-task evidence instead of relying only on
+      JSON `linkedTaskIds`.
+- [ ] AOG-BE-005 Knowledge/source link contract:
+      connect knowledge items, Drive files, and snapshots to supported graph
+      target families with guarded command-shaped writes later.
+- [ ] AOG-BE-006 Area operating graph MCP read tool:
+      expose the verified area operating graph as a read-only MCP tool for
+      Jarvis and Paperclip.
 - [ ] AGRUN-010 Upstream Agent Source Merge Execution:
       still blocked until upstream write access or an approved fork/PR route
       exists.
@@ -32,9 +63,9 @@ synchronized with `.codex/context/TASK_BOARD.md`.
       build metadata restoration is implemented locally; compare public
       `/health` `build.commit` with the pushed commit before claiming
       auto-deploy proof.
-- [ ] V1AREA database-backed proof:
-      run `npm run test:api` with a valid local `DATABASE_URL`, then repeat a
-      selected-area route proof against database-backed owner state.
+- [ ] Production AOG/settings smoke after the next deploy:
+      compare `/health` metadata with the pushed commit, then smoke
+      `/v1/operating-graph/areas/01-strategia` and authenticated settings.
 ### DEFERRED TO V2
 
 - [ ] ACF-UX-002 Company City Dashboard / Gamified Strategic Map:
@@ -55,6 +86,95 @@ The section below is retained as execution evidence. It is not the active
 queue. Future work must start from `Active Queue`, `.codex/context/TASK_BOARD.md`,
 and `docs/operations/v1-function-coverage-ledger.csv`.
 
+- [x] V1OPS-001 Operations Cockpit React view:
+      `/operations` now gives the owner one V1 supervision cockpit for clients,
+      tasks, department files/tables, and AI-agent handoff. It uses existing
+      owner APIs and table snapshots, adds client/task quick-create actions,
+      and keeps agent authority read-only/supervised. `npm run build:web`,
+      `npm run build`, `npm run validate`, and `npm run test:api` passed
+      against workspace-local PostgreSQL on `127.0.0.1:55476`. Real backend
+      Playwright proof registered an owner, created a proof client and proof
+      task, verified success states, and captured desktop/mobile evidence:
+      `docs/ux/evidence/v1-operations-cockpit-real-backend-desktop.png` and
+      `docs/ux/evidence/v1-operations-cockpit-real-backend-mobile.png`.
+      Task contract:
+      `docs/planning/v1-operations-cockpit-task-contract.md`.
+- [x] V1TASKS-001 Tasks and Delivery V1 workbench:
+      `/tasks-adapter` now renders a V1 delivery workbench with execution
+      pressure, task metrics, department delivery-table coverage, AI handoff
+      readiness, all-task filters, inline task creation, and quick task status
+      movement through existing protected task routes. `npm run build:web`,
+      `npm run validate`, `npm run test:api`, and `git diff --check` passed
+      against workspace-local PostgreSQL on `127.0.0.1:55476`. Real backend
+      Playwright proof created `Proof delivery task`, moved it to
+      `in_progress`, and captured desktop/mobile evidence:
+      `docs/ux/evidence/v1-tasks-delivery-real-backend-desktop.png` and
+      `docs/ux/evidence/v1-tasks-delivery-real-backend-mobile.png`.
+      Task contract:
+      `docs/planning/v1-tasks-delivery-workbench-task-contract.md`.
+- [x] V1SETTINGS-002 Unified settings React implementation:
+      `/settings`, `/settings/integrations`, `/settings/drive`,
+      `/settings/api`, and `/react-agent-tools` now render one unified React
+      settings module with Integrations, Agent keys, and MCP sections.
+      Provider setup uses existing backend contracts for credentials, active
+      state, scope IDs, `syncMode`, `importMode`, mapping, discovery, and
+      sync/import/reconcile actions. `npm run build:web`, `npm run validate`,
+      `git diff --check`, and `npm run test:api` passed. Playwright fallback
+      verified desktop/mobile settings routes, and real backend proof saved
+      Google Drive OAuth client credentials from `/settings/drive` and read
+      back `oauthClientConfigured=true`. Task contract:
+      `docs/planning/v1-settings-react-implementation-task-contract.md`.
+- [x] AOG-BE-001 Area operating graph read API:
+      `GET /v1/operating-graph/areas/:areaKey` aggregates existing data into
+      connected goals, targets, metrics, workflows, tasks, knowledge, Drive
+      sources, provider mappings, edge confidence, evidence, and gaps. MCP
+      exposes it through `operating-graph:read`, and the selected-area React
+      view consumes it with fallback. `npm run test:api` passed against
+      workspace-local PostgreSQL on `127.0.0.1:55476`. Task contract:
+      `docs/planning/aog-be-001-area-operating-graph-read-api-task-contract.md`.
+- [x] REACT-WEB-002 ClickUp setup React workflow:
+      closed by V1SETTINGS-002. ClickUp setup/discovery/list policy and
+      maintenance/task sync controls live inside the unified settings module.
+- [x] REACT-WEB-003 Google Drive OAuth/folder-selection React workflow:
+      closed by V1SETTINGS-002 for settings scope. Drive OAuth client
+      settings, folder IDs, selected folder policy, folder discovery/mapping,
+      import, and reconcile controls live inside the unified settings module.
+
+- [x] ORG-MOD-001 CompanyCore Business Module Map:
+      published `docs/architecture/companycore-business-module-map.md` as the
+      scalable model-level module map for CompanyCore as the bridge for
+      operating the company. The map defines canonical modules for company
+      graph, goals, work/tasks, processes/pipelines, runtime evidence,
+      knowledge, storage/documents, CRM, resources, integrations, agents/MCP,
+      governance, and metrics, and requires future work to classify modules as
+      native core, provider-backed, future adapter, or derived view before
+      implementation. `git diff --check` passed.
+- [x] ORG-FLOW-001 CompanyCore Global Business Flow:
+      published `docs/architecture/companycore-global-business-flow.md` as the
+      central company value-flow model for products, services, and hybrid
+      delivery. The flow connects strategic intent, brand, demand, lead
+      qualification, discovery, offer/agreement, delivery planning, execution,
+      quality/acceptance, payment, support, feedback, improvement, and next
+      intent, with dependency tree, stage contracts, operating-area mapping,
+      AI/MCP guardrails, metrics, and future implementation candidates.
+      `git diff --check` passed.
+- [x] DMS-ARCH-001 Department Management Systems Architecture:
+      published `docs/architecture/department-management-systems-architecture.md`,
+      `docs/ux/v1-department-management-systems-view-map.md`, and
+      `docs/ux/v1-department-system-prompt-pack.md`. The docs define every
+      00-12 Company Atlas area as a department management system with
+      subsystems over shared CompanyCore modules, plus public/private view
+      list, component layout, per-department route inventory, and reusable
+      prompts for specs, visual concepts, implementation plans, and AI-agent
+      packets. `git diff --check` passed.
+- [x] DMS-OPS-001 04 Operations Management System V1 Read Model:
+      implemented a dedicated read-only Operations Management System panel for
+      `/areas?area=04-operacje&view=overview`, corrected DMS docs to the
+      current Company Atlas numbering where `04` is Operacje, and validated
+      with `npm run build` plus `git diff --check`. Playwright authenticated
+      mocked-owner proof saved desktop/mobile screenshots with no horizontal
+      overflow. Disposable Docker/Postgres proof timed out before port `55479`
+      became available, so database-backed target smoke remains a follow-up.
 - [x] V1UX-CANON-001 Simple V1 Dashboard Canonical Design:
       published the V1 area-first Company Atlas direction, sitemap,
       component boundaries, Tailwind/DaisyUI style rules, pixel-perfect
@@ -73,8 +193,9 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       build:web`, `npm run validate`, and `git diff --check` passed.
       Playwright fallback verified desktop `1366x900`, tablet `834x1112`,
       and mobile `390x844` screenshots in `docs/ux/evidence/` with no
-      overflow and no console/page errors. `npm run test:api` is still
-      pending because host `DATABASE_URL` was unset.
+      overflow and no console/page errors. Follow-up local proof on
+      2026-05-15 ran `npm run test:api` against workspace-local PostgreSQL and
+      verified selected-area routes against a real backend owner session.
 - [x] V1AREA-003 Area Detail Capability Tabs:
       `/areas?area=:areaKey&view=:viewId` now gives every area capability tab a
       distinct area-scoped board for records, tables, providers, Drive proof,
@@ -126,10 +247,11 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       `docs/ux/evidence/production-auth-v1-1dafe91-2026-05-15/`.
 - [x] V1SETTINGS-001 Unified V1 Settings Canonical Design:
       published the unified settings IA and desktop/mobile canonical targets
-      for one minimal settings module spanning Integrations, Agent keys, and
-      MCP. Settings are credential-only; sync, import, mapping, badges,
-      counters, review queues, and large tool catalogs belong in dedicated work
-      views.
+      for one settings module spanning Integrations, Agent keys, and MCP.
+      Integrations use a provider list plus contextual backend-supported
+      fields, active/disabled provider switches, and provider tabs for
+      `Setup`, `Mapping`, and `Sync`. Badges, counters, review queues, and
+      large tool catalogs belong in dedicated work views.
       Targets:
       `docs/ux/assets/companycore-v1-settings-desktop-canonical.png` and
       `docs/ux/assets/companycore-v1-settings-mobile-canonical.png`.

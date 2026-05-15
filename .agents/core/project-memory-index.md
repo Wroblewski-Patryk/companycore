@@ -1,6 +1,6 @@
 # Project Memory Index
 
-Last updated: 2026-05-15
+Last updated: 2026-05-16
 
 ## Purpose
 
@@ -85,6 +85,38 @@ continue from repository files alone:
   Access and autonomy, and Audit and feedback. Future Paperclip work should
   first close the business-plan/context-to-task loop through existing
   knowledge, task, ClickUp, MCP, event, approval, and audit foundations.
+- `docs/architecture/companycore-business-module-map.md`: accepted
+  model-level module map for scaling CompanyCore as the bridge for operating
+  the company. It classifies future work as native core, provider-backed,
+  future adapter, or derived view, and defines canonical modules for the
+  company graph, goals, work/tasks, processes/pipelines, runtime evidence,
+  knowledge, storage/documents, CRM, resources, integrations, agents/MCP,
+  governance, and metrics. Future UI/API/MCP work should derive from this map
+  before adding new schema, provider-specific surfaces, or agent tools.
+- `docs/architecture/companycore-global-business-flow.md`: accepted global
+  business value-flow model. As of 2026-05-16, CompanyCore has one central
+  pipeline for products, services, and hybrid delivery:
+  strategic intent -> brand/market -> demand -> lead qualification ->
+  discovery -> offer/agreement -> delivery planning -> product/service
+  execution -> quality/acceptance -> payment -> support -> feedback ->
+  improvement -> next intent. Future CRM, marketing, delivery, finance,
+  feedback, AI, graph, and dashboard work should derive scoped tasks from this
+  flow before adding runtime surfaces.
+- `docs/architecture/department-management-systems-architecture.md` and
+  `docs/ux/v1-department-management-systems-view-map.md`: accepted V1
+  department management-system direction. As of 2026-05-16, every 00-12
+  Company Atlas area should be treated as a department management system with
+  subsystems over shared CompanyCore tables, pipelines, tasks, knowledge,
+  resources, metrics, decisions, governance, and AI/MCP tools. Future
+  department UI or Paperclip work should use
+  `docs/ux/v1-department-system-prompt-pack.md` before generating specs or
+  implementation tasks. DMS-OPS-001 is the first concrete implementation:
+  `/areas?area=04-operacje&view=overview` adds a read-only Operations
+  Management System board for planning, routines, controls, dependencies,
+  approvals, and agent-safe handoff. It is build-verified and has
+  desktop/mobile authenticated mocked-owner proof under `docs/ux/evidence/`;
+  database-backed target smoke remains pending because disposable Docker
+  startup timed out in the local session.
 - `docs/architecture/web-layer-react-ownership.md`: current web route
   ownership contract. As of 2026-05-15, user-facing web routes are React-owned
   and served from the Vite bundle in `public/react/index.html`. The legacy
@@ -99,14 +131,42 @@ continue from repository files alone:
   decisions, AI, and add-view planning from existing backend data. Future web
   slices must extend `web/src/` and the route registry instead of
   reintroducing page-local vanilla scripts or duplicated sidebar route maps.
+- `docs/planning/v1-area-operating-graph-backend-gap-plan.md` and
+  `docs/planning/aog-be-001-area-operating-graph-read-api-task-contract.md`:
+  current backend connectivity source for the V1 selected-department operating
+  room. As of 2026-05-15, AOG-BE-001 is locally verified: the protected
+  `GET /v1/operating-graph/areas/:areaKey` aggregate exists, selected-area
+  React consumption has fallback behavior, MCP exposes `operating-graph:read`,
+  and `npm run test:api` passed against workspace-local PostgreSQL on
+  `127.0.0.1:55476`. Future graph work should deploy/smoke the read aggregate
+  first, then evaluate `Target.metricId`, goal/workflow bridges,
+  workflow-task link normalization, knowledge/source link commands, and MCP
+  read tooling.
 - `docs/ux/v1-web-view-index-2026-05-15.md`: current V1 web UX maturity
-  index. It marks `/dashboard` and `/areas?area=:areaKey&view=:viewId` as V1
-  canonical, foundation routes as usable but not canonical yet, and remaining
-  module/workbench/admin routes as V0 rebuild or compatibility surfaces.
-  V1PROD-001 adds production parity status: production health currently reports
-  `b716f02`, while the V1 canonical web layer exists in the local working tree,
-  so production parity is blocked by deploy drift. Future web UX tasks should
+  index. It marks `/dashboard`, `/areas?area=:areaKey&view=:viewId`, unified
+  settings, `/operations`, and `/tasks-adapter` as V1 canonical. `/operations`
+  is the owner supervision cockpit for clients, tasks, department files/tables,
+  and AI-agent handoff. `/tasks-adapter` is the V1 tasks and delivery
+  workbench for execution pressure, task create/status movement, department
+  delivery-table coverage, and AI handoff readiness. Both are derived views
+  over existing contracts with real backend proof. V1PROD-001/V1PROD-003
+  capture production parity status for earlier V1 surfaces; operations/tasks
+  production smoke remains a follow-up after deploy. Future web UX tasks should
   update this index when route maturity or production parity changes.
+- `docs/planning/v1-operations-cockpit-task-contract.md`: current task and
+  evidence source for V1OPS-001. As of 2026-05-16, `/operations` is locally
+  verified through build, validate, API tests, and real backend Playwright
+  proof that created client/task records and captured responsive screenshots.
+  Future work should deepen downstream `tasks-adapter`, `data`, or
+  `relationships` capability routes instead of making `/operations` a raw
+  everything-editor.
+- `docs/planning/v1-tasks-delivery-workbench-task-contract.md`: current task
+  and evidence source for V1TASKS-001. As of 2026-05-16, `/tasks-adapter` is
+  locally verified through build, validate, API tests, diff hygiene, and real
+  backend Playwright proof that created `Proof delivery task`, moved it to
+  `in_progress`, and captured responsive screenshots. It intentionally does
+  not invent a direct task-to-area relation; future area-task ownership must be
+  designed as a separate backend-backed slice.
 - `docs/ux/v1-production-canonical-discrepancy-audit-2026-05-15.md`: current
   production-to-canonical discrepancy register for the five V1 web surfaces.
   It records the original deployed screenshots, root/auth mismatches,
@@ -115,14 +175,35 @@ continue from repository files alone:
   while authenticated dashboard and selected-area screenshot parity remains
   the open private-route proof.
 - `docs/ux/v1-settings-canonical-spec-2026-05-15.md`: current canonical
-  planning target for the unified V1 settings module. It defines `/settings`
-  as a minimal credential surface with sections for Integrations, Agent keys,
-  and MCP. Settings must not contain badges, counters, sync/import queues,
-  folder mapping, relationship review, large MCP catalogs, or dashboard-style
-  metrics; those belong in dedicated work views. The
+  source for the unified V1 settings module. It defines `/settings` as a
+  contextual connector configuration surface with sections for Integrations,
+  Agent keys, and MCP. As of V1SETTINGS-002 on 2026-05-15, `/settings`,
+  `/settings/integrations`, `/settings/drive`, `/settings/api`, and
+  `/react-agent-tools` render one React `UnifiedSettingsRoute`. Integrations
+  show a provider list and the selected provider's backend-supported fields:
+  credentials, active state, provider scope IDs, `syncMode`, and `importMode`.
+  The provider list includes direct active/disabled switches; disabling a
+  provider stops future sync/actions while existing imported CompanyCore data
+  remains available. The selected provider has `Setup`, `Mapping`, and `Sync`
+  tabs backed by existing ClickUp and Google Drive contracts for discovery,
+  area mapping, import, reconcile, maintenance, and task sync.
+  Settings must not contain badges, counters, sync/import queues, folder
+  mapping, relationship review, large MCP catalogs, or dashboard-style metrics;
+  those belong in dedicated work views. The
   desktop/mobile target images are
   `docs/ux/assets/companycore-v1-settings-desktop-canonical.png` and
-  `docs/ux/assets/companycore-v1-settings-mobile-canonical.png`.
+  `docs/ux/assets/companycore-v1-settings-mobile-canonical.png`. Local proof:
+  `npm run build:web`, `npm run validate`, `git diff --check`, and
+  Playwright fallback screenshots
+  `docs/ux/evidence/v1-settings-unified-proof-desktop.png` and
+  `docs/ux/evidence/v1-settings-unified-proof-mobile.png`. Database-backed
+  proof also passed: `npm run test:api` against workspace-local PostgreSQL,
+  plus real backend Playwright proof that registered an owner, saved Google
+  Drive OAuth client settings from `/settings/drive`, read back
+  `oauthClientConfigured=true`, and captured
+  `docs/ux/evidence/v1-settings-real-backend-desktop.png`,
+  `docs/ux/evidence/v1-settings-drive-save-real-backend-desktop.png`, and
+  `docs/ux/evidence/v1-settings-real-backend-mobile.png`.
 - `docs/architecture/relationship-graph-audit-2026-05-14.md`: current
   relationship graph source audit for the pre-V2 web/backend/MCP foundation.
   Relationship APIs and UI must distinguish direct database edges,

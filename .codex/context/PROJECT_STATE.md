@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-05-15
+Last updated: 2026-05-16
 
 ## Product Snapshot
 - Name: LuckySparrow Company Core
@@ -12,6 +12,24 @@ Last updated: 2026-05-15
   import is complete for the numbered department roots; application completion
   audit found UX, security, data-completeness, documentation, maintainability,
   and deployment-proof finish work before the product can be called complete.
+  As of 2026-05-16, the V1 unified React settings module, AOG-BE-001
+  selected-area operating graph read API, V1 operations cockpit, and V1
+  tasks/delivery workbench are locally verified. `npm run test:api` passed
+  against workspace-local PostgreSQL on `127.0.0.1:55476`; real backend
+  Playwright proof saved Google Drive OAuth client settings from
+  `/settings/drive`; `/operations` created proof client/task records while
+  showing department files/tables and AI handoff context; and
+  `/tasks-adapter` created `Proof delivery task`, moved it to `in_progress`,
+  and captured desktop/mobile proof without horizontal overflow.
+  As of 2026-05-16, DMS-OPS-001 added the first concrete Department Management
+  System slice for `04 Operacje` on the selected-area route. It is a read-only
+  Operations Management System board for planning, procedures, procedure
+  steps, dependencies, approvals, business functions, and AI-safe handoff.
+  The board now appears before generic selected-area layers. `npm run build`
+  and `git diff --check` passed; Playwright authenticated mocked-owner proof
+  saved desktop/mobile screenshots with no horizontal overflow. Disposable
+  Docker/Postgres proof timed out before port `55479` became available, so
+  target/database smoke remains a deployment follow-up.
 
 ## Product Decisions (Confirmed)
 - 2026-05-07: CRM and pipelines are separate domain concepts. Pipelines are a
@@ -130,6 +148,12 @@ Last updated: 2026-05-15
   shorter atlas preview. `npm run validate` and `git diff --check` passed;
   Playwright fallback reverified desktop `1366x900` and mobile `390x844` with
   no horizontal overflow and no console/page errors.
+- 2026-05-15: Follow-up local database proof closed the stale V1AREA API gate.
+  `npm run test:api` passed against workspace-local PostgreSQL on
+  `127.0.0.1:55476`, and real backend Playwright proof verified selected-area
+  routes with a freshly registered owner. Evidence:
+  `docs/ux/evidence/v1-area-real-backend-selected-area-desktop.png` and
+  `docs/ux/evidence/v1-area-real-backend-selected-area-mobile.png`.
 - 2026-05-15: V1AREA-001 premium parity pass added the final Company Atlas
   sidebar footer/owner row, subtle atlas/card material accents, visible desktop
   owner context while preserving all 00-12 area rows in the first viewport,
@@ -234,6 +258,33 @@ Last updated: 2026-05-15
   review business-plan/company context, inspect ClickUp and CompanyCore task
   state, identify missing work, propose or create scoped tasks, and feed back
   evidence through CompanyCore without direct DB or provider-token access.
+- 2026-05-15: CompanyCore business module scaling direction is accepted.
+  `docs/architecture/companycore-business-module-map.md` now defines
+  CompanyCore as the bridge for operating the company through canonical modules
+  for company graph, goals, work/tasks, processes/pipelines, runtime evidence,
+  knowledge, storage/documents, CRM, resources, integrations, agents/MCP,
+  governance, and metrics. Future schema, UI, API, MCP, and provider work must
+  classify modules as native core, provider-backed, future adapter, or derived
+  view before implementation.
+- 2026-05-16: CompanyCore global business-flow direction is accepted.
+  `docs/architecture/companycore-global-business-flow.md` now defines one
+  cyclic company pipeline for products, services, and hybrid delivery:
+  strategic intent -> brand/market -> demand -> lead qualification ->
+  discovery -> offer/agreement -> delivery planning -> product/service
+  execution -> quality/acceptance -> payment -> support -> feedback ->
+  improvement -> next intent. Future CRM, marketing, delivery, finance,
+  support, feedback, graph, dashboard, and AI-agent work should derive from
+  this flow before adding runtime surfaces.
+- 2026-05-16: CompanyCore V1 department management-system direction is
+  accepted. Each 00-12 Company Atlas area should become a department management
+  system with subsystems over shared CompanyCore tables, pipelines, tasks,
+  knowledge, resources, metrics, decisions, governance, and AI/MCP tools.
+  Source docs:
+  `docs/architecture/department-management-systems-architecture.md`,
+  `docs/ux/v1-department-management-systems-view-map.md`, and
+  `docs/ux/v1-department-system-prompt-pack.md`. Future department UI and
+  Paperclip tasks should generate one department spec or implementation slice
+  at a time from these docs.
 - 2026-05-15: V1WEB-002 organized the V1 web layer into five canonical
   surfaces. `/` is now public home, `/auth/login` and `/auth/register` share
   the public layout, `/dashboard` remains the authenticated Company Atlas, and
@@ -2887,6 +2938,31 @@ Last updated: 2026-05-15
   state. `01 Strategia` now resolves backend context with `8 TABLES`, Drive
   evidence, and provider mappings. Evidence:
   `docs/ux/evidence/production-auth-v1-1dafe91-2026-05-15/`.
+- 2026-05-15: Planned the backend connectivity gap for the V1 selected-area
+  operating room. The current UI can present a connected view from partial
+  existing foundations, but the backend does not yet expose one area-scoped
+  operating graph contract for goals, targets, metrics, workflows, tasks,
+  knowledge, Drive sources, provider mappings, and readiness gaps. Added
+  `docs/planning/v1-area-operating-graph-backend-gap-plan.md`, queued
+  AOG-BE-001 as the P0 read-only aggregate
+  `GET /v1/operating-graph/areas/:areaKey`, and recorded follow-up graph
+  relation tasks for target metrics, goal/workflow bridges, workflow-task link
+  normalization, knowledge/source links, and MCP read exposure. This was a
+  planning/source-of-truth update only; no runtime change or deploy.
+- 2026-05-15: Implemented and locally verified AOG-BE-001 for the selected-area
+  operating graph. Added protected
+  `GET /v1/operating-graph/areas/:areaKey`, canonical V1 area-key aliases,
+  edge confidence/evidence, layers, gaps, review items, unsupported relation
+  families, API docs, MCP `operating-graph:read` exposure, and selected-area
+  React consumption with fallback. Added API regression coverage for graph
+  shape, workspace isolation, gaps, and MCP manifest exposure. Validation
+  passed: `npm run build:server`, `npm run build:web`,
+  `npx prisma validate` with a dummy `DATABASE_URL`, `git diff --check`, and
+  `npm run test:api` against workspace-local PostgreSQL on
+  `127.0.0.1:55476`. During verification, invalid UUID sentinels in the AOG
+  empty filters and Google Drive OAuth repair/refresh client persistence were
+  fixed and covered by the API gate. Production graph smoke remains pending
+  after deploy.
 
 ## Working Agreements
 - Keep task board and project state synchronized.
@@ -2926,6 +3002,9 @@ Last updated: 2026-05-15
 - `docs/architecture/tech-stack.md`
 - `docs/architecture/architecture-source-of-truth.md`
 - `docs/architecture/organizational-architecture-bridge.md`
+- `docs/architecture/companycore-business-module-map.md`
+- `docs/architecture/companycore-global-business-flow.md`
+- `docs/architecture/department-management-systems-architecture.md`
 - `docs/engineering/local-development.md`
 - `docs/engineering/testing.md`
 - `docs/governance/working-agreements.md`

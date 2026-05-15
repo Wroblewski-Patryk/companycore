@@ -1032,6 +1032,7 @@ label {
 
 .area-operating-board,
 .area-capability-focus,
+.operations-system-panel,
 .area-detail-rail,
 .area-evidence-panel {
   padding: 1rem;
@@ -1206,6 +1207,273 @@ label {
 .area-lane-red small {
   background: rgb(194 65 61 / 0.1);
   color: #c2413d;
+}
+
+.operations-system-panel {
+  display: grid;
+  gap: 0.9rem;
+  overflow: hidden;
+  border: 1px solid rgb(216 225 238 / 0.86);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgb(7 18 37 / 0.035), transparent 38%),
+    linear-gradient(90deg, rgb(22 132 91 / 0.06), transparent 54%),
+    rgb(255 255 255 / 0.96);
+  box-shadow: 0 18px 48px rgb(7 18 37 / 0.07);
+}
+
+.operations-system-header {
+  display: grid;
+  gap: 0.78rem;
+  align-items: start;
+}
+
+@media (min-width: 880px) {
+  .operations-system-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+.operations-system-header h2 {
+  margin: 0.1rem 0 0;
+  color: #071225;
+  font-size: 1.15rem;
+  font-weight: 950;
+  line-height: 1.08;
+}
+
+.operations-system-header p {
+  max-width: 58rem;
+  margin: 0.45rem 0 0;
+  color: #51627f;
+  font-size: 0.86rem;
+  font-weight: 650;
+  line-height: 1.58;
+}
+
+.operations-command-grid,
+.operations-system-metrics,
+.operations-system-grid {
+  display: grid;
+  gap: 0.7rem;
+}
+
+@media (min-width: 760px) {
+  .operations-command-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .operations-system-metrics {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 980px) {
+  .operations-system-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.operations-command-card {
+  display: grid;
+  min-height: 10.4rem;
+  align-content: start;
+  gap: 0.5rem;
+  border: 1px solid rgb(216 225 238 / 0.9);
+  border-radius: 8px;
+  background: rgb(248 250 252 / 0.86);
+  padding: 0.78rem;
+  color: #071225;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.operations-command-card:hover,
+.operations-command-card:focus-visible {
+  border-color: #16845b;
+  background: #ffffff;
+  box-shadow: 0 14px 34px rgb(22 132 91 / 0.11);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.operations-command-card span,
+.operations-system-section > div,
+.operations-agent-packet > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.operations-command-card span {
+  justify-content: space-between;
+}
+
+.operations-command-card i,
+.operations-system-section i,
+.operations-agent-packet i {
+  display: grid;
+  width: 2.18rem;
+  height: 2.18rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgb(216 225 238 / 0.9);
+  border-radius: 999px;
+  background: #ffffff;
+  color: #16845b;
+}
+
+.operations-command-card em {
+  color: #51627f;
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.operations-command-card strong,
+.operations-system-section h3,
+.operations-agent-packet h3 {
+  margin: 0;
+  color: #071225;
+  font-size: 0.96rem;
+  font-weight: 950;
+  line-height: 1.14;
+}
+
+.operations-command-card p,
+.operations-system-section > p,
+.operations-agent-packet p {
+  margin: 0;
+  color: #51627f;
+  font-size: 0.73rem;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.operations-command-card small,
+.operations-system-section > div span,
+.operations-agent-packet > div:first-child span {
+  width: fit-content;
+  border-radius: 999px;
+  background: rgb(22 132 91 / 0.1);
+  padding: 0.3rem 0.52rem;
+  color: #16845b;
+  font-size: 0.64rem;
+  font-weight: 950;
+}
+
+.operations-system-metrics span {
+  display: grid;
+  gap: 0.18rem;
+  border: 1px solid rgb(216 225 238 / 0.86);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 0.66rem;
+}
+
+.operations-system-metrics i {
+  color: #2364d2;
+}
+
+.operations-system-metrics small,
+.operations-system-metrics strong {
+  display: block;
+  min-width: 0;
+}
+
+.operations-system-metrics small {
+  color: #51627f;
+  font-size: 0.62rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.operations-system-metrics strong {
+  color: #071225;
+  font-size: 1.08rem;
+  font-weight: 950;
+}
+
+.operations-system-section,
+.operations-agent-packet {
+  display: grid;
+  align-content: start;
+  gap: 0.72rem;
+  border: 1px solid rgb(216 225 238 / 0.86);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.92);
+  padding: 0.82rem;
+}
+
+.operations-system-section > div,
+.operations-agent-packet > div:first-child {
+  justify-content: space-between;
+}
+
+.operations-system-list {
+  display: grid;
+  gap: 0.48rem;
+}
+
+.operations-system-list a,
+.operations-system-list span {
+  display: grid;
+  gap: 0.18rem;
+  border-radius: 8px;
+  background: rgb(248 250 252 / 0.92);
+  padding: 0.58rem 0.62rem;
+  color: #071225;
+  text-decoration: none;
+}
+
+.operations-system-list a:hover,
+.operations-system-list a:focus-visible {
+  background: rgb(35 100 210 / 0.08);
+  outline: none;
+}
+
+.operations-system-list strong,
+.operations-system-list small,
+.operations-system-list em {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.operations-system-list strong {
+  font-size: 0.78rem;
+  font-weight: 950;
+}
+
+.operations-system-list small {
+  color: #51627f;
+  font-size: 0.68rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.operations-system-list em {
+  color: #2364d2;
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.operations-agent-packet > div:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.operations-agent-packet a {
+  border: 1px solid rgb(216 225 238 / 0.9);
+  border-radius: 999px;
+  padding: 0.36rem 0.62rem;
+  color: #2364d2;
+  font-size: 0.7rem;
+  font-weight: 950;
+  text-decoration: none;
 }
 
 .area-capability-focus {

@@ -113,11 +113,14 @@ export type TableColumn<Row> = {
 export type TaskRecord = {
   id: string;
   title: string;
+  description?: string | null;
   status?: string | null;
   priority?: string | null;
   dueDate?: string | null;
   source?: string | null;
   externalId?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
   taskList?: {
     id: string;
     name: string;
@@ -167,6 +170,73 @@ export type GoogleDriveFileRecord = {
 
 type GoogleDriveFilesResponse = {
   data: GoogleDriveFileRecord[];
+};
+
+export type AreaOperatingGraph = {
+  area: {
+    id: string;
+    key: string;
+    canonicalKey: string;
+    resolvedKey: string;
+    name: string;
+    description?: string | null;
+    position: number;
+  };
+  summary: {
+    goals: number;
+    targets: number;
+    metrics: number;
+    workflows: number;
+    tasks: number;
+    knowledge: number;
+    sources: number;
+    gaps: number;
+    nodes: number;
+    edges: number;
+    limit: number;
+  };
+  nodes: Array<{
+    id: string;
+    type: string;
+    label: string;
+    summary?: string | null;
+    metadata?: Record<string, unknown>;
+  }>;
+  edges: Array<{
+    id: string;
+    from: string;
+    to: string;
+    label: string;
+    confidence: string;
+    sourceModel: string;
+    sourceField: string;
+    evidence: Array<Record<string, unknown>>;
+  }>;
+  layers: Record<"goals" | "workflows" | "tasks" | "knowledge" | "sources", string[]>;
+  gaps: Array<{
+    id: string;
+    severity: "info" | "warning" | "critical";
+    layer: "goals" | "workflows" | "tasks" | "knowledge" | "sources";
+    nodeId?: string;
+    title: string;
+    detail: string;
+  }>;
+  reviewItems: Array<{
+    id: string;
+    severity: "info" | "warning" | "critical";
+    layer: string;
+    title: string;
+    detail: string;
+  }>;
+  unsupportedFamilies: Array<{
+    family: string;
+    reason: string;
+    nextAction: string;
+  }>;
+};
+
+type AreaOperatingGraphResponse = {
+  data: AreaOperatingGraph;
 };
 
 export type TableRecordSnapshot = Record<string, Array<Record<string, unknown>>>;
@@ -718,6 +788,22 @@ export async function loadGoogleDriveFiles(token: string): Promise<GoogleDriveFi
 
   if (!response.ok || !("data" in body)) {
     const message = "error" in body && body.error ? body.error : "google_drive_files_failed";
+    throw new Error(message);
+  }
+
+  return body.data;
+}
+
+export async function loadAreaOperatingGraph(token: string, areaKey: string): Promise<AreaOperatingGraph> {
+  const response = await fetch(`/v1/operating-graph/areas/${encodeURIComponent(areaKey)}?limit=100`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+  const body = await response.json() as AreaOperatingGraphResponse | { error?: string };
+
+  if (!response.ok || !("data" in body)) {
+    const message = "error" in body && body.error ? body.error : "area_operating_graph_failed";
     throw new Error(message);
   }
 

@@ -2,31 +2,25 @@
 
 ## Ready
 
-- REACT-WEB-002 ClickUp setup React workflow.
+- V1OPS-002 Production operations cockpit smoke.
   - Stage: planning
-  - Owner: Frontend Builder + Backend Builder
+  - Owner: Frontend Builder + Ops/Release
   - Priority: P1
-  - Goal: rebuild ClickUp setup inside the unified V1 settings module instead
-    of keeping `/settings` as a ClickUp-only route.
-- REACT-WEB-003 Google Drive OAuth/folder-selection React workflow.
+  - Source: `docs/planning/v1-operations-cockpit-task-contract.md`
+  - Goal: after the next deploy, compare public health build metadata with the
+    pushed commit and run authenticated `/operations` smoke for client/task
+    creation, table/file coverage, and AI handoff readiness.
+- V1DATA-001 Evidence browser V1 workbench.
   - Stage: planning
-  - Owner: Frontend Builder + Backend Builder
+  - Owner: Frontend Builder + QA/Test
   - Priority: P1
-  - Goal: rebuild `/settings/drive` as a tab-aware entry into the unified V1
-    settings module, covering OAuth, folder discovery, selection, import,
-    mapping, and reconcile controls against existing backend contracts.
-- V1SETTINGS-002 Unified settings React implementation.
-  - Stage: planning
-  - Owner: Frontend Builder + Backend Builder
-  - Priority: P1
-  - Source: `docs/ux/v1-settings-canonical-spec-2026-05-15.md`
-  - Goal: implement the canonical `/settings` module with minimal sections for
-    Integrations, Agent keys, and MCP, then route old settings entry points
-    into those sections once verified. Sync, import, mapping, badges, counters,
-    and large tool catalogs must stay outside the first settings view.
+  - Source: `docs/ux/v1-web-view-index-2026-05-15.md`
+  - Goal: convert `/data` and `/data/:table` from V0 rebuild into a V1
+    evidence browser tied to departments, tables, and agent-readable context.
 ## In Progress
 
-No task is actively in progress.
+- No active implementation task is currently in progress after the local
+  04 Operations Management System implementation checkpoint.
 
 ## Blocked
 
@@ -56,6 +50,41 @@ No task is actively in progress.
 
 ## Backlog
 
+- AOG-BE-002 Target metric relation.
+  - Stage: planning
+  - Owner: Backend Builder
+  - Priority: P1
+  - Source: `docs/planning/v1-area-operating-graph-backend-gap-plan.md`
+  - Goal: add optional `Target.metricId` while preserving the existing
+    `Target.metric` display field.
+- AOG-BE-003 Goal/workflow bridge.
+  - Stage: planning
+  - Owner: Backend Builder + Product Docs
+  - Priority: P1
+  - Source: `docs/planning/v1-area-operating-graph-backend-gap-plan.md`
+  - Goal: add the minimal durable relation between goals/targets and
+    process/pipeline roots after the AOG-BE-001 read model proves ownership.
+- AOG-BE-004 Workflow task link normalization.
+  - Stage: planning
+  - Owner: Backend Builder
+  - Priority: P1
+  - Source: `docs/planning/v1-area-operating-graph-backend-gap-plan.md`
+  - Goal: normalize workflow-run task evidence instead of relying on JSON-only
+    `linkedTaskIds`.
+- AOG-BE-005 Knowledge/source link contract.
+  - Stage: planning
+  - Owner: Backend Builder + Product Docs
+  - Priority: P1
+  - Source: `docs/planning/v1-area-operating-graph-backend-gap-plan.md`
+  - Goal: connect knowledge items, Drive files, and snapshots to supported
+    operating graph target families with guarded command-shaped writes later.
+- AOG-BE-006 Area operating graph MCP read tool.
+  - Stage: planning
+  - Owner: Backend Builder + AI Integration
+  - Priority: P1
+  - Source: `docs/planning/v1-area-operating-graph-backend-gap-plan.md`
+  - Goal: expose the verified area operating graph as a read-only MCP tool for
+    Jarvis and Paperclip.
 - ACF-UX-002 Company City Dashboard / Gamified Strategic Map.
   - Stage: planning
   - Owner: Frontend Builder + Product Docs
@@ -72,6 +101,155 @@ No task is actively in progress.
   auto-deploy webhook administration task.
 
 ## Done
+
+- DMS-OPS-001 04 Operations Management System V1 Read Model.
+  - Evidence: `/areas?area=04-operacje&view=overview` now renders a dedicated
+    Operations Management System board as the first management surface for
+    authenticated owners. The board derives planning, routines, controls,
+    dependencies, approvals, business functions, and AI handoff signals from
+    existing selected-area tables and links to existing Company OS, agent
+    tools, and API scope routes.
+  - Validation: `npm run build` and `git diff --check` passed. Playwright
+    authenticated mocked-owner proof verified desktop/mobile markers and no
+    horizontal overflow, with screenshots in
+    `docs/ux/evidence/dms-ops-management-system-desktop.png` and
+    `docs/ux/evidence/dms-ops-management-system-mobile.png`.
+    Disposable Docker/Postgres proof timed out before port `55479` became
+    available.
+  - Task contract:
+    `docs/planning/operations-management-system-v1-task-contract.md`.
+
+- DMS-ARCH-001 Department Management Systems Architecture And V1 View Map.
+  - Evidence: `docs/architecture/department-management-systems-architecture.md`
+    defines each 00-12 Company Atlas area as a department management system
+    over shared CompanyCore tables, pipelines, tasks, knowledge, resources,
+    metrics, decisions, governance, and AI/MCP tools.
+    `docs/ux/v1-department-management-systems-view-map.md` lists public,
+    private, support workbench, and all 13 department system routes.
+    `docs/ux/v1-department-system-prompt-pack.md` provides reusable prompts
+    for UX specs, visual concepts, implementation plans, and Paperclip/AI
+    packets.
+  - Validation: source-of-truth review and `git diff --check` passed.
+  - Task contract:
+    `docs/planning/department-management-systems-architecture-task-contract.md`.
+
+- V1TASKS-001 Tasks and Delivery V1 workbench.
+  - Evidence: `/tasks-adapter` is now a V1 canonical route that loads
+    workspace, task, Company OS, and MCP context; shows execution pressure,
+    department delivery-table coverage, AI handoff readiness, all-task
+    filters, inline task creation, and quick task status movement through
+    existing protected task routes.
+  - Validation: `npm run build:web`, `npm run validate`, `npm run test:api`,
+    and `git diff --check` passed against workspace-local PostgreSQL on
+    `127.0.0.1:55476`. Real backend Playwright proof on
+    `http://127.0.0.1:3162/tasks-adapter` registered a fresh owner, created
+    `Proof delivery task`, moved it to `in_progress`, verified success states,
+    and captured desktop/mobile screenshots with no horizontal overflow:
+    `docs/ux/evidence/v1-tasks-delivery-real-backend-desktop.png` and
+    `docs/ux/evidence/v1-tasks-delivery-real-backend-mobile.png`.
+  - Task contract:
+    `docs/planning/v1-tasks-delivery-workbench-task-contract.md`.
+
+- ORG-FLOW-001 CompanyCore Global Business Flow.
+  - Evidence: `docs/architecture/companycore-global-business-flow.md` defines
+    one 13-stage company value pipeline for products, services, and hybrid
+    delivery from strategic intent, brand, demand, lead qualification,
+    discovery, offer/agreement, delivery planning, execution,
+    quality/acceptance, payment, support, feedback, and improvement back to
+    next intent. It includes a dependency tree, stage contracts,
+    operating-area mapping, relationship model, AI/MCP guardrails, metrics,
+    visualization levels, and future implementation candidates.
+  - Validation: source-of-truth review and `git diff --check` passed.
+  - Task contract:
+    `docs/planning/companycore-global-business-flow-task-contract.md`.
+
+- V1OPS-001 Operations Cockpit React view.
+  - Evidence: `/operations` is served by the React app, registered as a V1
+    canonical command route, and aggregates existing owner contracts for
+    workspace connection, clients, tasks, Google Drive files, agents, agent
+    events, Company OS, and table record snapshots. The route includes client
+    and task quick-create forms, department file/table evidence, area coverage,
+    owner direction queue, and AI-agent handoff/readiness context.
+  - Validation: `npm run build:web`, `npm run build`, `npm run validate`, and
+    `npm run test:api` passed against workspace-local PostgreSQL on
+    `127.0.0.1:55476`. Real backend Playwright proof on
+    `http://127.0.0.1:3161/operations` registered a fresh owner, rendered the
+    four cockpit lanes, created a proof client and proof task, verified success
+    states, and captured desktop/mobile screenshots with no horizontal
+    overflow:
+    `docs/ux/evidence/v1-operations-cockpit-real-backend-desktop.png` and
+    `docs/ux/evidence/v1-operations-cockpit-real-backend-mobile.png`.
+  - Task contract:
+    `docs/planning/v1-operations-cockpit-task-contract.md`.
+
+- AOG-BE-001 Area operating graph read API.
+  - Evidence: `GET /v1/operating-graph/areas/:areaKey` is implemented in
+    `src/modules/operating-graph/operating-graph.routes.ts`, mounted in
+    `src/app.ts`, exposed through `operating-graph:read` in capabilities and
+    MCP manifest, consumed by selected-area React fallback logic, documented in
+    `docs/API.md`, and covered in `src/tests/api.test.ts`.
+  - Validation: `npm run test:api` passed against workspace-local PostgreSQL
+    on `127.0.0.1:55476`, including build, migrations, protected API flow,
+    AOG regressions, MCP exposure, and Google Drive OAuth refresh regression.
+    `npm run validate` and `git diff --check` also passed in this mission.
+  - Task contract:
+    `docs/planning/aog-be-001-area-operating-graph-read-api-task-contract.md`.
+
+- V1SETTINGS-002 Unified settings React implementation.
+  - Evidence: `/settings`, `/settings/integrations`, `/settings/drive`,
+    `/settings/api`, and `/react-agent-tools` now render one
+    `UnifiedSettingsRoute` with sections for Integrations, Agent keys, and
+    MCP. Integrations expose ClickUp and Google Drive provider rows, direct
+    active/disabled switches, Setup/Mapping/Sync tabs, backend-backed
+    credential and scope fields, `syncMode`, `importMode`, provider discovery,
+    mapping, and sync/import/reconcile actions through existing contracts.
+    `web/src/app-route-registry.ts` now marks settings entry routes as V1
+    canonical and prevents `/settings` from resolving as the old ClickUp
+    bridge route.
+  - Validation: `npm run build:web`, `npm run validate`, `git diff --check`,
+    and `npm run test:api` passed. Playwright fallback with mocked owner API
+    verified desktop `/settings` Mapping and mobile `/settings/drive` Sync.
+    A real backend Playwright proof on `http://127.0.0.1:3160` registered an
+    owner, opened `/settings`, saved Google Drive OAuth client credentials from
+    `/settings/drive`, read back `oauthClientConfigured=true` from
+    `/v1/integration-settings/google_drive`, and captured desktop/mobile
+    screenshots:
+    `docs/ux/evidence/v1-settings-unified-proof-desktop.png`,
+    `docs/ux/evidence/v1-settings-unified-proof-mobile.png`,
+    `docs/ux/evidence/v1-settings-real-backend-desktop.png`,
+    `docs/ux/evidence/v1-settings-drive-save-real-backend-desktop.png`, and
+    `docs/ux/evidence/v1-settings-real-backend-mobile.png`.
+  - Task contract:
+    `docs/planning/v1-settings-react-implementation-task-contract.md`.
+
+- REACT-WEB-002 ClickUp setup React workflow.
+  - Evidence: closed by V1SETTINGS-002. ClickUp setup, token preservation,
+    team/list/space/folder IDs, discovery, area mapping, maintenance run, and
+    task sync controls now live inside the unified V1 settings Integrations
+    section instead of a ClickUp-only root settings route.
+  - Validation: covered by V1SETTINGS-002 build and Playwright proof.
+
+- REACT-WEB-003 Google Drive OAuth/folder-selection React workflow.
+  - Evidence: closed by V1SETTINGS-002 for the settings-scope portion. Google
+    Drive client credentials, root/shared/selected folder IDs,
+    `changesPageToken`, sync policy, folder discovery, folder-area mapping,
+    import, and reconcile controls now live inside the unified V1 settings
+    Integrations section. Existing imported CompanyCore data remains available
+    when the provider is disabled.
+  - Validation: covered by V1SETTINGS-002 build and Playwright proof.
+
+- ORG-MOD-001 CompanyCore Business Module Map.
+  - Evidence: `docs/architecture/companycore-business-module-map.md` now
+    defines CompanyCore as the bridge for operating the company through
+    canonical modules for company graph, goals, work/tasks,
+    processes/pipelines, runtime evidence, knowledge, storage/documents, CRM,
+    resources, integrations, agents/MCP, governance, and metrics. Future work
+    must classify modules as native core, provider-backed, future adapter, or
+    derived view before adding schema, UI, API, MCP, or provider-specific
+    behavior.
+  - Validation: `git diff --check` passed.
+  - Task contract:
+    `docs/planning/companycore-business-module-map-task-contract.md`.
 
 - V1PROD-003 Authenticated V1 production parity and selected-area data match.
   - Evidence: commit `1dafe910ff612e027b686f09e2a488600f6e60d4`
@@ -218,10 +396,14 @@ No task is actively in progress.
     `docs/planning/v1-web-five-canonical-surfaces-task-contract.md`.
 
 - V1SETTINGS-001 Unified V1 Settings Canonical Design.
-  - Evidence: the settings IA now uses minimal sections for Integrations,
-    Agent keys, and MCP. Settings are explicitly credential-only; sync, import,
-    mapping, badges, counters, review queues, and large tool catalogs belong in
-    dedicated work views.
+  - Evidence: the settings IA now uses sections for Integrations, Agent keys,
+    and MCP. Integrations are contextual by provider and expose
+    backend-supported credentials, active state, scope IDs, `syncMode`, and
+    `importMode`; provider rows expose an active/disabled switch for pausing
+    future sync/actions while preserving imported CompanyCore data. The
+    selected provider exposes `Setup`, `Mapping`, and `Sync` tabs. Badges,
+    counters, review queues, and large tool catalogs belong in dedicated work
+    views.
   - Canonical images:
     `docs/ux/assets/companycore-v1-settings-desktop-canonical.png` and
     `docs/ux/assets/companycore-v1-settings-mobile-canonical.png`.
@@ -372,9 +554,11 @@ No task is actively in progress.
     `docs/ux/evidence/v1-area-dashboard-desktop-1366x900.png`,
     `docs/ux/evidence/v1-area-dashboard-tablet-834x1112.png`, and
     `docs/ux/evidence/v1-area-dashboard-mobile-390x844.png`.
-  - Residual validation gap: `npm run test:api` remains blocked locally because
-    `DATABASE_URL` is not set. A database-backed API regression run remains
-    required before the next release/deploy claim.
+  - Follow-up validation: `npm run test:api` passed against workspace-local
+    PostgreSQL on `127.0.0.1:55476`; real backend Playwright proof verified
+    selected-area desktop/mobile routes with screenshots
+    `docs/ux/evidence/v1-area-real-backend-selected-area-desktop.png` and
+    `docs/ux/evidence/v1-area-real-backend-selected-area-mobile.png`.
   - Task contract:
     `docs/planning/v1-area-first-pixel-perfect-task-contract.md`.
 

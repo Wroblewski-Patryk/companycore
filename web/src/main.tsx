@@ -22,7 +22,9 @@ import {
   deleteOperatingArea as sharedDeleteOperatingArea,
   evaluateCompanyOsAutomationRules as sharedEvaluateCompanyOsAutomationRules,
   integrationStatus as sharedIntegrationStatus,
+  loadAreaOperatingGraph as sharedLoadAreaOperatingGraph,
   loadCompanyOsWorkflowDrafts as sharedLoadCompanyOsWorkflowDrafts,
+  loadTableRecordSnapshot as sharedLoadTableRecordSnapshot,
   ownerToken as sharedOwnerToken,
   previewCompanyOsWorkflowDraftImpact as sharedPreviewCompanyOsWorkflowDraftImpact,
   redirectToOwnerLogin as sharedRedirectToOwnerLogin,
@@ -62,6 +64,7 @@ import type {
   CompanyOsWorkbenchState,
   ConnectionData,
   AgentToolSurfaceState,
+  AreaOperatingGraph,
   AreasWorkbenchState,
   DashboardState,
   ExternalContainerMapping,
@@ -223,6 +226,8 @@ type AreaDetailContext = {
   driveItems: GoogleDriveFileRecord[];
   providerMappings: ExternalContainerMapping[];
   globalReviewDebt: number;
+  operatingGraph?: AreaOperatingGraph | null;
+  operatingGraphStatus?: "idle" | "loading" | "ready" | "error";
 };
 
 type AreaDetailLane = {
@@ -503,6 +508,22 @@ function useCompanyOsAgentContextState(): [CompanyOsAgentContextState, () => voi
 
 function ownerToken() {
   return sharedOwnerToken();
+}
+
+async function loadAreaOperatingGraph(areaKey: string) {
+  const token = ownerToken();
+  if (!token) {
+    throw new Error("invalid_token");
+  }
+  return sharedLoadAreaOperatingGraph(token, areaKey);
+}
+
+async function loadTableRecordSnapshot(connection: ConnectionData) {
+  const token = ownerToken();
+  if (!token) {
+    throw new Error("invalid_token");
+  }
+  return sharedLoadTableRecordSnapshot(token, connection);
 }
 
 async function requestCompanyOsApproval(input: Parameters<typeof sharedRequestCompanyOsApproval>[1]) {
@@ -1525,6 +1546,8 @@ type AreaCapability = {
   href: string;
 };
 
+type LayerKey = "goals" | "workflows" | "tasks" | "knowledge" | "sources";
+
 const canonicalAreas: CanonicalArea[] = [
   { key: "00-ogolny", label: "00 Ogolny", shortLabel: "00", lens: "Workspace", icon: "ph-compass", backendAliases: ["main-general", "00 general", "00 glowny"] },
   { key: "01-strategia", label: "01 Strategia", shortLabel: "01", lens: "Govern", icon: "ph-target", backendAliases: ["strategy-governance", "strategy", "governance", "goals", "targets"] },
@@ -2116,6 +2139,234 @@ function areaCapabilityDriveItems(context: AreaDetailContext, limit = 5) {
   }));
 }
 
+const operationsSystemSlugs = [
+  "business-functions",
+  "procedures",
+  "procedure-steps",
+  "approvals",
+  "dependencies"
+];
+
+function operationSystemRows(context: AreaDetailContext, slugs: string[], limit = 5): AreaCapabilityBoardItem[] {
+  const wanted = new Set(slugs);
+  return context.tableRecordRows
+    .filter((row) => wanted.has(row.apiSlug))
+    .slice(0, limit)
+    .map((row) => ({
+      title: compactRecordTitle(row.record),
+      detail: `${row.tableName} - ${compactRecordDetail(row.record)}`,
+      meta: row.apiSlug,
+      href: row.href
+    }));
+}
+
+function operationSystemTables(context: AreaDetailContext, slugs: string[]) {
+  const wanted = new Set(slugs);
+  return context.tables.filter((table) => wanted.has(table.apiSlug));
+}
+
+function OperationsManagementSystemPanel({
+  area,
+  context,
+  connection,
+  onSelectCapability
+}: {
+  area: AreaViewState;
+  context: AreaDetailContext;
+  connection: ConnectionData;
+  onSelectCapability: (capability: string) => void;
+}) {
+  if (area.key !== "04-operacje") {
+    return null;
+  }
+
+  const procedures = operationSystemRows(context, ["procedures"], 4);
+  const procedureSteps = operationSystemRows(context, ["procedure-steps"], 4);
+  const approvals = operationSystemRows(context, ["approvals"], 4);
+  const dependencies = operationSystemRows(context, ["dependencies"], 4);
+  const businessFunctions = operationSystemRows(context, ["business-functions"], 4);
+  const operationTables = operationSystemTables(context, operationsSystemSlugs);
+  const commandItems = [
+    {
+      label: "Plan",
+      title: "Planning authority",
+      detail: businessFunctions.length > 0
+        ? "Business functions are visible, so planning can start from owned operating areas."
+        : "Add or import business functions before treating operations planning as complete.",
+      metric: `${businessFunctions.length}`,
+      icon: "ph-map-trifold",
+      view: "workflows"
+    },
+    {
+      label: "Run",
+      title: "Routines and SOPs",
+      detail: procedures.length > 0
+        ? "Procedures are available as the operating rhythm for repeatable work."
+        : "No procedures are loaded yet; recurring work should stay review-only.",
+      metric: `${procedures.length}`,
+      icon: "ph-list-checks",
+      view: "workflows"
+    },
+    {
+      label: "Control",
+      title: "Approvals and dependencies",
+      detail: approvals.length + dependencies.length > 0
+        ? "Risky work can be inspected through approvals and dependency evidence."
+        : "Approval and dependency records are empty in this department context.",
+      metric: `${approvals.length + dependencies.length}`,
+      icon: "ph-shield-check",
+      view: "decisions"
+    },
+    {
+      label: "Delegate",
+      title: "Agent-safe packet",
+      detail: connection.mcpManifest
+        ? "Paperclip can read the operating context; writes still require command routes and approvals."
+        : "Keep AI handoff read-only until MCP manifest context is available.",
+      metric: connection.mcpManifest ? "Guarded" : "Review",
+      icon: "ph-robot",
+      view: "ai"
+    }
+  ];
+
+  const metricItems = [
+    { label: "Ops tables", value: `${operationTables.length}`, icon: "ph-database" },
+    { label: "Procedures", value: `${procedures.length}`, icon: "ph-clipboard-text" },
+    { label: "Steps", value: `${procedureSteps.length}`, icon: "ph-stairs" },
+    { label: "Approvals", value: `${approvals.length}`, icon: "ph-seal-check" },
+    { label: "Deps", value: `${dependencies.length}`, icon: "ph-git-merge" }
+  ];
+
+  return (
+    <section className="operations-system-panel" id="operations-system" aria-label="04 Operations management system">
+      <div className="operations-system-header">
+        <div>
+          <p className="atlas-kicker">04 Operations Management System</p>
+          <h2>Planning, routines, controls, dependencies</h2>
+          <p>
+            Operacje is the owner surface for keeping the company plan executable:
+            procedures, recurring routines, approvals, dependencies, and evidence
+            stay together before the owner or an agent acts.
+          </p>
+        </div>
+        <a className="atlas-primary-action" href="/react-company-os">
+          Open Company OS
+          <i className="ph-bold ph-caret-right" aria-hidden="true"></i>
+        </a>
+      </div>
+
+      <div className="operations-command-grid">
+        {commandItems.map((item) => (
+          <button
+            type="button"
+            className="operations-command-card"
+            onClick={() => onSelectCapability(item.view)}
+            key={item.label}
+          >
+            <span>
+              <i className={`ph-bold ${item.icon}`} aria-hidden="true"></i>
+              <em>{item.label}</em>
+            </span>
+            <strong>{item.title}</strong>
+            <p>{item.detail}</p>
+            <small>{item.metric}</small>
+          </button>
+        ))}
+      </div>
+
+      <div className="operations-system-metrics" aria-label="Operations system metrics">
+        {metricItems.map((metric) => (
+          <span key={metric.label}>
+            <i className={`ph-bold ${metric.icon}`} aria-hidden="true"></i>
+            <small>{metric.label}</small>
+            <strong>{metric.value}</strong>
+          </span>
+        ))}
+      </div>
+
+      <div className="operations-system-grid">
+        <OperationsSystemSection
+          title="Planning board"
+          icon="ph-calendar-check"
+          empty="No business functions, procedure plans, or dependencies are loaded for operations planning yet."
+          items={[...businessFunctions, ...dependencies, ...procedures].slice(0, 6)}
+        />
+        <OperationsSystemSection
+          title="Routine library"
+          icon="ph-clipboard-text"
+          empty="No procedures or procedure steps are loaded yet."
+          items={[...procedures, ...procedureSteps].slice(0, 6)}
+        />
+        <OperationsSystemSection
+          title="Controls and approvals"
+          icon="ph-shield-warning"
+          empty="No approvals or dependencies are visible for this department."
+          items={[...approvals, ...dependencies].slice(0, 6)}
+        />
+        <article className="operations-agent-packet">
+          <div>
+            <i className="ph-bold ph-robot" aria-hidden="true"></i>
+            <h3>Paperclip packet</h3>
+            <span>{connection.mcpManifest ? "read-safe" : "manifest review"}</span>
+          </div>
+          <p>
+            Agent context should include purpose, active plan, procedures,
+            dependencies, approval needs, evidence sources, and allowed MCP tools.
+            Risky operations stay behind CompanyCore commands and owner approval.
+          </p>
+          <div>
+            <a href="/react-agent-tools">Agent tools</a>
+            <a href="/settings/api">API scope</a>
+            <a href="/react-company-os">Approvals</a>
+          </div>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function OperationsSystemSection({
+  title,
+  icon,
+  empty,
+  items
+}: {
+  title: string;
+  icon: string;
+  empty: string;
+  items: AreaCapabilityBoardItem[];
+}) {
+  return (
+    <article className="operations-system-section">
+      <div>
+        <i className={`ph-bold ${icon}`} aria-hidden="true"></i>
+        <h3>{title}</h3>
+        <span>{items.length}</span>
+      </div>
+      {items.length === 0 ? (
+        <p>{empty}</p>
+      ) : (
+        <div className="operations-system-list">
+          {items.map((item, index) => {
+            const content = (
+              <>
+                <strong>{item.title}</strong>
+                <small>{item.detail}</small>
+                {item.meta ? <em>{item.meta}</em> : null}
+              </>
+            );
+            return item.href ? (
+              <a href={item.href} key={`${title}-${index}`}>{content}</a>
+            ) : (
+              <span key={`${title}-${index}`}>{content}</span>
+            );
+          })}
+        </div>
+      )}
+    </article>
+  );
+}
+
 function areaCapabilityMcpItems(connection: ConnectionData, capabilityId: string, limit = 6) {
   const tools = connection.mcpManifest?.tools || [];
   const filtered = capabilityId === "ai"
@@ -2130,6 +2381,7 @@ function areaCapabilityMcpItems(connection: ConnectionData, capabilityId: string
 }
 
 function areaLayerInsights(context: AreaDetailContext): AreaLayerInsight[] {
+  const graphCounts = context.operatingGraph?.summary;
   const layerDefinitions: Array<Omit<AreaLayerInsight, "count">> = [
     {
       id: "goals",
@@ -2174,6 +2426,16 @@ function areaLayerInsights(context: AreaDetailContext): AreaLayerInsight[] {
   ];
 
   return layerDefinitions.map((layer) => {
+    if (graphCounts) {
+      const graphCount = {
+        goals: graphCounts.goals + graphCounts.targets + graphCounts.metrics,
+        workflows: graphCounts.workflows,
+        tasks: graphCounts.tasks,
+        knowledge: graphCounts.knowledge,
+        sources: graphCounts.sources
+      }[layer.id as LayerKey];
+      return { ...layer, count: graphCount };
+    }
     const tableCount = layer.tableSlugs.length === 0
       ? context.tables.length
       : context.tables.filter((table) => layer.tableSlugs.includes(table.apiSlug)).length;
@@ -2813,6 +3075,93 @@ function TasksStatePanel({ state, onRetry }: { state: TasksWorkbenchState; onRet
   );
 }
 
+type TasksDeliveryBundle = {
+  connection: ConnectionData;
+  tasks: TaskRecord[];
+  companyOs: CompanyOsData | null;
+  mcpManifest: McpManifest | null;
+};
+
+const taskStatusOptions = ["todo", "in_progress", "blocked", "done", "archived"];
+
+function taskStatusBadgeClass(status?: string | null) {
+  const normalized = String(status || "todo").toLowerCase();
+  if (normalized === "done") {
+    return "badge badge-success";
+  }
+  if (normalized === "blocked") {
+    return "badge badge-error";
+  }
+  if (normalized === "in_progress") {
+    return "badge badge-primary";
+  }
+  if (normalized === "archived") {
+    return "badge badge-neutral";
+  }
+  return "badge badge-outline";
+}
+
+function taskPriorityBadgeClass(priority?: string | null) {
+  const normalized = String(priority || "").toLowerCase();
+  if (["urgent", "critical", "high"].includes(normalized)) {
+    return "badge badge-error";
+  }
+  if (["medium", "normal"].includes(normalized)) {
+    return "badge badge-warning";
+  }
+  if (normalized) {
+    return "badge badge-success";
+  }
+  return "badge badge-ghost";
+}
+
+function taskPressureRows(tasks: TaskRecord[]) {
+  return [...tasks]
+    .filter(isOpenTask)
+    .sort((left, right) => {
+      const priorityRank = (value?: string | null) => {
+        const normalized = String(value || "").toLowerCase();
+        if (["urgent", "critical"].includes(normalized)) return 0;
+        if (normalized === "high") return 1;
+        if (normalized === "medium") return 2;
+        return 3;
+      };
+      const leftDue = left.dueDate ? new Date(left.dueDate).getTime() : Number.POSITIVE_INFINITY;
+      const rightDue = right.dueDate ? new Date(right.dueDate).getTime() : Number.POSITIVE_INFINITY;
+      return priorityRank(left.priority) - priorityRank(right.priority) || leftDue - rightDue;
+    });
+}
+
+function taskAreaCoverage(connection: ConnectionData) {
+  return companyAreas(connection).map((area) => {
+    const tables = area.tables || [];
+    const taskTables = tables.filter((table) => ["tasks", "task-lists", "pipeline-stages"].includes(table.apiSlug));
+    const providerTables = taskTables.filter((table) => table.source && table.source !== "companycore").length;
+    return {
+      id: area.id,
+      key: area.key,
+      name: area.name,
+      taskTables: taskTables.length,
+      providerTables,
+      totalTables: tables.length,
+      status: taskTables.length > 0 ? "Ready" : "Review"
+    };
+  });
+}
+
+function taskHandoffSummary(tasks: TaskRecord[], companyOs: CompanyOsData | null, mcpManifest: McpManifest | null) {
+  const taskTools = (mcpManifest?.tools || []).filter((tool) => tool.path.includes("/tasks") || tool.capability.includes("task"));
+  const supervisedTools = taskTools.filter((tool) => tool.requiresApproval);
+  return {
+    visibleTasks: tasks.length,
+    openTasks: tasks.filter(isOpenTask).length,
+    taskTools: taskTools.length,
+    supervisedTools: supervisedTools.length,
+    approvals: companyOs?.attention.pendingApprovals?.length || 0,
+    blockedRuntime: (companyOs?.attention.blockedPipelineRuns?.length || 0) + (companyOs?.attention.failedStageRuns?.length || 0)
+  };
+}
+
 function TaskFilters({
   filters,
   onChange,
@@ -2827,73 +3176,79 @@ function TaskFilters({
   const listOptions = uniqueTaskOptions(tasks, normalizedTaskList);
 
   return (
-    <section className="card border border-base-300 bg-base-100 shadow-sm">
-      <div className="card-body gap-4">
-        <div className="grid gap-3 lg:grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr]">
-          <label className="form-control">
-            <span className="label">
-              <span className="label-text font-bold">Search tasks</span>
-            </span>
-            <input
-              className="input input-bordered"
-              type="search"
-              value={filters.search}
-              onChange={(event) => onChange({ ...filters, search: event.target.value })}
-              placeholder="Title, status, priority, list..."
-            />
-          </label>
-          <label className="form-control">
-            <span className="label">
-              <span className="label-text font-bold">Status</span>
-            </span>
-            <select
-              className="select select-bordered"
-              value={filters.status}
-              onChange={(event) => onChange({ ...filters, status: event.target.value })}
-            >
-              <option value="">All statuses</option>
-              {statusOptions.map((status) => (
-                <option value={status} key={status}>{status}</option>
-              ))}
-            </select>
-          </label>
-          <label className="form-control">
-            <span className="label">
-              <span className="label-text font-bold">Source</span>
-            </span>
-            <select
-              className="select select-bordered"
-              value={filters.source}
-              onChange={(event) => onChange({ ...filters, source: event.target.value })}
-            >
-              <option value="">All sources</option>
-              {sourceOptions.map((source) => (
-                <option value={source} key={source}>{source}</option>
-              ))}
-            </select>
-          </label>
-          <label className="form-control">
-            <span className="label">
-              <span className="label-text font-bold">Task list</span>
-            </span>
-            <select
-              className="select select-bordered"
-              value={filters.list}
-              onChange={(event) => onChange({ ...filters, list: event.target.value })}
-            >
-              <option value="">All lists</option>
-              {listOptions.map((list) => (
-                <option value={list} key={list}>{list}</option>
-              ))}
-            </select>
-          </label>
-        </div>
+    <section className="rounded-company border border-base-300 bg-base-100 p-4 shadow-sm">
+      <div className="grid gap-3 lg:grid-cols-[1.3fr_0.8fr_0.8fr_0.8fr]">
+        <label className="form-control">
+          <span className="label py-1">
+            <span className="label-text text-xs font-black uppercase text-company-muted">Search tasks</span>
+          </span>
+          <input
+            className="input input-bordered input-sm"
+            type="search"
+            value={filters.search}
+            onChange={(event) => onChange({ ...filters, search: event.target.value })}
+            placeholder="Title, status, priority, list..."
+          />
+        </label>
+        <label className="form-control">
+          <span className="label py-1">
+            <span className="label-text text-xs font-black uppercase text-company-muted">Status</span>
+          </span>
+          <select
+            className="select select-bordered select-sm"
+            value={filters.status}
+            onChange={(event) => onChange({ ...filters, status: event.target.value })}
+          >
+            <option value="">All statuses</option>
+            {statusOptions.map((status) => (
+              <option value={status} key={status}>{status}</option>
+            ))}
+          </select>
+        </label>
+        <label className="form-control">
+          <span className="label py-1">
+            <span className="label-text text-xs font-black uppercase text-company-muted">Source</span>
+          </span>
+          <select
+            className="select select-bordered select-sm"
+            value={filters.source}
+            onChange={(event) => onChange({ ...filters, source: event.target.value })}
+          >
+            <option value="">All sources</option>
+            {sourceOptions.map((source) => (
+              <option value={source} key={source}>{source}</option>
+            ))}
+          </select>
+        </label>
+        <label className="form-control">
+          <span className="label py-1">
+            <span className="label-text text-xs font-black uppercase text-company-muted">Task list</span>
+          </span>
+          <select
+            className="select select-bordered select-sm"
+            value={filters.list}
+            onChange={(event) => onChange({ ...filters, list: event.target.value })}
+          >
+            <option value="">All lists</option>
+            {listOptions.map((list) => (
+              <option value={list} key={list}>{list}</option>
+            ))}
+          </select>
+        </label>
       </div>
     </section>
   );
 }
 
-function TasksTable({ tasks }: { tasks: TaskRecord[] }) {
+function TasksTable({
+  tasks,
+  busyTaskId,
+  onStatusChange
+}: {
+  tasks: TaskRecord[];
+  busyTaskId: string | null;
+  onStatusChange: (task: TaskRecord, status: string) => void;
+}) {
   const columns: Array<TableColumn<TaskRecord>> = [
     {
       key: "title",
@@ -2908,12 +3263,12 @@ function TasksTable({ tasks }: { tasks: TaskRecord[] }) {
     {
       key: "status",
       header: "Status",
-      cell: (task) => <span className="badge badge-outline">{task.status || "todo"}</span>
+      cell: (task) => <span className={taskStatusBadgeClass(task.status)}>{task.status || "todo"}</span>
     },
     {
       key: "priority",
       header: "Priority",
-      cell: (task) => task.priority ? <span className="font-black">{task.priority}</span> : "-"
+      cell: (task) => <span className={taskPriorityBadgeClass(task.priority)}>{task.priority || "No priority"}</span>
     },
     {
       key: "list",
@@ -2933,6 +3288,21 @@ function TasksTable({ tasks }: { tasks: TaskRecord[] }) {
       key: "due",
       header: "Due",
       cell: (task) => formatTaskDate(task.dueDate)
+    },
+    {
+      key: "move",
+      header: "Move",
+      cell: (task) => (
+        <select
+          className="select select-bordered select-xs min-w-28"
+          value={task.status || "todo"}
+          disabled={busyTaskId === task.id}
+          onChange={(event) => onStatusChange(task, event.target.value)}
+          aria-label={`Change status for ${task.title}`}
+        >
+          {taskStatusOptions.map((status) => <option value={status} key={status}>{status}</option>)}
+        </select>
+      )
     }
   ];
 
@@ -2946,72 +3316,262 @@ function TasksTable({ tasks }: { tasks: TaskRecord[] }) {
   );
 }
 
-function TasksWorkbench({ connection, tasks }: { connection: ConnectionData; tasks: TaskRecord[] }) {
+function TasksWorkbench({
+  connection,
+  tasks,
+  companyOs,
+  mcpManifest,
+  notice,
+  onNotice,
+  onReload
+}: TasksDeliveryBundle & {
+  notice: { tone: NoticeTone; title: string; detail: string } | null;
+  onNotice: (notice: { tone: NoticeTone; title: string; detail: string } | null) => void;
+  onReload: () => void;
+}) {
   const [filters, setFilters] = useState<TaskFilterState>({
     search: "",
     status: "",
     source: "",
     list: ""
   });
+  const [busyAction, setBusyAction] = useState<string | null>(null);
   const metrics = useMemo(() => taskMetrics(tasks), [tasks]);
   const visibleTasks = useMemo(() => filteredTasks(tasks, filters), [tasks, filters]);
+  const pressureTasks = useMemo(() => taskPressureRows(tasks), [tasks]);
+  const coverageRows = useMemo(() => taskAreaCoverage(connection), [connection]);
+  const handoff = useMemo(() => taskHandoffSummary(tasks, companyOs, mcpManifest), [tasks, companyOs, mcpManifest]);
+  const blockedTasks = tasks.filter((task) => String(task.status || "").toLowerCase() === "blocked");
+  const doneTasks = tasks.filter((task) => String(task.status || "").toLowerCase() === "done");
+
+  async function createTask(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    const title = String(form.get("title") || "").trim();
+    const priority = String(form.get("priority") || "").trim();
+    const dueDate = String(form.get("dueDate") || "").trim();
+    if (!title) {
+      onNotice({ tone: "error", title: "Task not created", detail: "Task title is required." });
+      return;
+    }
+
+    setBusyAction("create");
+    onNotice(null);
+    try {
+      await ownerApi<TaskRecord>("/v1/tasks", {
+        method: "POST",
+        body: JSON.stringify({
+          title,
+          status: "todo",
+          source: "companycore",
+          ...(priority ? { priority } : {}),
+          ...(dueDate ? { dueDate } : {})
+        })
+      });
+      formElement.reset();
+      onNotice({ tone: "success", title: "Task created", detail: "The task is now in the delivery queue and available to agent context." });
+      onReload();
+    } catch (error) {
+      onNotice({ tone: "error", title: "Task not created", detail: apiErrorMessage(error) });
+    } finally {
+      setBusyAction(null);
+    }
+  }
+
+  async function changeTaskStatus(task: TaskRecord, status: string) {
+    if (status === task.status) {
+      return;
+    }
+
+    setBusyAction(task.id);
+    onNotice(null);
+    try {
+      await ownerApi<TaskRecord>(`/v1/tasks/${task.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status })
+      });
+      onNotice({ tone: "success", title: "Task moved", detail: `${task.title} is now ${status}.` });
+      onReload();
+    } catch (error) {
+      onNotice({ tone: "error", title: "Task was not moved", detail: apiErrorMessage(error) });
+    } finally {
+      setBusyAction(null);
+    }
+  }
 
   return (
-    <Shell connection={connection}>
-      <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-8">
-        <section className="card border border-base-300 bg-base-100 shadow-sm">
-          <div className="card-body gap-5">
-            <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-start">
-              <div className="flex items-start gap-3">
-                <span className="dashboard-icon text-primary">
-                  <i className="ph-bold ph-list-checks" aria-hidden="true"></i>
-                </span>
-                <div>
-                  <p className="eyebrow">React workbench</p>
-                  <h1 className="text-3xl font-black leading-tight">Tasks</h1>
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-company-muted">
-                    Inspect execution records, ClickUp ownership, open workload, and due-soon risk before editing the canonical task data.
-                  </p>
-                </div>
-              </div>
-              <div className="area-hero-actions flex flex-wrap gap-2">
-                <a className="btn btn-primary" href="/data/tasks">Open task editor</a>
-                <a className="btn btn-ghost" href="/tasks-adapter">Current adapter</a>
-              </div>
-            </div>
-
-            <LocalNotice
-              tone={metrics.total === 0 ? "warning" : "success"}
-              title={metrics.total === 0 ? "No task records loaded" : "Live task workbench"}
-              detail={metrics.total === 0
-                ? "This workspace has no task records yet. Create a task in the typed editor or connect ClickUp before reviewing workload."
-                : `${visibleTasks.length} of ${metrics.total} tasks are visible after filters. ${metrics.open} are open and ${metrics.dueSoon} are due soon.`}
-              action={metrics.total === 0 ? { label: "Create task", href: "/data/tasks" } : undefined}
-            />
-
-            <div className="area-hero-metrics grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-              <MetricCard icon="ph-stack" label="Total" value={`${metrics.total}`} detail="Task records" />
-              <MetricCard icon="ph-circle-notch" label="Open" value={`${metrics.open}`} detail="Not complete or archived" />
-              <MetricCard icon="ph-plugs-connected" label="ClickUp" value={`${metrics.clickUp}`} detail="Provider-owned tasks" />
-              <MetricCard icon="ph-calendar-check" label="Due soon" value={`${metrics.dueSoon}`} detail="Open within 7 days" />
-              <MetricCard icon="ph-list-bullets" label="Lists" value={`${metrics.lists}`} detail="Task list groups" />
-            </div>
+    <Shell connection={connection} appLabel="Tasks & delivery">
+      <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-6">
+        <header className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-start">
+          <div>
+            <p className="eyebrow">Company delivery</p>
+            <h1 className="text-3xl font-black leading-tight md:text-4xl">Tasks & delivery</h1>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-company-muted">
+              Supervise execution pressure, move work forward, and keep Paperclip/Jarvis aligned with the task context they can safely read.
+            </p>
           </div>
+          <div className="flex flex-wrap gap-2">
+            <a className="btn btn-primary" href="#create-task">
+              <i className="ph-bold ph-plus" aria-hidden="true"></i>
+              Create task
+            </a>
+            <a className="btn btn-outline" href="/operations">Operations cockpit</a>
+          </div>
+        </header>
+
+        {notice ? <LocalNotice tone={notice.tone} title={notice.title} detail={notice.detail} /> : null}
+
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          <MetricCard icon="ph-pulse" label="Workspace health" value={blockedTasks.length > 0 ? "Review" : "Good"} detail={`${blockedTasks.length} blocked`} />
+          <MetricCard icon="ph-list-checks" label="Open tasks" value={`${metrics.open}`} detail={`${metrics.total} total records`} />
+          <MetricCard icon="ph-calendar-check" label="Due soon" value={`${metrics.dueSoon}`} detail="Open within 7 days" />
+          <MetricCard icon="ph-warning-circle" label="Blocked tasks" value={`${blockedTasks.length}`} detail={`${doneTasks.length} done`} />
+          <MetricCard icon="ph-robot" label="AI handoff" value={`${handoff.taskTools}`} detail={`${handoff.supervisedTools} supervised tools`} />
         </section>
 
-        <TaskFilters filters={filters} onChange={setFilters} tasks={tasks} />
-
-        <section className="card border border-base-300 bg-base-100 shadow-sm">
-          <div className="card-body gap-4">
-            <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-start">
+        <section className="grid gap-4 xl:grid-cols-[1.1fr_1fr_1fr] xl:items-start">
+          <section className="rounded-company border border-base-300 bg-base-100 p-5 shadow-sm">
+            <div className="mb-4 flex items-start justify-between gap-3">
               <div>
-                <p className="eyebrow">Execution table</p>
-                <h2 className="text-xl font-black">Current task records</h2>
+                <p className="eyebrow">Execution pressure</p>
+                <h2 className="text-xl font-black">Top of the queue</h2>
               </div>
-              <span className="badge badge-outline">{visibleTasks.length} visible</span>
+              <span className="badge badge-outline">{pressureTasks.length} open</span>
             </div>
-            <TasksTable tasks={visibleTasks.slice(0, 80)} />
-          </div>
+            <div className="grid gap-2">
+              {pressureTasks.slice(0, 6).map((task) => (
+                <div className="grid gap-3 rounded-company border border-base-300 p-3 sm:grid-cols-[1fr_auto] sm:items-center" key={task.id}>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <strong>{task.title}</strong>
+                      <span className={taskPriorityBadgeClass(task.priority)}>{task.priority || "No priority"}</span>
+                    </div>
+                    <p className="mt-1 text-xs text-company-muted">{normalizedTaskList(task)} - due {formatTaskDate(task.dueDate)}</p>
+                  </div>
+                  <select
+                    className="select select-bordered select-sm"
+                    value={task.status || "todo"}
+                    disabled={busyAction === task.id}
+                    onChange={(event) => void changeTaskStatus(task, event.target.value)}
+                    aria-label={`Change status for ${task.title}`}
+                  >
+                    {taskStatusOptions.map((status) => <option value={status} key={status}>{status}</option>)}
+                  </select>
+                </div>
+              ))}
+              {pressureTasks.length === 0 ? (
+                <p className="text-sm text-company-muted">No open tasks are visible. Create the next task below or review completed work.</p>
+              ) : null}
+            </div>
+          </section>
+
+          <section className="rounded-company border border-base-300 bg-base-100 p-5 shadow-sm">
+            <div className="mb-4">
+              <p className="eyebrow">Department ownership</p>
+              <h2 className="text-xl font-black">Task coverage by area</h2>
+            </div>
+            <div className="grid gap-2">
+              {coverageRows.slice(0, 7).map((row) => (
+                <div className="grid gap-2 border-b border-base-200 py-2 last:border-b-0 sm:grid-cols-[1fr_auto] sm:items-center" key={row.id}>
+                  <div>
+                    <strong className="text-sm">{row.name}</strong>
+                    <p className="text-xs text-company-muted">{row.taskTables} delivery tables / {row.totalTables} total tables</p>
+                  </div>
+                  <span className={row.status === "Ready" ? "badge badge-success" : "badge badge-outline"}>{row.status}</span>
+                </div>
+              ))}
+            </div>
+            <LocalNotice
+              tone="info"
+              title="Area relation boundary"
+              detail="This view uses current task/list records plus department table coverage. Direct task-to-area ownership should be added only through an approved backend contract."
+              action={{ label: "Open areas", href: "/areas?view=tasks" }}
+            />
+          </section>
+
+          <section className="rounded-company border border-base-300 bg-base-100 p-5 shadow-sm">
+            <div className="mb-4">
+              <p className="eyebrow">AI handoff</p>
+              <h2 className="text-xl font-black">Paperclip and Jarvis</h2>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-3">
+              <div className="rounded-company bg-base-200/60 p-3">
+                <span className="block text-2xl font-black">{handoff.visibleTasks}</span>
+                <span className="text-xs text-company-muted">Readable tasks</span>
+              </div>
+              <div className="rounded-company bg-base-200/60 p-3">
+                <span className="block text-2xl font-black">{handoff.approvals}</span>
+                <span className="text-xs text-company-muted">Approvals</span>
+              </div>
+              <div className="rounded-company bg-base-200/60 p-3">
+                <span className="block text-2xl font-black">{handoff.blockedRuntime}</span>
+                <span className="text-xs text-company-muted">Runtime blocks</span>
+              </div>
+            </div>
+            <div className="mt-4 grid gap-2">
+              <LocalNotice
+                tone={handoff.supervisedTools > 0 ? "warning" : "success"}
+                title="Safe task context"
+                detail={`${handoff.taskTools} task-related MCP tools are visible. ${handoff.supervisedTools} require owner supervision before action.`}
+                action={{ label: "Review agent tools", href: "/react-agent-tools" }}
+              />
+              {blockedTasks.slice(0, 3).map((task) => (
+                <div className="rounded-company border border-base-300 p-3" key={task.id}>
+                  <strong className="text-sm">{task.title}</strong>
+                  <p className="text-xs text-company-muted">Blocked task for owner review - {normalizedTaskSource(task)}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        </section>
+
+        <section className="grid gap-4 xl:grid-cols-[1fr_22rem]">
+          <section className="rounded-company border border-base-300 bg-base-100 p-5 shadow-sm">
+            <div className="mb-4 grid gap-3 lg:grid-cols-[1fr_auto] lg:items-start">
+              <div>
+                <p className="eyebrow">All tasks</p>
+                <h2 className="text-xl font-black">Delivery records</h2>
+                <p className="mt-1 text-sm text-company-muted">{visibleTasks.length} of {metrics.total} tasks visible after filters.</p>
+              </div>
+              <a className="btn btn-outline btn-sm" href="/data/tasks">Open typed editor</a>
+            </div>
+            <TaskFilters filters={filters} onChange={setFilters} tasks={tasks} />
+            <div className="mt-4">
+              <TasksTable tasks={visibleTasks.slice(0, 80)} busyTaskId={busyAction} onStatusChange={(task, status) => void changeTaskStatus(task, status)} />
+            </div>
+          </section>
+
+          <aside id="create-task" className="rounded-company border border-base-300 bg-base-100 p-5 shadow-sm">
+            <div className="mb-4">
+              <p className="eyebrow">Create task</p>
+              <h2 className="text-xl font-black">Next delivery item</h2>
+            </div>
+            <form className="grid gap-3" onSubmit={createTask}>
+              <label className="form-control">
+                <span className="label py-1"><span className="label-text text-xs font-black uppercase text-company-muted">Title</span></span>
+                <input className="input input-bordered input-sm" name="title" placeholder="e.g. Prepare onboarding plan" required />
+              </label>
+              <label className="form-control">
+                <span className="label py-1"><span className="label-text text-xs font-black uppercase text-company-muted">Priority</span></span>
+                <select className="select select-bordered select-sm" name="priority" defaultValue="medium">
+                  <option value="">No priority</option>
+                  <option value="low">low</option>
+                  <option value="medium">medium</option>
+                  <option value="high">high</option>
+                  <option value="critical">critical</option>
+                </select>
+              </label>
+              <label className="form-control">
+                <span className="label py-1"><span className="label-text text-xs font-black uppercase text-company-muted">Due date</span></span>
+                <input className="input input-bordered input-sm" name="dueDate" type="date" />
+              </label>
+              <button className="btn btn-primary btn-sm" type="submit" disabled={busyAction === "create"}>
+                {busyAction === "create" ? "Creating..." : "Create task"}
+              </button>
+              <p className="text-xs leading-5 text-company-muted">Created tasks stay in CompanyCore. ClickUp write-back is used only when an existing ClickUp task list contract is selected.</p>
+            </form>
+          </aside>
         </section>
       </section>
     </Shell>
@@ -3766,7 +4326,9 @@ function areaDetailContext(
   area: AreaViewState,
   externalMappings: ExternalContainerMapping[],
   googleDriveFiles: GoogleDriveFileRecord[],
-  tableRecords: TableRecordSnapshot
+  tableRecords: TableRecordSnapshot,
+  operatingGraph?: AreaOperatingGraph | null,
+  operatingGraphStatus: AreaDetailContext["operatingGraphStatus"] = "idle"
 ): AreaDetailContext {
   const tables = area.backendArea?.tables || [];
   const tableIds = new Set(tables.map((table) => table.id));
@@ -3806,7 +4368,9 @@ function areaDetailContext(
     recordPreviews,
     driveItems,
     providerMappings,
-    globalReviewDebt
+    globalReviewDebt,
+    operatingGraph,
+    operatingGraphStatus
   };
 }
 
@@ -3885,16 +4449,23 @@ function AreaDetailHero({
     { label: "Drive", value: `${context.driveItems.length}`, icon: "ph-cloud" },
     { label: "Provider", value: `${context.providerMappings.length}`, icon: "ph-plugs-connected" }
   ];
+  const isOperationsSystem = area.key === "04-operacje";
 
   return (
     <section className="area-detail-hero">
       <div className="area-detail-hero-copy">
-        <p className="atlas-kicker">{connection.workspace.name} / {area.lens}</p>
+        <p className="atlas-kicker">
+          {connection.workspace.name} / {isOperationsSystem ? "Operations Management System" : area.lens}
+        </p>
         <h1>{area.label}</h1>
-        <p>{area.backendArea?.description || area.detail}</p>
+        <p>
+          {isOperationsSystem
+            ? "Plan the company rhythm, inspect procedures, control dependencies, watch approvals, and prepare safe AI handoff from one operations command surface."
+            : area.backendArea?.description || area.detail}
+        </p>
         <div className="area-detail-actions">
-          <a className="atlas-primary-action" href="/react-company-os">
-            Review operating system
+          <a className="atlas-primary-action" href={isOperationsSystem ? "#operations-system" : "/react-company-os"}>
+            {isOperationsSystem ? "Manage operations" : "Review operating system"}
             <i className="ph-bold ph-caret-right" aria-hidden="true"></i>
           </a>
           <a className="atlas-secondary-action" href="/dashboard">Back to atlas</a>
@@ -4033,6 +4604,12 @@ function AreaOperatingMap({
   onSelectCapability: (capability: string) => void;
 }) {
   const insights = areaLayerInsights(context);
+  const graphSummary = context.operatingGraph?.summary;
+  const graphBadge = context.operatingGraphStatus === "ready" && graphSummary
+    ? `${graphSummary.nodes} nodes / ${graphSummary.edges} edges`
+    : context.operatingGraphStatus === "loading"
+      ? "Loading graph"
+      : `${context.tables.length} tables`;
 
   return (
     <section className="area-operating-map" aria-label="Area operating map">
@@ -4041,7 +4618,7 @@ function AreaOperatingMap({
           <p className="atlas-kicker">Operating graph</p>
           <h3>Goals to workflows to tasks to knowledge to sources</h3>
         </div>
-        <span>{context.tables.length} tables</span>
+        <span>{graphBadge}</span>
       </div>
       <div className="area-operating-map-track">
         {insights.map((insight, index) => (
@@ -4396,14 +4973,47 @@ function AreaDetailView({
   const initialAreaKey = resolveInitialAreaKey(areas);
   const [selectedAreaKey, setSelectedAreaKey] = useState(initialAreaKey);
   const [activeCapability, setActiveCapability] = useState(resolveInitialCapability);
+  const [operatingGraphState, setOperatingGraphState] = useState<{
+    status: "idle" | "loading" | "ready" | "error";
+    graph: AreaOperatingGraph | null;
+  }>({ status: "idle", graph: null });
   const selectedArea = areas.find((area) => area.key === selectedAreaKey) || areas[0];
   const ownerLabel = connection.user?.name || connection.user?.email || "Owner";
   const ownerDetail = connection.user?.email ? "Owner" : connection.workspace.name;
+
+  useEffect(() => {
+    let cancelled = false;
+    setOperatingGraphState({ status: "loading", graph: null });
+    loadAreaOperatingGraph(selectedArea.key)
+      .then((graph) => {
+        if (!cancelled) {
+          setOperatingGraphState({ status: "ready", graph });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setOperatingGraphState({ status: "error", graph: null });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedArea.key]);
+
   const context = useMemo(
-    () => areaDetailContext(selectedArea, externalMappings, googleDriveFiles, tableRecords),
-    [selectedArea, externalMappings, googleDriveFiles, tableRecords]
+    () => areaDetailContext(
+      selectedArea,
+      externalMappings,
+      googleDriveFiles,
+      tableRecords,
+      operatingGraphState.graph,
+      operatingGraphState.status
+    ),
+    [selectedArea, externalMappings, googleDriveFiles, tableRecords, operatingGraphState.graph, operatingGraphState.status]
   );
   const lanes = useMemo(() => areaDetailLanes(selectedArea, context, connection), [selectedArea, context, connection]);
+  const isOperationsSystem = selectedArea.key === "04-operacje";
 
   function selectArea(key: string) {
     setSelectedAreaKey(key);
@@ -4433,8 +5043,16 @@ function AreaDetailView({
         <section className="area-detail-layout">
           <div className="area-detail-main">
             <AreaDetailHero area={selectedArea} context={context} connection={connection} />
+            {isOperationsSystem ? (
+              <OperationsManagementSystemPanel
+                area={selectedArea}
+                context={context}
+                connection={connection}
+                onSelectCapability={selectCapability}
+              />
+            ) : null}
             <AreaCapabilityRail activeCapability={activeCapability} onSelectCapability={selectCapability} />
-            <AreaOperatingBoard lanes={lanes} />
+            {!isOperationsSystem ? <AreaOperatingBoard lanes={lanes} /> : null}
             <AreaCapabilityFocus
               area={selectedArea}
               activeCapability={activeCapability}
@@ -8630,7 +9248,48 @@ type PipelineBundle = {
   interactions: Array<Record<string, unknown>>;
 };
 
+type ClientRecord = {
+  id: string;
+  name: string;
+  companyName?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  status?: string | null;
+  source?: string | null;
+  createdAt?: string;
+};
+
+type AgentRecord = {
+  id: string;
+  name: string;
+  role?: string | null;
+  status?: string | null;
+  source?: string | null;
+  createdAt?: string;
+};
+
+type AgentEventRecord = {
+  id: string;
+  type?: string | null;
+  deliveryStatus?: string | null;
+  source?: string | null;
+  createdAt?: string;
+  payload?: Record<string, unknown> | null;
+};
+
+type OperationsBundle = {
+  connection: ConnectionData;
+  clients: ClientRecord[];
+  tasks: TaskRecord[];
+  driveFiles: GoogleDriveFileRecord[];
+  agents: AgentRecord[];
+  agentEvents: AgentEventRecord[];
+  companyOs: CompanyOsData | null;
+  tableRecords: TableRecordSnapshot;
+};
+
 type SettingsIntegrationId = "clickup" | "google_drive";
+type IntegrationPaneId = "setup" | "mapping" | "sync";
 
 type IntegrationSettingRecord = {
   id: string;
@@ -8640,6 +9299,17 @@ type IntegrationSettingRecord = {
   secretConfigured?: boolean;
   oauthClientConfigured?: boolean;
   oauthTokenConfigured?: boolean;
+};
+
+type ClickUpDiscoveryResult = {
+  workspaces?: Array<{ id: string; name: string }>;
+  selectedWorkspace?: { id: string; name: string } | null;
+  spaces?: Array<{
+    id: string;
+    name: string;
+    folders?: Array<{ id: string; name: string; lists?: Array<{ id: string; name: string }> }>;
+    lists?: Array<{ id: string; name: string }>;
+  }>;
 };
 
 type PrivateLoadState<T> =
@@ -8957,6 +9627,433 @@ function AuthRoute({ mode }: { mode: "login" | "register" }) {
   );
 }
 
+function OperationsCockpitRoute() {
+  const [notice, setNotice] = useState<{ tone: NoticeTone; title: string; detail: string } | null>(null);
+  const [busyAction, setBusyAction] = useState<string | null>(null);
+  const [state, reload] = usePrivateLoader(async () => {
+    const connection = await ownerApi<ConnectionData>("/v1/connection");
+    const [clients, tasks, driveFiles, agents, agentEvents, companyOs, tableRecords] = await Promise.all([
+      ownerApi<ClientRecord[]>("/v1/clients").catch(() => []),
+      ownerApi<TaskRecord[]>("/v1/tasks").catch(() => []),
+      ownerApi<GoogleDriveFileRecord[]>("/v1/google-drive/files").catch(() => []),
+      ownerApi<AgentRecord[]>("/v1/agents").catch(() => []),
+      ownerApi<AgentEventRecord[]>("/v1/agent-events").catch(() => []),
+      ownerApi<CompanyOsData>("/v1/company-os").catch(() => null),
+      loadTableRecordSnapshot(connection).catch(() => ({}))
+    ]);
+    return { connection, clients, tasks, driveFiles, agents, agentEvents, companyOs, tableRecords } satisfies OperationsBundle;
+  });
+
+  async function createClient(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    const name = String(form.get("name") || "").trim();
+    const companyName = String(form.get("companyName") || "").trim();
+    const email = String(form.get("email") || "").trim();
+    if (!name) {
+      setNotice({ tone: "error", title: "Client not created", detail: "Client name is required." });
+      return;
+    }
+    setBusyAction("client");
+    setNotice(null);
+    try {
+      await ownerApi<ClientRecord>("/v1/clients", {
+        method: "POST",
+        body: JSON.stringify({
+          name,
+          ...(companyName ? { companyName } : {}),
+          ...(email ? { email } : {}),
+          status: "active",
+          source: "companycore"
+        })
+      });
+      formElement.reset();
+      setNotice({ tone: "success", title: "Client created", detail: "The client is now visible in CRM and relationship context." });
+      reload();
+    } catch (error) {
+      setNotice({ tone: "error", title: "Client not created", detail: apiErrorMessage(error) });
+    } finally {
+      setBusyAction(null);
+    }
+  }
+
+  async function createTask(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    const title = String(form.get("title") || "").trim();
+    const priority = String(form.get("priority") || "").trim();
+    if (!title) {
+      setNotice({ tone: "error", title: "Task not created", detail: "Task title is required." });
+      return;
+    }
+    setBusyAction("task");
+    setNotice(null);
+    try {
+      await ownerApi<TaskRecord>("/v1/tasks", {
+        method: "POST",
+        body: JSON.stringify({
+          title,
+          ...(priority ? { priority } : {}),
+          status: "todo",
+          source: "companycore"
+        })
+      });
+      formElement.reset();
+      setNotice({ tone: "success", title: "Task created", detail: "The task is now available for delivery review and agent context." });
+      reload();
+    } catch (error) {
+      setNotice({ tone: "error", title: "Task not created", detail: apiErrorMessage(error) });
+    } finally {
+      setBusyAction(null);
+    }
+  }
+
+  return (
+    <PrivateStateGate state={state} title="Operations cockpit" detail="CompanyCore is loading clients, tasks, files, tables, and agent context." onRetry={reload}>
+      {(data) => (
+        <OperationsCockpit
+          data={data}
+          notice={notice}
+          busyAction={busyAction}
+          onCreateClient={createClient}
+          onCreateTask={createTask}
+        />
+      )}
+    </PrivateStateGate>
+  );
+}
+
+function recordStatus(record: { status?: string | null }) {
+  return String(record.status || "active").toLowerCase();
+}
+
+function activeClientCount(clients: ClientRecord[]) {
+  return clients.filter((client) => !["archived", "lost", "inactive"].includes(recordStatus(client))).length;
+}
+
+function areaFileCount(files: GoogleDriveFileRecord[], areaId?: string) {
+  return areaId ? files.filter((file) => file.operatingAreaId === areaId).length : 0;
+}
+
+function areaRecordCount(area: AreaViewState, tableRecords: TableRecordSnapshot) {
+  return (area.backendArea?.tables || []).reduce((total, table) => total + (tableRecords[table.apiSlug]?.length || 0), 0);
+}
+
+function fileIcon(file: GoogleDriveFileRecord) {
+  if (file.isFolder) {
+    return "ph-folder";
+  }
+  if (file.mimeType.includes("spreadsheet")) {
+    return "ph-file-xls";
+  }
+  if (file.mimeType.includes("document")) {
+    return "ph-file-doc";
+  }
+  return "ph-file";
+}
+
+function OperationsCockpit({
+  data,
+  notice,
+  busyAction,
+  onCreateClient,
+  onCreateTask
+}: {
+  data: OperationsBundle;
+  notice: { tone: NoticeTone; title: string; detail: string } | null;
+  busyAction: string | null;
+  onCreateClient: (event: React.FormEvent<HTMLFormElement>) => void;
+  onCreateTask: (event: React.FormEvent<HTMLFormElement>) => void;
+}) {
+  const { connection, clients, tasks, driveFiles, agents, agentEvents, companyOs, tableRecords } = data;
+  const areas = useMemo(() => buildAreaViewState(connection), [connection]);
+  const [selectedAreaKey, setSelectedAreaKey] = useState(() => areas[1]?.key || areas[0]?.key || "01-strategia");
+  const selectedArea = areas.find((area) => area.key === selectedAreaKey) || areas[0];
+  const selectedBackendArea = selectedArea?.backendArea;
+  const selectedTables = selectedBackendArea?.tables || [];
+  const selectedFiles = driveFiles.filter((file) => file.operatingAreaId === selectedBackendArea?.id);
+  const selectedFolders = selectedFiles.filter((file) => file.isFolder);
+  const selectedRecords = areaRecordCount(selectedArea, tableRecords);
+  const taskStats = taskMetrics(tasks);
+  const openTasks = tasks.filter(isOpenTask);
+  const dueSoonTasks = tasks.filter(isDueSoon);
+  const unscopedFiles = driveFiles.filter((file) => !file.operatingAreaId && !file.trashed);
+  const activeAgents = agents.filter((agent) => recordStatus(agent) === "active");
+  const mcpTools = connection.mcpManifest?.tools || [];
+  const readTools = mcpTools.filter((tool) => tool.riskLevel === "read").length;
+  const supervisedTools = mcpTools.filter((tool) => tool.requiresApproval).length;
+  const pendingApprovals = companyOs?.attentionQueues?.pendingApprovals?.length || 0;
+  const blockedRuns = (companyOs?.attentionQueues?.blockedPipelineRuns?.length || 0) + (companyOs?.attentionQueues?.failedStageRuns?.length || 0);
+  const directionItems = [
+    ...dueSoonTasks.slice(0, 2).map((task) => ({
+      title: task.title,
+      detail: `Due ${formatTaskDate(task.dueDate)} - ${task.status || "todo"}`,
+      href: "/tasks-adapter",
+      tone: "warning" as const
+    })),
+    ...(unscopedFiles.length ? [{
+      title: `${unscopedFiles.length} Drive files need department scope`,
+      detail: "Assign files so agents can reason from the right department.",
+      href: "/settings/drive",
+      tone: "info" as const
+    }] : []),
+    ...(pendingApprovals ? [{
+      title: `${pendingApprovals} Company OS approvals waiting`,
+      detail: "Review before agent or workflow action continues.",
+      href: "/react-company-os",
+      tone: "warning" as const
+    }] : [])
+  ].slice(0, 5);
+
+  return (
+    <Shell connection={connection} appLabel="Operations cockpit">
+      <section className="mx-auto grid w-full max-w-[92rem] gap-5 px-4 py-6 sm:px-5">
+        <section className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-start">
+          <div>
+            <p className="eyebrow">Company operations</p>
+            <h1 className="text-3xl font-black sm:text-4xl">Operations cockpit</h1>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-company-muted">
+              One V1 supervision view for clients, delivery, department evidence, and AI handoff. Create the next client or task here, then let the detailed workbenches carry the deeper workflow.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 lg:justify-end">
+            <a className="btn btn-primary" href="#new-task"><i className="ph-bold ph-plus" aria-hidden="true"></i> New task</a>
+            <a className="btn btn-outline" href="#new-client"><i className="ph-bold ph-user-plus" aria-hidden="true"></i> New client</a>
+            <a className="btn btn-ghost" href="/react-company-os">Agent console</a>
+          </div>
+        </section>
+
+        {notice ? <LocalNotice tone={notice.tone} title={notice.title} detail={notice.detail} /> : null}
+
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <MetricCard icon="ph-users" label="Clients" value={`${clients.length}`} detail={`${activeClientCount(clients)} active relationship records`} />
+          <MetricCard icon="ph-list-checks" label="Tasks" value={`${tasks.length}`} detail={`${taskStats.open} open, ${taskStats.dueSoon} due soon`} />
+          <MetricCard icon="ph-folder-open" label="Files and tables" value={`${driveFiles.length}/${connectionMetrics(connection).tables}`} detail={`${unscopedFiles.length} files still need department scope`} />
+          <MetricCard icon="ph-robot" label="AI handoff" value={`${activeAgents.length}`} detail={`${readTools} read tools, ${supervisedTools} supervised tools`} />
+        </section>
+
+        <section className="grid gap-4 xl:grid-cols-4">
+          <article className="card border border-base-300 bg-base-100 shadow-sm">
+            <div className="card-body gap-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="eyebrow">Clients / CRM</p>
+                  <h2 className="text-xl font-black">Relationship queue</h2>
+                </div>
+                <a className="link text-sm font-bold" href="/pipeline">View CRM</a>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                <span className="rounded-company bg-base-200 p-2"><strong className="block text-base">{activeClientCount(clients)}</strong>Active</span>
+                <span className="rounded-company bg-base-200 p-2"><strong className="block text-base">{clients.filter((client) => recordStatus(client) === "archived").length}</strong>Archived</span>
+                <span className="rounded-company bg-base-200 p-2"><strong className="block text-base">{clients.filter((client) => client.source && client.source !== "companycore").length}</strong>Provider</span>
+              </div>
+              <div className="grid gap-2">
+                {clients.slice(0, 5).map((client) => (
+                  <div className="rounded-company border border-base-300 bg-base-200/40 p-3" key={client.id}>
+                    <strong className="block break-words text-sm">{client.companyName || client.name}</strong>
+                    <span className="text-xs text-company-muted">{client.name}{client.status ? ` - ${client.status}` : ""}</span>
+                  </div>
+                ))}
+                {clients.length === 0 ? <p className="text-sm text-company-muted">No clients yet. Add the first account below.</p> : null}
+              </div>
+              <form id="new-client" className="grid gap-2 border-t border-base-300 pt-3" onSubmit={onCreateClient}>
+                <input className="input input-bordered input-sm" name="name" placeholder="Client contact name" required />
+                <input className="input input-bordered input-sm" name="companyName" placeholder="Company name" />
+                <input className="input input-bordered input-sm" name="email" type="email" placeholder="Email" />
+                <button className="btn btn-primary btn-sm" type="submit" disabled={busyAction === "client"}>{busyAction === "client" ? "Creating..." : "Create client"}</button>
+              </form>
+            </div>
+          </article>
+
+          <article className="card border border-base-300 bg-base-100 shadow-sm">
+            <div className="card-body gap-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="eyebrow">Tasks / delivery</p>
+                  <h2 className="text-xl font-black">Execution pressure</h2>
+                </div>
+                <a className="link text-sm font-bold" href="/tasks-adapter">View tasks</a>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                <span className="rounded-company bg-base-200 p-2"><strong className="block text-base">{taskStats.open}</strong>Open</span>
+                <span className="rounded-company bg-base-200 p-2"><strong className="block text-base">{taskStats.dueSoon}</strong>Due soon</span>
+                <span className="rounded-company bg-base-200 p-2"><strong className="block text-base">{taskStats.clickUp}</strong>ClickUp</span>
+              </div>
+              <div className="grid gap-2">
+                {openTasks.slice(0, 5).map((task) => (
+                  <div className="rounded-company border border-base-300 bg-base-200/40 p-3" key={task.id}>
+                    <div className="flex items-start justify-between gap-2">
+                      <strong className="break-words text-sm">{task.title}</strong>
+                      <span className="badge badge-outline badge-sm">{task.status || "todo"}</span>
+                    </div>
+                    <span className="text-xs text-company-muted">{normalizedTaskList(task)} - due {formatTaskDate(task.dueDate)}</span>
+                  </div>
+                ))}
+                {openTasks.length === 0 ? <p className="text-sm text-company-muted">No open tasks are visible.</p> : null}
+              </div>
+              <form id="new-task" className="grid gap-2 border-t border-base-300 pt-3" onSubmit={onCreateTask}>
+                <input className="input input-bordered input-sm" name="title" placeholder="Task title" required />
+                <select className="select select-bordered select-sm" name="priority" defaultValue="">
+                  <option value="">No priority</option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+                <button className="btn btn-primary btn-sm" type="submit" disabled={busyAction === "task"}>{busyAction === "task" ? "Creating..." : "Create task"}</button>
+              </form>
+            </div>
+          </article>
+
+          <article className="card border border-base-300 bg-base-100 shadow-sm">
+            <div className="card-body gap-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="eyebrow">Department files and tables</p>
+                  <h2 className="text-xl font-black">Evidence lens</h2>
+                </div>
+                <a className="link text-sm font-bold" href={areaHref(selectedArea, "knowledge")}>Open area</a>
+              </div>
+              <select className="select select-bordered select-sm" value={selectedArea.key} onChange={(event) => setSelectedAreaKey(event.target.value)} aria-label="Select department for operations cockpit">
+                {areas.map((area) => <option value={area.key} key={area.key}>{area.label}</option>)}
+              </select>
+              <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                <span className="rounded-company bg-base-200 p-2"><strong className="block text-base">{selectedTables.length}</strong>Tables</span>
+                <span className="rounded-company bg-base-200 p-2"><strong className="block text-base">{selectedRecords}</strong>Records</span>
+                <span className="rounded-company bg-base-200 p-2"><strong className="block text-base">{selectedFiles.length}</strong>Files</span>
+              </div>
+              <div className="grid gap-2">
+                {selectedFiles.slice(0, 5).map((file) => (
+                  <div className="flex items-start gap-3 rounded-company border border-base-300 bg-base-200/40 p-3" key={file.id}>
+                    <i className={`ph-bold ${fileIcon(file)} mt-0.5 text-lg text-company-blue`} aria-hidden="true"></i>
+                    <span className="min-w-0">
+                      <strong className="block break-words text-sm">{file.name}</strong>
+                      <small className="text-company-muted">{file.isFolder ? "Folder" : file.mimeType.split(".").at(-1) || "File"}{file.modifiedTime ? ` - ${formatTaskDate(file.modifiedTime)}` : ""}</small>
+                    </span>
+                  </div>
+                ))}
+                {selectedFiles.length === 0 ? <p className="text-sm text-company-muted">No Drive files are scoped to this department yet.</p> : null}
+              </div>
+              <div className="grid gap-2 border-t border-base-300 pt-3">
+                {selectedTables.slice(0, 4).map((table) => (
+                  <div className="flex items-center justify-between gap-2 text-sm" key={table.id}>
+                    <span className="break-words">{table.name}</span>
+                    <span className="badge badge-outline badge-sm">{tableRecords[table.apiSlug]?.length || 0}</span>
+                  </div>
+                ))}
+                <a className="btn btn-outline btn-sm" href="/data">Open tables</a>
+              </div>
+            </div>
+          </article>
+
+          <article className="card border border-base-300 bg-base-100 shadow-sm">
+            <div className="card-body gap-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="eyebrow">AI agent handoff</p>
+                  <h2 className="text-xl font-black">Paperclip and Jarvis</h2>
+                </div>
+                <a className="link text-sm font-bold" href="/react-agent-tools">MCP</a>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                <span className="rounded-company bg-base-200 p-2"><strong className="block text-base">{activeAgents.length}</strong>Ready</span>
+                <span className="rounded-company bg-base-200 p-2"><strong className="block text-base">{agentEvents.length}</strong>Events</span>
+                <span className="rounded-company bg-base-200 p-2"><strong className="block text-base">{pendingApprovals + blockedRuns}</strong>Needs review</span>
+              </div>
+              <div className="rounded-company border border-success/30 bg-success/10 p-3 text-sm">
+                <strong className="block">Safe read context</strong>
+                <span className="text-company-muted">{readTools} read tools are visible. {supervisedTools} tools require owner supervision.</span>
+              </div>
+              <div className="grid gap-2">
+                {agents.slice(0, 5).map((agent) => (
+                  <div className="flex items-center justify-between gap-2 rounded-company border border-base-300 bg-base-200/40 p-3 text-sm" key={agent.id}>
+                    <span className="min-w-0">
+                      <strong className="block break-words">{agent.name}</strong>
+                      <small className="text-company-muted">{agent.role || agent.source || "Agent"}</small>
+                    </span>
+                    <span className="badge badge-outline badge-sm">{agent.status || "active"}</span>
+                  </div>
+                ))}
+                {agents.length === 0 ? <p className="text-sm text-company-muted">No agent records yet. API keys and MCP are ready paths for external agents.</p> : null}
+              </div>
+              <a className="btn btn-outline btn-sm" href="/react-company-os">Open agent console</a>
+            </div>
+          </article>
+        </section>
+
+        <section className="grid gap-4 lg:grid-cols-[1.5fr_1fr_1fr]">
+          <article className="card border border-base-300 bg-base-100 shadow-sm">
+            <div className="card-body gap-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="eyebrow">Departments</p>
+                  <h2 className="text-xl font-black">Coverage by area</h2>
+                </div>
+                <a className="link text-sm font-bold" href="/areas">View all</a>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>Department</th>
+                      <th>Tables</th>
+                      <th>Records</th>
+                      <th>Files</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {areas.map((area) => (
+                      <tr key={area.key}>
+                        <td><a className="font-bold" href={areaHref(area)}>{area.label}</a></td>
+                        <td>{area.tableCount}</td>
+                        <td>{areaRecordCount(area, tableRecords)}</td>
+                        <td>{areaFileCount(driveFiles, area.backendArea?.id)}</td>
+                        <td><span className="badge badge-outline badge-sm">{area.statusLabel}</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </article>
+
+          <article className="card border border-base-300 bg-base-100 shadow-sm">
+            <div className="card-body gap-4">
+              <p className="eyebrow">What needs direction</p>
+              <h2 className="text-xl font-black">Owner queue</h2>
+              <div className="grid gap-2">
+                {directionItems.map((item) => (
+                  <a className="rounded-company border border-base-300 bg-base-200/40 p-3 text-sm" href={item.href} key={`${item.title}-${item.href}`}>
+                    <strong className="block break-words">{item.title}</strong>
+                    <span className="text-company-muted">{item.detail}</span>
+                  </a>
+                ))}
+                {directionItems.length === 0 ? <p className="text-sm text-company-muted">No urgent owner direction is visible from this cockpit.</p> : null}
+              </div>
+            </div>
+          </article>
+
+          <article className="card border border-base-300 bg-base-100 shadow-sm">
+            <div className="card-body gap-4">
+              <p className="eyebrow">Agent status</p>
+              <h2 className="text-xl font-black">Background work readiness</h2>
+              <div className="grid gap-2 text-sm">
+                <div className="flex items-center justify-between rounded-company bg-base-200 p-3"><span>Company OS approvals</span><strong>{pendingApprovals}</strong></div>
+                <div className="flex items-center justify-between rounded-company bg-base-200 p-3"><span>Blocked runtime</span><strong>{blockedRuns}</strong></div>
+                <div className="flex items-center justify-between rounded-company bg-base-200 p-3"><span>Unscoped Drive files</span><strong>{unscopedFiles.length}</strong></div>
+                <div className="flex items-center justify-between rounded-company bg-base-200 p-3"><span>Folders in selected area</span><strong>{selectedFolders.length}</strong></div>
+              </div>
+              <a className="btn btn-primary btn-sm" href="/react-agent-tools">Review agent tools</a>
+            </div>
+          </article>
+        </section>
+      </section>
+    </Shell>
+  );
+}
+
 function AccountSettingsRoute() {
   const [state, reload] = usePrivateLoader(async () => ownerApi<ConnectionData>("/v1/connection"));
   return (
@@ -9199,18 +10296,186 @@ function UnifiedSettingsRoute() {
   const [activeIntegration, setActiveIntegration] = useState<SettingsIntegrationId>(() => (
     window.location.pathname.includes("/settings/drive") ? "google_drive" : "clickup"
   ));
+  const [integrationPane, setIntegrationPane] = useState<IntegrationPaneId>("setup");
   const [createdKey, setCreatedKey] = useState<string | null>(null);
+  const [integrationAction, setIntegrationAction] = useState<SettingsIntegrationId | null>(null);
+  const [syncAction, setSyncAction] = useState<string | null>(null);
+  const [clickUpDiscovery, setClickUpDiscovery] = useState<ClickUpDiscoveryResult | null>(null);
+  const [driveFolders, setDriveFolders] = useState<GoogleDriveFolderOption[] | null>(null);
+  const [driveFolderAreaDraft, setDriveFolderAreaDraft] = useState<Record<string, string>>({});
   const [settingsNotice, setSettingsNotice] = useState<{ tone: NoticeTone; title: string; detail: string } | null>(null);
   const [state, reload] = usePrivateLoader(async () => {
-    const [connection, keys, profiles, clickupSetting, driveSetting] = await Promise.all([
+    const [connection, keys, profiles, clickupSetting, driveSetting, externalMappings, driveFiles] = await Promise.all([
       ownerApi<ConnectionData>("/v1/connection"),
       ownerApi<ApiKeyRecord[]>("/v1/api-keys").catch(() => []),
       ownerApi<AgentKeyProfile[]>("/v1/api-keys/profiles").catch(() => []),
       ownerApi<IntegrationSettingRecord>("/v1/integration-settings/clickup").catch(() => null),
-      ownerApi<IntegrationSettingRecord>("/v1/integration-settings/google_drive").catch(() => null)
+      ownerApi<IntegrationSettingRecord>("/v1/integration-settings/google_drive").catch(() => null),
+      ownerApi<ExternalContainerMapping[]>("/v1/operating-model/external-mappings").catch(() => []),
+      ownerApi<GoogleDriveFileRecord[]>("/v1/google-drive/files").catch(() => [])
     ]);
-    return { connection, keys, profiles, integrationSettings: { clickup: clickupSetting, google_drive: driveSetting } };
+    return { connection, keys, profiles, externalMappings, driveFiles, integrationSettings: { clickup: clickupSetting, google_drive: driveSetting } };
   });
+
+  async function toggleIntegrationActive(provider: SettingsIntegrationId, nextActive: boolean) {
+    const label = settingsIntegrations.find((integration) => integration.id === provider)?.label || provider;
+    setIntegrationAction(provider);
+    setSettingsNotice(null);
+    try {
+      await ownerApi(`/v1/integration-settings/${provider}`, {
+        method: "PUT",
+        body: JSON.stringify({ active: nextActive })
+      });
+      setSettingsNotice({
+        tone: "success",
+        title: nextActive ? `${label} enabled` : `${label} disabled`,
+        detail: nextActive
+          ? "CompanyCore can use this connector again during sync and connector actions."
+          : "Existing imported data stays available, but new sync and connector actions stop using this integration."
+      });
+      reload();
+    } catch (error) {
+      setSettingsNotice({
+        tone: "error",
+        title: `${label} was not updated`,
+        detail: apiErrorMessage(error)
+      });
+    } finally {
+      setIntegrationAction(null);
+    }
+  }
+
+  async function discoverClickUpStructure() {
+    const teamId = stringFromConfig(state.status === "ready" ? (state.data.integrationSettings.clickup?.config || state.data.connection.integrations.clickup.config || {}) : {}, "teamId");
+    setSyncAction("clickup-discover");
+    setSettingsNotice(null);
+    try {
+      const result = await ownerApi<ClickUpDiscoveryResult>("/v1/integration-settings/clickup/discover", {
+        method: "POST",
+        body: JSON.stringify({ useStoredToken: true, ...(teamId ? { teamId } : {}) })
+      });
+      setClickUpDiscovery(result);
+      setSettingsNotice({ tone: "success", title: "ClickUp structure discovered", detail: "CompanyCore refreshed ClickUp workspace, space, folder, and list mappings." });
+      reload();
+    } catch (error) {
+      setSettingsNotice({ tone: "error", title: "ClickUp discovery failed", detail: apiErrorMessage(error) });
+    } finally {
+      setSyncAction(null);
+    }
+  }
+
+  async function discoverDriveFolders() {
+    setSyncAction("drive-discover");
+    setSettingsNotice(null);
+    try {
+      const folders = await ownerApi<GoogleDriveFolderOption[]>("/v1/integration-settings/google_drive/folders/discover");
+      setDriveFolders(folders);
+      if (state.status === "ready") {
+        const config = state.data.integrationSettings.google_drive?.config || state.data.connection.integrations.googleDrive.config || {};
+        const mappings = Array.isArray(config.operatingScopeMappings) ? config.operatingScopeMappings : [];
+        setDriveFolderAreaDraft(Object.fromEntries(mappings
+          .filter((mapping): mapping is { folderId: string; operatingAreaId: string } => (
+            Boolean(mapping)
+            && typeof mapping === "object"
+            && "folderId" in mapping
+            && "operatingAreaId" in mapping
+            && typeof mapping.folderId === "string"
+            && typeof mapping.operatingAreaId === "string"
+          ))
+          .map((mapping) => [mapping.folderId, mapping.operatingAreaId])));
+      }
+      setSettingsNotice({ tone: "success", title: "Drive folders discovered", detail: `${folders.length} folders are available for scope selection.` });
+    } catch (error) {
+      setSettingsNotice({ tone: "error", title: "Drive folder discovery failed", detail: apiErrorMessage(error) });
+    } finally {
+      setSyncAction(null);
+    }
+  }
+
+  async function runIntegrationSync(action: "clickup-maintenance" | "clickup-sync" | "drive-import" | "drive-reconcile") {
+    setSyncAction(action);
+    setSettingsNotice(null);
+    try {
+      if (action === "clickup-maintenance") {
+        await ownerApi("/v1/integration-settings/clickup/maintenance/run", { method: "POST", body: JSON.stringify({}) });
+      } else if (action === "clickup-sync") {
+        await ownerApi("/v1/tasks/sync/clickup/native", { method: "POST", body: JSON.stringify({}) });
+      } else if (action === "drive-import") {
+        const config = state.status === "ready" ? (state.data.integrationSettings.google_drive?.config || state.data.connection.integrations.googleDrive.config || {}) : {};
+        await ownerApi("/v1/integration-settings/google_drive/import", {
+          method: "POST",
+          body: JSON.stringify({
+            folderIds: Array.isArray(config.selectedFolderIds) ? config.selectedFolderIds : undefined,
+            importMode: stringFromConfig(config, "importMode", "merge")
+          })
+        });
+      } else {
+        await ownerApi("/v1/integration-settings/google_drive/changes/reconcile", { method: "POST", body: JSON.stringify({}) });
+      }
+      setSettingsNotice({ tone: "success", title: "Integration action finished", detail: "CompanyCore completed the requested provider action." });
+      reload();
+    } catch (error) {
+      setSettingsNotice({ tone: "error", title: "Integration action failed", detail: apiErrorMessage(error) });
+    } finally {
+      setSyncAction(null);
+    }
+  }
+
+  async function assignMappingArea(mappingId: string, areaId: string) {
+    if (!areaId) {
+      return;
+    }
+    setSyncAction(`mapping-${mappingId}`);
+    setSettingsNotice(null);
+    try {
+      await ownerApi(`/v1/operating-model/external-mappings/${mappingId}/scope`, {
+        method: "PATCH",
+        body: JSON.stringify({ areaId, applyToChildren: true })
+      });
+      setSettingsNotice({ tone: "success", title: "Mapping saved", detail: "Provider element is now scoped to the selected CompanyCore area." });
+      reload();
+    } catch (error) {
+      setSettingsNotice({ tone: "error", title: "Mapping failed", detail: apiErrorMessage(error) });
+    } finally {
+      setSyncAction(null);
+    }
+  }
+
+  async function saveDriveFolderMappings(folders: GoogleDriveFolderOption[], config: Record<string, unknown>, active: boolean) {
+    const operatingScopeMappings = Object.entries(driveFolderAreaDraft)
+      .filter(([, areaId]) => Boolean(areaId))
+      .map(([folderId, operatingAreaId]) => ({ folderId, operatingAreaId }));
+    const selectedFolderIds = [...new Set([
+      ...folders.filter((folder) => folder.selected).map((folder) => folder.id),
+      ...operatingScopeMappings.map((mapping) => mapping.folderId)
+    ])];
+
+    setSyncAction("drive-mapping-save");
+    setSettingsNotice(null);
+    try {
+      await ownerApi("/v1/integration-settings/google_drive", {
+        method: "PUT",
+        body: JSON.stringify({
+          active,
+          config: {
+            rootFolderIds: selectedFolderIds,
+            selectedFolderIds,
+            sharedDriveIds: Array.isArray(config.sharedDriveIds) ? config.sharedDriveIds : [],
+            syncMode: stringFromConfig(config, "syncMode", "pull"),
+            importMode: stringFromConfig(config, "importMode", "merge"),
+            ...(stringFromConfig(config, "changesPageToken") ? { changesPageToken: stringFromConfig(config, "changesPageToken") } : {}),
+            operatingScopeMappings
+          }
+        })
+      });
+      setSettingsNotice({ tone: "success", title: "Drive mapping saved", detail: `${operatingScopeMappings.length} folder mapping${operatingScopeMappings.length === 1 ? "" : "s"} will be applied during import.` });
+      reload();
+    } catch (error) {
+      setSettingsNotice({ tone: "error", title: "Drive mapping was not saved", detail: apiErrorMessage(error) });
+    } finally {
+      setSyncAction(null);
+    }
+  }
 
   async function saveIntegration(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -9288,7 +10553,7 @@ function UnifiedSettingsRoute() {
 
   return (
     <PrivateStateGate state={state} title="Settings" detail="CompanyCore is loading simple workspace settings." onRetry={reload}>
-      {({ connection, keys, profiles, integrationSettings }) => {
+      {({ connection, keys, profiles, integrationSettings, externalMappings, driveFiles }) => {
         const clickup = connection.integrations.clickup;
         const drive = connection.integrations.googleDrive;
         const activeKeys = keys.filter((key) => key.active);
@@ -9297,6 +10562,23 @@ function UnifiedSettingsRoute() {
         const selectedState = connection.integrations[selectedMeta.providerName];
         const selectedSetting = integrationSettings[activeIntegration] || null;
         const selectedConfig = selectedSetting?.config || selectedState.config || {};
+        const driveScopeMappings = Array.isArray(selectedConfig.operatingScopeMappings) ? selectedConfig.operatingScopeMappings : [];
+        const areas = connection.operatingModel.areas || [];
+        const providerMappings = externalMappings.filter((mapping) => mapping.provider === activeIntegration);
+        const visibleDriveFolders = driveFolders || driveFiles.filter((file) => file.isFolder).map((file) => ({
+          id: file.externalId,
+          name: file.name,
+          path: file.name,
+          parentId: file.parentExternalId || null,
+          depth: 0,
+          selected: (Array.isArray(selectedConfig.selectedFolderIds) ? selectedConfig.selectedFolderIds : []).includes(file.externalId),
+          selectedAncestor: false,
+          selectedDescendantCount: 0,
+          imported: true,
+          directImportedItemCount: 0,
+          childCount: 0,
+          descendantCount: 0
+        } as GoogleDriveFolderOption));
 
         return (
           <Shell connection={connection} appLabel="Settings">
@@ -9327,22 +10609,40 @@ function UnifiedSettingsRoute() {
                   <aside className="grid gap-2">
                     {settingsIntegrations.map((integration) => {
                       const providerState = connection.integrations[integration.providerName];
+                      const providerSetting = integrationSettings[integration.id];
+                      const configured = providerState.configured || providerState.oauthClientConfigured || Boolean(providerSetting?.secretConfigured);
+                      const active = Boolean(providerSetting?.active ?? providerState.active);
                       return (
-                        <button
-                          className={`rounded-company border p-4 text-left transition ${activeIntegration === integration.id ? "border-primary bg-primary/5" : "border-base-300 bg-base-100 hover:border-primary/50"}`}
-                          type="button"
-                          onClick={() => setActiveIntegration(integration.id)}
+                        <article
+                          className={`rounded-company border bg-base-100 transition ${activeIntegration === integration.id ? "border-primary bg-primary/5" : "border-base-300 hover:border-primary/50"}`}
                           key={integration.id}
                         >
-                          <span className="block text-sm font-black">{integration.label}</span>
-                          <span className="mt-1 block text-xs leading-5 text-company-muted">{integration.purpose}</span>
-                          <span className="mt-3 block text-xs font-bold text-company-muted">{providerState.configured || providerState.oauthClientConfigured ? "Configured" : "Needs credentials"}</span>
-                        </button>
+                          <button
+                            className="block w-full p-4 text-left"
+                            type="button"
+                            onClick={() => setActiveIntegration(integration.id)}
+                          >
+                            <span className="block text-sm font-black">{integration.label}</span>
+                            <span className="mt-1 block text-xs leading-5 text-company-muted">{integration.purpose}</span>
+                            <span className="mt-3 block text-xs font-bold text-company-muted">{configured ? "Configured" : "Needs credentials"}</span>
+                          </button>
+                          <label className="flex items-center justify-between gap-3 border-t border-base-300 px-4 py-3 text-xs font-bold">
+                            <span>{active ? "Active" : "Disabled"}</span>
+                            <input
+                              className="toggle toggle-primary toggle-sm"
+                              type="checkbox"
+                              checked={active}
+                              disabled={integrationAction === integration.id || !configured}
+                              onChange={(event) => void toggleIntegrationActive(integration.id, event.target.checked)}
+                              aria-label={`${active ? "Disable" : "Enable"} ${integration.label}`}
+                            />
+                          </label>
+                        </article>
                       );
                     })}
                   </aside>
 
-                  <form className="rounded-company border border-base-300 bg-base-100 p-5 shadow-sm" onSubmit={saveIntegration}>
+                  <form className="rounded-company border border-base-300 bg-base-100 p-5 shadow-sm" onSubmit={saveIntegration} key={activeIntegration}>
                     <input type="hidden" name="provider" value={activeIntegration} />
                     <div className="grid gap-5">
                       <div className="grid gap-1">
@@ -9350,6 +10650,25 @@ function UnifiedSettingsRoute() {
                         <p className="text-sm leading-6 text-company-muted">{selectedMeta.purpose}</p>
                       </div>
 
+                      <nav className="flex flex-wrap gap-2" aria-label={`${selectedMeta.label} integration sections`}>
+                        {[
+                          ["setup", "Setup"],
+                          ["mapping", "Mapping"],
+                          ["sync", "Sync"]
+                        ].map(([id, label]) => (
+                          <button
+                            className={`btn btn-xs ${integrationPane === id ? "btn-primary" : "btn-outline"}`}
+                            type="button"
+                            onClick={() => setIntegrationPane(id as IntegrationPaneId)}
+                            key={id}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </nav>
+
+                      {integrationPane === "setup" ? (
+                        <>
                       <label className="flex items-center justify-between gap-3 rounded-company border border-base-300 bg-base-200/40 px-4 py-3 text-sm font-bold">
                         <span>Integration active</span>
                         <input className="toggle toggle-primary" name="active" type="checkbox" defaultChecked={selectedSetting?.active ?? selectedState.active ?? true} />
@@ -9438,6 +10757,116 @@ function UnifiedSettingsRoute() {
                       <div className="flex flex-wrap gap-2">
                         <button className="btn btn-primary" type="submit">Save {selectedMeta.label}</button>
                       </div>
+                        </>
+                      ) : null}
+
+                      {integrationPane === "mapping" ? (
+                        <section className="grid gap-4">
+                          <LocalNotice
+                            tone="info"
+                            title="Map before sync"
+                            detail={activeIntegration === "clickup"
+                              ? "Discover ClickUp first, then map spaces, folders, and lists to CompanyCore areas before running sync."
+                              : "Discover Drive folders, save selected folder scope, then map imported folders/files to CompanyCore areas in the area workbench."}
+                          />
+                          <div className="flex flex-wrap gap-2">
+                            {activeIntegration === "clickup" ? (
+                              <button className="btn btn-outline" type="button" onClick={() => void discoverClickUpStructure()} disabled={syncAction === "clickup-discover" || !selectedState.active}>
+                                {syncAction === "clickup-discover" ? "Discovering..." : "Discover ClickUp structure"}
+                              </button>
+                            ) : (
+                              <button className="btn btn-outline" type="button" onClick={() => void discoverDriveFolders()} disabled={syncAction === "drive-discover" || !selectedState.active}>
+                                {syncAction === "drive-discover" ? "Discovering..." : "Discover Drive folders"}
+                              </button>
+                            )}
+                          </div>
+                          {activeIntegration === "clickup" ? (
+                            <div className="grid gap-2">
+                              {providerMappings.length > 0 ? providerMappings.slice(0, 16).map((mapping) => (
+                                <div className="grid gap-3 rounded-company border border-base-300 p-3 sm:grid-cols-[1fr_14rem]" key={mapping.id}>
+                                  <div>
+                                    <p className="text-sm font-black">{mapping.name || mapping.externalId}</p>
+                                    <p className="text-xs text-company-muted">{mapping.entityType} · {mapping.externalId}</p>
+                                  </div>
+                                  <select
+                                    className="select select-bordered select-sm"
+                                    defaultValue={mapping.areaId || ""}
+                                    onChange={(event) => void assignMappingArea(mapping.id, event.target.value)}
+                                    disabled={syncAction === `mapping-${mapping.id}`}
+                                  >
+                                    <option value="">Choose area</option>
+                                    {areas.map((area) => <option value={area.id} key={area.id}>{area.name}</option>)}
+                                  </select>
+                                </div>
+                              )) : <p className="text-sm text-company-muted">No ClickUp mappings yet. Run discovery after saving the token and team ID.</p>}
+                            </div>
+                          ) : (
+                            <div className="grid gap-2">
+                              {visibleDriveFolders.length > 0 ? visibleDriveFolders.slice(0, 16).map((folder) => (
+                                <div className="grid gap-3 rounded-company border border-base-300 p-3 sm:grid-cols-[1fr_14rem]" key={folder.id}>
+                                  <div>
+                                    <span className="block text-sm font-black">{folder.name}</span>
+                                    <span className="block text-xs text-company-muted">{folder.path}</span>
+                                  </div>
+                                  <select
+                                    className="select select-bordered select-sm"
+                                    value={driveFolderAreaDraft[folder.id] ?? (driveScopeMappings.find((mapping) => (
+                                      mapping
+                                      && typeof mapping === "object"
+                                      && !Array.isArray(mapping)
+                                      && (mapping as Record<string, unknown>).folderId === folder.id
+                                    )) as Record<string, unknown> | undefined)?.operatingAreaId as string | undefined ?? ""}
+                                    onChange={(event) => setDriveFolderAreaDraft((current) => ({ ...current, [folder.id]: event.target.value }))}
+                                  >
+                                    <option value="">Choose area</option>
+                                    {areas.map((area) => <option value={area.id} key={area.id}>{area.name}</option>)}
+                                  </select>
+                                </div>
+                              )) : <p className="text-sm text-company-muted">No Drive folders loaded yet. Run discovery after OAuth setup.</p>}
+                              <div className="flex flex-wrap gap-2">
+                                <button className="btn btn-primary btn-sm" type="button" onClick={() => void saveDriveFolderMappings(visibleDriveFolders, selectedConfig, Boolean(selectedSetting?.active ?? selectedState.active))} disabled={syncAction === "drive-mapping-save" || visibleDriveFolders.length === 0}>
+                                  {syncAction === "drive-mapping-save" ? "Saving..." : "Save Drive mapping"}
+                                </button>
+                              </div>
+                              <p className="text-xs text-company-muted">Saved folder mappings are stored in Google Drive integration config and applied during import to CompanyCore records.</p>
+                            </div>
+                          )}
+                        </section>
+                      ) : null}
+
+                      {integrationPane === "sync" ? (
+                        <section className="grid gap-4">
+                          <LocalNotice
+                            tone={selectedState.active ? "info" : "warning"}
+                            title={selectedState.active ? "Sync uses saved mapping" : `${selectedMeta.label} is disabled`}
+                            detail={selectedState.active
+                              ? "Run sync only after credentials, provider scope, and mapping are ready."
+                              : "Existing CompanyCore data remains available, but provider sync/actions are blocked until the integration is active."}
+                          />
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            {activeIntegration === "clickup" ? (
+                              <>
+                                <button className="btn btn-outline" type="button" onClick={() => void runIntegrationSync("clickup-maintenance")} disabled={!selectedState.active || syncAction !== null}>
+                                  {syncAction === "clickup-maintenance" ? "Running..." : "Run webhook maintenance"}
+                                </button>
+                                <button className="btn btn-primary" type="button" onClick={() => void runIntegrationSync("clickup-sync")} disabled={!selectedState.active || syncAction !== null}>
+                                  {syncAction === "clickup-sync" ? "Syncing..." : "Sync ClickUp tasks"}
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button className="btn btn-outline" type="button" onClick={() => void runIntegrationSync("drive-reconcile")} disabled={!selectedState.active || syncAction !== null}>
+                                  {syncAction === "drive-reconcile" ? "Reconciling..." : "Reconcile Drive changes"}
+                                </button>
+                                <button className="btn btn-primary" type="button" onClick={() => void runIntegrationSync("drive-import")} disabled={!selectedState.active || syncAction !== null}>
+                                  {syncAction === "drive-import" ? "Importing..." : "Import selected folders"}
+                                </button>
+                              </>
+                            )}
+                          </div>
+                          <p className="text-xs leading-5 text-company-muted">Two-way behavior is limited by backend support and provider permissions. CompanyCore keeps working from its own database when integrations are disabled.</p>
+                        </section>
+                      ) : null}
                     </div>
                   </form>
                 </section>
@@ -9495,7 +10924,7 @@ function UnifiedSettingsRoute() {
                     </label>
                     <div className="flex flex-wrap gap-2">
                       <a className="btn btn-primary" href="/settings/api">Create API key</a>
-                      <a className="btn btn-outline" href="/react-agent-tools">Open tool list</a>
+                      <a className="btn btn-outline" href="/react-company-os">Open Company OS</a>
                     </div>
                   </div>
                 </section>
@@ -9874,17 +11303,22 @@ function ReactDashboardApp() {
 }
 
 function ReactTasksApp() {
-  const [tasksState, reload] = useTasksWorkbenchState();
+  const [notice, setNotice] = useState<{ tone: NoticeTone; title: string; detail: string } | null>(null);
+  const [state, reload] = usePrivateLoader(async () => {
+    const [connection, tasks, companyOs, mcpManifest] = await Promise.all([
+      ownerApi<ConnectionData>("/v1/connection"),
+      ownerApi<TaskRecord[]>("/v1/tasks"),
+      ownerApi<CompanyOsData>("/v1/company-os").catch(() => null),
+      ownerApi<McpManifest>("/v1/mcp/manifest").catch(() => null)
+    ]);
+    return { connection, tasks, companyOs, mcpManifest } satisfies TasksDeliveryBundle;
+  });
 
-  if (tasksState.status === "ready") {
-    return <TasksWorkbench connection={tasksState.connection} tasks={tasksState.tasks} />;
-  }
-
-  if (tasksState.status === "signed-out") {
-    return <OwnerLoginRedirect />;
-  }
-
-  return <TasksStatePanel state={tasksState} onRetry={reload} />;
+  return (
+    <PrivateStateGate state={state} title="Tasks & delivery" detail="CompanyCore is loading task records, Company OS context, and AI handoff readiness." onRetry={reload}>
+      {(data) => <TasksWorkbench {...data} notice={notice} onNotice={setNotice} onReload={reload} />}
+    </PrivateStateGate>
+  );
 }
 
 function ReactIntegrationsApp() {
@@ -9968,6 +11402,10 @@ const appRouteComponents: AppRouteComponent[] = [
   {
     meta: { id: "register", href: "/auth/register", title: "Create account" },
     component: () => <AuthRoute mode="register" />
+  },
+  {
+    meta: { id: "operations", href: "/operations", title: "Operations Cockpit" },
+    component: OperationsCockpitRoute
   },
   {
     meta: { id: "areas", href: "/areas", title: "Areas", aliases: ["/react-areas"] },

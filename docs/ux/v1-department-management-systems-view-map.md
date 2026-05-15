@@ -1,0 +1,155 @@
+# V1 Department Management Systems View Map
+
+Last updated: 2026-05-16
+
+## Purpose
+
+This document defines the V1 web view map for CompanyCore after accepting the
+department management systems direction. It refreshes the view list so the app
+can evolve from separate modules into one coherent company operating system.
+
+Architecture source:
+
+- `docs/architecture/department-management-systems-architecture.md`
+- `docs/architecture/companycore-global-business-flow.md`
+- `docs/architecture/companycore-business-module-map.md`
+
+## View Layers
+
+CompanyCore V1 has three web layers:
+
+| Layer | Audience | Purpose |
+| --- | --- | --- |
+| Public | visitors and owner before login | explain the product and allow safe entry. |
+| Private owner | owner/operator | operate the company through the Company Atlas and department systems. |
+| Agent-facing support | owner plus supervised agents | expose what agents can read/do, what needs approval, and what evidence exists. |
+
+## Public Views
+
+| View | Route | Purpose | V1 status | Primary components |
+| --- | --- | --- | --- | --- |
+| Public Home | `/` | Explain CompanyCore and route to login/register. | V1 canonical | value statement, product signal, login/register actions |
+| Owner Login | `/auth/login` | Safe owner return path. | V1 canonical | login form, pending route recovery, workspace safety copy |
+| Owner Registration | `/auth/register` | First owner and workspace bootstrap. | V1 canonical | registration form, workspace creation, onboarding cue |
+
+## Private Core Views
+
+| View | Route | Purpose | V1 status | Primary components |
+| --- | --- | --- | --- | --- |
+| Company Atlas | `/dashboard` | Whole-company command map across 00-12 areas. | V1 canonical | company decision board, area map, health signals, next action |
+| Operations Cockpit | `/operations` | Cross-perspective supervision for clients, tasks, files/tables, and AI handoff. | V1 canonical | four-lane command surface, quick create, department evidence, AI handoff |
+| Department Management System | `/areas?area=:areaKey&view=:viewId` | Canonical department operating room for one area. | V1 canonical base | department identity, command brief, subsystem tabs, board, evidence rail |
+| Unified Settings | `/settings` | Configure connectors, agent keys, and MCP handoff fields. | V1 canonical | integration settings, agent keys, MCP instructions |
+
+## Private Support Workbenches
+
+These support department systems and should be progressively rebuilt around the
+department management model.
+
+| View | Route | Current status | Target role |
+| --- | --- | --- | --- |
+| All-Areas Admin Workbench | `/areas` | V0 rebuild | Manage operating-area mappings and lifecycle, not the primary department view. |
+| Task Delivery Workbench | `/tasks-adapter` | V1 canonical | Execution pressure and task operations for department systems. |
+| Data Evidence Browser | `/data`, `/data/:table` | V0 rebuild | Area-aware table/record evidence browser. |
+| Relationship Review | `/relationships` | V0 rebuild | Area-aware relationship provenance and confidence review. |
+| Pipeline Workbench | `/pipeline` | V0 rebuild | Workflow and sales/delivery pipeline management by area. |
+| Company OS Cockpit | `/react-company-os` | V1 foundation | Command/evidence cockpit for workflows, approvals, audit, and standards. |
+| Agent Tool Surface | `/react-agent-tools` | V1 canonical section entry | MCP tool handoff from settings, later area-aware agent view. |
+| Account Settings | `/settings/account` | V0 rebuild | Workspace/account administration. |
+
+## Department System Routes
+
+All department systems use:
+
+```text
+/areas?area=:areaKey&view=:viewId
+```
+
+Default `viewId` values:
+
+```text
+overview
+goals
+workflows
+tasks
+records
+knowledge
+resources
+metrics
+risks
+decisions
+ai
+improvements
+```
+
+The current implementation already supports a subset of capability tabs. V1
+should expand toward the full set as existing backend contracts allow it.
+
+## Department System Inventory
+
+| Area key | Label | System view name | Primary route | Core subsystems |
+| --- | --- | --- | --- | --- |
+| `00-glowny` | 00 Ogolny | Company Orchestration System | `/areas?area=00-glowny&view=overview` | owner inbox, cross-department priorities, company graph, global flow, system health |
+| `01-strategia` | 01 Strategia | Strategy Management System | `/areas?area=01-strategia&view=overview` | goals, targets, roadmap, decisions, risks, KPIs, portfolio |
+| `02-produkt` | 02 Produkt | Product And Delivery Management System | `/areas?area=02-produkt&view=overview` | offers, service/product catalog, backlog, delivery plans, releases, acceptance |
+| `03-sprzedaz` | 03 Sprzedaz | Sales Management System | `/areas?area=03-sprzedaz&view=overview` | leads, discovery, opportunities, offers, pricing, deal pipeline |
+| `04-operacje` | 04 Operacje | Operations Management System | `/areas?area=04-operacje&view=overview` | planning, SOPs, recurring operations, quality controls, admin routines, dependencies, approvals |
+| `05-relacje` | 05 Relacje | Relationship Management System | `/areas?area=05-relacje&view=overview` | clients, stakeholders, interactions, support, success, referrals |
+| `06-kadry` | 06 Kadry | People And Role Management System | `/areas?area=06-kadry&view=overview` | roles, responsibilities, capacity, escalation, PAEI, permissions |
+| `07-finanse` | 07 Finanse | Finance And Billing Management System | `/areas?area=07-finanse&view=overview` | invoices, payments, receivables, margin, finance risks |
+| `08-zasoby` | 08 Zasoby | Assets And Resource Management System | `/areas?area=08-zasoby&view=overview` | files, folders, resources, repositories, prompts, tools, storage locations |
+| `09-technologia` | 09 Technologia | Technology And AI Infrastructure Management System | `/areas?area=09-technologia&view=overview` | agents, MCP tools, integration health, API keys, audit, observability |
+| `10-prawo` | 10 Prawo | Legal, Standards, And Decision Management System | `/areas?area=10-prawo&view=overview` | policies, standards, decision logs, risks, controls, compliance |
+| `11-innowacje` | 11 Innowacje | Innovation And Growth Management System | `/areas?area=11-innowacje&view=overview` | experiments, growth ideas, marketing signals, feedback loops, improvements |
+| `12-zarzadzanie` | 12 Zarzadzanie | Executive Management System | `/areas?area=12-zarzadzanie&view=overview` | owner command, approvals, escalation, cross-department health, portfolio |
+
+## Department View Component Contract
+
+Every department route should be composed from these groups:
+
+| Zone | Component group | Required content |
+| --- | --- | --- |
+| Header | Department identity bar | name, role, value-flow contribution, health, active owner/agent focus |
+| Top board | Management command brief | what matters now, blocker/risk, next owner decision, suggested AI action |
+| Navigation | Subsystem tabs | overview, goals, workflows, tasks, records, knowledge, resources, metrics, risks, decisions, AI, improvements |
+| Main | Primary management board | subsystem-specific cards, tables, pipeline preview, task list, action panels |
+| Right rail | Evidence and graph rail | linked records, Drive files, knowledge, pipeline runs, events, audit, relationship confidence |
+| Bottom | Improvement loop | feedback, retro notes, improvement tasks, standards/process updates |
+
+## Per-Department UX Requirements
+
+| System | Must answer first | Must not do |
+| --- | --- | --- |
+| Company Orchestration | What needs owner attention across the whole company? | Become a duplicate of every department board. |
+| Strategy | Which goals and decisions steer the company now? | Hide execution blockers from strategic decisions. |
+| Product And Delivery | What value is promised, being built, and accepted? | Split products and services into unrelated systems. |
+| Work Execution | What is blocked, overdue, assigned, or ready to move? | Show tasks without ownership, area, or evidence. |
+| Sales | Which opportunities need qualification, discovery, offer, or follow-up? | Mix sales with generic relationship support without stage clarity. |
+| Relationships | Which clients/stakeholders need care, support, or expansion? | Treat clients as only sales leads. |
+| Finance | Which delivered value needs invoice/payment/closure? | Add payment actions without finance/security contracts. |
+| People And Roles | Who or what role owns the work and escalation? | Use PAEI as permission or authority. |
+| Operations | Which routines, controls, and procedures keep the company running? | Become a dumping ground for unowned work. |
+| Knowledge | What does the company know, decide, and need to learn? | Store knowledge without source, ownership, or freshness. |
+| Assets | Which files, tools, repos, prompts, and resources are addressable? | Expose raw provider complexity before company meaning. |
+| Integrations | Which providers and automations are connected and healthy? | Let providers become the product model. |
+| AI Agents | What can agents read/do, and what needs supervision? | Let agents bypass approvals, audit, or CompanyCore APIs. |
+
+## V1 Build Sequence
+
+1. Publish the shared department-system architecture and prompt pack.
+2. Update the selected-area route spec so each area is a department management
+   system, not a generic area detail.
+3. Refresh Company Atlas copy and route metadata to point to department
+   systems.
+4. Build read-only department shell consistency for all 13 systems.
+5. Deepen one system at a time, starting from existing backend contracts:
+   Strategy, Sales, Work Execution, Knowledge, AI Agents.
+6. Add write actions only where current APIs already support safe scoped
+   behavior.
+7. Add Paperclip/MCP department packets after human-readable department
+   read models are stable.
+
+## Prompt Pack Link
+
+Use `docs/ux/v1-department-system-prompt-pack.md` for generation and
+implementation prompts.
