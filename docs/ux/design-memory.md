@@ -57,6 +57,14 @@ of rediscovering them.
   `docs/ux/assets/companycore-v1-area-first-dashboard-desktop-canonical.png`
   and
   `docs/ux/assets/companycore-v1-area-first-dashboard-mobile-canonical.png`.
+  Latest implementation proof refreshed
+  `docs/ux/evidence/v1-area-dashboard-desktop-1366x900.png` and
+  `docs/ux/evidence/v1-area-dashboard-mobile-390x844.png` after the parity
+  continuation pass that aligned the desktop progressive path, sidebar
+  density, mobile appbar, `Dzialy` strip, summary metrics, and mobile atlas
+  heading with the active canonical images. The premium parity pass then added
+  the final sidebar owner footer, subtle atlas/card material accents, and a
+  shorter fixed mobile nav while preserving no-overflow desktop/mobile proof.
 
 ### 2026-05-14 - Relationship Confidence Badges
 - Type: reusable_pattern

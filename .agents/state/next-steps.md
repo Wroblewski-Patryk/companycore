@@ -23,9 +23,8 @@ Last updated: 2026-05-15
 3. V1AREA follow-up verification and route convergence.
    - First unblock the host API gate by setting a valid local `DATABASE_URL`
      and running `npm run test:api` for the new `/dashboard` routing.
-   - Then decide whether V1AREA-002 should converge `/areas` route body into
-     the same area capability model or perform a tighter pixel-parity pass
-     against the current desktop/mobile canonical images.
+   - Then start V1AREA-002 as a narrow `/areas` route convergence or
+     capability-detail polish slice using the same area-first component model.
 
 ## LATER
 

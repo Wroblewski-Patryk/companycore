@@ -4,8 +4,8 @@
 - ID: V1AREA-001
 - Title: Area-First Dashboard Pixel-Perfect Implementation
 - Task Type: feature
-- Current Stage: planning
-- Status: READY
+- Current Stage: verification
+- Status: IMPLEMENTED_NOT_FULLY_VERIFIED
 - Owner: Frontend Builder + QA/Test
 - Depends on: approval of canonical desktop and mobile images; UX100-W02 verification unblock before merge if touching the same shell files
 - Priority: P1
@@ -17,7 +17,7 @@
 - Iteration: next implementation wave
 - Operation Mode: BUILDER
 - Mission ID: V1AREA
-- Mission Status: PLANNED
+- Mission Status: IMPLEMENTED, PARTIALLY VERIFIED
 
 ## Process Self-Audit
 - [x] All seven autonomous loop steps are planned.
@@ -157,7 +157,8 @@ Backend schema and route changes are out of scope.
 - Post-launch learning needed: yes
 
 ## Deliverable For This Stage
-Planning and implementation contract for a future coding task.
+Verified implementation evidence for the V1 area-first dashboard and the
+remaining release gate list.
 
 ## Constraints
 - use existing systems and approved mechanisms
@@ -220,6 +221,24 @@ Planning and implementation contract for a future coding task.
   read-only readiness, primary strategy-review CTA, open-area link, and MECE
   accountability note. The right `Today` rail now uses canonical priority,
   strategy decision, AI handoff, proof, and source-chip groups.
+- 2026-05-15 parity continuation pass: the desktop progressive path now uses
+  the canonical icon/title/detail step anatomy, the desktop sidebar is denser
+  so all 00-12 areas are visible in the first viewport, and the mobile shell
+  now matches the canonical anatomy more closely with a full-width app bar,
+  centered LuckySparrow title/status dot, shield guard icon, `Dzialy` heading,
+  `Map` shortcut, four compact summary metrics, mobile-only atlas heading and
+  breadcrumb, and a shorter atlas preview. Playwright fallback verified
+  desktop `1366x900` and mobile `390x844` with no horizontal overflow and no
+  console/page errors; refreshed screenshot evidence replaced the desktop and
+  mobile files in `docs/ux/evidence/`.
+- 2026-05-15 premium parity pass: the sidebar brand and user footer were
+  polished into the final Company Atlas shell, atlas/cards received subtle
+  non-distracting material accents, the desktop shell keeps the owner profile
+  visible while showing all 00-12 areas, and mobile bottom navigation was
+  shortened with extra page breathing room. Playwright fallback verified the
+  latest built `/dashboard` bundle at desktop `1366x900` and mobile
+  `390x844` with no horizontal overflow and no console/page errors; refreshed
+  screenshot evidence replaced the desktop and mobile files.
 - Coverage ledger updated: not applicable.
 - Module confidence ledger updated: yes, `V1AREA-001`.
 - Requirements matrix updated: yes, `REQ-V1AREA-001`.
@@ -322,4 +341,14 @@ Validation summary:
   health banner present, four area-signal tiles present, Jarvis readiness card
   present, desktop/tablet capability tabs fit without horizontal overflow, and
   mobile uses intentional horizontal tab overflow.
+- Passed: 2026-05-15 parity continuation proof at desktop `1366x900` and
+  mobile `390x844`: no overflow, no console/page errors, full icon/detail
+  progressive path visible on desktop, all 00-12 area rows visible in the
+  desktop sidebar first viewport, and the mobile appbar/area strip/atlas
+  anatomy aligned with the active canonical mobile reference.
+- Passed: 2026-05-15 premium parity proof at desktop `1366x900` and mobile
+  `390x844`: no overflow, no console/page errors, final sidebar footer and
+  owner row visible, desktop first viewport remains complete, and the mobile
+  fixed nav is shorter while the full-page path remains readable from overview
+  to area detail.
 - Not completed: `npm run test:api` because local `DATABASE_URL` is unset.

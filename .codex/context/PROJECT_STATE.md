@@ -103,6 +103,23 @@ Last updated: 2026-05-15
   `834x1112`, and mobile `390x844` with no overflow and no console/page
   errors; evidence screenshots are in `docs/ux/evidence/`. Host
   `npm run test:api` remains pending because local `DATABASE_URL` is unset.
+- 2026-05-15: V1AREA-001 parity continuation tightened the same `/dashboard`
+  implementation against the active desktop/mobile canonical images. The
+  desktop first viewport now has a denser area sidebar with all 00-12 rows
+  visible, an icon/title/detail progressive path, and the refined selected-area
+  CEO overview. The mobile surface now has the canonical appbar anatomy,
+  centered LuckySparrow status, guard shield, `Dzialy` heading with `Map`
+  shortcut, four compact summary metrics, mobile atlas heading/breadcrumb, and
+  shorter atlas preview. `npm run validate` and `git diff --check` passed;
+  Playwright fallback reverified desktop `1366x900` and mobile `390x844` with
+  no horizontal overflow and no console/page errors.
+- 2026-05-15: V1AREA-001 premium parity pass added the final Company Atlas
+  sidebar footer/owner row, subtle atlas/card material accents, visible desktop
+  owner context while preserving all 00-12 area rows in the first viewport,
+  and a shorter fixed mobile nav with extra page breathing room. The local
+  React build now emits `public/react/assets/index-wbA5Pvhk.js` and
+  `public/react/assets/index-B1Wcb5DB.css`; release/deploy proof is still
+  separate from this local visual pass.
 - 2026-05-15: V1AREA-001 production rollover updated CompanyCore from
   `fb6aca9` to `df99969` through the approved manual VPS backend path after
   Coolify redeploy left the public runtime on the old image. Public web and

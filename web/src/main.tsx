@@ -1586,19 +1586,25 @@ function AreaSidebar({
   areas,
   selectedArea,
   activeCapability,
+  ownerLabel,
+  ownerDetail,
   onSelectArea,
   onSelectCapability
 }: {
   areas: AreaViewState[];
   selectedArea: AreaViewState;
   activeCapability: string;
+  ownerLabel: string;
+  ownerDetail: string;
   onSelectArea: (key: string) => void;
   onSelectCapability: (capability: string) => void;
 }) {
   return (
     <aside className="area-sidebar" aria-label="LuckySparrow company areas">
       <a className="area-sidebar-brand" href="/dashboard">
-        <span className="atlas-brand-mark">LS</span>
+        <span className="atlas-brand-mark">
+          <i className="ph-bold ph-cube" aria-hidden="true"></i>
+        </span>
         <span>
           <strong>LuckySparrow</strong>
           <small>Company Atlas</small>
@@ -1645,10 +1651,22 @@ function AreaSidebar({
         })}
       </nav>
 
-      <a className="area-sidebar-system" href="/settings/account">
-        <i className="ph-bold ph-sliders-horizontal" aria-hidden="true"></i>
-        <span>Workspace settings</span>
-      </a>
+      <footer className="area-sidebar-footer">
+        <a className="area-sidebar-system" href="/settings/account">
+          <i className="ph-bold ph-sliders-horizontal" aria-hidden="true"></i>
+          <span>Workspace settings</span>
+        </a>
+        <a className="area-sidebar-user" href="/settings/account">
+          <span className="area-sidebar-avatar">
+            <i className="ph-bold ph-user" aria-hidden="true"></i>
+          </span>
+          <span>
+            <strong>{ownerLabel}</strong>
+            <small>{ownerDetail}</small>
+          </span>
+          <i className="ph-bold ph-caret-right" aria-hidden="true"></i>
+        </a>
+      </footer>
     </aside>
   );
 }
@@ -1666,7 +1684,10 @@ function MobileAppBar({ workspaceName }: { workspaceName: string }) {
       <a className="mobile-icon-link" href="/settings/api" aria-label="Search and agent access">
         <i className="ph-bold ph-magnifying-glass" aria-hidden="true"></i>
       </a>
-      <span className="mobile-guarded-status">Guarded</span>
+      <a className="mobile-shield-link" href="/settings/api" aria-label="Agent guardrails">
+        <i className="ph-bold ph-shield-check" aria-hidden="true"></i>
+        <span className="area-status-dot is-ready" aria-hidden="true"></span>
+      </a>
     </header>
   );
 }
@@ -1715,19 +1736,28 @@ function MobileAreaSelector({
   onSelectArea: (key: string) => void;
 }) {
   return (
-    <nav className="mobile-area-selector" aria-label="Dzialy">
-      {areas.map((area) => (
-        <button
-          className={area.key === selectedArea.key ? "is-selected" : ""}
-          type="button"
-          key={area.key}
-          onClick={() => onSelectArea(area.key)}
-        >
-          <span className={`area-status-dot ${areaStatusClass(area.status)}`} aria-hidden="true"></span>
-          {area.shortLabel}
-        </button>
-      ))}
-    </nav>
+    <section className="mobile-area-strip" aria-label="Dzialy">
+      <div className="mobile-area-strip-heading">
+        <h2>Dzialy</h2>
+        <a href="/dashboard">
+          <i className="ph-bold ph-map-trifold" aria-hidden="true"></i>
+          Map
+        </a>
+      </div>
+      <nav className="mobile-area-selector" aria-label="Dzialy">
+        {areas.map((area) => (
+          <button
+            className={area.key === selectedArea.key ? "is-selected" : ""}
+            type="button"
+            key={area.key}
+            onClick={() => onSelectArea(area.key)}
+          >
+            <span className={`area-status-dot ${areaStatusClass(area.status)}`} aria-hidden="true"></span>
+            {area.label}
+          </button>
+        ))}
+      </nav>
+    </section>
   );
 }
 
@@ -1820,6 +1850,14 @@ function CompanyAtlasBoard({
         <div>
           <p className="atlas-kicker">APQC lens</p>
           <h2>Company operating system</h2>
+          <h2 className="atlas-mobile-heading">Company overview</h2>
+        </div>
+        <div className="atlas-mobile-crumbs" aria-hidden="true">
+          <span>Overview</span>
+          <i className="ph-bold ph-arrow-right"></i>
+          <strong>Area</strong>
+          <i className="ph-bold ph-arrow-right"></i>
+          <span>Capability</span>
         </div>
         <div className="atlas-lens-row" aria-label="Process lens">
           {["All", "Govern", "Build", "Sell", "Deliver", "Learn", "Automate"].map((lens) => (
@@ -2157,12 +2195,21 @@ function DecisionRail({
 }
 
 function ProgressivePath({ activeCapability }: { activeCapability: string }) {
-  const steps = ["Overview", "Area", "Capability", "Record", "Evidence", "AI action"];
+  const steps = [
+    { id: "overview", label: "Overview", detail: "See the whole", icon: "ph-globe-hemisphere-west" },
+    { id: "area", label: "Area", detail: "Focus the company", icon: "ph-buildings" },
+    { id: "capability", label: "Capability", detail: "Choose what matters", icon: "ph-squares-four" },
+    { id: "record", label: "Record", detail: "Open the right record", icon: "ph-clipboard-text" },
+    { id: "evidence", label: "Evidence", detail: "Verify with proof", icon: "ph-shield-check" },
+    { id: "ai", label: "AI action", detail: "Delegate or execute", icon: "ph-robot" }
+  ];
   return (
     <nav className="progressive-path" aria-label="Progressive path">
       {steps.map((step, index) => (
-        <span className={index <= 2 || activeCapability === "ai" ? "is-active" : ""} key={step}>
-          {step}
+        <span className={index <= 2 || activeCapability === "ai" ? "is-active" : ""} key={step.id}>
+          <i className={`ph-bold ${step.icon}`} aria-hidden="true"></i>
+          <strong>{step.label}</strong>
+          <small>{step.detail}</small>
         </span>
       ))}
     </nav>
@@ -2207,6 +2254,8 @@ function AreaFirstDashboard({ connection }: { connection: ConnectionData }) {
   const [selectedAreaKey, setSelectedAreaKey] = useState(initialArea.key);
   const [activeCapability, setActiveCapability] = useState("overview");
   const selectedArea = areas.find((area) => area.key === selectedAreaKey) || initialArea;
+  const ownerLabel = connection.user?.name || connection.user?.email || "Owner";
+  const ownerDetail = connection.user?.email ? "Owner" : connection.workspace.name;
 
   return (
     <main className="atlas-shell" data-theme="companycore">
@@ -2214,6 +2263,8 @@ function AreaFirstDashboard({ connection }: { connection: ConnectionData }) {
         areas={areas}
         selectedArea={selectedArea}
         activeCapability={activeCapability}
+        ownerLabel={ownerLabel}
+        ownerDetail={ownerDetail}
         onSelectArea={setSelectedAreaKey}
         onSelectCapability={setActiveCapability}
       />

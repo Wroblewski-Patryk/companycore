@@ -87,6 +87,10 @@ No active implementation task is in progress.
     five-item mobile bottom nav. The view derives area labels/status/table
     counts, integration readiness, capabilities, workspace, and MCP scope from
     `/v1/connection` instead of static UI records.
+    The latest premium parity pass added the final sidebar owner footer,
+    subtle atlas/card material accents, visible desktop owner context in the
+    first viewport, and a shorter mobile bottom nav with refreshed desktop and
+    mobile evidence screenshots.
   - Changed files: `src/app.ts`, `web/src/main.tsx`, `web/src/styles.css`,
     generated `public/react/*`, and screenshot evidence in
     `docs/ux/evidence/`.
@@ -105,15 +109,17 @@ No active implementation task is in progress.
     canonical CEO overview: health banner, four area-signal tiles, Jarvis
     read-only readiness, primary strategy-review CTA, open-area link, MECE
     accountability note, and a `Today` rail with priority/decision/AI/proof
-    groups.
+    groups. The latest parity continuation pass tightened the mobile appbar,
+    `Dzialy` strip, mobile atlas heading/breadcrumb, four-metric summary,
+    desktop sidebar density, and desktop progressive path icon/detail anatomy
+    against the active canonical references.
     Screenshots:
     `docs/ux/evidence/v1-area-dashboard-desktop-1366x900.png`,
     `docs/ux/evidence/v1-area-dashboard-tablet-834x1112.png`, and
     `docs/ux/evidence/v1-area-dashboard-mobile-390x844.png`.
-  - Residual validation gap: `npm run test:api` rebuilt successfully but
-    stopped at `prisma migrate deploy` because local `DATABASE_URL` is not set.
-    A database-backed API regression run remains required before a release
-    commit or deployment claim.
+  - Residual validation gap: `npm run test:api` remains blocked locally because
+    `DATABASE_URL` is not set. A database-backed API regression run remains
+    required before the next release/deploy claim.
   - Task contract:
     `docs/planning/v1-area-first-pixel-perfect-task-contract.md`.
 
