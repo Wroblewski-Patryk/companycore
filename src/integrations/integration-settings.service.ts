@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../db/prisma";
+import { IntegrationError } from "./errors";
 import { decryptSecret } from "./secrets";
 
 export const supportedIntegrationProviders = ["clickup", "google_drive"] as const;
@@ -76,8 +77,13 @@ export async function getGoogleDriveSettingsForWorkspace(workspaceId: string) {
     return null;
   }
 
+  const oauth = parseGoogleDriveOAuthSecret(setting.secretCiphertext);
+  if (!oauth) {
+    return null;
+  }
+
   return {
-    oauth: JSON.parse(decryptSecret(setting.secretCiphertext)) as GoogleDriveOAuthSecret,
+    oauth,
     config: setting.config as GoogleDriveIntegrationConfig,
     rawSetting: setting
   };
@@ -97,7 +103,11 @@ export function parseGoogleDriveOAuthSecret(
     if (options.failClosed === false) {
       return null;
     }
-    throw error;
+    throw new IntegrationError(
+      "integration_invalid_token",
+      401,
+      "Stored Google Drive OAuth secret could not be decrypted."
+    );
   }
 }
 

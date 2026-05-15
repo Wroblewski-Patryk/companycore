@@ -105,17 +105,12 @@ export async function createGoogleSheet(input: {
   range?: string;
 }) {
   const client = await getWorkspaceGoogleDriveClient(input.workspaceId);
-  const spreadsheetId = input.parentId
-    ? (await client.createDriveFile({
-        name: input.title,
-        mimeType: googleSheetMimeType,
-        parentId: input.parentId
-      })).id
-    : String((await client.createSpreadsheet({
-        properties: {
-          title: input.title
-        }
-      })).spreadsheetId ?? "");
+  const createdMetadata = await client.createDriveFile({
+    name: input.title,
+    mimeType: googleSheetMimeType,
+    parentId: input.parentId
+  });
+  const spreadsheetId = createdMetadata.id;
   if (!spreadsheetId) {
     throw new IntegrationError("integration_unavailable", 502, "Google Sheets did not return spreadsheet ID.");
   }

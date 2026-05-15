@@ -158,7 +158,10 @@ Implemented foundation:
   description note that tells agents and operators what a Drive item contains.
 - `/v1/google-drive/docs` and `/v1/google-drive/sheets` create Google Docs and
   Sheets, optionally under a supplied Drive `parentId`, persist metadata,
-  extract searchable content, and emit safe events.
+  extract searchable content, and emit safe events. Google Sheets are created
+  through Drive `files.create` with MIME type
+  `application/vnd.google-apps.spreadsheet` so folder placement is controlled
+  by CompanyCore before values are written through the Sheets API.
 - `/v1/google-drive/docs/:id` and `/v1/google-drive/sheets/:id/values` write to
   Google first, then refresh CompanyCore metadata/content snapshots only after
   the provider write succeeds.

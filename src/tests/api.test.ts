@@ -4524,7 +4524,7 @@ test("CompanyCore v1 protected API flow", async () => {
     });
 
     if (url.pathname === "/drive/v3/files" && init?.method === "POST") {
-      const body = init.body ? JSON.parse(String(init.body)) : {};
+      const body = init?.body ? JSON.parse(String(init.body)) as { mimeType?: string } : {};
       if (body.mimeType === "application/vnd.google-apps.spreadsheet") {
         return new Response(JSON.stringify({
           id: "created-sheet-1",
@@ -4535,6 +4535,7 @@ test("CompanyCore v1 protected API flow", async () => {
           webViewLink: "https://docs.google.com/spreadsheets/d/created-sheet-1"
         }), { status: 200 });
       }
+
       return new Response(JSON.stringify({
         id: "created-doc-1",
         name: "Jarvis doc",
@@ -4593,13 +4594,6 @@ test("CompanyCore v1 protected API flow", async () => {
             }
           }]
         }
-      }), { status: 200 });
-    }
-
-    if (url.pathname === "/v4/spreadsheets" && init?.method === "POST") {
-      return new Response(JSON.stringify({
-        spreadsheetId: "created-sheet-1",
-        spreadsheetUrl: "https://docs.google.com/spreadsheets/d/created-sheet-1"
       }), { status: 200 });
     }
 
