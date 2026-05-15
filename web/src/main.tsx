@@ -25,6 +25,7 @@ import {
   loadCompanyOsWorkflowDrafts as sharedLoadCompanyOsWorkflowDrafts,
   ownerToken as sharedOwnerToken,
   previewCompanyOsWorkflowDraftImpact as sharedPreviewCompanyOsWorkflowDraftImpact,
+  redirectToOwnerLogin as sharedRedirectToOwnerLogin,
   requestCompanyOsApproval as sharedRequestCompanyOsApproval,
   startCompanyOsStage as sharedStartCompanyOsStage,
   updateCompanyOsStandard as sharedUpdateCompanyOsStandard,
@@ -1572,11 +1573,36 @@ function reviewCount(areas: AreaViewState[]) {
 }
 
 function DashboardStatePanel({ state, onRetry }: { state: DashboardState; onRetry: () => void }) {
+  if (state.status === "signed-out") {
+    return <OwnerLoginRedirect />;
+  }
+
   return (
     <main className="atlas-shell atlas-shell-signed-out" data-theme="companycore">
       <section className="atlas-state-panel">
         <span className="atlas-brand-mark">CC</span>
         <StatePanel state={state} onRetry={onRetry} />
+      </section>
+    </main>
+  );
+}
+
+function OwnerLoginRedirect() {
+  useEffect(() => {
+    sharedRedirectToOwnerLogin();
+  }, []);
+
+  return (
+    <main className="atlas-shell atlas-shell-signed-out" data-theme="companycore">
+      <section className="atlas-state-panel" aria-live="polite">
+        <span className="atlas-brand-mark">CC</span>
+        <div className="alert alert-info" role="status">
+          <i className="ph-bold ph-arrows-clockwise text-xl" aria-hidden="true"></i>
+          <div>
+            <strong>Opening sign in</strong>
+            <p className="text-sm">CompanyCore is preparing your owner session.</p>
+          </div>
+        </div>
       </section>
     </main>
   );
@@ -7403,6 +7429,10 @@ function ReactTasksApp() {
     return <TasksWorkbench connection={tasksState.connection} tasks={tasksState.tasks} />;
   }
 
+  if (tasksState.status === "signed-out") {
+    return <OwnerLoginRedirect />;
+  }
+
   return <TasksStatePanel state={tasksState} onRetry={reload} />;
 }
 
@@ -7411,6 +7441,10 @@ function ReactIntegrationsApp() {
 
   if (integrationState.status === "ready") {
     return <IntegrationWorkbench connection={integrationState.connection} />;
+  }
+
+  if (integrationState.status === "signed-out") {
+    return <OwnerLoginRedirect />;
   }
 
   return <IntegrationStatePanel state={integrationState} onRetry={reload} />;
@@ -7431,6 +7465,10 @@ function ReactAreasApp() {
     );
   }
 
+  if (areasState.status === "signed-out") {
+    return <OwnerLoginRedirect />;
+  }
+
   return <AreasStatePanel state={areasState} onRetry={reload} />;
 }
 
@@ -7441,6 +7479,10 @@ function ReactCompanyOsApp() {
     return <CompanyOsWorkbench connection={companyOsState.connection} companyOs={companyOsState.companyOs} onReload={reload} />;
   }
 
+  if (companyOsState.status === "signed-out") {
+    return <OwnerLoginRedirect />;
+  }
+
   return <CompanyOsStatePanel state={companyOsState} onRetry={reload} />;
 }
 
@@ -7449,6 +7491,10 @@ function ReactAgentToolsApp() {
 
   if (surfaceState.status === "ready") {
     return <AgentToolSurfaceWorkbench connection={surfaceState.connection} manifest={surfaceState.manifest} />;
+  }
+
+  if (surfaceState.status === "signed-out") {
+    return <OwnerLoginRedirect />;
   }
 
   return <AgentToolSurfaceStatePanel state={surfaceState} onRetry={reload} />;

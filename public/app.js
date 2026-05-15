@@ -1,5 +1,6 @@
 const privateRoutes = new Set(["/dashboard", "/data", "/areas", "/relationships", "/tasks-adapter", "/pipeline", "/settings", "/settings/account", "/settings/integrations", "/settings/drive", "/settings/api"]);
 const publicRoutes = new Set(["/", "/auth/login", "/auth/register"]);
+const reactShellRoutes = new Set(["/", "/dashboard", "/areas", "/react-agent-tools", "/react-company-os", "/react-areas", "/react-dashboard", "/react-integrations", "/react-tasks"]);
 const pendingPrivatePathKey = "companycorePendingPrivatePath";
 const apiRequestTimeoutMs = 20_000;
 
@@ -1174,8 +1175,8 @@ function renderRoute() {
   }
 
   if ((path === "/auth/login" || path === "/auth/register") && isSignedIn()) {
-    window.history.replaceState({}, "", "/dashboard");
-    path = "/dashboard";
+    window.location.replace("/");
+    return;
   }
 
   views.forEach((view) => {
@@ -6653,6 +6654,12 @@ async function openPostAuthTarget(defaultPath = "/dashboard") {
   const pendingPath = sessionStorage.getItem(pendingPrivatePathKey);
   sessionStorage.removeItem(pendingPrivatePathKey);
   const target = pendingPath && pendingPath.startsWith("/") ? pendingPath : defaultPath;
+  const targetUrl = new URL(target, window.location.origin);
+  if (reactShellRoutes.has(targetUrl.pathname)) {
+    window.location.replace(`${targetUrl.pathname}${targetUrl.search}${targetUrl.hash}`);
+    return;
+  }
+
   navigate(target, { replace: true });
   await completeGoogleDriveOAuthFromCurrentUrl();
 }

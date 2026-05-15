@@ -623,6 +623,18 @@ export function ownerToken() {
   return window.sessionStorage.getItem("companycoreOwnerToken");
 }
 
+export function redirectToOwnerLogin(returnPath = `${window.location.pathname}${window.location.search}${window.location.hash}`) {
+  if (window.location.pathname === "/auth/login" || window.location.pathname === "/auth/register") {
+    return;
+  }
+
+  if (returnPath && returnPath !== "/auth/login" && returnPath !== "/auth/register") {
+    window.sessionStorage.setItem("companycorePendingPrivatePath", returnPath);
+  }
+
+  window.location.replace("/auth/login");
+}
+
 function clearOwnerToken() {
   window.sessionStorage.removeItem("companycoreOwnerToken");
 }
