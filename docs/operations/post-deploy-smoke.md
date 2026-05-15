@@ -40,6 +40,44 @@ Use this file to record the minimum checks after each deploy.
 
 ## Evidence
 
+- Timestamp: 2026-05-15 18:05 +02:00
+- Environment: production VPS Docker backend
+- Purpose: V1AUTH-001 owner auth redirect flow.
+- Deployment:
+  - Manual VPS backend rollover to commit `c62d662`.
+  - Runtime image: `rnqqkhl3o3dut4qv56mlxly2_backend:c62d662`.
+  - Running backend container:
+    `backend-rnqqkhl3o3dut4qv56mlxly2-manual-c62d662`.
+  - Previous backend container retained stopped as rollback:
+    `backend-rnqqkhl3o3dut4qv56mlxly2-manual-e69919b-previous-c62d662`.
+  - Production Postgres container
+    `postgres-rnqqkhl3o3dut4qv56mlxly2-152944834285` remained running and
+    healthy.
+- Local/source checks:
+  - `npm run validate`: passed.
+  - `git diff --check`: passed before commit.
+  - Local Playwright stale-token proof redirected `/dashboard` to
+    `/auth/login`, preserved pending `/dashboard`, removed the invalid owner
+    token, and did not render the dashboard load error.
+  - Local Playwright post-login proof redirected pending `/` into the React
+    shell after login.
+- Public smoke:
+  - `GET https://companycore.luckysparrow.ch/health` returned `200` with
+    build commit `c62d662`.
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `200` with
+    build commit `c62d662`.
+  - `GET https://companycore.luckysparrow.ch/` returned React shell assets
+    `index-DCaIUVzr.js` and `index-B1Wcb5DB.css`.
+  - Production Playwright verified missing-session `/` redirects to
+    `/auth/login` with pending `/`.
+  - Production Playwright verified stale-token `/dashboard` redirects to
+    `/auth/login`, preserves pending `/dashboard`, clears the token, and does
+    not render the dashboard load error.
+- Deployment-path verdict:
+  - Manual VPS rollover remains the accepted release path for runtime changes
+    until GitHub-to-Coolify auto-deploy is proven with matching public build
+    metadata.
+
 - Timestamp: 2026-05-15 17:19 +02:00
 - Environment: production VPS Docker backend
 - Purpose: V1AREA-001 premium Company Atlas visual parity rollout.

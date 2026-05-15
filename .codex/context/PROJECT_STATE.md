@@ -136,6 +136,17 @@ Last updated: 2026-05-15
   `backend-rnqqkhl3o3dut4qv56mlxly2-manual-df99969`; previous
   `fb6aca9` backend retained stopped as rollback. Production Postgres remained
   running and healthy.
+- 2026-05-15: V1AUTH-001 deployed owner-auth redirect hardening commit
+  `c62d662` through the approved manual VPS backend path. Private React routes
+  now redirect missing or invalid owner sessions to `/auth/login`, preserve the
+  pending private path, clear stale `companycoreOwnerToken` values, and avoid
+  the generic "Dashboard could not load" dead end for invalid session errors.
+  Login/register post-auth navigation now full-redirects React-owned routes
+  into the React shell. Public `/health` reports build commit `c62d662` and
+  image `rnqqkhl3o3dut4qv56mlxly2_backend:c62d662`; `/` serves React assets
+  `index-DCaIUVzr.js` and `index-B1Wcb5DB.css`. Production Playwright smoke
+  verified missing-session `/` and stale-token `/dashboard` both redirect to
+  `/auth/login` with no dashboard error.
 - 2026-05-14: Production now runs owner-console snapshot routing hotfix commit
   `a7557120b8ea4630a0b32097e66ba0d4bb012b1b`. The vanilla web shell routes
   implemented table snapshots to their correct API paths, sends Company OS

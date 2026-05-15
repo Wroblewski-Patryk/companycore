@@ -66,6 +66,22 @@ No active implementation task is in progress.
 
 ## Done
 
+- V1AUTH-001 Owner auth redirect flow.
+  - Evidence: private React routes with missing owner sessions now redirect to
+    `/auth/login` instead of rendering a dead-end signed-out panel. Stale or
+    invalid owner tokens are cleared and invalid dashboard bootstrap responses
+    no longer show the generic dashboard load error. Login/register preserves
+    the pending private route and opens React-owned routes through a full-page
+    React shell redirect after authentication.
+  - Deployment: pushed and manually rolled over production to commit
+    `c62d662`, image `rnqqkhl3o3dut4qv56mlxly2_backend:c62d662`, running
+    container `backend-rnqqkhl3o3dut4qv56mlxly2-manual-c62d662`.
+  - Validation: `npm run validate`, `git diff --check`, local Playwright
+    stale-token and post-login pending-route proofs, plus production
+    Playwright missing-session and stale-token checks passed.
+  - Task contract:
+    `docs/planning/v1auth-001-owner-auth-redirect-task-contract.md`.
+
 - V1AREA-001 premium production manual rollover to `1acb709`.
   - Evidence: after pushing the premium Company Atlas polish, public health
     still reported `79d8d0e`, so the approved archive-based manual VPS rollover
