@@ -423,3 +423,22 @@ fixes for this repository.
   remaining validation-owned browser processes. UX100-W05 repeated the same
   cleanup pattern after Company OS/MCP proof and again confirmed no
   `chrome-headless-shell` or pg-lite `postgres` processes remained.
+
+### 2026-05-15 - Free validation artifacts before patching large docs on a full disk
+- Context: ACF-OPS-002 updated deployment/state docs after API validation.
+- Symptom: The filesystem had `0` bytes free. A failed write against a large
+  markdown file left it empty until restored from Git, and Git reported an
+  `index.lock` write error with `Out of diskspace`.
+- Root cause: Local validation artifacts, including temporary Playwright
+  screenshots and portable PostgreSQL data/binaries under `.tmp`, consumed the
+  remaining disk headroom.
+- Guardrail: Before editing large docs or committing after validation-heavy
+  work, check `Get-PSDrive -PSProvider FileSystem`. If free space is low,
+  delete only validation-owned temp screenshots, pg-lite data/binaries, and
+  stale headless browser processes before continuing.
+- Preferred pattern: Restore any accidentally truncated tracked file from Git
+  immediately, remove stale `.git/index.lock` only after confirming no Git
+  command is running, then rerun `git diff --check`.
+- Evidence: ACF-OPS-002 restored `docs/operations/post-deploy-smoke.md` from
+  Git, removed validation-owned temp artifacts, and increased free space from
+  `0` bytes to over `500 MB`.

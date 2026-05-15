@@ -127,6 +127,16 @@ Current status as of 2026-05-15:
 - Public web and API health currently return `200`, but build metadata reports
   `commit: unknown` and `image: unknown`; this cannot prove that GitHub push
   `ece93b1` reached the running image automatically.
+- ACF-OPS-002 restored source-level metadata wiring. The backend now derives
+  health `build.commit` from `COMPANYCORE_BUILD_COMMIT`, Coolify
+  `SOURCE_COMMIT`, or common Git commit env vars, and derives `build.image`
+  from `COMPANYCORE_BUILD_IMAGE`, Coolify/container identifiers, or
+  `HOSTNAME`. `docker-compose.coolify.yml` maps `SOURCE_COMMIT` and
+  `COOLIFY_CONTAINER_NAME` into the backend metadata path.
+- Coolify's `SOURCE_COMMIT` may require enabling `Include Source Commit in
+  Build` in the application Advanced settings when build args are needed. For
+  runtime health proof, keep `COMPANYCORE_BUILD_COMMIT=$SOURCE_COMMIT`
+  available to the backend service or use the compose mapping.
 - Auto-deploy should therefore be treated as unverified until a future task
   records a push-to-running-image smoke in `docs/operations/post-deploy-smoke.md`.
 

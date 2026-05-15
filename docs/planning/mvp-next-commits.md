@@ -14,9 +14,10 @@ No active ready UX100 implementation wave remains after UX100-W05.
 - [ ] AGRUN-010 Upstream Agent Source Merge Execution:
       still blocked until upstream write access or an approved fork/PR route
       exists.
-- [ ] Restore build commit/image metadata in production health:
-      future deployability improvement so push-to-running-image proof can be
-      captured without privileged Coolify inspection.
+- [ ] Production push-to-running-image smoke after the next deploy:
+      build metadata restoration is implemented locally; compare public
+      `/health` `build.commit` with the pushed commit before claiming
+      auto-deploy proof.
 
 ### DEFERRED TO V2
 
@@ -60,6 +61,12 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       `git diff --check`, `npm run test:api` on portable PostgreSQL
       `localhost:55475`, and Playwright fallback at desktop, tablet, and
       mobile all passed.
+- [x] ACF-OPS-002 Build Metadata Health Restoration:
+      restored source-level build metadata wiring for production health by
+      deriving safe metadata from `SOURCE_COMMIT`, Coolify/container runtime
+      variables, and explicit `COMPANYCORE_BUILD_*` overrides. `npm run build`,
+      `git diff --check`, and `npm run test:api` on portable PostgreSQL
+      `localhost:55475` passed, including a production health regression test.
 - [x] ACF-DOC-001 Coverage Ledger Reconciliation:
       stale Drive first-import blocker language was reconciled across
       architecture, function-coverage audit, project-control, system-health,

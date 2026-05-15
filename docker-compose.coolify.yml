@@ -14,7 +14,11 @@ services:
       retries: 5
 
   backend:
-    build: .
+    build:
+      context: .
+      args:
+        COMPANYCORE_BUILD_COMMIT: ${SOURCE_COMMIT:-unknown}
+        COMPANYCORE_BUILD_IMAGE: ${COOLIFY_CONTAINER_NAME:-unknown}
     depends_on:
       postgres:
         condition: service_healthy
@@ -26,6 +30,8 @@ services:
       AUTH_TOKEN_SECRET: ${AUTH_TOKEN_SECRET}
       API_KEY_HASH_SECRET: ${API_KEY_HASH_SECRET}
       INTEGRATION_SECRET_KEY: ${INTEGRATION_SECRET_KEY}
+      COMPANYCORE_BUILD_COMMIT: ${SOURCE_COMMIT:-unknown}
+      COMPANYCORE_BUILD_IMAGE: ${COOLIFY_CONTAINER_NAME:-unknown}
       COMPANYCORE_ALLOWED_ORIGINS: "${COMPANYCORE_ALLOWED_ORIGINS:-https://companycore.luckysparrow.ch,https://api.companycore.luckysparrow.ch}"
       SERVICE_URL_BACKEND_3000: ${SERVICE_URL_BACKEND_3000}
     expose:

@@ -2646,6 +2646,16 @@ Last updated: 2026-05-15
   both routes at desktop, tablet, and mobile with bridge/approval/MCP markers
   present, no overflow, no console issues, no failed requests, and zero
   unnamed visible controls.
+- 2026-05-15: Completed ACF-OPS-002 by restoring source-level build metadata
+  wiring for production health. Runtime config now derives `build.commit` from
+  explicit CompanyCore metadata, Coolify `SOURCE_COMMIT`, or common Git commit
+  env vars, and derives `build.image` from explicit metadata, Coolify/container
+  identifiers, or `HOSTNAME`. `docker-compose.coolify.yml` now passes
+  `SOURCE_COMMIT` and `COOLIFY_CONTAINER_NAME` into the backend build/runtime
+  metadata path. `npm run build`, `git diff --check`, and `npm run test:api`
+  passed against portable PostgreSQL on `localhost:55475`, including a
+  production `/health` regression test for safe Coolify metadata. Public
+  push-to-running-image proof still requires the next deployment smoke.
 - 2026-05-06: Deployed the Agent CRUD API rollout to production with manual
   VPS backend rollover. The running backend container is
   `backend-rnqqkhl3o3dut4qv56mlxly2-manual-bf59b2f`, image

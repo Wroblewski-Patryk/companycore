@@ -10,9 +10,10 @@ No active ready UX100 implementation wave remains after UX100-W05.
 
 1. AGRUN-010 Upstream Agent Source Merge Execution.
    - Blocked until upstream write access or an approved fork/PR route exists.
-2. Restore build commit/image metadata in production health.
-   - Future deployability improvement so push-to-running-image proof can be
-     captured without privileged Coolify inspection.
+2. Production push-to-running-image smoke after the next deploy.
+   - Build metadata restoration is implemented locally; after deploy, compare
+     public `/health` `build.commit` with the pushed commit before claiming
+     auto-deploy proof.
 
 ## LATER
 

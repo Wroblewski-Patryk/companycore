@@ -48,10 +48,30 @@ No active local implementation task is currently in progress.
 - Future v2 dashboard surfaces that show ClickUp Lists, Drive folders/files,
   storage locations, knowledge roots, automations, and CompanyCore tables as
   one company operating area.
+- Production push-to-running-image smoke after the next deploy.
+  - Stage: verification
+  - Owner: Ops/Release
+  - Priority: P2
+  - Source: `docs/planning/acf-ops-002-build-metadata-health-task-contract.md`
+  - Goal: compare public `/health` `build.commit` with the pushed commit after
+    deployment before claiming auto-deploy proof.
 - Upstream OpenJarvis/Paperclip source merge execution and blocked GitHub
   auto-deploy webhook administration task.
 
 ## Done
+
+- ACF-OPS-002 Build Metadata Health Restoration.
+  - Evidence: restored source-level production build metadata wiring by
+    deriving `build.commit` from `COMPANYCORE_BUILD_COMMIT`, `SOURCE_COMMIT`,
+    or common Git commit env vars, and deriving `build.image` from
+    `COMPANYCORE_BUILD_IMAGE`, Coolify/container variables, or `HOSTNAME`.
+    `docker-compose.coolify.yml` now passes `SOURCE_COMMIT` and
+    `COOLIFY_CONTAINER_NAME` into backend build/runtime metadata fields.
+    `npm run build`, `git diff --check`, and `npm run test:api` passed against
+    portable PostgreSQL on `localhost:55475`, including a production health
+    regression test that verified safe Coolify metadata appears in `/health`.
+  - Task contract:
+    `docs/planning/acf-ops-002-build-metadata-health-task-contract.md`.
 
 - UX100-W05 Company OS And MCP Tools Alignment.
   - Evidence: added a shared React agent-authority bridge to

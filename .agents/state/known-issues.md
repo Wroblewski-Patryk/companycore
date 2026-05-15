@@ -7,7 +7,7 @@ Last updated: 2026-05-15
 | ID | Severity | Area | Summary | Owner | Status | Next action |
 | --- | --- | --- | --- | --- | --- | --- |
 | KI-007 | P1 | Product data completeness | Production `/v1/operating-model` has 13 areas and 26 external mappings but `0` storage locations, `0` knowledge roots, `0` automation definitions, and `/v1/projects` returns `0` while tasks exist. | Product + Backend | OPEN | Execute ACF-PROD-001 to decide, seed, import, or explicitly defer these owner-facing operating model records. |
-| KI-002 | P2 | Release automation | GitHub-to-Coolify auto-deploy is not proven as reliable; manual VPS/Coolify backend rollover remains the accepted and approved path. | Ops/Release | ACCEPTED | Record a push-to-running-image smoke only after build commit/image metadata or equivalent Coolify evidence is available. |
+| KI-002 | P2 | Release automation | GitHub-to-Coolify auto-deploy is not proven as reliable; manual VPS/Coolify backend rollover remains the accepted and approved path. | Ops/Release | ACCEPTED | After the next deploy, compare public `/health` `build.commit` with the pushed commit before claiming push-to-running-image proof. |
 | KI-003 | P2 | Source handoff | Paperclip and OpenJarvis validated source changes could not be pushed upstream because GitHub returned `403`. | Ops/Release | BLOCKED | Resume AGRUN-010 after write access or an approved fork/PR route exists. |
 
 ## Accepted Residual Risks
@@ -18,6 +18,9 @@ Last updated: 2026-05-15
   domains are healthy, but `/health` reports `commit: unknown` and
   `image: unknown`, so automatic deployment cannot be proven from public
   metadata. Manual VPS/Coolify rollover remains the accepted path.
+- 2026-05-15: ACF-OPS-002 restored source-level build metadata wiring and
+  regression coverage. The release-automation proof gap remains accepted until
+  the next deployed runtime is checked through public `/health`.
 
 ## Recently Closed Issues
 

@@ -317,6 +317,37 @@ test("production environment validation keeps API key hash fallback compatible",
   assert.equal(summary.authTokenSecret, "production-auth-token-secret-for-tests");
 });
 
+test("production health reports safe Coolify build metadata", async () => {
+  const result = await runNodeScript(`
+    const { createApp } = await import("./dist/app.js");
+    const server = createApp().listen(0);
+    await new Promise((resolve) => server.once("listening", resolve));
+    const { port } = server.address();
+    const response = await fetch("http://127.0.0.1:" + port + "/health");
+    const body = await response.json();
+    server.close();
+    console.log(JSON.stringify(body.build));
+  `, {
+    NODE_ENV: "production",
+    DATABASE_URL: "postgresql://companycore:companycore@localhost:5432/companycore?schema=public",
+    AUTH_TOKEN_SECRET: "production-auth-token-secret-for-tests",
+    INTEGRATION_SECRET_KEY: "production-integration-secret-for-tests",
+    API_KEY_HASH_SECRET: "production-api-key-hash-secret-for-tests",
+    COMPANYCORE_BUILD_COMMIT: undefined,
+    COMPANYCORE_BUILD_IMAGE: undefined,
+    SOURCE_COMMIT: "coolify-source-commit-for-tests",
+    COOLIFY_CONTAINER_NAME: "backend-companycore-coolify-for-tests"
+  });
+
+  assert.equal(result.exitCode, 0, `stdout:\n${result.stdout}\nstderr:\n${result.stderr}`);
+  const build = JSON.parse(result.stdout) as {
+    commit: string;
+    image: string;
+  };
+  assert.equal(build.commit, "coolify-source-commit-for-tests");
+  assert.equal(build.image, "backend-companycore-coolify-for-tests");
+});
+
 test("production CORS allows approved origins and rejects unknown browser origins", async () => {
   const result = await runNodeScript(`
     const { createApp } = await import("./dist/app.js");
