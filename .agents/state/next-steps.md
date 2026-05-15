@@ -4,9 +4,7 @@ Last updated: 2026-05-15
 
 ## NOW
 
-1. UX100-W05 Company OS And MCP Tools Alignment.
-   - Make agent supervision, Company OS command context, and MCP tools feel
-     coherent and safe after operating pressure is visible.
+No active ready UX100 implementation wave remains after UX100-W05.
 
 ## NEXT
 

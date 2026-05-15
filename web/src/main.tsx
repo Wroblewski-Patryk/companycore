@@ -3156,6 +3156,54 @@ function companyOsReadiness(companyOs: CompanyOsData) {
   };
 }
 
+function AgentAuthorityBridge({
+  eyebrow,
+  title,
+  detail,
+  cards,
+  primary,
+  secondary
+}: {
+  eyebrow: string;
+  title: string;
+  detail: string;
+  cards: Array<{ label: string; value: string; detail: string; tone?: "safe" | "review" | "blocked" | "neutral" }>;
+  primary: { label: string; href: string };
+  secondary: { label: string; href: string };
+}) {
+  const toneClass = {
+    safe: "border-success/25 bg-success/10",
+    review: "border-warning/30 bg-warning/10",
+    blocked: "border-error/25 bg-error/10",
+    neutral: "border-base-300 bg-base-200/50"
+  };
+
+  return (
+    <section className="rounded-company border border-primary/20 bg-primary/5 p-4 shadow-sm">
+      <div className="grid gap-4 xl:grid-cols-[1fr_auto] xl:items-start">
+        <div>
+          <p className="eyebrow">{eyebrow}</p>
+          <h2 className="mt-1 text-xl font-black">{title}</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-company-muted">{detail}</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <a className="btn btn-primary btn-sm" href={primary.href}>{primary.label}</a>
+          <a className="btn btn-ghost btn-sm" href={secondary.href}>{secondary.label}</a>
+        </div>
+      </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {cards.map((card) => (
+          <article className={`rounded-company border p-3 ${toneClass[card.tone || "neutral"]}`} key={`${card.label}-${card.value}`}>
+            <strong className="block text-lg leading-tight">{card.value}</strong>
+            <span className="mt-1 block text-xs font-black uppercase text-company-ink">{card.label}</span>
+            <p className="mt-1 text-xs leading-5 text-company-muted">{card.detail}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function CompanyOsStatePanel({ state, onRetry }: { state: CompanyOsWorkbenchState; onRetry: () => void }) {
   if (state.status === "ready") {
     return null;
@@ -6036,6 +6084,9 @@ function CompanyOsWorkbench({
   const runtime = sumCountGroup(companyOs.counts.runtime);
   const governance = sumCountGroup(companyOs.counts.governance);
   const totalAttention = attentionCount(companyOs);
+  const pendingApprovals = companyOs.attention.pendingApprovals.length;
+  const blockedExecution = companyOs.attention.blockedPipelineRuns.length + companyOs.attention.failedStageRuns.length;
+  const highRisks = companyOs.attention.highRisks.length;
   const activeRecent = [
     ...companyOs.recent.pipelineRuns,
     ...companyOs.recent.approvals,
@@ -6078,6 +6129,20 @@ function CompanyOsWorkbench({
               title={readiness.title}
               detail={readiness.detail}
               action={readiness.action}
+            />
+
+            <AgentAuthorityBridge
+              eyebrow="Agent supervision bridge"
+              title="Company OS commands stay approval-first"
+              detail="This cockpit is the owner-facing view of the same command authority agents must respect: approvals, blocked runtime evidence, high-risk guardrails, and MCP manifest review before supervised action."
+              primary={{ label: "Open MCP tools", href: "/react-agent-tools" }}
+              secondary={{ label: "Agent keys", href: "/settings/api" }}
+              cards={[
+                { label: "Pending approvals", value: `${pendingApprovals}`, detail: "Human decisions required before risky commands proceed.", tone: pendingApprovals > 0 ? "review" : "safe" },
+                { label: "Blocked runtime", value: `${blockedExecution}`, detail: "Failed or blocked runs should be resolved before more automation.", tone: blockedExecution > 0 ? "blocked" : "safe" },
+                { label: "High risks", value: `${highRisks}`, detail: "Risk records and policies shape supervised agent behavior.", tone: highRisks > 0 ? "review" : "safe" },
+                { label: "MCP handoff", value: "Manifest", detail: "Agent tools expose route, capability, risk, and approval metadata.", tone: "neutral" }
+              ]}
             />
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
@@ -6354,6 +6419,20 @@ function AgentToolSurfaceWorkbench({ connection, manifest }: { connection: Conne
               tone={requiresApproval > 0 ? "warning" : "success"}
               title="Owner can inspect agent authority before handing out keys"
               detail={`${manifest.tools.length} tools are visible in this session. ${requiresApproval} require explicit approval or supervised operation, including ${companyOsRisky} Company OS command tools.`}
+            />
+
+            <AgentAuthorityBridge
+              eyebrow="Agent authority bridge"
+              title="MCP tools mirror Company OS supervision"
+              detail="Use this bridge before handing an API key to an agent: it connects visible MCP routes, supervised commands, Company OS risk, and destructive authority to the owner approval model."
+              primary={{ label: "Company OS", href: "/react-company-os" }}
+              secondary={{ label: "API settings", href: "/settings/api" }}
+              cards={[
+                { label: "Visible tools", value: `${manifest.tools.length}`, detail: "Manifest tools available to this owner session.", tone: manifest.tools.length > 0 ? "safe" : "blocked" },
+                { label: "Supervised", value: `${requiresApproval}`, detail: "Tools that require approval or supervised operation.", tone: requiresApproval > 0 ? "review" : "safe" },
+                { label: "Company OS risk", value: `${companyOsRisky}`, detail: "Risky Company OS command tools in the MCP surface.", tone: companyOsRisky > 0 ? "review" : "safe" },
+                { label: "Destructive", value: `${destructive}`, detail: "Delete or archive authority must stay least-privilege.", tone: destructive > 0 ? "blocked" : "safe" }
+              ]}
             />
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">

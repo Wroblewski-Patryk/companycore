@@ -1044,3 +1044,23 @@ of rediscovering them.
   tablet, and mobile with four decision metrics, at least one decision item,
   13 area cards, no horizontal overflow, no console issues, no failed requests,
   and zero unnamed visible controls.
+
+### 2026-05-15 - Agent Authority Bridge
+- Type: reusable_pattern
+- Context: Owner-facing Company OS and MCP surfaces must make the same
+  approval, supervision, risk, and destructive-authority model obvious before
+  a human gives agents API or command access.
+- Decision: Use a compact route-local authority bridge above dense Company OS
+  and MCP workbenches. It should translate backend capability metadata into
+  owner language: what requires approval, what is blocked, what is risky, and
+  what an agent can see or do.
+- Reuse when: A screen exposes agent tools, API-key handoff, MCP manifests,
+  Company OS commands, workflow execution, destructive actions, or any
+  supervised automation capability.
+- Avoid when: The route is read-only and the shared route command strip
+  already explains the complete authority model without adding another panel.
+- Evidence: UX100-W05 added the shared React `AgentAuthorityBridge` to
+  `/react-company-os` and `/react-agent-tools`, then verified both routes at
+  desktop, tablet, and mobile with bridge/approval/MCP markers present, no
+  overflow, no console issues, no failed requests, and zero unnamed visible
+  controls.

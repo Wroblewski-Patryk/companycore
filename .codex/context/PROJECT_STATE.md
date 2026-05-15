@@ -2635,6 +2635,17 @@ Last updated: 2026-05-15
   `/tasks-adapter` and `/pipeline` at desktop, tablet, and mobile with
   pressure cards and next-action blocks present, no overflow, no console
   issues, no failed requests, and zero unnamed visible controls.
+- 2026-05-15: Completed UX100-W05 by adding a shared React
+  agent-authority bridge to `/react-company-os` and `/react-agent-tools`.
+  The Company OS cockpit now explains pending approvals, blocked runtime,
+  high-risk governance, and MCP handoff before command work. The MCP tools
+  surface now mirrors that vocabulary with visible tools, supervised tools,
+  Company OS risk, and destructive authority before API-key handoff. `npm run
+  build`, `git diff --check`, and `npm run test:api` passed; the API gate
+  used portable PostgreSQL on `localhost:55475`. Playwright fallback verified
+  both routes at desktop, tablet, and mobile with bridge/approval/MCP markers
+  present, no overflow, no console issues, no failed requests, and zero
+  unnamed visible controls.
 - 2026-05-06: Deployed the Agent CRUD API rollout to production with manual
   VPS backend rollover. The running backend container is
   `backend-rnqqkhl3o3dut4qv56mlxly2-manual-bf59b2f`, image

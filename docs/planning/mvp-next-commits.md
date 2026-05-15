@@ -7,9 +7,7 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] UX100-W05 Company OS And MCP Tools Alignment:
-      make agent supervision, Company OS command context, and MCP tools feel
-      coherent and safe after operating pressure is visible.
+No active ready UX100 implementation wave remains after UX100-W05.
 
 ### NEXT
 
@@ -54,6 +52,14 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       `npm run check:public-js`, `npm run validate`, `git diff --check`,
       `npm run test:api` on portable PostgreSQL `localhost:55475`, and
       Playwright fallback at desktop, tablet, and mobile all passed.
+- [x] UX100-W05 Company OS And MCP Tools Alignment:
+      added a shared agent-authority bridge to `/react-company-os` and
+      `/react-agent-tools`, aligning pending approvals, blocked runtime,
+      Company OS risk, visible MCP tools, supervised tools, and destructive
+      authority around one approval-first vocabulary. `npm run build`,
+      `git diff --check`, `npm run test:api` on portable PostgreSQL
+      `localhost:55475`, and Playwright fallback at desktop, tablet, and
+      mobile all passed.
 - [x] ACF-DOC-001 Coverage Ledger Reconciliation:
       stale Drive first-import blocker language was reconciled across
       architecture, function-coverage audit, project-control, system-health,
