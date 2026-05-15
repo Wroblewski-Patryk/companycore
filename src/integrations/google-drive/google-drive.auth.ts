@@ -222,5 +222,5 @@ async function getStoredGoogleDriveSecret(workspaceId?: string) {
       secretCiphertext: true
     }
   });
-  return parseGoogleDriveOAuthSecret(setting?.secretCiphertext);
+  return parseGoogleDriveOAuthSecret(setting?.secretCiphertext, { failClosed: false });
 }

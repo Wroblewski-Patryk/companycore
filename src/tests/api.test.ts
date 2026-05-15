@@ -4268,6 +4268,69 @@ test("CompanyCore v1 protected API flow", async () => {
   });
   assert.equal(serviceCannotCreateGoogleDriveAuthUrl.status, 403);
 
+  await prisma.integrationSetting.update({
+    where: {
+      workspaceId_provider: {
+        workspaceId: ownerA.workspace.id,
+        provider: "google_drive"
+      }
+    },
+    data: {
+      secretCiphertext: "invalid-google-drive-oauth-ciphertext"
+    }
+  });
+
+  const reconnectAuthorizeUrl = await request("/v1/integration-settings/google_drive/oauth/authorize-url", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      redirectUri: "https://companycore.luckysparrow.ch/settings/drive",
+      state: "repair-google-drive-oauth"
+    })
+  });
+  assert.equal(reconnectAuthorizeUrl.status, 200);
+  const reconnectUrl = new URL((reconnectAuthorizeUrl.body as { data: { authorizationUrl: string } }).data.authorizationUrl);
+  assert.equal(reconnectUrl.searchParams.get("client_id"), "dev-google-oauth-client-id");
+
+  const originalFetchBeforeGoogleDriveReconnect = globalThis.fetch;
+  globalThis.fetch = (async (input: string | URL | Request) => {
+    const url = new URL(String(input));
+    assert.equal(url.origin, "https://oauth2.googleapis.com");
+    return new Response(JSON.stringify({
+      access_token: "reconnected-google-access-token",
+      refresh_token: "reconnected-google-refresh-token",
+      expires_in: 3600,
+      token_type: "Bearer",
+      scope: "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/spreadsheets"
+    }), { status: 200 });
+  }) as typeof fetch;
+
+  try {
+    const reconnectExchange = await request("/v1/integration-settings/google_drive/oauth/exchange", {
+      method: "POST",
+      headers: authA,
+      body: JSON.stringify({
+        code: "repair-google-drive-code",
+        redirectUri: "https://companycore.luckysparrow.ch/settings/drive",
+        active: true,
+        config: {
+          rootFolderIds: ["drive-folder-root"],
+          selectedFolderIds: ["drive-folder-root"],
+          sharedDriveIds: ["shared-drive-1"],
+          syncMode: "two_way",
+          importMode: "merge",
+          changesPageToken: "changes-token-1"
+        }
+      })
+    });
+    assert.equal(reconnectExchange.status, 200);
+    assert.equal((reconnectExchange.body as { data: { oauthTokenConfigured: boolean } }).data.oauthTokenConfigured, true);
+    const repairedGoogleDriveSettings = await getGoogleDriveSettingsForWorkspace(ownerA.workspace.id);
+    assert.equal(repairedGoogleDriveSettings?.oauth.refreshToken, "reconnected-google-refresh-token");
+  } finally {
+    globalThis.fetch = originalFetchBeforeGoogleDriveReconnect;
+  }
+
   const originalFetchBeforeGoogleDriveImport = globalThis.fetch;
   let googleDriveListCallCount = 0;
   globalThis.fetch = (async (input: string | URL | Request) => {
