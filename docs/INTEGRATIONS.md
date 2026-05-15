@@ -157,7 +157,8 @@ Implemented foundation:
 - `/v1/google-drive/files/:id/description` updates the CompanyCore-owned
   description note that tells agents and operators what a Drive item contains.
 - `/v1/google-drive/docs` and `/v1/google-drive/sheets` create Google Docs and
-  Sheets, persist metadata, extract searchable content, and emit safe events.
+  Sheets, optionally under a supplied Drive `parentId`, persist metadata,
+  extract searchable content, and emit safe events.
 - `/v1/google-drive/docs/:id` and `/v1/google-drive/sheets/:id/values` write to
   Google first, then refresh CompanyCore metadata/content snapshots only after
   the provider write succeeds.

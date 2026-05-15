@@ -6,7 +6,13 @@ No active local implementation task is currently ready.
 
 ## In Progress
 
-No active local implementation task is currently in progress.
+- V2GD-010 Google Sheet Parent Folder Creation
+  - Stage: verification
+  - Owner: Backend Builder
+  - Priority: P0
+  - Scope: let `/v1/google-drive/sheets` accept optional `parentId` and create
+    the Sheet through the existing Drive file boundary when a parent folder is
+    supplied.
 
 ## Blocked
 

@@ -374,6 +374,9 @@ Last updated: 2026-05-15
   Folder discovery must request `mimeType`, and imported Google Docs/Sheets
   refresh searchable content snapshots for MCP-facing agents through the
   CompanyCore HTTP boundary.
+- 2026-05-15: Google Sheet creation may use a Drive `parentId` through the
+  native CompanyCore Google Drive API so Docs and Sheets can be created under
+  the same operator-selected folder without bypassing CompanyCore.
 - 2026-05-03: Provider-to-operating-area mappings must be operator-editable in
   the owner console. Automatic classification is only the first pass; manual
   ClickUp List/Folder/Space and Google Drive folder assignments are persisted

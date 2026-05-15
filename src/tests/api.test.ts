@@ -4524,6 +4524,17 @@ test("CompanyCore v1 protected API flow", async () => {
     });
 
     if (url.pathname === "/drive/v3/files" && init?.method === "POST") {
+      const body = init.body ? JSON.parse(String(init.body)) : {};
+      if (body.mimeType === "application/vnd.google-apps.spreadsheet") {
+        return new Response(JSON.stringify({
+          id: "created-sheet-1",
+          name: "Jarvis sheet",
+          mimeType: "application/vnd.google-apps.spreadsheet",
+          parents: ["drive-folder-root"],
+          headRevisionId: "sheet-created-rev-1",
+          webViewLink: "https://docs.google.com/spreadsheets/d/created-sheet-1"
+        }), { status: 200 });
+      }
       return new Response(JSON.stringify({
         id: "created-doc-1",
         name: "Jarvis doc",
@@ -4662,6 +4673,7 @@ test("CompanyCore v1 protected API flow", async () => {
       headers: authA,
       body: JSON.stringify({
         title: "Jarvis sheet",
+        parentId: "drive-folder-root",
         range: "A1:Z100",
         values: [["Name", "Value"], ["Jarvis", "ready"]]
       })
@@ -4687,6 +4699,12 @@ test("CompanyCore v1 protected API flow", async () => {
   }
 
   assert.ok(googleDriveCalls.some((call) => call.path === "/v1/documents/created-doc-1:batchUpdate" && call.method === "POST"));
+  assert.ok(googleDriveCalls.some((call) => (
+    call.path === "/drive/v3/files"
+    && call.method === "POST"
+    && (call.body as { mimeType?: string; parents?: string[] }).mimeType === "application/vnd.google-apps.spreadsheet"
+    && (call.body as { parents?: string[] }).parents?.[0] === "drive-folder-root"
+  )));
   assert.ok(googleDriveCalls.some((call) => call.path === "/v4/spreadsheets/created-sheet-1/values/A1%3AZ100" && call.method === "PUT"));
   const contentSnapshotCount = await prisma.googleDriveContentSnapshot.count({
     where: { workspaceId: ownerA.workspace.id }

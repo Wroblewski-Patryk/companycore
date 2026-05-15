@@ -26,6 +26,7 @@ const updateDocSchema = z.object({
 
 const createSheetSchema = z.object({
   title: z.string().min(1),
+  parentId: z.string().min(1).optional(),
   range: z.string().min(1).optional(),
   values: z.array(z.array(z.unknown())).optional()
 }).strict();
