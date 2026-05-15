@@ -2862,6 +2862,18 @@ Last updated: 2026-05-15
   create/read/update/archive, and Paperclip agent-event readback. Temporary
   VPS rollout scripts were removed, and the previous backend container remains
   stopped for rollback reference.
+- 2026-05-15: V1PROD-003 authenticated production proof logged in with an
+  owner session and captured `/dashboard` plus
+  `/areas?area=01-strategia&view=overview` on desktop and mobile. The dashboard
+  rendered the V1 Company Atlas. The first area screenshots were loading-state
+  captures; the timed rerun rendered the canonical selected-area view and
+  exposed the real mismatch that `01 Strategia` did not map to backend
+  `strategy-governance`, causing zero linked tables/records. The React matcher
+  now uses canonical area backend aliases, normalized matching, and table-name
+  candidates so the 00-12 LuckySparrow model can resolve to the existing
+  backend operating model. `npm run validate` and `git diff --check` passed;
+  production deploy and final owner-session rerun are tracked by
+  `docs/planning/v1-production-authenticated-parity-task-contract.md`.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

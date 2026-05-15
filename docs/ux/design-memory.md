@@ -41,11 +41,11 @@ of rediscovering them.
   Paperclip, and future AI/application access without scattering each tool
   into a separate view or mixing OAuth, imports, mapping, and permissions into
   one form.
-- Decision: Treat settings as a calm configuration surface, not an operations
-  dashboard. Use four simple sections: General, Connections, Agent access, and
-  MCP. Settings may save provider connection choices and create scoped agent
-  keys, but import, sync, mapping, review queues, large MCP catalogs, and
-  operational metrics must live in dedicated work views.
+- Decision: Treat settings as a minimal credential surface, not an operations
+  dashboard. Use three simple sections: Integrations, Agent keys, and MCP.
+  Settings may save provider credentials and create scoped agent keys, but
+  import, sync, mapping, review queues, large MCP catalogs, badges, counters,
+  and operational metrics must live in dedicated work views.
 - Reuse when: Rebuilding `/settings`, `/settings/integrations`,
   `/settings/drive`, `/settings/api`, `/react-agent-tools`, ClickUp
   connection setup, Drive connection setup, service-key workflows, or future

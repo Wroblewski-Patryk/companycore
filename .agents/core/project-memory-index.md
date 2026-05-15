@@ -116,10 +116,10 @@ continue from repository files alone:
   the open private-route proof.
 - `docs/ux/v1-settings-canonical-spec-2026-05-15.md`: current canonical
   planning target for the unified V1 settings module. It defines `/settings`
-  as a simple configuration surface with section-aware entries for General,
-  Connections, Agent access, and MCP. Settings must not contain sync/import
-  queues, folder mapping, relationship review, large MCP catalogs, or
-  dashboard-style metrics; those belong in dedicated work views. The
+  as a minimal credential surface with sections for Integrations, Agent keys,
+  and MCP. Settings must not contain badges, counters, sync/import queues,
+  folder mapping, relationship review, large MCP catalogs, or dashboard-style
+  metrics; those belong in dedicated work views. The
   desktop/mobile target images are
   `docs/ux/assets/companycore-v1-settings-desktop-canonical.png` and
   `docs/ux/assets/companycore-v1-settings-mobile-canonical.png`.

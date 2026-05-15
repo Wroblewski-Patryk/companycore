@@ -10,7 +10,7 @@
 - Depends on: V1 web shell and route registry foundation
 - Priority: P1
 - Coverage Ledger Rows: not applicable
-- Module Confidence Rows: Settings / Integrations / Agent access
+- Module Confidence Rows: Settings / Integrations / Agent keys
 - Requirement Rows: future settings requirements to be derived during implementation
 - Quality Scenario Rows: UX clarity, mobile responsiveness, AI access safety
 - Risk Rows: AI authority, provider integration scope, stale V0 settings routes
@@ -56,15 +56,15 @@
 The V1 web view index marks `/settings`, `/settings/drive`, and
 `/settings/integrations` as V0 rebuild surfaces. `/settings/api` and
 `/react-agent-tools` are V1 foundations. The user requested one clean settings
-module that supports application settings, ClickUp and Google Drive
-integrations, API access, MCP usage, and AI-agent layers for Paperclip and
-Jarvis.
+module that exposes only the credentials needed to connect ClickUp, Google
+Drive, Jarvis, Paperclip, and MCP. Sync, import, mapping, and review work are
+out of scope for settings.
 
 ## Goal
 
-Define a canonical settings direction that separates integration setup,
-knowledge, tools, API keys, MCP, and audit without creating ten disconnected
-views or one overloaded provider form.
+Define and implement a canonical settings direction that exposes only the
+credentials needed to connect tools: ClickUp API token, Google Drive OAuth
+client credentials, Jarvis/Paperclip API key creation, and MCP endpoint fields.
 
 ## Scope
 
@@ -76,6 +76,7 @@ Allowed files:
 - `docs/ux/assets/companycore-v1-settings-mobile-canonical.png`
 - `docs/ux/design-memory.md`
 - `docs/ux/v1-web-view-index-2026-05-15.md`
+- `web/src/main.tsx`
 - `.codex/context/TASK_BOARD.md`
 
 ## Implementation Plan
@@ -119,27 +120,28 @@ Allowed files:
 ### 3. Plan Implementation
 - Files or surfaces to modify: UX spec, canonical assets, React settings route,
   planning and memory docs.
-- Logic: route settings entry points to one simple configuration surface with
-  General, Connections, Agent access, and MCP sections.
+- Logic: route settings entry points to one minimal credential surface with
+  Integrations, Agent keys, and MCP sections.
 - Edge cases: mobile no-overflow, readable settings sections, and no sync,
   import, mapping, review queue, or large MCP catalog inside settings.
 
 ### 4. Execute Implementation
 - Implementation notes: replaced the overloaded canonical mockup with a
-  configuration-only target and routed the old settings entry points to a
+  credentials-only target and routed the old settings entry points to a
   unified React settings surface.
 
 ### 5. Verify and Test
 - Validation performed: rendered both images, visually inspected them, and ran
   the React web build.
 - Result: desktop and mobile images are readable, intentionally sparse, and
-  align with the V1 atlas shell direction.
+  align with the V1 atlas shell direction. Browser proof confirmed the React
+  route renders the required fields without desktop or mobile overflow.
 
 ### 6. Self-Review
 - Simpler option considered: text-only IA without images.
 - Technical debt introduced: no
 - Scalability assessment: section model supports future integrations and
-  external applications without turning settings into an operations dashboard.
+  external applications while keeping settings as a credential form.
 - Refinements made: removed dashboard-style counters, sync lanes, import
   queues, mapping work, and dense review information from settings.
 
@@ -151,7 +153,7 @@ Allowed files:
 ## Acceptance Criteria
 - [x] Desktop canonical image exists.
 - [x] Mobile canonical image exists.
-- [x] Spec explains sections, configuration-only boundaries, AI access, MCP,
+- [x] Spec explains sections, credential-only boundaries, AI access, MCP,
       and states.
 - [x] Future implementation direction avoids ten disconnected settings views,
       one overloaded provider form, and settings-as-synchronization.
@@ -159,17 +161,17 @@ Allowed files:
 ## Success Signal
 - User or operator problem: settings feel scattered and too technical for
   owner and AI administration.
-- Expected product or reliability outcome: one settings module can configure
-  workspace defaults, provider connections, Jarvis/Paperclip access, and MCP
-  endpoint settings without hiding work views inside settings.
+- Expected product or reliability outcome: one settings module can save
+  provider credentials, create Jarvis/Paperclip API keys, and show MCP endpoint
+  settings without hiding work views inside settings.
 - How success will be observed: future implementation can replace V0 settings
   routes against these targets.
 - Post-launch learning needed: yes
 
 ## Deliverable For This Stage
 
-Planning artifacts, canonical desktop/mobile images, and the first simple React
-settings route consolidation.
+Planning artifacts, canonical desktop/mobile images, and the first minimal
+React settings route consolidation.
 
 ## Constraints
 - use existing systems and approved mechanisms
@@ -183,9 +185,8 @@ settings route consolidation.
 ## Definition of Done
 - [x] Code builds without errors.
 - [x] Feature works manually through the real UI, API, CLI, or operator path.
-      Partially verified through React build; browser proof was attempted with
-      mocked backend responses, but the final automated no-overflow script
-      remained flaky in Vite path setup.
+      Verified through React build and mocked-browser desktop/mobile render
+      proof for the settings route.
 - [x] No mock, placeholder, fake, or temporary data/path remains in runtime.
 - [x] Full data flow works across all relevant layers. Not applicable.
 - [x] Backend and UI/client error handling exists where applicable. Not

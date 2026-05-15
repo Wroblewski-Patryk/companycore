@@ -3,35 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CompanyCore V1 Settings Canonical</title>
+  <title>CompanyCore Minimal Settings Canonical</title>
   <style>
     :root {
       --ink: #071225;
-      --muted: #54647c;
-      --line: #cfdced;
+      --muted: #5a687d;
+      --line: #d1deee;
       --blue: #2563df;
-      --green: #0f9b70;
-      --amber: #b77904;
       --nav: #07162b;
-      --surface: #f3f8fd;
-      --panel: #ffffff;
-      --soft: #f7fbff;
+      --surface: #eef5fb;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      color: var(--ink);
-      background: linear-gradient(180deg, #f8fbff 0%, #eaf2f9 100%);
-      font-weight: 700;
-    }
-    .desktop {
-      width: 1365px;
-      min-height: 920px;
-      display: grid;
-      grid-template-columns: 232px 1fr;
-      background: var(--surface);
-    }
+    body { margin: 0; color: var(--ink); background: var(--surface); font-weight: 700; }
+    .desktop { width: 1365px; min-height: 900px; display: grid; grid-template-columns: 232px 1fr; }
     .sidebar {
       background: linear-gradient(180deg, var(--nav), #06101f);
       color: #eaf3ff;
@@ -40,461 +25,133 @@
       flex-direction: column;
       gap: 14px;
     }
-    .brand {
-      display: grid;
-      grid-template-columns: 38px 1fr;
-      gap: 12px;
-      align-items: center;
-      padding-bottom: 14px;
-      border-bottom: 1px solid rgba(255,255,255,.12);
-    }
-    .mark {
-      width: 38px;
-      height: 38px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, #1d64c8, #0f9b70);
-    }
+    .brand { display: grid; grid-template-columns: 38px 1fr; gap: 12px; align-items: center; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,.12); }
+    .mark { width: 38px; height: 38px; border-radius: 8px; background: linear-gradient(135deg, #1d64c8, #0f9b70); }
     .brand small { display: block; color: #9fb1ca; font-size: 12px; }
-    .nav-title {
-      margin: 4px 6px 0;
-      color: #9fb1ca;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: .03em;
-    }
-    .nav-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      min-height: 36px;
-      padding: 8px 10px;
-      border-radius: 7px;
-      color: #dfeaff;
-      font-size: 13px;
-    }
-    .nav-item.active {
-      border: 1px solid rgba(89,142,255,.68);
-      background: rgba(86,127,196,.25);
-      color: white;
-    }
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 99px;
-      display: inline-block;
-      margin-right: 8px;
-      background: #97a8bd;
-    }
-    .dot.green { background: var(--green); }
-    .dot.amber { background: var(--amber); }
-    .pill-dark {
-      min-width: 23px;
-      height: 23px;
-      display: inline-grid;
-      place-items: center;
-      border: 1px solid rgba(255,255,255,.15);
-      border-radius: 99px;
-      color: #bdcae0;
-      font-size: 11px;
-    }
-    .sidebar-bottom {
-      margin-top: auto;
-      display: grid;
-      gap: 10px;
-      border-top: 1px solid rgba(255,255,255,.12);
-      padding-top: 12px;
-    }
-    .workspace-link, .owner-card {
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.055);
-      border-radius: 7px;
-      padding: 12px;
-    }
+    .nav-title { color: #9fb1ca; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
+    .nav-item { min-height: 36px; padding: 8px 10px; border-radius: 7px; color: #dfeaff; font-size: 13px; display: flex; justify-content: space-between; }
+    .nav-item.active { border: 1px solid rgba(89,142,255,.68); background: rgba(86,127,196,.25); color: white; }
+    .sidebar-bottom { margin-top: auto; display: grid; gap: 10px; border-top: 1px solid rgba(255,255,255,.12); padding-top: 12px; }
+    .workspace-link, .owner-card { border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.055); border-radius: 7px; padding: 12px; }
     .main { display: grid; grid-template-rows: 70px 1fr; min-width: 0; }
-    .topbar {
-      background: rgba(255,255,255,.86);
-      border-bottom: 1px solid var(--line);
-      display: grid;
-      grid-template-columns: 1fr 390px auto;
-      gap: 18px;
-      align-items: center;
-      padding: 0 22px;
-    }
+    .topbar { background: rgba(255,255,255,.88); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; padding: 0 22px; }
     .breadcrumb { color: #53637b; font-size: 14px; }
-    .search {
-      border: 1px solid var(--line);
-      background: #f6f9fe;
-      border-radius: 8px;
-      height: 44px;
-      color: #7a8799;
-      display: flex;
-      align-items: center;
-      padding: 0 18px;
-      font-size: 13px;
-    }
-    .avatar {
-      width: 40px;
-      height: 40px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #f7fbff;
-    }
-    .content {
-      padding: 18px;
-      display: grid;
-      gap: 16px;
-      align-content: start;
-    }
-    .hero, .panel {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: rgba(255,255,255,.9);
-      box-shadow: 0 18px 44px rgba(36,55,82,.07);
-    }
-    .hero {
-      padding: 22px;
-      display: grid;
-      grid-template-columns: 1fr 280px;
-      gap: 20px;
-      background:
-        radial-gradient(circle at 82% 18%, rgba(15,155,112,.12), transparent 18rem),
-        linear-gradient(135deg, #ffffff, #f5faff);
-    }
-    .eyebrow {
-      margin: 0 0 7px;
-      color: #536782;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: .03em;
-    }
-    h1, h2, h3, p { margin: 0; }
-    h1 { font-size: 42px; line-height: 1; letter-spacing: 0; }
-    h2 { font-size: 22px; line-height: 1.15; }
-    h3 { font-size: 16px; line-height: 1.2; }
-    p { color: var(--muted); font-size: 13px; line-height: 1.58; }
-    .button-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
-    .btn {
-      min-height: 40px;
-      border-radius: 7px;
-      border: 1px solid var(--line);
-      background: #fff;
-      padding: 0 14px;
-      display: inline-flex;
-      align-items: center;
-      color: var(--ink);
-      font-size: 13px;
-      font-weight: 900;
-    }
-    .btn.primary { border-color: var(--blue); background: var(--blue); color: white; }
-    .quiet-box {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: rgba(255,255,255,.76);
-      padding: 14px;
-      display: grid;
-      gap: 8px;
-    }
-    .tabs {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-    }
-    .tab {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
-      padding: 14px;
-      display: grid;
-      gap: 4px;
-      min-height: 72px;
-    }
-    .tab.active {
-      border-color: #8bb2ff;
-      background: #eef6ff;
-      color: var(--blue);
-    }
-    .tab span { color: var(--muted); font-size: 12px; }
-    .settings-body {
-      display: grid;
-      grid-template-columns: 275px 1fr;
-      gap: 16px;
-      align-items: start;
-    }
-    .panel-body { padding: 18px; display: grid; gap: 14px; }
-    .section-menu { display: grid; gap: 8px; }
-    .menu-item {
-      border: 1px solid var(--line);
-      border-radius: 7px;
-      background: var(--soft);
-      padding: 12px;
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: center;
-      font-size: 13px;
-    }
-    .menu-item.active { border-color: #8bb2ff; background: #eef6ff; color: var(--blue); }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      min-height: 22px;
-      border-radius: 999px;
-      padding: 0 8px;
-      background: #edf3fb;
-      color: #3e526c;
-      font-size: 11px;
-      font-weight: 900;
-      white-space: nowrap;
-    }
-    .badge.green { background: #ddf5ea; color: #087456; }
-    .badge.amber { background: #fff2d2; color: #8a5a00; }
-    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .card {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fbfdff;
-      padding: 15px;
-      display: grid;
-      gap: 10px;
-    }
-    .field {
-      border: 1px solid var(--line);
-      border-radius: 7px;
-      background: white;
-      min-height: 44px;
-      padding: 12px;
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-      color: #273852;
-      font-size: 13px;
-    }
-    .small-list { display: grid; gap: 8px; }
+    .avatar { width: 40px; height: 40px; border: 1px solid var(--line); border-radius: 8px; background: #f7fbff; }
+    .content { padding: 24px; display: grid; gap: 18px; align-content: start; max-width: 850px; }
+    .eyebrow { margin: 0 0 6px; color: #536782; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
+    h1, h2, p { margin: 0; }
+    h1 { font-size: 34px; line-height: 1.08; letter-spacing: 0; }
+    h2 { font-size: 20px; line-height: 1.18; }
+    p { color: var(--muted); font-size: 14px; line-height: 1.55; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tab { border: 1px solid var(--line); border-radius: 7px; background: white; padding: 10px 14px; font-size: 13px; }
+    .tab.active { border-color: var(--blue); background: var(--blue); color: white; }
+    .panel { border: 1px solid var(--line); border-radius: 8px; background: white; padding: 18px; display: grid; gap: 16px; box-shadow: 0 16px 34px rgba(36,55,82,.07); }
+    .form-grid { display: grid; gap: 14px; }
+    .field { display: grid; gap: 6px; }
+    label { font-size: 13px; font-weight: 900; }
+    input, select { width: 100%; min-height: 44px; border: 1px solid var(--line); border-radius: 7px; padding: 0 12px; font: inherit; color: var(--ink); background: #fbfdff; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn { min-height: 40px; border-radius: 7px; border: 1px solid var(--blue); background: var(--blue); color: white; padding: 0 14px; font-weight: 900; width: fit-content; }
+    .quiet { color: var(--muted); font-size: 12px; }
     .mobile { display: none; }
-
     @media (max-width: 600px) {
       .desktop { display: none; }
-      .mobile {
-        display: block;
-        width: 390px;
-        min-height: 1180px;
-        background: linear-gradient(180deg, #f8fbff, #eaf2fa);
-      }
-      .mobile-top {
-        height: 70px;
-        background: white;
-        border-bottom: 1px solid var(--line);
-        display: grid;
-        grid-template-columns: 54px 1fr 54px;
-        align-items: center;
-        padding: 0 14px;
-      }
+      .mobile { display: block; width: 390px; min-height: 980px; background: var(--surface); }
+      .mobile-top { height: 70px; background: white; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 54px 1fr 54px; align-items: center; padding: 0 14px; }
       .mobile-brand { text-align: center; font-size: 16px; }
-      .mobile-orb {
-        width: 44px;
-        height: 44px;
-        border-radius: 99px;
-        border: 1px solid var(--line);
-        background: #f6fbff;
-      }
-      .mobile-content {
-        padding: 18px 14px 40px;
-        display: grid;
-        gap: 14px;
-      }
-      .mobile .hero {
-        display: grid;
-        grid-template-columns: 1fr;
-        padding: 16px;
-      }
-      .mobile h1 { font-size: 36px; }
-      .mobile .tabs {
-        display: flex;
-        overflow-x: auto;
-        padding-bottom: 2px;
-      }
-      .mobile .tab {
-        min-width: 138px;
-      }
-      .mobile .settings-body,
-      .mobile .grid2 {
-        grid-template-columns: 1fr;
-      }
+      .mobile-orb { width: 44px; height: 44px; border-radius: 99px; border: 1px solid var(--line); background: #f6fbff; }
+      .mobile-content { padding: 18px 14px 40px; display: grid; gap: 16px; }
+      .mobile h1 { font-size: 30px; }
+      .mobile .tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 2px; }
+      .mobile .tab { white-space: nowrap; }
+      .mobile .two { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="desktop">
     <aside class="sidebar">
-      <div class="brand">
-        <div class="mark"></div>
-        <div><strong>LuckySparrow</strong><small>Company Atlas</small></div>
-      </div>
+      <div class="brand"><div class="mark"></div><div><strong>LuckySparrow</strong><small>Company Atlas</small></div></div>
       <div class="nav-item">Company Atlas</div>
       <div class="nav-title">Dzialy</div>
-      <div class="nav-item"><span><span class="dot amber"></span>00 Ogolny</span><span class="pill-dark">0</span></div>
-      <div class="nav-item"><span><span class="dot green"></span>01 Strategia</span><span class="pill-dark">9</span></div>
-      <div class="nav-item"><span><span class="dot green"></span>02 Produkt</span><span class="pill-dark">1</span></div>
-      <div class="nav-item"><span><span class="dot"></span>03 Sprzedaz</span><span class="pill-dark">0</span></div>
-      <div class="nav-item"><span><span class="dot"></span>04 Operacje</span><span class="pill-dark">0</span></div>
-      <div class="nav-item"><span><span class="dot"></span>05 Relacje</span><span class="pill-dark">0</span></div>
-      <div class="nav-item"><span><span class="dot"></span>06 Kadry</span><span class="pill-dark">0</span></div>
-      <div class="nav-item"><span><span class="dot"></span>07 Finanse</span><span class="pill-dark">0</span></div>
-      <div class="nav-item"><span><span class="dot"></span>08 Zasoby</span><span class="pill-dark">0</span></div>
-      <div class="nav-item"><span><span class="dot"></span>09 Technologia</span><span class="pill-dark">0</span></div>
-      <div class="nav-item"><span><span class="dot"></span>10 Prawo</span><span class="pill-dark">0</span></div>
-      <div class="nav-item"><span><span class="dot"></span>11 Innowacje</span><span class="pill-dark">0</span></div>
-      <div class="nav-item"><span><span class="dot"></span>12 Zarzadzanie</span><span class="pill-dark">0</span></div>
-      <div class="sidebar-bottom">
-        <div class="workspace-link">Workspace settings</div>
-        <div class="owner-card">Owner<br><small>Owner</small></div>
-      </div>
+      <div class="nav-item">00 Ogolny <span>0</span></div>
+      <div class="nav-item">01 Strategia <span>9</span></div>
+      <div class="nav-item">02 Produkt <span>1</span></div>
+      <div class="nav-item">03 Sprzedaz <span>0</span></div>
+      <div class="nav-item">04 Operacje <span>0</span></div>
+      <div class="nav-item">05 Relacje <span>0</span></div>
+      <div class="nav-item">06 Kadry <span>0</span></div>
+      <div class="nav-item">07 Finanse <span>0</span></div>
+      <div class="nav-item">08 Zasoby <span>0</span></div>
+      <div class="nav-item">09 Technologia <span>0</span></div>
+      <div class="nav-item">10 Prawo <span>0</span></div>
+      <div class="nav-item">11 Innowacje <span>0</span></div>
+      <div class="nav-item">12 Zarzadzanie <span>0</span></div>
+      <div class="sidebar-bottom"><div class="workspace-link">Workspace settings</div><div class="owner-card">Owner<br><small>Owner</small></div></div>
     </aside>
     <main class="main">
-      <div class="topbar">
-        <div class="breadcrumb">LuckySparrow / Settings</div>
-        <div class="search">Search setting or agent access...</div>
-        <div class="avatar"></div>
-      </div>
+      <div class="topbar"><div class="breadcrumb">LuckySparrow / Settings</div><div class="avatar"></div></div>
       <div class="content">
-        <section class="hero">
-          <div>
-            <p class="eyebrow">Workspace settings</p>
-            <h1>Simple configuration for you and AI.</h1>
-            <p style="margin-top:12px;max-width:680px;">Connect providers, issue scoped access for Jarvis and Paperclip, and keep risky tools approval-first. Synchronization, imports, mapping, and review queues live outside settings.</p>
-            <div class="button-row">
-              <span class="btn primary">Connect Paperclip</span>
-              <span class="btn">Connect Jarvis</span>
-            </div>
-          </div>
-          <div class="quiet-box">
-            <p class="eyebrow">Current posture</p>
-            <h3>Settings are for configuration only.</h3>
-            <p>No import tables, no sync queues, no operational dashboards here.</p>
+        <section>
+          <p class="eyebrow">Settings</p>
+          <h1>Credentials only.</h1>
+          <p>Enter the keys needed to connect providers and agents. Sync, import, mapping, and review happen elsewhere.</p>
+        </section>
+        <nav class="tabs"><span class="tab active">Integrations</span><span class="tab">Agent keys</span><span class="tab">MCP</span></nav>
+        <section class="panel">
+          <h2>ClickUp</h2>
+          <div class="form-grid">
+            <div class="field"><label>API token</label><input type="password" placeholder="pk_..." /></div>
+            <button class="btn">Save ClickUp</button>
           </div>
         </section>
-        <nav class="tabs" aria-label="Settings sections">
-          <div class="tab"><strong>General</strong><span>Workspace defaults</span></div>
-          <div class="tab active"><strong>Connections</strong><span>ClickUp and Drive</span></div>
-          <div class="tab"><strong>Agent access</strong><span>Jarvis and Paperclip</span></div>
-          <div class="tab"><strong>MCP</strong><span>Tool endpoint</span></div>
-        </nav>
-        <section class="settings-body">
-          <aside class="panel">
-            <div class="panel-body">
-              <p class="eyebrow">Sections</p>
-              <div class="section-menu">
-                <div class="menu-item active"><span>Connections</span><span class="badge green">2</span></div>
-                <div class="menu-item"><span>Agent keys</span><span class="badge amber">1 missing</span></div>
-                <div class="menu-item"><span>MCP endpoint</span><span class="badge green">ready</span></div>
-                <div class="menu-item"><span>Safety defaults</span><span class="badge green">on</span></div>
-              </div>
-            </div>
-          </aside>
-          <section class="panel">
-            <div class="panel-body">
-              <div>
-                <p class="eyebrow">Connections</p>
-                <h2>Only connection settings. Work happens elsewhere.</h2>
-                <p>Use this section to save provider access. After connecting, open the dedicated work views for import, sync, mapping, or task review.</p>
-              </div>
-              <div class="grid2">
-                <article class="card">
-                  <div class="field"><strong>Google Drive</strong><span class="badge green">connected</span></div>
-                  <p>Used as the trusted knowledge source for Jarvis, Paperclip, and area context.</p>
-                  <div class="button-row"><span class="btn primary">Configure connection</span><span class="btn">Open knowledge view</span></div>
-                </article>
-                <article class="card">
-                  <div class="field"><strong>ClickUp</strong><span class="badge amber">needs setup</span></div>
-                  <p>Used as the task provider for execution handoff and future tool actions.</p>
-                  <div class="button-row"><span class="btn primary">Configure connection</span><span class="btn">Open tasks</span></div>
-                </article>
-              </div>
-              <div class="grid2">
-                <article class="card">
-                  <p class="eyebrow">Jarvis</p>
-                  <h3>Read-safe assistant</h3>
-                  <p>Recommended profile: reader first, operator only after approval rules are checked.</p>
-                  <div class="field"><span>Service key</span><span class="badge green">active</span></div>
-                </article>
-                <article class="card">
-                  <p class="eyebrow">Paperclip</p>
-                  <h3>Company management assistant</h3>
-                  <p>Create a scoped key and choose which knowledge and tools it can use.</p>
-                  <div class="field"><span>Service key</span><span class="badge amber">create</span></div>
-                </article>
-              </div>
-            </div>
-          </section>
+        <section class="panel">
+          <h2>Google Drive</h2>
+          <div class="form-grid">
+            <div class="field"><label>Client ID</label><input placeholder="Google OAuth client ID" /></div>
+            <div class="field"><label>Client secret</label><input type="password" placeholder="Google OAuth client secret" /></div>
+            <button class="btn">Save Google Drive</button>
+          </div>
+        </section>
+        <section class="panel">
+          <h2>Jarvis / Paperclip</h2>
+          <div class="two">
+            <div class="field"><label>Agent</label><select><option>Jarvis</option><option>Paperclip</option></select></div>
+            <div class="field"><label>Access profile</label><select><option>MCP reader</option><option>MCP operator</option></select></div>
+          </div>
+          <button class="btn">Create API key</button>
+          <p class="quiet">The generated key is shown once.</p>
         </section>
       </div>
     </main>
   </div>
 
   <div class="mobile">
-    <div class="mobile-top">
-      <div></div>
-      <div class="mobile-brand">LuckySparrow <span class="dot green"></span></div>
-      <div class="mobile-orb"></div>
-    </div>
+    <div class="mobile-top"><div></div><div class="mobile-brand">LuckySparrow</div><div class="mobile-orb"></div></div>
     <div class="mobile-content">
-      <section class="hero">
-        <div>
-          <p class="eyebrow">Workspace settings</p>
-          <h1>Simple AI settings</h1>
-          <p style="margin-top:10px;">Connect providers and agent access. Sync, import, and mapping stay outside settings.</p>
-          <div class="button-row">
-            <span class="btn primary">Paperclip</span>
-            <span class="btn">Jarvis</span>
-          </div>
-        </div>
-        <div class="quiet-box">
-          <h3>Configuration only</h3>
-          <p>No queues or operational dashboards here.</p>
-        </div>
+      <section>
+        <p class="eyebrow">Settings</p>
+        <h1>Credentials only.</h1>
+        <p>Enter keys. Run sync and mapping elsewhere.</p>
       </section>
-      <nav class="tabs" aria-label="Settings sections">
-        <div class="tab"><strong>General</strong><span>Defaults</span></div>
-        <div class="tab active"><strong>Connections</strong><span>Drive, ClickUp</span></div>
-        <div class="tab"><strong>Agents</strong><span>Keys</span></div>
-        <div class="tab"><strong>MCP</strong><span>Tools</span></div>
-      </nav>
-      <section class="settings-body">
-        <aside class="panel">
-          <div class="panel-body">
-            <p class="eyebrow">Sections</p>
-            <div class="section-menu">
-              <div class="menu-item active"><span>Connections</span><span class="badge green">2</span></div>
-              <div class="menu-item"><span>Agent keys</span><span class="badge amber">1 missing</span></div>
-              <div class="menu-item"><span>MCP endpoint</span><span class="badge green">ready</span></div>
-            </div>
-          </div>
-        </aside>
-        <section class="panel">
-          <div class="panel-body">
-            <div>
-              <p class="eyebrow">Connections</p>
-              <h2>Only connection settings.</h2>
-              <p>After connecting, open dedicated work views for import, sync, mapping, or review.</p>
-            </div>
-            <article class="card">
-              <div class="field"><strong>Google Drive</strong><span class="badge green">connected</span></div>
-              <p>Trusted knowledge source for Jarvis and Paperclip.</p>
-              <div class="button-row"><span class="btn primary">Configure</span></div>
-            </article>
-            <article class="card">
-              <div class="field"><strong>ClickUp</strong><span class="badge amber">needs setup</span></div>
-              <p>Task provider for execution handoff and future tool actions.</p>
-              <div class="button-row"><span class="btn primary">Configure</span></div>
-            </article>
-            <article class="card">
-              <div class="field"><strong>Paperclip key</strong><span class="badge amber">create</span></div>
-              <p>Create a scoped key and choose a safe profile.</p>
-              <div class="button-row"><span class="btn primary">Create key</span></div>
-            </article>
-          </div>
-        </section>
+      <nav class="tabs"><span class="tab active">Integrations</span><span class="tab">Agent keys</span><span class="tab">MCP</span></nav>
+      <section class="panel">
+        <h2>ClickUp</h2>
+        <div class="field"><label>API token</label><input type="password" placeholder="pk_..." /></div>
+        <button class="btn">Save ClickUp</button>
+      </section>
+      <section class="panel">
+        <h2>Google Drive</h2>
+        <div class="field"><label>Client ID</label><input placeholder="Google OAuth client ID" /></div>
+        <div class="field"><label>Client secret</label><input type="password" placeholder="Google OAuth client secret" /></div>
+        <button class="btn">Save Google Drive</button>
+      </section>
+      <section class="panel">
+        <h2>Jarvis / Paperclip</h2>
+        <div class="field"><label>Agent</label><select><option>Jarvis</option><option>Paperclip</option></select></div>
+        <div class="field"><label>Access profile</label><select><option>MCP reader</option><option>MCP operator</option></select></div>
+        <button class="btn">Create API key</button>
       </section>
     </div>
   </div>

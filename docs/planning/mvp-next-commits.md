@@ -7,6 +7,12 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
+- [ ] V1PROD-003 Authenticated V1 production parity and selected-area data
+      match:
+      deploy the validated area matcher fix, confirm public `/health` reports
+      the deployed commit, and rerun authenticated production desktop/mobile
+      screenshots for `/dashboard` and
+      `/areas?area=01-strategia&view=overview`.
 - [ ] REACT-WEB-002 ClickUp setup React workflow:
       rebuild ClickUp token discovery, workspace/list selection, save, and
       maintenance run controls inside the unified V1 settings module instead
@@ -20,9 +26,9 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [ ] V1SETTINGS-002 Unified settings React implementation:
       implement the canonical `/settings` module from
       `docs/ux/v1-settings-canonical-spec-2026-05-15.md`, then route old
-      settings entry points into General, Connections, Agent access, or MCP
-      once verified. Sync, import, mapping, review queues, and large tool
-      catalogs must stay outside the first settings view.
+      settings entry points into Integrations, Agent keys, or MCP once
+      verified. Sync, import, mapping, badges, counters, review queues, and
+      large tool catalogs must stay outside the first settings view.
 ### NEXT
 
 - [ ] AGRUN-010 Upstream Agent Source Merge Execution:
@@ -115,9 +121,10 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       `docs/ux/evidence/production-v1-ff5e041-2026-05-15/`.
 - [x] V1SETTINGS-001 Unified V1 Settings Canonical Design:
       published the unified settings IA and desktop/mobile canonical targets
-      for one simple settings module spanning General, Connections, Agent
-      access, and MCP. Settings are configuration only; sync, import, mapping,
-      review queues, and large tool catalogs belong in dedicated work views.
+      for one minimal settings module spanning Integrations, Agent keys, and
+      MCP. Settings are credential-only; sync, import, mapping, badges,
+      counters, review queues, and large tool catalogs belong in dedicated work
+      views.
       Targets:
       `docs/ux/assets/companycore-v1-settings-desktop-canonical.png` and
       `docs/ux/assets/companycore-v1-settings-mobile-canonical.png`.

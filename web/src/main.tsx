@@ -1487,6 +1487,7 @@ type CanonicalArea = {
   shortLabel: string;
   lens: string;
   icon: string;
+  backendAliases?: string[];
 };
 
 type AreaViewState = CanonicalArea & {
@@ -1506,19 +1507,19 @@ type AreaCapability = {
 };
 
 const canonicalAreas: CanonicalArea[] = [
-  { key: "00-ogolny", label: "00 Ogolny", shortLabel: "00", lens: "Workspace", icon: "ph-compass" },
-  { key: "01-strategia", label: "01 Strategia", shortLabel: "01", lens: "Govern", icon: "ph-target" },
-  { key: "02-produkt", label: "02 Produkt", shortLabel: "02", lens: "Build", icon: "ph-cube" },
-  { key: "03-sprzedaz", label: "03 Sprzedaz", shortLabel: "03", lens: "Sell", icon: "ph-handshake" },
-  { key: "04-operacje", label: "04 Operacje", shortLabel: "04", lens: "Deliver", icon: "ph-gear-six" },
-  { key: "05-relacje", label: "05 Relacje", shortLabel: "05", lens: "Relationships", icon: "ph-git-branch" },
-  { key: "06-kadry", label: "06 Kadry", shortLabel: "06", lens: "People", icon: "ph-users-three" },
-  { key: "07-finanse", label: "07 Finanse", shortLabel: "07", lens: "Control", icon: "ph-chart-line-up" },
-  { key: "08-zasoby", label: "08 Zasoby", shortLabel: "08", lens: "Support", icon: "ph-archive" },
-  { key: "09-technologia", label: "09 Technologia", shortLabel: "09", lens: "Automate", icon: "ph-cpu" },
-  { key: "10-prawo", label: "10 Prawo", shortLabel: "10", lens: "Guard", icon: "ph-scales" },
-  { key: "11-innowacje", label: "11 Innowacje", shortLabel: "11", lens: "Learn", icon: "ph-sparkle" },
-  { key: "12-zarzadzanie", label: "12 Zarzadzanie", shortLabel: "12", lens: "Manage", icon: "ph-crown" }
+  { key: "00-ogolny", label: "00 Ogolny", shortLabel: "00", lens: "Workspace", icon: "ph-compass", backendAliases: ["main-general", "00 general", "00 glowny"] },
+  { key: "01-strategia", label: "01 Strategia", shortLabel: "01", lens: "Govern", icon: "ph-target", backendAliases: ["strategy-governance", "strategy", "governance", "goals", "targets"] },
+  { key: "02-produkt", label: "02 Produkt", shortLabel: "02", lens: "Build", icon: "ph-cube", backendAliases: ["02 product", "product"] },
+  { key: "03-sprzedaz", label: "03 Sprzedaz", shortLabel: "03", lens: "Sell", icon: "ph-handshake", backendAliases: ["sales-crm", "03 sales", "sales", "deals", "clients"] },
+  { key: "04-operacje", label: "04 Operacje", shortLabel: "04", lens: "Deliver", icon: "ph-gear-six", backendAliases: ["operations-administration", "04 operations", "operations", "procedures"] },
+  { key: "05-relacje", label: "05 Relacje", shortLabel: "05", lens: "Relationships", icon: "ph-git-branch", backendAliases: ["05 relations", "relations", "stakeholders", "clients"] },
+  { key: "06-kadry", label: "06 Kadry", shortLabel: "06", lens: "People", icon: "ph-users-three", backendAliases: ["people-roles", "06 people", "people", "roles"] },
+  { key: "07-finanse", label: "07 Finanse", shortLabel: "07", lens: "Control", icon: "ph-chart-line-up", backendAliases: ["finance-billing", "07 finances", "finance", "billing"] },
+  { key: "08-zasoby", label: "08 Zasoby", shortLabel: "08", lens: "Support", icon: "ph-archive", backendAliases: ["assets-storage", "08 resources", "resources", "artifacts"] },
+  { key: "09-technologia", label: "09 Technologia", shortLabel: "09", lens: "Automate", icon: "ph-cpu", backendAliases: ["ai-agents-observability", "09 technology", "technology", "agents", "audit"] },
+  { key: "10-prawo", label: "10 Prawo", shortLabel: "10", lens: "Guard", icon: "ph-scales", backendAliases: ["knowledge-decisions", "10 law", "law", "policies", "standards"] },
+  { key: "11-innowacje", label: "11 Innowacje", shortLabel: "11", lens: "Learn", icon: "ph-sparkle", backendAliases: ["marketing-growth", "11 innovations", "innovations", "growth"] },
+  { key: "12-zarzadzanie", label: "12 Zarzadzanie", shortLabel: "12", lens: "Manage", icon: "ph-crown", backendAliases: ["ai-agents-observability", "12 management", "management", "observability"] }
 ];
 
 const areaCapabilities: AreaCapability[] = [
@@ -1532,26 +1533,47 @@ const areaCapabilities: AreaCapability[] = [
   { id: "ai", label: "AI", icon: "ph-robot", href: "/react-agent-tools" }
 ];
 
+function normalizeAreaMatcherValue(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[._-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function areaKeyCandidates(area: OperatingArea) {
   return [
     area.key,
     area.name,
-    area.description || ""
-  ].map((value) => value.toLowerCase());
+    area.description || "",
+    ...(area.tables || []).flatMap((table) => [table.name, table.apiSlug, table.source || ""])
+  ].map((value) => normalizeAreaMatcherValue(value));
 }
 
 function findBackendArea(connection: ConnectionData, canonical: CanonicalArea) {
   const canonicalNumber = canonical.shortLabel;
-  const canonicalName = canonical.label.replace(/^\d+\s+/, "").toLowerCase();
-  return connection.operatingModel.areas.find((area) => {
-    const candidates = areaKeyCandidates(area);
-    return candidates.some((candidate) => (
-      candidate.includes(canonical.key)
-      || candidate.startsWith(canonicalNumber)
-      || candidate.includes(canonicalName)
-      || (canonical.key === "00-ogolny" && candidate.includes("main-general"))
-    ));
-  });
+  const canonicalKey = normalizeAreaMatcherValue(canonical.key);
+  const canonicalName = normalizeAreaMatcherValue(canonical.label.replace(/^\d+\s+/, ""));
+  const aliasCandidates = [canonical.key, canonical.label, ...(canonical.backendAliases || [])]
+    .map((alias) => normalizeAreaMatcherValue(alias));
+
+  const scoredAreas = connection.operatingModel.areas
+    .map((area) => {
+      const candidates = areaKeyCandidates(area);
+      const score = candidates.reduce((total, candidate) => {
+        const exactAlias = aliasCandidates.some((alias) => candidate === alias || candidate.includes(alias));
+        const canonicalMatch = candidate.includes(canonicalKey) || candidate.includes(canonicalName);
+        const numberedTableMatch = candidate.startsWith(`${canonicalNumber} `) || candidate.includes(` ${canonicalNumber} `);
+        return total + (exactAlias ? 12 : 0) + (canonicalMatch ? 8 : 0) + (numberedTableMatch ? 5 : 0);
+      }, 0);
+      return { area, score };
+    })
+    .filter((entry) => entry.score > 0)
+    .sort((left, right) => right.score - left.score);
+
+  return scoredAreas[0]?.area;
 }
 
 function areaStatus(area?: OperatingArea): AreaStatus {
@@ -8800,13 +8822,12 @@ function PipelineRoute() {
   );
 }
 
-type SettingsTabId = "general" | "connections" | "agents" | "mcp";
+type SettingsTabId = "connections" | "agents" | "mcp";
 
-const settingsTabs: Array<{ id: SettingsTabId; label: string; detail: string; icon: string }> = [
-  { id: "general", label: "General", detail: "Workspace defaults", icon: "ph-sliders-horizontal" },
-  { id: "connections", label: "Connections", detail: "ClickUp and Drive", icon: "ph-plugs-connected" },
-  { id: "agents", label: "Agent access", detail: "Jarvis and Paperclip", icon: "ph-robot" },
-  { id: "mcp", label: "MCP", detail: "Visible tool surface", icon: "ph-terminal-window" }
+const settingsTabs: Array<{ id: SettingsTabId; label: string }> = [
+  { id: "connections", label: "Integrations" },
+  { id: "agents", label: "Agent keys" },
+  { id: "mcp", label: "MCP" }
 ];
 
 function initialSettingsTab(): SettingsTabId {
@@ -8820,61 +8841,7 @@ function initialSettingsTab(): SettingsTabId {
   if (path.includes("/settings/drive") || path.includes("/settings/integrations")) {
     return "connections";
   }
-  return "general";
-}
-
-function agentPresetName(name: string) {
-  const lowerName = name.toLowerCase();
-  if (lowerName.includes("paperclip")) {
-    return "Paperclip";
-  }
-  if (lowerName.includes("jarvis")) {
-    return "Jarvis";
-  }
-  return name;
-}
-
-function providerStatusLabel(active: boolean, configured: boolean) {
-  if (active) {
-    return "Connected";
-  }
-  if (configured) {
-    return "Configured";
-  }
-  return "Not connected";
-}
-
-function SimpleSettingCard({
-  icon,
-  title,
-  detail,
-  children,
-  status
-}: {
-  icon: string;
-  title: string;
-  detail: string;
-  children?: React.ReactNode;
-  status?: { label: string; tone: "success" | "warning" | "neutral" };
-}) {
-  const statusClass = status?.tone === "success" ? "badge-success" : status?.tone === "warning" ? "badge-warning" : "badge-outline";
-  return (
-    <article className="rounded-company border border-base-300 bg-base-100 p-4 shadow-sm">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-3">
-          <span className="dashboard-icon text-primary">
-            <i className={`ph-bold ${icon}`} aria-hidden="true"></i>
-          </span>
-          <div className="min-w-0">
-            <h3 className="text-lg font-black leading-tight">{title}</h3>
-            <p className="mt-1 text-sm leading-6 text-company-muted">{detail}</p>
-          </div>
-        </div>
-        {status ? <span className={`badge ${statusClass}`}>{status.label}</span> : null}
-      </div>
-      {children ? <div className="mt-4">{children}</div> : null}
-    </article>
-  );
+  return "connections";
 }
 
 function UnifiedSettingsRoute() {
@@ -8882,14 +8849,47 @@ function UnifiedSettingsRoute() {
   const [createdKey, setCreatedKey] = useState<string | null>(null);
   const [settingsNotice, setSettingsNotice] = useState<{ tone: NoticeTone; title: string; detail: string } | null>(null);
   const [state, reload] = usePrivateLoader(async () => {
-    const [connection, keys, profiles, manifest] = await Promise.all([
+    const [connection, keys, profiles] = await Promise.all([
       ownerApi<ConnectionData>("/v1/connection"),
       ownerApi<ApiKeyRecord[]>("/v1/api-keys").catch(() => []),
-      ownerApi<AgentKeyProfile[]>("/v1/api-keys/profiles").catch(() => []),
-      ownerApi<McpManifest>("/v1/mcp/manifest").catch(() => ({ tools: [], guardrails: [] } as McpManifest))
+      ownerApi<AgentKeyProfile[]>("/v1/api-keys/profiles").catch(() => [])
     ]);
-    return { connection, keys, profiles, manifest };
+    return { connection, keys, profiles };
   });
+
+  async function saveClickUp(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const token = String(form.get("token") || "").trim();
+    await ownerApi("/v1/integration-settings/clickup", {
+      method: "PUT",
+      body: JSON.stringify({ token, active: true, config: {} })
+    });
+    setSettingsNotice({ tone: "success", title: "ClickUp saved", detail: "The API token was stored for this workspace." });
+    event.currentTarget.reset();
+    reload();
+  }
+
+  async function saveGoogleDrive(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const clientId = String(form.get("clientId") || "").trim();
+    const clientSecret = String(form.get("clientSecret") || "").trim();
+    await ownerApi("/v1/integration-settings/google_drive", {
+      method: "PUT",
+      body: JSON.stringify({
+        oauthClient: {
+          clientId,
+          ...(clientSecret ? { clientSecret } : {})
+        },
+        active: true,
+        config: {}
+      })
+    });
+    setSettingsNotice({ tone: "success", title: "Google Drive saved", detail: "The OAuth client was stored for this workspace." });
+    event.currentTarget.reset();
+    reload();
+  }
 
   async function createAgentKey(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -8911,140 +8911,77 @@ function UnifiedSettingsRoute() {
 
   return (
     <PrivateStateGate state={state} title="Settings" detail="CompanyCore is loading simple workspace settings." onRetry={reload}>
-      {({ connection, keys, profiles, manifest }) => {
+      {({ connection, keys, profiles }) => {
         const clickup = connection.integrations.clickup;
         const drive = connection.integrations.googleDrive;
         const activeKeys = keys.filter((key) => key.active);
-        const jarvisKey = activeKeys.find((key) => key.name.toLowerCase().includes("jarvis"));
-        const paperclipKey = activeKeys.find((key) => key.name.toLowerCase().includes("paperclip"));
         const readerProfile = profiles.find((profile) => profile.id.includes("reader")) || profiles[0];
-        const operatorProfile = profiles.find((profile) => profile.id.includes("operator")) || profiles[0];
 
         return (
           <Shell connection={connection} appLabel="Settings">
-            <section className="mx-auto grid w-full max-w-6xl gap-5 px-5 py-8">
-              <section className="rounded-company border border-base-300 bg-base-100 p-5 shadow-sm">
-                <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-start">
-                  <div>
-                    <p className="eyebrow">Workspace settings</p>
-                    <h1 className="text-3xl font-black leading-tight">Configure CompanyCore once, then let agents use it safely.</h1>
-                    <p className="mt-2 max-w-3xl text-sm leading-6 text-company-muted">
-                      Settings stay focused on connection and access. Imports, synchronization, mapping, and review queues belong in their own work views.
-                    </p>
-                  </div>
-                  <div className="rounded-company border border-base-300 bg-base-200/45 p-3 text-sm">
-                    <span className="block text-company-muted">Workspace</span>
-                    <strong>{connection.workspace.name}</strong>
-                  </div>
-                </div>
+            <section className="mx-auto grid w-full max-w-3xl gap-5 px-5 py-8">
+              <section className="grid gap-2">
+                <p className="eyebrow">Settings</p>
+                <h1 className="text-3xl font-black leading-tight">Connection settings</h1>
+                <p className="text-sm leading-6 text-company-muted">Enter credentials, save, then run sync from a separate work view.</p>
               </section>
 
-              <nav className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4" aria-label="Settings sections">
+              <nav className="flex flex-wrap gap-2" aria-label="Settings sections">
                 {settingsTabs.map((tab) => (
                   <button
-                    className={`rounded-company border p-4 text-left transition ${activeTab === tab.id ? "border-primary bg-primary/10 text-primary" : "border-base-300 bg-base-100 text-company-ink"}`}
+                    className={`btn btn-sm ${activeTab === tab.id ? "btn-primary" : "btn-outline"}`}
                     type="button"
                     onClick={() => setActiveTab(tab.id)}
                     key={tab.id}
                   >
-                    <span className="flex items-center gap-2 text-sm font-black">
-                      <i className={`ph-bold ${tab.icon}`} aria-hidden="true"></i>
-                      {tab.label}
-                    </span>
-                    <span className="mt-1 block text-xs text-company-muted">{tab.detail}</span>
+                    {tab.label}
                   </button>
                 ))}
               </nav>
 
               {settingsNotice ? <LocalNotice tone={settingsNotice.tone} title={settingsNotice.title} detail={settingsNotice.detail} /> : null}
 
-              {activeTab === "general" ? (
-                <section className="grid gap-4 lg:grid-cols-2">
-                  <SimpleSettingCard
-                    icon="ph-buildings"
-                    title="Application defaults"
-                    detail="Keep the owner workspace simple: identity, language, and safe default behavior."
-                  >
-                    <div className="grid gap-3">
-                      <label className="form-control">
-                        <span className="label-text font-bold">Workspace name</span>
-                        <input className="input input-bordered" value={connection.workspace.name} readOnly />
-                      </label>
-                      <label className="form-control">
-                        <span className="label-text font-bold">Default area for unknown imports</span>
-                        <select className="select select-bordered" defaultValue="00-ogolny">
-                          <option value="00-ogolny">00 Ogolny</option>
-                          {companyAreas(connection).map((area) => (
-                            <option value={area.key} key={area.id}>{area.name}</option>
-                          ))}
-                        </select>
-                      </label>
-                    </div>
-                  </SimpleSettingCard>
-                  <SimpleSettingCard
-                    icon="ph-shield-check"
-                    title="Safe behavior"
-                    detail="Risky agent actions should stay approval-first until you deliberately change the access profile."
-                    status={{ label: "Recommended", tone: "success" }}
-                  >
-                    <label className="flex items-start gap-3 rounded-company border border-base-300 bg-base-200/45 p-3 text-sm">
-                      <input className="checkbox checkbox-sm mt-1" type="checkbox" defaultChecked />
-                      <span>
-                        <strong className="block">Require owner approval for write or destructive tools</strong>
-                        <span className="text-company-muted">Jarvis and Paperclip can read safely, but commands stay supervised by default.</span>
-                      </span>
-                    </label>
-                  </SimpleSettingCard>
-                </section>
-              ) : null}
-
               {activeTab === "connections" ? (
-                <section className="grid gap-4 lg:grid-cols-2">
-                  <SimpleSettingCard
-                    icon="ph-cloud"
-                    title="Google Drive"
-                    detail="Connect Drive as a knowledge source. Import and folder review are handled outside settings."
-                    status={{
-                      label: providerStatusLabel(drive.active, drive.configured),
-                      tone: drive.active ? "success" : drive.configured ? "warning" : "neutral"
-                    }}
-                  >
-                    <div className="flex flex-wrap gap-2">
-                      <a className="btn btn-primary" href="/settings/drive">Configure connection</a>
-                      <a className="btn btn-ghost" href="/areas?area=12-zarzadzanie&view=knowledge">Review knowledge</a>
+                <section className="grid gap-4">
+                  <form className="rounded-company border border-base-300 bg-base-100 p-4 shadow-sm" onSubmit={saveClickUp}>
+                    <div className="grid gap-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <h2 className="text-xl font-black">ClickUp</h2>
+                        <span className="text-xs text-company-muted">{clickup.configured ? "Saved" : "Not saved"}</span>
+                      </div>
+                      <label className="form-control">
+                        <span className="label-text font-bold">API token</span>
+                        <input className="input input-bordered" name="token" type="password" autoComplete="off" placeholder="pk_..." required={!clickup.configured} />
+                      </label>
+                      <button className="btn btn-primary w-fit" type="submit">Save ClickUp</button>
                     </div>
-                  </SimpleSettingCard>
-                  <SimpleSettingCard
-                    icon="ph-kanban"
-                    title="ClickUp"
-                    detail="Connect ClickUp as the task provider for human and AI work handoff."
-                    status={{
-                      label: providerStatusLabel(clickup.active, clickup.configured),
-                      tone: clickup.active ? "success" : clickup.configured ? "warning" : "neutral"
-                    }}
-                  >
-                    <div className="flex flex-wrap gap-2">
-                      <a className="btn btn-primary" href="/settings/integrations">Configure connection</a>
-                      <a className="btn btn-ghost" href="/tasks-adapter">Open tasks</a>
+                  </form>
+
+                  <form className="rounded-company border border-base-300 bg-base-100 p-4 shadow-sm" onSubmit={saveGoogleDrive}>
+                    <div className="grid gap-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <h2 className="text-xl font-black">Google Drive</h2>
+                        <span className="text-xs text-company-muted">{drive.oauthClientConfigured ? "Saved" : "Not saved"}</span>
+                      </div>
+                      <label className="form-control">
+                        <span className="label-text font-bold">Client ID</span>
+                        <input className="input input-bordered" name="clientId" autoComplete="off" placeholder="Google OAuth client ID" required={!drive.oauthClientConfigured} />
+                      </label>
+                      <label className="form-control">
+                        <span className="label-text font-bold">Client secret</span>
+                        <input className="input input-bordered" name="clientSecret" type="password" autoComplete="off" placeholder="Google OAuth client secret" />
+                      </label>
+                      <button className="btn btn-primary w-fit" type="submit">Save Google Drive</button>
                     </div>
-                  </SimpleSettingCard>
-                  <LocalNotice
-                    tone="info"
-                    title="Synchronization is not a settings screen"
-                    detail="Settings only stores connection choices. Folder import, task sync, mapping, and verification should open in dedicated work views."
-                  />
+                  </form>
                 </section>
               ) : null}
 
               {activeTab === "agents" ? (
-                <section className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+                <section className="grid gap-4">
                   <form className="rounded-company border border-base-300 bg-base-100 p-4 shadow-sm" onSubmit={createAgentKey}>
-                    <div className="grid gap-4">
-                      <div>
-                        <p className="eyebrow">Agent connection</p>
-                        <h2 className="text-xl font-black">Connect Jarvis or Paperclip</h2>
-                        <p className="mt-1 text-sm leading-6 text-company-muted">Create one scoped key per agent. Start read-only, then upgrade deliberately.</p>
-                      </div>
+                    <div className="grid gap-3">
+                      <h2 className="text-xl font-black">Create API key</h2>
                       <label className="form-control">
                         <span className="label-text font-bold">Agent</span>
                         <select className="select select-bordered" name="agentName" defaultValue="Jarvis">
@@ -9055,7 +8992,7 @@ function UnifiedSettingsRoute() {
                       </label>
                       <label className="form-control">
                         <span className="label-text font-bold">Access profile</span>
-                        <select className="select select-bordered" name="profileId" defaultValue={readerProfile?.id || operatorProfile?.id || ""}>
+                        <select className="select select-bordered" name="profileId" defaultValue={readerProfile?.id || ""}>
                           {profiles.map((profile) => (
                             <option value={profile.id} key={profile.id}>{profile.label}</option>
                           ))}
@@ -9065,58 +9002,36 @@ function UnifiedSettingsRoute() {
                       {createdKey ? <LocalNotice tone="warning" title="Copy once" detail={createdKey} /> : null}
                     </div>
                   </form>
-                  <section className="grid gap-3">
-                    <SimpleSettingCard
-                      icon="ph-robot"
-                      title="Jarvis"
-                      detail="Use Jarvis for read-safe company context and supervised CompanyCore actions."
-                      status={{ label: jarvisKey ? "Key active" : "Needs key", tone: jarvisKey ? "success" : "warning" }}
-                    />
-                    <SimpleSettingCard
-                      icon="ph-paperclip"
-                      title="Paperclip"
-                      detail="Use Paperclip as the company management assistant once its scoped key is created."
-                      status={{ label: paperclipKey ? "Key active" : "Needs key", tone: paperclipKey ? "success" : "warning" }}
-                    />
-                    <SimpleSettingCard
-                      icon="ph-key"
-                      title="Existing keys"
-                      detail={activeKeys.length > 0 ? activeKeys.map((key) => agentPresetName(key.name)).join(", ") : "No active service keys yet."}
-                    />
+                  <section className="rounded-company border border-base-300 bg-base-100 p-4 shadow-sm">
+                    <h2 className="text-xl font-black">Existing keys</h2>
+                    <div className="mt-3 grid gap-2 text-sm">
+                      {activeKeys.length > 0 ? activeKeys.map((key) => (
+                        <div className="rounded-company border border-base-300 p-3" key={key.id}>
+                          {key.name}
+                        </div>
+                      )) : <p className="text-company-muted">No active keys.</p>}
+                    </div>
                   </section>
                 </section>
               ) : null}
 
               {activeTab === "mcp" ? (
-                <section className="grid gap-4 lg:grid-cols-[1fr_1fr]">
-                  <SimpleSettingCard
-                    icon="ph-terminal-window"
-                    title="MCP endpoint"
-                    detail="Expose CompanyCore through the same guarded tool surface used by Jarvis and future applications."
-                    status={{ label: manifest.tools.length > 0 ? "Available" : "No tools", tone: manifest.tools.length > 0 ? "success" : "warning" }}
-                  >
-                    <div className="grid gap-3 text-sm">
-                      <div className="rounded-company border border-base-300 bg-base-200/45 p-3">
-                        <span className="block text-company-muted">HTTP API</span>
-                        <code>/v1/mcp/manifest</code>
-                      </div>
-                      <div className="rounded-company border border-base-300 bg-base-200/45 p-3">
-                        <span className="block text-company-muted">Local server command</span>
-                        <code>npm run mcp:server</code>
-                      </div>
+                <section className="rounded-company border border-base-300 bg-base-100 p-4 shadow-sm">
+                  <div className="grid gap-3">
+                    <h2 className="text-xl font-black">MCP</h2>
+                    <label className="form-control">
+                      <span className="label-text font-bold">Manifest URL</span>
+                      <input className="input input-bordered" value="/v1/mcp/manifest" readOnly />
+                    </label>
+                    <label className="form-control">
+                      <span className="label-text font-bold">Local server command</span>
+                      <input className="input input-bordered" value="npm run mcp:server" readOnly />
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      <a className="btn btn-primary" href="/settings/api">Create API key</a>
+                      <a className="btn btn-outline" href="/react-agent-tools">Open tool list</a>
                     </div>
-                  </SimpleSettingCard>
-                  <SimpleSettingCard
-                    icon="ph-shield-warning"
-                    title="Tool safety"
-                    detail="Read tools can be exposed broadly; write and destructive tools should require an operator profile or owner approval."
-                  >
-                    <div className="grid gap-2 text-sm">
-                      <span className="badge badge-outline w-fit">{manifest.tools.length} visible tools</span>
-                      <span className="badge badge-warning w-fit">{manifest.tools.filter((tool) => tool.requiresApproval).length} approval-gated tools</span>
-                      <a className="btn btn-ghost w-fit" href="/react-agent-tools">Inspect full tool catalog</a>
-                    </div>
-                  </SimpleSettingCard>
+                  </div>
                 </section>
               ) : null}
             </section>

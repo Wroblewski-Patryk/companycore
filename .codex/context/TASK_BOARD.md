@@ -20,13 +20,22 @@
   - Owner: Frontend Builder + Backend Builder
   - Priority: P1
   - Source: `docs/ux/v1-settings-canonical-spec-2026-05-15.md`
-  - Goal: implement the canonical `/settings` module with simple sections for
-    General, Connections, Agent access, and MCP, then route old settings entry
-    points into those sections once verified. Sync, import, mapping, and large
-    tool catalogs must stay outside the first settings view.
+  - Goal: implement the canonical `/settings` module with minimal sections for
+    Integrations, Agent keys, and MCP, then route old settings entry points
+    into those sections once verified. Sync, import, mapping, badges, counters,
+    and large tool catalogs must stay outside the first settings view.
 ## In Progress
 
-No task is actively in progress.
+- V1PROD-003 Authenticated V1 production parity and selected-area data match.
+  - Stage: release
+  - Owner: Frontend Builder + Ops/Release
+  - Priority: P0
+  - Source:
+    `docs/planning/v1-production-authenticated-parity-task-contract.md`
+  - Goal: deploy and verify the authenticated V1 dashboard plus selected-area
+    detail route so production `/areas?area=01-strategia&view=overview`
+    resolves backend `strategy-governance` context instead of the empty
+    unmatched-area state.
 
 ## Blocked
 
@@ -199,10 +208,10 @@ No task is actively in progress.
     `docs/planning/v1-web-five-canonical-surfaces-task-contract.md`.
 
 - V1SETTINGS-001 Unified V1 Settings Canonical Design.
-  - Evidence: the settings IA now uses simple sections for General,
-    Connections, Agent access, and MCP. Settings are explicitly configuration
-    only; sync, import, mapping, review queues, and large tool catalogs belong
-    in dedicated work views.
+  - Evidence: the settings IA now uses minimal sections for Integrations,
+    Agent keys, and MCP. Settings are explicitly credential-only; sync, import,
+    mapping, badges, counters, review queues, and large tool catalogs belong in
+    dedicated work views.
   - Canonical images:
     `docs/ux/assets/companycore-v1-settings-desktop-canonical.png` and
     `docs/ux/assets/companycore-v1-settings-mobile-canonical.png`.
