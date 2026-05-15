@@ -623,6 +623,14 @@ export function ownerToken() {
   return window.sessionStorage.getItem("companycoreOwnerToken");
 }
 
+function clearOwnerToken() {
+  window.sessionStorage.removeItem("companycoreOwnerToken");
+}
+
+function isInvalidSessionError(error: Error) {
+  return ["invalid_token", "invalid_auth_token", "missing_api_key", "invalid_api_key"].includes(error.message);
+}
+
 export async function loadConnection(token: string): Promise<ConnectionData> {
   const response = await fetch("/v1/connection", {
     headers: {
@@ -1272,9 +1280,15 @@ export function useDashboardState(): [DashboardState, () => void] {
       })
       .catch((error: Error) => {
         if (!cancelled) {
+          if (isInvalidSessionError(error)) {
+            clearOwnerToken();
+            setDashboardState({ status: "signed-out" });
+            return;
+          }
+
           setDashboardState({
             status: "error",
-            message: error.message === "invalid_token"
+            message: isInvalidSessionError(error)
               ? "Your session expired. Sign in again to load the company dashboard."
               : "CompanyCore could not load the owner dashboard. Try again or return to the current dashboard."
           });
