@@ -7598,7 +7598,12 @@ googleDriveAuthUrlButton.addEventListener("click", async () => {
     });
     googleDriveAuthLink.href = response.data.authorizationUrl;
     googleDriveAuthLink.hidden = false;
-    reportAction(googleDriveActionStatus, "Google Drive OAuth URL created. Open Google consent, then paste the authorization code here.");
+    const consentWindow = window.open(response.data.authorizationUrl, "_blank", "noopener,noreferrer");
+    if (consentWindow) {
+      reportAction(googleDriveActionStatus, "Google consent opened in a new tab. If it did not appear, use the Open Google consent button, then paste the authorization code here.");
+    } else {
+      reportAction(googleDriveActionStatus, "Google blocked the automatic consent popup. Use the Open Google consent button, then paste the authorization code here.", "warning");
+    }
   } catch (error) {
     reportAction(googleDriveActionStatus, friendlyError(error), "error");
   } finally {
