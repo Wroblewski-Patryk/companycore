@@ -7,9 +7,10 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] DMS-SHELL-003 Wire shared shell to operating graph fallback:
-      make each department shell consume operating graph/connection fallback
-      data consistently before department packet APIs and Finance web work.
+- [ ] DMS-07-003 Read-only Finance web board:
+      render `/areas?area=07-finanse&view=overview` from
+      `GET /v1/finance/context` with pricing conflicts, hourly value,
+      commercial exceptions, invoice blockers, and no finance writes.
 
 ### NEXT
 
@@ -123,6 +124,16 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       portable PostgreSQL `127.0.0.1:55482`.
       Task contract:
       `docs/planning/dms-00-paperclip-background-output-review-proof-task-contract.md`.
+- [x] DMS-SHELL-003 Department data backbone:
+      added a shared data-backbone section to selected-area department shells,
+      showing operating graph readiness, tables, records, knowledge/source
+      count, review gaps, and fallback text. `npm run build:web`,
+      `git diff --check`, and Playwright proof on local backend
+      `http://127.0.0.1:3212` passed for `01-strategia`, `07-finanse`, and
+      `12-zarzadzanie` on desktop/mobile with no console/page errors or
+      horizontal overflow.
+      Task contract:
+      `docs/planning/dms-shell-003-department-data-backbone-task-contract.md`.
 - [x] DMS-07-001 Finance system spec:
       defined the Finance Management System board, first safe web shape,
       protected read-only `GET /v1/finance/context` target, pricing model and

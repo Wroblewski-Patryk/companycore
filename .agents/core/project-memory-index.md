@@ -226,6 +226,13 @@ continue from repository files alone:
   status. Existing API regression coverage passed again during DMS-07-002 on
   portable PostgreSQL `127.0.0.1:55482`. Repeat a fresh desktop/mobile visual
   proof before final UI signoff.
+- `docs/planning/dms-shell-003-department-data-backbone-task-contract.md`:
+  shared department-shell data backbone handoff. As of 2026-05-16,
+  `DepartmentDataBackbone` renders graph readiness, table/record context,
+  knowledge/source count, review gaps, and fallback text inside the shared
+  selected-area shell. `npm run build:web`, `git diff --check`, and
+  Playwright proof on `http://127.0.0.1:3212` verified `01`, `07`, and `12`
+  desktop/mobile with no console/page errors or horizontal overflow.
 - `docs/planning/dms-03-commercial-exception-read-model-spec.md`: active
   Sales/Finance commercial exception handoff. As of 2026-05-16, DMS-03-005
   defines protected read-only `GET /v1/commercial-exceptions`, exception packet

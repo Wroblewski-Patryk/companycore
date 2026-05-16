@@ -5654,6 +5654,89 @@ function DepartmentImprovementLoop({
   );
 }
 
+function DepartmentDataBackbone({
+  context
+}: {
+  context: AreaDetailContext;
+}) {
+  const graph = context.operatingGraph;
+  const graphReady = context.operatingGraphStatus === "ready" && Boolean(graph);
+  const graphSummary = graph?.summary;
+  const graphSignal = context.operatingGraphStatus === "loading"
+    ? "Loading graph"
+    : graphReady
+      ? "Operating graph live"
+      : context.operatingGraphStatus === "error"
+        ? "Graph fallback"
+        : "Graph pending";
+  const signals = [
+    {
+      label: "Graph nodes",
+      value: `${graphSummary?.nodes ?? 0}`,
+      detail: graphReady ? `${graphSummary?.edges ?? 0} edges` : graphSignal,
+      icon: "ph-graph"
+    },
+    {
+      label: "Tables",
+      value: `${context.tables.length}`,
+      detail: `${context.tableRecordsCount} records`,
+      icon: "ph-database"
+    },
+    {
+      label: "Knowledge",
+      value: `${graphSummary?.knowledge ?? context.driveItems.length}`,
+      detail: `${context.driveItems.length} Drive items`,
+      icon: "ph-cloud"
+    },
+    {
+      label: "Review gaps",
+      value: `${graphSummary?.gaps ?? context.globalReviewDebt}`,
+      detail: graphReady ? `${graph?.reviewItems.length ?? 0} review items` : `${context.globalReviewDebt} ownership debts`,
+      icon: "ph-warning-diamond"
+    }
+  ];
+  const gaps = graph?.gaps.slice(0, 3) ?? [];
+
+  return (
+    <section className="department-data-backbone" aria-label="Department data backbone">
+      <div className="area-detail-section-heading">
+        <p className="atlas-kicker">Data backbone</p>
+        <h2>Graph, tables, sources, review gaps</h2>
+        <span>{graphSignal}</span>
+      </div>
+      <div className="department-backbone-grid">
+        {signals.map((signal) => (
+          <article key={signal.label}>
+            <i className={`ph-bold ${signal.icon}`} aria-hidden="true"></i>
+            <span>
+              <strong>{signal.value}</strong>
+              <small>{signal.label}</small>
+            </span>
+            <em>{signal.detail}</em>
+          </article>
+        ))}
+      </div>
+      <div className="department-backbone-gaps">
+        {gaps.length > 0 ? gaps.map((gap) => (
+          <a href="#area-detail-decisions" className={`is-${gap.severity}`} key={gap.id}>
+            <span>
+              <strong>{gap.title}</strong>
+              <small>{gap.detail}</small>
+            </span>
+            <em>{gap.layer}</em>
+          </a>
+        )) : (
+          <p>
+            {graphReady
+              ? "No operating graph gaps are visible for this department."
+              : "Using local table, provider, and Drive fallback until the area operating graph is available."}
+          </p>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function DepartmentManagementShell({
   selectedArea,
   activeCapability,
@@ -5678,6 +5761,7 @@ function DepartmentManagementShell({
       <AreaDetailHero area={selectedArea} context={context} connection={connection} />
       {specialPanel}
       <DepartmentSubsystemRegistry area={selectedArea} connection={connection} />
+      <DepartmentDataBackbone context={context} />
       <AreaCapabilityRail activeCapability={activeCapability} onSelectCapability={onSelectCapability} />
       {showOperatingBoard ? <AreaOperatingBoard lanes={lanes} /> : null}
       <AreaCapabilityFocus

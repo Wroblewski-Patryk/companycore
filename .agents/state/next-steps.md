@@ -4,12 +4,12 @@ Last updated: 2026-05-16
 
 ## NOW
 
-1. DMS-SHELL-003 Wire shared shell to operating graph fallback.
+1. DMS-07-003 Read-only Finance web board.
    - Source:
-     `docs/planning/dms-shell-002-department-subsystem-registry-task-contract.md`.
-   - Use the shared subsystem registry plus current AOG fallback to make each
-     department shell consume graph/connection data consistently before packet
-     API work.
+     `docs/planning/dms-07-finance-system-spec.md`.
+   - Render `/areas?area=07-finanse&view=overview` from
+     `GET /v1/finance/context`, showing pricing conflicts, hourly value,
+     commercial exceptions, invoice blockers, and blocked finance actions.
 
 ## NEXT
 

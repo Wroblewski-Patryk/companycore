@@ -2,6 +2,14 @@
 
 ## Ready
 
+- DMS-07-003 Read-only Finance web board.
+  - Stage: planning
+  - Owner: Frontend Builder + Backend Builder + QA/Test
+  - Priority: P1
+  - Source: `docs/planning/dms-07-finance-system-spec.md`
+  - Goal: render `/areas?area=07-finanse&view=overview` as a read-only
+    Finance Management Board consuming `GET /v1/finance/context`, with no
+    quote, discount, invoice, payment, or active-pricing writes.
 - DMS-NEXT-001 Department systems user review and implementation sequence.
   - Stage: planning
   - Owner: Product Docs + Frontend Builder + Backend Builder
@@ -119,6 +127,18 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- DMS-SHELL-003 Department Data Backbone.
+  - Evidence:
+    `web/src/main.tsx` now renders `DepartmentDataBackbone` inside the shared
+    department shell, using existing operating graph status, table/record
+    context, Drive/source count, and review gaps with fallback text.
+  - Validation: `npm run build:web`, `git diff --check`, and Playwright proof
+    on `http://127.0.0.1:3212` for `01-strategia`, `07-finanse`, and
+    `12-zarzadzanie` on desktop/mobile. No console/page errors or horizontal
+    overflow were observed. Validation backend and PostgreSQL were stopped.
+  - Task contract:
+    `docs/planning/dms-shell-003-department-data-backbone-task-contract.md`.
 
 - DMS-00-007 Paperclip Background Output Review Proof.
   - Evidence:

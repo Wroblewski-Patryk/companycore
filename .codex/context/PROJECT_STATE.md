@@ -141,6 +141,14 @@ Last updated: 2026-05-16
   `GET /v1/commercial-exceptions` and `GET /v1/finance/context` so pricing or
   discount output can move from `00 Main` into Sales/Finance review without
   bypassing CompanyCore.
+  As of 2026-05-16, DMS-SHELL-003 added a shared department data backbone to
+  selected-area routes. Every department shell now shows operating graph
+  readiness, graph/table/source/review-gap signals, and fallback text when the
+  operating graph is not available. `npm run build:web`, `git diff --check`,
+  and Playwright proof on `http://127.0.0.1:3212` verified `01-strategia`,
+  `07-finanse`, and `12-zarzadzanie` on desktop/mobile with no console/page
+  errors and no horizontal overflow. The validation backend and PostgreSQL
+  processes were stopped after proof.
 
 ## Product Decisions (Confirmed)
 - 2026-05-07: CRM and pipelines are separate domain concepts. Pipelines are a
