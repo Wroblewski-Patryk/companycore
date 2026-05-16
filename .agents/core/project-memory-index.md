@@ -138,6 +138,12 @@ continue from repository files alone:
   `01-strategia` returned `strategy-governance` with `27` nodes and `32`
   edges. Evidence lives in
   `docs/ux/evidence/production-v1-5f1fc71-2026-05-16/`.
+  As of V1OPS-003, backend department-key compatibility is centralized in
+  `src/operating-model/department-registry.ts`. AOG and global intake now use
+  the same canonical `00`-`12` vocabulary, so `03-sprzedaz` resolves to
+  `sales-crm`, `07-finanse` resolves to `finance-billing`, intake suggestions
+  emit canonical keys, and non-canonical command inputs still fail closed.
+  `npm run test:api` passed on validation-owned PostgreSQL `127.0.0.1:55494`.
 - `docs/architecture/department-management-systems-v1-blueprint.md`:
   detailed V1 blueprint for `00 Main` plus the 12 operating department
   management systems. As of 2026-05-16, future department work should use this

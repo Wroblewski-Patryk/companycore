@@ -4,11 +4,12 @@ Last updated: 2026-05-16
 
 ## NOW
 
-1. Deepen the next V1 capability from `/operations`.
+1. Implement the next department-specific read model or safe command contract.
    - Source: `docs/planning/mvp-next-commits.md`.
-   - Choose one route-level slice that already has backend contracts.
-   - Preferred order: compatibility alias cleanup, then one
-     department-specific read model or safe command contract.
+   - Start from the shared backend department registry added in V1OPS-003.
+   - Preferred order: a read-only `01 Strategy` department packet or the first
+     safe `04 Operations` planning/procedure command contract.
+   - Keep new write behavior behind explicit command contracts and API tests.
 
 ## NEXT
 

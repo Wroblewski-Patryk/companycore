@@ -7,10 +7,11 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] Deepen the next V1 capability from `/operations`:
-      choose one route-level slice that already has backend contracts, with
-      preferred order compatibility alias cleanup, then one department-specific
-      read model or safe command contract.
+- [ ] Implement the next department-specific read model or safe command
+      contract:
+      start from the shared department registry and existing backend
+      contracts. Preferred order: a read-only `01 Strategy` department packet
+      or the first safe `04 Operations` planning/procedure command contract.
 
 ### NEXT
 
@@ -94,6 +95,20 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       `docs/ux/evidence/production-v1-5f1fc71-2026-05-16/`.
       Task contract:
       `docs/planning/v1-production-smoke-rollout-task-contract.md`.
+
+- [x] V1OPS-003 V1 Operations compatibility alias cleanup:
+      centralized backend canonical `00`-`12` department keys, backend area
+      aliases, and intake hint terms in
+      `src/operating-model/department-registry.ts`; AOG selected-area reads
+      now resolve `03-sprzedaz` to `sales-crm` and `07-finanse` to
+      `finance-billing` before numeric fallback; global intake suggestions
+      emit canonical keys such as `07-finanse` and `00-ogolny`; invalid
+      non-canonical route proposals like `07-finance` remain rejected.
+      Validation passed with `npm run build:server`, `npm run test:api`
+      against validation-owned PostgreSQL on `127.0.0.1:55494`, and
+      `git diff --check`. Validation PostgreSQL and temporary artifacts were
+      cleaned up. Task contract:
+      `docs/planning/v1-operations-compatibility-alias-cleanup-task-contract.md`.
 
 - [x] V1COS-001 Company OS area-aware foundation:
       `/react-company-os` now connects Company OS evidence and guarded

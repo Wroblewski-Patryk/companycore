@@ -109,6 +109,15 @@ Last updated: 2026-05-16
   proof found no console/page errors, failed non-font requests, or horizontal
   overflow. Evidence:
   `docs/ux/evidence/production-v1-5f1fc71-2026-05-16/`.
+  As of 2026-05-16, V1OPS-003 centralized the backend `00`-`12`
+  department-key vocabulary in `src/operating-model/department-registry.ts`.
+  AOG selected-area reads now resolve canonical V1 keys such as
+  `03-sprzedaz` and `07-finanse` to the intended backend areas before numeric
+  position fallback, and global intake suggestions now emit canonical keys
+  such as `07-finanse` and `00-ogolny`. `npm run build:server`,
+  `npm run test:api` against validation-owned PostgreSQL on
+  `127.0.0.1:55494`, and `git diff --check` passed. The validation database
+  process and temporary files were removed after the run.
   As of 2026-05-16, DMS-00-003 implemented the first backend slice of
   `00 Main`: protected read-only `GET /v1/intake`. It aggregates existing
   agent events, provider inbox rows, unassigned Drive/provider resources,

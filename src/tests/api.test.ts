@@ -567,7 +567,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(globalIntake.status, 200);
   const globalIntakeBody = globalIntake.body as {
     data: {
-      summary: { total: number; byFamily: Record<string, number>; byRisk: Record<string, number> };
+      summary: { total: number; byFamily: Record<string, number>; byRisk: Record<string, number>; byDepartment: Record<string, number> };
       items: Array<{
         id: string;
         family: string;
@@ -585,10 +585,13 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(globalIntakeBody.data.summary.total >= 7);
   assert.ok(globalIntakeBody.data.summary.byFamily.agent_output >= 1);
   assert.ok(globalIntakeBody.data.summary.byRisk.critical >= 1);
+  assert.ok(globalIntakeBody.data.summary.byDepartment["07-finanse"] >= 1);
+  assert.ok(globalIntakeBody.data.summary.byDepartment["00-ogolny"] >= 1);
   assert.ok(globalIntakeBody.data.items.some((item) => (
     item.sourceModel === "AgentEventOutbox"
     && item.sourceId === paperclipIntakeEvent.id
     && item.family === "agent_output"
+    && item.suggestedDepartment === "07-finanse"
   )));
   assert.ok(globalIntakeBody.data.items.some((item) => (
     item.sourceModel === "ProviderEventInbox"
@@ -617,6 +620,12 @@ test("CompanyCore v1 protected API flow", async () => {
     item.sourceModel === "Risk"
     && item.sourceId === highIntakeRisk.id
     && item.risk === "critical"
+    && item.suggestedDepartment === "07-finanse"
+  )));
+  assert.ok(globalIntakeBody.data.items.some((item) => (
+    item.sourceModel === "AgentEventOutbox"
+    && item.sourceId === jarvisIntakeEvent.id
+    && item.suggestedDepartment === "00-ogolny"
   )));
   assert.ok(!globalIntakeBody.data.items.some((item) => item.sourceId === foreignIntakeEvent.id));
 
@@ -1462,6 +1471,22 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(areaGraphBody.data.gaps.some((gap) => gap.id === `gap:goal:${graphLonelyGoal.id}:target`));
   assert.ok(areaGraphBody.data.reviewItems.some((item) => item.id === `gap:goal:${graphLonelyGoal.id}:target`));
   assert.ok(areaGraphBody.data.unsupportedFamilies.some((family) => family.family === "target_metric_fk"));
+
+  const salesAreaGraph = await request("/v1/operating-graph/areas/03-sprzedaz?limit=20", { headers: authA });
+  assert.equal(salesAreaGraph.status, 200);
+  const salesAreaGraphBody = salesAreaGraph.body as { data: { area: { key: string; canonicalKey: string; resolvedKey: string; position: number } } };
+  assert.equal(salesAreaGraphBody.data.area.key, "sales-crm");
+  assert.equal(salesAreaGraphBody.data.area.canonicalKey, "03-sprzedaz");
+  assert.equal(salesAreaGraphBody.data.area.resolvedKey, "sales-crm");
+  assert.notEqual(salesAreaGraphBody.data.area.position, 3);
+
+  const financeAreaGraph = await request("/v1/operating-graph/areas/07-finanse?limit=20", { headers: authA });
+  assert.equal(financeAreaGraph.status, 200);
+  const financeAreaGraphBody = financeAreaGraph.body as { data: { area: { key: string; canonicalKey: string; resolvedKey: string; position: number } } };
+  assert.equal(financeAreaGraphBody.data.area.key, "finance-billing");
+  assert.equal(financeAreaGraphBody.data.area.canonicalKey, "07-finanse");
+  assert.equal(financeAreaGraphBody.data.area.resolvedKey, "finance-billing");
+  assert.notEqual(financeAreaGraphBody.data.area.position, 7);
 
   const foreignAreaGraph = await request("/v1/operating-graph/areas/01-strategia?limit=100", { headers: selectedWorkspaceAuth });
   assert.equal(foreignAreaGraph.status, 200);

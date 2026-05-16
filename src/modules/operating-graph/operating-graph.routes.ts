@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../../db/prisma";
 import { asyncHandler } from "../../middleware/async-handler";
 import { ensureOperatingModelForWorkspace } from "../../operating-model/catalog";
+import { normalizeDepartmentKey, resolveDepartmentBackendAreaKey, resolveDepartmentEntry } from "../../operating-model/department-registry";
 
 const querySchema = z.object({
   include: z.string().trim().max(300).optional(),
@@ -62,51 +63,9 @@ type GraphGap = {
 
 type LayerKey = "goals" | "workflows" | "tasks" | "knowledge" | "sources";
 
-const canonicalAreaAliases: Record<string, string> = {
-  "00-ogolny": "main-general",
-  "00-ogólny": "main-general",
-  "00-general": "main-general",
-  "01-strategia": "strategy-governance",
-  "01-strategy": "strategy-governance",
-  "02-produkt": "projects-delivery",
-  "02-product": "projects-delivery",
-  "03-sprzedaz": "sales-crm",
-  "03-sprzedaż": "sales-crm",
-  "03-sales": "sales-crm",
-  "04-operacje": "operations-administration",
-  "04-operations": "operations-administration",
-  "05-relacje": "sales-crm",
-  "05-relations": "sales-crm",
-  "06-kadry": "people-roles",
-  "06-people": "people-roles",
-  "07-finanse": "finance-billing",
-  "07-finance": "finance-billing",
-  "08-zasoby": "assets-storage",
-  "08-resources": "assets-storage",
-  "09-technologia": "automations-integrations",
-  "09-technology": "automations-integrations",
-  "10-prawo": "strategy-governance",
-  "10-legal": "strategy-governance",
-  "11-innowacje": "ai-agents-observability",
-  "11-innovation": "ai-agents-observability",
-  "12-zarzadzanie": "knowledge-decisions",
-  "12-zarządzanie": "knowledge-decisions",
-  "12-management": "knowledge-decisions"
-};
-
 export const operatingGraphRouter = Router();
 
 const EMPTY_UUID = "00000000-0000-0000-0000-000000000000";
-
-function normalizeKey(value: string) {
-  return decodeURIComponent(value)
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
 
 function graphId(type: string, id: string) {
   return `${type}:${id}`;
@@ -153,25 +112,31 @@ operatingGraphRouter.get("/areas/:areaKey", asyncHandler(async (req, res) => {
   const workspaceId = req.auth!.workspaceId;
   await ensureOperatingModelForWorkspace(prisma, workspaceId);
 
-  const requestedKey = normalizeKey(String(req.params.areaKey));
-  const resolvedKey = canonicalAreaAliases[requestedKey] ?? requestedKey;
+  const requestedKey = normalizeDepartmentKey(String(req.params.areaKey));
+  const departmentEntry = resolveDepartmentEntry(requestedKey);
+  const canonicalRequestKey = departmentEntry?.canonicalKey ?? requestedKey;
+  const resolvedKey = resolveDepartmentBackendAreaKey(requestedKey);
   const positionMatch = /^(\d{2})-/.exec(requestedKey);
   const requestedPosition = positionMatch ? Number(positionMatch[1]) : null;
+
+  const areaIncludes = {
+    folders: { orderBy: { name: "asc" as const } },
+    tables: { orderBy: { apiSlug: "asc" as const } }
+  };
 
   const area = await prisma.operatingArea.findFirst({
     where: {
       workspaceId,
-      OR: [
-        { key: resolvedKey },
-        { key: requestedKey },
-        ...(requestedPosition === null ? [] : [{ position: requestedPosition }])
-      ]
+      key: { in: [...new Set([resolvedKey, requestedKey])] }
     },
-    include: {
-      folders: { orderBy: { name: "asc" } },
-      tables: { orderBy: { apiSlug: "asc" } }
-    }
-  });
+    include: areaIncludes
+  }) ?? (requestedPosition === null ? null : await prisma.operatingArea.findFirst({
+    where: {
+      workspaceId,
+      position: requestedPosition
+    },
+    include: areaIncludes
+  }));
 
   if (!area) {
     return res.status(404).json({ error: "not_found" });
@@ -1034,7 +999,7 @@ operatingGraphRouter.get("/areas/:areaKey", asyncHandler(async (req, res) => {
       area: {
         id: area.id,
         key: area.key,
-        canonicalKey: requestedKey,
+        canonicalKey: canonicalRequestKey,
         resolvedKey,
         name: area.name,
         description: area.description,

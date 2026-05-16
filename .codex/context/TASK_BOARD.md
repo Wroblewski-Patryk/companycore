@@ -23,7 +23,7 @@
 ## In Progress
 
 - No active implementation task is currently in progress after the
-  V1 production smoke rollout proof.
+  V1OPS-003 compatibility alias cleanup proof.
 
 ## Blocked
 
@@ -104,6 +104,22 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- V1OPS-003 V1 Operations Compatibility Alias Cleanup.
+  - Evidence:
+    `src/operating-model/department-registry.ts` now centralizes canonical
+    `00`-`12` department keys, backend area keys, aliases, and intake hint
+    terms. AOG selected-area reads resolve `03-sprzedaz` to `sales-crm` and
+    `07-finanse` to `finance-billing` before numeric fallback. Global intake
+    suggestions use canonical department keys and scored hints so finance-heavy
+    Paperclip/pricing signals route to `07-finanse`, while generic signals
+    fall back to `00-ogolny`.
+  - Validation:
+    `npm run build:server`; `npm run test:api` with validation-owned
+    PostgreSQL on `127.0.0.1:55494`; `git diff --check`; validation
+    PostgreSQL and temporary artifacts cleaned up.
+  - Task contract:
+    `docs/planning/v1-operations-compatibility-alias-cleanup-task-contract.md`.
 
 - V1OPS-002 Production V1 smoke after Company OS area foundation.
   - Evidence:

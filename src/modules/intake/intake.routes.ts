@@ -3,6 +3,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../../db/prisma";
 import { asyncHandler } from "../../middleware/async-handler";
+import { canonicalDepartmentKeys, type CanonicalDepartmentKey, departmentRegistry } from "../../operating-model/department-registry";
 
 const intakeQuerySchema = z.object({
   family: z.string().min(1).optional(),
@@ -25,22 +26,6 @@ const sourceModels = [
   "Event"
 ] as const;
 
-const departmentKeys = [
-  "00-ogolny",
-  "01-strategia",
-  "02-produkt",
-  "03-sprzedaz",
-  "04-operacje",
-  "05-relacje",
-  "06-kadry",
-  "07-finanse",
-  "08-zasoby",
-  "09-technologia",
-  "10-prawo",
-  "11-innowacje",
-  "12-zarzadzanie"
-] as const;
-
 const classificationValues = [
   "needs_classification",
   "route_to_department",
@@ -57,7 +42,7 @@ const riskLevels = ["low", "medium", "high", "critical"] as const;
 const routeProposalSchema = z.object({
   sourceModel: z.enum(sourceModels),
   sourceId: z.string().uuid(),
-  targetDepartmentKey: z.enum(departmentKeys),
+  targetDepartmentKey: z.enum(canonicalDepartmentKeys),
   classification: z.enum(classificationValues).default("route_to_department"),
   reason: z.string().trim().min(8).max(1200),
   proposedNextAction: z.string().trim().min(3).max(1200).optional(),
@@ -90,22 +75,13 @@ type IntakeItem = {
 
 type RouteProposalInput = z.infer<typeof routeProposalSchema>;
 type IntakeSourceModel = typeof sourceModels[number];
-type IntakeDepartmentKey = typeof departmentKeys[number];
+type IntakeDepartmentKey = CanonicalDepartmentKey;
 type IntakeTx = Prisma.TransactionClient;
 
-const departmentHints = [
-  { key: "07-finance", terms: ["price", "pricing", "discount", "invoice", "payment", "cost", "margin", "finance"] },
-  { key: "03-sales", terms: ["lead", "deal", "offer", "proposal", "sales", "client prospect", "promotion", "ad"] },
-  { key: "05-client-relations", terms: ["client", "support", "feedback", "follow-up", "relationship", "customer"] },
-  { key: "04-operations", terms: ["operation", "workflow", "sop", "dependency", "routine", "approval", "blocker"] },
-  { key: "01-strategy", terms: ["strategy", "goal", "target", "kpi", "vision", "positioning"] },
-  { key: "02-product-delivery", terms: ["product", "delivery", "acceptance", "test", "scope", "service"] },
-  { key: "08-assets-knowledge", terms: ["drive", "file", "folder", "resource", "asset", "knowledge", "document"] },
-  { key: "09-technology-automation", terms: ["agent", "mcp", "api", "integration", "runtime", "webhook", "automation"] },
-  { key: "10-governance-risk-legal", terms: ["policy", "legal", "risk", "control", "security", "permission"] },
-  { key: "11-innovation-improvement", terms: ["experiment", "improvement", "lesson", "retrospective", "idea"] },
-  { key: "06-people-agents-roles", terms: ["role", "people", "agent capacity", "capacity", "escalation", "owner"] }
-] as const;
+const departmentHints = departmentRegistry.map((department) => ({
+  key: department.canonicalKey,
+  terms: department.hintTerms
+}));
 
 export const intakeRouter = Router();
 
@@ -809,8 +785,14 @@ function inferRisk(...values: unknown[]): IntakeItem["risk"] {
 
 function inferDepartment(...values: unknown[]) {
   const text = values.map(searchable).join(" ");
-  const match = departmentHints.find((department) => department.terms.some((term) => text.includes(term)));
-  return match?.key ?? "00-main";
+  const matches = departmentHints
+    .map((department) => ({
+      key: department.key,
+      score: department.terms.filter((term) => text.includes(term)).length
+    }))
+    .filter((department) => department.score > 0)
+    .sort((left, right) => right.score - left.score);
+  return matches[0]?.key ?? "00-ogolny";
 }
 
 function riskRank(risk: IntakeItem["risk"]) {
