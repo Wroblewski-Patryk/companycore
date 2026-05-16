@@ -107,7 +107,8 @@ continue from repository files alone:
   future UI work should reuse it instead of direct DaisyUI button markup.
   `CC-UI-003` has also implemented `CcDataTable` in
   `web/src/components/cc-data-table.tsx`; future record/table views should use
-  that primitive or the compatible `DataTable` export from `react-route-kit`.
+  that primitive directly. `WEB-CORE-001` later removed the unused historical
+  `web/src/react-route-kit.tsx` from the active web layer.
   `CC-00-002` has implemented verified read-only route proposal lifecycle
   readback at `GET /v1/intake/route-proposals`, exposed through `intake:read`
   and MCP as a read-risk tool. `CC-04-002` has implemented verified read-only
@@ -126,8 +127,8 @@ continue from repository files alone:
   WEB-CORE-001 narrowed the active React web runtime to public home, auth,
   `00 General`, `04 Operations`, and `08 Assets` only. Old private web paths
   such as settings, data, relationships, tasks, pipeline, Company OS cockpit,
-  and MCP catalog now show an archived-route notice instead of their former
-  screen bodies; backend APIs remain available for future rebuilds. Next V1
+  and MCP catalog are no longer React app routes; backend APIs remain
+  available for future rebuilds. Next V1
   department work should start from `05 Relationships` only through a scoped
   department-system task contract unless deployment smoke is selected first.
 - `docs/architecture/companycore-business-module-map.md`: accepted

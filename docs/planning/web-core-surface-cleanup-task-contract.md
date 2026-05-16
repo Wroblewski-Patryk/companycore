@@ -30,14 +30,15 @@ systems.
    active private CompanyCore views: `00 General`, `04 Operations`, and
    `08 Assets`.
 2. Replace the active React entrypoint with a smaller implementation that
-   renders only those views and a clear archived-route message for old private
-   paths.
+   renders only those views.
 3. Keep `/dashboard`, `/react-dashboard`, `/areas`, and `/operations` as
    compatibility entries that normalize into the approved current views.
 4. Keep data read behavior source-backed through existing packets:
    `/v1/intake/route-proposals`, `/v1/operations/work-items`, and
    `/v1/assets/context`.
-5. Validate build, route proof, mobile overflow, and validation process cleanup.
+5. Remove old private web routes from the Express React route list.
+6. Validate build, route proof, mobile overflow, removed-route behavior, and
+   validation process cleanup.
 6. Refresh source-of-truth docs and planning queues.
 
 ## Acceptance Criteria
@@ -48,8 +49,8 @@ systems.
 - `/areas?area=04-operacje&view=overview` renders the Operations management
   view.
 - `/areas?area=08-zasoby&view=overview` renders the Assets management view.
-- Old private web paths such as `/settings/api` no longer render their former
-  v0/v1 screens.
+- Old private web paths such as `/settings/api` are no longer React app routes
+  and no longer render former v0/v1 screens.
 - Backend code and API route files are not deleted.
 - Desktop and mobile proof has no console/page errors or horizontal overflow.
 
@@ -67,10 +68,14 @@ systems.
 ## Result Report
 
 - `web/src/main.tsx` now contains the active small web shell and view set only:
-  public home, auth, `00 General`, `04 Operations`, `08 Assets`, and an
-  archived-route notice for removed old screens.
+  public home, auth, `00 General`, `04 Operations`, and `08 Assets`.
 - `web/src/app-route-registry.ts` now exposes only the approved active route
   set and compatibility aliases.
+- `src/app.ts` now serves the React app only for the approved public/auth/core
+  web routes and compatibility aliases.
+- `web/src/react-route-kit.tsx` was removed because it belonged to the old
+  broad React workbench surface and is no longer imported by the active web
+  bundle.
 - `npm run build:web` passed and the generated bundle dropped to a much smaller
   active app surface.
 - `npm run build:server` passed.
@@ -78,7 +83,7 @@ systems.
 - Playwright proof on a temporary static React server passed for:
   `/`, `/auth/login`, login redirect to `00 General`, `/dashboard` alias,
   desktop `04 Operations`, desktop `08 Assets`, mobile `08 Assets` without
-  overflow, and `/settings/api` archived-route behavior.
+  overflow, and absence of the former `/settings/api` React view.
 - A targeted post-auth redirect proof also passed for direct unauthenticated
   entry into `/areas?area=04-operacje&view=overview`, confirming it returns to
   `04 Operations` after login instead of falling back to `00 General`.

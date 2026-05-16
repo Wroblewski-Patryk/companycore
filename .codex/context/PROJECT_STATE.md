@@ -65,8 +65,8 @@ Last updated: 2026-05-16
   `web/src/app-route-registry.ts` now expose only public home, owner login,
   owner registration, `00 General`, `04 Operations`, and `08 Assets`.
   Historical v0/v1 paths such as settings, data, relationships, tasks,
-  pipeline, Company OS cockpit, and MCP tools now show an archived-route notice
-  instead of their former screen bodies; backend APIs were not removed.
+  pipeline, Company OS cockpit, and MCP tools are no longer React app routes;
+  backend APIs were not removed.
   `npm run build:web`, `npm run build:server`, Playwright route proof, and
   `git diff --check` passed. The next runtime slice should rebuild any new web
   surface only through a scoped department-system task contract, with `05

@@ -127,16 +127,17 @@
 
 - WEB-CORE-001 Web core surface cleanup.
   - Evidence: `web/src/main.tsx` now renders only public home, owner login,
-    owner registration, `00 General`, `04 Operations`, `08 Assets`, and an
-    archived-route notice for old private web paths. `web/src/app-route-registry.ts`
-    now exposes only the active route set plus compatibility aliases.
-    Backend API files were not removed. Task contract:
+    owner registration, `00 General`, `04 Operations`, and `08 Assets`.
+    `web/src/app-route-registry.ts` now exposes only the active route set plus
+    compatibility aliases. `src/app.ts` no longer serves old private
+    workbench paths as React app routes. Backend API files were not removed.
+    Task contract:
     `docs/planning/web-core-surface-cleanup-task-contract.md`.
   - Validation: `npm run build:web`; `npm run build:server`; Playwright proof
     against a temporary static React server covered `/`, `/auth/login`,
     login -> `/areas?area=00-ogolny&view=overview`, `/dashboard` alias,
     desktop `04 Operations`, desktop `08 Assets`, mobile `08 Assets` with no
-    horizontal overflow, and `/settings/api` archived-route behavior.
+    horizontal overflow, and removed `/settings/api` React-route behavior.
     `git diff --check` passed with line-ending warnings only; port `3231` was
     closed and no validation-owned `chrome-headless-shell` process remained.
 

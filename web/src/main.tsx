@@ -594,35 +594,6 @@ function AssetsRoute() {
   );
 }
 
-function RemovedWebViewRoute() {
-  useEffect(() => {
-    if (!isSignedIn()) {
-      window.sessionStorage.setItem("companycorePendingPrivatePath", window.location.pathname + window.location.search);
-    }
-  }, []);
-
-  if (!isSignedIn()) {
-    return <AuthRoute mode="login" />;
-  }
-
-  return (
-    <Shell activeArea="00-ogolny">
-      <section className="rounded-company border border-base-300 bg-base-100 p-5">
-        <p className="text-sm font-black uppercase text-warning">Archived web view</p>
-        <h1 className="mt-2 text-3xl font-black text-company-ink">This old v0 screen is no longer active.</h1>
-        <p className="mt-3 max-w-3xl leading-7 text-company-muted">
-          The backend remains available, but the web layer has been cleaned to prevent unfinished screens from mixing with the current operating system UX.
-        </p>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <CcButton href={canonicalGeneralDashboardPath} variant="primary">Open 00 General</CcButton>
-          <CcButton href={canonicalOperationsPath} variant="outline">Open 04 Operations</CcButton>
-          <CcButton href={canonicalAssetsPath} variant="outline">Open 08 Assets</CcButton>
-        </div>
-      </section>
-    </Shell>
-  );
-}
-
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const routeKey = window.location.pathname + window.location.search;
   if (!isSignedIn()) {
@@ -670,7 +641,12 @@ function App() {
     return <PrivateRoute><GeneralDashboard /></PrivateRoute>;
   }
 
-  return <RemovedWebViewRoute />;
+  if (isSignedIn()) {
+    window.history.replaceState(null, "", canonicalGeneralDashboardPath);
+    return <PrivateRoute><GeneralDashboard /></PrivateRoute>;
+  }
+
+  return <AuthRoute mode="login" />;
 }
 
 createRoot(document.getElementById("root")!).render(

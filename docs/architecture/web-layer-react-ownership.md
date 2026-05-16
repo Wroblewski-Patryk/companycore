@@ -57,9 +57,9 @@ Active private route behavior:
 - `/operations`: compatibility entry that normalizes to the `04 Operations`
   selected-area view.
 
-Old private web paths may still be served by the SPA fallback, but they must
-show an archived-route notice instead of their former screen body. They are not
-active product views.
+Old private web paths are no longer served as React app routes. If a future
+screen needs one of those addresses, it must be reintroduced through a scoped
+task contract and route-registry update.
 
 API hosts still use the existing JSON API behavior. Protected backend contracts
 remain under `/v1/*` and root protected compatibility routes.
@@ -91,7 +91,7 @@ The current active React coverage is:
 - `00 General` post-login dashboard;
 - `04 Operations` management read view;
 - `08 Assets` management read view;
-- archived-route notice for old private web paths.
+No old private workbench component remains in the active `web/src` bundle.
 
 These views consume existing backend contracts where applicable. The removed
 web views are not deleted from backend architecture; they are simply not active

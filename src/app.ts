@@ -85,22 +85,7 @@ const reactAppRoutes = [
   "/areas",
   "/auth/login",
   "/auth/register",
-  "/data",
-  "/data/:table",
-  "/relationships",
-  "/tasks-adapter",
-  "/pipeline",
-  "/settings",
-  "/settings/account",
-  "/settings/integrations",
-  "/settings/drive",
-  "/settings/api",
-  "/react-agent-tools",
-  "/react-company-os",
-  "/react-areas",
-  "/react-dashboard",
-  "/react-integrations",
-  "/react-tasks"
+  "/react-dashboard"
 ];
 
 function createCorsMiddleware() {

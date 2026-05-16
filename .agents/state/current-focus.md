@@ -32,8 +32,8 @@ dashboard after login. `npm run build:web`, `npm run build:server`, rendered
 route proof, and `git diff --check` passed. `WEB-CORE-001` then narrowed the
 active web runtime to the owner-approved current surfaces only: public home,
 auth, `00 General`, `04 Operations`, and `08 Assets`. Old private web
-workbenches now render an archived-route notice instead of their former UI,
-while backend APIs remain available for future rebuilds. The next active slice
+workbenches are no longer React app routes, while backend APIs remain available
+for future rebuilds. The next active slice
 should continue only through a scoped department-system contract, with `05
 Relationships` still the likely next department unless production deployment
 smoke is selected first.
