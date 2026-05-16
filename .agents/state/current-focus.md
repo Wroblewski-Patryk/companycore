@@ -33,10 +33,15 @@ route proof, and `git diff --check` passed. `WEB-CORE-001` then narrowed the
 active web runtime to the owner-approved current surfaces only: public home,
 auth, `00 General`, `04 Operations`, and `08 Assets`. Old private web
 workbenches are no longer React app routes, while backend APIs remain available
-for future rebuilds. The next active slice
-should continue only through a scoped department-system contract, with `05
-Relationships` still the likely next department unless production deployment
-smoke is selected first.
+for future rebuilds. `WEB-QA-AUDIT-001` then audited that cleaned web
+foundation. The active web base is production-testable and correctly scoped,
+but it should not expand into more department screens until `WEB-QA-001`
+centralizes default-English i18n with a future Polish path, user-facing API
+error messages, shared form field/validation primitives, and reusable
+notice/action feedback. The next active slice should be `WEB-QA-001`; after
+that, department work should continue only through a scoped department-system
+contract, with `05 Relationships` still the likely next department unless
+production deployment smoke is selected first.
 
 Current DMS focus: the first `00 Main` intake API/web panel, proposal-only
 route command, shared department shell, department subsystem registry, Finance

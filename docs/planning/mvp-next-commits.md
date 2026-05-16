@@ -7,13 +7,20 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
+- [ ] Implement `WEB-QA-001` Web language, message, and form foundation before
+      adding more department screens. The cleaned active web base is
+      production-testable, but `WEB-QA-AUDIT-001` found that i18n, user-facing
+      API error mapping, form primitives, and centralized notice/action
+      feedback must be shared now to avoid duplicated UX behavior. Default UI
+      language remains English; Polish support should be added through a
+      dictionary/selector path, not page-local copy forks.
 - [ ] Continue V1 department systems with `DMS-NEXT-004` Relationships
-      Management read packet and board, unless deployment smoke is selected
-      first. The owner-approved `00 Main -> 04 Operations -> 08 Assets`
-      checkpoint is now complete through shared primitives, verified backend
-      packets, selected-area UI adoption, CC-AUDIT-001 post-login dashboard
-      proof, and WEB-CORE-001 active web cleanup. CompanyCore remains the
-      operating system; AI agents remain external API/MCP clients. Do not
+      Management read packet and board after `WEB-QA-001`, unless deployment
+      smoke is selected first. The owner-approved `00 Main -> 04 Operations ->
+      08 Assets` checkpoint is complete through shared primitives, verified
+      backend packets, selected-area UI adoption, CC-AUDIT-001 post-login
+      dashboard proof, and WEB-CORE-001 active web cleanup. CompanyCore remains
+      the operating system; AI agents remain external API/MCP clients. Do not
       restore old private workbench screens without a scoped task contract.
 
 ### NEXT
@@ -64,6 +71,13 @@ synchronized with `.codex/context/TASK_BOARD.md`.
       React app routes. Backend APIs remain untouched for future rebuilds.
       Validation: `npm run build:web`, `npm run build:server`, Playwright
       route proof, removed-route proof, and `git diff --check`.
+- [x] Web quality audit checkpoint completed for `WEB-QA-AUDIT-001`:
+      `docs/planning/web-foundation-quality-audit-2026-05-16.md` records the
+      current web base as production-testable but not ready for broad new
+      department expansion until i18n, user-facing error mapping, shared form
+      primitives, and centralized notices are implemented. Validation:
+      source review, Playwright fallback proof on a temporary mocked API
+      server, `npm run build:web`, and `npm run build:server`.
 - [ ] Continue V1 department systems after the `00 -> 04 -> 08` loop has the
       next planning/runtime checkpoint. `03 Sales` read packet and board is
       complete locally; the broader sequence remains `05 Relationships`,

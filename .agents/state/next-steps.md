@@ -4,8 +4,21 @@ Last updated: 2026-05-16
 
 ## NOW
 
-1. Continue V1 department systems with `DMS-NEXT-004` Relationships Management
-   read packet and board, unless deployment smoke is selected first.
+1. Implement `WEB-QA-001` Web language, message, and form foundation before
+   adding more department screens.
+   - Source:
+     `docs/planning/web-foundation-quality-audit-2026-05-16.md`.
+   - Goal: keep the cleaned web base scalable by adding default-English i18n
+     with a persistent language selector and future Polish dictionary path,
+     shared user-facing API error mapping, shared form field/validation
+     primitives, and reusable notices/action feedback.
+   - Validation target: web build, responsive Playwright proof for public
+     home/auth/`00`/`04`/`08`, negative auth error proof with user-facing
+     messages instead of raw codes, `html lang` switching, no mobile overflow,
+     and no unnamed visible controls.
+2. Continue V1 department systems with `DMS-NEXT-004` Relationships Management
+   read packet and board after `WEB-QA-001`, unless deployment smoke is
+   selected first.
    - Source:
      `docs/planning/companycore-00-04-08-operating-loop-plan.md`.
    - `CC-UI-001`, `CC-00-001`, `CC-04-001`, and `CC-08-001` are now complete
@@ -131,7 +144,8 @@ Last updated: 2026-05-16
 15. V1AREA capability actions.
    - Add create/edit/filter actions only where an existing backend contract
      already supports the selected capability safely.
-16. Resume broader department sequencing after the `00 -> 04 -> 08`
+16. Resume broader department sequencing after `WEB-QA-001` and the
+    `00 -> 04 -> 08`
     checkpoint.
    - `03 Sales` is locally verified. The broader next sequence remains
      `05 Relationships`, `02 Product And Delivery`, `09 Technology/AI`, and

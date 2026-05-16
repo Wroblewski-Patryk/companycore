@@ -2,6 +2,15 @@
 
 ## Ready
 
+- WEB-QA-001 Web language, message, and form foundation.
+  - Stage: planning
+  - Owner: Frontend Builder + QA/Test + Product Docs
+  - Priority: P0
+  - Source: `docs/planning/web-foundation-quality-audit-2026-05-16.md`
+  - Goal: implement the next web-foundation quality slice before adding more
+    departments: default English UI with a persistent language selector and
+    Polish dictionary path, shared user-facing API error mapping, shared form
+    field/validation primitives, and centralized notices/action feedback.
 - DMS-NEXT-004 Relationships Management read packet and board.
   - Stage: planning
   - Owner: Product Docs + Backend Builder + Frontend Builder
@@ -124,6 +133,27 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- WEB-QA-AUDIT-001 Web foundation quality audit.
+  - Evidence:
+    `docs/planning/web-foundation-quality-audit-2026-05-16.md` audits the
+    cleaned active web layer for route ownership, responsive readiness,
+    form validation, error/notification behavior, language readiness,
+    accessibility smoke, and scalable next implementation order. It records
+    the base as production-testable but not ready for broad new department
+    expansion until i18n, shared errors, shared forms, and notices are
+    centralized. Task contract:
+    `docs/planning/web-foundation-quality-audit-task-contract.md`.
+  - Validation: source review of `web/src/main.tsx`,
+    `web/src/app-route-registry.ts`, shared components, and `src/app.ts`;
+    Playwright fallback against a temporary mocked API server on
+    `http://127.0.0.1:3234`; `npm run build:web`; `npm run build:server`.
+    Proof covered public home, native auth form validation, raw negative API
+    error display, login redirect to `00 General`, `00/04/08` packet states,
+    mobile `08 Assets` with no horizontal overflow, removed old route
+    behavior, `html lang="en"`, and lack of a language switcher. The temporary
+    server was closed and no validation-owned `chrome-headless-shell` process
+    remained.
 
 - WEB-CORE-001 Web core surface cleanup.
   - Evidence: `web/src/main.tsx` now renders only public home, owner login,

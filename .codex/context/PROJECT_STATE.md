@@ -66,7 +66,12 @@ Last updated: 2026-05-16
   owner registration, `00 General`, `04 Operations`, and `08 Assets`.
   Historical v0/v1 paths such as settings, data, relationships, tasks,
   pipeline, Company OS cockpit, and MCP tools are no longer React app routes;
-  backend APIs were not removed.
+  backend APIs were not removed. `WEB-QA-AUDIT-001` then audited the cleaned
+  web foundation. The base is production-testable, but the next web slice
+  should be `WEB-QA-001`: default-English i18n with a persistent selector and
+  Polish dictionary path, user-facing API error mapping, shared form
+  field/validation primitives, and centralized notices/action feedback before
+  more department screens are added.
   `npm run build:web`, `npm run build:server`, Playwright route proof, and
   `git diff --check` passed. The next runtime slice should rebuild any new web
   surface only through a scoped department-system task contract, with `05

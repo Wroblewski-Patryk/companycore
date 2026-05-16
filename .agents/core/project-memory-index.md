@@ -128,9 +128,26 @@ continue from repository files alone:
   `00 General`, `04 Operations`, and `08 Assets` only. Old private web paths
   such as settings, data, relationships, tasks, pipeline, Company OS cockpit,
   and MCP catalog are no longer React app routes; backend APIs remain
-  available for future rebuilds. Next V1
-  department work should start from `05 Relationships` only through a scoped
+  available for future rebuilds. `WEB-QA-AUDIT-001` then audited the cleaned
+  web foundation. The current base is production-testable, but future
+  department expansion must first implement `WEB-QA-001`: default-English i18n
+  with a persistent language selector and Polish dictionary path, shared
+  user-facing API error mapping, shared form field/validation primitives, and
+  centralized notice/action feedback. Next V1 department work should start
+  from `05 Relationships` only after that quality slice, through a scoped
   department-system task contract unless deployment smoke is selected first.
+- `docs/planning/web-foundation-quality-audit-2026-05-16.md` and
+  `docs/planning/web-foundation-quality-audit-task-contract.md`: active web
+  foundation quality audit. It reviewed `web/src/main.tsx`,
+  `web/src/app-route-registry.ts`, `web/src/components/cc-button.tsx`,
+  `web/src/components/cc-data-table.tsx`, `web/src/styles.css`, and
+  `src/app.ts`, then ran Playwright fallback proof on a temporary mocked API
+  server plus `npm run build:web` and `npm run build:server`. The audit found
+  no route-scope blocker, no mobile overflow in the checked active path, and
+  no unnamed visible controls, but it found P1 gaps for i18n, raw auth error
+  codes, native-only form validation, and decentralized feedback. Treat
+  `WEB-QA-001` as the next web foundation implementation before new
+  department screens.
 - `docs/architecture/companycore-business-module-map.md`: accepted
   model-level module map for scaling CompanyCore as the bridge for operating
   the company. It classifies future work as native core, provider-backed,
