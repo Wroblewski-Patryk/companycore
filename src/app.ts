@@ -25,6 +25,7 @@ import { mcpRouter } from "./modules/mcp/mcp.routes";
 import { notesRouter } from "./modules/notes/notes.routes";
 import { operatingGraphRouter } from "./modules/operating-graph/operating-graph.routes";
 import { operatingModelRouter } from "./modules/operating-model/operating-model.routes";
+import { operationsRouter } from "./modules/operations/operations.routes";
 import { pipelineStagesRouter } from "./modules/pipeline-stages/pipeline-stages.routes";
 import { projectsRouter } from "./modules/projects/projects.routes";
 import { relationshipsRouter } from "./modules/relationships/relationships.routes";
@@ -45,6 +46,7 @@ function mountProtectedRoutes(router: Router) {
   router.use("/mcp", mcpRouter);
   router.use("/operating-graph", operatingGraphRouter);
   router.use("/operating-model", operatingModelRouter);
+  router.use("/operations", operationsRouter);
   router.use("/relationships", relationshipsRouter);
   router.use("/goals", goalsRouter);
   router.use("/google-drive", googleDriveRouter);

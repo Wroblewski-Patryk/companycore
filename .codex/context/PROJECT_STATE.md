@@ -118,6 +118,17 @@ Last updated: 2026-05-16
   `npm run test:api` against validation-owned PostgreSQL on
   `127.0.0.1:55494`, and `git diff --check` passed. The validation database
   process and temporary files were removed after the run.
+  As of 2026-05-16, V1OPS-004 added protected read-only
+  `GET /v1/operations/context` as the backend Operations Management packet
+  for `04-operacje`. The route aggregates existing procedures, procedure
+  steps, approvals, dependencies, business functions, operational tasks,
+  summary counts, and a read-only agent packet with blocked write actions.
+  It is exposed through `operations:read`, MCP manifest tooling, and the
+  read-oriented MCP key profiles. `npm run build:server`,
+  `npm run test:api` against validation-owned PostgreSQL on
+  `127.0.0.1:55495`, and `git diff --check` passed. The validation database
+  process and temporary files were removed after the run. Production smoke for
+  this new route remains the next release step after deployment.
   As of 2026-05-16, DMS-00-003 implemented the first backend slice of
   `00 Main`: protected read-only `GET /v1/intake`. It aggregates existing
   agent events, provider inbox rows, unassigned Drive/provider resources,

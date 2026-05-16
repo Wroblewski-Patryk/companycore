@@ -955,6 +955,62 @@ Edge confidence values:
 - `needs_review`: the owner should confirm or assign scope.
 - `unsupported`: the relation family is known but not modeled as a fact.
 
+## Operations Context
+
+```http
+GET /v1/operations/context
+```
+
+Required capability:
+
+```text
+operations:read
+```
+
+`GET /v1/operations/context` returns the read-only `04 Operations`
+management packet for owners and MCP agents. It aggregates existing Company OS
+and task records without creating procedures, deciding approvals, changing
+dependencies, creating tasks, or mutating provider state.
+
+Safe response shape:
+
+```json
+{
+  "data": {
+    "department": {
+      "canonicalKey": "04-operacje",
+      "backendAreaKey": "operations-administration",
+      "name": "Operations Management System"
+    },
+    "summary": {
+      "procedures": 7,
+      "activeProcedures": 7,
+      "procedureSteps": 21,
+      "pendingApprovals": 1,
+      "blockedDependencies": 1,
+      "activeBusinessFunctions": 12,
+      "openTasks": 3,
+      "operationalTasks": 2
+    },
+    "procedures": [],
+    "approvals": [],
+    "dependencies": [],
+    "businessFunctions": [],
+    "tasks": [],
+    "agentPacket": {
+      "mode": "read_only",
+      "allowedActions": ["read_operations_context", "inspect_procedure"],
+      "blockedActions": [
+        {
+          "action": "create_or_change_procedure",
+          "reason": "Procedure definition changes must use Company OS workflow-definition draft commands."
+        }
+      ]
+    }
+  }
+}
+```
+
 ## Company OS
 
 Company OS records are exposed through a mostly read-oriented,
@@ -2230,7 +2286,7 @@ Query:
 | `status` | string | unset | Filters statuses such as `needs_classification`, `needs_owner_decision`, `ready_to_route`, and `blocked`. |
 | `sourceAgent` | string | unset | Returns items for the selected agent plus broadcast agent events. |
 | `risk` | string | unset | Filters `low`, `medium`, `high`, or `critical`. |
-| `suggestedDepartment` | string | unset | Filters inferred department keys such as `04-operations` or `07-finance`. |
+| `suggestedDepartment` | string | unset | Filters inferred canonical department keys such as `04-operacje` or `07-finanse`. |
 | `limit` | number | `100` | Maximum `200`. |
 
 Safe response shape:
@@ -2244,7 +2300,7 @@ Safe response shape:
       "byFamily": { "agent_output": 1, "provider_signal": 1, "risk_or_approval": 1 },
       "byStatus": { "needs_owner_decision": 1, "blocked": 2 },
       "byRisk": { "high": 2, "critical": 1 },
-      "byDepartment": { "04-operations": 1, "07-finance": 2 }
+      "byDepartment": { "04-operacje": 1, "07-finanse": 2 }
     },
     "items": [
       {
@@ -2257,7 +2313,7 @@ Safe response shape:
         "sourceModel": "AgentEventOutbox",
         "sourceId": "event-uuid",
         "risk": "critical",
-        "suggestedDepartment": "07-finance",
+        "suggestedDepartment": "07-finanse",
         "confidence": "direct",
         "allowedActions": ["review", "route_to_department", "create_task", "ack_after_handled"],
         "blockedActions": [

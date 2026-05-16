@@ -7,11 +7,11 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] Implement the next department-specific read model or safe command
-      contract:
-      start from the shared department registry and existing backend
-      contracts. Preferred order: a read-only `01 Strategy` department packet
-      or the first safe `04 Operations` planning/procedure command contract.
+- [ ] Production smoke for V1OPS-004 after deployment:
+      compare public `/health` metadata with the pushed commit, then smoke
+      protected `GET /v1/operations/context` with owner credentials or an
+      `operations:read` key before claiming production readiness for the
+      completed V1OPS group.
 
 ### NEXT
 
@@ -109,6 +109,18 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       `git diff --check`. Validation PostgreSQL and temporary artifacts were
       cleaned up. Task contract:
       `docs/planning/v1-operations-compatibility-alias-cleanup-task-contract.md`.
+
+- [x] V1OPS-004 V1 Operations context read API:
+      protected read-only `GET /v1/operations/context` now returns the
+      `04-operacje` Operations Management packet with procedures, procedure
+      steps, approvals, dependencies, business functions, operational tasks,
+      summary counts, allowed read actions, and blocked write actions. The
+      route is exposed through `operations:read`, MCP manifest tooling, and
+      read-oriented MCP key profiles. Validation passed with
+      `npm run build:server`, `npm run test:api` against validation-owned
+      PostgreSQL on `127.0.0.1:55495`, and `git diff --check`. Validation
+      PostgreSQL and temporary artifacts were cleaned up. Task contract:
+      `docs/planning/v1-operations-context-read-api-task-contract.md`.
 
 - [x] V1COS-001 Company OS area-aware foundation:
       `/react-company-os` now connects Company OS evidence and guarded

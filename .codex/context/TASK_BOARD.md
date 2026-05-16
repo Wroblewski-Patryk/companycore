@@ -23,7 +23,7 @@
 ## In Progress
 
 - No active implementation task is currently in progress after the
-  V1OPS-003 compatibility alias cleanup proof.
+  V1OPS-004 Operations context read API proof.
 
 ## Blocked
 
@@ -104,6 +104,21 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- V1OPS-004 V1 Operations Context Read API.
+  - Evidence:
+    Protected read-only `GET /v1/operations/context` now returns the
+    `04-operacje` Operations Management packet with procedures, procedure
+    steps, approvals, dependencies, business functions, operational tasks,
+    summary counts, and read-only agent handoff. The route is exposed through
+    `operations:read`, MCP manifest tooling, and read-oriented MCP key
+    profiles.
+  - Validation:
+    `npm run build:server`; `npm run test:api` with validation-owned
+    PostgreSQL on `127.0.0.1:55495`; `git diff --check`; validation
+    PostgreSQL and temporary artifacts cleaned up.
+  - Task contract:
+    `docs/planning/v1-operations-context-read-api-task-contract.md`.
 
 - V1OPS-003 V1 Operations Compatibility Alias Cleanup.
   - Evidence:

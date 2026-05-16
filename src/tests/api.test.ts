@@ -1098,6 +1098,173 @@ test("CompanyCore v1 protected API flow", async () => {
   await prisma.deal.delete({ where: { id: commercialDeal.id } });
   await prisma.client.delete({ where: { id: commercialClient.id } });
 
+  const operationsProcedure = await prisma.procedure.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Operations weekly planning",
+      purpose: "Plan weekly operations, dependencies, approvals, and handoffs.",
+      status: "active",
+      requiredTools: ["companycore"],
+      requiredPermissions: ["company-os:read"],
+      expectedResult: "Owner has an approved operations plan."
+    }
+  });
+  const operationsStep = await prisma.procedureStep.create({
+    data: {
+      procedureId: operationsProcedure.id,
+      stepOrder: 1,
+      instruction: "Review blocked dependencies and pending approvals.",
+      stepType: "manual"
+    }
+  });
+  const operationsBusinessFunction = await prisma.businessFunction.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Operations planning and control",
+      category: "operations",
+      description: "Keeps routines, dependencies, and handoffs under control.",
+      status: "active"
+    }
+  });
+  const operationsResource = await prisma.resource.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      type: "system",
+      name: "Operations calendar"
+    }
+  });
+  const operationsDependency = await prisma.dependency.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      dependencyType: "routine_blocker",
+      fromResourceId: operationsResource.id,
+      toEntityType: "procedure",
+      toEntityId: operationsProcedure.id,
+      status: "blocked",
+      metadata: { blocker: "Owner needs to confirm cadence." }
+    }
+  });
+  const operationsApproval = await prisma.approval.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      requestedByType: "agent",
+      requestedById: "paperclip",
+      requestedForAction: "operations.weekly_plan.approve",
+      resourceType: "procedure",
+      resourceId: operationsProcedure.id,
+      riskLevel: "medium"
+    }
+  });
+  const operationsTask = await prisma.task.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      title: "Operations procedure review",
+      description: "Review SOP, dependency, and approval context.",
+      status: "in_progress",
+      priority: "high"
+    }
+  });
+  const foreignOperationsProcedure = await prisma.procedure.create({
+    data: {
+      workspaceId: ownerB.workspace.id,
+      name: "Foreign operations procedure",
+      purpose: "Must not leak into workspace A operations context.",
+      status: "active"
+    }
+  });
+
+  const unauthenticatedOperationsContext = await request("/v1/operations/context");
+  assert.equal(unauthenticatedOperationsContext.status, 401);
+  const operationsCountsBefore = {
+    procedures: await prisma.procedure.count({ where: { workspaceId: ownerA.workspace.id } }),
+    procedureSteps: await prisma.procedureStep.count({ where: { procedure: { workspaceId: ownerA.workspace.id } } }),
+    approvals: await prisma.approval.count({ where: { workspaceId: ownerA.workspace.id } }),
+    dependencies: await prisma.dependency.count({ where: { workspaceId: ownerA.workspace.id } }),
+    businessFunctions: await prisma.businessFunction.count({ where: { workspaceId: ownerA.workspace.id } }),
+    tasks: await prisma.task.count({ where: { workspaceId: ownerA.workspace.id } }),
+    auditLogs: await prisma.auditLog.count({ where: { workspaceId: ownerA.workspace.id } }),
+    events: await prisma.event.count({ where: { workspaceId: ownerA.workspace.id } })
+  };
+  const operationsContext = await request("/v1/operations/context", { headers: authA });
+  assert.equal(operationsContext.status, 200);
+  const operationsContextBody = operationsContext.body as {
+    data: {
+      department: { canonicalKey: string; backendAreaKey: string };
+      summary: {
+        procedures: number;
+        activeProcedures: number;
+        procedureSteps: number;
+        pendingApprovals: number;
+        blockedDependencies: number;
+        activeBusinessFunctions: number;
+        operationalTasks: number;
+      };
+      procedures: Array<{ id: string; steps: Array<{ id: string; instruction: string }> }>;
+      approvals: Array<{ id: string; requestedForAction: string; status: string }>;
+      dependencies: Array<{ id: string; status: string; type: string }>;
+      businessFunctions: Array<{ id: string; name: string }>;
+      tasks: Array<{ id: string; title: string }>;
+      agentPacket: { mode: string; allowedActions: string[]; blockedActions: Array<{ action: string }> };
+    };
+  };
+  assert.equal(operationsContextBody.data.department.canonicalKey, "04-operacje");
+  assert.equal(operationsContextBody.data.department.backendAreaKey, "operations-administration");
+  assert.ok(operationsContextBody.data.summary.procedures >= 1);
+  assert.ok(operationsContextBody.data.summary.activeProcedures >= 1);
+  assert.ok(operationsContextBody.data.summary.procedureSteps >= 1);
+  assert.ok(operationsContextBody.data.summary.pendingApprovals >= 1);
+  assert.ok(operationsContextBody.data.summary.blockedDependencies >= 1);
+  assert.ok(operationsContextBody.data.summary.activeBusinessFunctions >= 1);
+  assert.ok(operationsContextBody.data.summary.operationalTasks >= 1);
+  assert.ok(operationsContextBody.data.procedures.some((procedure) => (
+    procedure.id === operationsProcedure.id
+    && procedure.steps.some((step) => step.id === operationsStep.id)
+  )));
+  assert.ok(operationsContextBody.data.approvals.some((approval) => approval.id === operationsApproval.id));
+  assert.ok(operationsContextBody.data.dependencies.some((dependency) => dependency.id === operationsDependency.id));
+  assert.ok(operationsContextBody.data.businessFunctions.some((businessFunction) => businessFunction.id === operationsBusinessFunction.id));
+  assert.ok(operationsContextBody.data.tasks.some((task) => task.id === operationsTask.id));
+  assert.equal(operationsContextBody.data.agentPacket.mode, "read_only");
+  assert.ok(operationsContextBody.data.agentPacket.allowedActions.includes("read_operations_context"));
+  assert.ok(operationsContextBody.data.agentPacket.blockedActions.some((action) => action.action === "create_or_change_procedure"));
+  const operationsCountsAfter = {
+    procedures: await prisma.procedure.count({ where: { workspaceId: ownerA.workspace.id } }),
+    procedureSteps: await prisma.procedureStep.count({ where: { procedure: { workspaceId: ownerA.workspace.id } } }),
+    approvals: await prisma.approval.count({ where: { workspaceId: ownerA.workspace.id } }),
+    dependencies: await prisma.dependency.count({ where: { workspaceId: ownerA.workspace.id } }),
+    businessFunctions: await prisma.businessFunction.count({ where: { workspaceId: ownerA.workspace.id } }),
+    tasks: await prisma.task.count({ where: { workspaceId: ownerA.workspace.id } }),
+    auditLogs: await prisma.auditLog.count({ where: { workspaceId: ownerA.workspace.id } }),
+    events: await prisma.event.count({ where: { workspaceId: ownerA.workspace.id } })
+  };
+  assert.deepEqual(operationsCountsAfter, operationsCountsBefore);
+  const foreignOperationsContext = await request("/v1/operations/context", { headers: authB });
+  assert.equal(foreignOperationsContext.status, 200);
+  const foreignOperationsContextBody = foreignOperationsContext.body as {
+    data: { procedures: Array<{ id: string }> };
+  };
+  assert.ok(foreignOperationsContextBody.data.procedures.some((procedure) => procedure.id === foreignOperationsProcedure.id));
+  assert.ok(!foreignOperationsContextBody.data.procedures.some((procedure) => procedure.id === operationsProcedure.id));
+  const operationsMcpManifest = await request("/v1/mcp/manifest", { headers: authA });
+  assert.equal(operationsMcpManifest.status, 200);
+  const operationsMcpManifestBody = operationsMcpManifest.body as {
+    data: { tools: Array<{ name: string; path: string; capability: string; riskLevel: string; requiresApproval: boolean }> };
+  };
+  assert.ok(operationsMcpManifestBody.data.tools.some((tool) => (
+    tool.name === "companycore_get_operations_context"
+    && tool.path === "/v1/operations/context"
+    && tool.capability === "operations:read"
+    && tool.riskLevel === "read"
+    && tool.requiresApproval === false
+  )));
+
+  await prisma.task.delete({ where: { id: operationsTask.id } });
+  await prisma.approval.delete({ where: { id: operationsApproval.id } });
+  await prisma.dependency.delete({ where: { id: operationsDependency.id } });
+  await prisma.resource.delete({ where: { id: operationsResource.id } });
+  await prisma.businessFunction.delete({ where: { id: operationsBusinessFunction.id } });
+  await prisma.procedure.deleteMany({ where: { id: { in: [operationsProcedure.id, foreignOperationsProcedure.id] } } });
+
   const ownerAWorkspacesInitial = await request("/v1/workspaces", { headers: authA });
   assert.equal(ownerAWorkspacesInitial.status, 200);
   const ownerAWorkspacesInitialBody = ownerAWorkspacesInitial.body as {
@@ -3386,6 +3553,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(companyOsReaderProfile.scopes.includes("commercial-exceptions:read"));
   assert.ok(companyOsReaderProfile.scopes.includes("finance:read"));
   assert.ok(companyOsReaderProfile.scopes.includes("relationships:read"));
+  assert.ok(companyOsReaderProfile.scopes.includes("operations:read"));
   assert.ok(!companyOsReaderProfile.scopes.includes("company-os:definition:write"));
   assert.ok(!companyOsReaderProfile.scopes.includes("company-os:workflow-definition:write"));
   assert.ok(!companyOsReaderProfile.scopes.includes("company-os:workflow-definition:activate"));
@@ -3414,6 +3582,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(createdProfileKeyBody.data.scopes.includes("commercial-exceptions:read"));
   assert.ok(createdProfileKeyBody.data.scopes.includes("finance:read"));
   assert.ok(createdProfileKeyBody.data.scopes.includes("relationships:read"));
+  assert.ok(createdProfileKeyBody.data.scopes.includes("operations:read"));
   assert.ok(!createdProfileKeyBody.data.scopes.includes("company-os:definition:write"));
   assert.ok(!createdProfileKeyBody.data.scopes.includes("company-os:workflow-definition:write"));
   assert.ok(!createdProfileKeyBody.data.scopes.includes("company-os:workflow-definition:activate"));
@@ -3437,6 +3606,10 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(profileMcpManifestBody.data.tools.some((tool) => (
     tool.path === "/v1/finance/context"
     && tool.capability === "finance:read"
+  )));
+  assert.ok(profileMcpManifestBody.data.tools.some((tool) => (
+    tool.path === "/v1/operations/context"
+    && tool.capability === "operations:read"
   )));
   assert.ok(!profileMcpManifestBody.data.tools.some((tool) => tool.capability === "company-os:definition:write"));
   assert.ok(!profileMcpManifestBody.data.tools.some((tool) => tool.capability === "company-os:workflow-definition:write"));
@@ -3600,6 +3773,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(!scopedConnectionBody.data.capabilities.includes("company-os:workflow-definition:activate"));
   assert.ok(!scopedConnectionBody.data.capabilities.includes("commercial-exceptions:read"));
   assert.ok(!scopedConnectionBody.data.capabilities.includes("finance:read"));
+  assert.ok(!scopedConnectionBody.data.capabilities.includes("operations:read"));
   assert.ok(!scopedConnectionBody.data.capabilities.includes("notes:write"));
   assert.ok(scopedConnectionBody.data.mcpManifest.tools.some((tool) => (
     tool.path === "/v1/company-os"
@@ -3612,6 +3786,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(!scopedConnectionBody.data.mcpManifest.tools.some((tool) => tool.capability === "company-os:workflow-definition:activate"));
   assert.ok(!scopedConnectionBody.data.mcpManifest.tools.some((tool) => tool.capability === "commercial-exceptions:read"));
   assert.ok(!scopedConnectionBody.data.mcpManifest.tools.some((tool) => tool.capability === "finance:read"));
+  assert.ok(!scopedConnectionBody.data.mcpManifest.tools.some((tool) => tool.capability === "operations:read"));
 
   const scopedMcpManifest = await request("/v1/mcp/manifest", {
     headers: scopedAuth
@@ -3633,6 +3808,7 @@ test("CompanyCore v1 protected API flow", async () => {
   )));
   assert.ok(!scopedMcpManifestBody.data.tools.some((tool) => tool.capability === "commercial-exceptions:read"));
   assert.ok(!scopedMcpManifestBody.data.tools.some((tool) => tool.capability === "finance:read"));
+  assert.ok(!scopedMcpManifestBody.data.tools.some((tool) => tool.capability === "operations:read"));
 
   const deniedScopedCommercialExceptions = await request("/v1/commercial-exceptions", {
     headers: scopedAuth
@@ -3644,6 +3820,11 @@ test("CompanyCore v1 protected API flow", async () => {
   });
   assert.equal(deniedScopedFinanceContext.status, 403);
   assert.equal((deniedScopedFinanceContext.body as { error: string }).error, "forbidden");
+  const deniedScopedOperationsContext = await request("/v1/operations/context", {
+    headers: scopedAuth
+  });
+  assert.equal(deniedScopedOperationsContext.status, 403);
+  assert.equal((deniedScopedOperationsContext.body as { error: string }).error, "forbidden");
 
   const scopedReadCompanyOs = await request("/v1/company-os/approvals", {
     headers: scopedAuth

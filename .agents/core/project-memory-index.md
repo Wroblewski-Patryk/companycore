@@ -144,6 +144,12 @@ continue from repository files alone:
   `sales-crm`, `07-finanse` resolves to `finance-billing`, intake suggestions
   emit canonical keys, and non-canonical command inputs still fail closed.
   `npm run test:api` passed on validation-owned PostgreSQL `127.0.0.1:55494`.
+  As of V1OPS-004, `GET /v1/operations/context` provides the read-only
+  backend packet for `04 Operations`: procedures, procedure steps, approvals,
+  dependencies, business functions, operational tasks, summary counts, allowed
+  read actions, and blocked write actions. It is exposed through
+  `operations:read` and MCP. `npm run test:api` passed on validation-owned
+  PostgreSQL `127.0.0.1:55495`; production smoke remains pending after deploy.
 - `docs/architecture/department-management-systems-v1-blueprint.md`:
   detailed V1 blueprint for `00 Main` plus the 12 operating department
   management systems. As of 2026-05-16, future department work should use this

@@ -4,12 +4,12 @@ Last updated: 2026-05-16
 
 ## NOW
 
-1. Implement the next department-specific read model or safe command contract.
+1. Run production smoke for V1OPS-004 after deployment.
    - Source: `docs/planning/mvp-next-commits.md`.
-   - Start from the shared backend department registry added in V1OPS-003.
-   - Preferred order: a read-only `01 Strategy` department packet or the first
-     safe `04 Operations` planning/procedure command contract.
-   - Keep new write behavior behind explicit command contracts and API tests.
+   - Compare public `/health` metadata with the pushed commit.
+   - Smoke protected `GET /v1/operations/context` with owner credentials or an
+     `operations:read` key.
+   - Mark V1OPS production readiness only after the deployed route is proven.
 
 ## NEXT
 
