@@ -2138,6 +2138,79 @@ same task. The note uses `source = clickup` and the ClickUp comment ID as
 `externalId`, so repeated webhook deliveries update the same note instead of
 duplicating context.
 
+## Global Intake
+
+```http
+GET /v1/intake
+GET /intake
+```
+
+Required capability:
+
+```text
+intake:read
+```
+
+`GET /v1/intake` is the read-only `00 Main` queue for owner review and MCP
+agents. It aggregates existing workspace records into one normalized routing
+surface without acknowledging events, retrying providers, changing Drive scope,
+or executing approvals.
+
+Query:
+
+| Name | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `family` | string | unset | Filters normalized intake families such as `agent_output`, `provider_signal`, `unassigned_resource`, `risk_or_approval`, and `feedback_signal`. |
+| `status` | string | unset | Filters statuses such as `needs_classification`, `needs_owner_decision`, `ready_to_route`, and `blocked`. |
+| `sourceAgent` | string | unset | Returns items for the selected agent plus broadcast agent events. |
+| `risk` | string | unset | Filters `low`, `medium`, `high`, or `critical`. |
+| `suggestedDepartment` | string | unset | Filters inferred department keys such as `04-operations` or `07-finance`. |
+| `limit` | number | `100` | Maximum `200`. |
+
+Safe response shape:
+
+```json
+{
+  "data": {
+    "workspaceId": "workspace-uuid",
+    "summary": {
+      "total": 3,
+      "byFamily": { "agent_output": 1, "provider_signal": 1, "risk_or_approval": 1 },
+      "byStatus": { "needs_owner_decision": 1, "blocked": 2 },
+      "byRisk": { "high": 2, "critical": 1 },
+      "byDepartment": { "04-operations": 1, "07-finance": 2 }
+    },
+    "items": [
+      {
+        "id": "AgentEventOutbox:event-uuid",
+        "family": "agent_output",
+        "status": "needs_owner_decision",
+        "title": "Paperclip pricing discount proposal",
+        "source": "agent_event_outbox",
+        "sourceAgent": "paperclip",
+        "sourceModel": "AgentEventOutbox",
+        "sourceId": "event-uuid",
+        "risk": "critical",
+        "suggestedDepartment": "07-finance",
+        "confidence": "direct",
+        "allowedActions": ["review", "route_to_department", "create_task", "ack_after_handled"],
+        "blockedActions": [
+          {
+            "action": "ack",
+            "reason": "Intake is read-only; use POST /v1/agent-events/:id/ack after handling."
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+The MCP manifest exposes this endpoint as `companycore_get_intake` when the key
+has `intake:read`. The canonical MCP profiles include `intake:read` so
+Paperclip can inspect background work and route it through CompanyCore instead
+of reading provider tables directly.
+
 ## Agent Events
 
 ```http

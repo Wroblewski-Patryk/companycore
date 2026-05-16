@@ -30,6 +30,14 @@ Last updated: 2026-05-16
   saved desktop/mobile screenshots with no horizontal overflow. Disposable
   Docker/Postgres proof timed out before port `55479` became available, so
   target/database smoke remains a deployment follow-up.
+  As of 2026-05-16, DMS-00-003 implemented the first backend slice of
+  `00 Main`: protected read-only `GET /v1/intake`. It aggregates existing
+  agent events, provider inbox rows, unassigned Drive/provider resources,
+  approvals, high risks, tasks, and events into one normalized intake queue
+  with family/status/risk/department filters and MCP exposure through
+  `intake:read`. `npm run test:api` passed against workspace-local PostgreSQL
+  on `127.0.0.1:55476` using the existing `postgres` database, and the
+  validation-owned PostgreSQL process was stopped after the run.
 
 ## Product Decisions (Confirmed)
 - 2026-05-07: CRM and pipelines are separate domain concepts. Pipelines are a

@@ -7,9 +7,6 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] DMS-00-003 Implement read-only global intake aggregate:
-      implement protected `GET /v1/intake` from the DMS-00 source audit,
-      exposing unclassified owner/client/provider/agent work without mutation.
 - [ ] DMS-MONEY-001 Pricing/hourly-value/discount source inventory:
       inventory Drive/ClickUp pricing, service definitions, hourly-value
       assumptions, discount cases including 100 percent discount, current
@@ -18,14 +15,15 @@ synchronized with `.codex/context/TASK_BOARD.md`.
       plan and then extract the reusable selected-area department shell for
       identity, command brief, subsystem tabs, management board, evidence rail,
       improvement loop, and Paperclip handoff.
+- [ ] DMS-00-004 Global intake web panel for `00 Main`:
+      add the first owner-facing read-only panel over `/v1/intake`, with
+      Paperclip filtering, routing suggestions, blocked approvals/risks, and
+      no write actions until command contracts are approved.
 ### NEXT
 
 - [ ] DMS-04-001 Operations real-data proof:
       run database-backed or production proof for the existing
       `/areas?area=04-operacje&view=overview` Operations Management System.
-- [ ] DMS-00-004 Expose intake aggregate in MCP manifest:
-      expose the read-only intake aggregate as an MCP tool for Paperclip after
-      the HTTP contract is implemented and tested.
 - [ ] V1DATA-001 Evidence browser V1 workbench:
       convert `/data` and `/data/:table` from V0 rebuild into a V1 evidence
       browser tied to departments, tables, and agent-readable context.
@@ -104,6 +102,17 @@ The section below is retained as execution evidence. It is not the active
 queue. Future work must start from `Active Queue`, `.codex/context/TASK_BOARD.md`,
 and `docs/operations/v1-function-coverage-ledger.csv`.
 
+- [x] DMS-00-003 Global Intake Read API:
+      protected `GET /v1/intake` aggregates existing agent events, provider
+      inbox rows, unassigned Drive/provider resources, approvals, high risks,
+      tasks, and events into one read-only `00 Main` queue with normalized
+      family, status, risk, suggested department, evidence, allowed action, and
+      blocked action metadata. `intake:read` is exposed through capabilities,
+      adapter manifest, MCP manifest, and MCP-oriented profiles. `npm run
+      test:api` passed against workspace-local PostgreSQL on
+      `127.0.0.1:55476` using the existing `postgres` database.
+      Task contract:
+      `docs/planning/dms-00-global-intake-read-api-task-contract.md`.
 - [x] V1OPS-001 Operations Cockpit React view:
       `/operations` now gives the owner one V1 supervision cockpit for clients,
       tasks, department files/tables, and AI-agent handoff. It uses existing

@@ -152,6 +152,14 @@ continue from repository files alone:
   review, approvals, risks, notes, decisions, and MCP/agent data without a
   migration. The selected first route is `GET /v1/intake`; reading intake must
   not acknowledge agent events or mutate provider state.
+- `docs/planning/dms-00-global-intake-read-api-task-contract.md`: DMS-00
+  backend runtime handoff. As of 2026-05-16, protected read-only
+  `GET /v1/intake` exists and is exposed as `intake:read` through the adapter
+  manifest, MCP manifest, and MCP-oriented agent profiles. It normalizes
+  existing agent, provider, unassigned resource, approval, risk, task, and
+  event records into one `00 Main` queue. `npm run test:api` passed against
+  workspace-local PostgreSQL on `127.0.0.1:55476` using the existing
+  `postgres` database. The next implementation is the owner-facing web panel.
 - `docs/architecture/web-layer-react-ownership.md`: current web route
   ownership contract. As of 2026-05-15, user-facing web routes are React-owned
   and served from the Vite bundle in `public/react/index.html`. The legacy

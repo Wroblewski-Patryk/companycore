@@ -4,18 +4,19 @@ Last updated: 2026-05-16
 
 ## NOW
 
-1. DMS-00-003 Implement read-only global intake aggregate.
-   - Source:
-     `docs/planning/dms-00-intake-source-audit.md`.
-   - Implement protected `GET /v1/intake` from existing data sources without a
-     migration. Reading intake must not acknowledge agent events or mutate
-     provider state.
-2. DMS-MONEY-001 Pricing/hourly-value/discount source inventory.
+1. DMS-MONEY-001 Pricing/hourly-value/discount source inventory.
    - Inventory Drive/ClickUp pricing, service definitions, hourly-value
      assumptions, discounts including 100 percent discount, current client
      work, and old-client archive evidence.
-3. DMS-SHELL-001 Shared Department Management Shell.
+2. DMS-SHELL-001 Shared Department Management Shell.
    - Plan and extract the reusable department shell used by `00`-`12`.
+3. DMS-00-004 Global intake web panel for `00 Main`.
+   - Source:
+     `docs/planning/dms-00-global-intake-read-api-task-contract.md`.
+   - Add the first owner-facing read-only review panel for `/v1/intake` in the
+     department management shell, including Paperclip filter, routing signals,
+     blocked approvals/risks, and no write actions until a command contract is
+     approved.
 
 ## NEXT
 
@@ -62,9 +63,10 @@ Last updated: 2026-05-16
    - `00 Main` is the global intake for owner ideas, client requests,
      documents, tasks, risks, bugs, opportunities, Paperclip background
      outputs, feedback, and improvement signals.
-   - First implementation should be read-only/review-first: show unassigned
-     items, Paperclip-created background outputs, classification status,
-     owner decision needs, and suggested department routing.
+   - First backend implementation is `GET /v1/intake`; next implementation
+     should be read-only/review-first in the web layer: show unassigned items,
+     Paperclip-created background outputs, classification status, owner
+     decision needs, and suggested department routing.
 7. Inventory pricing, discounts, current client work, and archived clients.
    - Source:
      `docs/architecture/department-management-systems-v1-blueprint.md`.

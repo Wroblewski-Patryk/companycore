@@ -466,6 +466,193 @@ test("CompanyCore v1 protected API flow", async () => {
   const authA = { Authorization: `Bearer ${ownerA.token}` };
   const authB = { Authorization: `Bearer ${ownerB.token}` };
 
+  const unauthenticatedIntake = await request("/v1/intake");
+  assert.equal(unauthenticatedIntake.status, 401);
+
+  const paperclipIntakeEvent = await prisma.agentEventOutbox.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      eventType: "paperclip_pricing_discount_proposal",
+      targetAgent: "paperclip",
+      payload: {
+        client: "Trial client",
+        proposedDiscount: "100%",
+        requestedAction: "route_to_sales_and_finance"
+      }
+    }
+  });
+  const jarvisIntakeEvent = await prisma.agentEventOutbox.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      eventType: "jarvis_internal_note",
+      targetAgent: "jarvis",
+      payload: { note: "Not for Paperclip filtered intake." }
+    }
+  });
+  const foreignIntakeEvent = await prisma.agentEventOutbox.create({
+    data: {
+      workspaceId: ownerB.workspace.id,
+      eventType: "foreign_workspace_signal",
+      targetAgent: "paperclip",
+      payload: { leak: false }
+    }
+  });
+  const failedProviderIntake = await prisma.providerEventInbox.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      provider: "clickup",
+      externalWebhookId: "intake-webhook-1",
+      eventName: "taskStatusUpdated",
+      externalTaskId: "clickup-intake-task-1",
+      idempotencyKey: "intake-provider-failed-1",
+      payloadHash: "intake-provider-failed-hash-1",
+      payload: { status: "blocked", task: "Client delivery blocked" },
+      processingStatus: "failed",
+      retryCount: 2,
+      lastErrorCode: "missing_scope_mapping"
+    }
+  });
+  const unassignedDriveFile = await prisma.googleDriveFile.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      provider: "google_drive",
+      externalId: "intake-drive-file-1",
+      name: "Client pricing notes",
+      mimeType: "application/vnd.google-apps.document",
+      webViewLink: "https://drive.google.com/intake-drive-file-1"
+    }
+  });
+  const unassignedContainer = await prisma.externalContainerMapping.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      provider: "clickup",
+      entityType: "folder",
+      externalId: "intake-clickup-folder-1",
+      name: "Operations Intake Folder"
+    }
+  });
+  const unassignedField = await prisma.externalFieldMapping.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      provider: "clickup",
+      externalId: "intake-clickup-field-1",
+      name: "Discount Approval",
+      fieldType: "drop_down"
+    }
+  });
+  const pendingIntakeApproval = await prisma.approval.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      requestedByType: "agent",
+      requestedById: "paperclip",
+      requestedForAction: "invoice.discount.apply",
+      resourceType: "deal",
+      riskLevel: "high"
+    }
+  });
+  const highIntakeRisk = await prisma.risk.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Intake test critical payment risk",
+      description: "Payment and invoice workflow needs owner review.",
+      category: "finance",
+      riskLevel: "critical"
+    }
+  });
+
+  const globalIntake = await request("/v1/intake?limit=50", { headers: authA });
+  assert.equal(globalIntake.status, 200);
+  const globalIntakeBody = globalIntake.body as {
+    data: {
+      summary: { total: number; byFamily: Record<string, number>; byRisk: Record<string, number> };
+      items: Array<{
+        id: string;
+        family: string;
+        status: string;
+        sourceModel: string;
+        sourceId: string;
+        sourceAgent?: string | null;
+        risk: string;
+        suggestedDepartment: string;
+        allowedActions: string[];
+        blockedActions: Array<{ action: string; reason: string }>;
+      }>;
+    };
+  };
+  assert.ok(globalIntakeBody.data.summary.total >= 7);
+  assert.ok(globalIntakeBody.data.summary.byFamily.agent_output >= 1);
+  assert.ok(globalIntakeBody.data.summary.byRisk.critical >= 1);
+  assert.ok(globalIntakeBody.data.items.some((item) => (
+    item.sourceModel === "AgentEventOutbox"
+    && item.sourceId === paperclipIntakeEvent.id
+    && item.family === "agent_output"
+  )));
+  assert.ok(globalIntakeBody.data.items.some((item) => (
+    item.sourceModel === "ProviderEventInbox"
+    && item.sourceId === failedProviderIntake.id
+    && item.status === "blocked"
+  )));
+  assert.ok(globalIntakeBody.data.items.some((item) => (
+    item.sourceModel === "GoogleDriveFile"
+    && item.sourceId === unassignedDriveFile.id
+    && item.allowedActions.includes("assign_scope")
+  )));
+  assert.ok(globalIntakeBody.data.items.some((item) => (
+    item.sourceModel === "ExternalContainerMapping"
+    && item.sourceId === unassignedContainer.id
+  )));
+  assert.ok(globalIntakeBody.data.items.some((item) => (
+    item.sourceModel === "ExternalFieldMapping"
+    && item.sourceId === unassignedField.id
+  )));
+  assert.ok(globalIntakeBody.data.items.some((item) => (
+    item.sourceModel === "Approval"
+    && item.sourceId === pendingIntakeApproval.id
+    && item.blockedActions.some((action) => action.action === "execute_requested_action")
+  )));
+  assert.ok(globalIntakeBody.data.items.some((item) => (
+    item.sourceModel === "Risk"
+    && item.sourceId === highIntakeRisk.id
+    && item.risk === "critical"
+  )));
+  assert.ok(!globalIntakeBody.data.items.some((item) => item.sourceId === foreignIntakeEvent.id));
+
+  const paperclipFilteredIntake = await request("/v1/intake?sourceAgent=paperclip&limit=20", { headers: authA });
+  assert.equal(paperclipFilteredIntake.status, 200);
+  const paperclipFilteredIntakeBody = paperclipFilteredIntake.body as {
+    data: { items: Array<{ sourceId: string; sourceAgent?: string | null }> };
+  };
+  assert.ok(paperclipFilteredIntakeBody.data.items.some((item) => item.sourceId === paperclipIntakeEvent.id));
+  assert.ok(!paperclipFilteredIntakeBody.data.items.some((item) => item.sourceId === jarvisIntakeEvent.id));
+
+  const pendingPaperclipEventAfterIntake = await prisma.agentEventOutbox.findUniqueOrThrow({
+    where: { id: paperclipIntakeEvent.id }
+  });
+  assert.equal(pendingPaperclipEventAfterIntake.deliveryStatus, "pending");
+
+  const mcpManifestWithIntake = await request("/v1/mcp/manifest", { headers: authA });
+  assert.equal(mcpManifestWithIntake.status, 200);
+  const mcpManifestWithIntakeBody = mcpManifestWithIntake.body as {
+    data: { tools: Array<{ name: string; path: string; capability: string; riskLevel: string; requiresApproval: boolean }> };
+  };
+  assert.ok(mcpManifestWithIntakeBody.data.tools.some((tool) => (
+    tool.name === "companycore_get_intake"
+    && tool.path === "/v1/intake"
+    && tool.capability === "intake:read"
+    && tool.riskLevel === "read"
+    && tool.requiresApproval === false
+  )));
+
+  await prisma.risk.delete({ where: { id: highIntakeRisk.id } });
+  await prisma.approval.delete({ where: { id: pendingIntakeApproval.id } });
+  await prisma.externalFieldMapping.delete({ where: { id: unassignedField.id } });
+  await prisma.externalContainerMapping.delete({ where: { id: unassignedContainer.id } });
+  await prisma.googleDriveFile.delete({ where: { id: unassignedDriveFile.id } });
+  await prisma.providerEventInbox.delete({ where: { id: failedProviderIntake.id } });
+  await prisma.agentEventOutbox.deleteMany({
+    where: { id: { in: [paperclipIntakeEvent.id, jarvisIntakeEvent.id, foreignIntakeEvent.id] } }
+  });
+
   const ownerAWorkspacesInitial = await request("/v1/workspaces", { headers: authA });
   assert.equal(ownerAWorkspacesInitial.status, 200);
   const ownerAWorkspacesInitialBody = ownerAWorkspacesInitial.body as {

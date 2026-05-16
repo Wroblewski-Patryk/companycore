@@ -24,6 +24,7 @@ export const agentKeyProfiles = [
     scopes: [
       ...mcpBaseScopes,
       "company-os:read",
+      "intake:read",
       "relationships:read",
       "operating-model:read",
       "events:read"
@@ -38,6 +39,7 @@ export const agentKeyProfiles = [
     scopes: [
       ...mcpBaseScopes,
       "company-os:read",
+      "intake:read",
       "relationships:read",
       "operating-model:read",
       "notes:read",
@@ -55,6 +57,7 @@ export const agentKeyProfiles = [
     scopes: [
       ...mcpBaseScopes,
       "company-os:read",
+      "intake:read",
       "relationships:read",
       "operating-model:read",
       "projects:read",
@@ -78,6 +81,7 @@ export const agentKeyProfiles = [
     scopes: [
       ...mcpBaseScopes,
       "company-os:read",
+      "intake:read",
       "relationships:read",
       "tasks:read",
       "agent-logs:read",
@@ -96,6 +100,7 @@ export const agentKeyProfiles = [
     scopes: [
       ...mcpBaseScopes,
       "company-os:read",
+      "intake:read",
       "relationships:read",
       "company-os:workflow-definition:write",
       "company-os:workflow-definition:activate",

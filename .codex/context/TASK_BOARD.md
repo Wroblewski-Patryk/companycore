@@ -2,16 +2,16 @@
 
 ## Ready
 
-- DMS-00-003 Implement read-only global intake aggregate.
+- DMS-00-004 Global intake web panel for `00 Main`.
   - Stage: planning
-  - Owner: Backend Builder
+  - Owner: Frontend Builder + Backend Builder
   - Priority: P1
   - Source:
-    `docs/planning/dms-00-intake-source-audit.md`
-  - Goal: implement protected `GET /v1/intake` using current data sources,
-    with workspace isolation, no mutation on read, Paperclip filtering,
-    high-risk blocked action metadata, API docs, MCP manifest metadata if in
-    scope, and API regression tests.
+    `docs/planning/dms-00-global-intake-read-api-task-contract.md`
+  - Goal: add the first owner-facing read-only review panel over
+    `/v1/intake`, including Paperclip filtering, routing suggestions,
+    blocked approval/risk surfacing, and no write actions until command
+    contracts are approved.
 - DMS-MONEY-001 Pricing/hourly-value/discount source inventory.
   - Stage: analysis
   - Owner: Product Docs + Backend Builder
@@ -154,6 +154,24 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- DMS-00-003 Global Intake Read API.
+  - Evidence: protected `GET /v1/intake` now aggregates existing
+    AgentEventOutbox, ProviderEventInbox, GoogleDriveFile,
+    ExternalContainerMapping, ExternalFieldMapping, Approval, Risk, Task, and
+    Event records into one read-only `00 Main` intake queue with normalized
+    family, status, risk, suggested department, evidence, allowed action, and
+    blocked action metadata. `intake:read` is exposed through capabilities,
+    adapter manifest, MCP manifest, and MCP-oriented agent key profiles.
+  - Validation: `npm run build:server` passed. `npm run test:api` passed
+    against workspace-local PostgreSQL on `127.0.0.1:55476` using the existing
+    `postgres` database. `npm run typecheck` is not available in
+    `package.json`. API regression coverage was added in `src/tests/api.test.ts`
+    for authentication, workspace isolation, Paperclip filtering, provider
+    failures, unassigned resources, high-risk rows, MCP exposure, and no
+    mutation on read.
+  - Task contract:
+    `docs/planning/dms-00-global-intake-read-api-task-contract.md`.
 
 - DMS-00-002 Intake Source Audit.
   - Evidence:

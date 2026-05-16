@@ -215,4 +215,3 @@ Required tests:
 | Should route/classification create tasks directly or create proposals first? | defer to DMS-00-006 | Backend + Security |
 | Should Paperclip create intake items, agent events, tasks, or all three? | defer to PC-DMS-002 | AI Integration |
 | Should archived old clients enter through intake or relationships first? | defer to DMS-05 and DMS-MONEY | Product Docs |
-

@@ -17,6 +17,7 @@ import { decisionsRouter } from "./modules/decisions/decisions.routes";
 import { eventsRouter } from "./modules/events/events.routes";
 import { goalsRouter } from "./modules/goals/goals.routes";
 import { googleDriveRouter } from "./modules/google-drive/google-drive.routes";
+import { intakeRouter } from "./modules/intake/intake.routes";
 import { integrationSettingsRouter } from "./modules/integration-settings/integration-settings.routes";
 import { mcpRouter } from "./modules/mcp/mcp.routes";
 import { notesRouter } from "./modules/notes/notes.routes";
@@ -44,6 +45,7 @@ function mountProtectedRoutes(router: Router) {
   router.use("/relationships", relationshipsRouter);
   router.use("/goals", goalsRouter);
   router.use("/google-drive", googleDriveRouter);
+  router.use("/intake", intakeRouter);
   router.use("/targets", targetsRouter);
   router.use("/task-lists", taskListsRouter);
   router.use("/tasks", tasksRouter);
