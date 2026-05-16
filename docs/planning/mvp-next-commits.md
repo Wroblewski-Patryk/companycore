@@ -14,11 +14,6 @@ synchronized with `.codex/context/TASK_BOARD.md`.
       Paperclip still misses files, rotate/update Paperclip to a newer active
       bridge key from `/settings/api`; older active adapter keys have narrow
       legacy scopes.
-- [ ] Diagnose production Google Drive `changes/reconcile`:
-      local fix PROD-GDRIVE-002 is implemented and API-tested. A missing
-      `changesPageToken` now initializes through Drive `changes/startPageToken`.
-      After deploy, rerun production reconcile and close KI-009 only if it no
-      longer returns `422 sync_failed`.
 - [ ] Polish `/react-company-os` into an area-aware V1 foundation:
       connect Company OS evidence back to selected-area department context
       without adding new command authority.
@@ -99,6 +94,20 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 The section below is retained as execution evidence. It is not the active
 queue. Future work must start from `Active Queue`, `.codex/context/TASK_BOARD.md`,
 and `docs/operations/v1-function-coverage-ledger.csv`.
+
+- [x] PROD-GDRIVE-002 Production Google Drive changes baseline:
+      implemented first-run baseline initialization for
+      `POST /v1/integration-settings/google_drive/changes/reconcile` when no
+      stored `changesPageToken` exists. `npm run build:server`,
+      `git diff --check`, and `npm run test:api` passed against portable
+      PostgreSQL on `127.0.0.1:55490`. Production was manually rolled over to
+      `d2c9b9460a5db63703ca28f98988a2fa35d3a651`; public health reported that
+      commit, first protected reconcile returned `200` with
+      `baselineInitialized=true`, second reconcile returned `200` through the
+      stored-token path, and Drive index remained `754` records with no
+      unassigned/pending/failed/trashed rows.
+      Task contract:
+      `docs/planning/prod-google-drive-changes-baseline-task-contract.md`.
 
 - [x] DMS-03-005A Commercial exception read API:
       implemented protected read-only `GET /v1/commercial-exceptions`,

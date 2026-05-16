@@ -230,8 +230,17 @@ Last updated: 2026-05-16
   `changes.list` flow remains unchanged. `npm run build:server`,
   `git diff --check`, and `npm run test:api` passed against portable
   PostgreSQL on `127.0.0.1:55490`; the validation PostgreSQL process was
-  stopped. Production proof remains pending until this commit is deployed and
-  `POST /v1/integration-settings/google_drive/changes/reconcile` is rerun.
+  stopped. Production was then manually rolled over to
+  `d2c9b9460a5db63703ca28f98988a2fa35d3a651` with image
+  `rnqqkhl3o3dut4qv56mlxly2_backend:d2c9b9460a5db63703ca28f98988a2fa35d3a651`
+  and running container `backend-rnqqkhl3o3dut4qv56mlxly2-manual-d2c9b94`.
+  Public API/web health report that commit and image. Protected production
+  smoke proved first reconcile returned `200`, `baselineInitialized=true`, and
+  stored `newStartPageToken=25137`; second reconcile returned `200` through
+  the stored-token path; `/v1/google-drive/files` remained `754` total with
+  `0` unassigned, `0` pending, `0` failed, and `0` trashed. The previous
+  backend container is retained stopped as
+  `backend-rnqqkhl3o3dut4qv56mlxly2-000111041002-previous-d2c9b94`.
 
 ## Product Decisions (Confirmed)
 - 2026-05-07: CRM and pipelines are separate domain concepts. Pipelines are a

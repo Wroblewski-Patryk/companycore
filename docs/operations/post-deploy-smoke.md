@@ -2,6 +2,44 @@
 
 Use this file to record the minimum checks after each deploy.
 
+## Production Google Drive Changes Baseline Rollover
+
+- Timestamp: 2026-05-16
+- Environment: production VPS Docker backend
+- Commit: `d2c9b9460a5db63703ca28f98988a2fa35d3a651`
+- Image:
+  `rnqqkhl3o3dut4qv56mlxly2_backend:d2c9b9460a5db63703ca28f98988a2fa35d3a651`
+- Running container:
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-d2c9b94`
+- Replaced container:
+  `backend-rnqqkhl3o3dut4qv56mlxly2-000111041002`, retained stopped as
+  `backend-rnqqkhl3o3dut4qv56mlxly2-000111041002-previous-d2c9b94`.
+- Data safety:
+  - Production Postgres container stayed running.
+  - Canary startup reported no pending migrations and seed completed.
+  - Final backend startup reported no pending migrations and seed completed.
+- Public smoke:
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `200` with
+    build commit `d2c9b9460a5db63703ca28f98988a2fa35d3a651`.
+  - `GET https://companycore.luckysparrow.ch/health` returned `200` with the
+    same build commit and image.
+- Protected smoke:
+  - Before first reconcile, the Google Drive setting had no
+    `changesPageToken`.
+  - First `POST /v1/integration-settings/google_drive/changes/reconcile`
+    returned `200`, `baselineInitialized=true`, `processedCount=0`, and stored
+    `newStartPageToken=25137`.
+  - Second reconcile returned `200` through the stored-token path.
+  - `/v1/google-drive/files` stayed clean with `754` records, `0` unassigned,
+    `0` pending, `0` failed, and `0` trashed.
+- Cleanup:
+  - Temporary VPS source archive, source directory, rollout script, label file,
+    and env file were removed from `/tmp`. The temporary env file contained
+    runtime secrets and was deleted after smoke.
+- Residual risks:
+  - Paperclip runtime key selection remains KI-010 if Paperclip is still using
+    an older narrow adapter key.
+
 ## Global Checks
 
 - [x] `https://api.companycore.luckysparrow.ch/health` returns success

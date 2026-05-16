@@ -6,7 +6,6 @@ Last updated: 2026-05-16
 
 | ID | Severity | Area | Summary | Owner | Status | Next action |
 | --- | --- | --- | --- | --- | --- | --- |
-| KI-009 | P1 | Google Drive changes reconciliation | Production selected-scope Drive import works and the table has no missing or unassigned records, but `POST /v1/integration-settings/google_drive/changes/reconcile` returned `422 sync_failed` during the 2026-05-16 production audit because no stored changes page token existed. PROD-GDRIVE-002 implements first-run baseline initialization locally. | Ops/Release + Backend | MITIGATING | Deploy the baseline fix, then rerun production reconcile and close this only after it returns a baseline or normal reconcile result instead of `422 sync_failed`. Until deployed, use protected `import` with `merge` or `inspect_only` for selected-scope catch-up evidence. |
 | KI-010 | P1 | Paperclip runtime key selection | CompanyCore has active Paperclip bridge keys with Google Drive scopes, but older active `Paperclip production adapter` keys remain present with narrow legacy scopes. Paperclip may miss Drive data if its runtime still uses an old key. | AI Integration + Ops/Release | OPEN | Confirm Paperclip runtime uses the newer Paperclip bridge key; if not, rotate a fresh key from `/settings/api` and store it only in Paperclip's secret store. |
 | KI-008 | P2 | Google Drive production OAuth write/read samples | Historical production OAuth decrypt/write-read evidence was stale after a prior secret incident. The 2026-05-16 production audit proves the stored Google Drive OAuth path can list/import selected folders and refresh content snapshots, but Docs/Sheets write samples and `changes/reconcile` still need targeted proof. | Ops/Release + Owner | MITIGATED | Run a target-safe Docs/Sheets write/read smoke and the KI-009 changes-reconcile diagnostic before closing the historical OAuth concern completely. |
 | KI-007 | P1 | Product data completeness | Production `/v1/operating-model` has 13 areas and 26 external mappings but `0` storage locations, `0` knowledge roots, `0` automation definitions, and `/v1/projects` returns `0` while tasks exist. | Product + Backend | OPEN | Execute ACF-PROD-001 to decide, seed, import, or explicitly defer these owner-facing operating model records. |
@@ -33,6 +32,12 @@ Last updated: 2026-05-16
 
 ## Recently Closed Issues
 
+- KI-009 Google Drive changes reconciliation: closed by PROD-GDRIVE-002 on
+  2026-05-16. Production was manually rolled over to commit
+  `d2c9b9460a5db63703ca28f98988a2fa35d3a651`; first protected production
+  reconcile initialized `newStartPageToken=25137` with
+  `baselineInitialized=true`, and second reconcile returned `200` through the
+  stored-token path.
 - V1 runtime readiness: closed by `docs/operations/v1-operator-handoff.md` and
   `docs/operations/v1-release-readiness.md`.
 - KI-004 authenticated private-route screenshot gap: closed by UXA-002 on

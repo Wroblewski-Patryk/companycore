@@ -30,18 +30,8 @@
     creation, table/file coverage, and AI handoff readiness.
 ## In Progress
 
-- PROD-GDRIVE-002 Production Google Drive changes baseline.
-  - Stage: release
-  - Owner: Backend Builder + Ops/Release
-  - Priority: P1
-  - Source:
-    `docs/planning/prod-google-drive-changes-baseline-task-contract.md`
-  - Goal: deploy and smoke the local first-run changes baseline fix so
-    production `changes/reconcile` no longer returns `422 sync_failed` when no
-    stored Drive changes page token exists.
-  - Local evidence: `npm run build:server`, `git diff --check`, and
-    `npm run test:api` passed against portable PostgreSQL on
-    `127.0.0.1:55490`; validation PostgreSQL was stopped.
+- No active implementation task is currently in progress after the production
+  Google Drive changes baseline rollout.
 
 ## Blocked
 
@@ -122,6 +112,27 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- PROD-GDRIVE-002 Production Google Drive changes baseline.
+  - Evidence:
+    `POST /v1/integration-settings/google_drive/changes/reconcile` now
+    initializes a missing Drive changes page token through
+    `changes/startPageToken`, stores it, emits existing reconcile evidence, and
+    returns `baselineInitialized=true` with zero processed changes. Production
+    was manually rolled over to commit
+    `d2c9b9460a5db63703ca28f98988a2fa35d3a651`; public API/web health report
+    that commit. First protected production reconcile returned `200` with
+    `baselineInitialized=true` and stored `newStartPageToken=25137`; second
+    reconcile returned `200` through the stored-token path. Drive index stayed
+    `754` total with `0` unassigned, `0` pending, `0` failed, and `0` trashed.
+  - Validation: `npm run build:server`, `git diff --check`, and
+    `npm run test:api` passed against portable PostgreSQL on
+    `127.0.0.1:55490`; manual VPS canary and production rollover passed;
+    temporary VPS env/source/rollout files were removed. Previous backend was
+    retained stopped as rollback container
+    `backend-rnqqkhl3o3dut4qv56mlxly2-000111041002-previous-d2c9b94`.
+  - Task contract:
+    `docs/planning/prod-google-drive-changes-baseline-task-contract.md`.
 
 - PROD-GDRIVE-001 Production Google Drive Index And Paperclip Access Audit.
   - Evidence:

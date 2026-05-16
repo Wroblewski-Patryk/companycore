@@ -157,8 +157,12 @@ continue from repository files alone:
   `changes/startPageToken`, stores the token, emits existing reconcile
   evidence, and returns `baselineInitialized=true` with zero processed changes.
   `npm run build:server`, `git diff --check`, and `npm run test:api` passed on
-  portable PostgreSQL `127.0.0.1:55490`. Production proof remains pending until
-  the commit is deployed and `changes/reconcile` is rerun.
+  portable PostgreSQL `127.0.0.1:55490`. The commit was manually rolled over
+  to production as
+  `rnqqkhl3o3dut4qv56mlxly2_backend:d2c9b9460a5db63703ca28f98988a2fa35d3a651`;
+  public health reports that commit. First protected production reconcile
+  initialized `newStartPageToken=25137`; second reconcile returned `200`
+  through the stored-token path.
 - `docs/planning/dms-00-global-intake-paperclip-review-contract.md`: active
   DMS-00 planning contract. It defines `00 Main` as the global intake and
   Paperclip output review surface, reusing AgentEventOutbox, provider inbox,

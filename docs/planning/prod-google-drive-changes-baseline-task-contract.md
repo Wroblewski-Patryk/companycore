@@ -5,8 +5,8 @@
 - ID: PROD-GDRIVE-002
 - Title: Production Google Drive Changes Baseline
 - Task Type: fix
-- Current Stage: release
-- Status: REVIEW
+- Current Stage: post-release
+- Status: DONE
 - Owner: Backend Builder + Ops/Release
 - Depends on: PROD-GDRIVE-001
 - Priority: P1
@@ -18,7 +18,7 @@
 - Iteration: 2026-05-16 production follow-up
 - Operation Mode: BUILDER
 - Mission ID: PROD-GDRIVE-FRESHNESS
-- Mission Status: PARTIALLY_VERIFIED
+- Mission Status: VERIFIED
 
 ## Process Self-Audit
 
@@ -152,7 +152,8 @@ Drive `changes.list` from the stored token.
 - Technical debt introduced: no.
 - Scalability assessment: uses the existing Drive client and integration
   setting config; no parallel freshness system.
-- Refinements made: pending.
+- Refinements made: production manual rollover used a canary first, then
+  retained the replaced backend container stopped as rollback.
 
 ### 7. Update Documentation and Knowledge
 
@@ -175,7 +176,7 @@ Drive `changes.list` from the stored token.
 - [x] Existing changes reconciliation with a stored token remains covered and
   still updates changed/removed records.
 - [x] API and integration docs describe the first-run baseline behavior.
-- [ ] Production proof after deploy shows reconcile no longer returns the
+- [x] Production proof after deploy shows reconcile no longer returns the
   previous `422 sync_failed` for the missing-token case, or the task records
   why deployment proof is still pending.
 
@@ -191,7 +192,7 @@ Drive `changes.list` from the stored token.
 
 ## Deliverable For This Stage
 
-Implement and locally verify the backend first-run baseline behavior.
+Deploy and verify the backend first-run baseline behavior.
 
 ## Constraints
 
@@ -206,13 +207,14 @@ Implement and locally verify the backend first-run baseline behavior.
 ## Definition of Done
 
 - [x] Code builds without errors.
-- [x] Feature works through the API regression path.
+- [x] Feature works through the API regression path and the production API
+  path.
 - [x] No mock, placeholder, fake, or temporary data/path remains.
 - [x] Backend error handling uses existing integration error boundaries.
 - [x] No existing functionality is broken.
 - [x] Changes are documented in relevant source of truth.
 - [x] Behavior is reproducible from the evidence recorded below.
-- [x] `DEFINITION_OF_DONE.md` was checked before status changed to `REVIEW`.
+- [x] `DEFINITION_OF_DONE.md` was checked before status changed to `DONE`.
 
 ## Stage Exit Criteria
 
@@ -232,28 +234,29 @@ Implement and locally verify the backend first-run baseline behavior.
 
 - Tests: `npm run build:server`, `git diff --check`, and `npm run test:api`
   passed.
-- Manual checks: production proof remains pending until deployment.
+- Manual checks: production proof passed after manual VPS rollover to commit
+  `d2c9b9460a5db63703ca28f98988a2fa35d3a651`.
 - Screenshots/logs: not applicable.
 - High-risk checks: no raw Google OAuth tokens or API keys are returned or
   logged by the changed route; provider auth failures still use existing
   `IntegrationError` handling.
-- Coverage ledger updated: pending.
+- Coverage ledger updated: not applicable.
 - Module confidence ledger updated: yes.
 - Requirements matrix updated: yes.
 - Quality scenarios updated: yes.
 - Risk register updated: yes.
-- Reality status: partially verified.
+- Reality status: verified.
 
 ## Integration Evidence
 
 - `INTEGRATION_CHECKLIST.md` reviewed: yes.
-- Real API/service path used: yes, through API regression tests and existing
-  Google Drive client boundary mocks.
+- Real API/service path used: yes, through API regression tests, existing
+  Google Drive client boundary mocks, and production protected API smoke.
 - Endpoint and client contract match: yes.
 - DB schema and migrations verified: not applicable.
 - Loading state verified: not applicable.
-- Error state verified: existing stored-token and provider error behavior is
-  preserved by regression scope; production error closure remains deploy-gated.
+- Error state verified: the previous production missing-token `422 sync_failed`
+  case now returns `200` with `baselineInitialized=true`.
 - Refresh/restart behavior verified: not applicable.
 - Regression check performed: full API regression suite.
 
@@ -266,7 +269,7 @@ Implement and locally verify the backend first-run baseline behavior.
 - Smallest useful slice: initialize a baseline token on first reconcile.
 - Success metric or signal: no `422 sync_failed` for missing-token baseline.
 - Feature flag, staged rollout, or disable path: not applicable.
-- Post-launch feedback or metric check: confirm production reconcile after
+- Post-launch feedback or metric check: production reconcile confirmed after
   deploy.
 
 ## User Feedback Evidence
@@ -291,11 +294,39 @@ Implement and locally verify the backend first-run baseline behavior.
   workspace.
 - SLO: not established for V1.
 - Error budget posture: not applicable.
-- Health/readiness check: production health already passed in PROD-GDRIVE-001.
+- Health/readiness check: production API and web `/health` returned `200` with
+  build commit `d2c9b9460a5db63703ca28f98988a2fa35d3a651`.
 - Logs, dashboard, or alert route: existing event table.
-- Smoke command or manual smoke: production smoke pending after deploy.
+- Smoke command or manual smoke: production first reconcile returned `200`
+  with `baselineInitialized=true` and stored `newStartPageToken=25137`; second
+  reconcile returned `200` through the stored-token path; Drive index stayed
+  `754` total, `0` unassigned, `0` pending, `0` failed, and `0` trashed.
 - Rollback or disable path: revert the code commit; import/inspect remains
   available.
+
+## Result Report
+
+Completed on 2026-05-16.
+
+Production was manually rolled over to image
+`rnqqkhl3o3dut4qv56mlxly2_backend:d2c9b9460a5db63703ca28f98988a2fa35d3a651`
+with running container `backend-rnqqkhl3o3dut4qv56mlxly2-manual-d2c9b94`.
+The previous backend container was retained stopped as
+`backend-rnqqkhl3o3dut4qv56mlxly2-000111041002-previous-d2c9b94`.
+
+Public health passed for both production domains and reported the deployed
+commit and image. Protected owner smoke proved:
+
+- Before first reconcile, the Google Drive setting had no `changesPageToken`.
+- First `POST /v1/integration-settings/google_drive/changes/reconcile`
+  returned `200`, `baselineInitialized=true`, `processedCount=0`, and stored
+  `newStartPageToken=25137`.
+- A second reconcile returned `200` through the stored-token path.
+- `/v1/google-drive/files` stayed clean with `754` records, `0` unassigned,
+  `0` pending, `0` failed, and `0` trashed.
+
+Temporary VPS source, rollout, label, and env files were removed. The temporary
+env file contained runtime secrets and was deleted after successful smoke.
 
 ## AI Testing Evidence
 
