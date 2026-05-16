@@ -81,6 +81,19 @@ Last updated: 2026-05-16
   with no console/page errors or horizontal overflow. Screenshots:
   `docs/ux/evidence/v1-area-tasks-depth-desktop.png` and
   `docs/ux/evidence/v1-area-tasks-depth-mobile.png`.
+  As of 2026-05-16, V1COS-001 converted `/react-company-os` into an
+  area-aware V1 foundation. The route now shows a department control map for
+  all `00`-`12` management systems before the existing Company OS evidence and
+  command panels, with subsystem context, mapped backend table preview, agent
+  handoff, first safe action, and blocked actions. `npm run build:web`,
+  `git diff --check`, and embedded PostgreSQL migration deploy on
+  `127.0.0.1:55483` passed. Playwright real-backend proof on
+  `http://127.0.0.1:3219` registered a fresh owner, verified
+  `/react-company-os?area=04-operacje`, clicked `06`, verified
+  `People/Agents And Role Management System`, and found no console/page errors
+  or horizontal overflow. Screenshots:
+  `docs/ux/evidence/v1-company-os-area-foundation-desktop.png` and
+  `docs/ux/evidence/v1-company-os-area-foundation-mobile.png`.
   As of 2026-05-16, DMS-00-003 implemented the first backend slice of
   `00 Main`: protected read-only `GET /v1/intake`. It aggregates existing
   agent events, provider inbox rows, unassigned Drive/provider resources,

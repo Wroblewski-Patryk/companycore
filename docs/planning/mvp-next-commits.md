@@ -7,20 +7,18 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] Polish `/react-company-os` into an area-aware V1 foundation:
-      connect Company OS evidence back to selected-area department context
-      without adding new command authority.
-
-### NEXT
-
 - [ ] V1OPS-002 Production operations cockpit smoke:
       after the next deploy, compare public `/health` build metadata with the
       pushed commit and run authenticated `/operations`, `/tasks-adapter`, AOG,
-      settings, `/data`, and `04 Operacje` smoke.
+      settings, `/data`, `04 Operacje`, and `/react-company-os` area-aware
+      foundation smoke.
+
+### NEXT
+
 - [ ] Deepen the next V1 capability from `/operations`:
       choose one route-level slice that already has backend contracts, with
-      preferred order Company OS area-aware foundation polish, then
-      compatibility alias cleanup.
+      preferred order compatibility alias cleanup, then one department-specific
+      read model or safe command contract.
 - [ ] Use the CompanyCore business module map during upcoming product intake:
       `docs/architecture/companycore-business-module-map.md` now classifies
       future work as native core, provider-backed, future adapter, or derived
@@ -87,6 +85,20 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 The section below is retained as execution evidence. It is not the active
 queue. Future work must start from `Active Queue`, `.codex/context/TASK_BOARD.md`,
 and `docs/operations/v1-function-coverage-ledger.csv`.
+
+- [x] V1COS-001 Company OS area-aware foundation:
+      `/react-company-os` now connects Company OS evidence and guarded
+      command context to the `00`-`12` department management systems through a
+      department selector, subsystem context, mapped table preview, agent
+      handoff, first safe action, and blocked actions. `npm run build:web`,
+      `git diff --check`, embedded PostgreSQL migration deploy on
+      `127.0.0.1:55483`, and Playwright real-backend proof on
+      `http://127.0.0.1:3219` passed for desktop/mobile with no console/page
+      errors or horizontal overflow. Evidence:
+      `docs/ux/evidence/v1-company-os-area-foundation-desktop.png` and
+      `docs/ux/evidence/v1-company-os-area-foundation-mobile.png`.
+      Task contract:
+      `docs/planning/v1-company-os-area-foundation-task-contract.md`.
 
 - [x] PROD-GDRIVE-002 Production Google Drive changes baseline:
       implemented first-run baseline initialization for

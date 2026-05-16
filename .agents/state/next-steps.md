@@ -4,10 +4,11 @@ Last updated: 2026-05-16
 
 ## NOW
 
-1. Polish `/react-company-os` into an area-aware V1 foundation.
-   - Source: `docs/ux/v1-web-view-index-2026-05-15.md`.
-   - Connect Company OS evidence back to selected-area department context
-     without adding new command authority.
+1. Run the next production smoke for locally verified V1 routes after deploy.
+   - Source: `docs/planning/mvp-next-commits.md`.
+   - Compare public `/health` build metadata with the pushed commit, then
+     smoke authenticated `/operations`, `/tasks-adapter`, AOG, settings,
+     `/data`, `04 Operacje`, and `/react-company-os`.
 
 ## NEXT
 
@@ -89,7 +90,8 @@ Last updated: 2026-05-16
      before raising production confidence.
 13. V1 operations route-depth slices.
    - Deepen one existing-contract workbench from the operations cockpit:
-     Company OS area-aware foundation polish, then compatibility alias cleanup.
+     compatibility alias cleanup, then one department-specific read model or
+     safe command contract.
 14. Production smoke for locally verified V1 command surfaces.
    - After the next deploy, compare public `/health` build metadata with the
      pushed commit.

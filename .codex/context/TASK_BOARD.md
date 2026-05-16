@@ -30,9 +30,8 @@
     creation, table/file coverage, and AI handoff readiness.
 ## In Progress
 
-- No active implementation task is currently in progress after the production
-  Google Drive changes baseline rollout and Paperclip runtime Drive visibility
-  proof.
+- No active implementation task is currently in progress after the
+  V1 Company OS area-aware foundation proof.
 
 ## Blocked
 
@@ -113,6 +112,24 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- V1COS-001 Company OS Area-Aware V1 Foundation.
+  - Evidence:
+    `/react-company-os` now renders a department control map that connects
+    Company OS governance/runtime evidence to the `00`-`12` department
+    management systems. The selected department shows subsystem purpose,
+    mapped backend tables, agent handoff, first safe action, and blocked
+    actions while preserving the existing Company OS command and evidence
+    panels.
+  - Validation: `npm run build:web`, `git diff --check`, embedded PostgreSQL
+    migration deploy on `127.0.0.1:55483`, and Playwright real-backend proof
+    on `http://127.0.0.1:3219/react-company-os?area=04-operacje`. The proof
+    registered a fresh owner, verified Operations, clicked `06`, verified
+    `People/Agents And Role Management System`, and found no console/page
+    errors or horizontal overflow. Validation backend and PostgreSQL were
+    stopped.
+  - Task contract:
+    `docs/planning/v1-company-os-area-foundation-task-contract.md`.
 
 - PROD-GDRIVE-002 Production Google Drive changes baseline.
   - Evidence:

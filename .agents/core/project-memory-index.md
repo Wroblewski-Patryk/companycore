@@ -120,6 +120,13 @@ continue from repository files alone:
   function, procedure, procedure-step, approval, and dependency records after
   the shared React table-record loader was aligned with the existing
   `company-os:read` capability. Production smoke remains pending after deploy.
+  As of V1COS-001, `/react-company-os` also includes an area-aware department
+  control map before the existing Company OS command/evidence panels. It lets
+  the owner select any `00`-`12` management system and inspect subsystem
+  purpose, mapped backend tables, agent handoff, first safe action, and
+  blocked actions without adding new API or write authority. Local
+  real-backend proof passed on `http://127.0.0.1:3219` with screenshots in
+  `docs/ux/evidence/v1-company-os-area-foundation-*.png`.
 - `docs/architecture/department-management-systems-v1-blueprint.md`:
   detailed V1 blueprint for `00 Main` plus the 12 operating department
   management systems. As of 2026-05-16, future department work should use this

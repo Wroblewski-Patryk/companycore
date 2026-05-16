@@ -136,7 +136,8 @@ export const appRouteGroups: AppRouteGroup[] = [
         icon: "ph-circles-four",
         private: true,
         uxStage: "v1-foundation",
-        rebuildNote: "Keep as command/evidence foundation; polish as contextual area/governance cockpit."
+        canonicalSource: "docs/planning/v1-company-os-area-foundation-task-contract.md",
+        rebuildNote: "V1 foundation for area-aware Company OS governance, runtime evidence, guarded commands, and department handoff."
       }
     ]
   },

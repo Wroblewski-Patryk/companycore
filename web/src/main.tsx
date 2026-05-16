@@ -10156,6 +10156,125 @@ function CompanyOsOperatingGraphDetail({ connection }: { connection: ConnectionD
   );
 }
 
+function updateCompanyOsAreaRoute(areaKey: string) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.history.replaceState(null, "", `/react-company-os?area=${areaKey}`);
+}
+
+function CompanyOsDepartmentControlMap({
+  areas,
+  selectedArea,
+  onSelectArea
+}: {
+  areas: AreaViewState[];
+  selectedArea: AreaViewState;
+  onSelectArea: (areaKey: string) => void;
+}) {
+  const config = departmentSystemConfig(selectedArea.key);
+  const tablePreview = (selectedArea.backendArea?.tables || []).slice(0, 5);
+  const readyAreas = areas.filter((area) => area.status === "ready").length;
+  const reviewAreas = areas.filter((area) => area.status === "review").length;
+  const emptyAreas = areas.filter((area) => area.status === "empty").length;
+
+  return (
+    <section className="card border border-base-300 bg-base-100 shadow-sm" aria-label="Company OS department control map">
+      <div className="card-body gap-5">
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
+          <div className="space-y-4">
+            <div>
+              <p className="eyebrow">Department control map</p>
+              <h2 className="text-2xl font-black leading-tight">Company OS connected to the 00-12 management systems</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-company-muted">
+                Use this layer to inspect how the global Company OS control plane supports a specific department before opening deeper workflow, governance, data, or agent tools.
+              </p>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              <MetricCard icon="ph-buildings" label="Departments" value={`${areas.length}`} detail={`${readyAreas} ready, ${reviewAreas} review`} />
+              <MetricCard icon="ph-database" label="Selected tables" value={`${selectedArea.tableCount}`} detail={selectedArea.statusLabel} />
+              <MetricCard icon="ph-warning-circle" label="Empty maps" value={`${emptyAreas}`} detail="Need source ownership" />
+              <MetricCard icon={selectedArea.icon} label="Active system" value={selectedArea.shortLabel} detail={selectedArea.label} />
+            </div>
+            <div className="flex flex-wrap gap-2" role="list" aria-label="Select department system">
+              {areas.map((area) => (
+                <button
+                  className={`btn btn-sm ${area.key === selectedArea.key ? "btn-primary" : "btn-outline"}`}
+                  key={area.key}
+                  type="button"
+                  onClick={() => onSelectArea(area.key)}
+                >
+                  <i className={`ph-bold ${area.icon}`} aria-hidden="true"></i>
+                  {area.shortLabel}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <article className="rounded-company border border-base-300 bg-base-200 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="eyebrow">{selectedArea.label}</p>
+                <h3 className="text-lg font-black">{config.systemName}</h3>
+              </div>
+              <span className={`inline-flex min-w-16 justify-center rounded-full px-3 py-1 text-xs font-bold leading-none ${selectedArea.status === "ready" ? "bg-success text-success-content" : selectedArea.status === "review" ? "bg-warning text-warning-content" : "border border-base-300 text-company-muted"}`}>
+                {selectedArea.statusLabel}
+              </span>
+            </div>
+            <p className="mt-3 text-sm leading-6 text-company-muted">{config.valueRole}</p>
+            <p className="mt-3 text-sm font-bold">{config.ownerQuestion}</p>
+            <div className="mt-4 grid gap-2">
+              <a className="btn btn-primary btn-sm" href={areaHref(selectedArea, "overview")}>Open department</a>
+              <a className="btn btn-outline btn-sm" href={areaHref(selectedArea, "knowledge")}>Knowledge context</a>
+              <a className="btn btn-outline btn-sm" href="/react-agent-tools">Agent tools</a>
+            </div>
+          </article>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-3">
+          <article className="rounded-company border border-base-300 bg-base-100 p-4">
+            <p className="eyebrow">Subsystems</p>
+            <div className="mt-3 space-y-3">
+              {config.subsystems.map((subsystem) => (
+                <div key={subsystem.name}>
+                  <p className="font-bold">{subsystem.name}</p>
+                  <p className="text-sm leading-6 text-company-muted">{subsystem.purpose}</p>
+                </div>
+              ))}
+            </div>
+          </article>
+
+          <article className="rounded-company border border-base-300 bg-base-100 p-4">
+            <p className="eyebrow">Backend evidence</p>
+            <div className="mt-3 space-y-3">
+              {tablePreview.length > 0 ? tablePreview.map((table) => (
+                <a className="block rounded-company bg-base-200 p-3 text-sm" href={`/data/${table.apiSlug}`} key={table.id}>
+                  <span className="font-bold">{table.name}</span>
+                  <span className="block text-company-muted">{table.apiSlug}</span>
+                </a>
+              )) : (
+                <LocalNotice tone="info" title="No mapped tables" detail="This department exists in the V1 operating map, but backend table ownership needs review." />
+              )}
+            </div>
+          </article>
+
+          <article className="rounded-company border border-base-300 bg-base-100 p-4">
+            <p className="eyebrow">Agent guardrails</p>
+            <p className="mt-3 text-sm leading-6 text-company-muted">{config.agentHandoff}</p>
+            <p className="mt-3 text-sm font-bold">{config.firstSafeAction}</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {config.blockedActions.slice(0, 3).map((action) => (
+                <span className="badge badge-outline" key={action}>{action}</span>
+              ))}
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function CompanyOsWorkbench({
   connection,
   companyOs,
@@ -10167,6 +10286,8 @@ function CompanyOsWorkbench({
 }) {
   const [activeCollection, setActiveCollection] = useState<CompanyOsCollectionName>("pipelines");
   const [selectedRecord, setSelectedRecord] = useState<{ collection: CompanyOsCollectionName; id: string } | null>(null);
+  const areas = useMemo(() => buildAreaViewState(connection), [connection]);
+  const [selectedAreaKey, setSelectedAreaKey] = useState(() => resolveInitialAreaKey(areas));
   const readiness = useMemo(() => companyOsReadiness(companyOs), [companyOs]);
   const definitions = sumCountGroup(companyOs.counts.definitions);
   const runtime = sumCountGroup(companyOs.counts.runtime);
@@ -10182,10 +10303,16 @@ function CompanyOsWorkbench({
     ...companyOs.recent.events
   ].slice(0, 12);
   const selectedRecordId = selectedRecord?.collection === activeCollection ? selectedRecord.id : "";
+  const selectedArea = areas.find((area) => area.key === selectedAreaKey) || areas[0];
 
   function handleCollectionSelect(collection: CompanyOsCollectionName) {
     setActiveCollection(collection);
     setSelectedRecord(null);
+  }
+
+  function handleAreaSelect(areaKey: string) {
+    setSelectedAreaKey(areaKey);
+    updateCompanyOsAreaRoute(areaKey);
   }
 
   return (
@@ -10242,6 +10369,12 @@ function CompanyOsWorkbench({
             </div>
           </div>
         </section>
+
+        <CompanyOsDepartmentControlMap
+          areas={areas}
+          selectedArea={selectedArea}
+          onSelectArea={handleAreaSelect}
+        />
 
         <CompanyOsAgentContextPanel onChanged={onReload} />
 
