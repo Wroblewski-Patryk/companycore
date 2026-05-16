@@ -34,6 +34,27 @@ of rediscovering them.
 
 ## Entries
 
+### 2026-05-17 - Canonical Departments Over Backend Areas
+- Type: reusable_pattern
+- Context: OPS-DEPT-FILTER-001 fixed the Operations board showing legacy
+  backend operating-area labels such as `Strategy and governance` while the
+  owner expects the canonical CompanyCore department model from the sidebar.
+- Decision: Owner-facing department controls must use canonical `00`-`12`
+  departments. Backend operating areas may remain as compatibility buckets for
+  tables, provider mappings, and existing records, but UI labels, filters,
+  assignment controls, and calendar overlays should present canonical
+  departments and store an explicit canonical key when a shared backend area
+  represents multiple departments.
+- Reuse when: Assigning imported provider containers, Drive folders, task
+  lists, resources, clients, projects, or future workflow definitions to a
+  department.
+- Avoid when: Showing low-level diagnostics intended only for technical
+  migration/debugging or backend operating-model maintenance.
+- Evidence:
+  `docs/planning/operations-canonical-department-filtering-task-contract.md`,
+  `src/modules/operations/operations.routes.ts`, and
+  `docs/ux/evidence/ops-canonical-departments-*.png`.
+
 ### 2026-05-17 - Operations Center Two-Pane Pattern
 - Type: reusable_pattern
 - Context: OPS-MGMT-002 deepened the owner-requested `04 Operations` work

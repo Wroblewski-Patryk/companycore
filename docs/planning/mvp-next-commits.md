@@ -17,6 +17,9 @@ synchronized with `.codex/context/TASK_BOARD.md`.
       list-board UX polish plus OPS-MGMT-002 deepening: one canonical task
       board route, department-grouped task lists, list metadata/department
       editing, drag/drop status movement, and day/week/month calendar modes.
+      OPS-DEPT-FILTER-001 also aligns Operations assignment/filtering to the
+      canonical `00`-`12` departments and adds multi-list checkbox filters for
+      the board/calendar.
       `npm run validate` and Playwright proof passed; `npm run test:api`
       should be rerun when Docker/PostgreSQL validation is healthy.
       CompanyCore remains the operating system; AI agents remain external

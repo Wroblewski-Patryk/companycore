@@ -226,6 +226,12 @@ continue from repository files alone:
   has day/week/month modes. `npm run validate` and Playwright fallback proof
   passed; API integration proof is pending rerun because local Docker/Postgres
   commands timed out during this checkpoint.
+- `docs/planning/operations-canonical-department-filtering-task-contract.md`:
+  records the Operations canonical department filtering checkpoint. Owner UI
+  assignment and filters now use the sidebar's `00`-`12` department model
+  instead of legacy backend operating-area names. Backend mappings preserve
+  compatibility by resolving `departmentKey` to an operating area and storing
+  the explicit canonical key in mapping raw payload.
 - `docs/architecture/companycore-business-module-map.md`: accepted
   model-level module map for scaling CompanyCore as the bridge for operating
   the company. It classifies future work as native core, provider-backed,

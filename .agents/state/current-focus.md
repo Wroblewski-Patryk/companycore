@@ -56,9 +56,15 @@ last, added a domain list-edit endpoint and modal, added drag/drop status
 movement, and replaced the calendar placeholder with day/week/month modes. The
 runtime slice is locally build- and Playwright-verified, but API integration
 test confidence remains partial until Docker/PostgreSQL validation can be rerun
-on a healthy local database environment. Department work can now continue only
-through a scoped department-system contract, with production smoke for this
-Operations center or `05 Relationships` as the likely next checkpoint.
+on a healthy local database environment. OPS-DEPT-FILTER-001 then aligned
+Operations list assignment and filters with canonical `00`-`12` departments,
+while keeping legacy backend operating areas as compatibility buckets. Active
+web still does not have a full canonical Department Settings editor; that is
+the next dedicated slice if the owner wants to edit department name,
+hierarchy/order, icon, description, and resource ownership. Department work can
+now continue only through a scoped department-system contract, with production
+smoke for this Operations center, canonical Department Settings, or `05
+Relationships` as the likely next checkpoint.
 
 Current DMS focus: the first `00 Main` intake API/web panel, proposal-only
 route command, shared department shell, department subsystem registry, Finance

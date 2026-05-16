@@ -96,6 +96,7 @@ export type OperationsTaskList = {
   project?: { id: string; name: string; status?: string } | null;
   areaAssignment?: {
     mappingId?: string;
+    department?: OperationsDepartment | null;
     area?: OperationsArea | null;
   } | null;
 };
@@ -113,9 +114,17 @@ export type OperationsArea = {
   isSystem?: boolean;
 };
 
+export type OperationsDepartment = {
+  key: CoreAreaKey;
+  backendAreaKey?: string;
+  position?: number;
+  operatingArea?: OperationsArea | null;
+};
+
 export type OperationsPacket = {
   summary?: Record<string, unknown>;
   operatingAreas?: OperationsArea[];
+  departments?: OperationsDepartment[];
   taskLists?: OperationsTaskList[];
   statuses?: OperationsStatusColumn[];
   workItems?: OperationsWorkItem[];

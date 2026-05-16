@@ -5,7 +5,7 @@ import { prisma } from "../../db/prisma";
 import { IntegrationError } from "../../integrations/errors";
 import { writeBackCompanyCoreTaskToClickUp } from "../../integrations/clickup/clickup.webhooks";
 import { asyncHandler } from "../../middleware/async-handler";
-import { resolveDepartmentEntry } from "../../operating-model/department-registry";
+import { departmentRegistry, resolveDepartmentEntry } from "../../operating-model/department-registry";
 import { createEvent } from "../events/event.service";
 
 const OPERATIONS_DEPARTMENT_KEY = "04-operacje";
@@ -38,7 +38,8 @@ const updateOperationsTaskListSchema = z.object({
   description: z.string().nullable().optional(),
   status: z.string().min(1).optional(),
   projectId: z.string().uuid().nullable().optional(),
-  areaId: z.string().uuid().nullable().optional()
+  areaId: z.string().uuid().nullable().optional(),
+  departmentKey: z.string().min(1).nullable().optional()
 }).strict();
 
 function asJsonArray(value: unknown) {
@@ -150,6 +151,50 @@ function taskListMappingIdentity(taskList: { id: string; source: string | null; 
     entityType: "task_list",
     externalId: taskList.externalId || taskList.id
   };
+}
+
+function objectRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
+}
+
+function manualDepartmentKey(value: unknown) {
+  const raw = objectRecord(value);
+  return typeof raw.manualDepartmentKey === "string" ? raw.manualDepartmentKey : null;
+}
+
+function canonicalDepartmentsForAreas(areas: Array<{ id: string; key: string; name: string; position: number; isSystem: boolean }>) {
+  const areaByKey = new Map(areas.map((area) => [area.key, area]));
+  return departmentRegistry.map((department) => {
+    const area = areaByKey.get(department.backendAreaKey) ?? null;
+    return {
+      key: department.canonicalKey,
+      backendAreaKey: department.backendAreaKey,
+      position: department.position,
+      operatingArea: area ? {
+        id: area.id,
+        key: area.key,
+        name: area.name,
+        position: area.position,
+        isSystem: area.isSystem
+      } : null
+    };
+  });
+}
+
+function resolveTaskListDepartment(mapping: {
+  area: { key: string } | null;
+  raw: unknown;
+} | undefined | null) {
+  if (!mapping) return null;
+  const explicitKey = manualDepartmentKey(mapping.raw);
+  const explicit = explicitKey ? resolveDepartmentEntry(explicitKey) : null;
+  const inferred = mapping.area ? resolveDepartmentEntry(mapping.area.key) : null;
+  const department = explicit ?? inferred;
+  return department ? {
+    key: department.canonicalKey,
+    backendAreaKey: department.backendAreaKey,
+    position: department.position
+  } : null;
 }
 
 export const operationsRouter = Router();
@@ -460,6 +505,7 @@ operationsRouter.get("/work-items", asyncHandler(async (req, res) => {
         position: area.position,
         isSystem: area.isSystem
       })),
+      departments: canonicalDepartmentsForAreas(operatingAreas),
       taskLists: [
         {
           id: "unassigned",
@@ -478,6 +524,7 @@ operationsRouter.get("/work-items", asyncHandler(async (req, res) => {
             return {
               areaAssignment: mapping ? {
                 mappingId: mapping.id,
+                department: resolveTaskListDepartment(mapping),
                 area: mapping.area ? {
                   id: mapping.area.id,
                   key: mapping.area.key,
@@ -539,8 +586,21 @@ operationsRouter.patch("/task-lists/:id", asyncHandler(async (req, res) => {
     }
   }
 
+  const departmentEntry = input.departmentKey ? resolveDepartmentEntry(input.departmentKey) : null;
+  if (input.departmentKey && !departmentEntry) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
   let area: { id: string } | null = null;
-  if (input.areaId) {
+  if (departmentEntry) {
+    area = await prisma.operatingArea.findFirst({
+      where: { key: departmentEntry.backendAreaKey, workspaceId },
+      select: { id: true }
+    });
+    if (!area) {
+      return res.status(404).json({ error: "not_found" });
+    }
+  } else if (input.areaId) {
     area = await prisma.operatingArea.findFirst({
       where: { id: input.areaId, workspaceId },
       select: { id: true }
@@ -550,7 +610,7 @@ operationsRouter.patch("/task-lists/:id", asyncHandler(async (req, res) => {
     }
   }
 
-  const { areaId: _areaId, ...taskListInput } = input;
+  const { areaId: _areaId, departmentKey: _departmentKey, ...taskListInput } = input;
   const taskList = await prisma.taskList.update({
     where: { id: existing.id },
     data: taskListInput
@@ -558,7 +618,7 @@ operationsRouter.patch("/task-lists/:id", asyncHandler(async (req, res) => {
 
   let areaMapping = null;
   const identity = taskListMappingIdentity(taskList);
-  if (input.areaId === null) {
+  if (input.areaId === null || input.departmentKey === null) {
     await prisma.externalContainerMapping.updateMany({
       where: {
         workspaceId,
@@ -572,7 +632,8 @@ operationsRouter.patch("/task-lists/:id", asyncHandler(async (req, res) => {
         raw: {
           source: "operations_task_list_assignment",
           taskListId: taskList.id,
-          manualAreaId: null
+          manualAreaId: null,
+          manualDepartmentKey: null
         } as Prisma.InputJsonValue
       }
     });
@@ -596,7 +657,8 @@ operationsRouter.patch("/task-lists/:id", asyncHandler(async (req, res) => {
         raw: {
           source: "operations_task_list_assignment",
           taskListId: taskList.id,
-          manualAreaId: area.id
+          manualAreaId: area.id,
+          manualDepartmentKey: departmentEntry?.canonicalKey ?? null
         } as Prisma.InputJsonValue
       },
       update: {
@@ -605,7 +667,8 @@ operationsRouter.patch("/task-lists/:id", asyncHandler(async (req, res) => {
         raw: {
           source: "operations_task_list_assignment",
           taskListId: taskList.id,
-          manualAreaId: area.id
+          manualAreaId: area.id,
+          manualDepartmentKey: departmentEntry?.canonicalKey ?? null
         } as Prisma.InputJsonValue
       },
       include: { area: true }
@@ -629,6 +692,7 @@ operationsRouter.patch("/task-lists/:id", asyncHandler(async (req, res) => {
       ...taskList,
       areaAssignment: areaMapping ? {
         mappingId: areaMapping.id,
+        department: resolveTaskListDepartment(areaMapping),
         area: areaMapping.area ? {
           id: areaMapping.area.id,
           key: areaMapping.area.key,

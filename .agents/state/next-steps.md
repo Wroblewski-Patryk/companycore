@@ -58,6 +58,10 @@ Last updated: 2026-05-17
       movement, and day/week/month calendar modes. `npm run validate` and
       Playwright proof passed; rerun `npm run test:api` when local
       Docker/PostgreSQL validation is healthy.
+    - `OPS-DEPT-FILTER-001` is complete with partial database-test confidence:
+      Operations now displays and assigns task lists through canonical
+      `00`-`12` departments instead of legacy operating-area names, and board
+      plus Calendar filters support multi-list checkbox selection.
    - CompanyCore remains the company operating system; AI agents remain
      external API/MCP clients.
    - Keep writes behind explicit command contracts, audit/events, and API
@@ -89,7 +93,13 @@ Last updated: 2026-05-17
      consume a verified backend contract.
    - Add MCP tools/resources only from the same API contracts, with capability
      filtering, blocked actions, approval metadata, events, and audit.
-3. Use the CompanyCore business module map during upcoming product intake.
+3. Canonical Department Settings module.
+   - Source:
+     `docs/planning/operations-canonical-department-filtering-task-contract.md`.
+   - Goal: expose owner-facing workspace settings for canonical departments:
+     display name, hierarchy/order number, icon, description, and resource
+     ownership rules, while preserving backend operating-area compatibility.
+4. Use the CompanyCore business module map during upcoming product intake.
    - Source: `docs/architecture/companycore-business-module-map.md`.
    - Apply it before settings, Drive, ClickUp, CRM, pipeline, knowledge,
      resource, or agent work so each slice is classified as native core,

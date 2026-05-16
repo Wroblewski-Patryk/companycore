@@ -1685,7 +1685,8 @@ test("CompanyCore v1 protected API flow", async () => {
         driveFiles: Array<{ id: string; name: string; syncStatus: string; scanStatus: string }>;
       };
       operatingAreas: Array<{ id: string; key: string; name: string }>;
-      taskLists: Array<{ id: string; name: string; source: string | null; taskCount: number; areaAssignment?: { area?: { id: string; key: string } | null } | null }>;
+      departments: Array<{ key: string; backendAreaKey: string; operatingArea?: { id: string; key: string } | null }>;
+      taskLists: Array<{ id: string; name: string; source: string | null; taskCount: number; areaAssignment?: { department?: { key: string } | null; area?: { id: string; key: string } | null } | null }>;
       statuses: Array<{ key: string; label: string }>;
       workItems: Array<{
         task: { id: string; status: string; normalizedStatus: string; completedAt: string | null; estimatedDurationMinutes: number | null };
@@ -1718,6 +1719,11 @@ test("CompanyCore v1 protected API flow", async () => {
     && file.scanStatus === "scanned"
   )));
   assert.ok(operationsWorkItemsBody.data.operatingAreas.some((area) => area.id === operationsArea.id));
+  assert.ok(operationsWorkItemsBody.data.departments.some((department) => (
+    department.key === "04-operacje"
+    && department.backendAreaKey === "operations-administration"
+    && department.operatingArea?.id === operationsArea.id
+  )));
   assert.ok(operationsWorkItemsBody.data.taskLists.some((list) => (
     list.id === operationsTaskList.id
     && list.name === "Operations backlog"
@@ -1819,15 +1825,16 @@ test("CompanyCore v1 protected API flow", async () => {
       name: "Operations execution list",
       description: "Mapped from Operations UI.",
       status: "active",
-      areaId: operationsArea.id
+      departmentKey: "04-operacje"
     })
   });
   assert.equal(patchedOperationsTaskList.status, 200);
   const patchedOperationsTaskListBody = patchedOperationsTaskList.body as {
-    data: { id: string; name: string; areaAssignment?: { area?: { id: string } | null } | null };
+    data: { id: string; name: string; areaAssignment?: { department?: { key: string } | null; area?: { id: string } | null } | null };
   };
   assert.equal(patchedOperationsTaskListBody.data.id, operationsTaskList.id);
   assert.equal(patchedOperationsTaskListBody.data.name, "Operations execution list");
+  assert.equal(patchedOperationsTaskListBody.data.areaAssignment?.department?.key, "04-operacje");
   assert.equal(patchedOperationsTaskListBody.data.areaAssignment?.area?.id, operationsArea.id);
   const operationsTaskListMapping = await prisma.externalContainerMapping.findFirst({
     where: {
@@ -1839,6 +1846,7 @@ test("CompanyCore v1 protected API flow", async () => {
     }
   });
   assert.ok(operationsTaskListMapping);
+  assert.equal((operationsTaskListMapping.raw as { manualDepartmentKey?: string } | null)?.manualDepartmentKey, "04-operacje");
   const operationsTaskListUpdatedEvent = await prisma.event.findFirst({
     where: {
       workspaceId: ownerA.workspace.id,

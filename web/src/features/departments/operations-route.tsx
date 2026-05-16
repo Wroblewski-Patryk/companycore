@@ -7,8 +7,8 @@ import { CcNotice } from "../../components/cc-notice";
 import { CcTextInput } from "../../components/cc-text-input";
 import { Shell } from "../../layout/shell";
 import { useOwnerPacket } from "../../hooks/use-owner-packet";
-import { useLanguage } from "../../i18n/i18n";
-import { OperationsArea, OperationsPacket, OperationsStatusColumn, OperationsTaskList, OperationsWorkItem } from "../../types";
+import { MessageKey, Translate, useLanguage } from "../../i18n/i18n";
+import { CoreAreaKey, OperationsDepartment, OperationsPacket, OperationsStatusColumn, OperationsTaskList, OperationsWorkItem } from "../../types";
 
 type OperationsView = "tasks" | "calendar";
 type CalendarMode = "today" | "week" | "month";
@@ -90,11 +90,20 @@ function missingFieldLabel(field: string) {
   return field.replace(/^task\./, "").replace(/_/g, " ").replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase();
 }
 
-function listArea(list: OperationsTaskList, areas: OperationsArea[]) {
-  return list.areaAssignment?.area ?? areas.find((area) => (
-    list.project?.name.toLowerCase().includes(area.name.toLowerCase())
-    || list.name.toLowerCase().includes(area.name.toLowerCase())
-  )) ?? null;
+function departmentLabelKey(key: CoreAreaKey): MessageKey {
+  if (key === "00-ogolny") return "areas.00.label";
+  if (key === "04-operacje") return "areas.04.label";
+  if (key === "08-zasoby") return "areas.08.label";
+  const number = key.slice(0, 2);
+  return `departments.${number}` as MessageKey;
+}
+
+function departmentLabel(key: CoreAreaKey, t: Translate) {
+  return t(departmentLabelKey(key));
+}
+
+function listDepartmentKey(list: OperationsTaskList) {
+  return list.areaAssignment?.department?.key ?? null;
 }
 
 function PriorityBadge({ priority }: { priority?: string | null }) {
@@ -279,12 +288,12 @@ function TaskPreviewModal({
 
 function TaskListModal({
   list,
-  areas,
+  departments,
   onClose,
   onSaved
 }: {
   list: OperationsTaskList;
-  areas: OperationsArea[];
+  departments: OperationsDepartment[];
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -305,7 +314,7 @@ function TaskListModal({
           name: String(form.get("name") || ""),
           description: String(form.get("description") || ""),
           status: String(form.get("status") || "active"),
-          areaId: String(form.get("areaId") || "") || null
+          departmentKey: String(form.get("departmentKey") || "") || null
         })
       });
       onSaved();
@@ -345,9 +354,9 @@ function TaskListModal({
           </label>
           <label className="form-control">
             <span className="label"><span className="label-text font-bold">{t("operations.departmentAssignment")}</span></span>
-            <select className="select select-bordered" name="areaId" defaultValue={list.areaAssignment?.area?.id || ""}>
+            <select className="select select-bordered" name="departmentKey" defaultValue={list.areaAssignment?.department?.key || ""}>
               <option value="">{t("operations.noDepartment")}</option>
-              {areas.map((area) => <option key={area.id} value={area.id}>{area.name}</option>)}
+              {departments.map((department) => <option key={department.key} value={department.key}>{departmentLabel(department.key, t)}</option>)}
             </select>
           </label>
         </div>
@@ -364,20 +373,20 @@ function TaskListModal({
 function OperationsBoard({
   rows,
   taskLists,
-  areas,
+  departments,
   statuses,
-  selectedListId,
-  setSelectedListId,
+  selectedListIds,
+  setSelectedListIds,
   setSelectedTask,
   setSelectedList,
   onRefresh
 }: {
   rows: OperationsWorkItem[];
   taskLists: OperationsTaskList[];
-  areas: OperationsArea[];
+  departments: OperationsDepartment[];
   statuses: OperationsStatusColumn[];
-  selectedListId: string;
-  setSelectedListId: (listId: string) => void;
+  selectedListIds: string[];
+  setSelectedListIds: (listIds: string[]) => void;
   setSelectedTask: (task: OperationsWorkItem) => void;
   setSelectedList: (list: OperationsTaskList) => void;
   onRefresh: () => void;
@@ -386,18 +395,22 @@ function OperationsBoard({
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
   const [draggedTaskId, setDraggedTaskId] = useState("");
   const [moveError, setMoveError] = useState("");
-  const allList: OperationsTaskList = { id: "all", name: t("operations.allTasks"), description: t("operations.allTasksDescription"), source: t("state.native") };
   const unassignedList = taskLists.find((list) => list.id === "unassigned");
   const realLists = taskLists.filter((list) => list.id !== "all" && list.id !== "unassigned" && rows.some((row) => taskBelongsToList(row, list.id)));
-  const groups = areas.map((area) => ({
-    id: area.id,
-    name: area.name,
-    lists: realLists.filter((list) => listArea(list, areas)?.id === area.id)
+  const selectableListIds = [...realLists.map((list) => list.id), ...(unassignedList ? [unassignedList.id] : [])];
+  const selectedSet = new Set(selectedListIds.length ? selectedListIds : selectableListIds);
+  const allSelected = selectableListIds.length > 0 && selectableListIds.every((id) => selectedSet.has(id));
+  const groups = departments.map((department) => ({
+    id: department.key,
+    name: departmentLabel(department.key, t),
+    lists: realLists.filter((list) => listDepartmentKey(list) === department.key)
   })).filter((group) => group.lists.length > 0);
-  const noDepartment = realLists.filter((list) => !listArea(list, areas));
-  const activeListId = selectedListId || "all";
-  const activeList = activeListId === "all" ? allList : taskLists.find((list) => list.id === activeListId) || allList;
-  const visibleRows = rows.filter((row) => taskBelongsToList(row, activeListId));
+  const noDepartment = realLists.filter((list) => !listDepartmentKey(list));
+  const visibleRows = rows.filter((row) => {
+    const listId = row.hierarchy?.taskList?.id || "unassigned";
+    return selectedSet.has(listId);
+  });
+  const selectedLabel = allSelected ? t("operations.allTasks") : t("operations.selectedLists", { count: selectedSet.size });
 
   useEffect(() => {
     setOpenGroups((current) => {
@@ -409,6 +422,26 @@ function OperationsBoard({
       return next;
     });
   }, [groups.map((group) => group.id).join("|")]);
+
+  useEffect(() => {
+    if (!selectedListIds.length && selectableListIds.length) {
+      setSelectedListIds(selectableListIds);
+    }
+  }, [selectableListIds.join("|"), selectedListIds.length, setSelectedListIds]);
+
+  function toggleAllLists(checked: boolean) {
+    setSelectedListIds(checked ? selectableListIds : []);
+  }
+
+  function toggleList(listId: string, checked: boolean) {
+    const next = new Set(selectedSet);
+    if (checked) {
+      next.add(listId);
+    } else {
+      next.delete(listId);
+    }
+    setSelectedListIds(Array.from(next));
+  }
 
   async function moveTaskToStatus(status: string) {
     if (!draggedTaskId) return;
@@ -429,13 +462,17 @@ function OperationsBoard({
   }
 
   function renderListButton(list: OperationsTaskList) {
+    const checked = selectedSet.has(list.id);
     return (
-      <div className={`grid grid-cols-[minmax(0,1fr)_2rem] items-stretch rounded-company ${activeListId === list.id ? "bg-primary text-primary-content" : "hover:bg-base-200"}`} key={list.id}>
-        <button className="grid min-w-0 gap-0.5 px-3 py-2 text-left" onClick={() => setSelectedListId(list.id)} type="button">
+      <div className={`grid grid-cols-[2rem_minmax(0,1fr)_2rem] items-stretch rounded-company ${checked ? "bg-primary/10" : "hover:bg-base-200"}`} key={list.id}>
+        <label className="grid place-items-center">
+          <input className="checkbox checkbox-primary checkbox-xs" checked={checked} onChange={(event) => toggleList(list.id, event.target.checked)} type="checkbox" />
+        </label>
+        <button className="grid min-w-0 gap-0.5 px-1 py-2 text-left" onClick={() => toggleList(list.id, !checked)} type="button">
           <strong className="truncate text-sm">{list.name}</strong>
-          <span className={`truncate text-xs ${activeListId === list.id ? "text-primary-content/70" : "text-company-muted"}`}>{list.areaAssignment?.area?.name || list.project?.name || list.source || t("state.native")}</span>
+          <span className="truncate text-xs text-company-muted">{list.areaAssignment?.department?.key ? departmentLabel(list.areaAssignment.department.key, t) : list.project?.name || list.source || t("state.native")}</span>
         </button>
-        <button className={activeListId === list.id ? "text-primary-content/80 hover:bg-black/10" : "text-company-muted hover:text-company-ink"} aria-label={t("operations.editList")} onClick={() => setSelectedList(list)} type="button">
+        <button className="text-company-muted hover:text-company-ink" aria-label={t("operations.editList")} onClick={() => setSelectedList(list)} type="button">
           <i className="ph-bold ph-gear-six" aria-hidden="true"></i>
         </button>
       </div>
@@ -445,10 +482,13 @@ function OperationsBoard({
   return (
     <section className="grid h-[calc(100vh-12.5rem)] min-h-[34rem] gap-4 xl:grid-cols-[17rem_minmax(0,1fr)]">
       <aside className="grid min-h-0 content-start gap-3 overflow-y-auto rounded-company border border-base-300 bg-base-100 p-3">
-        <button className={`rounded-company px-3 py-2 text-left ${activeListId === "all" ? "bg-primary text-primary-content" : "hover:bg-base-200"}`} onClick={() => setSelectedListId("all")} type="button">
-          <strong className="block text-sm">{t("operations.allTasks")}</strong>
-          <span className={activeListId === "all" ? "text-xs text-primary-content/70" : "text-xs text-company-muted"}>{t("operations.allTasksDescription")}</span>
-        </button>
+        <label className="grid grid-cols-[2rem_minmax(0,1fr)] items-center rounded-company px-1 py-2 hover:bg-base-200">
+          <input className="checkbox checkbox-primary checkbox-sm" checked={allSelected} onChange={(event) => toggleAllLists(event.target.checked)} type="checkbox" />
+          <span className="grid min-w-0 gap-0.5">
+            <strong className="block text-sm">{t("operations.allTasks")}</strong>
+            <span className="text-xs text-company-muted">{t("operations.allTasksDescription")}</span>
+          </span>
+        </label>
 
         {groups.map((group) => (
           <section className="grid gap-1" key={group.id}>
@@ -477,11 +517,10 @@ function OperationsBoard({
       <div className="grid min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)] rounded-company border border-base-300 bg-base-100 p-3">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
-            <h2 className="truncate text-xl font-black text-company-ink">{activeList.name}</h2>
-            <p className="line-clamp-1 text-sm text-company-muted">{activeList.description || t("operations.boardDescription")}</p>
+            <h2 className="truncate text-xl font-black text-company-ink">{selectedLabel}</h2>
+            <p className="line-clamp-1 text-sm text-company-muted">{t("operations.boardDescription")}</p>
           </div>
           <div className="flex gap-2">
-            {activeList.id !== "all" && activeList.id !== "unassigned" ? <CcButton onClick={() => setSelectedList(activeList)} iconLeft="ph-gear-six" variant="ghost">{t("operations.editList")}</CcButton> : null}
             <CcButton onClick={onRefresh} iconLeft="ph-arrow-clockwise" variant="outline">{t("operations.refresh")}</CcButton>
           </div>
         </div>
@@ -523,6 +562,48 @@ function CalendarTaskPill({ row, onOpen }: { row: OperationsWorkItem; onOpen: ()
       <strong className="line-clamp-1 block text-company-ink">{row.task.title}</strong>
       <span className="mt-1 flex gap-1"><PriorityBadge priority={row.task.priority} /></span>
     </button>
+  );
+}
+
+function OperationsCalendarFilters({
+  taskLists,
+  selectedListIds,
+  setSelectedListIds
+}: {
+  taskLists: OperationsTaskList[];
+  selectedListIds: string[];
+  setSelectedListIds: (listIds: string[]) => void;
+}) {
+  const { t } = useLanguage();
+  const selectableLists = taskLists.filter((list) => list.id !== "all");
+  const selectableIds = selectableLists.map((list) => list.id);
+  const selectedSet = new Set(selectedListIds.length ? selectedListIds : selectableIds);
+  const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedSet.has(id));
+
+  function toggleAll(checked: boolean) {
+    setSelectedListIds(checked ? selectableIds : []);
+  }
+
+  function toggleList(listId: string, checked: boolean) {
+    const next = new Set(selectedSet);
+    if (checked) next.add(listId);
+    else next.delete(listId);
+    setSelectedListIds(Array.from(next));
+  }
+
+  return (
+    <div className="flex min-w-0 flex-wrap items-center gap-2 rounded-company border border-base-300 bg-base-100 p-2">
+      <label className="flex items-center gap-2 rounded-company px-2 py-1 text-sm font-bold hover:bg-base-200">
+        <input className="checkbox checkbox-primary checkbox-sm" checked={allSelected} onChange={(event) => toggleAll(event.target.checked)} type="checkbox" />
+        {t("operations.allTasks")}
+      </label>
+      {selectableLists.map((list) => (
+        <label className="flex min-w-0 items-center gap-2 rounded-company px-2 py-1 text-sm hover:bg-base-200" key={list.id}>
+          <input className="checkbox checkbox-primary checkbox-xs" checked={selectedSet.has(list.id)} onChange={(event) => toggleList(list.id, event.target.checked)} type="checkbox" />
+          <span className="max-w-48 truncate">{list.name}</span>
+        </label>
+      ))}
+    </div>
   );
 }
 
@@ -620,14 +701,17 @@ export function OperationsRoute() {
   const { t } = useLanguage();
   const activeView = currentOperationsView();
   const [refreshKey, setRefreshKey] = useState(0);
-  const [selectedListId, setSelectedListId] = useState<string>("all");
+  const [selectedListIds, setSelectedListIds] = useState<string[]>([]);
   const [selectedTask, setSelectedTask] = useState<OperationsWorkItem | null>(null);
   const [selectedList, setSelectedList] = useState<OperationsTaskList | null>(null);
   const packet = useOwnerPacket<OperationsPacket>(`/v1/operations/work-items?limit=200&refresh=${refreshKey}`, true, t);
   const rows = useMemo(() => (packet.data?.workItems || []).map((item) => ({ ...item, id: item.task.id })), [packet.data?.workItems]);
   const taskLists = packet.data?.taskLists || [];
-  const areas = packet.data?.operatingAreas || [];
+  const departments = packet.data?.departments || [];
   const statuses = packet.data?.statuses?.length ? packet.data.statuses : fallbackStatuses;
+  const selectableListIds = taskLists.filter((list) => list.id !== "all").map((list) => list.id);
+  const selectedSet = new Set(selectedListIds.length ? selectedListIds : selectableListIds);
+  const filteredRows = rows.filter((row) => selectedSet.has(row.hierarchy?.taskList?.id || "unassigned"));
 
   function refresh() {
     setRefreshKey((value) => value + 1);
@@ -645,18 +729,21 @@ export function OperationsRoute() {
 
       {packet.status === "loading" ? <CcNotice tone="loading" title={t("table.loading.title")} detail={t("table.loading.detail")} /> : null}
       {packet.status === "error" ? <CcNotice tone="error" title={packet.error || t("operations.packetError")} live /> : null}
+      {packet.status === "ready" && activeView === "calendar" ? (
+        <OperationsCalendarFilters taskLists={taskLists} selectedListIds={selectedListIds} setSelectedListIds={setSelectedListIds} />
+      ) : null}
 
       {packet.status === "ready" ? (
         activeView === "calendar" ? (
-          <OperationsCalendar rows={rows} setSelectedTask={setSelectedTask} />
+          <OperationsCalendar rows={filteredRows} setSelectedTask={setSelectedTask} />
         ) : (
           <OperationsBoard
             rows={rows}
             taskLists={taskLists}
-            areas={areas}
+            departments={departments}
             statuses={statuses}
-            selectedListId={selectedListId}
-            setSelectedListId={setSelectedListId}
+            selectedListIds={selectedListIds}
+            setSelectedListIds={setSelectedListIds}
             setSelectedTask={setSelectedTask}
             setSelectedList={setSelectedList}
             onRefresh={refresh}
@@ -665,7 +752,7 @@ export function OperationsRoute() {
       ) : null}
 
       {selectedTask ? <TaskPreviewModal item={selectedTask} statuses={statuses} onClose={() => setSelectedTask(null)} onSaved={refresh} /> : null}
-      {selectedList ? <TaskListModal list={selectedList} areas={areas} onClose={() => setSelectedList(null)} onSaved={refresh} /> : null}
+      {selectedList ? <TaskListModal list={selectedList} departments={departments} onClose={() => setSelectedList(null)} onSaved={refresh} /> : null}
     </Shell>
   );
 }

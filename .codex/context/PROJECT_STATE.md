@@ -172,6 +172,19 @@ Last updated: 2026-05-17
   `npm run test:api` remains blocked for this checkpoint because the local
   Docker daemon timed out on PostgreSQL container commands; validation-owned
   docker CLI processes from the attempt were stopped.
+  OPS-DEPT-FILTER-001 then aligned the Operations owner UI with the canonical
+  `00`-`12` department model. The Operations packet now includes canonical
+  departments from the shared registry, task-list assignment accepts
+  `departmentKey` and stores `manualDepartmentKey`, the board groups lists by
+  canonical department labels instead of legacy operating-area names, list
+  selection is multi-checkbox based, and Calendar exposes the same list filter
+  before day/week/month views. `npm run validate`, `npx prisma validate`, and
+  `git diff --check` passed. Playwright fallback on temporary mocked API port
+  `3267` verified no visible `Strategy and governance`, canonical `00`-`12`
+  list-edit options, calendar filters, and no console/page errors. Full
+  owner-facing Department Settings remains future scope: backend operating-area
+  management exists, but active web does not yet provide canonical department
+  editing for name, hierarchy/order, icon, and description.
   As of 2026-05-16, DMS-OPS-001 added the first concrete Department Management
   System slice for `04 Operacje` on the selected-area route. It is a read-only
   Operations Management System board for planning, procedures, procedure
