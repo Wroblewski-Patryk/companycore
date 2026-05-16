@@ -32,13 +32,14 @@ Those belong elsewhere:
 3. `autonomous-company-operating-system.md`
 4. `tech-stack.md`
 5. `organizational-architecture-bridge.md`
-6. `companycore-business-module-map.md`
-7. `companycore-global-business-flow.md`
-8. `department-management-systems-architecture.md`
-9. `department-management-systems-v1-blueprint.md`
-10. `company-os-definition-editing-contract.md`
-11. `company-os-workflow-definition-command-contract.md`
-12. any project-specific architecture or ADR files added later
+6. `unified-organizational-operating-system.md`
+7. `companycore-business-module-map.md`
+8. `companycore-global-business-flow.md`
+9. `department-management-systems-architecture.md`
+10. `department-management-systems-v1-blueprint.md`
+11. `company-os-definition-editing-contract.md`
+12. `company-os-workflow-definition-command-contract.md`
+13. any project-specific architecture or ADR files added later
 
 ## Architecture Rules
 

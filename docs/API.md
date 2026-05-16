@@ -27,6 +27,15 @@ v1 routes are available under `/v1/*` without an `/api` prefix because the API
 uses a dedicated API domain in production. Root-level routes remain as v1
 compatibility aliases.
 
+The long-term API/MCP direction is organizational world-state access. Humans
+and AI agents should see the same CompanyCore source of truth through
+different clients and capability scopes. Future workforce, task, hierarchy,
+permission, and resource endpoints must derive access from workspace, rank,
+role, department, project/workflow context, capability, risk, approval, event,
+and audit rules instead of hardcoded user-specific visibility. The accepted
+target is recorded in
+`docs/architecture/unified-organizational-operating-system.md`.
+
 ## Response Contract
 
 CompanyCore v1 should use stable response envelopes so Paperclip, Jarvis,

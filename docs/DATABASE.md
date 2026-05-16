@@ -26,6 +26,15 @@ integration fields such as `external_id` and `source` where relevant.
 - `events`: append-style system events for important changes.
 - `company_roles`: human, agent, and system roles with responsibilities,
   permissions, allowed tools, escalation targets, and default policies.
+
+The target unified workforce direction is documented in
+`docs/architecture/unified-organizational-operating-system.md`. Current
+`users`, `agents`, `company_roles`, `business_functions`, service API keys,
+capabilities, tasks, workflow runs, approvals, events, and audit logs are the
+foundation for humans and AI agents as organizational workforce members. A
+future shared workforce/member, rank, supervisor, delegation, escalation, or
+contextual visibility schema must start from a scoped audit or read model
+instead of duplicating these existing foundations.
 - `processes`: durable company processes owned by roles and mapped to
   departments/categories, maturity, policy references, and metric references.
 - `pipelines`: reusable workflow definitions linked to processes, owners,

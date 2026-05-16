@@ -55,6 +55,11 @@ Vertical structure answers who owns, approves, escalates, and is accountable.
 Process structure answers how value moves across departments and roles.
 CompanyCore must not collapse one into the other.
 
+The unified workforce and organizational world-state layer is specified in
+`docs/architecture/unified-organizational-operating-system.md`. That document
+clarifies that humans and AI agents are both organizational entities in the
+target model, while CompanyCore remains non-AI infrastructure.
+
 ## Architecture Layers
 
 ### Organizational Structure
@@ -62,7 +67,7 @@ CompanyCore must not collapse one into the other.
 The target organization has a role hierarchy:
 
 ```text
-Patryk -> AssistantAI -> Directors -> Managers -> TeamLeaders -> Workers
+Owner -> Director -> Manager -> Leader -> Worker
 ```
 
 This should be modeled through roles, reporting relationships, responsibilities,
@@ -70,6 +75,11 @@ permissions, and escalation paths. The current `company_roles`, `agents`,
 `operating_areas`, `business_functions`, and future role hierarchy fields are
 the preferred foundation. Do not introduce a parallel people/agent hierarchy
 without reconciling it with these existing tables.
+
+The hierarchy applies to humans, AI agents, and mixed teams. Delegation flows
+downward, while reporting, blockers, requests for information, approvals, and
+escalations flow upward. This recursive loop must be preserved in task,
+workflow, API, MCP, and web design.
 
 ### APQC Process Structure
 

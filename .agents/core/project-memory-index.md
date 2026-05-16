@@ -85,6 +85,18 @@ continue from repository files alone:
   Access and autonomy, and Audit and feedback. Future Paperclip work should
   first close the business-plan/context-to-task loop through existing
   knowledge, task, ClickUp, MCP, event, approval, and audit foundations.
+- `docs/architecture/unified-organizational-operating-system.md`: accepted
+  unified organizational operating-system direction. As of 2026-05-16,
+  CompanyCore remains non-AI organizational infrastructure, while humans and
+  AI agents are both target workforce members inside one organizational model.
+  The architecture now explicitly covers unified workforce membership,
+  human/agent profiles, rank and role hierarchy, supervisor relationships,
+  contextual visibility, recursive delegation/escalation/reporting, richer
+  task lifecycle direction, and MCP/API-first organizational world-state
+  exposure. Future implementation must first audit and extend current
+  `users`, `agents`, `company_roles`, `business_functions`, tasks, workflow,
+  approval, event, audit, API, and MCP foundations before adding broad new
+  workforce or permission tables.
 - `docs/architecture/autonomous-company-operating-system.md`: accepted
   explicit architecture boundary from 2026-05-16. CompanyCore is the company
   operating system, not an embedded AI system. Humans use responsive web UI;

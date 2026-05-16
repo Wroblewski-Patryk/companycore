@@ -23,6 +23,10 @@ feedback, and operating-system improvement is documented in
 management-system direction for turning each of the 13 operating areas into a
 coherent management surface is documented in
 `docs/architecture/department-management-systems-architecture.md`.
+The unified workforce and organizational world-state direction is documented in
+`docs/architecture/unified-organizational-operating-system.md`; it treats
+humans and AI agents as organizational workforce members while preserving the
+boundary that CompanyCore itself is infrastructure, not AI.
 
 ## Main Runtime Surfaces
 
@@ -96,11 +100,30 @@ foundation target.
 - Platform state: events, users, workspaces, workspace-scoped API keys,
   integration settings.
 
+The target workforce model unifies human and AI organizational membership over
+these foundations:
+
+```text
+User / WorkforceMember
+  -> Human profile
+  -> Agent profile
+```
+
+The current `users` and `agents` tables are foundations, not competing systems.
+Future workforce work should add a shared member layer only through scoped
+contracts after read-model audits prove the exact need. The target shared
+attributes are type, department, role, rank, supervisor, visibility scope,
+active status, context access, and workload state. Human-specific employment
+and account metadata belongs in a human profile; AI-specific model/provider,
+MCP identity, connected systems, skills, tools, constraints, memory, and
+behavior metadata belongs in an agent profile.
+
 The target organizational bridge adds these cross-cutting dimensions without
 replacing the existing Company OS model:
 
 - vertical role hierarchy and escalation:
-  `Patryk -> AssistantAI -> Directors -> Managers -> TeamLeaders -> Workers`
+  `Owner -> Director -> Manager -> Leader -> Worker`, including human, agent,
+  and mixed teams
 - APQC-style process domains over the existing process and pipeline graph
 - MECE responsibility ownership for important processes, resources, KPIs,
   tools, and governance rules
@@ -112,6 +135,25 @@ replacing the existing Company OS model:
 - Paperclip as a supervised external company-building execution agent that
   uses CompanyCore knowledge, task context, and scoped tools through the same
   API/MCP boundaries rather than direct database or provider access
+
+Task delegation must flow downward through this hierarchy, while reporting,
+blockers, requests for information, and approvals flow upward. The task system
+must therefore evolve from basic todo records toward delegated work units with
+parent/child tasks, delegation chains, escalation chains, approval and
+reporting flows, dependency relationships, procedure execution, attached
+context/resources, communication history, and audit evidence. The target
+lifecycle is `Created -> Assigned -> In Progress -> Blocked -> Needs
+Information -> Escalated -> Waiting Response -> Returned -> Review ->
+Approved -> Completed`, with `Rejected` as a terminal or rework-triggering
+decision state. This should be implemented incrementally through read models,
+assignment/delegation records, and command-shaped lifecycle routes rather than
+one broad status-enum migration.
+
+Permissions should derive from rank, role, department, project/workflow
+context, capability profile, and autonomy policy. They should not be encoded
+as user-specific UI or route exceptions. The same derived authority must shape
+frontend navigation, dashboards, API responses, MCP manifest exposure,
+resource visibility, and organizational read packets.
 
 The global company flow must be treated as a graph projection over these
 modules:

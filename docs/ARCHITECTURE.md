@@ -7,6 +7,11 @@ The long-term product shape is a company operating bridge, not only a backend
 integration dashboard. The model-level module map for scaling UI, API, MCP,
 provider, and agent work is
 `docs/architecture/companycore-business-module-map.md`.
+The unified organizational operating-system direction is documented in
+`docs/architecture/unified-organizational-operating-system.md`: CompanyCore is
+the non-AI organizational world state where humans and AI agents are both
+workforce members operating through shared departments, hierarchy, tasks,
+permissions, resources, API, and MCP boundaries.
 
 ## Source Of Truth
 

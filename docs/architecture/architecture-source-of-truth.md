@@ -65,6 +65,7 @@ At minimum, keep these files aligned:
 - `docs/architecture/autonomous-company-operating-system.md`
 - `docs/architecture/tech-stack.md`
 - `docs/architecture/organizational-architecture-bridge.md`
+- `docs/architecture/unified-organizational-operating-system.md`
 - `docs/architecture/companycore-business-module-map.md`
 - `docs/architecture/companycore-global-business-flow.md`
 - `docs/architecture/department-management-systems-architecture.md`
@@ -129,6 +130,15 @@ The approved v1 direction is:
   future schema, MCP, web, mobile, Paperclip, governance, knowledge, KPI, and
   organizational graph work without bypassing scoped task contracts or existing
   Company OS boundaries.
+- CompanyCore's unified organizational operating-system direction is recorded
+  in `docs/architecture/unified-organizational-operating-system.md`. Humans
+  and AI agents are both organizational workforce members in the target model:
+  they can receive work, report progress, belong to departments, exist in a
+  hierarchy, hold role/rank-derived permissions, use procedures, access
+  resources, escalate issues, and communicate organizationally. This extends
+  the current `users`, `agents`, `company_roles`, `business_functions`,
+  `tasks`, workflow, approval, event, audit, API, and MCP foundations without
+  authorizing a broad schema rewrite.
 - CompanyCore should scale through model-level business modules recorded in
   `docs/architecture/companycore-business-module-map.md`. Future views and
   agent tools should derive from those modules and classify work as native

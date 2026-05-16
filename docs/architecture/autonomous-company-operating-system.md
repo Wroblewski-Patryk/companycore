@@ -45,6 +45,26 @@ manage pipelines, and propose actions only through approved CompanyCore API/MCP
 boundaries. CompanyCore owns validation, permissions, approvals, events, audit,
 and source-of-truth state.
 
+## Unified Workforce Boundary
+
+CompanyCore must treat humans and AI agents as organizational workforce
+members without making CompanyCore itself an AI runtime.
+
+```text
+Human workforce member -> web / future mobile -> CompanyCore API
+AI workforce member -> MCP / API / service integration -> CompanyCore API
+```
+
+Both humans and agents can receive tasks, report work, belong to departments,
+exist in hierarchy, own permissions, participate in workflows, execute
+procedures, access resources, escalate issues, and communicate
+organizationally. Their profiles and client interfaces differ, but the
+organizational structures they operate in must be shared.
+
+The detailed workforce, hierarchy, task recursion, contextual visibility, and
+world-state target lives in
+`docs/architecture/unified-organizational-operating-system.md`.
+
 ## Interaction Model
 
 | Client | Interface | Allowed model |

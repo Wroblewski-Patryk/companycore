@@ -19,6 +19,8 @@ delivery, payment, feedback, and improvement lives in
 management-system architecture that turns the 13 operating areas into scalable
 owner and agent surfaces lives in
 `docs/architecture/department-management-systems-architecture.md`.
+The unified workforce and organizational world-state target lives in
+`docs/architecture/unified-organizational-operating-system.md`.
 
 ## Product Direction
 
@@ -72,6 +74,7 @@ resource, knowledge, integration, or governance records.
 | Module | Classification | Primary purpose | Current foundation | Primary views or tools | Agent value |
 | --- | --- | --- | --- | --- | --- |
 | Company Graph Core | Native core | Connect work to departments, roles, responsibilities, ownership, escalation, and business functions. | `operating_areas`, `business_functions`, `company_roles`, `agents`, relationship graph | Company Atlas, selected-area operating room, relationship workbench | Agents can understand who owns a topic and where to escalate. |
+| Unified Workforce And Authority | Native core | Treat humans and AI agents as organizational members with departments, roles, ranks, supervisors, workload, context access, and escalation paths. | `users`, `agents`, `company_roles`, service API keys, capabilities, future workforce profile layer | People/Agents board, authority map, agent key/profile workbench, contextual navigation | Agents and humans can receive work, report progress, escalate, and use permissions from the same organizational model. |
 | Strategy, Goals, And Targets | Native core | Turn owner intent into measurable direction and execution targets. | `goals`, `targets`, `metrics`, decisions | dashboard brief, selected-area goals tab, future planning views | Agents can align proposed work with company priorities. |
 | Work And Tasks | Native core plus provider-backed ClickUp | Manage executable work, lists, status, priority, comments, and provider sync. | `tasks`, `task_lists`, ClickUp adapter, provider event inbox/outbox | tasks workbench, selected-area tasks tab, ClickUp settings | Agents can create, inspect, update, or report work through scoped commands. |
 | Processes And Pipelines | Native core | Define how work moves across departments from intake to outcome. | `processes`, `pipelines`, `pipeline_stages`, `procedures`, `procedure_steps`, workflow drafts | pipeline workbench, Company OS cockpit, selected-area workflows tab | Agents can follow approved procedures and avoid inventing workflow state. |

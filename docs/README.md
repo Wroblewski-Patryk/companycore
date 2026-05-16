@@ -89,6 +89,7 @@ or architecture truth:
   - `architecture/system-architecture.md`
   - `architecture/tech-stack.md`
   - `architecture/architecture-source-of-truth.md`
+  - `architecture/unified-organizational-operating-system.md`
 - Engineering:
   - `engineering/local-development.md`
   - `engineering/testing.md`

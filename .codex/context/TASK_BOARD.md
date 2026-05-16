@@ -136,6 +136,25 @@
 
 ## Done
 
+- ORG-ARCH-002 Unified organizational operating system architecture.
+  - Evidence:
+    `docs/architecture/unified-organizational-operating-system.md` records the
+    expanded CompanyCore direction as a non-AI organizational world state and
+    operational source of truth for a unified human/AI workforce. Existing
+    architecture docs now link that direction from the reading order,
+    source-of-truth contract, system architecture, autonomous Company OS
+    boundary, organizational bridge, business module map, and DMS blueprint.
+    Front-door `docs/ARCHITECTURE.md`, `docs/DATABASE.md`, `docs/API.md`, and
+    `docs/README.md` also point to the new direction.
+    It maps current `users`, `agents`, `company_roles`, `business_functions`,
+    tasks, workflow runs, approvals, events, audit logs, capabilities, and
+    MCP/API foundations to target workforce, hierarchy, task recursion,
+    permissions, contextual visibility, and organizational world-state gaps.
+  - Validation: source review of current architecture, Prisma schema, task,
+    pipeline, permission, and MCP foundations; `git diff --check`.
+  - Task contract:
+    `docs/planning/unified-organizational-operating-system-architecture-task-contract.md`.
+
 - WEB-QA-AUDIT-001 Web foundation quality audit.
   - Evidence:
     `docs/planning/web-foundation-quality-audit-2026-05-16.md` audits the

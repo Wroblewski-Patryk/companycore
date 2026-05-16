@@ -20,6 +20,15 @@ Last updated: 2026-05-16
   spreads. Sources:
   `docs/architecture/autonomous-company-operating-system.md` and
   `docs/planning/companycore-00-04-08-operating-loop-plan.md`.
+  As of 2026-05-16, the architectural direction is expanded in
+  `docs/architecture/unified-organizational-operating-system.md`: CompanyCore
+  is the unified organizational world state and operational source of truth,
+  while humans and AI agents are both future workforce members that can receive
+  work, report progress, belong to departments, exist in hierarchy, hold
+  rank/role/department/context-derived permissions, execute procedures, access
+  resources, escalate issues, and operate through shared API/MCP boundaries.
+  This is a documentation/source-of-truth update only; runtime schema and UI
+  changes remain future scoped task contracts.
   The first loop checkpoint is complete: `CC-UI-001` documented shared
   component gaps and primitive contracts; `CC-00-001` documented route
   proposal lifecycle readback; `CC-04-001` audited Operations task model gaps;
@@ -3433,6 +3442,7 @@ Last updated: 2026-05-16
 - `docs/architecture/tech-stack.md`
 - `docs/architecture/architecture-source-of-truth.md`
 - `docs/architecture/organizational-architecture-bridge.md`
+- `docs/architecture/unified-organizational-operating-system.md`
 - `docs/architecture/companycore-business-module-map.md`
 - `docs/architecture/companycore-global-business-flow.md`
 - `docs/architecture/department-management-systems-architecture.md`

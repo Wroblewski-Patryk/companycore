@@ -23,6 +23,7 @@ This document complements:
 - `docs/architecture/companycore-business-module-map.md`
 - `docs/architecture/companycore-global-business-flow.md`
 - `docs/architecture/organizational-architecture-bridge.md`
+- `docs/architecture/unified-organizational-operating-system.md`
 - `docs/ux/v1-department-management-systems-view-map.md`
 
 It is an architecture and planning source of truth. It does not approve broad
