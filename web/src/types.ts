@@ -94,6 +94,10 @@ export type OperationsTaskList = {
   externalId?: string | null;
   taskCount?: number;
   project?: { id: string; name: string; status?: string } | null;
+  areaAssignment?: {
+    mappingId?: string;
+    area?: OperationsArea | null;
+  } | null;
 };
 
 export type OperationsStatusColumn = {
@@ -101,8 +105,17 @@ export type OperationsStatusColumn = {
   label: string;
 };
 
+export type OperationsArea = {
+  id: string;
+  key: string;
+  name: string;
+  position?: number;
+  isSystem?: boolean;
+};
+
 export type OperationsPacket = {
   summary?: Record<string, unknown>;
+  operatingAreas?: OperationsArea[];
   taskLists?: OperationsTaskList[];
   statuses?: OperationsStatusColumn[];
   workItems?: OperationsWorkItem[];

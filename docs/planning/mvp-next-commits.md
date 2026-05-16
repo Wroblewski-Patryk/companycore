@@ -14,8 +14,11 @@ synchronized with `.codex/context/TASK_BOARD.md`.
       backend packets, selected-area UI adoption, CC-AUDIT-001 post-login
       dashboard proof, WEB-CORE-001 active web cleanup, and WEB-QA-001
       language/error/form foundation. `04 Operations` also has the verified
-      list-board UX polish with full-width layout, `All`, stable lanes,
-      priority/readiness cards, task modal context, and calendar view.
+      list-board UX polish plus OPS-MGMT-002 deepening: one canonical task
+      board route, department-grouped task lists, list metadata/department
+      editing, drag/drop status movement, and day/week/month calendar modes.
+      `npm run validate` and Playwright proof passed; `npm run test:api`
+      should be rerun when Docker/PostgreSQL validation is healthy.
       CompanyCore remains the operating system; AI agents remain external
       API/MCP clients. Do not restore old private workbench screens without a
       scoped task contract.

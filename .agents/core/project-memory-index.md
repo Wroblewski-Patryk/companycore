@@ -1,6 +1,6 @@
 # Project Memory Index
 
-Last updated: 2026-05-16
+Last updated: 2026-05-17
 
 ## Purpose
 
@@ -216,6 +216,16 @@ continue from repository files alone:
   are no longer shown as owner board panels, and `04 Operations -> Calendar`
   is available. `npm run build:web` and Playwright fallback desktop/mobile
   render proof passed.
+- `docs/planning/operations-management-center-deepening-task-contract.md`:
+  records the latest Operations management center checkpoint. `Tasks` is now
+  the canonical `04 Operations` work view, the active duplicate Operations
+  overview is removed from web route metadata, task lists are grouped by
+  department with unassigned lists below, `PATCH /v1/operations/task-lists/:id`
+  edits list metadata and department assignment through the Operations domain,
+  task cards can be drag/dropped between canonical status lanes, and Calendar
+  has day/week/month modes. `npm run validate` and Playwright fallback proof
+  passed; API integration proof is pending rerun because local Docker/Postgres
+  commands timed out during this checkpoint.
 - `docs/architecture/companycore-business-module-map.md`: accepted
   model-level module map for scaling CompanyCore as the bridge for operating
   the company. It classifies future work as native core, provider-backed,

@@ -17,7 +17,7 @@ export type AppRouteGroup = {
 };
 
 export const canonicalGeneralDashboardPath = "/areas?area=00-ogolny&view=overview";
-export const canonicalOperationsPath = "/areas?area=04-operacje&view=overview";
+export const canonicalOperationsPath = "/areas?area=04-operacje&view=tasks";
 export const canonicalAssetsPath = "/areas?area=08-zasoby&view=overview";
 
 export const publicHomeRoute: AppRouteMeta = {
@@ -149,7 +149,7 @@ export function canonicalPostAuthPath(pathname?: string | null) {
     const area = params.get("area");
     if (area === "04-operacje") {
       const view = params.get("view");
-      return view === "tasks" ? "/areas?area=04-operacje&view=tasks" : canonicalOperationsPath;
+      return view === "calendar" ? "/areas?area=04-operacje&view=calendar" : canonicalOperationsPath;
     }
     if (area === "08-zasoby") {
       return canonicalAssetsPath;

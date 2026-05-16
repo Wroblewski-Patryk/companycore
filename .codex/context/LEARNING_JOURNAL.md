@@ -26,6 +26,27 @@ fixes for this repository.
 
 ## Entries
 
+### 2026-05-17 - Treat Hanging Docker CLI As An Environment Blocker
+- Context: OPS-MGMT-002 attempted to run `npm run test:api` against a fresh
+  PostgreSQL Docker container after adding the Operations task-list assignment
+  endpoint.
+- Symptom: `docker run`, `docker ps`, and `docker version` commands timed out
+  instead of returning a clean PostgreSQL validation environment.
+- Root cause: The local Docker daemon or Docker CLI bridge was unhealthy during
+  the checkpoint; continuing to wait would not produce reliable API evidence.
+- Guardrail: When Docker control commands hang, stop only validation-owned
+  Docker CLI processes, record the database proof gap honestly, and do not
+  mark API integration tests as passed.
+- Preferred pattern: Continue with build/type gates and rendered UI proof, then
+  queue a rerun of `npm run test:api` on the next healthy PostgreSQL
+  validation environment.
+- Avoid: Killing unrelated long-lived Docker processes or treating a timed-out
+  test attempt as success.
+- Evidence: OPS-MGMT-002 `npm run validate`, frontend proof, and process
+  cleanup passed; database integration proof remains explicitly pending in
+  `.agents/state/module-confidence-ledger.md` and
+  `.agents/state/system-health.md`.
+
 ### 2026-05-14 - Use Source Archive For Private GitHub VPS Deploys
 - Context: AGRUN-007 manual CompanyCore rollover to production.
 - Symptom: VPS `git clone` from the private CompanyCore repository failed

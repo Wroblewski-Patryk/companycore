@@ -43,7 +43,7 @@
 ## In Progress
 
 - No active implementation task is currently in progress after the
-  OPS-BOARD-UX-001 Operations board UX polish checkpoint.
+  OPS-MGMT-002 Operations management center deepening checkpoint.
 
 ## Blocked
 

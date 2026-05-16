@@ -1,6 +1,6 @@
 # Next Steps
 
-Last updated: 2026-05-16
+Last updated: 2026-05-17
 
 ## NOW
 
@@ -52,6 +52,12 @@ Last updated: 2026-05-16
       Operations board starts with `All`, uses stable status lanes, shows
       visual priority/due/readiness signals, hides technical blocked-action
       diagnostics from the owner board, and adds the first calendar view.
+    - `OPS-MGMT-002` is complete with partial database-test confidence:
+      Operations now has one canonical task board, department-grouped task
+      lists, editable list metadata and department assignment, drag/drop status
+      movement, and day/week/month calendar modes. `npm run validate` and
+      Playwright proof passed; rerun `npm run test:api` when local
+      Docker/PostgreSQL validation is healthy.
    - CompanyCore remains the company operating system; AI agents remain
      external API/MCP clients.
    - Keep writes behind explicit command contracts, audit/events, and API

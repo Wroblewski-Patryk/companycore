@@ -141,6 +141,7 @@ export const adapterManifest = {
     operations: [
       { method: "GET", path: "/v1/operations/context", capability: "operations:read" },
       { method: "GET", path: "/v1/operations/work-items", capability: "operations:read" },
+      { method: "PATCH", path: "/v1/operations/task-lists/:id", capability: "operations:write" },
       { method: "PATCH", path: "/v1/operations/work-items/:id", capability: "operations:write" }
     ],
     assets: [

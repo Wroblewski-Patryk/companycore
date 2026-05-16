@@ -1684,7 +1684,8 @@ test("CompanyCore v1 protected API flow", async () => {
         area: { id: string; key: string } | null;
         driveFiles: Array<{ id: string; name: string; syncStatus: string; scanStatus: string }>;
       };
-      taskLists: Array<{ id: string; name: string; source: string | null; taskCount: number }>;
+      operatingAreas: Array<{ id: string; key: string; name: string }>;
+      taskLists: Array<{ id: string; name: string; source: string | null; taskCount: number; areaAssignment?: { area?: { id: string; key: string } | null } | null }>;
       statuses: Array<{ key: string; label: string }>;
       workItems: Array<{
         task: { id: string; status: string; normalizedStatus: string; completedAt: string | null; estimatedDurationMinutes: number | null };
@@ -1716,6 +1717,7 @@ test("CompanyCore v1 protected API flow", async () => {
     && file.syncStatus === "synced"
     && file.scanStatus === "scanned"
   )));
+  assert.ok(operationsWorkItemsBody.data.operatingAreas.some((area) => area.id === operationsArea.id));
   assert.ok(operationsWorkItemsBody.data.taskLists.some((list) => (
     list.id === operationsTaskList.id
     && list.name === "Operations backlog"
@@ -1810,6 +1812,49 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(operationsWorkItemUpdatedEvent);
   await prisma.event.delete({ where: { id: operationsWorkItemUpdatedEvent.id } });
 
+  const patchedOperationsTaskList = await request(`/v1/operations/task-lists/${operationsTaskList.id}`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({
+      name: "Operations execution list",
+      description: "Mapped from Operations UI.",
+      status: "active",
+      areaId: operationsArea.id
+    })
+  });
+  assert.equal(patchedOperationsTaskList.status, 200);
+  const patchedOperationsTaskListBody = patchedOperationsTaskList.body as {
+    data: { id: string; name: string; areaAssignment?: { area?: { id: string } | null } | null };
+  };
+  assert.equal(patchedOperationsTaskListBody.data.id, operationsTaskList.id);
+  assert.equal(patchedOperationsTaskListBody.data.name, "Operations execution list");
+  assert.equal(patchedOperationsTaskListBody.data.areaAssignment?.area?.id, operationsArea.id);
+  const operationsTaskListMapping = await prisma.externalContainerMapping.findFirst({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      provider: "companycore",
+      entityType: "task_list",
+      externalId: operationsTaskList.id,
+      areaId: operationsArea.id
+    }
+  });
+  assert.ok(operationsTaskListMapping);
+  const operationsTaskListUpdatedEvent = await prisma.event.findFirst({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      type: "operations_task_list_updated"
+    }
+  });
+  assert.ok(operationsTaskListUpdatedEvent);
+  await prisma.event.delete({ where: { id: operationsTaskListUpdatedEvent.id } });
+
+  const foreignPatchOperationsTaskList = await request(`/v1/operations/task-lists/${operationsTaskList.id}`, {
+    method: "PATCH",
+    headers: authB,
+    body: JSON.stringify({ name: "Must not cross workspaces" })
+  });
+  assert.equal(foreignPatchOperationsTaskList.status, 404);
+
   const foreignPatchOperationsWorkItem = await request(`/v1/operations/work-items/${operationsTask.id}`, {
     method: "PATCH",
     headers: authB,
@@ -1834,6 +1879,9 @@ test("CompanyCore v1 protected API flow", async () => {
   await prisma.approval.delete({ where: { id: operationsApproval.id } });
   await prisma.dependency.delete({ where: { id: operationsDependency.id } });
   await prisma.resource.delete({ where: { id: operationsResource.id } });
+  await prisma.externalContainerMapping.deleteMany({
+    where: { workspaceId: ownerA.workspace.id, provider: "companycore", entityType: "task_list", externalId: operationsTaskList.id }
+  });
   await prisma.taskList.delete({ where: { id: operationsTaskList.id } });
   await prisma.project.delete({ where: { id: operationsProject.id } });
   await prisma.businessFunction.delete({ where: { id: operationsBusinessFunction.id } });

@@ -1,6 +1,6 @@
 # Current Focus
 
-Last updated: 2026-05-16
+Last updated: 2026-05-17
 
 ## Active Focus
 
@@ -49,10 +49,16 @@ OPS-BOARD-UX-001 then polished the active `04 Operations` management surface:
 the shell content is full width, sidebar scrolling is stable, the task board
 starts with `All`, status lanes keep readable widths, task cards show
 priority/due/readiness visually, technical blocked-action diagnostics are no
-longer board content, and a first calendar view is available. Department work
-can now continue only through a scoped department-system
-contract, with `05 Relationships` still the likely next department unless
-production deployment smoke is selected first.
+longer board content, and a first calendar view is available. OPS-MGMT-002 then
+made `Tasks` the canonical Operations work view, removed the active duplicate
+Operations overview, grouped task lists by department with unassigned lists
+last, added a domain list-edit endpoint and modal, added drag/drop status
+movement, and replaced the calendar placeholder with day/week/month modes. The
+runtime slice is locally build- and Playwright-verified, but API integration
+test confidence remains partial until Docker/PostgreSQL validation can be rerun
+on a healthy local database environment. Department work can now continue only
+through a scoped department-system contract, with production smoke for this
+Operations center or `05 Relationships` as the likely next checkpoint.
 
 Current DMS focus: the first `00 Main` intake API/web panel, proposal-only
 route command, shared department shell, department subsystem registry, Finance

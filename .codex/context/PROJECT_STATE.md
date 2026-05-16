@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last updated: 2026-05-16
+Last updated: 2026-05-17
 
 ## Product Snapshot
 - Name: LuckySparrow Company Core
@@ -158,6 +158,20 @@ Last updated: 2026-05-16
   showing department files/tables and AI handoff context; and
   `/tasks-adapter` created `Proof delivery task`, moved it to `in_progress`,
   and captured desktop/mobile proof without horizontal overflow.
+  OPS-MGMT-002 then deepened the active `04 Operations` management center:
+  Operations no longer exposes a duplicated dashboard/overview view, `Tasks`
+  is the canonical work board, task lists are grouped by department with
+  unassigned lists below, task-list metadata and department assignment are
+  editable through a domain Operations endpoint, task cards support drag/drop
+  status changes through the existing work-item command route, and Calendar
+  now has day, week, and month modes. `npm run validate`, `npm run
+  build:server`, `npm run build:web`, and `git diff --check` passed.
+  Playwright fallback on temporary mocked API port `3261` verified desktop
+  tasks/list editing, desktop calendar, mobile tasks, one `All` entry, no
+  duplicated dashboard tab, seven week columns, and 31 current-month cells.
+  `npm run test:api` remains blocked for this checkpoint because the local
+  Docker daemon timed out on PostgreSQL container commands; validation-owned
+  docker CLI processes from the attempt were stopped.
   As of 2026-05-16, DMS-OPS-001 added the first concrete Department Management
   System slice for `04 Operacje` on the selected-area route. It is a read-only
   Operations Management System board for planning, procedures, procedure

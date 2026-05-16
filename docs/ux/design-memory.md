@@ -34,6 +34,34 @@ of rediscovering them.
 
 ## Entries
 
+### 2026-05-17 - Operations Center Two-Pane Pattern
+- Type: reusable_pattern
+- Context: OPS-MGMT-002 deepened the owner-requested `04 Operations` work
+  management center after feedback that duplicated dashboard/tasks views,
+  stacked tall sections, and loose calendar behavior made daily task use feel
+  heavier than needed.
+- Decision: For dense department execution screens, keep one canonical work
+  surface and constrain it to two main panes: a left rail for scope/list
+  selection and a right pane for the selected object's primary workflow. The
+  left rail may group lists by department and keep unassigned lists last. The
+  right pane should own the main workflow, such as status lanes or a calendar,
+  with internal scrolling and stable column widths. Editing related container
+  metadata belongs in a modal or drawer launched from the rail, not as a third
+  full-height section. Calendar modes should change information density:
+  day as a timeline, week as seven columns, and month as compact badge
+  summaries.
+- Reuse when: Building future Product delivery boards, Relationships follow-up
+  queues, Technology deployment queues, Assets review queues, or any
+  department screen where imported provider containers need CompanyCore
+  department ownership.
+- Avoid when: The task is a pure settings form, a single-record editor, or an
+  evidence/audit screen where grouping by work list would hide the primary
+  decision.
+- Evidence:
+  `docs/planning/operations-management-center-deepening-task-contract.md`,
+  `web/src/features/departments/operations-route.tsx`, and screenshots under
+  `docs/ux/evidence/ops-management-center-*.png`.
+
 ### 2026-05-16 - Department Work Board Pattern
 - Type: reusable_pattern
 - Context: OPS-BOARD-001 converted `04 Operations -> Tasks` from a flat table

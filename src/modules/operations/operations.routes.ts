@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { TaskStatus } from "@prisma/client";
+import { Prisma, TaskStatus } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "../../db/prisma";
 import { IntegrationError } from "../../integrations/errors";
@@ -31,6 +31,14 @@ const updateWorkItemSchema = z.object({
   goalId: z.string().uuid().nullable().optional(),
   targetId: z.string().uuid().nullable().optional(),
   taskListId: z.string().uuid().nullable().optional()
+}).strict();
+
+const updateOperationsTaskListSchema = z.object({
+  name: z.string().min(1).optional(),
+  description: z.string().nullable().optional(),
+  status: z.string().min(1).optional(),
+  projectId: z.string().uuid().nullable().optional(),
+  areaId: z.string().uuid().nullable().optional()
 }).strict();
 
 function asJsonArray(value: unknown) {
@@ -132,6 +140,18 @@ function mapBlockedOperationsActions() {
   ];
 }
 
+function taskListMappingIdentity(taskList: { id: string; source: string | null; externalId: string | null }) {
+  if (taskList.source === "clickup" && taskList.externalId) {
+    return { provider: "clickup", entityType: "list", externalId: taskList.externalId };
+  }
+
+  return {
+    provider: taskList.source || "companycore",
+    entityType: "task_list",
+    externalId: taskList.externalId || taskList.id
+  };
+}
+
 export const operationsRouter = Router();
 
 operationsRouter.get("/work-items", asyncHandler(async (req, res) => {
@@ -179,6 +199,35 @@ operationsRouter.get("/work-items", asyncHandler(async (req, res) => {
   ]);
 
   const taskCountByListId = new Map(taskCountByList.map((row) => [row.taskListId ?? "unassigned", row._count._all]));
+  const taskListMappingFilters = taskLists.map((taskList) => taskListMappingIdentity(taskList));
+  const [operatingAreas, taskListMappings] = await Promise.all([
+    prisma.operatingArea.findMany({
+      where: { workspaceId },
+      orderBy: { position: "asc" }
+    }),
+    taskListMappingFilters.length
+      ? prisma.externalContainerMapping.findMany({
+        where: {
+          workspaceId,
+          OR: taskListMappingFilters.map((mapping) => ({
+            provider: mapping.provider,
+            entityType: mapping.entityType,
+            externalId: mapping.externalId
+          }))
+        },
+        include: { area: true }
+      })
+      : Promise.resolve([])
+  ]);
+  const mappingByTaskListId = new Map(taskLists.flatMap((taskList) => {
+    const identity = taskListMappingIdentity(taskList);
+    const mapping = taskListMappings.find((candidate) => (
+      candidate.provider === identity.provider
+      && candidate.entityType === identity.entityType
+      && candidate.externalId === identity.externalId
+    ));
+    return mapping ? [[taskList.id, mapping] as const] : [];
+  }));
   const taskIds = tasks.map((task) => task.id);
   const projectIds = Array.from(new Set(tasks.map((task) => task.projectId).filter((id): id is string => Boolean(id))));
 
@@ -404,6 +453,13 @@ operationsRouter.get("/work-items", asyncHandler(async (req, res) => {
           modifiedTime: file.modifiedTime?.toISOString() ?? null
         }))
       },
+      operatingAreas: operatingAreas.map((area) => ({
+        id: area.id,
+        key: area.key,
+        name: area.name,
+        position: area.position,
+        isSystem: area.isSystem
+      })),
       taskLists: [
         {
           id: "unassigned",
@@ -412,10 +468,25 @@ operationsRouter.get("/work-items", asyncHandler(async (req, res) => {
           status: "active",
           source: "companycore",
           externalId: null,
+          areaAssignment: null,
           project: null,
           taskCount: taskCountByListId.get("unassigned") ?? 0
         },
         ...taskLists.map((taskList) => ({
+          ...(() => {
+            const mapping = mappingByTaskListId.get(taskList.id);
+            return {
+              areaAssignment: mapping ? {
+                mappingId: mapping.id,
+                area: mapping.area ? {
+                  id: mapping.area.id,
+                  key: mapping.area.key,
+                  name: mapping.area.name,
+                  position: mapping.area.position
+                } : null
+              } : null
+            };
+          })(),
           id: taskList.id,
           name: taskList.name,
           description: taskList.description,
@@ -443,6 +514,128 @@ operationsRouter.get("/work-items", asyncHandler(async (req, res) => {
         ],
         blockedActions: mapBlockedOperationsActions()
       }
+    }
+  });
+}));
+
+operationsRouter.patch("/task-lists/:id", asyncHandler(async (req, res) => {
+  const workspaceId = req.auth!.workspaceId;
+  const input = updateOperationsTaskListSchema.parse(req.body);
+
+  const existing = await prisma.taskList.findFirst({
+    where: { id: String(req.params.id), workspaceId }
+  });
+  if (!existing) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  if (input.projectId) {
+    const project = await prisma.project.findFirst({
+      where: { id: input.projectId, workspaceId },
+      select: { id: true }
+    });
+    if (!project) {
+      return res.status(404).json({ error: "not_found" });
+    }
+  }
+
+  let area: { id: string } | null = null;
+  if (input.areaId) {
+    area = await prisma.operatingArea.findFirst({
+      where: { id: input.areaId, workspaceId },
+      select: { id: true }
+    });
+    if (!area) {
+      return res.status(404).json({ error: "not_found" });
+    }
+  }
+
+  const { areaId: _areaId, ...taskListInput } = input;
+  const taskList = await prisma.taskList.update({
+    where: { id: existing.id },
+    data: taskListInput
+  });
+
+  let areaMapping = null;
+  const identity = taskListMappingIdentity(taskList);
+  if (input.areaId === null) {
+    await prisma.externalContainerMapping.updateMany({
+      where: {
+        workspaceId,
+        provider: identity.provider,
+        entityType: identity.entityType,
+        externalId: identity.externalId
+      },
+      data: {
+        name: taskList.name,
+        areaId: null,
+        raw: {
+          source: "operations_task_list_assignment",
+          taskListId: taskList.id,
+          manualAreaId: null
+        } as Prisma.InputJsonValue
+      }
+    });
+  } else if (area) {
+    areaMapping = await prisma.externalContainerMapping.upsert({
+      where: {
+        workspaceId_provider_entityType_externalId: {
+          workspaceId,
+          provider: identity.provider,
+          entityType: identity.entityType,
+          externalId: identity.externalId
+        }
+      },
+      create: {
+        workspaceId,
+        provider: identity.provider,
+        entityType: identity.entityType,
+        externalId: identity.externalId,
+        name: taskList.name,
+        areaId: area.id,
+        raw: {
+          source: "operations_task_list_assignment",
+          taskListId: taskList.id,
+          manualAreaId: area.id
+        } as Prisma.InputJsonValue
+      },
+      update: {
+        name: taskList.name,
+        areaId: area.id,
+        raw: {
+          source: "operations_task_list_assignment",
+          taskListId: taskList.id,
+          manualAreaId: area.id
+        } as Prisma.InputJsonValue
+      },
+      include: { area: true }
+    });
+  }
+
+  await createEvent({
+    type: "operations_task_list_updated",
+    workspaceId,
+    projectId: taskList.projectId,
+    source: taskList.source,
+    payload: {
+      taskListId: taskList.id,
+      changed: Object.keys(input),
+      areaMappingId: areaMapping?.id ?? null
+    }
+  });
+
+  res.json({
+    data: {
+      ...taskList,
+      areaAssignment: areaMapping ? {
+        mappingId: areaMapping.id,
+        area: areaMapping.area ? {
+          id: areaMapping.area.id,
+          key: areaMapping.area.key,
+          name: areaMapping.area.name,
+          position: areaMapping.area.position
+        } : null
+      } : null
     }
   });
 }));
