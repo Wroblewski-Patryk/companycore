@@ -34,9 +34,10 @@ Those belong elsewhere:
 5. `companycore-business-module-map.md`
 6. `companycore-global-business-flow.md`
 7. `department-management-systems-architecture.md`
-8. `company-os-definition-editing-contract.md`
-9. `company-os-workflow-definition-command-contract.md`
-10. any project-specific architecture or ADR files added later
+8. `department-management-systems-v1-blueprint.md`
+9. `company-os-definition-editing-contract.md`
+10. `company-os-workflow-definition-command-contract.md`
+11. any project-specific architecture or ADR files added later
 
 ## Architecture Rules
 

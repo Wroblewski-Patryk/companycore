@@ -67,6 +67,7 @@ At minimum, keep these files aligned:
 - `docs/architecture/companycore-business-module-map.md`
 - `docs/architecture/companycore-global-business-flow.md`
 - `docs/architecture/department-management-systems-architecture.md`
+- `docs/architecture/department-management-systems-v1-blueprint.md`
 - `docs/architecture/company-os-definition-editing-contract.md`
 - `docs/architecture/company-os-workflow-definition-command-contract.md`
 - `docs/architecture/web-and-mcp-foundation-before-v2.md`
@@ -141,6 +142,12 @@ The approved v1 direction is:
   the 13 areas is a scalable management system over shared tables, pipelines,
   tasks, knowledge, resources, metrics, decisions, governance, and AI/MCP
   tools, not a separate database or provider-led app.
+- The V1 implementation blueprint for the 12 operating department systems and
+  `00 Main` orchestration is recorded in
+  `docs/architecture/department-management-systems-v1-blueprint.md`. Future
+  department web/backend work should use that document to define each
+  department's purpose, subsystems, shared backend reuse, backend gaps, agent
+  packet, safe actions, and recommended implementation order before coding.
 
 ## Implementation Contract
 

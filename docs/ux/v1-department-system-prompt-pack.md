@@ -218,10 +218,10 @@ Subsystems: clients, stakeholders, interactions, support requests, success check
 First owner question: Which relationship needs care, support, renewal, or expansion?
 ```
 
-### 06 People - People And Role Management System
+### 06 People/Agents - People/Agents And Role Management System
 
 ```text
-Department system: People And Role Management System
+Department system: People/Agents And Role Management System
 Area key: 06-kadry
 Label: 06 Kadry
 Value-flow layer: human and agent organization

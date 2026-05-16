@@ -117,6 +117,27 @@ continue from repository files alone:
   desktop/mobile authenticated mocked-owner proof under `docs/ux/evidence/`;
   database-backed target smoke remains pending because disposable Docker
   startup timed out in the local session.
+- `docs/architecture/department-management-systems-v1-blueprint.md`:
+  detailed V1 blueprint for `00 Main` plus the 12 operating department
+  management systems. As of 2026-05-16, future department work should use this
+  blueprint to define each system's purpose, subsystems, backend foundations,
+  backend gaps, first safe implementation slice, Paperclip/agent packet,
+  implementation wave, and guardrails. It also records the recommended build
+  order: deepen `04 Operations`, then build read-only `01 Strategy`,
+  `03 Sales`, `05 Relationships`, `02 Product And Delivery`, `08 Assets`,
+  `09 Technology/AI`, `10 Legal/Standards`, `12 Executive`, `07 Finance`,
+  `06 People/Agents`, and `11 Innovation/Growth`. User feedback on
+  2026-05-16 renamed `06` from people-only framing to People/Agents and Roles
+  so CompanyCore can manage human roles, AI-agent units, capacity, authority,
+  escalation, hiring, and Paperclip agent-roster reconciliation in one place.
+- `docs/planning/v1-department-systems-global-implementation-plan.md`: active
+  global execution program for V1 department systems. As of 2026-05-16, it
+  breaks the work into waves for global intake/Paperclip review, shared
+  department shell, all department systems, pricing and discount context,
+  archived-client learning, feedback loops, Paperclip proposal/evidence
+  integration, QA, production smoke, and closeout. Future DMS implementation
+  should pick scoped tasks from this plan rather than inventing ad hoc route
+  work.
 - `docs/architecture/web-layer-react-ownership.md`: current web route
   ownership contract. As of 2026-05-15, user-facing web routes are React-owned
   and served from the Vite bundle in `public/react/index.html`. The legacy

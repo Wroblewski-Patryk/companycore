@@ -4,13 +4,17 @@ Last updated: 2026-05-16
 
 ## NOW
 
-1. Convert `/data` and `/data/:table` into a V1 evidence browser.
-   - `/operations` and `/tasks-adapter` are locally verified V1 command
-     surfaces with PostgreSQL-backed API tests and real backend Playwright
-     proof.
-   - The next V0 route in the V1 web index is the data/table evidence browser.
-   - Keep the slice on existing table APIs and agent-readable context; do not
-     add raw schema or fake department ownership.
+1. DMS-00-001 Global intake and Paperclip output review contract.
+   - Source:
+     `docs/planning/v1-department-systems-global-implementation-plan.md`.
+   - Design the `00 Main` read/review model for unclassified owner, client,
+     provider, and Paperclip-created items.
+2. DMS-MONEY-001 Pricing/hourly-value/discount source inventory.
+   - Inventory Drive/ClickUp pricing, service definitions, hourly-value
+     assumptions, discounts including 100 percent discount, current client
+     work, and old-client archive evidence.
+3. DMS-SHELL-001 Shared Department Management Shell.
+   - Plan and extract the reusable department shell used by `00`-`12`.
 
 ## NEXT
 
@@ -31,42 +35,74 @@ Last updated: 2026-05-16
 3. Use the department management systems architecture before generating or
    implementing department views.
    - Source: `docs/architecture/department-management-systems-architecture.md`.
+   - Detailed blueprint:
+     `docs/architecture/department-management-systems-v1-blueprint.md`.
    - View map: `docs/ux/v1-department-management-systems-view-map.md`.
    - Prompt pack: `docs/ux/v1-department-system-prompt-pack.md`.
    - Generate one department spec at a time, then implement one read-only
      department shell before adding writes.
-4. Run database-backed or production smoke for the `04 Operacje` department
+4. Review and apply the Department Management Systems V1 Blueprint.
+   - Source:
+     `docs/architecture/department-management-systems-v1-blueprint.md`.
+   - It defines `00 Main` orchestration, the 12 operating department systems,
+     implementation waves, backend gap register, Paperclip/agent packets, and
+     recommended build order.
+   - Recommended order after user review: deepen `04 Operations`, then build
+     read-only `01 Strategy`, `03 Sales`, `05 Relationships`, and
+     `02 Product And Delivery` systems.
+5. Use the V1 Department Systems Global Implementation Plan.
+   - Source:
+     `docs/planning/v1-department-systems-global-implementation-plan.md`.
+   - Follow its waves and task IDs for web, backend, Paperclip, QA,
+     production, and closeout work.
+6. Plan the minimum company control loop.
+   - Source:
+     `docs/architecture/department-management-systems-v1-blueprint.md`.
+   - `00 Main` is the global intake for owner ideas, client requests,
+     documents, tasks, risks, bugs, opportunities, Paperclip background
+     outputs, feedback, and improvement signals.
+   - First implementation should be read-only/review-first: show unassigned
+     items, Paperclip-created background outputs, classification status,
+     owner decision needs, and suggested department routing.
+7. Inventory pricing, discounts, current client work, and archived clients.
+   - Source:
+     `docs/architecture/department-management-systems-v1-blueprint.md`.
+   - Pull together Drive/ClickUp price lists, service value, hourly work value,
+     discount rules, current client work, and old-client archive evidence.
+   - Keep agents in analysis/proposal mode until pricing, invoice, payment,
+     and discount write contracts are explicit.
+8. Run database-backed or production smoke for the `04 Operacje` department
    system after deploy.
    - Route: `/areas?area=04-operacje&view=overview`.
    - Source: `docs/planning/operations-management-system-v1-task-contract.md`.
    - Frontend proof is complete with mocked owner data; target proof should
      use a real owner session and deployed/current database data.
-5. AOG-BE-002 through AOG-BE-006 backend graph follow-ups.
+9. AOG-BE-002 through AOG-BE-006 backend graph follow-ups.
    - After deployed AOG read proof is complete, plan and implement:
      `Target.metricId`,
      goal/workflow bridge, normalized workflow-task links, knowledge/source
      link contract, and read-only MCP exposure. Keep write relations
      command-shaped and avoid generic edge CRUD.
-6. AGRUN-010 Upstream Agent Source Merge Execution.
+10. AGRUN-010 Upstream Agent Source Merge Execution.
    - Blocked until upstream write access or an approved fork/PR route exists.
-7. Production push-to-running-image smoke after the next deploy.
+11. Production push-to-running-image smoke after the next deploy.
    - Build metadata restoration is implemented locally; after deploy, compare
      public `/health` `build.commit` with the pushed commit before claiming
      auto-deploy proof.
-8. Production AOG/settings smoke.
+12. Production AOG/settings smoke.
    - After the next deploy, compare public `/health` build metadata with the
      pushed commit.
    - Smoke `/v1/operating-graph/areas/01-strategia` and authenticated settings
      before raising production confidence.
-9. V1 operations route-depth slices.
+13. V1 operations route-depth slices.
    - Deepen one existing-contract workbench from the operations cockpit:
      `data` or `relationships`.
-10. Production smoke for locally verified V1 command surfaces.
+14. Production smoke for locally verified V1 command surfaces.
    - After the next deploy, compare public `/health` build metadata with the
      pushed commit.
    - Smoke `/v1/operating-graph/areas/01-strategia`, authenticated settings,
      authenticated `/operations`, and authenticated `/tasks-adapter`.
-11. V1AREA capability actions.
+15. V1AREA capability actions.
    - Add create/edit/filter actions only where an existing backend contract
      already supports the selected capability safely.
 

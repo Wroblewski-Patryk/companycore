@@ -285,6 +285,28 @@ Last updated: 2026-05-16
   `docs/ux/v1-department-system-prompt-pack.md`. Future department UI and
   Paperclip tasks should generate one department spec or implementation slice
   at a time from these docs.
+- 2026-05-16: CompanyCore V1 department buildout blueprint is accepted for
+  planning. `docs/architecture/department-management-systems-v1-blueprint.md`
+  describes `00 Main` as company orchestration and the 12 operating areas as
+  specialized management systems with purpose, subsystems, current backend
+  foundations, backend gaps, first safe implementation slices, and
+  Paperclip/agent packets. Future web/backend work should start with read-only
+  department systems and add writes only through existing or explicitly
+  approved command contracts.
+- 2026-05-16: User feedback refined the minimum company loop. `00 Main` is the
+  global intake and router for unclassified ideas, client requests, documents,
+  tasks, risks, bugs, opportunities, Paperclip background outputs, feedback,
+  and improvement signals. Near-term minimum gaps are a Paperclip output review
+  queue, pricing/hourly-value/discount context, current client work tracking,
+  and archived-client learning before autonomous pricing or finance writes.
+- 2026-05-16: The V1 department systems global implementation plan is active.
+  `docs/planning/v1-department-systems-global-implementation-plan.md` defines
+  the execution waves and many task IDs for web, backend, Paperclip,
+  department shells, each department system, pricing/discounts, archived
+  clients, feedback, QA, production smoke, and closeout. The first active
+  tasks are DMS-00-001 global intake/Paperclip review contract,
+  DMS-MONEY-001 pricing/hourly-value/discount source inventory, and
+  DMS-SHELL-001 shared department management shell.
 - 2026-05-15: V1WEB-002 organized the V1 web layer into five canonical
   surfaces. `/` is now public home, `/auth/login` and `/auth/register` share
   the public layout, `/dashboard` remains the authenticated Company Atlas, and
@@ -3005,6 +3027,7 @@ Last updated: 2026-05-16
 - `docs/architecture/companycore-business-module-map.md`
 - `docs/architecture/companycore-global-business-flow.md`
 - `docs/architecture/department-management-systems-architecture.md`
+- `docs/architecture/department-management-systems-v1-blueprint.md`
 - `docs/engineering/local-development.md`
 - `docs/engineering/testing.md`
 - `docs/governance/working-agreements.md`

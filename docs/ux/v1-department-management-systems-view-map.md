@@ -11,6 +11,7 @@ can evolve from separate modules into one coherent company operating system.
 Architecture source:
 
 - `docs/architecture/department-management-systems-architecture.md`
+- `docs/architecture/department-management-systems-v1-blueprint.md`
 - `docs/architecture/companycore-global-business-flow.md`
 - `docs/architecture/companycore-business-module-map.md`
 
@@ -95,7 +96,7 @@ should expand toward the full set as existing backend contracts allow it.
 | `03-sprzedaz` | 03 Sprzedaz | Sales Management System | `/areas?area=03-sprzedaz&view=overview` | leads, discovery, opportunities, offers, pricing, deal pipeline |
 | `04-operacje` | 04 Operacje | Operations Management System | `/areas?area=04-operacje&view=overview` | planning, SOPs, recurring operations, quality controls, admin routines, dependencies, approvals |
 | `05-relacje` | 05 Relacje | Relationship Management System | `/areas?area=05-relacje&view=overview` | clients, stakeholders, interactions, support, success, referrals |
-| `06-kadry` | 06 Kadry | People And Role Management System | `/areas?area=06-kadry&view=overview` | roles, responsibilities, capacity, escalation, PAEI, permissions |
+| `06-kadry` | 06 Kadry | People/Agents And Role Management System | `/areas?area=06-kadry&view=overview` | people, agents, roles, responsibilities, capacity, escalation, PAEI, permissions |
 | `07-finanse` | 07 Finanse | Finance And Billing Management System | `/areas?area=07-finanse&view=overview` | invoices, payments, receivables, margin, finance risks |
 | `08-zasoby` | 08 Zasoby | Assets And Resource Management System | `/areas?area=08-zasoby&view=overview` | files, folders, resources, repositories, prompts, tools, storage locations |
 | `09-technologia` | 09 Technologia | Technology And AI Infrastructure Management System | `/areas?area=09-technologia&view=overview` | agents, MCP tools, integration health, API keys, audit, observability |
@@ -127,7 +128,7 @@ Every department route should be composed from these groups:
 | Sales | Which opportunities need qualification, discovery, offer, or follow-up? | Mix sales with generic relationship support without stage clarity. |
 | Relationships | Which clients/stakeholders need care, support, or expansion? | Treat clients as only sales leads. |
 | Finance | Which delivered value needs invoice/payment/closure? | Add payment actions without finance/security contracts. |
-| People And Roles | Who or what role owns the work and escalation? | Use PAEI as permission or authority. |
+| People/Agents And Roles | Which human or agent unit owns the work, capacity, authority, and escalation? | Use PAEI as permission or authority. |
 | Operations | Which routines, controls, and procedures keep the company running? | Become a dumping ground for unowned work. |
 | Knowledge | What does the company know, decide, and need to learn? | Store knowledge without source, ownership, or freshness. |
 | Assets | Which files, tools, repos, prompts, and resources are addressable? | Expose raw provider complexity before company meaning. |
@@ -153,3 +154,10 @@ Every department route should be composed from these groups:
 
 Use `docs/ux/v1-department-system-prompt-pack.md` for generation and
 implementation prompts.
+
+## Detailed Department Blueprint
+
+Use `docs/architecture/department-management-systems-v1-blueprint.md` before
+building each department. It defines the 12 operating department systems,
+`00 Main` orchestration, shared layout, backend reuse rules, backend gap
+register, agent packets, and recommended build order.

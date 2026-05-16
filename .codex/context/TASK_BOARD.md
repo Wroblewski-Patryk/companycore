@@ -2,6 +2,58 @@
 
 ## Ready
 
+- DMS-00-001 Global intake and Paperclip output review contract.
+  - Stage: planning
+  - Owner: Product Docs + Backend Builder + Frontend Builder
+  - Priority: P1
+  - Source:
+    `docs/planning/v1-department-systems-global-implementation-plan.md`
+  - Goal: design the `00 Main` read/review model for unclassified owner,
+    client, provider, and Paperclip-created items, including review states,
+    classification, routing, evidence, and first safe actions.
+- DMS-MONEY-001 Pricing/hourly-value/discount source inventory.
+  - Stage: analysis
+  - Owner: Product Docs + Backend Builder
+  - Priority: P1
+  - Source:
+    `docs/planning/v1-department-systems-global-implementation-plan.md`
+  - Goal: inventory Drive/ClickUp pricing, service definitions, hourly-value
+    assumptions, discount cases, current client work, and old-client archive
+    evidence before pricing or invoice write contracts.
+- DMS-SHELL-001 Shared Department Management Shell.
+  - Stage: planning
+  - Owner: Frontend Builder + Product Docs
+  - Priority: P1
+  - Source:
+    `docs/planning/v1-department-systems-global-implementation-plan.md`
+  - Goal: plan and extract the reusable selected-area department shell for all
+    `00`-`12` management systems.
+- DMS-NEXT-001 Department systems user review and implementation sequence.
+  - Stage: planning
+  - Owner: Product Docs + Frontend Builder + Backend Builder
+  - Priority: P1
+  - Source: `docs/architecture/department-management-systems-v1-blueprint.md`
+  - Goal: review the detailed `00 Main` plus 12-department blueprint with the
+    owner, then create the first executable department-specific task contract.
+    Recommended sequence after review: deepen `04 Operations`, then read-only
+    `01 Strategy`, `03 Sales`, `05 Relationships`, and `02 Product And
+    Delivery`.
+- DMS-MIN-001 Global intake and Paperclip output review.
+  - Stage: planning
+  - Owner: Product Docs + Backend Builder + Frontend Builder
+  - Priority: P1
+  - Source: `docs/architecture/department-management-systems-v1-blueprint.md`
+  - Goal: make `00 Main` the review/router for unclassified owner, client,
+    provider, and Paperclip-created items before broad background automation.
+    Start with a read-only review queue and classification/routing model.
+- DMS-MIN-002 Pricing, discounts, current client, and archived-client context.
+  - Stage: planning
+  - Owner: Product Docs + Backend Builder
+  - Priority: P1
+  - Source: `docs/architecture/department-management-systems-v1-blueprint.md`
+  - Goal: inventory Drive/ClickUp pricing sources, hourly-value assumptions,
+    discount cases, current client work, and old-client archive evidence before
+    invoice/payment writes or autonomous pricing.
 - V1OPS-002 Production operations cockpit smoke.
   - Stage: planning
   - Owner: Frontend Builder + Ops/Release
@@ -101,6 +153,27 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- DMS-V1-000 V1 Department Systems Global Implementation Plan.
+  - Evidence:
+    `docs/planning/v1-department-systems-global-implementation-plan.md` now
+    defines the full V1 execution program for web, backend, Paperclip,
+    department shells, all department systems, pricing/discounts, archived
+    clients, feedback, QA, production smoke, and closeout.
+  - Validation: source-of-truth review and `git diff --check` passed.
+  - Task contract:
+    `docs/planning/v1-department-systems-global-implementation-plan-task-contract.md`.
+
+- DMS-BLUEPRINT-001 Department Management Systems V1 Blueprint.
+  - Evidence: `docs/architecture/department-management-systems-v1-blueprint.md`
+    now defines the shared department contract, shared web layout, backend
+    reuse rules, backend expansion principles, `00 Main` orchestration, all
+    12 operating department systems, implementation waves, recommended build
+    order, backend gap register, acceptance criteria for future department
+    specs, and guardrails for high-risk finance/legal/ads/AI writes.
+  - Validation: source-of-truth review and `git diff --check` passed.
+  - Task contract:
+    `docs/planning/department-management-systems-v1-blueprint-task-contract.md`.
 
 - DMS-OPS-001 04 Operations Management System V1 Read Model.
   - Evidence: `/areas?area=04-operacje&view=overview` now renders a dedicated

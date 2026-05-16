@@ -20,6 +20,12 @@ This document extends:
 It is architecture and UX planning scope. It does not approve broad schema,
 automation, billing, provider, or raw CRUD implementation by itself.
 
+The detailed V1 implementation blueprint for `00 Main` plus the 12 operating
+departments lives in
+`docs/architecture/department-management-systems-v1-blueprint.md`. Use that
+blueprint when planning department-specific web views, backend read models,
+safe write actions, and Paperclip department packets.
+
 ## Core Principle
 
 Every department is a management system over the same CompanyCore graph.
@@ -97,7 +103,7 @@ horizontal flow.
 | Payment and financial closure | 07 Finance |
 | Support and relationship care | 05 Relationships, 04 Operations |
 | Feedback and improvement | 11 Innovation, 01 Strategy, all departments |
-| Operating foundation | 00 Main, 06 People, 08 Resources, 09 Technology, 12 Management |
+| Operating foundation | 00 Main, 06 People/Agents, 08 Resources, 09 Technology, 12 Management |
 
 ## Canonical Department Systems
 
@@ -112,7 +118,7 @@ source of truth keeps English names for clarity.
 | 03 | Sprzedaz | Sales Management System | Commercial conversion | leads, opportunities, discovery, offers, pipeline, pricing, sales tasks |
 | 04 | Operacje | Operations Management System | Company administration and delivery control | planning, procedures, recurring operations, quality controls, admin routines, dependencies, approvals |
 | 05 | Relacje | Relationship Management System | Client and partner care | clients, stakeholders, interactions, support, success check-ins, referrals |
-| 06 | Kadry | People And Role Management System | Human/agent organization | roles, responsibilities, capacity, permissions, escalation, PAEI profiles |
+| 06 | Kadry | People/Agents And Role Management System | Human/agent organization | people, agents, roles, responsibilities, capacity, permissions, escalation, PAEI profiles |
 | 07 | Finanse | Finance And Billing Management System | Revenue capture | invoices, payment status, pricing decisions, receivables, margin signals |
 | 08 | Zasoby | Assets And Resource Management System | Addressable assets | files, folders, resources, repositories, documents, prompts, tools, storage locations |
 | 09 | Technologia | Technology And AI Infrastructure Management System | Tooling and observability | agents, service keys, MCP tools, command safety, audit, integration health |

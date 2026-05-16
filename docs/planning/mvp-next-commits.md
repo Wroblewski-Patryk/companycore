@@ -7,12 +7,26 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] V1DATA-001 Evidence browser V1 workbench:
-      `/operations` and `/tasks-adapter` are locally verified V1 command
-      surfaces. Convert `/data` and `/data/:table` from V0 rebuild into a V1
-      evidence browser tied to departments, tables, and agent-readable context.
+- [ ] DMS-00-001 Global intake and Paperclip output review contract:
+      design the read/review model for `00 Main` as the intake/router for
+      unclassified owner, client, provider, and Paperclip-created work. Source:
+      `docs/planning/v1-department-systems-global-implementation-plan.md`.
+- [ ] DMS-MONEY-001 Pricing/hourly-value/discount source inventory:
+      inventory Drive/ClickUp pricing, service definitions, hourly-value
+      assumptions, discount cases including 100 percent discount, current
+      client work, and old-client archive evidence.
+- [ ] DMS-SHELL-001 Shared Department Management Shell:
+      plan and then extract the reusable selected-area department shell for
+      identity, command brief, subsystem tabs, management board, evidence rail,
+      improvement loop, and Paperclip handoff.
 ### NEXT
 
+- [ ] DMS-04-001 Operations real-data proof:
+      run database-backed or production proof for the existing
+      `/areas?area=04-operacje&view=overview` Operations Management System.
+- [ ] V1DATA-001 Evidence browser V1 workbench:
+      convert `/data` and `/data/:table` from V0 rebuild into a V1 evidence
+      browser tied to departments, tables, and agent-readable context.
 - [ ] V1OPS-002 Production operations cockpit smoke:
       after the next deploy, compare public `/health` build metadata with the
       pushed commit and run authenticated `/operations`, `/tasks-adapter`, AOG,
@@ -37,6 +51,8 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [ ] Use the department management systems architecture before generating or
       implementing department views:
       `docs/architecture/department-management-systems-architecture.md`,
+      `docs/architecture/department-management-systems-v1-blueprint.md`,
+      `docs/planning/v1-department-systems-global-implementation-plan.md`,
       `docs/ux/v1-department-management-systems-view-map.md`, and
       `docs/ux/v1-department-system-prompt-pack.md` define each 00-12 area as
       a scalable management system with subsystems, shared components, and
