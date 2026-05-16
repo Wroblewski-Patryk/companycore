@@ -34,6 +34,26 @@ of rediscovering them.
 
 ## Entries
 
+### 2026-05-17 - CompanyCore Brand Theme Tokens
+- Type: visual_direction
+- Context: The owner requested a reusable brand/theme foundation for the active
+  Tailwind/DaisyUI web layer so future department views can feel modern,
+  minimal, outline-oriented, and premium without one-off styling.
+- Decision: Use the DaisyUI `companycore` theme plus Tailwind v4 `@theme`
+  tokens as the shared visual source for web UI. Body copy uses Inter,
+  headings use Sora, Phosphor remains the primary icon family, and the default
+  look is white panels, quiet blue-gray page surfaces, crisp outline borders,
+  calm spacing, visible focus rings, compact labels, and subtle elevation only
+  where it clarifies overlays or selected panels.
+- Reuse when: Building or polishing public home, auth, private shell,
+  department dashboards, Operations, Assets, future Relationship/Product/Sales
+  screens, settings, forms, tables, cards, modals, and filters.
+- Avoid when: A provider brand mark requires its own official asset or when a
+  future canonical screenshot explicitly approves a different visual treatment.
+- Evidence:
+  `web/src/styles.css`, `web/index.html`, and
+  `docs/ux/design-system-contract.md`.
+
 ### 2026-05-17 - Canonical Departments Over Backend Areas
 - Type: reusable_pattern
 - Context: OPS-DEPT-FILTER-001 fixed the Operations board showing legacy

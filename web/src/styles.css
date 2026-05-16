@@ -8,48 +8,89 @@
   default: true;
   color-scheme: light;
   --color-base-100: #ffffff;
-  --color-base-200: #f4f7fb;
-  --color-base-300: #d8e1ee;
-  --color-base-content: #071225;
-  --color-primary: #2364d2;
+  --color-base-200: #f6f8fb;
+  --color-base-300: #dfe6ef;
+  --color-base-content: #111827;
+  --color-primary: #2557d6;
   --color-primary-content: #ffffff;
-  --color-secondary: #51627f;
+  --color-secondary: #5b6477;
   --color-secondary-content: #ffffff;
-  --color-accent: #16845b;
+  --color-accent: #0f8b6f;
   --color-accent-content: #ffffff;
-  --color-neutral: #071225;
-  --color-neutral-content: #ffffff;
-  --color-info: #2364d2;
+  --color-neutral: #131a2a;
+  --color-neutral-content: #f8fafc;
+  --color-info: #2563eb;
   --color-info-content: #ffffff;
   --color-success: #16845b;
   --color-success-content: #ffffff;
-  --color-warning: #b87700;
-  --color-warning-content: #071225;
-  --color-error: #c2413d;
+  --color-warning: #b7791f;
+  --color-warning-content: #1f2937;
+  --color-error: #c83e4d;
   --color-error-content: #ffffff;
-  --radius-selector: 8px;
-  --radius-field: 8px;
-  --radius-box: 8px;
+  --radius-selector: 9px;
+  --radius-field: 9px;
+  --radius-box: 10px;
   --border: 1px;
-  --depth: 1;
+  --depth: 0;
   --noise: 0;
 }
 
 @theme {
-  --color-company-ink: #071225;
-  --color-company-muted: #51627f;
-  --color-company-blue: #2364d2;
-  --color-company-green: #16845b;
-  --color-company-amber: #b87700;
-  --color-company-border: #d8e1ee;
-  --radius-company: 8px;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-heading: "Sora", "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --color-company-ink: #111827;
+  --color-company-muted: #5b6477;
+  --color-company-soft: #f6f8fb;
+  --color-company-panel: #ffffff;
+  --color-company-blue: #2557d6;
+  --color-company-violet: #6d5dfc;
+  --color-company-green: #0f8b6f;
+  --color-company-amber: #b7791f;
+  --color-company-rose: #c83e4d;
+  --color-company-border: #dfe6ef;
+  --color-company-border-strong: #c7d1df;
+  --color-company-focus: #2557d6;
+  --color-company-overlay: #eef3f8;
+
+  --radius-company: 10px;
+  --radius-company-sm: 7px;
+  --radius-company-lg: 14px;
+
+  --spacing-company-rail: 1rem;
+  --spacing-company-panel: 1.25rem;
+  --spacing-company-page: clamp(1rem, 2vw, 2rem);
+  --spacing-company-section: clamp(1rem, 1.6vw, 1.5rem);
+
+  --shadow-company-soft: 0 1px 2px rgb(17 24 39 / 0.04), 0 12px 32px rgb(37 87 214 / 0.06);
+  --shadow-company-pop: 0 18px 46px rgb(17 24 39 / 0.12);
+}
+
+:root {
+  --cc-font-body: var(--font-sans);
+  --cc-font-heading: var(--font-heading);
+  --cc-focus: 0 0 0 3px rgb(37 87 214 / 0.18);
+  --cc-outline-border: color-mix(in srgb, var(--color-base-300) 78%, var(--color-primary) 22%);
+  --cc-surface-subtle: color-mix(in srgb, var(--color-base-100) 76%, var(--color-base-200) 24%);
+  --cc-panel-border: 1px solid var(--color-company-border);
+  --cc-panel-shadow: var(--shadow-company-soft);
 }
 
 body {
   margin: 0;
   max-width: 100%;
   overflow-x: hidden;
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--cc-font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  background: var(--color-base-200);
+}
+
+::selection {
+  background: rgb(37 87 214 / 0.18);
+  color: var(--color-company-ink);
 }
 
 #root {
@@ -97,6 +138,142 @@ label {
 .textarea {
   min-width: 0;
   max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-heading {
+  font-family: var(--cc-font-heading);
+  letter-spacing: 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--color-company-ink);
+}
+
+a,
+button,
+input,
+select,
+textarea {
+  outline-color: transparent;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: none;
+  box-shadow: var(--cc-focus);
+}
+
+.btn {
+  border-radius: var(--radius-field);
+  font-weight: 750;
+  letter-spacing: 0;
+  text-transform: none;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.btn-outline {
+  border-color: var(--cc-outline-border);
+}
+
+.btn-ghost:hover,
+.btn-outline:hover {
+  background: color-mix(in srgb, var(--color-primary) 7%, transparent);
+  border-color: var(--cc-outline-border);
+}
+
+.btn:not(.btn-disabled):not(:disabled):active {
+  transform: translateY(1px);
+}
+
+.input,
+.select,
+.textarea {
+  border-color: var(--color-base-300);
+  border-radius: var(--radius-field);
+  background: var(--color-base-100);
+  box-shadow: inset 0 1px 0 rgb(17 24 39 / 0.02);
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--cc-focus);
+  outline: none;
+}
+
+.badge {
+  border-radius: 999px;
+  font-weight: 750;
+  letter-spacing: 0;
+}
+
+.menu :where(li > a, li > button),
+.tab {
+  border-radius: var(--radius-company-sm);
+}
+
+.rounded-company {
+  border-radius: var(--radius-company);
+}
+
+.card {
+  border-color: var(--color-company-border);
+  border-radius: var(--radius-company);
+}
+
+.cc-panel {
+  border: var(--cc-panel-border);
+  border-radius: var(--radius-company);
+  background: var(--color-base-100);
+  box-shadow: var(--cc-panel-shadow);
+}
+
+.cc-panel-flat {
+  border: var(--cc-panel-border);
+  border-radius: var(--radius-company);
+  background: var(--color-base-100);
+}
+
+.cc-surface-subtle {
+  border: 1px solid color-mix(in srgb, var(--color-base-300) 84%, transparent);
+  border-radius: var(--radius-company);
+  background: var(--cc-surface-subtle);
+}
+
+.cc-label {
+  color: var(--color-company-muted);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.cc-icon-frame {
+  display: inline-grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 auto;
+  border: 1px solid var(--color-company-border);
+  border-radius: var(--radius-company-sm);
+  background: color-mix(in srgb, var(--color-base-100) 84%, var(--color-primary) 5%);
 }
 
 .btn,

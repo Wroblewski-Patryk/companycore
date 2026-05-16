@@ -33,8 +33,12 @@ continue from repository files alone:
 - `docs/operations/`: release, deploy, smoke, rollback, and target-environment
   evidence.
 - `docs/ux/`: approved visual direction, design-system rules, reusable UX
-  memory, and pattern guidance. As of 2026-05-14, high-level dashboard and map
-  work must preserve the accepted Company City strategic-map direction unless a
+  memory, and pattern guidance. As of 2026-05-17, the active web brand
+  foundation is the DaisyUI `companycore` theme plus Tailwind tokens in
+  `web/src/styles.css`: Inter body text, Sora headings, Phosphor Icons as the
+  primary icon family, outline-first surfaces, calm spacing, visible focus
+  rings, and reusable `cc-*` utilities. High-level dashboard and map work must
+  still preserve the accepted Company City strategic-map direction unless a
   new decision supersedes it.
 - `docs/planning/human-agent-web-architecture-map.md`: current V2
   human-agent web direction. As of 2026-05-14, `/react-agent-tools` exposes

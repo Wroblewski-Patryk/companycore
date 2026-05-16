@@ -33,6 +33,65 @@ Every meaningful UI change should preserve or improve:
 - purposeful motion, not decorative noise
 - a recognizable visual point of view instead of generic default styling
 
+## Brand Theme Foundation
+
+CompanyCore's active visual foundation is a modern, minimal, outline-first
+management console. It should feel precise and premium because information is
+easy to scan, controls are predictable, and spacing is calm. Do not add fake
+metric counters, decorative badges, or heavy visual effects to make a surface
+feel "premium".
+
+The canonical runtime theme is the DaisyUI `companycore` theme in
+`web/src/styles.css`, backed by Tailwind v4 `@theme` tokens. New UI should use
+DaisyUI component classes plus these CompanyCore tokens before adding page-local
+CSS.
+
+Core palette:
+
+- Base surfaces: `base-100` white panels, `base-200` quiet page background,
+  `base-300` outline borders.
+- Primary action: `primary` / `company-blue` for navigation, focus, active
+  state, and the highest-confidence action on a surface.
+- Secondary structure: `secondary` / `company-muted` for supporting controls
+  and lower-emphasis text.
+- Accent: `accent` / `company-green` for ready, connected, or completed
+  operational states.
+- Semantic colors: `info`, `success`, `warning`, and `error` are reserved for
+  real state feedback, validation, and risk communication.
+
+Typography:
+
+- Body: `Inter` through the `font-sans` token.
+- Headings: `Sora` through the `font-heading` token.
+- Use heading typography for page titles, section titles, and major module
+  labels only. Dense panels, cards, tables, and forms should keep type compact
+  and readable.
+
+Shape, spacing, and focus:
+
+- Default radius: `radius-company` / DaisyUI `radius-box`, with small variants
+  for menu items, tabs, and icon frames.
+- Default spacing rhythm: use `spacing-company-page`,
+  `spacing-company-section`, `spacing-company-panel`, and
+  `spacing-company-rail` before custom gaps.
+- Default emphasis is outline plus subtle surface contrast. Use
+  `shadow-company-soft` only when elevation clarifies an overlay, modal, or
+  selected panel.
+- Focus states must use the shared `--cc-focus` ring and remain visible on
+  buttons, links, inputs, selects, textareas, and custom focusable controls.
+
+Reusable CSS utilities:
+
+- `cc-panel`: primary reusable outlined panel with subtle shadow.
+- `cc-panel-flat`: outlined panel without elevation.
+- `cc-surface-subtle`: quiet nested surface for grouped metadata or filters.
+- `cc-label`: compact uppercase label text.
+- `cc-icon-frame`: standard icon container for module and action icons.
+
+Icon policy: Phosphor Icons remains the primary icon family. Do not add a
+second icon set until a concrete missing-icon gap is documented; mixing icon
+families should stay exceptional and intentional.
+
 ## Reuse-First Rule
 
 - Prefer an existing shared component or approved variant before creating a new

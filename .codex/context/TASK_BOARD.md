@@ -193,6 +193,22 @@
 
 ## Done
 
+- WEB-THEME-001 Brand theme foundation.
+  - Evidence:
+    `docs/planning/web-brand-theme-foundation-task-contract.md` records the
+    scoped theme slice. `web/src/styles.css` now defines the DaisyUI
+    `companycore` palette, Tailwind font/color/radius/spacing/shadow tokens,
+    reusable `cc-*` utilities, global focus styling, and outline-first
+    primitive tuning for buttons, forms, badges, menus, tabs, and cards.
+    `web/index.html` loads Inter and Sora while keeping Phosphor Icons as the
+    primary icon system. UX source-of-truth docs record the visual direction
+    and icon policy.
+  - Validation: `npm run build:web`; `git diff --check`; Playwright Vite render
+    proof saved `docs/ux/evidence/web-theme-001-public-home-desktop.png` and
+    verified Inter body font, Sora heading font, `9px` button radius, no
+    horizontal overflow, and no console/page errors. No
+    `chrome-headless-shell` validation process remained.
+
 - OPS-BOARD-UX-001 Operations management board UX polish.
   - Evidence:
     `docs/planning/operations-management-board-ux-polish-task-contract.md`
