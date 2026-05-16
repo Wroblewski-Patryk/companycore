@@ -10,6 +10,7 @@ execution queue for CompanyCore V1 web, backend, and Paperclip integration.
 Architecture inputs:
 
 - `docs/architecture/department-management-systems-v1-blueprint.md`
+- `docs/planning/dms-13-systems-v1-implementation-audit.md`
 - `docs/architecture/department-management-systems-architecture.md`
 - `docs/architecture/companycore-business-module-map.md`
 - `docs/architecture/companycore-global-business-flow.md`
@@ -77,6 +78,7 @@ repo state.
 | DMS-V1-003 | Define V1 department packet JSON contract | backend planning | Backend + AI Integration | DMS-V1-000 | Proposed shape for web and Paperclip packets | API design review |
 | DMS-V1-004 | Define V1 department health status vocabulary | product/backend planning | Product Docs + Backend | DMS-V1-000 | `ready`, `blocked`, `needs_data`, `needs_owner_decision`, `agent_ready`, `unsafe_for_automation` | source review |
 | DMS-V1-005 | Differentiate 12 department management systems | planning/product/UX | Product Docs | DMS-BLUEPRINT-001 | Shared shell plus department-specific board, desktop UX, mobile UX, and implementation assumptions for each operating department | source review + `git diff --check` |
+| DMS-V1-006 | Audit all 13 department systems for V1 implementation | planning/backend/UX/AI | Product Docs + Backend + Frontend | DMS-V1-005 | Source-backed audit mapping each system to current backend reuse, current web readiness, V1 board/mobile needs, backend gaps, Paperclip boundaries, and first implementation slice | source review + `git diff --check` |
 
 ### Differentiated Department Implementation Rule
 
@@ -93,6 +95,18 @@ After DMS-V1-005, each department implementation task must include:
 
 The shared Department Management Shell remains the frame. It must not flatten
 all departments into one generic area detail screen.
+
+### Active 13-System Audit
+
+`docs/planning/dms-13-systems-v1-implementation-audit.md` is the current
+handoff for selecting department implementation work. It confirms that `00
+Main`, `01 Strategy`, `04 Operations`, and `07 Finance` already have important
+read-only foundations, while `03 Sales`, `05 Relationships`, `02 Product And
+Delivery`, `08 Assets`, `09 Technology/AI`, `10 Legal/Standards`, `06
+People/Agents`, `11 Innovation/Growth`, and `12 Executive` still need
+department-specific packets or source audits before their boards can be called
+V1-complete. Future tasks must cite the relevant audit section and must not
+fake missing backend structures in the UI.
 
 ## Wave 1 - 00 Main Intake And Paperclip Review
 

@@ -8,10 +8,12 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 ### NOW
 
 - [ ] Continue V1 department systems with the next bounded slice:
-      preferred order is a read-only `03 Sales` department packet, then
-      `05 Relationships`, `02 Product And Delivery`, or a guarded
-      `04 Operations` planning/procedure command contract if operations writes
-      become more urgent.
+      use `docs/planning/dms-13-systems-v1-implementation-audit.md` as the
+      selection handoff. Preferred order is a read-only `03 Sales` department
+      packet and board, then `05 Relationships`, `02 Product And Delivery`,
+      `08 Assets`, `09 Technology/AI`, and `10 Legal/Standards`; use a
+      guarded `04 Operations` planning/procedure command contract only if
+      operations writes become more urgent.
       Each next slice must follow the DMS-V1-005 differentiated-system rule:
       shared CompanyCore shell, but a department-specific primary board,
       desktop layout, mobile attention queue, source records, state model, and
@@ -85,6 +87,14 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 The section below is retained as execution evidence. It is not the active
 queue. Future work must start from `Active Queue`, `.codex/context/TASK_BOARD.md`,
 and `docs/operations/v1-function-coverage-ledger.csv`.
+
+- [x] DMS-V1-006 13 department systems V1 implementation audit:
+      `docs/planning/dms-13-systems-v1-implementation-audit.md` covers
+      `00 Main` plus all 12 department systems with current backend reuse,
+      current web readiness, V1 desktop/mobile expectations, backend gaps,
+      Paperclip boundaries, blocked actions, first implementation slices,
+      cross-system backend gaps, and recommended build order. Task contract:
+      `docs/planning/dms-13-systems-v1-implementation-audit-task-contract.md`.
 
 - [x] V1OPS-002 Production V1 smoke after Company OS area foundation:
       production was manually rolled over to

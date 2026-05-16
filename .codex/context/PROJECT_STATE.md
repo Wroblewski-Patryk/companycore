@@ -167,6 +167,17 @@ Last updated: 2026-05-16
   `docs/architecture/department-management-systems-v1-blueprint.md`,
   `docs/ux/v1-department-management-systems-view-map.md`, and
   `docs/planning/v1-department-systems-global-implementation-plan.md`.
+  As of 2026-05-16, DMS-V1-006 added the source-backed implementation audit
+  for all 13 systems in
+  `docs/planning/dms-13-systems-v1-implementation-audit.md`. The audit maps
+  `00 Main` plus departments `01`-`12` to current backend foundations, current
+  web readiness, V1 desktop/mobile expectations, missing backend structures,
+  Paperclip boundaries, blocked actions, and first implementation slices. It
+  confirms that `00 Main`, `01 Strategy`, `04 Operations`, and `07 Finance`
+  have important read-only foundations, while the next recommended runtime
+  slice is `03 Sales` context and board over existing CRM, commercial
+  exception, and finance data before any quote, discount, invoice, ad, or
+  outreach automation writes.
   As of 2026-05-16, DMS-00-003 implemented the first backend slice of
   `00 Main`: protected read-only `GET /v1/intake`. It aggregates existing
   agent events, provider inbox rows, unassigned Drive/provider resources,

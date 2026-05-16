@@ -177,6 +177,15 @@ continue from repository files alone:
   but each of the 12 operating departments must define its own primary board,
   desktop layout, mobile attention queue, state model, source records, and
   Paperclip boundaries before implementation.
+  As of DMS-V1-006,
+  `docs/planning/dms-13-systems-v1-implementation-audit.md` is the current
+  implementation audit for `00 Main` plus departments `01`-`12`. It maps each
+  system to existing backend foundations, current web readiness, V1
+  desktop/mobile expectations, backend gaps, Paperclip role, blocked actions,
+  and first implementation slice. Future runtime work should cite the
+  relevant audit section; the recommended next slice is `03 Sales` read
+  packet and board, with all quote, discount, invoice, ad, and autonomous
+  outreach writes still blocked.
 - `docs/architecture/department-management-systems-v1-blueprint.md`:
   detailed V1 blueprint for `00 Main` plus the 12 operating department
   management systems. As of 2026-05-16, future department work should use this

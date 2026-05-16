@@ -2,6 +2,16 @@
 
 ## Ready
 
+- DMS-NEXT-003 Sales Management read packet and board.
+  - Stage: planning
+  - Owner: Product Docs + Backend Builder + Frontend Builder
+  - Priority: P1
+  - Source: `docs/planning/dms-13-systems-v1-implementation-audit.md`
+  - Goal: implement the first post-audit department slice for `03 Sales` by
+    creating a source-backed Sales context over clients, deals, stages,
+    interactions, tasks, notes, decisions, commercial exceptions, and finance
+    context before any quote, discount, invoice, ad, or outreach automation
+    writes.
 - DMS-NEXT-002 Differentiated department implementation slice.
   - Stage: planning
   - Owner: Product Docs + Frontend Builder + Backend Builder
@@ -114,6 +124,19 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- DMS-V1-006 13 Department Systems V1 Implementation Audit.
+  - Evidence:
+    `docs/planning/dms-13-systems-v1-implementation-audit.md` maps `00 Main`
+    plus all 12 operating department systems to current backend foundations,
+    current web readiness, V1 desktop/mobile expectations, missing backend
+    gaps, Paperclip boundaries, blocked actions, and first implementation
+    slices. The audit names `03 Sales` as the recommended next read-packet
+    slice while keeping high-risk writes blocked.
+  - Validation:
+    source review and `git diff --check`.
+  - Task contract:
+    `docs/planning/dms-13-systems-v1-implementation-audit-task-contract.md`.
 
 - DMS-V1-005 Differentiated Department Management Systems Analysis.
   - Evidence:
