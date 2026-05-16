@@ -719,14 +719,6 @@ export function OperationsRoute() {
 
   return (
     <Shell activeArea="04-operacje">
-      <section className="flex flex-wrap items-center justify-end gap-3 rounded-company border border-base-300 bg-base-100 px-4 py-3">
-        <h1 className="sr-only">{t("areas.04.label")}</h1>
-        <div className="tabs tabs-boxed">
-          <a className={`tab ${activeView === "tasks" ? "tab-active" : ""}`} href="/areas?area=04-operacje&view=tasks">{t("views.04.tasks")}</a>
-          <a className={`tab ${activeView === "calendar" ? "tab-active" : ""}`} href="/areas?area=04-operacje&view=calendar">{t("views.04.calendar")}</a>
-        </div>
-      </section>
-
       {packet.status === "loading" ? <CcNotice tone="loading" title={t("table.loading.title")} detail={t("table.loading.detail")} /> : null}
       {packet.status === "error" ? <CcNotice tone="error" title={packet.error || t("operations.packetError")} live /> : null}
       {packet.status === "ready" && activeView === "calendar" ? (
