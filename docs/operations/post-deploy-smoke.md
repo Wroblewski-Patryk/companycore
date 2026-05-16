@@ -37,8 +37,31 @@ Use this file to record the minimum checks after each deploy.
     and env file were removed from `/tmp`. The temporary env file contained
     runtime secrets and was deleted after smoke.
 - Residual risks:
-  - Paperclip runtime key selection remains KI-010 if Paperclip is still using
-    an older narrow adapter key.
+  - None for Google Drive changes baseline.
+
+## Production Paperclip CompanyCore Bridge Proof
+
+- Timestamp: 2026-05-16
+- Paperclip public health:
+  - `GET https://paperclip.luckysparrow.ch/api/health` returned `200`.
+- Runtime configuration proof:
+  - Paperclip `company_core_settings` stores the CompanyCore base URL plus
+    configured knowledge and tools keys.
+  - The current Paperclip app container does not rely on `COMPANYCORE_*` env
+    fallback for this bridge.
+- CompanyCore calls from the Paperclip runtime:
+  - knowledge key: `/v1/connection` returned `200`.
+  - knowledge key: `/v1/mcp/manifest` returned `200`.
+  - knowledge key: `/v1/google-drive/files` returned `200`.
+  - tools key: `/v1/connection` returned `200`.
+  - tools key: `/v1/google-drive/files` returned `200`.
+- Tool assignment proof:
+  - Paperclip has 1282 CompanyCore tool assignments across 36 agents,
+    including 12 distinct Google Drive tools.
+- Result:
+  - Global Paperclip-to-CompanyCore bridge rotation is not required.
+  - If a named Paperclip agent or UI screen still misses files, inspect that
+    agent's assigned tools or route filters.
 
 ## Global Checks
 

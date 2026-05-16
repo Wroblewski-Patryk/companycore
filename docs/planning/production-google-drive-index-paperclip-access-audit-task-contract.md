@@ -116,6 +116,17 @@ adapter` key that has only narrow legacy scopes; raw keys cannot be recovered
 from CompanyCore and must be rotated from `/settings/api` if Paperclip does not
 already use the newer bridge key.
 
+Follow-up completed on 2026-05-16: production Paperclip does not depend on the
+container env fallback for this bridge. Its `company_core_settings` row stores
+the CompanyCore base URL plus configured knowledge and tools keys. Runtime proof
+from the Paperclip container showed knowledge-key calls to `/v1/connection`,
+`/v1/mcp/manifest`, and `/v1/google-drive/files` returned `200`, and tools-key
+calls to `/v1/connection` and `/v1/google-drive/files` also returned `200`.
+Paperclip has 1282 CompanyCore tool assignments across 36 agents, including 12
+distinct Google Drive tools. The remaining follow-up, if the owner sees a named
+agent or screen missing files, is agent-level assignment or UI/filter analysis,
+not global bridge-key rotation.
+
 Validation:
 
 - Production API/web health checks: pass.

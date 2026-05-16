@@ -238,7 +238,16 @@ Last updated: 2026-05-16
   smoke proved first reconcile returned `200`, `baselineInitialized=true`, and
   stored `newStartPageToken=25137`; second reconcile returned `200` through
   the stored-token path; `/v1/google-drive/files` remained `754` total with
-  `0` unassigned, `0` pending, `0` failed, and `0` trashed. The previous
+  `0` unassigned, `0` pending, `0` failed, and `0` trashed. Follow-up
+  Paperclip production proof confirmed the bridge is configured in Paperclip's
+  `company_core_settings` table rather than container env fallback:
+  knowledge-key calls to `/v1/connection`, `/v1/mcp/manifest`, and
+  `/v1/google-drive/files` returned `200`; tools-key calls to
+  `/v1/connection` and `/v1/google-drive/files` returned `200`; and Paperclip
+  has 1282 CompanyCore tool assignments across 36 agents, including 12
+  distinct Google Drive tools. Global bridge-key rotation is no longer a
+  blocker; investigate agent-level assignment or Paperclip UI/filter behavior
+  only if a named agent or screen still misses files. The previous
   backend container is retained stopped as
   `backend-rnqqkhl3o3dut4qv56mlxly2-000111041002-previous-d2c9b94`.
 

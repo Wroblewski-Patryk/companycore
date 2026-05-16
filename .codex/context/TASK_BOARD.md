@@ -31,7 +31,8 @@
 ## In Progress
 
 - No active implementation task is currently in progress after the production
-  Google Drive changes baseline rollout.
+  Google Drive changes baseline rollout and Paperclip runtime Drive visibility
+  proof.
 
 ## Blocked
 
@@ -143,7 +144,13 @@
     records encountered during the audit were assigned by parent folder scope.
     MCP manifest exposes 15 Google Drive tools, and the active Paperclip Tools
     production bridge has Google Drive read/write/scope/import/reconcile
-    scopes.
+    scopes. Follow-up Paperclip runtime proof confirmed the bridge is
+    configured in Paperclip `company_core_settings`: knowledge-key calls to
+    `/v1/connection`, `/v1/mcp/manifest`, and `/v1/google-drive/files`
+    returned `200`; tools-key calls to `/v1/connection` and
+    `/v1/google-drive/files` returned `200`; and Paperclip has 1282
+    CompanyCore tool assignments across 36 agents, including 12 distinct
+    Google Drive tools.
   - Validation: production API/web health checks returned `200`; production
     Drive `inspect_only` returned `wouldCreateCount=0`; MCP manifest readback
     returned 146 tools. `changes/reconcile` returned `422 sync_failed`, so

@@ -7,13 +7,6 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] Confirm Paperclip runtime key and Drive visibility after production
-      Drive index repair:
-      CompanyCore production now has `754` indexed Drive records, `0`
-      unassigned, and `wouldCreateCount=0` for the selected 13 roots. If
-      Paperclip still misses files, rotate/update Paperclip to a newer active
-      bridge key from `/settings/api`; older active adapter keys have narrow
-      legacy scopes.
 - [ ] Polish `/react-company-os` into an area-aware V1 foundation:
       connect Company OS evidence back to selected-area department context
       without adding new command authority.
@@ -108,6 +101,16 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       unassigned/pending/failed/trashed rows.
       Task contract:
       `docs/planning/prod-google-drive-changes-baseline-task-contract.md`.
+
+- [x] PROD-PAPERCLIP-001 Paperclip runtime Drive visibility proof:
+      production Paperclip `company_core_settings` is configured with
+      CompanyCore base URL, knowledge key, and tools key. Knowledge-key calls
+      to `/v1/connection`, `/v1/mcp/manifest`, and `/v1/google-drive/files`
+      returned `200`; tools-key calls to `/v1/connection` and
+      `/v1/google-drive/files` returned `200`. Paperclip has 1282 CompanyCore
+      tool assignments across 36 agents, including 12 distinct Google Drive
+      tools. Follow-up only if a named agent/screen still misses files:
+      inspect agent-level tool assignment or UI/filter behavior.
 
 - [x] DMS-03-005A Commercial exception read API:
       implemented protected read-only `GET /v1/commercial-exceptions`,
