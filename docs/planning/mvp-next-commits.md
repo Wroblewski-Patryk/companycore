@@ -7,12 +7,12 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] DMS-07-001 Finance system spec:
-      use the pricing and discount inventory to define the first Finance
-      management board, read model, owner decisions, and security guardrails.
 - [ ] DMS-03-005 Discount/commercial exception read model:
       represent discounts including 100 percent discount as owner-reviewed
       commercial exceptions before invoice or payment writes exist.
+- [ ] DMS-07-002 Price-list and hourly-value read model:
+      implement protected read-only finance context from the Finance system
+      spec before Finance web, invoice readiness, or autonomous pricing work.
 ### NEXT
 
 - [ ] DMS-00-007 Paperclip background output review proof:
@@ -100,6 +100,14 @@ The section below is retained as execution evidence. It is not the active
 queue. Future work must start from `Active Queue`, `.codex/context/TASK_BOARD.md`,
 and `docs/operations/v1-function-coverage-ledger.csv`.
 
+- [x] DMS-07-001 Finance system spec:
+      defined the Finance Management System board, first safe web shape,
+      protected read-only `GET /v1/finance/context` target, pricing model and
+      hourly-value packet, commercial exception and invoice-readiness shapes,
+      owner decisions, Paperclip packet, and blocked invoice/payment/discount
+      actions. `git diff --check` passed.
+      Task contract:
+      `docs/planning/dms-07-finance-system-spec-task-contract.md`.
 - [x] DMS-SHELL-002 Department Subsystem Registry:
       added a typed 13-department registry, rendered it inside the shared
       selected-area shell, and gave each department system name, value role,

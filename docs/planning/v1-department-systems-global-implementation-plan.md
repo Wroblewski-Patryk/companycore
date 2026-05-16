@@ -213,7 +213,7 @@ and learning loop.
 | ID | Task | Type | Owner | Depends on | Output | Validation |
 | --- | --- | --- | --- | --- | --- | --- |
 | DMS-MONEY-001 | Pricing/hourly-value/discount source inventory | research | Product Docs + Backend | DMS-03-002 | Drive/ClickUp pricing, service definitions, hourly assumptions, discounts | source review |
-| DMS-07-001 | Finance system spec | planning | Product Docs + Security | DMS-MONEY-001 | Price list, hourly value, work estimate, discounts, invoice readiness | source review |
+| DMS-07-001 | Finance system spec | planning | Product Docs + Security | DMS-MONEY-001 | Completed Finance system spec for price list, hourly value, work valuation, discounts, invoice readiness, Paperclip packet, owner decisions, and blocked high-risk writes | source review + `git diff --check` |
 | DMS-07-002 | Price-list and hourly-value read model | backend | Backend | DMS-07-001 | Read-only pricing context | API tests |
 | DMS-07-003 | Finance read-only web board | frontend | Frontend | DMS-07-002 | Pricing, invoice readiness, discounts, payment context | Playwright proof |
 | DMS-07-004 | Invoice/payment command contract | backend/security planning | Backend + Security | DMS-07-003 | Approval-aware future command design | security/design review |
@@ -268,8 +268,8 @@ The first tasks to activate from this plan are:
 4. `DMS-SHELL-001` - completed by
    `docs/planning/dms-shell-001-shared-department-management-shell-task-contract.md`.
 5. `DMS-SHELL-002` - add department-specific subsystem registry and copy.
-6. `DMS-07-001` - define Finance system spec from the completed pricing and
-   discount inventory.
+6. `DMS-07-001` - completed by
+   `docs/planning/dms-07-finance-system-spec.md`.
 7. `DMS-03-005` - design discount/commercial exception read model for the
    current-client `100%` discount case.
 8. `DMS-04-001` - run real database-backed or production proof for the current

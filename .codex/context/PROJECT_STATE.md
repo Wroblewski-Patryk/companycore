@@ -93,6 +93,15 @@ Last updated: 2026-05-16
   `http://127.0.0.1:3211` verified `01-strategia`, `06-kadry`,
   `07-finanse`, and `12-zarzadzanie` with no console errors and no horizontal
   overflow.
+  As of 2026-05-16, DMS-07-001 completed the Finance Management System spec
+  before runtime finance work. `docs/planning/dms-07-finance-system-spec.md`
+  defines the `07 Finance And Billing` board, first safe web shape, future
+  protected read-only `GET /v1/finance/context` packet, pricing conflicts,
+  hourly-value assumptions, work valuation, commercial exceptions including
+  `100%` discounts, invoice-readiness blockers, owner decisions, Paperclip
+  packet, and blocked invoice/payment/discount/autonomous-pricing actions.
+  This is a planning checkpoint only; runtime Finance API and web board remain
+  future tasks.
 
 ## Product Decisions (Confirmed)
 - 2026-05-07: CRM and pipelines are separate domain concepts. Pipelines are a

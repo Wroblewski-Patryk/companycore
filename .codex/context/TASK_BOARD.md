@@ -2,6 +2,25 @@
 
 ## Ready
 
+- DMS-03-005 Discount/commercial exception read model.
+  - Stage: planning
+  - Owner: Product Docs + Backend Builder
+  - Priority: P1
+  - Source:
+    `docs/planning/dms-money-pricing-discount-source-inventory.md` and
+    `docs/planning/dms-07-finance-system-spec.md`
+  - Goal: represent discounts including 100 percent discounts as
+    owner-reviewed commercial exceptions connected to client, deal, work,
+    approval, and future invoice-readiness context.
+- DMS-07-002 Price-list and hourly-value read model.
+  - Stage: planning
+  - Owner: Backend Builder + Product Docs + Security
+  - Priority: P1
+  - Source: `docs/planning/dms-07-finance-system-spec.md`
+  - Goal: implement protected read-only Finance context for pricing models,
+    hourly-value assumptions, work valuation, source conflicts, and
+    invoice-readiness blockers before Finance web, invoice/payment, or
+    autonomous pricing behavior.
 - DMS-00-007 Paperclip background output review proof.
   - Stage: planning
   - Owner: AI Integration + QA/Test + Frontend Builder
@@ -12,24 +31,6 @@
     `00 Main`, receives a route proposal, remains source-safe, and can be
     handed to the next department/system review without bypassing
     CompanyCore.
-- DMS-07-001 Finance system spec.
-  - Stage: planning
-  - Owner: Product Docs + Backend Builder + Security
-  - Priority: P1
-  - Source:
-    `docs/planning/dms-money-pricing-discount-source-inventory.md`
-  - Goal: define the Finance management board, price-list/hourly-value read
-    model, owner decisions, and high-risk guardrails before invoice/payment or
-    autonomous pricing writes.
-- DMS-03-005 Discount/commercial exception read model.
-  - Stage: planning
-  - Owner: Product Docs + Backend Builder
-  - Priority: P1
-  - Source:
-    `docs/planning/dms-money-pricing-discount-source-inventory.md`
-  - Goal: represent discounts including 100 percent discounts as
-    owner-reviewed commercial exceptions connected to client, deal, work,
-    approval, and future invoice-readiness context.
 - DMS-NEXT-001 Department systems user review and implementation sequence.
   - Stage: planning
   - Owner: Product Docs + Frontend Builder + Backend Builder
@@ -147,6 +148,19 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- DMS-07-001 Finance System Spec.
+  - Evidence:
+    `docs/planning/dms-07-finance-system-spec.md` defines the
+    `07 Finance And Billing Management System` V1 board, first safe web
+    shape, protected read-only `GET /v1/finance/context` target, pricing model
+    packet, hourly-value assumptions, work valuation, commercial exceptions,
+    invoice-readiness blockers, owner decisions, Paperclip packet, and blocked
+    invoice/payment/discount/autonomous-pricing actions.
+  - Validation: source review of DMS blueprint, pricing inventory, global
+    plan, current code references, and `git diff --check` passed.
+  - Task contract:
+    `docs/planning/dms-07-finance-system-spec-task-contract.md`.
 
 - DMS-SHELL-002 Department Subsystem Registry.
   - Evidence: `web/src/main.tsx` now defines a typed registry for all `00`-`12`

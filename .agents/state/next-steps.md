@@ -4,17 +4,17 @@ Last updated: 2026-05-16
 
 ## NOW
 
-1. DMS-07-001 Finance system spec.
+1. DMS-03-005 Discount/commercial exception read model.
    - Source:
-     `docs/planning/dms-money-pricing-discount-source-inventory.md`.
-   - Define the Finance management board, price-list/hourly-value read model,
-     owner decisions, and guardrails before invoice/payment or autonomous
-     pricing writes.
-2. DMS-03-005 Discount/commercial exception read model.
-   - Source:
-     `docs/planning/dms-money-pricing-discount-source-inventory.md`.
+     `docs/planning/dms-money-pricing-discount-source-inventory.md` and
+     `docs/planning/dms-07-finance-system-spec.md`.
    - Represent discounts including 100 percent discount as owner-reviewed
      commercial exceptions connected to client/deal/work context.
+2. DMS-07-002 Price-list and hourly-value read model.
+   - Source:
+     `docs/planning/dms-07-finance-system-spec.md`.
+   - Implement protected read-only finance context before Finance web board,
+     invoice readiness, or Paperclip pricing packet runtime work.
 3. DMS-00-007 Paperclip background output review proof.
    - Source:
      `docs/planning/dms-00-global-intake-route-command-task-contract.md`.

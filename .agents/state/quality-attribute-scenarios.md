@@ -1,9 +1,10 @@
 # Quality Attribute Scenarios
 
-Last updated: 2026-05-15
+Last updated: 2026-05-16
 
 | ID | Attribute | Scenario | Measure | Verification | Linked Requirements | Status | Last Updated |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| QA-DMS-07-001 | security/product/AI | Finance runtime work starts from read-only, source-backed pricing and discount context before any invoice, payment, quote, active-pricing, or discount write exists. | Finance spec defines blocked actions, source conflict handling, `100%` discount commercial exception shape, Paperclip proposal-only packet, and future API tests for read-only behavior. | DMS-07-001 source review and `git diff --check` | REQ-DMS-07-001; REQ-DMS-MONEY-001 | verified | 2026-05-16 |
 | QA-000 | process | Agents verify significant claims before reporting completion. | Completed missions link evidence to requirement IDs. | inspection | REQ-FUNC-000 | verified | 2026-05-11 |
 | QA-CCOS-001 | reliability | A Company OS lifecycle trace is executed locally in Docker after migrations and seed. | One command proves approval, stage lifecycle, automation evaluator, event readback, and audit readback. | V1EVID-001 Docker smoke | REQ-CCOS-001; REQ-CCOS-002; REQ-CCOS-003; REQ-CCOS-004 | verified | 2026-05-11 |
 | QA-CCOS-002 | security | Risky Company OS lifecycle writes remain capability and command bounded. | Smoke uses HTTP command routes and verifies event/audit side effects; no raw status patching path is introduced. | source review plus V1EVID-001 Docker smoke | REQ-CCOS-001; REQ-CCOS-003 | verified | 2026-05-11 |

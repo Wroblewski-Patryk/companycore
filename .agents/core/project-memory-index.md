@@ -200,6 +200,15 @@ continue from repository files alone:
   DMS-07-001 Finance spec, DMS-07-002 price-list/hourly-value read model,
   DMS-03-005 discount/commercial exception read model, and DMS-05-002 archived
   client source audit.
+- `docs/planning/dms-07-finance-system-spec.md`: active Finance Management
+  System handoff. As of 2026-05-16, DMS-07-001 defines the first safe Finance
+  board, web shape, protected read-only `GET /v1/finance/context` target,
+  pricing-model packet, hourly-value assumptions, work valuation,
+  commercial-exception shape, invoice-readiness blockers, owner decisions,
+  Paperclip packet, and blocked invoice/payment/discount/autonomous-pricing
+  actions. Future Finance runtime should start with DMS-07-002 read-only
+  pricing/hourly-value context or DMS-03-005 commercial exception read model;
+  do not add invoice/payment or discount writes before their command contracts.
 - `docs/planning/dms-shell-001-shared-department-management-shell-task-contract.md`:
   active shared-shell handoff. As of 2026-05-16, selected-area department
   routes render through `DepartmentManagementShell`, with
