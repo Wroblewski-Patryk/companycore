@@ -2,15 +2,16 @@
 
 ## Ready
 
-- DMS-00-001 Global intake and Paperclip output review contract.
-  - Stage: planning
-  - Owner: Product Docs + Backend Builder + Frontend Builder
+- DMS-00-002 Audit current sources for intake candidates.
+  - Stage: analysis
+  - Owner: Backend Builder + Product Docs
   - Priority: P1
   - Source:
-    `docs/planning/v1-department-systems-global-implementation-plan.md`
-  - Goal: design the `00 Main` read/review model for unclassified owner,
-    client, provider, and Paperclip-created items, including review states,
-    classification, routing, evidence, and first safe actions.
+    `docs/planning/dms-00-global-intake-paperclip-review-contract.md`
+  - Goal: inspect existing agent events, provider inbox, events, tasks, Drive
+    files, provider mappings, relationship review, approvals, risks, decisions,
+    and notes; produce a source-to-intake mapping and choose the first runtime
+    read route shape without migrations if possible.
 - DMS-MONEY-001 Pricing/hourly-value/discount source inventory.
   - Stage: analysis
   - Owner: Product Docs + Backend Builder
@@ -153,6 +154,17 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- DMS-00-001 Global Intake And Paperclip Output Review Contract.
+  - Evidence:
+    `docs/planning/dms-00-global-intake-paperclip-review-contract.md` defines
+    intake candidate families, review statuses, priority/risk/agent-authority
+    vocabulary, intake row and summary shapes, proposed backend/MCP surfaces,
+    `00 Main` web panel requirements, routing heuristics, and future write
+    guardrails.
+  - Validation: source review and `git diff --check` passed.
+  - Task contract:
+    `docs/planning/dms-00-global-intake-paperclip-review-task-contract.md`.
 
 - DMS-V1-000 V1 Department Systems Global Implementation Plan.
   - Evidence:

@@ -307,6 +307,13 @@ Last updated: 2026-05-16
   tasks are DMS-00-001 global intake/Paperclip review contract,
   DMS-MONEY-001 pricing/hourly-value/discount source inventory, and
   DMS-SHELL-001 shared department management shell.
+- 2026-05-16: DMS-00-001 is complete as planning scope.
+  `docs/planning/dms-00-global-intake-paperclip-review-contract.md` defines
+  the global intake and Paperclip output review contract for `00 Main`,
+  including candidate families, review statuses, row shape, proposed
+  backend/MCP surface, web panel requirements, routing heuristics, and future
+  write guardrails. The next task is DMS-00-002 source audit before runtime
+  implementation.
 - 2026-05-15: V1WEB-002 organized the V1 web layer into five canonical
   surfaces. `/` is now public home, `/auth/login` and `/auth/register` share
   the public layout, `/dashboard` remains the authenticated Company Atlas, and

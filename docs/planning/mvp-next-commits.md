@@ -7,10 +7,10 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] DMS-00-001 Global intake and Paperclip output review contract:
-      design the read/review model for `00 Main` as the intake/router for
-      unclassified owner, client, provider, and Paperclip-created work. Source:
-      `docs/planning/v1-department-systems-global-implementation-plan.md`.
+- [ ] DMS-00-002 Audit current sources for intake candidates:
+      map existing agent events, provider inbox, events, tasks, Drive files,
+      provider mappings, relationship review, approvals, risks, decisions, and
+      notes into the DMS-00 intake families before runtime implementation.
 - [ ] DMS-MONEY-001 Pricing/hourly-value/discount source inventory:
       inventory Drive/ClickUp pricing, service definitions, hourly-value
       assumptions, discount cases including 100 percent discount, current
@@ -24,6 +24,9 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [ ] DMS-04-001 Operations real-data proof:
       run database-backed or production proof for the existing
       `/areas?area=04-operacje&view=overview` Operations Management System.
+- [ ] DMS-00-003 Implement read-only global intake aggregate:
+      after DMS-00-002, implement the protected read model for unclassified
+      items and Paperclip-created/proposed work.
 - [ ] V1DATA-001 Evidence browser V1 workbench:
       convert `/data` and `/data/:table` from V0 rebuild into a V1 evidence
       browser tied to departments, tables, and agent-readable context.
@@ -191,6 +194,13 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       mocked-owner proof saved desktop/mobile screenshots with no horizontal
       overflow. Disposable Docker/Postgres proof timed out before port `55479`
       became available, so database-backed target smoke remains a follow-up.
+- [x] DMS-00-001 Global Intake And Paperclip Output Review Contract:
+      published `docs/planning/dms-00-global-intake-paperclip-review-contract.md`
+      as the planning contract for `00 Main` intake, Paperclip output review,
+      candidate families, review statuses, row shape, backend/MCP surfaces,
+      web panel requirements, routing heuristics, and future write guardrails.
+      Task contract:
+      `docs/planning/dms-00-global-intake-paperclip-review-task-contract.md`.
 - [x] V1UX-CANON-001 Simple V1 Dashboard Canonical Design:
       published the V1 area-first Company Atlas direction, sitemap,
       component boundaries, Tailwind/DaisyUI style rules, pixel-perfect

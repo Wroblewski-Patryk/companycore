@@ -138,6 +138,13 @@ continue from repository files alone:
   integration, QA, production smoke, and closeout. Future DMS implementation
   should pick scoped tasks from this plan rather than inventing ad hoc route
   work.
+- `docs/planning/dms-00-global-intake-paperclip-review-contract.md`: active
+  DMS-00 planning contract. It defines `00 Main` as the global intake and
+  Paperclip output review surface, reusing AgentEventOutbox, provider inbox,
+  CompanyCore events, tasks, Drive files, provider mappings, relationship
+  graph, Company OS records, and MCP profiles. Future runtime work should
+  start with DMS-00-002 source audit, then implement a read-only intake
+  aggregate before write/review commands.
 - `docs/architecture/web-layer-react-ownership.md`: current web route
   ownership contract. As of 2026-05-15, user-facing web routes are React-owned
   and served from the Vite bundle in `public/react/index.html`. The legacy

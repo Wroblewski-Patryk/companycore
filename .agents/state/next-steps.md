@@ -4,11 +4,12 @@ Last updated: 2026-05-16
 
 ## NOW
 
-1. DMS-00-001 Global intake and Paperclip output review contract.
+1. DMS-00-002 Audit current sources for intake candidates.
    - Source:
-     `docs/planning/v1-department-systems-global-implementation-plan.md`.
-   - Design the `00 Main` read/review model for unclassified owner, client,
-     provider, and Paperclip-created items.
+     `docs/planning/dms-00-global-intake-paperclip-review-contract.md`.
+   - Map existing agent events, provider inbox, events, tasks, Drive files,
+     provider mappings, relationship review, approvals, risks, decisions, and
+     notes into the DMS-00 intake families before implementation.
 2. DMS-MONEY-001 Pricing/hourly-value/discount source inventory.
    - Inventory Drive/ClickUp pricing, service definitions, hourly-value
      assumptions, discounts including 100 percent discount, current client
