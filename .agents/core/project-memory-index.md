@@ -141,6 +141,16 @@ continue from repository files alone:
   integration, QA, production smoke, and closeout. Future DMS implementation
   should pick scoped tasks from this plan rather than inventing ad hoc route
   work.
+- `docs/planning/production-google-drive-index-paperclip-access-audit-task-contract.md`:
+  production Drive/Paperclip evidence. As of 2026-05-16, production Google
+  Drive selected-scope import and index repair are verified through protected
+  CompanyCore APIs: final readback has `754` Drive records, `0` unassigned,
+  `0` pending, `0` failed, `0` trashed, and `inspect_only` reports
+  `wouldCreateCount=0` across the 13 selected roots. MCP exposes 15 Google
+  Drive tools, and the active Paperclip Tools bridge includes Google Drive
+  read/write/scope/import/reconcile scopes. Follow-ups are KI-009
+  `changes/reconcile` returning `422 sync_failed` and KI-010 Paperclip runtime
+  possibly using an older narrow adapter key.
 - `docs/planning/dms-00-global-intake-paperclip-review-contract.md`: active
   DMS-00 planning contract. It defines `00 Main` as the global intake and
   Paperclip output review surface, reusing AgentEventOutbox, provider inbox,

@@ -113,6 +113,24 @@
 
 ## Done
 
+- PROD-GDRIVE-001 Production Google Drive Index And Paperclip Access Audit.
+  - Evidence:
+    Production Google Drive index was repaired through protected API routes.
+    The selected 13 Drive roots now have no missing create candidates in
+    `inspect_only`; `/v1/google-drive/files` reports `754` indexed records,
+    `0` unassigned, `0` pending, `0` failed, and `0` trashed. Six unassigned
+    records encountered during the audit were assigned by parent folder scope.
+    MCP manifest exposes 15 Google Drive tools, and the active Paperclip Tools
+    production bridge has Google Drive read/write/scope/import/reconcile
+    scopes.
+  - Validation: production API/web health checks returned `200`; production
+    Drive `inspect_only` returned `wouldCreateCount=0`; MCP manifest readback
+    returned 146 tools. `changes/reconcile` returned `422 sync_failed`, so
+    changes-polling freshness remains a follow-up rather than a completed
+    proof.
+  - Task contract:
+    `docs/planning/production-google-drive-index-paperclip-access-audit-task-contract.md`.
+
 - V1REL-001 Area relationship provenance review.
   - Evidence:
     `/relationships?area=04-operacje` now renders

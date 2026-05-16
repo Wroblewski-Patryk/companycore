@@ -209,6 +209,18 @@ Last updated: 2026-05-16
   proof on `http://127.0.0.1:3213` passed for desktop/mobile with no
   console/page errors or horizontal overflow. The validation backend and
   PostgreSQL processes were stopped after proof.
+  As of 2026-05-16, PROD-GDRIVE-001 repaired the production Google Drive index
+  for Paperclip/CompanyCore consumption. Production API/web health returned
+  `200`. The Drive table was refreshed through existing protected APIs:
+  six unassigned records were assigned by parent-folder operating scope, a
+  production `merge` import added the missing selected-scope records, and the
+  final readback showed `754` indexed records, `0` unassigned, `0` pending,
+  `0` failed, and `0` trashed. A follow-up `inspect_only` import over the 13
+  selected root folders reported `wouldCreateCount=0`. The MCP manifest exposes
+  146 tools including 15 Google Drive tools, and the active Paperclip Tools
+  production bridge has Google Drive read/write/scope/import/reconcile scopes.
+  `changes/reconcile` returned `422 sync_failed`, so Drive changes polling
+  freshness remains a targeted production follow-up.
 
 ## Product Decisions (Confirmed)
 - 2026-05-07: CRM and pipelines are separate domain concepts. Pipelines are a

@@ -7,6 +7,18 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
+- [ ] Confirm Paperclip runtime key and Drive visibility after production
+      Drive index repair:
+      CompanyCore production now has `754` indexed Drive records, `0`
+      unassigned, and `wouldCreateCount=0` for the selected 13 roots. If
+      Paperclip still misses files, rotate/update Paperclip to a newer active
+      bridge key from `/settings/api`; older active adapter keys have narrow
+      legacy scopes.
+- [ ] Diagnose production Google Drive `changes/reconcile`:
+      import/inspect catch-up works, but `POST
+      /v1/integration-settings/google_drive/changes/reconcile` returned
+      `422 sync_failed`. Diagnose this before using changes polling as the
+      freshness proof.
 - [ ] Polish `/react-company-os` into an area-aware V1 foundation:
       connect Company OS evidence back to selected-area department context
       without adding new command authority.
