@@ -106,7 +106,7 @@ The first backend aggregate should return this read shape:
   "priority": "p1",
   "risk": "medium",
   "agentAuthority": "proposal_only",
-  "targetDepartment": "00-glowny",
+  "targetDepartment": "00-ogolny",
   "suggestedDepartment": "04-operacje",
   "suggestedAction": "review_and_route",
   "sourceAgent": "paperclip",
@@ -195,7 +195,7 @@ intake:read
 First implementation note:
 
 - If a dedicated `/v1/intake` route feels too broad, implement as
-  `GET /v1/department-systems/00-glowny/intake` only after the department
+  `GET /v1/department-systems/00-ogolny/intake` only after the department
   packet route is selected. The product shape should stay the same.
 
 ### Future Review Commands
@@ -267,7 +267,7 @@ Paperclip must not:
 Route:
 
 ```text
-/areas?area=00-glowny&view=overview
+/areas?area=00-ogolny&view=overview
 ```
 
 Required panels:
@@ -325,7 +325,7 @@ Initial suggestions can be derived conservatively:
 | policy, standard, legal, risk/control | `10-prawo` |
 | experiment, feedback, improvement | `11-innowacje` |
 | authority, staffing, agent role | `06-kadry` |
-| unresolved or cross-department | `00-glowny` |
+| unresolved or cross-department | `00-ogolny` |
 
 Suggestions are not final assignments. Owner or approved command must confirm
 them.

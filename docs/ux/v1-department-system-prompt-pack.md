@@ -156,7 +156,7 @@ Do not allow direct database access, raw provider tokens, unapproved workflow ac
 
 ```text
 Department system: Company Orchestration System
-Area key: 00-glowny
+Area key: 00-ogolny
 Label: 00 Ogolny
 Value-flow layer: whole-company coordination
 Subsystems: owner inbox, global flow, company graph, cross-department priorities, system health, escalation

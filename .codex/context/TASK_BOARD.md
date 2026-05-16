@@ -2,16 +2,6 @@
 
 ## Ready
 
-- DMS-00-004 Global intake web panel for `00 Main`.
-  - Stage: planning
-  - Owner: Frontend Builder + Backend Builder
-  - Priority: P1
-  - Source:
-    `docs/planning/dms-00-global-intake-read-api-task-contract.md`
-  - Goal: add the first owner-facing read-only review panel over
-    `/v1/intake`, including Paperclip filtering, routing suggestions,
-    blocked approval/risk surfacing, and no write actions until command
-    contracts are approved.
 - DMS-MONEY-001 Pricing/hourly-value/discount source inventory.
   - Stage: analysis
   - Owner: Product Docs + Backend Builder
@@ -154,6 +144,23 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- DMS-00-004 Global Intake Web Panel.
+  - Evidence: `/areas?area=00-ogolny&view=overview` now renders a dedicated
+    `00 Main Management System` panel over the verified `/v1/intake` API. The
+    panel shows read-only intake/MCP readiness, summary counts, quick filters,
+    owner decision, Paperclip/agent, unassigned-resource, and risk/blocker
+    queues, plus a routing packet that only changes existing selected-area
+    views.
+  - Validation: `npm run build:web` and `npm run build:server` passed.
+    Playwright real-backend proof on `http://127.0.0.1:3192` logged in the
+    seeded owner, verified desktop and mobile route markers, clicked the panel
+    `Tasks` control to `/areas?area=00-ogolny&view=tasks`, and reported no
+    console errors, no framework overlay, and no horizontal overflow. Browser
+    plugin invocation was attempted first and fell back to Playwright because
+    no active Codex browser pane was available.
+  - Task contract:
+    `docs/planning/dms-00-global-intake-web-panel-task-contract.md`.
 
 - DMS-00-003 Global Intake Read API.
   - Evidence: protected `GET /v1/intake` now aggregates existing

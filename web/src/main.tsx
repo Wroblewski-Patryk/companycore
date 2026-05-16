@@ -230,6 +230,41 @@ type AreaDetailContext = {
   operatingGraphStatus?: "idle" | "loading" | "ready" | "error";
 };
 
+type IntakeItem = {
+  id: string;
+  family: string;
+  status: string;
+  title: string;
+  source: string;
+  sourceAgent?: string | null;
+  sourceModel: string;
+  sourceId: string;
+  risk: "low" | "medium" | "high" | "critical";
+  suggestedDepartment: string;
+  confidence: "direct" | "inferred" | "needs_review";
+  createdAt: string;
+  updatedAt: string;
+  summary?: string | null;
+  evidence: Array<{ label: string; href: string }>;
+  allowedActions: string[];
+  blockedActions: Array<{ action: string; reason: string }>;
+  metadata: Record<string, unknown>;
+};
+
+type IntakeSummary = {
+  total: number;
+  byFamily: Record<string, number>;
+  byStatus: Record<string, number>;
+  byRisk: Record<string, number>;
+  byDepartment: Record<string, number>;
+};
+
+type IntakeData = {
+  workspaceId: string;
+  summary: IntakeSummary;
+  items: IntakeItem[];
+};
+
 type AreaDetailLane = {
   id: string;
   label: string;
@@ -516,6 +551,10 @@ async function loadAreaOperatingGraph(areaKey: string) {
     throw new Error("invalid_token");
   }
   return sharedLoadAreaOperatingGraph(token, areaKey);
+}
+
+async function loadGlobalIntake(query = "limit=80") {
+  return ownerApi<IntakeData>(`/v1/intake?${query}`);
 }
 
 async function loadTableRecordSnapshot(connection: ConnectionData) {
@@ -2137,6 +2176,185 @@ function areaCapabilityDriveItems(context: AreaDetailContext, limit = 5) {
     meta: file.syncStatus || file.scanStatus || "scoped",
     href: file.webViewLink || "/settings/drive"
   }));
+}
+
+function intakeCount(summary: IntakeSummary | undefined, key: keyof IntakeSummary, value: string) {
+  const bucket = summary?.[key];
+  if (!bucket || typeof bucket === "number") {
+    return 0;
+  }
+  return bucket[value] ?? 0;
+}
+
+function intakeRiskClass(risk: IntakeItem["risk"]) {
+  return {
+    low: "is-low",
+    medium: "is-medium",
+    high: "is-high",
+    critical: "is-critical"
+  }[risk];
+}
+
+function formatIntakeLabel(value: string) {
+  return value.replace(/[-_]+/g, " ").replace(/^\w/, (letter) => letter.toUpperCase());
+}
+
+function MainIntakeSystemPanel({
+  intake,
+  status,
+  connection,
+  onSelectCapability
+}: {
+  intake: IntakeData | null;
+  status: "idle" | "loading" | "ready" | "error";
+  connection: ConnectionData;
+  onSelectCapability: (capability: string) => void;
+}) {
+  const items = intake?.items ?? [];
+  const ownerDecisions = items.filter((item) => item.status === "needs_owner_decision").slice(0, 5);
+  const unassignedResources = items.filter((item) => item.family === "unassigned_resource").slice(0, 5);
+  const blockedItems = items.filter((item) => item.status === "blocked" || item.risk === "critical" || item.risk === "high").slice(0, 5);
+  const paperclipItems = items.filter((item) => item.sourceAgent === "paperclip" || item.source.toLowerCase().includes("agent")).slice(0, 5);
+  const intakeToolVisible = Boolean(connection.mcpManifest?.tools?.some((tool) => tool.capability === "intake:read"));
+  const metrics = [
+    { label: "Total", value: intake?.summary.total ?? 0, icon: "ph-tray" },
+    { label: "Decision", value: intakeCount(intake?.summary, "byStatus", "needs_owner_decision"), icon: "ph-seal-warning" },
+    { label: "Blocked", value: intakeCount(intake?.summary, "byStatus", "blocked"), icon: "ph-warning-octagon" },
+    { label: "Resources", value: intakeCount(intake?.summary, "byFamily", "unassigned_resource"), icon: "ph-folder-open" },
+    { label: "High risk", value: (intakeCount(intake?.summary, "byRisk", "high") + intakeCount(intake?.summary, "byRisk", "critical")), icon: "ph-shield-warning" }
+  ];
+
+  return (
+    <section className="main-intake-system-panel" id="main-intake-system" aria-label="00 Main global intake system">
+      <div className="operations-system-header">
+        <div>
+          <p className="atlas-kicker">00 Main Management System</p>
+          <h2>Global intake, routing, owner decisions</h2>
+          <p>
+            This is the read-only owner queue for background agent output, provider signals,
+            unassigned resources, approvals, risks, feedback, and improvement candidates before
+            work is routed into a department system.
+          </p>
+        </div>
+        <a className="atlas-primary-action" href="/react-agent-tools">
+          <i className="ph-bold ph-robot" aria-hidden="true"></i>
+          Agent tools
+        </a>
+      </div>
+
+      <div className="main-intake-status-row">
+        <span className={`main-intake-status is-${status}`}>
+          <i className="ph-bold ph-pulse" aria-hidden="true"></i>
+          {status === "loading" ? "Loading intake" : status === "error" ? "Intake unavailable" : "Read-only intake"}
+        </span>
+        <span className={intakeToolVisible ? "main-intake-status is-ready" : "main-intake-status is-idle"}>
+          <i className="ph-bold ph-plugs-connected" aria-hidden="true"></i>
+          {intakeToolVisible ? "MCP intake tool visible" : "MCP intake scope review"}
+        </span>
+      </div>
+
+      <div className="operations-system-metrics" aria-label="Global intake metrics">
+        {metrics.map((metric) => (
+          <span key={metric.label}>
+            <i className={`ph-bold ${metric.icon}`} aria-hidden="true"></i>
+            <small>{metric.label}</small>
+            <strong>{metric.value}</strong>
+          </span>
+        ))}
+      </div>
+
+      <div className="main-intake-filter-row" aria-label="Intake quick filters">
+        <a href="/v1/intake?sourceAgent=paperclip">Paperclip</a>
+        <a href="/v1/intake?status=needs_owner_decision">Owner decisions</a>
+        <a href="/v1/intake?family=unassigned_resource">Unassigned resources</a>
+        <a href="/v1/intake?risk=critical">Critical risk</a>
+      </div>
+
+      <div className="operations-system-grid">
+        <MainIntakeSection
+          title="Owner decisions"
+          icon="ph-seal-warning"
+          empty={status === "loading" ? "Reading owner decision queue." : "No owner decision intake items are visible."}
+          items={ownerDecisions}
+        />
+        <MainIntakeSection
+          title="Paperclip and agents"
+          icon="ph-robot"
+          empty={status === "loading" ? "Reading agent output." : "No Paperclip or agent output is waiting in intake."}
+          items={paperclipItems}
+        />
+        <MainIntakeSection
+          title="Resources to classify"
+          icon="ph-folder-open"
+          empty={status === "loading" ? "Reading unassigned resources." : "No unassigned Drive/provider resources are visible."}
+          items={unassignedResources}
+        />
+        <MainIntakeSection
+          title="Risk and blockers"
+          icon="ph-shield-warning"
+          empty={status === "loading" ? "Reading risks and blockers." : "No high-risk intake items are visible."}
+          items={blockedItems}
+        />
+        <article className="operations-agent-packet main-intake-agent-packet">
+          <div>
+            <i className="ph-bold ph-flow-arrow" aria-hidden="true"></i>
+            <h3>Routing packet</h3>
+            <span>read-only</span>
+          </div>
+          <p>
+            The next safe layer is classification and routing proposals. Acknowledge, retry,
+            approve, invoice, discount, or delete actions stay outside this panel until they are
+            implemented as explicit CompanyCore commands.
+          </p>
+          <div>
+            <button type="button" onClick={() => onSelectCapability("tasks")}>Tasks</button>
+            <button type="button" onClick={() => onSelectCapability("decisions")}>Decisions</button>
+            <a href="/react-company-os">Approvals</a>
+          </div>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function MainIntakeSection({
+  title,
+  icon,
+  empty,
+  items
+}: {
+  title: string;
+  icon: string;
+  empty: string;
+  items: IntakeItem[];
+}) {
+  return (
+    <article className="operations-system-section main-intake-section">
+      <div>
+        <i className={`ph-bold ${icon}`} aria-hidden="true"></i>
+        <h3>{title}</h3>
+        <span>{items.length}</span>
+      </div>
+      {items.length === 0 ? (
+        <p>{empty}</p>
+      ) : (
+        <div className="operations-system-list main-intake-list">
+          {items.map((item) => (
+            <span key={item.id}>
+              <strong>{item.title}</strong>
+              <small>{item.summary || `${formatIntakeLabel(item.family)} from ${item.sourceModel}`}</small>
+              <em className={intakeRiskClass(item.risk)}>
+                {formatIntakeLabel(item.risk)} / {formatIntakeLabel(item.suggestedDepartment)}
+              </em>
+              {item.blockedActions.length > 0 ? (
+                <small>{item.blockedActions[0]?.reason}</small>
+              ) : null}
+            </span>
+          ))}
+        </div>
+      )}
+    </article>
+  );
 }
 
 const operationsSystemSlugs = [
@@ -4977,6 +5195,10 @@ function AreaDetailView({
     status: "idle" | "loading" | "ready" | "error";
     graph: AreaOperatingGraph | null;
   }>({ status: "idle", graph: null });
+  const [intakeState, setIntakeState] = useState<{
+    status: "idle" | "loading" | "ready" | "error";
+    data: IntakeData | null;
+  }>({ status: "idle", data: null });
   const selectedArea = areas.find((area) => area.key === selectedAreaKey) || areas[0];
   const ownerLabel = connection.user?.name || connection.user?.email || "Owner";
   const ownerDetail = connection.user?.email ? "Owner" : connection.workspace.name;
@@ -5001,6 +5223,31 @@ function AreaDetailView({
     };
   }, [selectedArea.key]);
 
+  useEffect(() => {
+    if (selectedArea.key !== "00-ogolny") {
+      setIntakeState({ status: "idle", data: null });
+      return;
+    }
+
+    let cancelled = false;
+    setIntakeState({ status: "loading", data: null });
+    loadGlobalIntake()
+      .then((data) => {
+        if (!cancelled) {
+          setIntakeState({ status: "ready", data });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setIntakeState({ status: "error", data: null });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedArea.key]);
+
   const context = useMemo(
     () => areaDetailContext(
       selectedArea,
@@ -5014,6 +5261,7 @@ function AreaDetailView({
   );
   const lanes = useMemo(() => areaDetailLanes(selectedArea, context, connection), [selectedArea, context, connection]);
   const isOperationsSystem = selectedArea.key === "04-operacje";
+  const isMainSystem = selectedArea.key === "00-ogolny";
 
   function selectArea(key: string) {
     setSelectedAreaKey(key);
@@ -5043,6 +5291,14 @@ function AreaDetailView({
         <section className="area-detail-layout">
           <div className="area-detail-main">
             <AreaDetailHero area={selectedArea} context={context} connection={connection} />
+            {isMainSystem ? (
+              <MainIntakeSystemPanel
+                intake={intakeState.data}
+                status={intakeState.status}
+                connection={connection}
+                onSelectCapability={selectCapability}
+              />
+            ) : null}
             {isOperationsSystem ? (
               <OperationsManagementSystemPanel
                 area={selectedArea}
@@ -5052,7 +5308,7 @@ function AreaDetailView({
               />
             ) : null}
             <AreaCapabilityRail activeCapability={activeCapability} onSelectCapability={selectCapability} />
-            {!isOperationsSystem ? <AreaOperatingBoard lanes={lanes} /> : null}
+            {!isOperationsSystem && !isMainSystem ? <AreaOperatingBoard lanes={lanes} /> : null}
             <AreaCapabilityFocus
               area={selectedArea}
               activeCapability={activeCapability}

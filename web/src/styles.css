@@ -1209,7 +1209,8 @@ label {
   color: #c2413d;
 }
 
-.operations-system-panel {
+.operations-system-panel,
+.main-intake-system-panel {
   display: grid;
   gap: 0.9rem;
   overflow: hidden;
@@ -1249,6 +1250,53 @@ label {
   font-size: 0.86rem;
   font-weight: 650;
   line-height: 1.58;
+}
+
+.main-intake-status-row,
+.main-intake-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.main-intake-status,
+.main-intake-filter-row a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  width: fit-content;
+  border: 1px solid rgb(216 225 238 / 0.86);
+  border-radius: 999px;
+  background: #ffffff;
+  padding: 0.42rem 0.68rem;
+  color: #2c3f5f;
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.main-intake-status.is-ready,
+.main-intake-status.is-idle {
+  background: rgb(22 132 91 / 0.09);
+  color: #16845b;
+}
+
+.main-intake-status.is-loading {
+  background: rgb(35 100 210 / 0.09);
+  color: #2364d2;
+}
+
+.main-intake-status.is-error {
+  background: rgb(198 46 46 / 0.1);
+  color: #b42318;
+}
+
+.main-intake-filter-row a:hover,
+.main-intake-filter-row a:focus-visible {
+  border-color: rgb(35 100 210 / 0.35);
+  background: rgb(35 100 210 / 0.08);
+  outline: none;
 }
 
 .operations-command-grid,
@@ -1407,6 +1455,10 @@ label {
   padding: 0.82rem;
 }
 
+.main-intake-section {
+  min-height: 15rem;
+}
+
 .operations-system-section > div,
 .operations-agent-packet > div:first-child {
   justify-content: space-between;
@@ -1460,6 +1512,19 @@ label {
   font-weight: 900;
 }
 
+.main-intake-list em.is-low {
+  color: #16845b;
+}
+
+.main-intake-list em.is-medium {
+  color: #2364d2;
+}
+
+.main-intake-list em.is-high,
+.main-intake-list em.is-critical {
+  color: #b87700;
+}
+
 .operations-agent-packet > div:last-child {
   display: flex;
   flex-wrap: wrap;
@@ -1474,6 +1539,25 @@ label {
   font-size: 0.7rem;
   font-weight: 950;
   text-decoration: none;
+}
+
+.main-intake-agent-packet button {
+  border: 1px solid rgb(216 225 238 / 0.9);
+  border-radius: 999px;
+  background: #ffffff;
+  padding: 0.36rem 0.62rem;
+  color: #2364d2;
+  font-size: 0.7rem;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.main-intake-agent-packet button:hover,
+.main-intake-agent-packet button:focus-visible,
+.operations-agent-packet a:hover,
+.operations-agent-packet a:focus-visible {
+  background: rgb(35 100 210 / 0.08);
+  outline: none;
 }
 
 .area-capability-focus {

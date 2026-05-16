@@ -10,13 +10,13 @@ Last updated: 2026-05-16
      work, and old-client archive evidence.
 2. DMS-SHELL-001 Shared Department Management Shell.
    - Plan and extract the reusable department shell used by `00`-`12`.
-3. DMS-00-004 Global intake web panel for `00 Main`.
+3. DMS-00-005 Global intake classify/route command contract.
    - Source:
-     `docs/planning/dms-00-global-intake-read-api-task-contract.md`.
-   - Add the first owner-facing read-only review panel for `/v1/intake` in the
-     department management shell, including Paperclip filter, routing signals,
-     blocked approvals/risks, and no write actions until a command contract is
-     approved.
+     `docs/planning/dms-00-global-intake-web-panel-task-contract.md`.
+   - Plan the next safe command layer for `00 Main`: classify, route, request
+     owner decision, and propose department ownership without acknowledging
+     agent events, approving risky work, invoicing, discounting, deleting, or
+     mutating provider state.
 
 ## NEXT
 
@@ -57,16 +57,16 @@ Last updated: 2026-05-16
      `docs/planning/v1-department-systems-global-implementation-plan.md`.
    - Follow its waves and task IDs for web, backend, Paperclip, QA,
      production, and closeout work.
-6. Plan the minimum company control loop.
+6. Plan the minimum company control loop command layer.
    - Source:
      `docs/architecture/department-management-systems-v1-blueprint.md`.
    - `00 Main` is the global intake for owner ideas, client requests,
      documents, tasks, risks, bugs, opportunities, Paperclip background
      outputs, feedback, and improvement signals.
-   - First backend implementation is `GET /v1/intake`; next implementation
-     should be read-only/review-first in the web layer: show unassigned items,
-     Paperclip-created background outputs, classification status, owner
-     decision needs, and suggested department routing.
+   - First backend implementation is `GET /v1/intake`; first web
+     implementation is the verified `00 Main` read-only panel. Next
+     implementation should design command-shaped classification and routing
+     proposals before any write behavior.
 7. Inventory pricing, discounts, current client work, and archived clients.
    - Source:
      `docs/architecture/department-management-systems-v1-blueprint.md`.

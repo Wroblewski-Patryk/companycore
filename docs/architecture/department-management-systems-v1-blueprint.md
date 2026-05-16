@@ -204,7 +204,7 @@ Current backend foundation:
 V1 web target:
 
 - `/dashboard` remains the main company command map.
-- `/areas?area=00-glowny&view=overview` becomes the detailed orchestration
+- `/areas?area=00-ogolny&view=overview` becomes the detailed orchestration
   room.
 
 Backend gaps:

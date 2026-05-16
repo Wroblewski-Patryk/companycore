@@ -159,7 +159,17 @@ continue from repository files alone:
   existing agent, provider, unassigned resource, approval, risk, task, and
   event records into one `00 Main` queue. `npm run test:api` passed against
   workspace-local PostgreSQL on `127.0.0.1:55476` using the existing
-  `postgres` database. The next implementation is the owner-facing web panel.
+  `postgres` database. Web consumption is tracked by DMS-00-004.
+- `docs/planning/dms-00-global-intake-web-panel-task-contract.md`: DMS-00
+  owner-facing web handoff. As of 2026-05-16,
+  `/areas?area=00-ogolny&view=overview` renders a read-only `00 Main`
+  management panel over `/v1/intake`, including intake/MCP readiness, summary
+  metrics, quick filters, owner-decision, Paperclip/agent,
+  unassigned-resource, and risk/blocker queues. `npm run build:web`,
+  `npm run build:server`, and Playwright real-backend proof on
+  `http://127.0.0.1:3192` passed. The next safe step is a command contract for
+  classify/route proposals; do not add acknowledge, approval, invoice,
+  discount, delete, or provider-write actions without that contract.
 - `docs/architecture/web-layer-react-ownership.md`: current web route
   ownership contract. As of 2026-05-15, user-facing web routes are React-owned
   and served from the Vite bundle in `public/react/index.html`. The legacy

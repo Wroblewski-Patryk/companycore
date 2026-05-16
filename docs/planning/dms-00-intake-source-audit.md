@@ -18,7 +18,7 @@ Result:
 - Preferred first route: `GET /v1/intake`.
 - Preferred first MCP tool: `companycore_get_intake`.
 - First web consumer: `00 Main` selected-area panel on
-  `/areas?area=00-glowny&view=overview`.
+  `/areas?area=00-ogolny&view=overview`.
 
 ## Source Inventory
 
@@ -48,7 +48,8 @@ The first read model can derive rows from existing records:
 
 No durable review state exists yet. That means DMS-00-003 should be read-only.
 Owner review commands such as mark-reviewed, route, archive, reject, or
-create-task-from-item require DMS-00-006 and a future write contract.
+create-task-from-item require DMS-00-005/DMS-00-006 and a future write
+contract.
 
 ## Source-To-Intake Mapping
 
@@ -142,7 +143,7 @@ Reason:
 - `00 Main` is a cross-department intake and router, not only a selected-area
   detail.
 - Paperclip and other agents need a stable top-level MCP-friendly tool.
-- The route can still be rendered inside `/areas?area=00-glowny`.
+- The route can still be rendered inside `/areas?area=00-ogolny`.
 
 Capability:
 
@@ -160,7 +161,7 @@ No write capability in DMS-00-003.
 
 ## First Web Decision
 
-DMS-00-005 should add a dedicated `00 Main` panel above the generic selected
+DMS-00-004 should add a dedicated `00 Main` panel above the generic selected
 area board, similar to how `04 Operations` currently has a dedicated board.
 
 Required sections:
@@ -193,7 +194,7 @@ Recommended files:
 - new `src/modules/intake/intake.routes.ts`
 - `src/tests/api.test.ts`
 - `docs/API.md`
-- web consumption can wait for DMS-00-005 unless a tiny route link is needed.
+- web consumption can wait for DMS-00-004 unless a tiny route link is needed.
 
 Required tests:
 
@@ -212,6 +213,6 @@ Required tests:
 | Question | Status | Suggested owner |
 | --- | --- | --- |
 | Should review state become durable in an `intake_items` table? | defer until after read model proof | Backend + Product Docs |
-| Should route/classification create tasks directly or create proposals first? | defer to DMS-00-006 | Backend + Security |
+| Should route/classification create tasks directly or create proposals first? | defer to DMS-00-005 | Backend + Security |
 | Should Paperclip create intake items, agent events, tasks, or all three? | defer to PC-DMS-002 | AI Integration |
 | Should archived old clients enter through intake or relationships first? | defer to DMS-05 and DMS-MONEY | Product Docs |

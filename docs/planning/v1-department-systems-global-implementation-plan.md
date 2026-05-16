@@ -84,11 +84,10 @@ Paperclip-output review surface.
 | DMS-00-001 | Design global intake and Paperclip output review contract | planning | Product Docs + Backend | DMS-V1-003 | Requirements for unclassified items, review states, routing, and evidence | source review |
 | DMS-00-002 | Audit current sources for intake candidates | research | Backend + Product Docs | DMS-00-001 | Map existing tasks, agent events, provider inboxes, Drive files, notes, risks, and decisions into intake candidates | source/code review |
 | DMS-00-003 | Implement read-only global intake aggregate | backend | Backend | DMS-00-002 | Protected read model for unclassified items and Paperclip-created/proposed items | API tests |
-| DMS-00-004 | Expose intake aggregate in MCP manifest | backend/AI | Backend + AI Integration | DMS-00-003 | Read-only MCP tool for `00 Main` intake context | API/MCP tests |
-| DMS-00-005 | Build `00 Main` intake/review web panel | frontend | Frontend | DMS-00-003 | Selected-area management panel for global intake, classification, owner decision, Paperclip review | Playwright desktop/mobile |
-| DMS-00-006 | Add owner classification/routing proposal states | backend planning | Backend + Security | DMS-00-005 | Command contract for future assign/route/approve actions | source review |
-| DMS-00-007 | Implement first safe route/classification command | backend/frontend | Backend + Frontend | DMS-00-006 | Assign item to department or mark needs owner decision, audited | API tests + browser proof |
-| DMS-00-008 | Paperclip background output review proof | AI/QA | QA + AI Integration | DMS-00-004, DMS-00-005 | Controlled Paperclip-like item appears in `00 Main`, gets reviewed/routed | end-to-end smoke |
+| DMS-00-004 | Build `00 Main` intake/review web panel | frontend | Frontend | DMS-00-003 | Selected-area management panel for global intake, classification context, owner decision, Paperclip review, and MCP intake visibility | Playwright desktop/mobile |
+| DMS-00-005 | Add owner classification/routing proposal states | backend planning | Backend + Security | DMS-00-004 | Command contract for future assign/route/approve actions | source review |
+| DMS-00-006 | Implement first safe route/classification command | backend/frontend | Backend + Frontend | DMS-00-005 | Assign item to department or mark needs owner decision, audited | API tests + browser proof |
+| DMS-00-007 | Paperclip background output review proof | AI/QA | QA + AI Integration | DMS-00-004, DMS-00-006 | Controlled Paperclip-like item appears in `00 Main`, gets reviewed/routed | end-to-end smoke |
 
 ## Wave 2 - Shared Department Shell And Packet Foundation
 
@@ -239,7 +238,7 @@ as the authority boundary.
 | PC-DMS-002 | Paperclip missing-work analysis contract | AI/backend planning | AI Integration + Backend | PC-DMS-001 | How Paperclip proposes gaps/tasks without direct writes | source review |
 | PC-DMS-003 | Paperclip task proposal/create command | backend/AI | Backend + AI Integration | PC-DMS-002 | Scoped task proposal/create through CompanyCore API/MCP | API/MCP tests |
 | PC-DMS-004 | Paperclip evidence report command | backend/AI | Backend + AI Integration | PC-DMS-003 | Agent can report evidence/status back to CompanyCore | API/MCP tests |
-| PC-DMS-005 | Paperclip output review UI integration | frontend | Frontend | DMS-00-005, PC-DMS-003 | Owner sees Paperclip proposals and evidence in `00 Main` | Playwright proof |
+| PC-DMS-005 | Paperclip output review UI integration | frontend | Frontend | DMS-00-004, PC-DMS-003 | Owner sees Paperclip proposals and evidence in `00 Main` | Playwright proof |
 | PC-DMS-006 | Paperclip supervised end-to-end smoke | QA/AI | QA + AI Integration | PC-DMS-005 | Business context -> proposal -> owner review -> task/evidence loop | repeatable smoke |
 
 ## Wave 8 - Verification, Production, And Closeout
@@ -251,7 +250,7 @@ Goal: prove the V1 minimal operating company loop locally and in production.
 | DMS-QA-001 | All-department local browser proof | QA | QA/Test | DMS-SHELL-008 | `00`-`12` routes render no overflow/error | Playwright screenshots |
 | DMS-QA-002 | Backend API gate for department packets | QA/backend | Backend + QA | DMS-SHELL-005 | Department packet API tests and workspace isolation | `npm run test:api` |
 | DMS-QA-003 | MCP manifest and Paperclip packet proof | QA/AI | AI Integration + QA | PC-DMS-001 | MCP exposes read-safe packet tools | MCP smoke |
-| DMS-QA-004 | Company control loop local proof | QA | QA/Test | DMS-00-007, PC-DMS-005 | Intake -> route -> task/proposal -> evidence -> improvement | e2e smoke |
+| DMS-QA-004 | Company control loop local proof | QA | QA/Test | DMS-00-006, PC-DMS-005 | Intake -> route -> task/proposal -> evidence -> improvement | e2e smoke |
 | DMS-QA-005 | Pricing/discount/current-client proof | QA | QA/Test | DMS-03-006, DMS-07-003 | Current client with 100 percent discount represented correctly | API + UI proof |
 | DMS-QA-006 | Archived-client learning proof | QA | QA/Test | DMS-05-004, DMS-11-002 | Old client archive contributes to improvement context | API + UI proof |
 | DMS-PROD-001 | Deploy V1 department systems | release | Ops/Release | DMS-QA-001..006 | Production running pushed commit | health + deploy evidence |
@@ -273,7 +272,7 @@ The first tasks to activate from this plan are:
 
 ```text
 DMS-V1-000
-  -> DMS-00-001 -> DMS-00-002 -> DMS-00-003 -> DMS-00-005
+  -> DMS-00-001 -> DMS-00-002 -> DMS-00-003 -> DMS-00-004
   -> DMS-SHELL-001 -> DMS-SHELL-005 -> DMS-SHELL-006
   -> DMS-04-001..006
   -> DMS-01 / DMS-03 / DMS-05 / DMS-02

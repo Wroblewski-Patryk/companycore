@@ -38,6 +38,16 @@ Last updated: 2026-05-16
   `intake:read`. `npm run test:api` passed against workspace-local PostgreSQL
   on `127.0.0.1:55476` using the existing `postgres` database, and the
   validation-owned PostgreSQL process was stopped after the run.
+  As of 2026-05-16, DMS-00-004 implemented the first owner-facing `00 Main`
+  web slice: `/areas?area=00-ogolny&view=overview` now renders a read-only
+  Global Intake panel over `/v1/intake`, with intake/MCP readiness, summary
+  metrics, Paperclip/agent, owner-decision, unassigned-resource, and
+  risk/blocker queues. `npm run build:web` and `npm run build:server` passed.
+  Playwright real-backend proof on `http://127.0.0.1:3192` verified desktop
+  and mobile markers, clicked `Tasks` to
+  `/areas?area=00-ogolny&view=tasks`, and found no console errors, framework
+  overlay, or horizontal overflow. The browser plugin path was attempted first
+  but had no active Codex browser pane, so Playwright fallback was used.
 
 ## Product Decisions (Confirmed)
 - 2026-05-07: CRM and pipelines are separate domain concepts. Pipelines are a

@@ -15,10 +15,10 @@ synchronized with `.codex/context/TASK_BOARD.md`.
       plan and then extract the reusable selected-area department shell for
       identity, command brief, subsystem tabs, management board, evidence rail,
       improvement loop, and Paperclip handoff.
-- [ ] DMS-00-004 Global intake web panel for `00 Main`:
-      add the first owner-facing read-only panel over `/v1/intake`, with
-      Paperclip filtering, routing suggestions, blocked approvals/risks, and
-      no write actions until command contracts are approved.
+- [ ] DMS-00-005 Global intake classify/route command contract:
+      plan command-shaped classification and routing proposals for `00 Main`
+      without adding acknowledge, approval, invoice, discount, delete, or
+      provider-write behavior.
 ### NEXT
 
 - [ ] DMS-04-001 Operations real-data proof:
@@ -113,6 +113,18 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       `127.0.0.1:55476` using the existing `postgres` database.
       Task contract:
       `docs/planning/dms-00-global-intake-read-api-task-contract.md`.
+- [x] DMS-00-004 Global Intake Web Panel:
+      `/areas?area=00-ogolny&view=overview` now renders a read-only `00 Main`
+      intake panel over `/v1/intake`, with MCP readiness, summary metrics,
+      quick filters, owner decision, Paperclip/agent, unassigned-resource, and
+      risk/blocker queues, plus routing controls that only change existing
+      selected-area views. `npm run build:web` and `npm run build:server`
+      passed. Playwright real-backend proof on `http://127.0.0.1:3192`
+      verified desktop/mobile markers, clicked `Tasks` to
+      `/areas?area=00-ogolny&view=tasks`, and found no console errors,
+      framework overlay, or horizontal overflow.
+      Task contract:
+      `docs/planning/dms-00-global-intake-web-panel-task-contract.md`.
 - [x] V1OPS-001 Operations Cockpit React view:
       `/operations` now gives the owner one V1 supervision cockpit for clients,
       tasks, department files/tables, and AI-agent handoff. It uses existing

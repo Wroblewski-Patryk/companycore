@@ -39,7 +39,7 @@ CompanyCore V1 has three web layers:
 | --- | --- | --- | --- | --- |
 | Company Atlas | `/dashboard` | Whole-company command map across 00-12 areas. | V1 canonical | company decision board, area map, health signals, next action |
 | Operations Cockpit | `/operations` | Cross-perspective supervision for clients, tasks, files/tables, and AI handoff. | V1 canonical | four-lane command surface, quick create, department evidence, AI handoff |
-| Department Management System | `/areas?area=:areaKey&view=:viewId` | Canonical department operating room for one area. | V1 canonical base | department identity, command brief, subsystem tabs, board, evidence rail |
+| Department Management System | `/areas?area=:areaKey&view=:viewId` | Canonical department operating room for one area. | V1 canonical base; `00 Main` and `04 Operacje` have first dedicated read-only management panels | department identity, command brief, subsystem tabs, board, evidence rail |
 | Unified Settings | `/settings` | Configure connectors, agent keys, and MCP handoff fields. | V1 canonical | integration settings, agent keys, MCP instructions |
 
 ## Private Support Workbenches
@@ -90,7 +90,7 @@ should expand toward the full set as existing backend contracts allow it.
 
 | Area key | Label | System view name | Primary route | Core subsystems |
 | --- | --- | --- | --- | --- |
-| `00-glowny` | 00 Ogolny | Company Orchestration System | `/areas?area=00-glowny&view=overview` | owner inbox, cross-department priorities, company graph, global flow, system health |
+| `00-ogolny` | 00 Ogolny | Company Orchestration System | `/areas?area=00-ogolny&view=overview` | global intake, owner inbox, Paperclip/agent output, unassigned resources, risks, cross-department priorities, company graph, global flow, system health |
 | `01-strategia` | 01 Strategia | Strategy Management System | `/areas?area=01-strategia&view=overview` | goals, targets, roadmap, decisions, risks, KPIs, portfolio |
 | `02-produkt` | 02 Produkt | Product And Delivery Management System | `/areas?area=02-produkt&view=overview` | offers, service/product catalog, backlog, delivery plans, releases, acceptance |
 | `03-sprzedaz` | 03 Sprzedaz | Sales Management System | `/areas?area=03-sprzedaz&view=overview` | leads, discovery, opportunities, offers, pricing, deal pipeline |
