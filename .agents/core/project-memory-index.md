@@ -170,6 +170,15 @@ continue from repository files alone:
   `http://127.0.0.1:3192` passed. The next safe step is a command contract for
   classify/route proposals; do not add acknowledge, approval, invoice,
   discount, delete, or provider-write actions without that contract.
+- `docs/planning/dms-00-global-intake-classify-route-command-contract.md`:
+  DMS-00 first write-boundary handoff. As of 2026-05-16, the selected future
+  command is proposal-only `POST /v1/intake/actions/propose-route`. It may
+  create auditable route/classification proposal evidence and optional owner
+  follow-up work, but it must not acknowledge agent events, retry providers,
+  approve work, mutate provider scope, invoice, discount, delete, or execute
+  legal/ads changes. DMS-00-006 should implement this command with source
+  allowlisting, canonical department validation, idempotency, API tests, and
+  browser proof.
 - `docs/planning/dms-money-pricing-discount-source-inventory.md`: active
   pricing and discount source handoff for Sales, Finance, Relationships,
   Innovation, and Paperclip. As of 2026-05-16, Google Drive source review

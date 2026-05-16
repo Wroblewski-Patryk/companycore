@@ -85,7 +85,7 @@ Paperclip-output review surface.
 | DMS-00-002 | Audit current sources for intake candidates | research | Backend + Product Docs | DMS-00-001 | Map existing tasks, agent events, provider inboxes, Drive files, notes, risks, and decisions into intake candidates | source/code review |
 | DMS-00-003 | Implement read-only global intake aggregate | backend | Backend | DMS-00-002 | Protected read model for unclassified items and Paperclip-created/proposed items | API tests |
 | DMS-00-004 | Build `00 Main` intake/review web panel | frontend | Frontend | DMS-00-003 | Selected-area management panel for global intake, classification context, owner decision, Paperclip review, and MCP intake visibility | Playwright desktop/mobile |
-| DMS-00-005 | Add owner classification/routing proposal states | backend planning | Backend + Security | DMS-00-004 | Command contract for future assign/route/approve actions | source review |
+| DMS-00-005 | Add owner classification/routing proposal states | backend planning | Backend + Security | DMS-00-004 | Completed command contract for proposal-only route/classification actions; source mutation and high-risk actions remain blocked | `git diff --check` |
 | DMS-00-006 | Implement first safe route/classification command | backend/frontend | Backend + Frontend | DMS-00-005 | Assign item to department or mark needs owner decision, audited | API tests + browser proof |
 | DMS-00-007 | Paperclip background output review proof | AI/QA | QA + AI Integration | DMS-00-004, DMS-00-006 | Controlled Paperclip-like item appears in `00 Main`, gets reviewed/routed | end-to-end smoke |
 

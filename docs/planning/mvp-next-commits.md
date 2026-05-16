@@ -7,10 +7,10 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] DMS-00-005 Global intake classify/route command contract:
-      plan command-shaped classification and routing proposals for `00 Main`
-      without adding acknowledge, approval, invoice, discount, delete, or
-      provider-write behavior.
+- [ ] DMS-00-006 First safe global intake route/classification command:
+      implement proposal-only classification and routing for `00 Main` without
+      acknowledging agent events, approving risky work, invoicing, discounting,
+      deleting, or mutating provider state.
 - [ ] DMS-07-001 Finance system spec:
       use the pricing and discount inventory to define the first Finance
       management board, read model, owner decisions, and security guardrails.
@@ -103,6 +103,15 @@ The section below is retained as execution evidence. It is not the active
 queue. Future work must start from `Active Queue`, `.codex/context/TASK_BOARD.md`,
 and `docs/operations/v1-function-coverage-ledger.csv`.
 
+- [x] DMS-00-005 Global Intake Classify/Route Command Contract:
+      defined `POST /v1/intake/actions/propose-route` as the first safe future
+      command layer for `00 Main`. The contract covers source allowlist,
+      canonical department keys, status vocabulary, idempotency, frontend
+      states, Paperclip proposal boundaries, and explicit blocks for
+      acknowledge, approval, provider-write, invoice, discount, delete, legal,
+      and ads behavior. `git diff --check` passed.
+      Task contract:
+      `docs/planning/dms-00-global-intake-classify-route-command-contract.md`.
 - [x] DMS-MONEY-001 Pricing/Hourly-Value/Discount Source Inventory:
       inventoried Drive-backed pricing and client sources, separated current
       strategic `499 CHF/month`, benchmarked hybrid `1500 CHF setup + 150

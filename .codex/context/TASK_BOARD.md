@@ -2,15 +2,17 @@
 
 ## Ready
 
-- DMS-00-005 Global intake classify/route command contract.
+- DMS-00-006 First safe global intake route/classification command.
   - Stage: planning
-  - Owner: Product Docs + Backend Builder + Security
+  - Owner: Backend Builder + Frontend Builder + Security
   - Priority: P1
   - Source:
-    `docs/planning/dms-00-global-intake-web-panel-task-contract.md`
-  - Goal: define the safe command-shaped classify/route proposal layer for
-    `00 Main` without acknowledging agent events, approving risky work,
-    invoicing, discounting, deleting, or mutating provider state.
+    `docs/planning/dms-00-global-intake-classify-route-command-contract.md`
+  - Goal: implement `POST /v1/intake/actions/propose-route` as an audited
+    proposal command that validates the source item and department, optionally
+    creates owner follow-up work, and leaves agent events, provider state,
+    approvals, finance, legal, invoice, discount, ads, and delete behavior
+    untouched.
 - DMS-SHELL-002 Department-specific subsystem registry.
   - Stage: planning
   - Owner: Frontend Builder + Product Docs
@@ -154,6 +156,19 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- DMS-00-005 Global Intake Classify/Route Command Contract.
+  - Evidence:
+    `docs/planning/dms-00-global-intake-classify-route-command-contract.md`
+    defines `POST /v1/intake/actions/propose-route`, payload and response
+    shapes, status vocabulary, source-model allowlist, department-key
+    validation, idempotency, frontend states, Paperclip proposal boundaries,
+    and explicit blocked actions for acknowledge, approval, provider-write,
+    invoice, discount, delete, legal, and ads behavior.
+  - Validation: source review of the current intake route and command-shaped
+    CompanyCore patterns; `git diff --check` passed.
+  - Next task: DMS-00-006 first safe global intake route/classification
+    command.
 
 - DMS-SHELL-001 Shared Department Management Shell.
   - Evidence: `web/src/main.tsx` now renders selected-area department views

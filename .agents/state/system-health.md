@@ -154,6 +154,11 @@ Last updated: 2026-05-16
 
 ## Runtime Health
 
+- DMS-00-005 planning proof on 2026-05-16 passed source review and
+  `git diff --check`. The first safe global intake write boundary is now
+  documented as proposal-only `POST /v1/intake/actions/propose-route`; source
+  systems remain unchanged by design until DMS-00-006 implements and tests the
+  command.
 - Production CompanyCore, Jarvis, and Paperclip health were green in the latest
   v1 handoff evidence.
 - CompanyCore public health currently reports image

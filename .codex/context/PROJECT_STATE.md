@@ -67,6 +67,15 @@ Last updated: 2026-05-16
   Playwright static SPA proof verified desktop `00`, `01`, `04`, and mobile
   `04` with required markers, no horizontal overflow, and no console/page
   errors.
+  As of 2026-05-16, DMS-00-005 completed the command contract for the next
+  safe `00 Main` step. `docs/planning/dms-00-global-intake-classify-route-command-contract.md`
+  defines proposal-only `POST /v1/intake/actions/propose-route` behavior,
+  source-model allowlisting, canonical department-key validation, idempotency,
+  response effects, frontend states, Paperclip proposal boundaries, and
+  blocked high-risk actions. The future command may create route proposal
+  evidence and optional owner follow-up work, but it must not acknowledge agent
+  events, retry providers, approve work, mutate provider scope, invoice,
+  discount, delete, or execute legal/ads changes.
 
 ## Product Decisions (Confirmed)
 - 2026-05-07: CRM and pipelines are separate domain concepts. Pipelines are a

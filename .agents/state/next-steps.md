@@ -4,13 +4,14 @@ Last updated: 2026-05-16
 
 ## NOW
 
-1. DMS-00-005 Global intake classify/route command contract.
+1. DMS-00-006 First safe global intake route/classification command.
    - Source:
-     `docs/planning/dms-00-global-intake-web-panel-task-contract.md`.
-   - Plan the next safe command layer for `00 Main`: classify, route, request
-     owner decision, and propose department ownership without acknowledging
-     agent events, approving risky work, invoicing, discounting, deleting, or
-     mutating provider state.
+     `docs/planning/dms-00-global-intake-classify-route-command-contract.md`.
+   - Implement the first proposal-only command for `00 Main`: validate the
+     source intake item, validate the target department, create auditable route
+     proposal evidence, optionally create owner follow-up work, and avoid
+     acknowledging agent events, approving risky work, invoicing, discounting,
+     deleting, or mutating provider state.
 2. DMS-SHELL-002 Department-specific subsystem registry.
    - Source:
      `docs/planning/dms-shell-001-shared-department-management-shell-task-contract.md`.
@@ -74,9 +75,9 @@ Last updated: 2026-05-16
      documents, tasks, risks, bugs, opportunities, Paperclip background
      outputs, feedback, and improvement signals.
    - First backend implementation is `GET /v1/intake`; first web
-     implementation is the verified `00 Main` read-only panel. Next
-     implementation should design command-shaped classification and routing
-     proposals before any write behavior.
+     implementation is the verified `00 Main` read-only panel. The
+     DMS-00-005 command contract now selects proposal-only classification and
+     routing as the next safe write layer.
 7. Implement pricing, discounts, current client work, and archived clients from
    the completed inventory.
    - Source:
