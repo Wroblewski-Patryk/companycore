@@ -84,8 +84,9 @@ export const appRouteGroups: AppRouteGroup[] = [
         title: "Relationships",
         icon: "ph-graph",
         private: true,
-        uxStage: "v0-rebuild",
-        rebuildNote: "Rebuild as area-scoped relationship/provenance view inside selected departments."
+        uxStage: "v1-foundation",
+        canonicalSource: "docs/planning/v1-relationship-provenance-review-task-contract.md",
+        rebuildNote: "V1 provenance review for relationship confidence, area focus, review gaps, and unsupported families."
       },
       {
         id: "data",

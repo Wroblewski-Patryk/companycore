@@ -4,11 +4,11 @@ Last updated: 2026-05-16
 
 ## NOW
 
-1. V1REL-001 Area relationship provenance review.
+1. Deepen selected-area knowledge view.
    - Source: `docs/ux/v1-web-view-index-2026-05-15.md`.
-   - Rebuild `/relationships` around selected-area provenance, confidence
-     labels, review gaps, unsupported families, and agent-safe relationship
-     context.
+   - Turn the selected department `knowledge` capability into a V1 evidence
+     view over Drive/source coverage, missing ownership, agent-safe knowledge
+     packets, and improvement candidates.
 
 ## NEXT
 
@@ -90,7 +90,7 @@ Last updated: 2026-05-16
      before raising production confidence.
 13. V1 operations route-depth slices.
    - Deepen one existing-contract workbench from the operations cockpit:
-     `relationships`, then selected-area `knowledge`.
+     selected-area `knowledge`, then selected-area `tasks`.
 14. Production smoke for locally verified V1 command surfaces.
    - After the next deploy, compare public `/health` build metadata with the
      pushed commit.

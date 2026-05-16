@@ -11462,6 +11462,8 @@ function formatUnknown(value: unknown) {
 }
 
 function RelationshipsRoute() {
+  const initialArea = new URLSearchParams(window.location.search).get("area") || "";
+  const [selectedAreaKey, setSelectedAreaKey] = useState(initialArea);
   const [state, reload] = usePrivateLoader(async () => {
     const [connection, graph] = await Promise.all([
       ownerApi<ConnectionData>("/v1/connection"),
@@ -11471,30 +11473,173 @@ function RelationshipsRoute() {
   });
 
   return (
-    <PrivateStateGate state={state} title="Relationship review" detail="CompanyCore is loading the relationship graph." onRetry={reload}>
+    <PrivateStateGate state={state} title="Relationship review" detail="CompanyCore is loading provenance, confidence, and review gaps." onRetry={reload}>
       {({ connection, graph }) => (
-        <Shell connection={connection} appLabel="Relationship review">
-          <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-8">
-            <section className="card border border-base-300 bg-base-100 shadow-sm">
-              <div className="card-body gap-4">
-                <p className="eyebrow">Operating graph</p>
-                <h1 className="text-3xl font-black">Relationships that agents can trust</h1>
-                <p className="text-sm leading-6 text-company-muted">Direct, provider-derived, route-inferred, and review-needed links stay visible before AI relies on them.</p>
-                <div className="grid gap-3 sm:grid-cols-4">
-                  <MetricCard icon="ph-dots-three-circle" label="Nodes" value={`${graph.nodes?.length || 0}`} detail="Known graph entities" />
-                  <MetricCard icon="ph-git-branch" label="Edges" value={`${graph.edges?.length || 0}`} detail="Readable relationships" />
-                  <MetricCard icon="ph-warning-circle" label="Review" value={`${graph.reviewItems?.length || 0}`} detail="Needs owner context" />
-                  <MetricCard icon="ph-prohibit" label="Unsupported" value={`${graph.unsupportedFamilies?.length || 0}`} detail="Not inferred as facts" />
-                </div>
-              </div>
-            </section>
-            <GenericRecordTable records={graph.reviewItems || []} emptyTitle="No review items" emptyDetail="No relationship review items are currently reported." />
-            <GenericRecordTable records={graph.edges || []} emptyTitle="No graph edges" emptyDetail="No relationship edges are available yet." />
-          </section>
-        </Shell>
+        <RelationshipProvenanceReview
+          connection={connection}
+          graph={graph}
+          selectedAreaKey={selectedAreaKey}
+          onSelectArea={setSelectedAreaKey}
+        />
       )}
     </PrivateStateGate>
   );
+}
+
+function RelationshipProvenanceReview({
+  connection,
+  graph,
+  selectedAreaKey,
+  onSelectArea
+}: {
+  connection: ConnectionData;
+  graph: RelationshipGraph;
+  selectedAreaKey: string;
+  onSelectArea: (areaKey: string) => void;
+}) {
+  const areas = connection.operatingModel.areas;
+  const selectedArea = areas.find((area) => canonicalAreaKeyFromBackend(area) === selectedAreaKey)
+    || areas.find((area) => (area.tables || []).length > 0)
+    || areas[0];
+  const selectedCanonicalKey = selectedArea ? canonicalAreaKeyFromBackend(selectedArea) : "";
+  const edges = graph.edges || [];
+  const nodes = graph.nodes || [];
+  const reviewItems = graph.reviewItems || [];
+  const unsupportedFamilies = graph.unsupportedFamilies || [];
+  const areaEdges = selectedArea ? edges.filter((edge) => relationshipMatchesArea(edge, selectedArea)) : edges;
+  const visibleEdges = areaEdges.length > 0 ? areaEdges : edges;
+  const areaReviewItems = selectedArea ? reviewItems.filter((item) => relationshipMatchesArea(item, selectedArea)) : reviewItems;
+  const visibleReviewItems = areaReviewItems.length > 0 ? areaReviewItems : reviewItems;
+  const confidenceCounts = edges.reduce<Record<string, number>>((counts, edge) => {
+    const confidence = String(edge.confidence || "unknown");
+    counts[confidence] = (counts[confidence] || 0) + 1;
+    return counts;
+  }, {});
+  const signals = [
+    { label: "Direct", value: `${confidenceCounts.direct || 0}`, detail: "Database-backed facts", icon: "ph-seal-check" },
+    { label: "Provider", value: `${confidenceCounts.provider_hierarchy || 0}`, detail: "Provider hierarchy evidence", icon: "ph-tree-structure" },
+    { label: "Inferred", value: `${confidenceCounts.route_inferred || 0}`, detail: "Route/table derived context", icon: "ph-git-branch" },
+    { label: "Review", value: `${reviewItems.length}`, detail: "Needs owner context", icon: "ph-warning-circle" }
+  ];
+
+  return (
+    <Shell connection={connection} appLabel="Relationship review">
+      <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-8">
+        <section className="card border border-base-300 bg-base-100 shadow-sm">
+          <div className="card-body gap-5">
+            <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-start">
+              <div>
+                <p className="eyebrow">V1 relationship provenance</p>
+                <h1 className="text-3xl font-black">Relationships that agents can trust</h1>
+                <p className="max-w-3xl text-sm leading-6 text-company-muted">
+                  Inspect direct, provider-derived, route-inferred, review-needed, and unsupported relationship evidence before the owner or Paperclip relies on it.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2 lg:justify-end">
+                <a className="btn btn-primary btn-sm" href={selectedArea ? `/areas?area=${selectedCanonicalKey}&view=resources` : "/areas"}>Open area resources</a>
+                <a className="btn btn-outline btn-sm" href="/data">Open evidence data</a>
+              </div>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {signals.map((signal) => (
+                <MetricCard icon={signal.icon} label={signal.label} value={signal.value} detail={signal.detail} key={signal.label} />
+              ))}
+            </div>
+            <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_260px] lg:items-end">
+              <div className="grid gap-2">
+                <span className="text-xs font-bold uppercase text-company-muted">Area focus</span>
+                <select
+                  className="select select-bordered"
+                  value={selectedCanonicalKey}
+                  onChange={(event) => onSelectArea(event.target.value)}
+                  aria-label="Relationship area focus"
+                >
+                  {areas.map((area) => (
+                    <option value={canonicalAreaKeyFromBackend(area)} key={area.id}>{area.name}</option>
+                  ))}
+                </select>
+              </div>
+              <span className="rounded-company bg-base-200 p-3 text-sm text-company-muted">
+                {visibleEdges.length} visible edges / {nodes.length} nodes
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]">
+          <article className="card border border-base-300 bg-base-100 shadow-sm">
+            <div className="card-body gap-4">
+              <div>
+                <p className="eyebrow">Provenance edges</p>
+                <h2 className="text-xl font-black">{selectedArea?.name || "Workspace graph"}</h2>
+              </div>
+              {visibleEdges.length === 0 ? (
+                <p className="rounded-company bg-base-200 p-4 text-sm text-company-muted">No relationship edges are available yet.</p>
+              ) : (
+                <div className="grid gap-3">
+                  {visibleEdges.slice(0, 12).map((edge, index) => (
+                    <article className="rounded-company border border-base-300 bg-base-50 p-4" key={String(edge.id || index)}>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="badge badge-outline">{String(edge.confidence || "unknown")}</span>
+                        <span className="badge badge-ghost">{String(edge.sourceModel || "source")}</span>
+                        <span className="badge badge-ghost">{String(edge.sourceField || "field")}</span>
+                      </div>
+                      <h3 className="mt-3 text-base font-black">{String(edge.label || edge.id || "Relationship edge")}</h3>
+                      <p className="mt-1 break-words text-sm text-company-muted">{String(edge.from || "unknown")} {"->"} {String(edge.to || "unknown")}</p>
+                      {"actionHint" in edge && edge.actionHint ? <p className="mt-2 text-sm">{String(edge.actionHint)}</p> : null}
+                    </article>
+                  ))}
+                </div>
+              )}
+            </div>
+          </article>
+          <aside className="grid content-start gap-4">
+            <article className="card border border-base-300 bg-base-100 shadow-sm">
+              <div className="card-body gap-3">
+                <p className="eyebrow">Review queue</p>
+                <h2 className="text-xl font-black">{visibleReviewItems.length} items</h2>
+                <div className="grid gap-2">
+                  {visibleReviewItems.slice(0, 6).map((item, index) => (
+                    <div className="rounded-company bg-base-200 p-3 text-sm" key={String(item.id || index)}>
+                      <strong>{String(item.title || item.id || "Review item")}</strong>
+                      <p className="mt-1 text-company-muted">{String(item.detail || "Needs owner context.")}</p>
+                    </div>
+                  ))}
+                  {visibleReviewItems.length === 0 ? <p className="rounded-company bg-base-200 p-3 text-sm text-company-muted">No review items are reported for this focus.</p> : null}
+                </div>
+              </div>
+            </article>
+            <article className="card border border-base-300 bg-base-100 shadow-sm">
+              <div className="card-body gap-3">
+                <p className="eyebrow">Unsupported families</p>
+                <h2 className="text-xl font-black">{unsupportedFamilies.length} blocked</h2>
+                <div className="grid gap-2">
+                  {unsupportedFamilies.slice(0, 5).map((family, index) => (
+                    <div className="rounded-company bg-base-200 p-3 text-sm" key={String(family.family || index)}>
+                      <strong>{String(family.family || "unsupported")}</strong>
+                      <p className="mt-1 text-company-muted">{String(family.reason || "No approved relationship contract.")}</p>
+                      <p className="mt-1">{String(family.nextAction || "Keep as unsupported until a concrete workflow exists.")}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </article>
+          </aside>
+        </section>
+      </section>
+    </Shell>
+  );
+}
+
+function relationshipMatchesArea(record: Record<string, unknown>, area: OperatingArea) {
+  const haystack = JSON.stringify(record).toLowerCase();
+  const needles = [
+    area.id,
+    area.key,
+    area.name,
+    ...(area.tables || []).flatMap((table) => [table.id, table.name, table.apiSlug])
+  ].filter(Boolean).map((value) => String(value).toLowerCase());
+  return needles.some((needle) => haystack.includes(needle));
 }
 
 function PipelineRoute() {

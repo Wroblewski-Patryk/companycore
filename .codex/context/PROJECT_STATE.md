@@ -51,6 +51,17 @@ Last updated: 2026-05-16
   horizontal overflow. Screenshots:
   `docs/ux/evidence/v1-data-evidence-browser-desktop.png` and
   `docs/ux/evidence/v1-data-evidence-browser-mobile.png`.
+  As of 2026-05-16, V1REL-001 converted `/relationships` into a V1 foundation
+  relationship provenance review. The route now supports selected-area focus,
+  direct/provider/inferred/review metrics, agent-readable edge provenance,
+  review queue, unsupported-family reporting, and links back to selected-area
+  resources plus `/data`. `npm run build:web` passed. Playwright real-backend
+  proof on `http://127.0.0.1:3216` registered a fresh owner, seeded mapped and
+  unscoped provider/Drive relationship evidence, and verified desktop/mobile
+  `/relationships?area=04-operacje` with no console/page errors or horizontal
+  overflow. Screenshots:
+  `docs/ux/evidence/v1-relationship-provenance-desktop.png` and
+  `docs/ux/evidence/v1-relationship-provenance-mobile.png`.
   As of 2026-05-16, DMS-00-003 implemented the first backend slice of
   `00 Main`: protected read-only `GET /v1/intake`. It aggregates existing
   agent events, provider inbox rows, unassigned Drive/provider resources,

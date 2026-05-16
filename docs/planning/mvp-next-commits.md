@@ -7,10 +7,10 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] V1REL-001 Area relationship provenance review:
-      rebuild `/relationships` around selected-area provenance, confidence
-      labels, review gaps, unsupported families, and agent-safe relationship
-      context.
+- [ ] Deepen selected-area knowledge view:
+      turn the selected department `knowledge` capability into a clearer V1
+      evidence view over Drive/source coverage, missing ownership, agent-safe
+      source packets, and improvement candidates.
 
 ### NEXT
 
@@ -20,8 +20,8 @@ synchronized with `.codex/context/TASK_BOARD.md`.
       settings, `/data`, and `04 Operacje` smoke.
 - [ ] Deepen the next V1 capability from `/operations`:
       choose one route-level slice that already has backend contracts, with
-      preferred order `relationships` provenance review, then selected-area
-      `knowledge` depth.
+      preferred order selected-area `knowledge` depth, then selected-area
+      `tasks` depth.
 - [ ] Use the CompanyCore business module map during upcoming product intake:
       `docs/architecture/companycore-business-module-map.md` now classifies
       future work as native core, provider-backed, future adapter, or derived
@@ -164,6 +164,19 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       `docs/ux/evidence/v1-data-evidence-browser-mobile.png`.
       Task contract:
       `docs/planning/v1-data-evidence-browser-task-contract.md`.
+- [x] V1REL-001 Area relationship provenance review:
+      rebuilt `/relationships?area=04-operacje` into a V1 foundation
+      provenance review with selected-area focus, direct/provider/inferred/
+      review metrics, agent-readable edge evidence, review queue, unsupported
+      families, and links back to area resources and `/data`. `npm run
+      build:web`, `git diff --check`, and Playwright real-backend proof on
+      `http://127.0.0.1:3216` passed for desktop/mobile with no console/page
+      errors or horizontal overflow.
+      Evidence:
+      `docs/ux/evidence/v1-relationship-provenance-desktop.png` and
+      `docs/ux/evidence/v1-relationship-provenance-mobile.png`.
+      Task contract:
+      `docs/planning/v1-relationship-provenance-review-task-contract.md`.
 - [x] DMS-07-001 Finance system spec:
       defined the Finance Management System board, first safe web shape,
       protected read-only `GET /v1/finance/context` target, pricing model and

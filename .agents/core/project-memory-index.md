@@ -337,9 +337,18 @@ continue from repository files alone:
   coverage links, and generic record inspection. `npm run build:web` and
   Playwright real-backend proof on `http://127.0.0.1:3215` verified desktop
   `/data` and mobile `/data/procedures` with seeded Company OS evidence, no
-  console/page errors, and no horizontal overflow. Future work should move to
-  `/relationships` provenance review or typed actions backed by existing
-  contracts.
+  console/page errors, and no horizontal overflow. Future typed actions must
+  stay backed by existing contracts.
+- `docs/planning/v1-relationship-provenance-review-task-contract.md`: current
+  task and evidence source for V1REL-001. As of 2026-05-16,
+  `/relationships?area=:areaKey` is a V1 foundation provenance review route.
+  It shows selected-area focus, direct/provider/inferred/review metrics,
+  provenance edges with confidence/source context, review queue, unsupported
+  families, and links back to area resources plus `/data`. `npm run build:web`
+  passed; Playwright proof on `http://127.0.0.1:3216` verified desktop/mobile
+  `/relationships?area=04-operacje` with no console/page errors or horizontal
+  overflow. Future relationship fixes require explicit command contracts; do
+  not add generic edge CRUD or fake links.
 - `docs/ux/v1-production-canonical-discrepancy-audit-2026-05-15.md`: current
   production-to-canonical discrepancy register for the five V1 web surfaces.
   It records the original deployed screenshots, root/auth mismatches,

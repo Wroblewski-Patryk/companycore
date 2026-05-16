@@ -28,18 +28,10 @@
   - Goal: after the next deploy, compare public health build metadata with the
     pushed commit and run authenticated `/operations` smoke for client/task
     creation, table/file coverage, and AI handoff readiness.
-- V1REL-001 Area relationship provenance review.
-  - Stage: planning
-  - Owner: Frontend Builder + QA/Test
-  - Priority: P1
-  - Source: `docs/ux/v1-web-view-index-2026-05-15.md`
-  - Goal: rebuild `/relationships` around selected-area provenance,
-    confidence labels, review gaps, unsupported families, and agent-safe
-    relationship context.
 ## In Progress
 
-- No active implementation task is currently in progress after the
-  database-backed 04 Operations Management System proof.
+- No active implementation task is currently in progress after the V1
+  relationship provenance proof.
 
 ## Blocked
 
@@ -120,6 +112,20 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- V1REL-001 Area relationship provenance review.
+  - Evidence:
+    `/relationships?area=04-operacje` now renders
+    `RelationshipProvenanceReview` over the existing relationship graph read
+    model, with area focus, direct/provider/inferred/review metrics,
+    agent-readable provenance edges, review queue, unsupported families, and
+    links back to selected-area resources plus `/data`.
+  - Validation: `npm run build:web`, `git diff --check`, and Playwright
+    real-backend proof on `http://127.0.0.1:3216` for desktop/mobile
+    `/relationships?area=04-operacje`. No console/page errors or horizontal
+    overflow were observed. Validation backend and PostgreSQL were stopped.
+  - Task contract:
+    `docs/planning/v1-relationship-provenance-review-task-contract.md`.
 
 - DMS-07-003 Read-Only Finance Web Board.
   - Evidence:
