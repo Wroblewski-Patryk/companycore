@@ -4,12 +4,12 @@ Last updated: 2026-05-16
 
 ## NOW
 
-1. DMS-00-002 Audit current sources for intake candidates.
+1. DMS-00-003 Implement read-only global intake aggregate.
    - Source:
-     `docs/planning/dms-00-global-intake-paperclip-review-contract.md`.
-   - Map existing agent events, provider inbox, events, tasks, Drive files,
-     provider mappings, relationship review, approvals, risks, decisions, and
-     notes into the DMS-00 intake families before implementation.
+     `docs/planning/dms-00-intake-source-audit.md`.
+   - Implement protected `GET /v1/intake` from existing data sources without a
+     migration. Reading intake must not acknowledge agent events or mutate
+     provider state.
 2. DMS-MONEY-001 Pricing/hourly-value/discount source inventory.
    - Inventory Drive/ClickUp pricing, service definitions, hourly-value
      assumptions, discounts including 100 percent discount, current client

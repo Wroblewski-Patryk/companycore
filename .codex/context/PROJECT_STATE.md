@@ -314,6 +314,13 @@ Last updated: 2026-05-16
   backend/MCP surface, web panel requirements, routing heuristics, and future
   write guardrails. The next task is DMS-00-002 source audit before runtime
   implementation.
+- 2026-05-16: DMS-00-002 is complete as analysis scope.
+  `docs/planning/dms-00-intake-source-audit.md` confirms the first DMS-00
+  global intake runtime slice can be a no-migration read-only aggregate over
+  existing agent events, provider inbox rows, events, tasks, Drive files,
+  provider mappings, relationship review items, approvals, risks, notes,
+  decisions, and MCP/agent context. The selected first route is
+  `GET /v1/intake`.
 - 2026-05-15: V1WEB-002 organized the V1 web layer into five canonical
   surfaces. `/` is now public home, `/auth/login` and `/auth/register` share
   the public layout, `/dashboard` remains the authenticated Company Atlas, and

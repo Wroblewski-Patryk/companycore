@@ -145,6 +145,13 @@ continue from repository files alone:
   graph, Company OS records, and MCP profiles. Future runtime work should
   start with DMS-00-002 source audit, then implement a read-only intake
   aggregate before write/review commands.
+- `docs/planning/dms-00-intake-source-audit.md`: DMS-00 source audit and
+  implementation handoff. It confirms the first global intake read model can
+  reuse existing AgentEventOutbox, ProviderEventInbox, Event, Task,
+  GoogleDriveFile, ExternalContainerMapping, ExternalFieldMapping, relationship
+  review, approvals, risks, notes, decisions, and MCP/agent data without a
+  migration. The selected first route is `GET /v1/intake`; reading intake must
+  not acknowledge agent events or mutate provider state.
 - `docs/architecture/web-layer-react-ownership.md`: current web route
   ownership contract. As of 2026-05-15, user-facing web routes are React-owned
   and served from the Vite bundle in `public/react/index.html`. The legacy

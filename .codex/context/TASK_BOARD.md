@@ -2,16 +2,16 @@
 
 ## Ready
 
-- DMS-00-002 Audit current sources for intake candidates.
-  - Stage: analysis
-  - Owner: Backend Builder + Product Docs
+- DMS-00-003 Implement read-only global intake aggregate.
+  - Stage: planning
+  - Owner: Backend Builder
   - Priority: P1
   - Source:
-    `docs/planning/dms-00-global-intake-paperclip-review-contract.md`
-  - Goal: inspect existing agent events, provider inbox, events, tasks, Drive
-    files, provider mappings, relationship review, approvals, risks, decisions,
-    and notes; produce a source-to-intake mapping and choose the first runtime
-    read route shape without migrations if possible.
+    `docs/planning/dms-00-intake-source-audit.md`
+  - Goal: implement protected `GET /v1/intake` using current data sources,
+    with workspace isolation, no mutation on read, Paperclip filtering,
+    high-risk blocked action metadata, API docs, MCP manifest metadata if in
+    scope, and API regression tests.
 - DMS-MONEY-001 Pricing/hourly-value/discount source inventory.
   - Stage: analysis
   - Owner: Product Docs + Backend Builder
@@ -154,6 +154,16 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- DMS-00-002 Intake Source Audit.
+  - Evidence:
+    `docs/planning/dms-00-intake-source-audit.md` maps current CompanyCore
+    sources into DMS-00 intake families and confirms the first read-only
+    aggregate can be implemented without a migration. It selects top-level
+    `GET /v1/intake` and lists DMS-00-003 implementation files/tests.
+  - Validation: code/schema source review and `git diff --check` passed.
+  - Task contract:
+    `docs/planning/dms-00-intake-source-audit-task-contract.md`.
 
 - DMS-00-001 Global Intake And Paperclip Output Review Contract.
   - Evidence:

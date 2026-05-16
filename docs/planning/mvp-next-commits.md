@@ -7,10 +7,9 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] DMS-00-002 Audit current sources for intake candidates:
-      map existing agent events, provider inbox, events, tasks, Drive files,
-      provider mappings, relationship review, approvals, risks, decisions, and
-      notes into the DMS-00 intake families before runtime implementation.
+- [ ] DMS-00-003 Implement read-only global intake aggregate:
+      implement protected `GET /v1/intake` from the DMS-00 source audit,
+      exposing unclassified owner/client/provider/agent work without mutation.
 - [ ] DMS-MONEY-001 Pricing/hourly-value/discount source inventory:
       inventory Drive/ClickUp pricing, service definitions, hourly-value
       assumptions, discount cases including 100 percent discount, current
@@ -24,9 +23,9 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [ ] DMS-04-001 Operations real-data proof:
       run database-backed or production proof for the existing
       `/areas?area=04-operacje&view=overview` Operations Management System.
-- [ ] DMS-00-003 Implement read-only global intake aggregate:
-      after DMS-00-002, implement the protected read model for unclassified
-      items and Paperclip-created/proposed work.
+- [ ] DMS-00-004 Expose intake aggregate in MCP manifest:
+      expose the read-only intake aggregate as an MCP tool for Paperclip after
+      the HTTP contract is implemented and tested.
 - [ ] V1DATA-001 Evidence browser V1 workbench:
       convert `/data` and `/data/:table` from V0 rebuild into a V1 evidence
       browser tied to departments, tables, and agent-readable context.
@@ -201,6 +200,14 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       web panel requirements, routing heuristics, and future write guardrails.
       Task contract:
       `docs/planning/dms-00-global-intake-paperclip-review-task-contract.md`.
+- [x] DMS-00-002 Intake Source Audit:
+      published `docs/planning/dms-00-intake-source-audit.md` with source
+      readiness for AgentEventOutbox, ProviderEventInbox, events, tasks, Drive
+      files, external mappings, relationship review items, approvals, risks,
+      notes, decisions, and MCP/agent context. The audit selected top-level
+      `GET /v1/intake` as the first no-migration read-only aggregate.
+      Task contract:
+      `docs/planning/dms-00-intake-source-audit-task-contract.md`.
 - [x] V1UX-CANON-001 Simple V1 Dashboard Canonical Design:
       published the V1 area-first Company Atlas direction, sitemap,
       component boundaries, Tailwind/DaisyUI style rules, pixel-perfect
