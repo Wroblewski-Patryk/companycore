@@ -234,6 +234,20 @@
     checks, zero unnamed visible controls, `npm run build:web`,
     `npm run build:server`, and `npm run validate`.
 
+- WEB-SIDEBAR-001 Department sidebar foundation.
+  - Evidence:
+    `docs/planning/web-sidebar-foundation-audit-2026-05-16.md` records the
+    sidebar contract: CompanyCore logo/name, company/workspace selector,
+    all `00`-`12` departments, disabled planned departments, active
+    `00/04/08` module dashboard links, and separate expand arrows for
+    active departments with more than one planned view.
+  - Validation: `npm run build:web`; Playwright fallback on temporary port
+    `3237` verified logo, workspace selector, all departments, exactly three
+    expand buttons, disabled `05 Relationships` without a link, Operations
+    subview expansion, 04 dashboard click-through, desktop/mobile no
+    horizontal overflow, server cleanup, and no validation-owned
+    `chrome-headless-shell`.
+
 - ORG-ARCH-002 Unified organizational operating system architecture.
   - Evidence:
     `docs/architecture/unified-organizational-operating-system.md` records the

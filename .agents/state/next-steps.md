@@ -39,6 +39,10 @@ Last updated: 2026-05-16
       also fixed locale contract extraction, planned department label
       localization, and API error normalization for string, nested, and backend
       `internal_server_error` payloads.
+    - `WEB-SIDEBAR-001` is complete and verified: authenticated sidebar now
+      shows logo/name, company/workspace selector, all `00`-`12` departments,
+      disabled planned modules, active `00/04/08` dashboard links, and separate
+      expand arrows for active module view lists.
    - CompanyCore remains the company operating system; AI agents remain
      external API/MCP clients.
    - Keep writes behind explicit command contracts, audit/events, and API

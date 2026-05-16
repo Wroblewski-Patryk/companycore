@@ -102,6 +102,13 @@ Last updated: 2026-05-16
   nested, and backend `internal_server_error` payloads into user-facing
   messages. Audit report:
   `docs/planning/web-qa-001-post-implementation-audit-2026-05-16.md`.
+- The 2026-05-16 web sidebar foundation now lists all `00`-`12` departments
+  under the CompanyCore logo and company/workspace selector. Only implemented
+  department systems are active links; planned departments are disabled.
+  `00 General`, `04 Operations`, and `08 Assets` use separate arrow buttons to
+  reveal their planned view lists while row clicks open each module dashboard.
+  Audit report:
+  `docs/planning/web-sidebar-foundation-audit-2026-05-16.md`.
   `npm run build:web`, `npm run build:server`, Playwright route proof, and
   `git diff --check` passed. The next runtime slice should rebuild any new web
   surface only through a scoped department-system task contract, with `05

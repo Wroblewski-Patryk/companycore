@@ -42,9 +42,12 @@ layout/auth/department/API module split. The post-implementation audit fixed
 locale contract extraction, planned department label localization, and API
 error normalization for string, nested, and backend `internal_server_error`
 payloads, then passed Browser, Playwright, build, validation, responsive, and
-accessibility smoke gates. Department work can now continue only through a
-scoped department-system contract, with `05 Relationships` still the likely
-next department unless production deployment smoke is selected first.
+accessibility smoke gates. The sidebar foundation now shows the CompanyCore
+logo/name, company/workspace selector, all `00`-`12` departments, disabled
+planned departments, and expandable view lists for active `00/04/08` systems.
+Department work can now continue only through a scoped department-system
+contract, with `05 Relationships` still the likely next department unless
+production deployment smoke is selected first.
 
 Current DMS focus: the first `00 Main` intake API/web panel, proposal-only
 route command, shared department shell, department subsystem registry, Finance

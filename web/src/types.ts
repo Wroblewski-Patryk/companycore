@@ -63,13 +63,35 @@ export type AssetsPacket = {
   agentPacket?: { mode?: string; instructions?: string[] };
 };
 
-export type CoreAreaKey = "00-ogolny" | "04-operacje" | "08-zasoby";
+export type CoreAreaKey =
+  | "00-ogolny"
+  | "01-strategia"
+  | "02-produkt"
+  | "03-sprzedaz"
+  | "04-operacje"
+  | "05-relacje"
+  | "06-kadry"
+  | "07-finanse"
+  | "08-zasoby"
+  | "09-technologia"
+  | "10-prawo"
+  | "11-innowacje"
+  | "12-zarzadzanie";
 
 export type CoreArea = {
   key: CoreAreaKey;
   labelKey: string;
   eyebrowKey: string;
-  href: string;
+  href?: string;
   descriptionKey: string;
   icon: string;
+  enabled?: boolean;
+  views?: DepartmentView[];
+};
+
+export type DepartmentView = {
+  key: string;
+  labelKey: string;
+  href?: string;
+  enabled?: boolean;
 };

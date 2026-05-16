@@ -177,6 +177,13 @@ continue from repository files alone:
   locale contract extraction, planned department label localization, and API
   error normalization for string, nested, and backend `internal_server_error`
   payloads, then passed Browser, Playwright, build, and validation gates.
+- `docs/planning/web-sidebar-foundation-audit-2026-05-16.md`: verified the
+  authenticated sidebar foundation. `web/src/layout/shell.tsx` renders the
+  CompanyCore logo/name, company/workspace selector, all `00`-`12`
+  departments, disabled planned departments, active `00/04/08` module links,
+  and separate expand arrows for active module view lists. Future department
+  views should extend `web/src/features/departments/core-area-data.ts` plus the
+  route registry through scoped task contracts.
 - `docs/architecture/companycore-business-module-map.md`: accepted
   model-level module map for scaling CompanyCore as the bridge for operating
   the company. It classifies future work as native core, provider-backed,
