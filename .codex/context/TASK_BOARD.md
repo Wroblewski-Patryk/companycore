@@ -31,7 +31,7 @@
 ## In Progress
 
 - No active implementation task is currently in progress after the V1 selected
-  area knowledge proof.
+  area tasks proof.
 
 ## Blocked
 
@@ -140,6 +140,19 @@
     stopped.
   - Task contract:
     `docs/planning/v1-selected-area-knowledge-depth-task-contract.md`.
+
+- V1AREATASKS-001 Selected-area tasks depth.
+  - Evidence:
+    `/areas?area=04-operacje&view=tasks` now renders a task execution panel
+    inside the selected-area shell, including task evidence, execution tables,
+    provider pressure, guarded ownership model, execution packet, owner action
+    queue, and explicit no-hidden-task-to-area-relation language.
+  - Validation: `npm run build:web`, `git diff --check`, and Playwright
+    real-backend proof on `http://127.0.0.1:3218` for desktop/mobile
+    `/areas?area=04-operacje&view=tasks`. No console/page errors or horizontal
+    overflow were observed. Validation backend and PostgreSQL were stopped.
+  - Task contract:
+    `docs/planning/v1-selected-area-tasks-depth-task-contract.md`.
 
 - DMS-07-003 Read-Only Finance Web Board.
   - Evidence:

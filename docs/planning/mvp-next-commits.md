@@ -7,10 +7,9 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] Deepen selected-area tasks view:
-      turn the selected department `tasks` capability into a clearer V1
-      execution view over task pressure, ownership gaps, agent handoff, and
-      safe next actions using existing task and Company OS contracts.
+- [ ] Polish `/react-company-os` into an area-aware V1 foundation:
+      connect Company OS evidence back to selected-area department context
+      without adding new command authority.
 
 ### NEXT
 
@@ -20,8 +19,8 @@ synchronized with `.codex/context/TASK_BOARD.md`.
       settings, `/data`, and `04 Operacje` smoke.
 - [ ] Deepen the next V1 capability from `/operations`:
       choose one route-level slice that already has backend contracts, with
-      preferred order selected-area `tasks` depth, then Company OS
-      area-aware foundation polish.
+      preferred order Company OS area-aware foundation polish, then
+      compatibility alias cleanup.
 - [ ] Use the CompanyCore business module map during upcoming product intake:
       `docs/architecture/companycore-business-module-map.md` now classifies
       future work as native core, provider-backed, future adapter, or derived
@@ -189,6 +188,18 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       `docs/ux/evidence/v1-area-knowledge-depth-mobile.png`.
       Task contract:
       `docs/planning/v1-selected-area-knowledge-depth-task-contract.md`.
+- [x] V1AREATASKS-001 Selected-area tasks depth:
+      deepened `/areas?area=04-operacje&view=tasks` with task evidence,
+      execution tables, provider pressure, guarded ownership model, execution
+      packet, owner action queue, and explicit no-hidden-task-to-area-relation
+      language. `npm run build:web`, `git diff --check`, and Playwright
+      real-backend proof on `http://127.0.0.1:3218` passed for desktop/mobile
+      with no console/page errors or horizontal overflow.
+      Evidence:
+      `docs/ux/evidence/v1-area-tasks-depth-desktop.png` and
+      `docs/ux/evidence/v1-area-tasks-depth-mobile.png`.
+      Task contract:
+      `docs/planning/v1-selected-area-tasks-depth-task-contract.md`.
 - [x] DMS-07-001 Finance system spec:
       defined the Finance Management System board, first safe web shape,
       protected read-only `GET /v1/finance/context` target, pricing model and

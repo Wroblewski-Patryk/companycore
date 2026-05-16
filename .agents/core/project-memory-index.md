@@ -360,6 +360,16 @@ continue from repository files alone:
   no console/page errors, and no horizontal overflow. Future knowledge writes,
   Drive edits, or autonomous source-trust decisions require explicit
   contracts.
+- `docs/planning/v1-selected-area-tasks-depth-task-contract.md`: current task
+  and evidence source for V1AREATASKS-001. As of 2026-05-16,
+  `/areas?area=:areaKey&view=tasks` has a V1 task-execution layer inside the
+  selected-area shell. It shows task evidence, execution tables, provider
+  pressure, guarded ownership, execution packet, owner action queue, and
+  explicit no-hidden-task-to-area-relation language. `npm run build:web`
+  passed; Playwright proof on `http://127.0.0.1:3218` verified desktop/mobile
+  `/areas?area=04-operacje&view=tasks` with no console/page errors or
+  horizontal overflow. Future factual area task counts require a backend-backed
+  ownership relation.
 - `docs/ux/v1-production-canonical-discrepancy-audit-2026-05-15.md`: current
   production-to-canonical discrepancy register for the five V1 web surfaces.
   It records the original deployed screenshots, root/auth mismatches,

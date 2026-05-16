@@ -72,6 +72,15 @@ Last updated: 2026-05-16
   errors or horizontal overflow. Screenshots:
   `docs/ux/evidence/v1-area-knowledge-depth-desktop.png` and
   `docs/ux/evidence/v1-area-knowledge-depth-mobile.png`.
+  As of 2026-05-16, V1AREATASKS-001 deepened the selected-area `tasks`
+  capability. `/areas?area=04-operacje&view=tasks` now shows task evidence,
+  execution tables, provider pressure, guarded ownership model, execution
+  packet, owner action queue, and explicit no-hidden-task-to-area-relation
+  language. `npm run build:web` passed. Playwright real-backend proof on
+  `http://127.0.0.1:3218` registered a fresh owner and verified desktop/mobile
+  with no console/page errors or horizontal overflow. Screenshots:
+  `docs/ux/evidence/v1-area-tasks-depth-desktop.png` and
+  `docs/ux/evidence/v1-area-tasks-depth-mobile.png`.
   As of 2026-05-16, DMS-00-003 implemented the first backend slice of
   `00 Main`: protected read-only `GET /v1/intake`. It aggregates existing
   agent events, provider inbox rows, unassigned Drive/provider resources,

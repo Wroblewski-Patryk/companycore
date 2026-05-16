@@ -414,6 +414,13 @@ type AreaKnowledgeSignal = {
   tone: "ready" | "review" | "blocked";
 };
 
+type AreaExecutionSignal = {
+  label: string;
+  value: string;
+  detail: string;
+  tone: "ready" | "review" | "blocked";
+};
+
 type CompanyOsDrilldown = {
   id: CompanyOsCollectionName;
   label: string;
@@ -5527,12 +5534,125 @@ function AreaLayerWorkbench({
         </div>
       </div>
       {activeCapability === "knowledge" ? <AreaKnowledgeDepthPanel context={context} /> : null}
+      {activeCapability === "tasks" ? <AreaTasksDepthPanel context={context} /> : null}
       <div className="area-layer-grid">
         <AreaDataLayerPanel context={context} tables={tables} />
         <AreaKnowledgeTreePanel tree={knowledgeTree} driveItems={context.driveItems} />
       </div>
     </section>
   );
+}
+
+function AreaTasksDepthPanel({ context }: { context: AreaDetailContext }) {
+  const taskRecords = areaCapabilityRecords(context, "tasks", 99);
+  const taskTables = areaCapabilityTables(context, "tasks");
+  const taskProviders = context.providerMappings.filter((mapping) => {
+    const text = JSON.stringify(mapping).toLowerCase();
+    return text.includes("task") || text.includes("clickup") || text.includes("workflow");
+  });
+  const taskRows = context.tableRecordRows.filter((row) => areaCapabilitySlugs("tasks").includes(row.apiSlug));
+  const hasDirectAreaTaskRecords = taskRecords.length > 0;
+  const signals: AreaExecutionSignal[] = [
+    {
+      label: "Task evidence",
+      value: `${taskRecords.length}`,
+      detail: hasDirectAreaTaskRecords ? "Task-like records are visible in this department context." : "No task records are directly scoped to this department yet.",
+      tone: hasDirectAreaTaskRecords ? "ready" : "review"
+    },
+    {
+      label: "Execution tables",
+      value: `${taskTables.length}`,
+      detail: taskTables.length > 0 ? "Task tables exist in the selected-area data layer." : "No task table is linked to this department.",
+      tone: taskTables.length > 0 ? "ready" : "blocked"
+    },
+    {
+      label: "Provider pressure",
+      value: `${taskProviders.length}`,
+      detail: taskProviders.length > 0 ? "Provider task/workflow sources are mapped for this area." : "No provider task source is mapped to this area.",
+      tone: taskProviders.length > 0 ? "ready" : "review"
+    },
+    {
+      label: "Ownership model",
+      value: "Guarded",
+      detail: "Direct task-to-area ownership is not invented until a backend relation exists.",
+      tone: "review"
+    }
+  ];
+  const queue = [
+    taskTables.length === 0 ? "Map or expose a department task table before treating area execution as complete." : "",
+    taskRecords.length === 0 ? "Use `/tasks-adapter` for real task creation and movement until area-task ownership is durable." : "",
+    taskProviders.length === 0 ? "Map ClickUp or workflow task sources if this department depends on provider execution." : "",
+    context.driveItems.length === 0 ? "Attach source material so execution tasks can reference proof and procedures." : "",
+    "Design direct task-to-area ownership as a separate backend-backed slice before showing area task counts as facts."
+  ].filter(Boolean);
+
+  return (
+    <section className="area-tasks-depth" aria-label="Task execution readiness">
+      <div className="area-tasks-depth-header">
+        <div>
+          <p className="atlas-kicker">Task execution</p>
+          <h3>Execution pressure without fake ownership</h3>
+          <p>Task records, provider sources, and evidence gaps are shown together while direct area-task ownership stays guarded.</p>
+        </div>
+        <a href="/tasks-adapter">Open tasks workbench</a>
+      </div>
+      <div className="area-tasks-signal-grid">
+        {signals.map((signal) => (
+          <article className={`area-tasks-signal is-${signal.tone}`} key={signal.label}>
+            <span>{signal.label}</span>
+            <strong>{signal.value}</strong>
+            <p>{signal.detail}</p>
+          </article>
+        ))}
+      </div>
+      <div className="area-tasks-depth-grid">
+        <article>
+          <div className="area-layer-panel-title">
+            <i className="ph-bold ph-list-checks" aria-hidden="true"></i>
+            <h3>Execution packet</h3>
+            <span>{taskRows.length} rows</span>
+          </div>
+          {taskRows.length === 0 ? (
+            <p className="area-layer-empty">No direct task rows are visible in this department layer yet.</p>
+          ) : (
+            <div className="area-tasks-packet-list">
+              {taskRows.slice(0, 8).map((row, index) => (
+                <a href={row.href} key={`${row.apiSlug}-${index}`}>
+                  <span>
+                    <strong>{areaRecordTitle(row.record)}</strong>
+                    <small>{row.tableName} / {areaRecordDetail(row.record)}</small>
+                  </span>
+                  <em>{row.apiSlug}</em>
+                </a>
+              ))}
+            </div>
+          )}
+        </article>
+        <article>
+          <div className="area-layer-panel-title">
+            <i className="ph-bold ph-warning-circle" aria-hidden="true"></i>
+            <h3>Owner action queue</h3>
+            <span>{queue.length}</span>
+          </div>
+          <div className="area-tasks-review-list">
+            {queue.map((item) => <span key={item}>{item}</span>)}
+          </div>
+        </article>
+      </div>
+      <p className="area-tasks-footnote">This panel reuses existing task, provider, table, and evidence context. It does not create a hidden task-to-area relation.</p>
+    </section>
+  );
+}
+
+function areaRecordTitle(record: Record<string, unknown>) {
+  return String(record.name || record.title || record.summary || record.subject || record.id || "Record");
+}
+
+function areaRecordDetail(record: Record<string, unknown>) {
+  const parts = [record.status, record.priority, record.type, record.source, record.createdAt]
+    .filter(Boolean)
+    .map((value) => String(value));
+  return parts.slice(0, 3).join(" / ") || "No detail";
 }
 
 function AreaKnowledgeDepthPanel({ context }: { context: AreaDetailContext }) {
