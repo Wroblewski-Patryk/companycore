@@ -221,6 +221,17 @@ Last updated: 2026-05-16
   production bridge has Google Drive read/write/scope/import/reconcile scopes.
   `changes/reconcile` returned `422 sync_failed`, so Drive changes polling
   freshness remains a targeted production follow-up.
+  As of 2026-05-16, PROD-GDRIVE-002 implemented the local backend fix for that
+  changes-polling follow-up. When Google Drive reconcile has no stored
+  `changesPageToken`, it now initializes a baseline through Drive
+  `changes/startPageToken`, stores it in the workspace integration config,
+  emits the existing reconciliation event, and returns
+  `baselineInitialized=true` with zero processed changes. The stored-token
+  `changes.list` flow remains unchanged. `npm run build:server`,
+  `git diff --check`, and `npm run test:api` passed against portable
+  PostgreSQL on `127.0.0.1:55490`; the validation PostgreSQL process was
+  stopped. Production proof remains pending until this commit is deployed and
+  `POST /v1/integration-settings/google_drive/changes/reconcile` is rerun.
 
 ## Product Decisions (Confirmed)
 - 2026-05-07: CRM and pipelines are separate domain concepts. Pipelines are a

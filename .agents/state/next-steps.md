@@ -15,9 +15,10 @@ Last updated: 2026-05-16
      scope set.
 2. Diagnose production Google Drive `changes/reconcile`.
    - Source: KI-009 in `.agents/state/known-issues.md`.
-   - Import/inspect catch-up works, but `changes/reconcile` returned
-     `422 sync_failed`; diagnose changes page token / OAuth changes-list
-     behavior before treating background Drive freshness as verified.
+   - Local fix PROD-GDRIVE-002 is implemented and API-tested: a missing
+     `changesPageToken` now initializes through Drive `changes/startPageToken`.
+     After deploy, rerun production reconcile and close KI-009 only if it no
+     longer returns `422 sync_failed`.
 3. Polish `/react-company-os` into an area-aware V1 foundation.
    - Source: `docs/ux/v1-web-view-index-2026-05-15.md`.
    - Connect Company OS evidence back to selected-area department context

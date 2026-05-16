@@ -151,6 +151,14 @@ continue from repository files alone:
   read/write/scope/import/reconcile scopes. Follow-ups are KI-009
   `changes/reconcile` returning `422 sync_failed` and KI-010 Paperclip runtime
   possibly using an older narrow adapter key.
+- `docs/planning/prod-google-drive-changes-baseline-task-contract.md`:
+  implementation checkpoint for KI-009. As of 2026-05-16, the local backend
+  initializes a missing Google Drive `changesPageToken` through Drive
+  `changes/startPageToken`, stores the token, emits existing reconcile
+  evidence, and returns `baselineInitialized=true` with zero processed changes.
+  `npm run build:server`, `git diff --check`, and `npm run test:api` passed on
+  portable PostgreSQL `127.0.0.1:55490`. Production proof remains pending until
+  the commit is deployed and `changes/reconcile` is rerun.
 - `docs/planning/dms-00-global-intake-paperclip-review-contract.md`: active
   DMS-00 planning contract. It defines `00 Main` as the global intake and
   Paperclip output review surface, reusing AgentEventOutbox, provider inbox,

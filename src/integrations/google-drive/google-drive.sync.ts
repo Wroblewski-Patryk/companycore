@@ -28,6 +28,7 @@ export type GoogleDriveChangesResult = {
   refreshedCount: number;
   removedCount: number;
   skippedCount: number;
+  baselineInitialized?: boolean;
   nextPageToken?: string;
   newStartPageToken?: string;
 };
@@ -340,11 +341,43 @@ export async function reconcileGoogleDriveChangesForWorkspace(input: {
 
   const pageToken = input.pageToken ?? settings.config.changesPageToken;
   if (!pageToken) {
-    throw new IntegrationError(
-      "sync_failed",
-      422,
-      "Google Drive changes page token is required before reconciliation can run."
-    );
+    const client = await getGoogleDriveClientForWorkspace(input.workspaceId);
+    const response = await client.getStartPageToken(input.driveId);
+    await prisma.integrationSetting.update({
+      where: {
+        workspaceId_provider: {
+          workspaceId: input.workspaceId,
+          provider: "google_drive"
+        }
+      },
+      data: {
+        config: toJsonInput({
+          ...settings.config,
+          changesPageToken: response.startPageToken
+        })
+      }
+    });
+
+    const result: GoogleDriveChangesResult = {
+      provider: "google_drive",
+      processedCount: 0,
+      refreshedCount: 0,
+      removedCount: 0,
+      skippedCount: 0,
+      baselineInitialized: true,
+      newStartPageToken: response.startPageToken
+    };
+
+    await prisma.event.create({
+      data: {
+        workspaceId: input.workspaceId,
+        type: "google_drive_changes_reconciled",
+        source: "google_drive",
+        payload: toJsonInput(result)
+      }
+    });
+
+    return result;
   }
 
   const client = await getGoogleDriveClientForWorkspace(input.workspaceId);

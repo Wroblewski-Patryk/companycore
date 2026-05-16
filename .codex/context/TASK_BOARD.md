@@ -30,8 +30,18 @@
     creation, table/file coverage, and AI handoff readiness.
 ## In Progress
 
-- No active implementation task is currently in progress after the V1 selected
-  area tasks proof.
+- PROD-GDRIVE-002 Production Google Drive changes baseline.
+  - Stage: release
+  - Owner: Backend Builder + Ops/Release
+  - Priority: P1
+  - Source:
+    `docs/planning/prod-google-drive-changes-baseline-task-contract.md`
+  - Goal: deploy and smoke the local first-run changes baseline fix so
+    production `changes/reconcile` no longer returns `422 sync_failed` when no
+    stored Drive changes page token exists.
+  - Local evidence: `npm run build:server`, `git diff --check`, and
+    `npm run test:api` passed against portable PostgreSQL on
+    `127.0.0.1:55490`; validation PostgreSQL was stopped.
 
 ## Blocked
 

@@ -15,10 +15,10 @@ synchronized with `.codex/context/TASK_BOARD.md`.
       bridge key from `/settings/api`; older active adapter keys have narrow
       legacy scopes.
 - [ ] Diagnose production Google Drive `changes/reconcile`:
-      import/inspect catch-up works, but `POST
-      /v1/integration-settings/google_drive/changes/reconcile` returned
-      `422 sync_failed`. Diagnose this before using changes polling as the
-      freshness proof.
+      local fix PROD-GDRIVE-002 is implemented and API-tested. A missing
+      `changesPageToken` now initializes through Drive `changes/startPageToken`.
+      After deploy, rerun production reconcile and close KI-009 only if it no
+      longer returns `422 sync_failed`.
 - [ ] Polish `/react-company-os` into an area-aware V1 foundation:
       connect Company OS evidence back to selected-area department context
       without adding new command authority.

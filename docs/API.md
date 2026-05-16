@@ -1640,6 +1640,13 @@ call raw CRUD routes for system tables such as API keys, integration settings,
 provider inbox rows, webhook registrations, event rows, users, workspaces, or
 memberships.
 
+Google Drive changes reconciliation is first-run safe. When no stored Drive
+changes page token exists, `POST /v1/integration-settings/google_drive/changes/reconcile`
+initializes a baseline with Drive `changes/startPageToken`, stores it in the
+workspace integration config, emits a reconciliation event, and returns zero
+processed changes with `baselineInitialized=true`. Later calls consume
+`changes.list` from the stored token.
+
 Current table policy summary:
 
 | Area | Tables | Agent access target |

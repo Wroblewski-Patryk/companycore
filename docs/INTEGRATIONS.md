@@ -169,7 +169,10 @@ Implemented foundation:
   Drive `changes.list`, records provider deliveries in the provider event
   inbox, refreshes changed file metadata/content snapshots, marks removed files
   safely, updates the stored changes page token, and emits provider-neutral
-  agent outbox events.
+  agent outbox events. If no stored changes page token exists yet, the route
+  initializes a safe baseline through Drive `changes/startPageToken`, stores it,
+  emits reconciliation evidence, and returns zero processed changes instead of
+  failing the first reconcile attempt.
 - `POST /v1/integration-settings/google_drive/oauth/authorize-url` generates a
   Google OAuth consent URL for owners using `access_type=offline`,
   `include_granted_scopes=true`, and the approved Drive/Docs/Sheets scopes.

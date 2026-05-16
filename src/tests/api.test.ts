@@ -1,4 +1,5 @@
 import { strict as assert } from "assert";
+import type { Prisma } from "@prisma/client";
 import { spawn } from "node:child_process";
 import type { AddressInfo } from "net";
 import test, { after, before } from "node:test";
@@ -5763,6 +5764,71 @@ test("CompanyCore v1 protected API flow", async () => {
   });
   assert.equal(deliveredAgentEvent.deliveryStatus, "delivered");
   assert.ok(deliveredAgentEvent.deliveredAt);
+
+  const settingBeforeBaseline = await prisma.integrationSetting.findUniqueOrThrow({
+    where: {
+      workspaceId_provider: {
+        workspaceId: ownerA.workspace.id,
+        provider: "google_drive"
+      }
+    }
+  });
+  const configBeforeBaseline = settingBeforeBaseline.config as Record<string, unknown>;
+  const { changesPageToken: _changesPageToken, ...configWithoutChangesToken } = configBeforeBaseline;
+  await prisma.integrationSetting.update({
+    where: {
+      workspaceId_provider: {
+        workspaceId: ownerA.workspace.id,
+        provider: "google_drive"
+      }
+    },
+    data: {
+      config: configWithoutChangesToken as Prisma.InputJsonObject
+    }
+  });
+
+  const originalFetchBeforeGoogleDriveBaseline = globalThis.fetch;
+  globalThis.fetch = (async (input: string | URL | Request) => {
+    const url = new URL(String(input));
+
+    if (url.pathname === "/drive/v3/changes/startPageToken") {
+      return new Response(JSON.stringify({
+        startPageToken: "changes-baseline-token"
+      }), { status: 200 });
+    }
+
+    if (url.pathname === "/drive/v3/changes") {
+      throw new Error("changes.list must not run while initializing the baseline token");
+    }
+
+    return new Response(JSON.stringify({ error: "not mocked", path: url.pathname }), { status: 404 });
+  }) as typeof fetch;
+
+  try {
+    const initializedDriveChangesBaseline = await request("/v1/integration-settings/google_drive/changes/reconcile", {
+      method: "POST",
+      headers: authA
+    });
+    assert.equal(initializedDriveChangesBaseline.status, 200);
+    const initializedDriveChangesBaselineBody = initializedDriveChangesBaseline.body as {
+      data: { processedCount: number; baselineInitialized: boolean; newStartPageToken: string };
+    };
+    assert.equal(initializedDriveChangesBaselineBody.data.processedCount, 0);
+    assert.equal(initializedDriveChangesBaselineBody.data.baselineInitialized, true);
+    assert.equal(initializedDriveChangesBaselineBody.data.newStartPageToken, "changes-baseline-token");
+  } finally {
+    globalThis.fetch = originalFetchBeforeGoogleDriveBaseline;
+  }
+
+  const baselineGoogleDriveSetting = await prisma.integrationSetting.findUniqueOrThrow({
+    where: {
+      workspaceId_provider: {
+        workspaceId: ownerA.workspace.id,
+        provider: "google_drive"
+      }
+    }
+  });
+  assert.equal((baselineGoogleDriveSetting.config as { changesPageToken?: string }).changesPageToken, "changes-baseline-token");
 
   const expiredGoogleDriveSettings = await request("/integration-settings/google_drive", {
     method: "PUT",
