@@ -83,6 +83,8 @@ const reactAppRoutes = [
   "/operations",
   "/dashboard",
   "/areas",
+  "/account/settings",
+  "/workspace/settings",
   "/auth/login",
   "/auth/register",
   "/react-dashboard"

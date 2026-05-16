@@ -13,6 +13,23 @@ export type AuthPayload = {
   error?: string;
 };
 
+export type AuthMe = {
+  authType: "user" | "api_key";
+  userId?: string;
+  workspaceId: string;
+  workspaces?: WorkspaceSummary[];
+};
+
+export type WorkspaceSummary = {
+  id: string;
+  name: string;
+  role?: string;
+  active?: boolean;
+  ownerUserId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 export type RouteProposal = {
   id: string;
   title?: string;
@@ -30,19 +47,46 @@ export type RouteProposalPacket = {
 
 export type OperationsWorkItem = {
   id: string;
-  title: string;
-  status?: string;
-  priority?: string;
-  owner?: string | null;
-  readiness?: string;
-  linkedResources?: number;
+  task: {
+    id: string;
+    title: string;
+    description?: string | null;
+    status?: string;
+    normalizedStatus?: string;
+    priority?: string;
+    dueDate?: string | null;
+    source?: string | null;
+    externalId?: string | null;
+    updatedAt?: string;
+  };
+  hierarchy?: {
+    project?: { id: string; name: string; status?: string } | null;
+    taskList?: { id: string; name: string; status?: string } | null;
+  };
+  readiness?: {
+    blocked?: boolean;
+    overdue?: boolean;
+    dependencyCount?: number;
+    riskLevel?: string;
+    missingFields?: string[];
+  };
+  evidence?: {
+    dependencies?: Array<{ id: string; type?: string; status?: string }>;
+    notes?: Array<{ id: string; content?: string; status?: string }>;
+    events?: Array<{ id: string; type?: string; source?: string }>;
+    projectResources?: Array<{ id: string; name?: string; type?: string }>;
+  };
 };
 
 export type OperationsPacket = {
-  summary?: Record<string, number>;
+  summary?: Record<string, unknown>;
   workItems?: OperationsWorkItem[];
-  blockedActions?: string[];
-  agentPacket?: { mode?: string; instructions?: string[] };
+  blockedActions?: Array<string | { action?: string; reason?: string }>;
+  agentPacket?: {
+    mode?: string;
+    instructions?: string[];
+    blockedActions?: Array<string | { action?: string; reason?: string }>;
+  };
 };
 
 export type AssetResource = {
@@ -57,7 +101,7 @@ export type AssetResource = {
 };
 
 export type AssetsPacket = {
-  summary?: Record<string, number>;
+  summary?: Record<string, unknown>;
   resources?: AssetResource[];
   blockedActions?: string[];
   agentPacket?: { mode?: string; instructions?: string[] };

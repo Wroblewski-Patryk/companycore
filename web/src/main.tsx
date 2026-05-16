@@ -11,6 +11,7 @@ import { AssetsRoute } from "./features/departments/assets-route";
 import { GeneralDashboard } from "./features/departments/general-dashboard";
 import { OperationsRoute } from "./features/departments/operations-route";
 import { PublicHomeRoute } from "./features/public/public-home";
+import { AccountSettingsRoute, WorkspaceSettingsRoute } from "./features/settings/settings-routes";
 import { LanguageProvider } from "./i18n/i18n";
 import "./styles.css";
 
@@ -64,6 +65,14 @@ function App() {
 
   if (pathname === "/areas" && currentAreaKey() === "08-zasoby") {
     return <PrivateRoute><AssetsRoute /></PrivateRoute>;
+  }
+
+  if (pathname === "/account/settings") {
+    return <PrivateRoute><AccountSettingsRoute /></PrivateRoute>;
+  }
+
+  if (pathname === "/workspace/settings") {
+    return <PrivateRoute><WorkspaceSettingsRoute /></PrivateRoute>;
   }
 
   if (route?.private) {

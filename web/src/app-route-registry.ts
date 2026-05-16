@@ -85,6 +85,24 @@ export const appRouteGroups: AppRouteGroup[] = [
         icon: "ph-folder-open",
         private: true,
         canonicalSource: "docs/planning/cc-08-002-assets-context-read-api-task-contract.md"
+      },
+      {
+        id: "account-settings",
+        href: "/account/settings",
+        label: "Account settings",
+        title: "Account settings",
+        icon: "ph-user",
+        private: true,
+        canonicalSource: "docs/architecture/autonomous-company-operating-system.md"
+      },
+      {
+        id: "workspace-settings",
+        href: "/workspace/settings",
+        label: "Workspace settings",
+        title: "Workspace settings",
+        icon: "ph-buildings",
+        private: true,
+        canonicalSource: "docs/architecture/autonomous-company-operating-system.md"
       }
     ]
   }
@@ -130,7 +148,8 @@ export function canonicalPostAuthPath(pathname?: string | null) {
     const params = new URLSearchParams(rawQuery);
     const area = params.get("area");
     if (area === "04-operacje") {
-      return canonicalOperationsPath;
+      const view = params.get("view");
+      return view === "tasks" ? "/areas?area=04-operacje&view=tasks" : canonicalOperationsPath;
     }
     if (area === "08-zasoby") {
       return canonicalAssetsPath;
@@ -149,6 +168,10 @@ export function canonicalPostAuthPath(pathname?: string | null) {
 
   if (route.id === "assets") {
     return canonicalAssetsPath;
+  }
+
+  if (route.id === "account-settings" || route.id === "workspace-settings") {
+    return route.href;
   }
 
   return canonicalGeneralDashboardPath;

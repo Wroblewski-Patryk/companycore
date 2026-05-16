@@ -57,7 +57,7 @@ export const coreAreas: CoreArea[] = [
     enabled: true,
     views: [
       { key: "overview", labelKey: "views.04.overview", href: canonicalOperationsPath, enabled: true },
-      { key: "tasks", labelKey: "views.04.tasks", enabled: false },
+      { key: "tasks", labelKey: "views.04.tasks", href: "/areas?area=04-operacje&view=tasks", enabled: true },
       { key: "pipelines", labelKey: "views.04.pipelines", enabled: false },
       { key: "workload", labelKey: "views.04.workload", enabled: false }
     ]

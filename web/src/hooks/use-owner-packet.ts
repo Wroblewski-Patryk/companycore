@@ -17,9 +17,12 @@ export function useOwnerPacket<T>(path: string, enabled: boolean, t: Translate):
     }
 
     setState({ status: "loading", data: null });
-    api<T>(path)
-      .then((data) => {
+    api<T | { data: T }>(path)
+      .then((response) => {
         if (active) {
+          const data = response && typeof response === "object" && "data" in response
+            ? (response as { data: T }).data
+            : response as T;
           setState({ status: "ready", data });
         }
       })

@@ -193,6 +193,24 @@
 
 ## Done
 
+- WEB-SHELL-OPS-001 Shell user menu, settings routes, and Operations tasks.
+  - Evidence:
+    `docs/planning/web-shell-user-settings-operations-tasks-task-contract.md`
+    records the active shell cleanup and Operations task-table slice. The
+    authenticated header no longer shows department buttons; it now exposes a
+    user dropdown with account/settings/sign-out actions. The sidebar keeps
+    canonical department ordering while hiding visible numeric prefixes.
+    Workspace settings is reachable next to the workspace selector, language
+    selection moved to the authenticated footer, and `/account/settings` plus
+    `/workspace/settings` are private React routes. The Operations Tasks view
+    now renders records from `/v1/operations/work-items` through the shared
+    table path.
+  - Validation: `npm run build:web`; `npm run build:server`;
+    `npm run validate`; Playwright fallback on temporary mocked API port
+    `3139` verified the Operations task table, user dropdown, sidebar label
+    cleanup, removed header department nav, footer attribution, and both
+    settings routes. No validation-owned browser or port processes remained.
+
 - UOS-000 Unified Organizational OS backend program queue alignment.
   - Evidence:
     `docs/planning/unified-org-backend-implementation-program.md` defines the

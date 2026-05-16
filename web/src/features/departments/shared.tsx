@@ -1,8 +1,10 @@
 import { CcNotice } from "../../components/cc-notice";
 import { useLanguage } from "../../i18n/i18n";
 
-export function SummaryGrid({ summary }: { summary?: Record<string, number> }) {
-  const entries = Object.entries(summary || {}).slice(0, 6);
+export function SummaryGrid({ summary }: { summary?: Record<string, unknown> }) {
+  const entries = Object.entries(summary || {})
+    .filter((entry): entry is [string, number] => typeof entry[1] === "number")
+    .slice(0, 6);
   if (entries.length === 0) {
     return null;
   }
@@ -19,7 +21,7 @@ export function SummaryGrid({ summary }: { summary?: Record<string, number> }) {
   );
 }
 
-export function BlockedActions({ actions }: { actions?: string[] }) {
+export function BlockedActions({ actions }: { actions?: Array<string | { action?: string; reason?: string }> }) {
   const { t } = useLanguage();
   if (!actions?.length) {
     return null;
@@ -28,9 +30,12 @@ export function BlockedActions({ actions }: { actions?: string[] }) {
   return (
     <section className="rounded-company border border-warning/35 bg-warning/10 p-4">
       <h2 className="text-sm font-black uppercase text-company-ink">{t("state.blockedActions")}</h2>
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
         {actions.map((action) => (
-          <span className="badge badge-warning badge-outline" key={action}>{action}</span>
+          <div className="rounded-company border border-warning/30 bg-base-100/70 p-3 text-sm" key={typeof action === "string" ? action : action.action}>
+            <strong className="block text-company-ink">{typeof action === "string" ? action : action.action}</strong>
+            {typeof action === "string" ? null : <span className="text-company-muted">{action.reason}</span>}
+          </div>
         ))}
       </div>
     </section>

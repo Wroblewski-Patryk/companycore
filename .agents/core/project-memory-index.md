@@ -184,6 +184,14 @@ continue from repository files alone:
   and separate expand arrows for active module view lists. Future department
   views should extend `web/src/features/departments/core-area-data.ts` plus the
   route registry through scoped task contracts.
+- `docs/planning/web-shell-user-settings-operations-tasks-task-contract.md`:
+  verified the next active web shell slice. The header now uses a user dropdown
+  instead of department buttons, language selection sits in the authenticated
+  footer with LuckySparrow attribution, workspace settings is reachable next to
+  the workspace selector, `/account/settings` and `/workspace/settings` are
+  private React routes, sidebar department labels hide visible numeric
+  prefixes while preserving canonical order, and `04 Operations -> Tasks`
+  renders real work-item records from `/v1/operations/work-items`.
 - `docs/architecture/companycore-business-module-map.md`: accepted
   model-level module map for scaling CompanyCore as the bridge for operating
   the company. It classifies future work as native core, provider-backed,

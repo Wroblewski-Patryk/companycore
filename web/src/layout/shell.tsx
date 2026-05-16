@@ -1,11 +1,17 @@
 import React, { useState } from "react";
 import { canonicalGeneralDashboardPath } from "../app-route-registry";
-import { clearOwnerToken } from "../api/auth-token";
+import { api } from "../api/client";
+import { clearOwnerToken, setOwnerToken } from "../api/auth-token";
 import { CcButton } from "../components/cc-button";
 import { LanguageSelector } from "../i18n/language-selector";
 import { useLanguage } from "../i18n/i18n";
-import { CoreAreaKey } from "../types";
+import { AuthMe, CoreAreaKey } from "../types";
 import { coreAreas } from "../features/departments/core-area-data";
+import { useOwnerPacket } from "../hooks/use-owner-packet";
+
+function displayDepartmentLabel(label: string) {
+  return label.replace(/^\d{2}\s+/, "");
+}
 
 function DepartmentSidebar({
   activeArea
@@ -28,7 +34,7 @@ function DepartmentSidebar({
         const enabledViews = area.views?.filter((view) => view.enabled !== false && view.href) || [];
         const hasExpandableViews = isEnabled && Boolean(area.views && area.views.length > 1);
         const isOpen = Boolean(openAreas[area.key]);
-        const label = t(area.labelKey);
+        const label = displayDepartmentLabel(t(area.labelKey));
 
         return (
           <div className="grid gap-1" key={area.key}>
@@ -122,6 +128,24 @@ export function Shell({
   activeArea?: CoreAreaKey;
 }) {
   const { t } = useLanguage();
+  const profile = useOwnerPacket<AuthMe>("/v1/auth/me", true, t);
+  const workspaces = profile.data?.workspaces || [];
+  const activeWorkspace = workspaces.find((workspace) => workspace.active) || workspaces[0];
+  const userLabel = activeWorkspace?.role === "owner" ? t("user.admin") : t("user.account");
+
+  async function selectWorkspace(workspaceId: string) {
+    if (!workspaceId || workspaceId === activeWorkspace?.id) {
+      return;
+    }
+
+    const response = await api<{ data?: { token?: string } }>(`/v1/workspaces/${workspaceId}/actions/select`, {
+      method: "POST"
+    });
+    if (response.data?.token) {
+      setOwnerToken(response.data.token);
+      window.location.assign(canonicalGeneralDashboardPath);
+    }
+  }
 
   return (
     <main className="min-h-screen bg-base-200 text-base-content" data-theme="companycore">
@@ -134,12 +158,26 @@ export function Shell({
               <small className="text-neutral-content/65">{t("app.operatingSystem")}</small>
             </span>
           </a>
-          <label className="mt-6 grid gap-2">
+          <div className="mt-6 grid gap-2">
             <span className="text-xs font-black uppercase tracking-wide text-neutral-content/55">{t("workspace.label")}</span>
-            <select className="select select-sm w-full border-neutral-content/15 bg-neutral-content/10 text-neutral-content" aria-label={t("workspace.label")}>
-              <option>{t("workspace.current")}</option>
-            </select>
-          </label>
+            <div className="grid grid-cols-[minmax(0,1fr)_2.25rem] gap-2">
+              <select
+                aria-label={t("workspace.label")}
+                className="select select-sm w-full border-neutral-content/15 bg-neutral-content/10 text-neutral-content"
+                onChange={(event) => void selectWorkspace(event.target.value)}
+                value={activeWorkspace?.id || ""}
+              >
+                {workspaces.length ? workspaces.map((workspace) => (
+                  <option key={workspace.id} value={workspace.id}>{workspace.name}</option>
+                )) : (
+                  <option value="">{t("workspace.current")}</option>
+                )}
+              </select>
+              <CcButton ariaLabel={t("workspace.settings")} className="px-0" href="/workspace/settings" iconLeft="ph-gear-six" size="sm" variant="ghost">
+                <span className="sr-only">{t("workspace.settings")}</span>
+              </CcButton>
+            </div>
+          </div>
           <DepartmentSidebar activeArea={activeArea} />
         </aside>
 
@@ -150,35 +188,39 @@ export function Shell({
                 <span className="grid h-9 w-9 place-items-center rounded-company bg-neutral text-neutral-content">CC</span>
                 <span>{t("app.name")}</span>
               </a>
-              <nav className="flex flex-wrap gap-2" aria-label={t("sidebar.departments")}>
-                {coreAreas.filter((area) => area.enabled !== false && area.href).map((area) => (
-                  <CcButton
-                    href={area.href || canonicalGeneralDashboardPath}
-                    key={area.key}
-                    size="sm"
-                    variant={activeArea === area.key ? "primary" : "ghost"}
-                  >
-                    {t(area.labelKey)}
-                  </CcButton>
-                ))}
-              </nav>
-              <div className="flex flex-wrap items-end gap-2">
-                <LanguageSelector compact />
-                <CcButton
-                  onClick={() => {
-                    clearOwnerToken();
-                    window.location.assign("/");
-                  }}
-                  size="sm"
-                  variant="outline"
-                >
-                  {t("nav.signOut")}
-                </CcButton>
+              <div className="ml-auto dropdown dropdown-end">
+                <button className="btn btn-ghost btn-circle" aria-label={t("user.menu")} type="button" tabIndex={0}>
+                  <i className="ph-bold ph-user-circle text-2xl" aria-hidden="true"></i>
+                </button>
+                <ul className="menu dropdown-content z-20 mt-3 w-64 rounded-company border border-base-300 bg-base-100 p-2 shadow-xl" tabIndex={0}>
+                  <li className="menu-title px-3 py-2">
+                    <span>{t("user.welcome", { name: userLabel })}</span>
+                  </li>
+                  <li><a href="/account/settings"><i className="ph-bold ph-user" aria-hidden="true"></i>{t("user.myAccount")}</a></li>
+                  <li><a href="/workspace/settings"><i className="ph-bold ph-buildings" aria-hidden="true"></i>{t("workspace.settings")}</a></li>
+                  <li><a href="/account/settings"><i className="ph-bold ph-gear-six" aria-hidden="true"></i>{t("user.settings")}</a></li>
+                  <li>
+                    <button
+                      onClick={() => {
+                        clearOwnerToken();
+                        window.location.assign("/");
+                      }}
+                      type="button"
+                    >
+                      <i className="ph-bold ph-sign-out" aria-hidden="true"></i>
+                      {t("nav.signOut")}
+                    </button>
+                  </li>
+                </ul>
               </div>
             </div>
           </header>
           <div className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-6 lg:px-8">
             {children}
+            <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-base-300 py-4 text-sm text-company-muted">
+              <span>{t("footer.copy")} {t("footer.madeWith")} <a className="font-bold text-primary" href="https://luckysparrow.ch" rel="noreferrer" target="_blank">LuckySparrow.ch</a></span>
+              <LanguageSelector compact />
+            </footer>
           </div>
         </section>
       </div>

@@ -20,6 +20,13 @@ Last updated: 2026-05-16
   spreads. Sources:
   `docs/architecture/autonomous-company-operating-system.md` and
   `docs/planning/companycore-00-04-08-operating-loop-plan.md`.
+  WEB-SHELL-OPS-001 has now tightened the active web foundation: the
+  authenticated header uses a user dropdown instead of department buttons,
+  language selection lives in the footer, workspace settings is reachable next
+  to the workspace selector, account/workspace settings routes exist as simple
+  private views, sidebar labels hide visible department numbers while
+  preserving canonical ordering, and `04 Operations -> Tasks` renders real
+  `/v1/operations/work-items` records including ClickUp-sourced tasks.
   As of 2026-05-16, the architectural direction is expanded in
   `docs/architecture/unified-organizational-operating-system.md`: CompanyCore
   is the unified organizational world state and operational source of truth,

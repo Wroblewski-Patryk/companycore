@@ -18,6 +18,11 @@ routes. WEB-CORE-001 then superseded the broader historical route set: active
 web now intentionally contains only public home, auth, `00 General`, `04
 Operations`, and `08 Assets`; old private web paths are no longer React app
 routes while backend APIs remain available for future rebuilds.
+WEB-SHELL-OPS-001 extends that verified base locally: `npm run validate`
+passed and Playwright fallback proved the user dropdown, workspace settings
+navigation, account/workspace settings routes, footer language selector,
+sidebar label cleanup, and Operations task table fed by the existing
+`/v1/operations/work-items` packet.
 
 Area detail note: V1AREA-002 is VERIFIED with high confidence for local scope.
 `/areas?area=01-strategia&view=overview` renders the canonical selected-area
