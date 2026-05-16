@@ -70,6 +70,13 @@ export type OperationsWorkItem = {
     riskLevel?: string;
     missingFields?: string[];
   };
+  responsibility?: {
+    status?: string;
+    evidence?: Array<{ type?: string; status?: string; source?: string }>;
+  };
+  operationalContext?: {
+    pipelineRuns?: Array<{ id: string; status?: string; source?: string }>;
+  };
   evidence?: {
     dependencies?: Array<{ id: string; type?: string; status?: string }>;
     notes?: Array<{ id: string; content?: string; status?: string }>;
@@ -90,7 +97,7 @@ export type OperationsTaskList = {
 };
 
 export type OperationsStatusColumn = {
-  key: "todo" | "in_progress" | "blocked" | "done" | "archived";
+  key: string;
   label: string;
 };
 

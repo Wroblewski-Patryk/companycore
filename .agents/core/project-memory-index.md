@@ -206,6 +206,16 @@ continue from repository files alone:
   without exposing raw database table editing as the user or MCP mental model.
   `npm run validate`, API regression on PostgreSQL `127.0.0.1:55511`, and
   desktop/mobile Playwright fallback proof passed.
+- `docs/planning/operations-management-board-ux-polish-task-contract.md`:
+  verified the Operations board usability polish after owner review. The
+  authenticated shell content is full width, the sidebar is sticky and
+  independently scrollable, active sidebar subviews track the query-string
+  view, `04 Operations -> Tasks` starts with `All`, status lanes have stable
+  horizontal board scrolling, task cards show visual priority/due/readiness
+  signals, task modal context is richer, technical blocked-action diagnostics
+  are no longer shown as owner board panels, and `04 Operations -> Calendar`
+  is available. `npm run build:web` and Playwright fallback desktop/mobile
+  render proof passed.
 - `docs/architecture/companycore-business-module-map.md`: accepted
   model-level module map for scaling CompanyCore as the bridge for operating
   the company. It classifies future work as native core, provider-backed,

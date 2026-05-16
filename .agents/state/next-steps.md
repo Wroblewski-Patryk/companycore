@@ -47,6 +47,11 @@ Last updated: 2026-05-16
       uses the Operations work-item packet as a list board with task-list
       selection, canonical CompanyCore status columns, task cards, and a modal
       edit form backed by `PATCH /v1/operations/work-items/:id`.
+    - `OPS-BOARD-UX-001` is complete and verified: the authenticated shell is
+      full width for management views, the sidebar scrolls independently, the
+      Operations board starts with `All`, uses stable status lanes, shows
+      visual priority/due/readiness signals, hides technical blocked-action
+      diagnostics from the owner board, and adds the first calendar view.
    - CompanyCore remains the company operating system; AI agents remain
      external API/MCP clients.
    - Keep writes behind explicit command contracts, audit/events, and API

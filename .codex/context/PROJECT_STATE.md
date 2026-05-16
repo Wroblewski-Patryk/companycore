@@ -44,6 +44,18 @@ Last updated: 2026-05-16
   `849b74c06f8f04364b2a08662a66e45c45ffafcf`; public web/API health reports
   the expected commit and `/areas?area=04-operacje&view=tasks` serves
   `/react/assets/index-SR5I21Wt.js`.
+  OPS-BOARD-UX-001 then polished the Operations management center for daily
+  task use. The authenticated shell content area is full width, the sidebar is
+  sticky/full-height with independent scrolling, active sidebar subviews track
+  the current view, the Operations board starts with `All`, status lanes use
+  stable horizontal board scrolling, task cards show visual priority and
+  due/readiness signals, the task modal separates supported editable fields
+  from read-only operational context, and the technical `Blocked write actions`
+  warning section is no longer shown as an owner board panel. `04 Operations`
+  now also exposes a `Calendar` subview over overdue, today, upcoming, monthly,
+  and unscheduled tasks. `npm run build:web` passed; Playwright fallback on
+  temporary mocked API port `3248` verified desktop board, modal, calendar, and
+  mobile board rendering with no console/page errors.
   As of 2026-05-16, the architectural direction is expanded in
   `docs/architecture/unified-organizational-operating-system.md`: CompanyCore
   is the unified organizational world state and operational source of truth,

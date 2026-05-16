@@ -43,7 +43,7 @@
 ## In Progress
 
 - No active implementation task is currently in progress after the
-  OPS-BOARD-001 Operations board checkpoint.
+  OPS-BOARD-UX-001 Operations board UX polish checkpoint.
 
 ## Blocked
 
@@ -192,6 +192,25 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- OPS-BOARD-UX-001 Operations management board UX polish.
+  - Evidence:
+    `docs/planning/operations-management-board-ux-polish-task-contract.md`
+    records the full-width layout and task-board polish slice. The
+    authenticated content wrapper now uses available width instead of
+    `max-w-7xl`, the sidebar is sticky/full-height and scrollable, Operations
+    sidebar subviews highlight the actual active view, `04 Operations` exposes
+    a `Calendar` subview, and the task board starts with a virtual `All` list.
+    The board now uses stable horizontally scrollable status lanes, visual
+    priority badges, due/readiness chips, richer task modal context, and no
+    visible technical `Blocked write actions` section in the owner work
+    surface.
+  - Validation: `npm run build:web`; Playwright fallback on temporary mocked
+    API port `3248` verified desktop board `All`/`Review`, absence of the
+    technical blocked-actions panel, modal opening, desktop calendar rendering,
+    mobile board rendering, and no console/page errors. Browser plugin was
+    available but had no active Codex browser pane. Temporary mock server
+    processes were stopped.
 
 - OPS-BOARD-001 Operations list board and work item editing.
   - Evidence:

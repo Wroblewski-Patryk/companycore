@@ -45,7 +45,12 @@ payloads, then passed Browser, Playwright, build, validation, responsive, and
 accessibility smoke gates. The sidebar foundation now shows the CompanyCore
 logo/name, company/workspace selector, all `00`-`12` departments, disabled
 planned departments, and expandable view lists for active `00/04/08` systems.
-Department work can now continue only through a scoped department-system
+OPS-BOARD-UX-001 then polished the active `04 Operations` management surface:
+the shell content is full width, sidebar scrolling is stable, the task board
+starts with `All`, status lanes keep readable widths, task cards show
+priority/due/readiness visually, technical blocked-action diagnostics are no
+longer board content, and a first calendar view is available. Department work
+can now continue only through a scoped department-system
 contract, with `05 Relationships` still the likely next department unless
 production deployment smoke is selected first.
 

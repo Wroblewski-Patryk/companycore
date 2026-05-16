@@ -37,14 +37,21 @@ of rediscovering them.
 ### 2026-05-16 - Department Work Board Pattern
 - Type: reusable_pattern
 - Context: OPS-BOARD-001 converted `04 Operations -> Tasks` from a flat table
-  into a task-list board over the existing Operations work-item packet.
+  into a task-list board over the existing Operations work-item packet. The
+  follow-up Operations UX polish refined the pattern after owner feedback about
+  cramped columns, hidden sidebar area, and noisy technical warning panels.
 - Decision: For department execution views, prefer a two-level work board:
   left-side list/source selection, then canonical status columns for the
-  selected list. Each task is a compact card/row that opens a modal form for
-  the domain object. The UI must use CompanyCore domain language such as work
-  item, resource, client, or relationship instead of exposing raw database
-  table rows. Avoid visible counters unless they directly support the current
-  decision.
+  selected list, with a virtual `All` list first when the owner needs the full
+  work portfolio. Columns should have stable minimum widths and horizontal
+  board scrolling instead of squeezing into the viewport. Each task is a compact
+  card/row with visual priority, due-date, source, and readiness signals, and
+  opens a modal form for the domain object. Keep technical blocked-action,
+  adapter, or MCP safety diagnostics out of the primary work surface; expose
+  them as API/MCP contract evidence or contextual readiness only. The UI must
+  use CompanyCore domain language such as work item, resource, client, or
+  relationship instead of exposing raw database table rows. Avoid visible
+  counters unless they directly support the current decision.
 - Reuse when: Building future Operations list detail, Product delivery boards,
   Relationship follow-up boards, Technology deployment boards, or any
   department screen that groups provider-imported work by list/stage/status.
@@ -53,6 +60,7 @@ of rediscovering them.
   action.
 - Evidence:
   `docs/planning/operations-management-board-implementation-task-contract.md`,
+  `docs/planning/operations-management-board-ux-polish-task-contract.md`,
   `web/src/features/departments/operations-route.tsx`, and API regression plus
   Playwright proof recorded in `.agents/state/system-health.md`.
 

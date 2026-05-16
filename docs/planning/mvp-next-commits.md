@@ -13,9 +13,12 @@ synchronized with `.codex/context/TASK_BOARD.md`.
       08 Assets` checkpoint is complete through shared primitives, verified
       backend packets, selected-area UI adoption, CC-AUDIT-001 post-login
       dashboard proof, WEB-CORE-001 active web cleanup, and WEB-QA-001
-      language/error/form foundation. CompanyCore remains the operating
-      system; AI agents remain external API/MCP clients. Do not restore old
-      private workbench screens without a scoped task contract.
+      language/error/form foundation. `04 Operations` also has the verified
+      list-board UX polish with full-width layout, `All`, stable lanes,
+      priority/readiness cards, task modal context, and calendar view.
+      CompanyCore remains the operating system; AI agents remain external
+      API/MCP clients. Do not restore old private workbench screens without a
+      scoped task contract.
 
 ### NEXT
 

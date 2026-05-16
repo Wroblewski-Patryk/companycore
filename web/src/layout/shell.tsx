@@ -13,12 +13,20 @@ function displayDepartmentLabel(label: string) {
   return label.replace(/^\d{2}\s+/, "");
 }
 
+function currentAreaView() {
+  if (typeof window === "undefined") {
+    return "overview";
+  }
+  return new URLSearchParams(window.location.search).get("view") || "overview";
+}
+
 function DepartmentSidebar({
   activeArea
 }: {
   activeArea?: CoreAreaKey;
 }) {
   const { t } = useLanguage();
+  const activeView = currentAreaView();
   const [openAreas, setOpenAreas] = useState<Partial<Record<CoreAreaKey, boolean>>>({
     "00-ogolny": activeArea === "00-ogolny",
     "04-operacje": activeArea === "04-operacje",
@@ -92,7 +100,7 @@ function DepartmentSidebar({
               <div className="ml-8 grid gap-1 border-l border-neutral-content/10 pl-2">
                 {area.views?.map((view) => {
                   const viewEnabled = view.enabled !== false && Boolean(view.href);
-                  const viewActive = isActive && enabledViews.some((enabledView) => enabledView.key === view.key);
+                  const viewActive = isActive && enabledViews.some((enabledView) => enabledView.key === view.key) && view.key === activeView;
                   return viewEnabled ? (
                     <a
                       className={`rounded-company px-3 py-2 text-xs font-bold no-underline ${viewActive ? "bg-white/15 text-neutral-content" : "text-neutral-content/65 hover:bg-white/10 hover:text-neutral-content"}`}
@@ -150,7 +158,7 @@ export function Shell({
   return (
     <main className="min-h-screen bg-base-200 text-base-content" data-theme="companycore">
       <div className="grid min-h-screen lg:grid-cols-[17rem_minmax(0,1fr)]">
-        <aside className="hidden max-h-screen overflow-y-auto border-r border-base-300 bg-neutral p-4 text-neutral-content lg:block">
+        <aside className="sticky top-0 hidden h-screen overflow-y-auto border-r border-base-300 bg-neutral p-4 text-neutral-content lg:block">
           <a className="flex items-center gap-3 no-underline text-neutral-content" href={canonicalGeneralDashboardPath}>
             <span className="grid h-10 w-10 place-items-center rounded-company bg-primary font-black">CC</span>
             <span>
@@ -215,7 +223,7 @@ export function Shell({
               </div>
             </div>
           </header>
-          <div className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-6 lg:px-8">
+          <div className="grid w-full max-w-none gap-6 px-4 py-6 lg:px-8">
             {children}
             <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-base-300 py-4 text-sm text-company-muted">
               <span>{t("footer.copy")} {t("footer.madeWith")} <a className="font-bold text-primary" href="https://luckysparrow.ch" rel="noreferrer" target="_blank">LuckySparrow.ch</a></span>
