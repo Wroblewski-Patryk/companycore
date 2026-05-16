@@ -621,6 +621,32 @@ Read guarantees:
 - agents may review or propose follow-up work, but may not apply discounts,
   send invoices, mark payments, or quote final terms from this endpoint
 
+## Finance Context
+
+`GET /v1/finance/context` is the protected read-only Finance and Billing
+packet for candidate pricing models, hourly-value assumptions, work valuation,
+commercial exceptions, invoice-readiness blockers, payment context, risks,
+source conflicts, and Paperclip-safe owner-decision prompts.
+
+Supported query parameters:
+
+- `clientId`
+- `dealId`
+- `market`
+- `status`
+- `includeArchived`
+- `limit`
+
+Read guarantees:
+
+- no pricing policy, discount, invoice, payment, deal, task, approval, note, or
+  agent-event source is mutated on read
+- conflicting price models remain `needs_owner_decision`
+- the `150 CHF/hour` assumption remains a candidate until confirmed
+- `100%` discounts are included from the commercial exception read model
+- Finance and Paperclip get explicit blocked actions for active price policy,
+  final quote, discount application, invoice sending, and payment status writes
+
 Required capability:
 
 ```text

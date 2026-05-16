@@ -14,6 +14,8 @@ const querySchema = z.object({
   limit: z.coerce.number().int().min(1).max(200).default(100)
 }).strict();
 
+export type CommercialExceptionQuery = Partial<z.input<typeof querySchema>>;
+
 type RiskLevel = "low" | "medium" | "high" | "critical";
 type ExceptionStatus = "proposed" | "needs_owner_decision" | "approved" | "rejected" | "needs_source" | "archived";
 type SourceFamily = "approval" | "decision" | "deal" | "task" | "note" | "interaction" | "agent_event" | "risk";
@@ -76,9 +78,8 @@ const commercialTerms = [
 
 export const commercialExceptionsRouter = Router();
 
-commercialExceptionsRouter.get("/", asyncHandler(async (req, res) => {
-  const query = querySchema.parse(req.query);
-  const workspaceId = req.auth!.workspaceId;
+export async function buildCommercialExceptionsContext(workspaceId: string, queryInput: CommercialExceptionQuery = {}) {
+  const query = querySchema.parse(queryInput);
   const perSourceLimit = Math.max(20, Math.min(query.limit, 75));
 
   const [
@@ -319,21 +320,25 @@ commercialExceptionsRouter.get("/", asyncHandler(async (req, res) => {
     .sort(compareExceptions)
     .slice(0, query.limit);
 
-  res.json({
-    data: {
-      workspaceId,
-      query,
-      summary: summarize(exceptions),
-      exceptions,
-      sourceConflicts: sourceConflicts(exceptions),
-      agentPacket: {
-        mode: "read_only",
-        safeActions: ["review_exception", "propose_missing_source_task", "route_to_sales_or_finance_review"],
-        blockedActions: blockedActions()
-      },
+  return {
+    workspaceId,
+    query,
+    summary: summarize(exceptions),
+    exceptions,
+    sourceConflicts: sourceConflicts(exceptions),
+    agentPacket: {
+      mode: "read_only",
+      safeActions: ["review_exception", "propose_missing_source_task", "route_to_sales_or_finance_review"],
       blockedActions: blockedActions()
-    }
-  });
+    },
+    blockedActions: blockedActions()
+  };
+}
+
+commercialExceptionsRouter.get("/", asyncHandler(async (req, res) => {
+  const workspaceId = req.auth!.workspaceId;
+  const data = await buildCommercialExceptionsContext(workspaceId, req.query);
+  res.json({ data });
 }));
 
 function commercialException(input: {

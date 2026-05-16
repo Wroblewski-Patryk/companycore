@@ -15,6 +15,7 @@ export const capabilities = [
   "intake:read",
   "intake:write",
   "commercial-exceptions:read",
+  "finance:read",
   "relationships:read",
   "operating-graph:read",
   "operating-model:read",
@@ -121,6 +122,9 @@ export const adapterManifest = {
     ],
     commercialExceptions: [
       { method: "GET", path: "/v1/commercial-exceptions", capability: "commercial-exceptions:read" }
+    ],
+    finance: [
+      { method: "GET", path: "/v1/finance/context", capability: "finance:read" }
     ],
     relationships: [
       { method: "GET", path: "/v1/relationships/graph", capability: "relationships:read" }

@@ -16,6 +16,7 @@ import { connectionRouter } from "./modules/connection/connection.routes";
 import { dealsRouter } from "./modules/deals/deals.routes";
 import { decisionsRouter } from "./modules/decisions/decisions.routes";
 import { eventsRouter } from "./modules/events/events.routes";
+import { financeRouter } from "./modules/finance/finance.routes";
 import { goalsRouter } from "./modules/goals/goals.routes";
 import { googleDriveRouter } from "./modules/google-drive/google-drive.routes";
 import { intakeRouter } from "./modules/intake/intake.routes";
@@ -63,6 +64,7 @@ function mountProtectedRoutes(router: Router) {
   router.use("/api-keys", apiKeysRouter);
   router.use("/integration-settings", integrationSettingsRouter);
   router.use("/events", eventsRouter);
+  router.use("/finance", financeRouter);
 }
 
 function isApiHost(host = "") {

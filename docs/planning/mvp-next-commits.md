@@ -7,15 +7,13 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] DMS-07-002 Price-list and hourly-value read model:
-      implement protected read-only finance context from the Finance system
-      spec before Finance web, invoice readiness, or autonomous pricing work.
-### NEXT
-
 - [ ] DMS-00-007 Paperclip background output review proof:
       prove a controlled Paperclip-like item appears in `00 Main`, receives a
       route proposal, remains source-safe, and can be handed off to department
       review without bypassing CompanyCore.
+
+### NEXT
+
 - [ ] DMS-04-001 Operations real-data proof:
       run database-backed or production proof for the existing
       `/areas?area=04-operacje&view=overview` Operations Management System.
@@ -107,6 +105,16 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       `127.0.0.1:55481`.
       Task contract:
       `docs/planning/dms-03-commercial-exception-read-api-task-contract.md`.
+- [x] DMS-07-002 Finance context read API:
+      implemented protected read-only `GET /v1/finance/context`,
+      `finance:read`, MCP exposure, Paperclip-safe profile access, API docs,
+      and regression coverage for candidate pricing conflicts, `150 CHF/hour`,
+      `100%` commercial exception inclusion, invoice-readiness blockers,
+      workspace isolation, no mutation on read, and blocked finance actions.
+      `npm run build:server`, `git diff --check`, and `npm run test:api`
+      passed against portable PostgreSQL on `127.0.0.1:55482`.
+      Task contract:
+      `docs/planning/dms-07-finance-context-read-api-task-contract.md`.
 - [x] DMS-07-001 Finance system spec:
       defined the Finance Management System board, first safe web shape,
       protected read-only `GET /v1/finance/context` target, pricing model and

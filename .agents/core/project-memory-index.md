@@ -209,6 +209,15 @@ continue from repository files alone:
   actions. Future Finance runtime should start with DMS-07-002 read-only
   pricing/hourly-value context or DMS-03-005 commercial exception read model;
   do not add invoice/payment or discount writes before their command contracts.
+- `docs/planning/dms-07-finance-context-read-api-task-contract.md`: Finance
+  context runtime handoff. As of 2026-05-16, DMS-07-002 implements protected
+  read-only `GET /v1/finance/context`, exposes `finance:read` through
+  capabilities, MCP, and agent key profiles, and verifies candidate pricing
+  conflicts, `150 CHF/hour`, commercial exception inclusion, invoice blockers,
+  workspace isolation, scoped-key denial, no-mutation reads, and blocked
+  finance actions through `npm run test:api` on portable PostgreSQL
+  `127.0.0.1:55482`. Future Finance web must consume this read model first
+  and keep write actions blocked until separate command contracts exist.
 - `docs/planning/dms-03-commercial-exception-read-model-spec.md`: active
   Sales/Finance commercial exception handoff. As of 2026-05-16, DMS-03-005
   defines protected read-only `GET /v1/commercial-exceptions`, exception packet

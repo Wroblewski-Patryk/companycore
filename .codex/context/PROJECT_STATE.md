@@ -120,6 +120,18 @@ Last updated: 2026-05-16
   terms. `npm run build:server`, `git diff --check`, and `npm run test:api`
   passed against portable PostgreSQL on `127.0.0.1:55481`; the validation
   database was stopped after the run.
+  As of 2026-05-16, DMS-07-002 implemented the protected read-only Finance
+  context API. `GET /v1/finance/context` exposes source-backed candidate
+  pricing models (`499 CHF/month`, `1500 CHF setup + 150 CHF/month`,
+  pure `150 CHF/month`, and archived PL pricing), the `150 CHF/hour`
+  hourly-value assumption, work valuation context from deals, commercial
+  exceptions from DMS-03-005A, invoice-readiness blockers, payment source
+  context, finance risks, source conflicts, and a Paperclip-safe read-only
+  agent packet. `finance:read` is available through the adapter and MCP
+  manifests and included in MCP profiles. `npm run build:server`,
+  `git diff --check`, and `npm run test:api` passed against portable
+  PostgreSQL on `127.0.0.1:55482`; the validation database was stopped after
+  the run.
 
 ## Product Decisions (Confirmed)
 - 2026-05-07: CRM and pipelines are separate domain concepts. Pipelines are a

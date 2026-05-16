@@ -982,6 +982,105 @@ test("CompanyCore v1 protected API flow", async () => {
     && tool.requiresApproval === false
   )));
 
+  const unauthenticatedFinanceContext = await request("/v1/finance/context");
+  assert.equal(unauthenticatedFinanceContext.status, 401);
+  const financeContext = await request("/v1/finance/context?market=CH&limit=50", { headers: authA });
+  assert.equal(financeContext.status, 200);
+  const financeContextBody = financeContext.body as {
+    data: {
+      summary: {
+        candidatePricingModels: number;
+        activePricingModels: number;
+        needsOwnerDecision: number;
+        openCommercialExceptions: number;
+        invoiceReadinessBlocked: number;
+      };
+      pricingModels: Array<{
+        id: string;
+        name: string;
+        market: string;
+        currency: string;
+        recurringFee: number | null;
+        setupFee: number | null;
+        status: string;
+        ownerDecisionNeeded: boolean;
+        riskFlags: string[];
+      }>;
+      hourlyValueAssumptions: Array<{ valuePerHour: number; status: string; riskFlags: string[] }>;
+      commercialExceptions: Array<{ sourceId: string; discountPercent: number | null; finalValue: number | null }>;
+      invoiceReadiness: Array<{ readinessStatus: string; blockedActions: Array<{ action: string }> }>;
+      sourceConflicts: Array<{ type: string; status: string }>;
+      agentPacket: { mode: string; blockedActions: Array<{ action: string }> };
+    };
+  };
+  assert.ok(financeContextBody.data.summary.candidatePricingModels >= 1);
+  assert.equal(financeContextBody.data.summary.activePricingModels, 0);
+  assert.ok(financeContextBody.data.summary.needsOwnerDecision >= 2);
+  assert.ok(financeContextBody.data.summary.openCommercialExceptions >= 1);
+  assert.ok(financeContextBody.data.summary.invoiceReadinessBlocked >= 1);
+  assert.ok(financeContextBody.data.pricingModels.some((model) => (
+    model.id === "pricing:src-money-001:start-499-chf"
+    && model.currency === "CHF"
+    && model.recurringFee === 499
+    && model.status === "needs_owner_decision"
+  )));
+  assert.ok(financeContextBody.data.pricingModels.some((model) => (
+    model.id === "pricing:src-money-002:hybrid-1500-150-chf"
+    && model.setupFee === 1500
+    && model.recurringFee === 150
+  )));
+  assert.ok(financeContextBody.data.hourlyValueAssumptions.some((assumption) => (
+    assumption.valuePerHour === 150
+    && assumption.status === "needs_owner_decision"
+    && assumption.riskFlags.includes("people_agents_capacity_missing")
+  )));
+  assert.ok(financeContextBody.data.commercialExceptions.some((item) => (
+    item.sourceId === commercialNote.id
+    && item.discountPercent === 100
+    && item.finalValue === 0
+  )));
+  assert.ok(financeContextBody.data.invoiceReadiness.some((item) => (
+    item.readinessStatus === "blocked"
+    && item.blockedActions.some((action) => action.action === "send_invoice")
+  )));
+  assert.ok(financeContextBody.data.sourceConflicts.some((conflict) => (
+    conflict.type === "pricing_policy_conflict"
+    && conflict.status === "needs_owner_decision"
+  )));
+  assert.equal(financeContextBody.data.agentPacket.mode, "read_only");
+  assert.ok(financeContextBody.data.agentPacket.blockedActions.some((action) => action.action === "set_active_price_policy"));
+
+  const financeCountsAfter = {
+    approvals: await prisma.approval.count({ where: { workspaceId: ownerA.workspace.id } }),
+    notes: await prisma.note.count({ where: { workspaceId: ownerA.workspace.id } }),
+    deals: await prisma.deal.count({ where: { workspaceId: ownerA.workspace.id } }),
+    tasks: await prisma.task.count({ where: { workspaceId: ownerA.workspace.id } }),
+    agentEvents: await prisma.agentEventOutbox.count({ where: { workspaceId: ownerA.workspace.id } })
+  };
+  assert.deepEqual(financeCountsAfter, {
+    ...commercialCountsAfter,
+    deals: 1
+  });
+  const foreignFinanceContext = await request("/v1/finance/context?limit=50", { headers: authB });
+  assert.equal(foreignFinanceContext.status, 200);
+  const foreignFinanceContextBody = foreignFinanceContext.body as {
+    data: { commercialExceptions: Array<{ sourceId: string }> };
+  };
+  assert.ok(!foreignFinanceContextBody.data.commercialExceptions.some((item) => item.sourceId === commercialNote.id));
+
+  const financeMcpManifest = await request("/v1/mcp/manifest", { headers: authA });
+  assert.equal(financeMcpManifest.status, 200);
+  const financeMcpManifestBody = financeMcpManifest.body as {
+    data: { tools: Array<{ name: string; path: string; capability: string; riskLevel: string; requiresApproval: boolean }> };
+  };
+  assert.ok(financeMcpManifestBody.data.tools.some((tool) => (
+    tool.name === "companycore_get_finance_context"
+    && tool.path === "/v1/finance/context"
+    && tool.capability === "finance:read"
+    && tool.riskLevel === "read"
+    && tool.requiresApproval === false
+  )));
+
   await prisma.agentEventOutbox.delete({ where: { id: commercialAgentEvent.id } });
   await prisma.task.delete({ where: { id: missingSourceTask.id } });
   await prisma.approval.delete({ where: { id: commercialApproval.id } });
@@ -3259,6 +3358,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(companyOsReaderProfile.scopes.includes("mcp:read"));
   assert.ok(companyOsReaderProfile.scopes.includes("company-os:read"));
   assert.ok(companyOsReaderProfile.scopes.includes("commercial-exceptions:read"));
+  assert.ok(companyOsReaderProfile.scopes.includes("finance:read"));
   assert.ok(companyOsReaderProfile.scopes.includes("relationships:read"));
   assert.ok(!companyOsReaderProfile.scopes.includes("company-os:definition:write"));
   assert.ok(!companyOsReaderProfile.scopes.includes("company-os:workflow-definition:write"));
@@ -3286,6 +3386,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(createdProfileKeyBody.data.scopes.includes("mcp:read"));
   assert.ok(createdProfileKeyBody.data.scopes.includes("company-os:read"));
   assert.ok(createdProfileKeyBody.data.scopes.includes("commercial-exceptions:read"));
+  assert.ok(createdProfileKeyBody.data.scopes.includes("finance:read"));
   assert.ok(createdProfileKeyBody.data.scopes.includes("relationships:read"));
   assert.ok(!createdProfileKeyBody.data.scopes.includes("company-os:definition:write"));
   assert.ok(!createdProfileKeyBody.data.scopes.includes("company-os:workflow-definition:write"));
@@ -3306,6 +3407,10 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(profileMcpManifestBody.data.tools.some((tool) => (
     tool.path === "/v1/commercial-exceptions"
     && tool.capability === "commercial-exceptions:read"
+  )));
+  assert.ok(profileMcpManifestBody.data.tools.some((tool) => (
+    tool.path === "/v1/finance/context"
+    && tool.capability === "finance:read"
   )));
   assert.ok(!profileMcpManifestBody.data.tools.some((tool) => tool.capability === "company-os:definition:write"));
   assert.ok(!profileMcpManifestBody.data.tools.some((tool) => tool.capability === "company-os:workflow-definition:write"));
@@ -3468,6 +3573,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(!scopedConnectionBody.data.capabilities.includes("company-os:workflow-definition:write"));
   assert.ok(!scopedConnectionBody.data.capabilities.includes("company-os:workflow-definition:activate"));
   assert.ok(!scopedConnectionBody.data.capabilities.includes("commercial-exceptions:read"));
+  assert.ok(!scopedConnectionBody.data.capabilities.includes("finance:read"));
   assert.ok(!scopedConnectionBody.data.capabilities.includes("notes:write"));
   assert.ok(scopedConnectionBody.data.mcpManifest.tools.some((tool) => (
     tool.path === "/v1/company-os"
@@ -3479,6 +3585,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(!scopedConnectionBody.data.mcpManifest.tools.some((tool) => tool.capability === "company-os:workflow-definition:write"));
   assert.ok(!scopedConnectionBody.data.mcpManifest.tools.some((tool) => tool.capability === "company-os:workflow-definition:activate"));
   assert.ok(!scopedConnectionBody.data.mcpManifest.tools.some((tool) => tool.capability === "commercial-exceptions:read"));
+  assert.ok(!scopedConnectionBody.data.mcpManifest.tools.some((tool) => tool.capability === "finance:read"));
 
   const scopedMcpManifest = await request("/v1/mcp/manifest", {
     headers: scopedAuth
@@ -3499,12 +3606,18 @@ test("CompanyCore v1 protected API flow", async () => {
     && tool.requiresApproval === false
   )));
   assert.ok(!scopedMcpManifestBody.data.tools.some((tool) => tool.capability === "commercial-exceptions:read"));
+  assert.ok(!scopedMcpManifestBody.data.tools.some((tool) => tool.capability === "finance:read"));
 
   const deniedScopedCommercialExceptions = await request("/v1/commercial-exceptions", {
     headers: scopedAuth
   });
   assert.equal(deniedScopedCommercialExceptions.status, 403);
   assert.equal((deniedScopedCommercialExceptions.body as { error: string }).error, "forbidden");
+  const deniedScopedFinanceContext = await request("/v1/finance/context", {
+    headers: scopedAuth
+  });
+  assert.equal(deniedScopedFinanceContext.status, 403);
+  assert.equal((deniedScopedFinanceContext.body as { error: string }).error, "forbidden");
 
   const scopedReadCompanyOs = await request("/v1/company-os/approvals", {
     headers: scopedAuth

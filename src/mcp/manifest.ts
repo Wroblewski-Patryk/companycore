@@ -121,6 +121,10 @@ function routeDescription(route: ManifestRoute) {
     return "Read source-backed discounts, pro bono work, commercial exceptions, invoice-readiness blockers, and owner-decision requirements without applying discounts, sending invoices, marking payments, or quoting final terms.";
   }
 
+  if (route.capability === "finance:read") {
+    return "Read Finance and Billing context for candidate pricing models, hourly-value assumptions, work valuations, commercial exceptions, invoice-readiness blockers, payment context, risks, and owner decisions without mutating price policy, discounts, invoices, payments, or final terms.";
+  }
+
   if (route.capability === "relationships:read") {
     return "Read the workspace relationship graph with direct, inferred, provider-derived, review, and unsupported relationship context.";
   }

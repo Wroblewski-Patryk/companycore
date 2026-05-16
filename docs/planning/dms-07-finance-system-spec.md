@@ -2,6 +2,11 @@
 
 Last updated: 2026-05-16
 
+Runtime update: DMS-07-002 now implements the protected read-only
+`GET /v1/finance/context` endpoint described in this spec. The route remains
+read-only and blocks active pricing, quote, discount, invoice, and payment
+writes.
+
 ## Purpose
 
 This spec defines the first safe V1 target for the `07 Finance And Billing

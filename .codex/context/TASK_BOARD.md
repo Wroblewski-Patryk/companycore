@@ -2,15 +2,6 @@
 
 ## Ready
 
-- DMS-07-002 Price-list and hourly-value read model.
-  - Stage: planning
-  - Owner: Backend Builder + Product Docs + Security
-  - Priority: P1
-  - Source: `docs/planning/dms-07-finance-system-spec.md`
-  - Goal: implement protected read-only Finance context for pricing models,
-    hourly-value assumptions, work valuation, source conflicts, and
-    invoice-readiness blockers before Finance web, invoice/payment, or
-    autonomous pricing behavior.
 - DMS-00-007 Paperclip background output review proof.
   - Stage: planning
   - Owner: AI Integration + QA/Test + Frontend Builder
@@ -138,6 +129,21 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- DMS-07-002 Finance Context Read API.
+  - Evidence:
+    `src/modules/finance/finance.routes.ts` implements protected read-only
+    `GET /v1/finance/context`, reusing commercial exception context and
+    exposing candidate pricing models, hourly-value assumptions, work
+    valuations, invoice-readiness blockers, payment source context, finance
+    risks, source conflicts, agent packet, and blocked actions.
+  - Validation: `npm run build:server`, `git diff --check`, and
+    `npm run test:api` passed against portable PostgreSQL on
+    `127.0.0.1:55482`. The API test covers auth, scoped-key denial, MCP
+    exposure, candidate pricing conflicts, `150 CHF/hour`, `100%` exception
+    inclusion, invoice blockers, workspace isolation, and no mutation on read.
+  - Task contract:
+    `docs/planning/dms-07-finance-context-read-api-task-contract.md`.
 
 - DMS-03-005A Commercial Exception Read API.
   - Evidence:

@@ -4,18 +4,13 @@ Last updated: 2026-05-16
 
 ## NOW
 
-1. DMS-07-002 Price-list and hourly-value read model.
-   - Source:
-     `docs/planning/dms-07-finance-system-spec.md`.
-   - Implement protected read-only finance context before Finance web board,
-     invoice readiness, or Paperclip pricing packet runtime work.
-2. DMS-00-007 Paperclip background output review proof.
+1. DMS-00-007 Paperclip background output review proof.
    - Source:
      `docs/planning/dms-00-global-intake-route-command-task-contract.md`.
    - Prove a controlled Paperclip-like background item appears in `00 Main`,
      receives a route proposal, stays source-safe, and can be handed off to a
      department/system review path.
-3. DMS-SHELL-003 Wire shared shell to operating graph fallback.
+2. DMS-SHELL-003 Wire shared shell to operating graph fallback.
    - Source:
      `docs/planning/dms-shell-002-department-subsystem-registry-task-contract.md`.
    - Use the shared subsystem registry plus current AOG fallback to make each
