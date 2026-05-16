@@ -2,16 +2,6 @@
 
 ## Ready
 
-- DMS-00-007 Paperclip background output review proof.
-  - Stage: planning
-  - Owner: AI Integration + QA/Test + Frontend Builder
-  - Priority: P1
-  - Source:
-    `docs/planning/dms-00-global-intake-route-command-task-contract.md`
-  - Goal: prove a controlled Paperclip-like background item appears in
-    `00 Main`, receives a route proposal, remains source-safe, and can be
-    handed to the next department/system review without bypassing
-    CompanyCore.
 - DMS-NEXT-001 Department systems user review and implementation sequence.
   - Stage: planning
   - Owner: Product Docs + Frontend Builder + Backend Builder
@@ -129,6 +119,19 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- DMS-00-007 Paperclip Background Output Review Proof.
+  - Evidence:
+    `docs/planning/dms-00-paperclip-background-output-review-proof.md`
+    records the verified loop from Paperclip-like `AgentEventOutbox` to
+    `GET /v1/intake`, `POST /v1/intake/actions/propose-route`, proposal
+    `Decision`/`AuditLog`/`Event`/optional `Task`, and unchanged source
+    delivery status.
+  - Validation: existing API regression coverage in `src/tests/api.test.ts`
+    passed again during the DMS-07-002 gate with `npm run test:api` against
+    portable PostgreSQL on `127.0.0.1:55482`.
+  - Task contract:
+    `docs/planning/dms-00-paperclip-background-output-review-proof-task-contract.md`.
 
 - DMS-07-002 Finance Context Read API.
   - Evidence:

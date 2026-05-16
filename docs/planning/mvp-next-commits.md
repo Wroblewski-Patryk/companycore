@@ -7,10 +7,9 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] DMS-00-007 Paperclip background output review proof:
-      prove a controlled Paperclip-like item appears in `00 Main`, receives a
-      route proposal, remains source-safe, and can be handed off to department
-      review without bypassing CompanyCore.
+- [ ] DMS-SHELL-003 Wire shared shell to operating graph fallback:
+      make each department shell consume operating graph/connection fallback
+      data consistently before department packet APIs and Finance web work.
 
 ### NEXT
 
@@ -115,6 +114,15 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       passed against portable PostgreSQL on `127.0.0.1:55482`.
       Task contract:
       `docs/planning/dms-07-finance-context-read-api-task-contract.md`.
+- [x] DMS-00-007 Paperclip background output review proof:
+      documented and verified the safe loop from Paperclip-like
+      `AgentEventOutbox` through `GET /v1/intake`,
+      `POST /v1/intake/actions/propose-route`, proposal evidence, optional
+      department review task, and unchanged source delivery status. Existing
+      API regression coverage passed again during the DMS-07-002 gate on
+      portable PostgreSQL `127.0.0.1:55482`.
+      Task contract:
+      `docs/planning/dms-00-paperclip-background-output-review-proof-task-contract.md`.
 - [x] DMS-07-001 Finance system spec:
       defined the Finance Management System board, first safe web shape,
       protected read-only `GET /v1/finance/context` target, pricing model and

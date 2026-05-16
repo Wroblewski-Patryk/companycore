@@ -132,6 +132,15 @@ Last updated: 2026-05-16
   `git diff --check`, and `npm run test:api` passed against portable
   PostgreSQL on `127.0.0.1:55482`; the validation database was stopped after
   the run.
+  As of 2026-05-16, DMS-00-007 recorded the Paperclip background output
+  review proof. The verified API path takes a Paperclip-like
+  `AgentEventOutbox` through `GET /v1/intake` and
+  `POST /v1/intake/actions/propose-route`, creates proposal evidence through
+  `Decision`, `AuditLog`, `Event`, and optional `Task`, and leaves the source
+  agent event `pending`. The proof links downstream review to
+  `GET /v1/commercial-exceptions` and `GET /v1/finance/context` so pricing or
+  discount output can move from `00 Main` into Sales/Finance review without
+  bypassing CompanyCore.
 
 ## Product Decisions (Confirmed)
 - 2026-05-07: CRM and pipelines are separate domain concepts. Pipelines are a

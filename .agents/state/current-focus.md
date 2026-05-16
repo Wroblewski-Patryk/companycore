@@ -7,9 +7,9 @@ Last updated: 2026-05-16
 Current DMS focus: the first `00 Main` intake API/web panel, proposal-only
 route command, shared department shell, department subsystem registry, Finance
 system spec, commercial exception runtime API, and Finance context runtime API
-are verified locally. The next active slice is DMS-00-007 Paperclip background
-output review proof, followed by DMS-SHELL-003 graph fallback consistency and
-the first read-only Finance web board.
+are verified locally. DMS-00-007 also records the Paperclip background output
+review proof. The next active slice is DMS-SHELL-003 graph fallback
+consistency, followed by the first read-only Finance web board.
 
 WEBFOUND-002/003/004, WEBFOUND-005, WEBFOUND-007, WEBFOUND-008A, WEBFOUND-008B, WEBFOUND-009, WEBFOUND-010, WEBFOUND-011, WEBFOUND-012, WEBFOUND-013, WEBFOUND-014, ACF-MAINT-001, V2VIS-001, and ACF-PROD-001 are now complete. The
 pre-V2 foundation has token-scoped multi-workspace owner switching, a workspace

@@ -218,6 +218,14 @@ continue from repository files alone:
   finance actions through `npm run test:api` on portable PostgreSQL
   `127.0.0.1:55482`. Future Finance web must consume this read model first
   and keep write actions blocked until separate command contracts exist.
+- `docs/planning/dms-00-paperclip-background-output-review-proof.md`:
+  Paperclip background-output review proof. As of 2026-05-16, DMS-00-007
+  records the safe loop from Paperclip-like `AgentEventOutbox` through
+  `GET /v1/intake`, `POST /v1/intake/actions/propose-route`, proposal
+  evidence, optional department review task, and unchanged source delivery
+  status. Existing API regression coverage passed again during DMS-07-002 on
+  portable PostgreSQL `127.0.0.1:55482`. Repeat a fresh desktop/mobile visual
+  proof before final UI signoff.
 - `docs/planning/dms-03-commercial-exception-read-model-spec.md`: active
   Sales/Finance commercial exception handoff. As of 2026-05-16, DMS-03-005
   defines protected read-only `GET /v1/commercial-exceptions`, exception packet
