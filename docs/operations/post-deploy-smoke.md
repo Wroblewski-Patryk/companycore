@@ -2,6 +2,47 @@
 
 Use this file to record the minimum checks after each deploy.
 
+## Production Operations List Board Rollover
+
+- Timestamp: 2026-05-16
+- Environment: production VPS Docker backend
+- Commit: `849b74c06f8f04364b2a08662a66e45c45ffafcf`
+- Image:
+  `rnqqkhl3o3dut4qv56mlxly2_backend:849b74c06f8f04364b2a08662a66e45c45ffafcf`
+- Running container:
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-849b74c`
+- Replaced container:
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-d673837`, retained stopped as
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-d673837-previous-849b74c`.
+- Local/source checks:
+  - `npm run validate`: passed.
+  - `npm run test:api` passed against validation-owned PostgreSQL on
+    `127.0.0.1:55511`.
+  - Playwright fallback on temporary mocked API port `3244`: passed for
+    desktop/mobile Operations board and modal save interaction.
+  - `git diff --check`: passed with line-ending warnings only.
+- Rollover checks:
+  - Docker image build from the pushed commit archive for `849b74c` passed.
+  - Canary container returned local `/health` with the expected commit before
+    traffic rollover.
+  - Final routed container returned local `/health` with the expected commit.
+  - Production Postgres container stayed running.
+- Public smoke:
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `status=ok`
+    with the expected build commit and image.
+  - `GET https://companycore.luckysparrow.ch/health` returned `status=ok`
+    with the same build commit and image.
+  - `GET /areas?area=04-operacje&view=tasks` returned the React shell HTML and
+    served `/react/assets/index-SR5I21Wt.js`.
+- Cleanup:
+  - Temporary local archive and rollout script were removed.
+  - Temporary VPS archive, extracted source directory, and rollout script were
+    removed from `/tmp`.
+- Residual risks:
+  - No production smoke defect was found.
+  - Full authenticated production data proof remains a future owner-session
+    smoke because the public smoke cannot inspect private task content.
+
 ## Production Web Shell And Operations Tasks Rollover
 
 - Timestamp: 2026-05-16

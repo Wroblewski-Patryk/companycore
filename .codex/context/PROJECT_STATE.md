@@ -40,6 +40,10 @@ Last updated: 2026-05-16
   CompanyCore APIs, not raw database tables. `npm run validate`, `npm run
   test:api` on validation-owned PostgreSQL `127.0.0.1:55511`, and Playwright
   fallback desktop/mobile board proof passed.
+  The slice was pushed and manually rolled over to production as commit
+  `849b74c06f8f04364b2a08662a66e45c45ffafcf`; public web/API health reports
+  the expected commit and `/areas?area=04-operacje&view=tasks` serves
+  `/react/assets/index-SR5I21Wt.js`.
   As of 2026-05-16, the architectural direction is expanded in
   `docs/architecture/unified-organizational-operating-system.md`: CompanyCore
   is the unified organizational world state and operational source of truth,

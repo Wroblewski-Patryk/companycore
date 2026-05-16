@@ -210,7 +210,10 @@
     `backlog` label, modal edit/save interaction, desktop/mobile rendering, no
     console warnings/errors, and no mobile horizontal overflow. Temporary
     PostgreSQL and mock server processes were stopped and validation temp
-    directories were removed.
+    directories were removed. Production was manually rolled over to commit
+    `849b74c06f8f04364b2a08662a66e45c45ffafcf`; public web/API health report
+    the expected commit and `/areas?area=04-operacje&view=tasks` serves
+    `index-SR5I21Wt.js`.
 
 - WEB-SHELL-OPS-001 Shell user menu, settings routes, and Operations tasks.
   - Evidence:
