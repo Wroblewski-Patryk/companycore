@@ -7,9 +7,10 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] DMS-03-005 Discount/commercial exception read model:
-      represent discounts including 100 percent discount as owner-reviewed
-      commercial exceptions before invoice or payment writes exist.
+- [ ] DMS-03-005A Commercial exception read API:
+      implement protected read-only `GET /v1/commercial-exceptions` with
+      `100%` discount packet support, workspace isolation, no mutation on
+      read, and explicit blocked actions.
 - [ ] DMS-07-002 Price-list and hourly-value read model:
       implement protected read-only finance context from the Finance system
       spec before Finance web, invoice readiness, or autonomous pricing work.
@@ -108,6 +109,13 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       actions. `git diff --check` passed.
       Task contract:
       `docs/planning/dms-07-finance-system-spec-task-contract.md`.
+- [x] DMS-03-005 Discount/commercial exception read model:
+      defined protected read-only `GET /v1/commercial-exceptions`, exception
+      packet fields, status/derivation rules, current-client `100%` discount
+      requirements, Paperclip guardrails, blocked finance actions, and backend
+      API handoff. `git diff --check` passed.
+      Task contract:
+      `docs/planning/dms-03-commercial-exception-read-model-task-contract.md`.
 - [x] DMS-SHELL-002 Department Subsystem Registry:
       added a typed 13-department registry, rendered it inside the shared
       selected-area shell, and gave each department system name, value role,

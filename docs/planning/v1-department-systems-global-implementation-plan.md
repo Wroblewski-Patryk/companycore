@@ -142,7 +142,8 @@ convert work, deliver value, and maintain client context.
 | DMS-03-002 | Audit CRM/deal/interaction/pricing sources | research | Backend + Product Docs | DMS-03-001 | Current data map from CompanyCore, Drive, ClickUp | source review |
 | DMS-03-003 | Sales read-only web board | frontend | Frontend | DMS-03-002 | Pipeline, discovery, offers, follow-up, discount context | Playwright proof |
 | DMS-03-004 | Lead/discovery/offer relation design | backend planning | Backend | DMS-03-002 | Relation/read-model contract | source review |
-| DMS-03-005 | Discount/commercial exception read model | backend | Backend | DMS-MONEY-001 | 100 percent discount support as evidence-backed field/context | API tests |
+| DMS-03-005 | Discount/commercial exception read model | planning | Product Docs + Backend | DMS-MONEY-001, DMS-07-001 | Completed protected read-only commercial exception packet spec with `100%` discount support and blocked high-risk writes | source review + `git diff --check` |
+| DMS-03-005A | Commercial exception read API | backend | Backend + Security | DMS-03-005 | Protected read-only `GET /v1/commercial-exceptions` with `100%` discount packet support and no source mutation | API tests |
 | DMS-03-006 | Current client work capture flow | frontend/backend | Frontend + Backend | DMS-03-003 | Add or classify current client work with discount context | browser/API proof |
 
 ### 05 Relationships

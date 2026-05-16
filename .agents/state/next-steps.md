@@ -4,12 +4,12 @@ Last updated: 2026-05-16
 
 ## NOW
 
-1. DMS-03-005 Discount/commercial exception read model.
+1. DMS-03-005A Commercial exception read API.
    - Source:
-     `docs/planning/dms-money-pricing-discount-source-inventory.md` and
-     `docs/planning/dms-07-finance-system-spec.md`.
-   - Represent discounts including 100 percent discount as owner-reviewed
-     commercial exceptions connected to client/deal/work context.
+     `docs/planning/dms-03-commercial-exception-read-model-spec.md`.
+   - Implement protected read-only `GET /v1/commercial-exceptions` with
+     `100%` discount packet support, workspace isolation, no mutation on read,
+     and explicit blocked actions.
 2. DMS-07-002 Price-list and hourly-value read model.
    - Source:
      `docs/planning/dms-07-finance-system-spec.md`.

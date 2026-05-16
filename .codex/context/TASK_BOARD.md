@@ -2,16 +2,15 @@
 
 ## Ready
 
-- DMS-03-005 Discount/commercial exception read model.
-  - Stage: planning
-  - Owner: Product Docs + Backend Builder
+- DMS-03-005A Commercial exception read API.
+  - Stage: implementation
+  - Owner: Backend Builder + Security + QA/Test
   - Priority: P1
   - Source:
-    `docs/planning/dms-money-pricing-discount-source-inventory.md` and
-    `docs/planning/dms-07-finance-system-spec.md`
-  - Goal: represent discounts including 100 percent discounts as
-    owner-reviewed commercial exceptions connected to client, deal, work,
-    approval, and future invoice-readiness context.
+    `docs/planning/dms-03-commercial-exception-read-model-spec.md`
+  - Goal: implement protected read-only
+    `GET /v1/commercial-exceptions` with `100%` discount packet support,
+    workspace isolation, no mutation on read, and explicit blocked actions.
 - DMS-07-002 Price-list and hourly-value read model.
   - Stage: planning
   - Owner: Backend Builder + Product Docs + Security
@@ -148,6 +147,18 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- DMS-03-005 Discount/Commercial Exception Read Model Spec.
+  - Evidence:
+    `docs/planning/dms-03-commercial-exception-read-model-spec.md` defines
+    protected read-only `GET /v1/commercial-exceptions`, query parameters,
+    packet fields, status rules, derivation rules from existing CompanyCore
+    sources, current-client `100%` discount requirements, Paperclip
+    guardrails, blocked actions, and implementation handoff.
+  - Validation: source review of DMS money inventory, Finance spec, DMS
+    blueprint, current Prisma foundations, and `git diff --check` passed.
+  - Task contract:
+    `docs/planning/dms-03-commercial-exception-read-model-task-contract.md`.
 
 - DMS-07-001 Finance System Spec.
   - Evidence:

@@ -209,6 +209,14 @@ continue from repository files alone:
   actions. Future Finance runtime should start with DMS-07-002 read-only
   pricing/hourly-value context or DMS-03-005 commercial exception read model;
   do not add invoice/payment or discount writes before their command contracts.
+- `docs/planning/dms-03-commercial-exception-read-model-spec.md`: active
+  Sales/Finance commercial exception handoff. As of 2026-05-16, DMS-03-005
+  defines protected read-only `GET /v1/commercial-exceptions`, exception packet
+  fields, status and derivation rules, current-client `100%` discount
+  requirements, Paperclip guardrails, blocked discount/invoice/payment actions,
+  and DMS-03-005A backend API handoff. Future implementation should derive
+  candidates from existing approvals, decisions, deals, tasks, notes,
+  interactions, risks, and intake/agent proposals without mutating sources.
 - `docs/planning/dms-shell-001-shared-department-management-shell-task-contract.md`:
   active shared-shell handoff. As of 2026-05-16, selected-area department
   routes render through `DepartmentManagementShell`, with

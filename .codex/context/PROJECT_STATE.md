@@ -102,6 +102,14 @@ Last updated: 2026-05-16
   packet, and blocked invoice/payment/discount/autonomous-pricing actions.
   This is a planning checkpoint only; runtime Finance API and web board remain
   future tasks.
+  As of 2026-05-16, DMS-03-005 completed the commercial exception read model
+  spec for discounts and pro-bono work. `docs/planning/dms-03-commercial-exception-read-model-spec.md`
+  defines protected read-only `GET /v1/commercial-exceptions`, status and
+  derivation rules over existing approvals, decisions, deals, tasks, notes,
+  interactions, risks, and intake/agent proposals, plus the current-client
+  `100%` discount packet requirements. Runtime API and web panels remain
+  future work; discount, invoice, payment, and final commercial term writes
+  stay blocked.
 
 ## Product Decisions (Confirmed)
 - 2026-05-07: CRM and pipelines are separate domain concepts. Pipelines are a
