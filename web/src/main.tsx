@@ -265,6 +265,35 @@ type IntakeData = {
   items: IntakeItem[];
 };
 
+type IntakeRouteProposal = {
+  proposal: {
+    id: string;
+    sourceModel: string;
+    sourceId: string;
+    targetDepartmentKey: string;
+    classification: string;
+    status: string;
+    riskLevel: string;
+    createdAt: string;
+  };
+  effects: {
+    sourceMutated: boolean;
+    agentEventAcknowledged: boolean;
+    providerStateMutated: boolean;
+    taskDraftCreated: boolean;
+    ownerDecisionRequested: boolean;
+    auditRecorded: boolean;
+    idempotentReplay: boolean;
+  };
+  evidence: {
+    decisionId: string;
+    taskId: string | null;
+    auditLogId: string | null;
+    idempotencyKey: string;
+  };
+  blockedActions: Array<{ action: string; reason: string }>;
+};
+
 type AreaDetailLane = {
   id: string;
   label: string;
@@ -555,6 +584,24 @@ async function loadAreaOperatingGraph(areaKey: string) {
 
 async function loadGlobalIntake(query = "limit=80") {
   return ownerApi<IntakeData>(`/v1/intake?${query}`);
+}
+
+async function proposeIntakeRoute(item: IntakeItem, targetDepartmentKey: string) {
+  return ownerApi<IntakeRouteProposal>("/v1/intake/actions/propose-route", {
+    method: "POST",
+    body: JSON.stringify({
+      sourceModel: item.sourceModel,
+      sourceId: item.sourceId,
+      targetDepartmentKey,
+      classification: item.status === "needs_owner_decision" ? "needs_owner_decision" : "route_to_department",
+      reason: `Owner review from 00 Main: ${item.title}`,
+      proposedNextAction: `Review and route this intake item to ${targetDepartmentKey}.`,
+      riskLevel: item.risk,
+      requestOwnerDecision: item.risk === "high" || item.risk === "critical" || item.status === "needs_owner_decision",
+      createTaskDraft: item.risk === "high" || item.risk === "critical",
+      idempotencyKey: `web-${item.sourceModel}-${item.sourceId}-${targetDepartmentKey}`
+    })
+  });
 }
 
 async function loadTableRecordSnapshot(connection: ConnectionData) {
@@ -2199,17 +2246,65 @@ function formatIntakeLabel(value: string) {
   return value.replace(/[-_]+/g, " ").replace(/^\w/, (letter) => letter.toUpperCase());
 }
 
+const intakeDepartmentRouteMap: Record<string, string> = {
+  "00-main": "00-ogolny",
+  "00-general": "00-ogolny",
+  "00-ogolny": "00-ogolny",
+  "01-strategy": "01-strategia",
+  "01-strategia": "01-strategia",
+  "02-product-delivery": "02-produkt",
+  "02-product": "02-produkt",
+  "02-produkt": "02-produkt",
+  "03-sales": "03-sprzedaz",
+  "03-sprzedaz": "03-sprzedaz",
+  "04-operations": "04-operacje",
+  "04-operacje": "04-operacje",
+  "05-client-relations": "05-relacje",
+  "05-relations": "05-relacje",
+  "05-relacje": "05-relacje",
+  "06-people-agents-roles": "06-kadry",
+  "06-people": "06-kadry",
+  "06-kadry": "06-kadry",
+  "07-finance": "07-finanse",
+  "07-finanse": "07-finanse",
+  "08-assets-knowledge": "08-zasoby",
+  "08-resources": "08-zasoby",
+  "08-zasoby": "08-zasoby",
+  "09-technology-automation": "09-technologia",
+  "09-technology": "09-technologia",
+  "09-technologia": "09-technologia",
+  "10-governance-risk-legal": "10-prawo",
+  "10-legal": "10-prawo",
+  "10-prawo": "10-prawo",
+  "11-innovation-improvement": "11-innowacje",
+  "11-innovation": "11-innowacje",
+  "11-innowacje": "11-innowacje",
+  "12-management": "12-zarzadzanie",
+  "12-zarzadzanie": "12-zarzadzanie"
+};
+
+function normalizeIntakeDepartmentKey(value: string) {
+  return intakeDepartmentRouteMap[value] || "00-ogolny";
+}
+
 function MainIntakeSystemPanel({
   intake,
   status,
   connection,
+  onRefresh,
   onSelectCapability
 }: {
   intake: IntakeData | null;
   status: "idle" | "loading" | "ready" | "error";
   connection: ConnectionData;
+  onRefresh: () => void;
   onSelectCapability: (capability: string) => void;
 }) {
+  const [proposalState, setProposalState] = useState<{
+    itemId: string | null;
+    status: "idle" | "loading" | "success" | "error";
+    message: string;
+  }>({ itemId: null, status: "idle", message: "" });
   const items = intake?.items ?? [];
   const ownerDecisions = items.filter((item) => item.status === "needs_owner_decision").slice(0, 5);
   const unassignedResources = items.filter((item) => item.family === "unassigned_resource").slice(0, 5);
@@ -2276,24 +2371,32 @@ function MainIntakeSystemPanel({
           icon="ph-seal-warning"
           empty={status === "loading" ? "Reading owner decision queue." : "No owner decision intake items are visible."}
           items={ownerDecisions}
+          proposalState={proposalState}
+          onProposeRoute={handleProposeRoute}
         />
         <MainIntakeSection
           title="Paperclip and agents"
           icon="ph-robot"
           empty={status === "loading" ? "Reading agent output." : "No Paperclip or agent output is waiting in intake."}
           items={paperclipItems}
+          proposalState={proposalState}
+          onProposeRoute={handleProposeRoute}
         />
         <MainIntakeSection
           title="Resources to classify"
           icon="ph-folder-open"
           empty={status === "loading" ? "Reading unassigned resources." : "No unassigned Drive/provider resources are visible."}
           items={unassignedResources}
+          proposalState={proposalState}
+          onProposeRoute={handleProposeRoute}
         />
         <MainIntakeSection
           title="Risk and blockers"
           icon="ph-shield-warning"
           empty={status === "loading" ? "Reading risks and blockers." : "No high-risk intake items are visible."}
           items={blockedItems}
+          proposalState={proposalState}
+          onProposeRoute={handleProposeRoute}
         />
         <article className="operations-agent-packet main-intake-agent-packet">
           <div>
@@ -2315,18 +2418,44 @@ function MainIntakeSystemPanel({
       </div>
     </section>
   );
+
+  async function handleProposeRoute(item: IntakeItem) {
+    const targetDepartmentKey = normalizeIntakeDepartmentKey(item.suggestedDepartment);
+    setProposalState({ itemId: item.id, status: "loading", message: `Proposing route to ${formatIntakeLabel(targetDepartmentKey)}.` });
+    try {
+      const result = await proposeIntakeRoute(item, targetDepartmentKey);
+      setProposalState({
+        itemId: item.id,
+        status: "success",
+        message: result.effects.idempotentReplay
+          ? "Route proposal already exists."
+          : `Route proposal created for ${formatIntakeLabel(targetDepartmentKey)}.`
+      });
+      onRefresh();
+    } catch (error) {
+      setProposalState({
+        itemId: item.id,
+        status: "error",
+        message: apiErrorMessage(error)
+      });
+    }
+  }
 }
 
 function MainIntakeSection({
   title,
   icon,
   empty,
-  items
+  items,
+  proposalState,
+  onProposeRoute
 }: {
   title: string;
   icon: string;
   empty: string;
   items: IntakeItem[];
+  proposalState: { itemId: string | null; status: "idle" | "loading" | "success" | "error"; message: string };
+  onProposeRoute: (item: IntakeItem) => void;
 }) {
   return (
     <article className="operations-system-section main-intake-section">
@@ -2348,6 +2477,20 @@ function MainIntakeSection({
               </em>
               {item.blockedActions.length > 0 ? (
                 <small>{item.blockedActions[0]?.reason}</small>
+              ) : null}
+              {item.allowedActions.includes("route_to_department") ? (
+                <button
+                  type="button"
+                  className="main-intake-proposal-action"
+                  disabled={proposalState.status === "loading" && proposalState.itemId === item.id}
+                  onClick={() => onProposeRoute(item)}
+                >
+                  <i className="ph-bold ph-signpost" aria-hidden="true"></i>
+                  {proposalState.status === "loading" && proposalState.itemId === item.id ? "Proposing" : "Propose route"}
+                </button>
+              ) : null}
+              {proposalState.itemId === item.id && proposalState.message ? (
+                <small className={`main-intake-proposal-status is-${proposalState.status}`}>{proposalState.message}</small>
               ) : null}
             </span>
           ))}
@@ -5399,6 +5542,7 @@ function AreaDetailView({
       intake={intakeState.data}
       status={intakeState.status}
       connection={connection}
+      onRefresh={reloadIntake}
       onSelectCapability={selectCapability}
     />
   ) : isOperationsSystem ? (
@@ -5418,6 +5562,16 @@ function AreaDetailView({
   function selectCapability(capability: string) {
     setActiveCapability(capability);
     updateAreaRoute(selectedArea.key, capability);
+  }
+
+  function reloadIntake() {
+    if (selectedArea.key !== "00-ogolny") {
+      return;
+    }
+    setIntakeState({ status: "loading", data: intakeState.data });
+    loadGlobalIntake()
+      .then((data) => setIntakeState({ status: "ready", data }))
+      .catch(() => setIntakeState({ status: "error", data: intakeState.data }));
   }
 
   return (

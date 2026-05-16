@@ -4,30 +4,28 @@ Last updated: 2026-05-16
 
 ## NOW
 
-1. DMS-00-006 First safe global intake route/classification command.
-   - Source:
-     `docs/planning/dms-00-global-intake-classify-route-command-contract.md`.
-   - Implement the first proposal-only command for `00 Main`: validate the
-     source intake item, validate the target department, create auditable route
-     proposal evidence, optionally create owner follow-up work, and avoid
-     acknowledging agent events, approving risky work, invoicing, discounting,
-     deleting, or mutating provider state.
-2. DMS-SHELL-002 Department-specific subsystem registry.
+1. DMS-SHELL-002 Department-specific subsystem registry.
    - Source:
      `docs/planning/dms-shell-001-shared-department-management-shell-task-contract.md`.
    - Add static config for `00`-`12` department purposes, subsystem tabs,
      blocked actions, and agent handoff copy on top of the shared shell.
-3. DMS-07-001 Finance system spec.
+2. DMS-07-001 Finance system spec.
    - Source:
      `docs/planning/dms-money-pricing-discount-source-inventory.md`.
    - Define the Finance management board, price-list/hourly-value read model,
      owner decisions, and guardrails before invoice/payment or autonomous
      pricing writes.
-4. DMS-03-005 Discount/commercial exception read model.
+3. DMS-03-005 Discount/commercial exception read model.
    - Source:
      `docs/planning/dms-money-pricing-discount-source-inventory.md`.
    - Represent discounts including 100 percent discount as owner-reviewed
      commercial exceptions connected to client/deal/work context.
+4. DMS-00-007 Paperclip background output review proof.
+   - Source:
+     `docs/planning/dms-00-global-intake-route-command-task-contract.md`.
+   - Prove a controlled Paperclip-like background item appears in `00 Main`,
+     receives a route proposal, stays source-safe, and can be handed off to a
+     department/system review path.
 
 ## NEXT
 
@@ -75,9 +73,9 @@ Last updated: 2026-05-16
      documents, tasks, risks, bugs, opportunities, Paperclip background
      outputs, feedback, and improvement signals.
    - First backend implementation is `GET /v1/intake`; first web
-     implementation is the verified `00 Main` read-only panel. The
-     DMS-00-005 command contract now selects proposal-only classification and
-     routing as the next safe write layer.
+     implementation is the verified `00 Main` read-only panel. DMS-00-006 now
+     implements proposal-only classification and routing; the next AI-facing
+     proof is DMS-00-007.
 7. Implement pricing, discounts, current client work, and archived clients from
    the completed inventory.
    - Source:

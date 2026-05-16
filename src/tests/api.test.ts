@@ -642,7 +642,161 @@ test("CompanyCore v1 protected API flow", async () => {
     && tool.riskLevel === "read"
     && tool.requiresApproval === false
   )));
+  assert.ok(mcpManifestWithIntakeBody.data.tools.some((tool) => (
+    tool.name === "companycore_post_intake_actions_propose_route"
+    && tool.path === "/v1/intake/actions/propose-route"
+    && tool.capability === "intake:write"
+    && tool.riskLevel === "write"
+    && tool.requiresApproval === false
+  )));
 
+  const routeProposal = await request("/v1/intake/actions/propose-route", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      sourceModel: "AgentEventOutbox",
+      sourceId: paperclipIntakeEvent.id,
+      targetDepartmentKey: "03-sprzedaz",
+      classification: "route_to_department",
+      reason: "Paperclip proposal should be reviewed by Sales before any commercial action.",
+      proposedNextAction: "Review the discount context and decide whether a Sales follow-up task is needed.",
+      riskLevel: "medium",
+      requestOwnerDecision: true,
+      createTaskDraft: true,
+      idempotencyKey: "paperclip-discount-route-test"
+    })
+  });
+  assert.equal(routeProposal.status, 201);
+  const routeProposalBody = routeProposal.body as {
+    data: {
+      proposal: {
+        id: string;
+        sourceModel: string;
+        sourceId: string;
+        targetDepartmentKey: string;
+        classification: string;
+        status: string;
+      };
+      effects: {
+        sourceMutated: boolean;
+        agentEventAcknowledged: boolean;
+        providerStateMutated: boolean;
+        taskDraftCreated: boolean;
+        ownerDecisionRequested: boolean;
+        auditRecorded: boolean;
+        idempotentReplay: boolean;
+      };
+      evidence: { decisionId: string; taskId: string | null; auditLogId: string | null };
+      blockedActions: Array<{ action: string; reason: string }>;
+    };
+  };
+  assert.equal(routeProposalBody.data.proposal.sourceModel, "AgentEventOutbox");
+  assert.equal(routeProposalBody.data.proposal.sourceId, paperclipIntakeEvent.id);
+  assert.equal(routeProposalBody.data.proposal.targetDepartmentKey, "03-sprzedaz");
+  assert.equal(routeProposalBody.data.proposal.status, "proposed");
+  assert.equal(routeProposalBody.data.effects.sourceMutated, false);
+  assert.equal(routeProposalBody.data.effects.agentEventAcknowledged, false);
+  assert.equal(routeProposalBody.data.effects.providerStateMutated, false);
+  assert.equal(routeProposalBody.data.effects.taskDraftCreated, true);
+  assert.equal(routeProposalBody.data.effects.ownerDecisionRequested, true);
+  assert.equal(routeProposalBody.data.effects.auditRecorded, true);
+  assert.equal(routeProposalBody.data.effects.idempotentReplay, false);
+  assert.ok(routeProposalBody.data.evidence.taskId);
+  assert.ok(routeProposalBody.data.evidence.auditLogId);
+  assert.ok(routeProposalBody.data.blockedActions.some((action) => action.action === "commercial_or_legal_action"));
+
+  const proposalDecision = await prisma.decision.findFirstOrThrow({
+    where: {
+      id: routeProposalBody.data.evidence.decisionId,
+      workspaceId: ownerA.workspace.id,
+      source: "companycore_intake"
+    }
+  });
+  assert.equal(proposalDecision.status, "proposed");
+
+  const proposalAudit = await prisma.auditLog.findUniqueOrThrow({
+    where: { id: routeProposalBody.data.evidence.auditLogId! }
+  });
+  assert.equal(proposalAudit.action, "intake.route_proposed");
+  assert.equal(proposalAudit.resourceType, "intake_route_proposal");
+
+  const proposalEvent = await prisma.event.findFirstOrThrow({
+    where: {
+      workspaceId: ownerA.workspace.id,
+      type: "intake.route_proposed",
+      resourceId: proposalDecision.id
+    }
+  });
+  assert.equal(proposalEvent.source, "companycore_intake");
+
+  const pendingPaperclipEventAfterProposal = await prisma.agentEventOutbox.findUniqueOrThrow({
+    where: { id: paperclipIntakeEvent.id }
+  });
+  assert.equal(pendingPaperclipEventAfterProposal.deliveryStatus, "pending");
+
+  const repeatedRouteProposal = await request("/v1/intake/actions/propose-route", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      sourceModel: "AgentEventOutbox",
+      sourceId: paperclipIntakeEvent.id,
+      targetDepartmentKey: "03-sprzedaz",
+      classification: "route_to_department",
+      reason: "Paperclip proposal should be reviewed by Sales before any commercial action.",
+      proposedNextAction: "Review the discount context and decide whether a Sales follow-up task is needed.",
+      riskLevel: "medium",
+      requestOwnerDecision: true,
+      createTaskDraft: true,
+      idempotencyKey: "paperclip-discount-route-test"
+    })
+  });
+  assert.equal(repeatedRouteProposal.status, 200);
+  const repeatedRouteProposalBody = repeatedRouteProposal.body as {
+    data: {
+      proposal: { id: string };
+      effects: { idempotentReplay: boolean };
+      evidence: { taskId: string | null; auditLogId: string | null };
+    };
+  };
+  assert.equal(repeatedRouteProposalBody.data.proposal.id, routeProposalBody.data.proposal.id);
+  assert.equal(repeatedRouteProposalBody.data.effects.idempotentReplay, true);
+  assert.equal(repeatedRouteProposalBody.data.evidence.taskId, routeProposalBody.data.evidence.taskId);
+
+  const foreignRouteProposal = await request("/v1/intake/actions/propose-route", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      sourceModel: "AgentEventOutbox",
+      sourceId: foreignIntakeEvent.id,
+      targetDepartmentKey: "04-operacje",
+      classification: "route_to_department",
+      reason: "Cross-workspace source should not be routable.",
+      idempotencyKey: "foreign-source-route-test"
+    })
+  });
+  assert.equal(foreignRouteProposal.status, 404);
+  assert.equal((foreignRouteProposal.body as { error: string }).error, "intake_source_not_found");
+
+  const invalidDepartmentProposal = await request("/v1/intake/actions/propose-route", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      sourceModel: "AgentEventOutbox",
+      sourceId: paperclipIntakeEvent.id,
+      targetDepartmentKey: "07-finance",
+      classification: "route_to_department",
+      reason: "Non-canonical department keys should be rejected.",
+      idempotencyKey: "invalid-department-route-test"
+    })
+  });
+  assert.equal(invalidDepartmentProposal.status, 400);
+
+  await prisma.event.deleteMany({ where: { resourceId: proposalDecision.id } });
+  await prisma.auditLog.deleteMany({ where: { resourceId: proposalDecision.id } });
+  if (routeProposalBody.data.evidence.taskId) {
+    await prisma.task.delete({ where: { id: routeProposalBody.data.evidence.taskId } });
+  }
+  await prisma.decision.delete({ where: { id: proposalDecision.id } });
   await prisma.risk.delete({ where: { id: highIntakeRisk.id } });
   await prisma.approval.delete({ where: { id: pendingIntakeApproval.id } });
   await prisma.externalFieldMapping.delete({ where: { id: unassignedField.id } });

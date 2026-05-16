@@ -159,6 +159,15 @@ Last updated: 2026-05-16
   documented as proposal-only `POST /v1/intake/actions/propose-route`; source
   systems remain unchanged by design until DMS-00-006 implements and tests the
   command.
+- DMS-00-006 runtime proof on 2026-05-16 passed `npm run build:server`,
+  `npm run build:web`, `npm run test:api` with
+  `DATABASE_URL=postgresql://postgres@127.0.0.1:55480/postgres`, and Playwright
+  browser proof on `http://127.0.0.1:3210`. The proof created a proposal from
+  `00 Main`, source `AgentEventOutbox.deliveryStatus` stayed `pending`, no
+  console errors were observed, and no horizontal overflow was detected.
+  Validation-owned backend/PostgreSQL processes on `3210`, `55476`, and
+  `55480` were stopped; pre-existing `chrome-headless-shell` processes from an
+  earlier run were left untouched.
 - Production CompanyCore, Jarvis, and Paperclip health were green in the latest
   v1 handoff evidence.
 - CompanyCore public health currently reports image

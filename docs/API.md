@@ -2211,6 +2211,93 @@ has `intake:read`. The canonical MCP profiles include `intake:read` so
 Paperclip can inspect background work and route it through CompanyCore instead
 of reading provider tables directly.
 
+```http
+POST /v1/intake/actions/propose-route
+POST /intake/actions/propose-route
+```
+
+Required capability:
+
+```text
+intake:write
+```
+
+Creates a proposal-only classification or route record for one intake source
+item. The command validates workspace ownership of the source item and the
+canonical department key, then writes proposal evidence through CompanyCore
+records. It does not acknowledge agent events, retry provider events, approve
+work, change provider scope, invoice, discount, delete, or execute legal/ads
+actions.
+
+Body:
+
+```json
+{
+  "sourceModel": "AgentEventOutbox",
+  "sourceId": "event-uuid",
+  "targetDepartmentKey": "03-sprzedaz",
+  "classification": "route_to_department",
+  "reason": "Paperclip output should be reviewed by Sales before any commercial action.",
+  "proposedNextAction": "Create a Sales follow-up after owner review.",
+  "riskLevel": "medium",
+  "requestOwnerDecision": true,
+  "createTaskDraft": true,
+  "idempotencyKey": "paperclip-route-event-uuid-sales"
+}
+```
+
+Allowed `sourceModel` values are `AgentEventOutbox`, `ProviderEventInbox`,
+`GoogleDriveFile`, `ExternalContainerMapping`, `ExternalFieldMapping`,
+`Approval`, `Risk`, `Task`, and `Event`.
+
+Allowed `targetDepartmentKey` values are the canonical Company Atlas keys:
+`00-ogolny`, `01-strategia`, `02-produkt`, `03-sprzedaz`, `04-operacje`,
+`05-relacje`, `06-kadry`, `07-finanse`, `08-zasoby`, `09-technologia`,
+`10-prawo`, `11-innowacje`, and `12-zarzadzanie`.
+
+Safe response shape:
+
+```json
+{
+  "data": {
+    "proposal": {
+      "id": "decision-uuid",
+      "sourceModel": "AgentEventOutbox",
+      "sourceId": "event-uuid",
+      "targetDepartmentKey": "03-sprzedaz",
+      "classification": "route_to_department",
+      "status": "proposed",
+      "riskLevel": "medium",
+      "createdAt": "2026-05-16T12:00:00.000Z"
+    },
+    "effects": {
+      "sourceMutated": false,
+      "agentEventAcknowledged": false,
+      "providerStateMutated": false,
+      "taskDraftCreated": true,
+      "ownerDecisionRequested": true,
+      "auditRecorded": true,
+      "idempotentReplay": false
+    },
+    "evidence": {
+      "decisionId": "decision-uuid",
+      "taskId": "task-uuid",
+      "auditLogId": "audit-log-uuid",
+      "idempotencyKey": "paperclip-route-event-uuid-sales"
+    },
+    "blockedActions": [
+      {
+        "action": "commercial_or_legal_action",
+        "reason": "Invoice, discount, payment, legal, and ads changes require their own approval-aware command contracts."
+      }
+    ]
+  }
+}
+```
+
+Idempotent replays with the same source, target department, classification, and
+idempotency key return the existing proposal with `idempotentReplay=true`.
+
 ## Agent Events
 
 ```http

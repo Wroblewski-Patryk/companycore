@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../../db/prisma";
@@ -10,6 +11,60 @@ const intakeQuerySchema = z.object({
   risk: z.string().min(1).optional(),
   suggestedDepartment: z.string().min(1).optional(),
   limit: z.coerce.number().int().min(1).max(200).default(100)
+}).strict();
+
+const sourceModels = [
+  "AgentEventOutbox",
+  "ProviderEventInbox",
+  "GoogleDriveFile",
+  "ExternalContainerMapping",
+  "ExternalFieldMapping",
+  "Approval",
+  "Risk",
+  "Task",
+  "Event"
+] as const;
+
+const departmentKeys = [
+  "00-ogolny",
+  "01-strategia",
+  "02-produkt",
+  "03-sprzedaz",
+  "04-operacje",
+  "05-relacje",
+  "06-kadry",
+  "07-finanse",
+  "08-zasoby",
+  "09-technologia",
+  "10-prawo",
+  "11-innowacje",
+  "12-zarzadzanie"
+] as const;
+
+const classificationValues = [
+  "needs_classification",
+  "route_to_department",
+  "needs_owner_decision",
+  "create_task",
+  "request_approval",
+  "archive_learning",
+  "needs_source_fix",
+  "defer"
+] as const;
+
+const riskLevels = ["low", "medium", "high", "critical"] as const;
+
+const routeProposalSchema = z.object({
+  sourceModel: z.enum(sourceModels),
+  sourceId: z.string().uuid(),
+  targetDepartmentKey: z.enum(departmentKeys),
+  classification: z.enum(classificationValues).default("route_to_department"),
+  reason: z.string().trim().min(8).max(1200),
+  proposedNextAction: z.string().trim().min(3).max(1200).optional(),
+  riskLevel: z.enum(riskLevels).default("medium"),
+  requestOwnerDecision: z.boolean().default(true),
+  createTaskDraft: z.boolean().default(false),
+  idempotencyKey: z.string().trim().min(1).max(220).optional()
 }).strict();
 
 type IntakeItem = {
@@ -33,6 +88,11 @@ type IntakeItem = {
   metadata: Record<string, unknown>;
 };
 
+type RouteProposalInput = z.infer<typeof routeProposalSchema>;
+type IntakeSourceModel = typeof sourceModels[number];
+type IntakeDepartmentKey = typeof departmentKeys[number];
+type IntakeTx = Prisma.TransactionClient;
+
 const departmentHints = [
   { key: "07-finance", terms: ["price", "pricing", "discount", "invoice", "payment", "cost", "margin", "finance"] },
   { key: "03-sales", terms: ["lead", "deal", "offer", "proposal", "sales", "client prospect", "promotion", "ad"] },
@@ -48,6 +108,188 @@ const departmentHints = [
 ] as const;
 
 export const intakeRouter = Router();
+
+intakeRouter.post("/actions/propose-route", asyncHandler(async (req, res) => {
+  const input = routeProposalSchema.parse(req.body);
+  const workspaceId = req.auth!.workspaceId;
+  const actor = authActor(req);
+  const source = await findIntakeSource(prisma, workspaceId, input.sourceModel, input.sourceId);
+
+  if (!source) {
+    return res.status(404).json({ error: "intake_source_not_found" });
+  }
+
+  const idempotencyKey = input.idempotencyKey
+    ?? [
+      "intake-route",
+      input.sourceModel,
+      input.sourceId,
+      input.targetDepartmentKey,
+      input.classification
+    ].join(":");
+  const externalId = routeProposalExternalId(input, idempotencyKey);
+
+  const existing = await prisma.decision.findFirst({
+    where: {
+      workspaceId,
+      source: "companycore_intake",
+      externalId
+    },
+    orderBy: { createdAt: "desc" }
+  });
+
+  if (existing) {
+    const existingTask = await prisma.task.findFirst({
+      where: {
+        workspaceId,
+        source: "companycore_intake",
+        externalId
+      },
+      orderBy: { createdAt: "desc" }
+    });
+    const existingAudit = await prisma.auditLog.findFirst({
+      where: {
+        workspaceId,
+        action: "intake.route_proposed",
+        resourceType: "intake_route_proposal",
+        resourceId: existing.id
+      },
+      orderBy: { createdAt: "desc" }
+    });
+
+    return res.status(200).json({
+      data: routeProposalResponse({
+        decision: existing,
+        input,
+        idempotencyKey,
+        taskId: existingTask?.id ?? null,
+        auditLogId: existingAudit?.id ?? null,
+        idempotentReplay: true
+      })
+    });
+  }
+
+  const result = await prisma.$transaction(async (tx) => {
+    const freshSource = await findIntakeSource(tx, workspaceId, input.sourceModel, input.sourceId);
+    if (!freshSource) {
+      return null;
+    }
+
+    const title = `Intake route proposal: ${sourceTitle(freshSource, input.sourceModel)} -> ${input.targetDepartmentKey}`;
+    const rationale = [
+      input.reason,
+      input.proposedNextAction ? `Next action: ${input.proposedNextAction}` : null,
+      `Source: ${input.sourceModel}:${input.sourceId}`,
+      `Classification: ${input.classification}`,
+      `Risk: ${input.riskLevel}`
+    ].filter(Boolean).join("\n");
+
+    const decision = await tx.decision.create({
+      data: {
+        workspaceId,
+        title,
+        rationale,
+        outcome: input.proposedNextAction ?? "Owner should review and route the intake item.",
+        status: "proposed",
+        source: "companycore_intake",
+        externalId
+      }
+    });
+
+    const task = input.createTaskDraft
+      ? await tx.task.create({
+        data: {
+          workspaceId,
+          title: `Review intake route: ${sourceTitle(freshSource, input.sourceModel)}`,
+          description: [
+            `Target department: ${input.targetDepartmentKey}`,
+            `Classification: ${input.classification}`,
+            `Reason: ${input.reason}`,
+            input.proposedNextAction ? `Proposed next action: ${input.proposedNextAction}` : null,
+            `Source: ${input.sourceModel}:${input.sourceId}`,
+            "This task is a proposal follow-up only; it does not acknowledge, approve, invoice, discount, delete, retry, or mutate provider state."
+          ].filter(Boolean).join("\n"),
+          priority: input.riskLevel === "critical" || input.riskLevel === "high" ? "high" : "normal",
+          source: "companycore_intake",
+          externalId
+        }
+      })
+      : null;
+
+    const correlationId = `intake-route:${decision.id}`;
+    const outputPayload = {
+      proposalId: decision.id,
+      taskId: task?.id ?? null,
+      sourceMutated: false,
+      agentEventAcknowledged: false,
+      providerStateMutated: false,
+      taskDraftCreated: Boolean(task),
+      ownerDecisionRequested: input.requestOwnerDecision,
+      auditRecorded: true
+    };
+
+    const auditLog = await tx.auditLog.create({
+      data: {
+        workspaceId,
+        actorType: actor.actorType,
+        actorId: actor.actorId,
+        action: "intake.route_proposed",
+        resourceType: "intake_route_proposal",
+        resourceId: decision.id,
+        inputPayload: asInputJson({
+          ...input,
+          idempotencyKey,
+          sourceTitle: sourceTitle(freshSource, input.sourceModel)
+        }),
+        outputPayload: asInputJson(outputPayload),
+        correlationId
+      }
+    });
+
+    await tx.event.create({
+      data: {
+        workspaceId,
+        type: "intake.route_proposed",
+        source: "companycore_intake",
+        actorType: actor.actorType,
+        actorId: actor.actorId,
+        resourceType: "intake_route_proposal",
+        resourceId: decision.id,
+        correlationId,
+        taskId: task?.id ?? undefined,
+        payload: {
+          auditLogId: auditLog.id,
+          proposalId: decision.id,
+          taskId: task?.id ?? null,
+          sourceModel: input.sourceModel,
+          sourceId: input.sourceId,
+          targetDepartmentKey: input.targetDepartmentKey,
+          classification: input.classification,
+          riskLevel: input.riskLevel,
+          idempotencyKey,
+          sourceMutated: false
+        }
+      }
+    });
+
+    return { decision, taskId: task?.id ?? null, auditLogId: auditLog.id };
+  });
+
+  if (!result) {
+    return res.status(404).json({ error: "intake_source_not_found" });
+  }
+
+  res.status(201).json({
+    data: routeProposalResponse({
+      decision: result.decision,
+      input,
+      idempotencyKey,
+      taskId: result.taskId,
+      auditLogId: result.auditLogId,
+      idempotentReplay: false
+    })
+  });
+}));
 
 intakeRouter.get("/", asyncHandler(async (req, res) => {
   const query = intakeQuerySchema.parse(req.query);
@@ -400,6 +642,130 @@ function item(input: Omit<IntakeItem, "id" | "createdAt" | "updatedAt"> & { crea
     id: `${input.sourceModel}:${input.sourceId}`,
     createdAt: input.createdAt.toISOString(),
     updatedAt: input.updatedAt.toISOString()
+  };
+}
+
+function authActor(req: { auth?: { authType: "user" | "api_key"; userId?: string; apiKeyId?: string } }) {
+  if (req.auth?.authType === "user") {
+    return {
+      actorType: "user" as const,
+      actorId: req.auth.userId ?? null
+    };
+  }
+
+  return {
+    actorType: "agent" as const,
+    actorId: req.auth?.apiKeyId ?? null
+  };
+}
+
+function asInputJson(value: Record<string, unknown>) {
+  return value as Prisma.InputJsonObject;
+}
+
+function routeProposalExternalId(input: RouteProposalInput, idempotencyKey: string) {
+  return [
+    "intake-route",
+    input.sourceModel,
+    input.sourceId,
+    input.targetDepartmentKey,
+    input.classification,
+    idempotencyKey
+  ].join(":");
+}
+
+async function findIntakeSource(
+  client: IntakeTx | typeof prisma,
+  workspaceId: string,
+  sourceModel: IntakeSourceModel,
+  sourceId: string
+) {
+  switch (sourceModel) {
+    case "AgentEventOutbox":
+      return client.agentEventOutbox.findFirst({ where: { id: sourceId, workspaceId } });
+    case "ProviderEventInbox":
+      return client.providerEventInbox.findFirst({ where: { id: sourceId, workspaceId } });
+    case "GoogleDriveFile":
+      return client.googleDriveFile.findFirst({ where: { id: sourceId, workspaceId } });
+    case "ExternalContainerMapping":
+      return client.externalContainerMapping.findFirst({ where: { id: sourceId, workspaceId } });
+    case "ExternalFieldMapping":
+      return client.externalFieldMapping.findFirst({ where: { id: sourceId, workspaceId } });
+    case "Approval":
+      return client.approval.findFirst({ where: { id: sourceId, workspaceId } });
+    case "Risk":
+      return client.risk.findFirst({ where: { id: sourceId, workspaceId } });
+    case "Task":
+      return client.task.findFirst({ where: { id: sourceId, workspaceId } });
+    case "Event":
+      return client.event.findFirst({ where: { id: sourceId, workspaceId } });
+  }
+}
+
+function sourceTitle(source: unknown, sourceModel: IntakeSourceModel) {
+  const sourceRecord = source && typeof source === "object" ? source as Record<string, unknown> : {};
+  const value = sourceRecord.title
+    ?? sourceRecord.name
+    ?? sourceRecord.eventType
+    ?? sourceRecord.eventName
+    ?? sourceRecord.type
+    ?? sourceRecord.requestedForAction
+    ?? sourceRecord.id;
+  return `${value ? String(value) : sourceModel}`;
+}
+
+function routeProposalResponse(params: {
+  decision: {
+    id: string;
+    status: string;
+    createdAt: Date;
+  };
+  input: RouteProposalInput;
+  idempotencyKey: string;
+  taskId: string | null;
+  auditLogId: string | null;
+  idempotentReplay: boolean;
+}) {
+  return {
+    proposal: {
+      id: params.decision.id,
+      sourceModel: params.input.sourceModel,
+      sourceId: params.input.sourceId,
+      targetDepartmentKey: params.input.targetDepartmentKey as IntakeDepartmentKey,
+      classification: params.input.classification,
+      status: params.decision.status,
+      riskLevel: params.input.riskLevel,
+      createdAt: params.decision.createdAt.toISOString()
+    },
+    effects: {
+      sourceMutated: false,
+      agentEventAcknowledged: false,
+      providerStateMutated: false,
+      taskDraftCreated: Boolean(params.taskId),
+      ownerDecisionRequested: params.input.requestOwnerDecision,
+      auditRecorded: Boolean(params.auditLogId),
+      idempotentReplay: params.idempotentReplay
+    },
+    evidence: {
+      decisionId: params.decision.id,
+      taskId: params.taskId,
+      auditLogId: params.auditLogId,
+      idempotencyKey: params.idempotencyKey
+    },
+    blockedActions: [
+      {
+        action: "ack",
+        reason: "Use POST /v1/agent-events/:id/ack only after the owner or assigned department handles the item."
+      },
+      {
+        action: "provider_write",
+        reason: "Provider retry, scope, delete, and write actions stay in provider-specific guarded routes."
+      },
+      {
+        action: "commercial_or_legal_action",
+        reason: "Invoice, discount, payment, legal, and ads changes require their own approval-aware command contracts."
+      }
+    ]
   };
 }
 

@@ -13,6 +13,7 @@ export const capabilities = [
   "company-os:automation:execute",
   "mcp:read",
   "intake:read",
+  "intake:write",
   "relationships:read",
   "operating-graph:read",
   "operating-model:read",
@@ -114,7 +115,8 @@ export const adapterManifest = {
       { method: "GET", path: "/v1/mcp/manifest", capability: "mcp:read" }
     ],
     intake: [
-      { method: "GET", path: "/v1/intake", capability: "intake:read" }
+      { method: "GET", path: "/v1/intake", capability: "intake:read" },
+      { method: "POST", path: "/v1/intake/actions/propose-route", capability: "intake:write" }
     ],
     relationships: [
       { method: "GET", path: "/v1/relationships/graph", capability: "relationships:read" }

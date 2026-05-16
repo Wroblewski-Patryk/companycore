@@ -76,6 +76,15 @@ Last updated: 2026-05-16
   evidence and optional owner follow-up work, but it must not acknowledge agent
   events, retry providers, approve work, mutate provider scope, invoice,
   discount, delete, or execute legal/ads changes.
+  As of 2026-05-16, DMS-00-006 implemented that first safe route command:
+  `POST /v1/intake/actions/propose-route` creates proposal evidence through
+  `Decision`, `AuditLog`, `Event`, and optional `Task`; `intake:write` is now
+  exposed through capabilities and MCP; and the `00 Main` web panel can create
+  a proposal from an intake row. `npm run build:server`, `npm run build:web`,
+  and `npm run test:api` passed against a disposable PostgreSQL instance on
+  `127.0.0.1:55480`. Playwright proof on `http://127.0.0.1:3210` created a
+  route proposal, found no console errors or horizontal overflow, and confirmed
+  the source agent event remained `pending`.
 
 ## Product Decisions (Confirmed)
 - 2026-05-07: CRM and pipelines are separate domain concepts. Pipelines are a

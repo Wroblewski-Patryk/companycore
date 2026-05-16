@@ -179,6 +179,14 @@ continue from repository files alone:
   legal/ads changes. DMS-00-006 should implement this command with source
   allowlisting, canonical department validation, idempotency, API tests, and
   browser proof.
+- `docs/planning/dms-00-global-intake-route-command-task-contract.md`: DMS-00
+  first proposal-command implementation handoff. As of 2026-05-16,
+  `POST /v1/intake/actions/propose-route` exists, creates proposal evidence
+  through `Decision`, `AuditLog`, `Event`, and optional `Task`, and is exposed
+  through `intake:write` in the HTTP/MCP capability map. The `00 Main` web
+  panel has a `Propose route` action that normalizes old inferred department
+  hints into canonical `00`-`12` keys. API tests and Playwright proof passed;
+  the command still deliberately leaves source systems unchanged.
 - `docs/planning/dms-money-pricing-discount-source-inventory.md`: active
   pricing and discount source handoff for Sales, Finance, Relationships,
   Innovation, and Paperclip. As of 2026-05-16, Google Drive source review

@@ -2,17 +2,16 @@
 
 ## Ready
 
-- DMS-00-006 First safe global intake route/classification command.
+- DMS-00-007 Paperclip background output review proof.
   - Stage: planning
-  - Owner: Backend Builder + Frontend Builder + Security
+  - Owner: AI Integration + QA/Test + Frontend Builder
   - Priority: P1
   - Source:
-    `docs/planning/dms-00-global-intake-classify-route-command-contract.md`
-  - Goal: implement `POST /v1/intake/actions/propose-route` as an audited
-    proposal command that validates the source item and department, optionally
-    creates owner follow-up work, and leaves agent events, provider state,
-    approvals, finance, legal, invoice, discount, ads, and delete behavior
-    untouched.
+    `docs/planning/dms-00-global-intake-route-command-task-contract.md`
+  - Goal: prove a controlled Paperclip-like background item appears in
+    `00 Main`, receives a route proposal, remains source-safe, and can be
+    handed to the next department/system review without bypassing
+    CompanyCore.
 - DMS-SHELL-002 Department-specific subsystem registry.
   - Stage: planning
   - Owner: Frontend Builder + Product Docs
@@ -156,6 +155,23 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- DMS-00-006 First Safe Global Intake Route Command.
+  - Evidence: `POST /v1/intake/actions/propose-route` now validates source
+    allowlist, workspace ownership, canonical department keys, and idempotency;
+    creates proposal evidence through `Decision`, `AuditLog`, `Event`, and
+    optional `Task`; exposes `intake:write` in capabilities/MCP; and adds a
+    `Propose route` action to the `00 Main` web panel.
+  - Validation: `npm run build:server`, `npm run build:web`, and
+    `npm run test:api` passed with
+    `DATABASE_URL=postgresql://postgres@127.0.0.1:55480/postgres`.
+    Playwright browser proof on `http://127.0.0.1:3210` created a route
+    proposal from `/areas?area=00-ogolny&view=overview`, found no console
+    errors or horizontal overflow, and confirmed the source agent event
+    remained `pending`. Temporary validation backend and PostgreSQL processes
+    were stopped.
+  - Task contract:
+    `docs/planning/dms-00-global-intake-route-command-task-contract.md`.
 
 - DMS-00-005 Global Intake Classify/Route Command Contract.
   - Evidence:

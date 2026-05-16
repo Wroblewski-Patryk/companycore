@@ -113,6 +113,10 @@ function routeDescription(route: ManifestRoute) {
     return "Read the global 00 Main intake queue for agent output, provider signals, unassigned resources, approvals, risks, feedback, and routing candidates.";
   }
 
+  if (route.capability === "intake:write") {
+    return "Create proposal-only global intake classification and routing evidence without acknowledging agent events, mutating providers, approving work, invoicing, discounting, deleting, or executing commercial/legal actions.";
+  }
+
   if (route.capability === "relationships:read") {
     return "Read the workspace relationship graph with direct, inferred, provider-derived, review, and unsupported relationship context.";
   }

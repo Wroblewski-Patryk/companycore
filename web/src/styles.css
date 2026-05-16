@@ -1532,6 +1532,45 @@ label {
   color: #b87700;
 }
 
+.main-intake-proposal-action {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1px solid rgb(35 100 210 / 0.25);
+  border-radius: 999px;
+  background: #ffffff;
+  padding: 0.34rem 0.58rem;
+  color: #2364d2;
+  font-size: 0.66rem;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.main-intake-proposal-action:hover,
+.main-intake-proposal-action:focus-visible {
+  background: rgb(35 100 210 / 0.08);
+  outline: none;
+}
+
+.main-intake-proposal-action:disabled {
+  cursor: progress;
+  opacity: 0.68;
+}
+
+.main-intake-proposal-status {
+  color: #51627f;
+  font-weight: 800;
+}
+
+.main-intake-proposal-status.is-success {
+  color: #16845b;
+}
+
+.main-intake-proposal-status.is-error {
+  color: #a84242;
+}
+
 .operations-agent-packet > div:last-child {
   display: flex;
   flex-wrap: wrap;

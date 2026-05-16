@@ -88,6 +88,7 @@ export const agentKeyProfiles = [
       "agent-logs:write",
       "agent-events:read",
       "agent-events:ack",
+      "intake:write",
       "events:read"
     ]
   },
@@ -101,6 +102,7 @@ export const agentKeyProfiles = [
       ...mcpBaseScopes,
       "company-os:read",
       "intake:read",
+      "intake:write",
       "relationships:read",
       "company-os:workflow-definition:write",
       "company-os:workflow-definition:activate",

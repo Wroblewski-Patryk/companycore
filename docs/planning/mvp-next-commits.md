@@ -7,10 +7,6 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] DMS-00-006 First safe global intake route/classification command:
-      implement proposal-only classification and routing for `00 Main` without
-      acknowledging agent events, approving risky work, invoicing, discounting,
-      deleting, or mutating provider state.
 - [ ] DMS-07-001 Finance system spec:
       use the pricing and discount inventory to define the first Finance
       management board, read model, owner decisions, and security guardrails.
@@ -22,6 +18,10 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [ ] DMS-SHELL-002 Department-specific subsystem registry:
       add static config for `00`-`12` department purposes, subsystem tabs,
       blocked actions, and agent handoff copy on top of the shared shell.
+- [ ] DMS-00-007 Paperclip background output review proof:
+      prove a controlled Paperclip-like item appears in `00 Main`, receives a
+      route proposal, remains source-safe, and can be handed off to department
+      review without bypassing CompanyCore.
 - [ ] DMS-04-001 Operations real-data proof:
       run database-backed or production proof for the existing
       `/areas?area=04-operacje&view=overview` Operations Management System.
@@ -103,6 +103,16 @@ The section below is retained as execution evidence. It is not the active
 queue. Future work must start from `Active Queue`, `.codex/context/TASK_BOARD.md`,
 and `docs/operations/v1-function-coverage-ledger.csv`.
 
+- [x] DMS-00-006 First Safe Global Intake Route Command:
+      implemented proposal-only `POST /v1/intake/actions/propose-route`,
+      `intake:write`, MCP exposure, API tests, and the `00 Main` web
+      `Propose route` affordance. Validation passed with
+      `npm run build:server`, `npm run build:web`, and `npm run test:api`
+      against `postgresql://postgres@127.0.0.1:55480/postgres`; Playwright
+      proof on `http://127.0.0.1:3210` created a proposal while the source
+      agent event remained `pending`.
+      Task contract:
+      `docs/planning/dms-00-global-intake-route-command-task-contract.md`.
 - [x] DMS-00-005 Global Intake Classify/Route Command Contract:
       defined `POST /v1/intake/actions/propose-route` as the first safe future
       command layer for `00 Main`. The contract covers source allowlist,
