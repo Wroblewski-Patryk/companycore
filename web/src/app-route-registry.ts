@@ -20,6 +20,7 @@ export type AppRouteGroup = {
 };
 
 export const canonicalDashboardPath = "/dashboard";
+export const canonicalGeneralDashboardPath = "/areas?area=00-ogolny&view=overview";
 
 export const publicHomeRoute: AppRouteMeta = {
   id: "home",
@@ -51,13 +52,14 @@ export const appRouteGroups: AppRouteGroup[] = [
       {
         id: "dashboard",
         href: canonicalDashboardPath,
-        label: "Company map",
-        title: "Company Atlas",
+        label: "00 dashboard",
+        title: "00 Ogolny Dashboard",
         icon: "ph-map-trifold",
         aliases: ["/react-dashboard"],
         private: true,
         uxStage: "v1-canonical",
-        canonicalSource: "docs/ux/v1-simple-dashboard-canonical-spec-2026-05-15.md"
+        canonicalSource: "docs/architecture/autonomous-company-operating-system.md",
+        rebuildNote: "/dashboard is a compatibility alias that opens the 00 Ogolny selected-area dashboard."
       }
     ]
   },
@@ -261,10 +263,11 @@ export const appRoutes: AppRouteMeta[] = [
 ];
 
 function normalizeRoutePath(pathname: string) {
-  if (!pathname || pathname === "/") {
+  const pathOnly = pathname.split(/[?#]/)[0];
+  if (!pathOnly || pathOnly === "/") {
     return "/";
   }
-  return pathname.replace(/\/+$/, "") || "/";
+  return pathOnly.replace(/\/+$/, "") || "/";
 }
 
 export function routeMatches(route: Pick<AppRouteMeta, "href" | "aliases" | "match">, pathname: string) {
@@ -284,20 +287,25 @@ export function resolveRouteMeta(pathname: string) {
 }
 
 export function canonicalPostAuthPath(pathname?: string | null) {
-  if (!pathname) {
-    return canonicalDashboardPath;
+  const targetPath = pathname?.trim();
+  if (!targetPath) {
+    return canonicalGeneralDashboardPath;
   }
 
-  const route = resolveRouteMeta(pathname);
+  const route = resolveRouteMeta(targetPath);
   if (!route || route.private === false) {
-    return canonicalDashboardPath;
+    return canonicalGeneralDashboardPath;
   }
 
-  const currentPath = normalizeRoutePath(pathname);
+  if (route.id === "dashboard") {
+    return canonicalGeneralDashboardPath;
+  }
+
+  const currentPath = normalizeRoutePath(targetPath);
   const aliases = (route.aliases || []).map(normalizeRoutePath);
   if (currentPath === "/" || aliases.includes(currentPath)) {
     return route.href;
   }
 
-  return currentPath;
+  return targetPath.startsWith("/") ? targetPath : currentPath;
 }

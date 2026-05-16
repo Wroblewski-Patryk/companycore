@@ -13,6 +13,7 @@ the global business flow.
 This document extends:
 
 - `docs/architecture/system-architecture.md`
+- `docs/architecture/autonomous-company-operating-system.md`
 - `docs/architecture/companycore-business-module-map.md`
 - `docs/architecture/companycore-global-business-flow.md`
 - `docs/architecture/organizational-architecture-bridge.md`
@@ -74,6 +75,11 @@ Department shell
 Departments may have specialized subsystems, but they must reuse shared
 CompanyCore foundations: operating areas, tables, tasks, processes, pipelines,
 resources, knowledge, metrics, policies, events, audit, and MCP.
+
+The backend remains a company operating-system backend. AI agents are external
+clients through API/MCP, so department systems may expose agent packets and
+supervised commands, but they must not embed chatbot/personality/orchestration
+logic inside department modules.
 
 Do not create a separate application, database model, or provider-led workflow
 for each department unless a future architecture decision proves the shared

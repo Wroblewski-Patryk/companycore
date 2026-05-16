@@ -43,7 +43,7 @@
 ## In Progress
 
 - No active implementation task is currently in progress after the
-  DMS-01-005B production Strategy context smoke.
+  CC-AUDIT-001 `00/04/08` architecture and UX audit checkpoint.
 
 ## Blocked
 
@@ -124,6 +124,152 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- CC-AUDIT-001 00/04/08 architecture and UX audit.
+  - Evidence: `docs/planning/cc-00-04-08-architecture-ux-audit.md`
+    records delivered scope and gaps for `00 Ogolny`, `04 Operations`, and
+    `08 Assets`. `web/src/app-route-registry.ts` now makes
+    `/areas?area=00-ogolny&view=overview` the canonical post-auth dashboard,
+    preserves valid private query-string routes, and keeps `/dashboard` as a
+    compatibility alias. `web/src/main.tsx` redirects `/dashboard` into
+    `00 Ogolny` and points atlas/dashboard links there.
+  - Validation: `npm run build:web`; `npm run build:server`; Playwright
+    fallback rendered login -> `00 Ogolny`, `/dashboard` -> `00 Ogolny`,
+    desktop `04 Operations`, desktop `08 Assets`, and mobile `08 Assets`
+    against a temporary static React server with mocked already-verified read
+    packets. No console/page errors or mobile horizontal overflow were found.
+    Screenshots: `docs/ux/evidence/cc-audit-001-post-login-00-dashboard.png`,
+    `docs/ux/evidence/cc-audit-001-dashboard-alias-00.png`,
+    `docs/ux/evidence/cc-audit-001-04-operations.png`,
+    `docs/ux/evidence/cc-audit-001-08-assets-desktop.png`, and
+    `docs/ux/evidence/cc-audit-001-08-assets-mobile.png`. `git diff --check`
+    passed with line-ending warnings only; no validation-owned
+    `chrome-headless-shell` process or port `3227` server remained.
+- CC-UI-004 00/04/08 read-packet UI adoption.
+  - Evidence: selected-area UI now consumes the verified read packets for
+    `00 Main` route proposals, `04 Operations` work items, and `08 Assets`
+    resources. The panels reuse shared `CcDataTable`/`CcButton` paths and keep
+    writes blocked behind future command contracts.
+  - Validation: `npm run build:web`; Playwright rendered
+    `/areas?area=00-ogolny&view=overview`,
+    `/areas?area=04-operacje&view=overview`,
+    `/areas?area=08-zasoby&view=overview`, and mobile `08 Assets` through a
+    temporary local static server with mocked API packet responses for the
+    already verified endpoints. No console/page errors or horizontal overflow
+    were found. `git diff --check` passed with line-ending warnings only; no
+    validation-owned `chrome-headless-shell` process remained.
+  - Evidence screenshots:
+    `docs/ux/evidence/cc-ui-004-00-desktop.png`,
+    `docs/ux/evidence/cc-ui-004-04-desktop.png`,
+    `docs/ux/evidence/cc-ui-004-08-desktop.png`,
+    `docs/ux/evidence/cc-ui-004-08-mobile.png`.
+  - Task contract:
+    `docs/planning/cc-ui-004-00-04-08-read-packet-ui-adoption-task-contract.md`.
+
+- CC-08-002 Assets context read API.
+  - Evidence: `GET /v1/assets/context` now exposes a protected read-only
+    `08 Assets` packet over Drive files/folders, content snapshots, Resource
+    records, Knowledge Roots, Knowledge Items, operating-area scope, resource
+    taxonomy, AI-readiness labels, relations, cleanup summary, and blocked
+    provider actions. It is exposed through `assets:read` and MCP as a
+    read-risk tool.
+  - Validation: `npm run build:server`; `npm run test:api` against disposable
+    PostgreSQL on `127.0.0.1:55500`; validation-owned PostgreSQL stopped and
+    port closed.
+  - Task contract:
+    `docs/planning/cc-08-002-assets-context-read-api-task-contract.md`.
+
+- CC-04-002 Operations task read model v1.
+  - Evidence: `GET /v1/operations/work-items` now exposes a protected
+    read-only Operations work item packet over current tasks, hierarchy,
+    pipeline/stage/procedure evidence, dependencies, notes, events, agent log
+    evidence, project resources, scoped Operations Drive files, readiness gaps,
+    and blocked actions. It is exposed through `operations:read` and MCP as a
+    read-risk tool.
+  - Validation: `npm run build:server`; `npm run test:api` against disposable
+    PostgreSQL on `127.0.0.1:55499`; validation-owned PostgreSQL stopped and
+    port closed.
+  - Task contract:
+    `docs/planning/cc-04-002-operations-work-item-read-model-task-contract.md`.
+
+- CC-00-002 Route proposal lifecycle readback API.
+  - Evidence: `GET /v1/intake/route-proposals` now exposes read-only route
+    proposal lifecycle state from current `Decision`, optional `Task`,
+    `AuditLog`, and `Event` records. The route is available under
+    `intake:read`, appears in the MCP manifest as a read-risk tool, and
+    returns proposal evidence, effects, blocked actions, summary, and
+    read-only agent packet without acknowledging events, mutating providers,
+    approving proposals, discounting, invoicing, deleting, or executing
+    commercial/legal actions.
+  - Validation: `npm run build:server`; `npm run test:api` against disposable
+    PostgreSQL on `127.0.0.1:55498`; validation-owned PostgreSQL stopped and
+    port closed.
+  - Task contract:
+    `docs/planning/cc-00-002-route-proposal-lifecycle-readback-api-task-contract.md`.
+
+- CC-UI-003 Shared data table/list primitive.
+  - Evidence: `web/src/components/cc-data-table.tsx` adds `CcDataTable` with
+    loading, empty, error, density, pagination-ready controls, row actions,
+    and optional mobile card behavior. `web/src/react-route-kit.tsx` keeps the
+    existing `DataTable` export as a compatibility wrapper over the new
+    primitive.
+  - Validation: `npm run build:web`; `npx tsx -e` static render check;
+    Playwright local `/auth/login` route smoke with no console/page errors and
+    no horizontal overflow; `git diff --check`.
+  - Task contract:
+    `docs/planning/cc-ui-003-shared-data-table-list-primitive-task-contract.md`.
+
+- CC-UI-002 Shared action/button primitive.
+  - Evidence: `web/src/components/cc-button.tsx` adds `CcButton` over DaisyUI
+    `btn` with variants, size, icons, loading, disabled reason, href/button
+    behavior, and accessible labels. `web/src/react-route-kit.tsx` and
+    `web/src/main.tsx` adopt it in the shared notice and generic state panel.
+  - Validation: `npm run build:web`; `npx tsx -e` static render check;
+    Playwright local `/auth/login` route smoke with no console/page errors and
+    no horizontal overflow; `git diff --check`.
+  - Task contract:
+    `docs/planning/cc-ui-002-shared-action-button-primitive-task-contract.md`.
+
+- CC-UI-001 Shared component inventory for CompanyCore management UI.
+  - Evidence: `docs/planning/cc-ui-001-shared-component-inventory.md`
+    records current Shell, notice/state, table, card, button, badge, tab, and
+    form reuse/gaps from `web/src/main.tsx`, `web/src/react-route-kit.tsx`,
+    and `web/src/styles.css`. It defines the next shared primitives:
+    `CcButton`, `CcDataTable`, `CcStatePanel`, `CcCard`, `CcBadge`,
+    `CcTabs`, `CcField`, and `CcToolbar`.
+  - Validation: `git diff --check` passed.
+  - Task contract:
+    `docs/planning/cc-ui-001-shared-component-inventory-task-contract.md`.
+
+- CC-00-001 Route proposal lifecycle readback plan.
+  - Evidence:
+    `docs/planning/cc-00-001-route-proposal-lifecycle-readback-plan.md`
+    maps current intake route proposals to `Decision`, optional `Task`,
+    `AuditLog`, and `Event` readback, lifecycle states, UI requirements,
+    API/MCP constraints, and blocked actions.
+  - Validation: `git diff --check` passed.
+  - Task contract:
+    `docs/planning/cc-00-001-route-proposal-lifecycle-readback-task-contract.md`.
+
+- CC-04-001 Operations task model gap audit.
+  - Evidence:
+    `docs/planning/cc-04-001-operations-task-model-gap-audit.md` compares the
+    owner target Operations task model with current Task, Project, TaskList,
+    Pipeline, Stage, Procedure, Operations context, and UI coverage, and
+    recommends `CC-04-002` as a read-model-first runtime slice.
+  - Validation: `git diff --check` passed.
+  - Task contract:
+    `docs/planning/cc-04-001-operations-task-model-gap-audit-task-contract.md`.
+
+- CC-08-001 Assets/resource system spec.
+  - Evidence:
+    `docs/planning/cc-08-001-assets-resource-system-spec.md` defines the first
+    `08 Assets` board, resource taxonomy, AI-readiness labels, desktop/tablet/
+    mobile layout, blocked provider actions, and agent packet over existing
+    Google Drive, Resource, and knowledge foundations.
+  - Validation: `git diff --check` passed.
+  - Task contract:
+    `docs/planning/cc-08-001-assets-resource-system-spec-task-contract.md`.
 
 - DMS-03-006 Sales Management context and board.
   - Evidence:

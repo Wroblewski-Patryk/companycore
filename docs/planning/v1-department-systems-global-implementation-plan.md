@@ -31,6 +31,11 @@ The goal is a coherent minimal V1 where:
   primitives but each has a differentiated management board and mobile review
   experience for its own work model.
 
+As of 2026-05-16, the active owner-approved checkpoint is the
+`00 Main -> 04 Operations -> 08 Assets` operating loop. Use
+`docs/planning/companycore-00-04-08-operating-loop-plan.md` for the immediate
+queue before resuming the broader department sequence.
+
 ## V1 Success Definition
 
 CompanyCore V1 department systems are minimally working when:
@@ -294,21 +299,16 @@ Goal: prove the V1 minimal operating company loop locally and in production.
 
 ## First Executable NOW Queue
 
-The first tasks to activate from this plan are:
+The current active tasks are maintained in
+`docs/planning/companycore-00-04-08-operating-loop-plan.md`:
 
-1. `DMS-V1-000` - publish this global plan.
-2. `DMS-00-001` - design global intake and Paperclip output review contract.
-3. `DMS-MONEY-001` - completed by
-   `docs/planning/dms-money-pricing-discount-source-inventory.md`.
-4. `DMS-SHELL-001` - completed by
-   `docs/planning/dms-shell-001-shared-department-management-shell-task-contract.md`.
-5. `DMS-SHELL-002` - add department-specific subsystem registry and copy.
-6. `DMS-07-001` - completed by
-   `docs/planning/dms-07-finance-system-spec.md`.
-7. `DMS-03-005` - design discount/commercial exception read model for the
-   current-client `100%` discount case.
-8. `DMS-04-001` - run real database-backed or production proof for the current
-   `04 Operations` system.
+1. `CC-UI-001` - shared component inventory.
+2. `CC-00-001` - route proposal lifecycle readback plan.
+3. `CC-04-001` - Operations task model gap audit.
+4. `CC-08-001` - Assets/resource system spec.
+
+The original bootstrap tasks from this global plan are now historical or
+completed unless reactivated by a new task contract.
 
 ## Dependency Summary
 

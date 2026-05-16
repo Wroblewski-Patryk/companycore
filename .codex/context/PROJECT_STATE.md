@@ -12,6 +12,57 @@ Last updated: 2026-05-16
   import is complete for the numbered department roots; application completion
   audit found UX, security, data-completeness, documentation, maintainability,
   and deployment-proof finish work before the product can be called complete.
+  As of 2026-05-16, the owner-approved architecture direction is now recorded
+  explicitly: CompanyCore is the company operating system, while AI agents are
+  external API/MCP clients. The active near-term planning focus is the
+  `00 Main -> 04 Operations -> 08 Assets` operating loop, with shared
+  Tailwind/DaisyUI component primitives required before deeper route clutter
+  spreads. Sources:
+  `docs/architecture/autonomous-company-operating-system.md` and
+  `docs/planning/companycore-00-04-08-operating-loop-plan.md`.
+  The first loop checkpoint is complete: `CC-UI-001` documented shared
+  component gaps and primitive contracts; `CC-00-001` documented route
+  proposal lifecycle readback; `CC-04-001` audited Operations task model gaps;
+  and `CC-08-001` specified the first Assets/resource system. Next runtime
+  work started with `CC-UI-002`, which added the shared `CcButton` primitive
+  and minimal adoption in shared notice/state panel actions. `CC-UI-003` then
+  added `CcDataTable` with loading, empty, error, pagination-ready, row action,
+  density, and mobile-mode APIs while preserving the existing `DataTable`
+  export. `CC-00-002` then added verified read-only
+  `GET /v1/intake/route-proposals` lifecycle readback over proposal
+  decisions, optional task drafts, audit logs, and events, exposed through
+  `intake:read` and MCP as a read-risk tool. `CC-04-002` added verified
+  read-only `GET /v1/operations/work-items` over tasks, hierarchy,
+  workflow evidence, dependencies, notes, events, agent logs, resources, and
+  Operations Drive context, exposed through `operations:read` and MCP as a
+  read-risk tool. `CC-08-002` added verified read-only
+  `GET /v1/assets/context` over Drive files/folders, content snapshots,
+  Resource records, Knowledge Roots, Knowledge Items, taxonomy, AI-readiness
+  labels, relations, cleanup summary, and blocked provider actions, exposed
+  through `assets:read` and MCP as a read-risk tool. `CC-UI-004` completed
+  the next runtime slice: the selected-area UI now consumes
+  `/v1/intake/route-proposals`, `/v1/operations/work-items`, and
+  `/v1/assets/context` for `00 Main`, `04 Operations`, and `08 Assets` using
+  shared `CcDataTable` and `CcButton` paths. `npm run build:web` passed;
+  Playwright rendered desktop `00`, desktop `04`, desktop `08`, and mobile
+  `08` with no console/page errors or horizontal overflow. Evidence:
+  `docs/ux/evidence/cc-ui-004-00-desktop.png`,
+  `docs/ux/evidence/cc-ui-004-04-desktop.png`,
+  `docs/ux/evidence/cc-ui-004-08-desktop.png`, and
+  `docs/ux/evidence/cc-ui-004-08-mobile.png`. `CC-AUDIT-001` then audited
+  `00 Ogolny`, `04 Operations`, and `08 Assets` against the accepted
+  architecture and closed the main post-login UX gap: successful auth and the
+  `/dashboard` compatibility route now open
+  `/areas?area=00-ogolny&view=overview`. `npm run build:web`,
+  `npm run build:server`, Playwright fallback route proof, and
+  `git diff --check` passed. Evidence screenshots are
+  `docs/ux/evidence/cc-audit-001-post-login-00-dashboard.png`,
+  `docs/ux/evidence/cc-audit-001-dashboard-alias-00.png`,
+  `docs/ux/evidence/cc-audit-001-04-operations.png`,
+  `docs/ux/evidence/cc-audit-001-08-assets-desktop.png`, and
+  `docs/ux/evidence/cc-audit-001-08-assets-mobile.png`. The next runtime
+  slice should continue V1 department systems with `05 Relationships` unless
+  deployment smoke is selected first.
   As of 2026-05-16, the V1 unified React settings module, AOG-BE-001
   selected-area operating graph read API, V1 operations cockpit, and V1
   tasks/delivery workbench are locally verified. `npm run test:api` passed

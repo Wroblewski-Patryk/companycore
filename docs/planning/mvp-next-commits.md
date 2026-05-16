@@ -7,21 +7,60 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] Continue V1 department systems with the next bounded slice:
-      use `docs/planning/dms-13-systems-v1-implementation-audit.md` as the
-      selection handoff. `03 Sales` read packet and board is now complete
-      locally; preferred next order is `05 Relationships`,
-      `02 Product And Delivery`, `08 Assets`, `09 Technology/AI`, and
-      `10 Legal/Standards`; use a guarded `04 Operations`
-      planning/procedure command contract only if operations writes become
-      more urgent.
-      Each next slice must follow the DMS-V1-005 differentiated-system rule:
-      shared CompanyCore shell, but a department-specific primary board,
-      desktop layout, mobile attention queue, source records, state model, and
-      Paperclip boundaries.
+- [ ] Continue V1 department systems with `DMS-NEXT-004` Relationships
+      Management read packet and board, unless deployment smoke is selected
+      first. The owner-approved `00 Main -> 04 Operations -> 08 Assets`
+      checkpoint is now complete through shared primitives, verified backend
+      packets, selected-area UI adoption, and CC-AUDIT-001 post-login
+      dashboard proof. CompanyCore remains the operating system; AI agents
+      remain external API/MCP clients.
 
 ### NEXT
 
+- [x] Planning checkpoint completed for the first `00 -> 04 -> 08` wave:
+      `CC-UI-001`, `CC-00-001`, `CC-04-001`, and `CC-08-001` are documented
+      and verified with `git diff --check`.
+- [x] Runtime checkpoint completed for `CC-UI-002`: shared `CcButton` exists
+      and has minimal route-kit/web adoption with web build and smoke proof.
+- [x] Runtime checkpoint completed for `CC-UI-003`: shared `CcDataTable`
+      exists with compatibility wrapper, pagination-ready API, state handling,
+      row actions, density, and mobile mode with web build and smoke proof.
+- [x] Runtime checkpoint completed for `CC-00-002`: route proposal lifecycle
+      readback API exists at `GET /v1/intake/route-proposals`, is exposed
+      through `intake:read` and MCP as a read-risk tool, and is verified with
+      `npm run test:api` against disposable PostgreSQL.
+- [x] Runtime checkpoint completed for `CC-04-002`: Operations work item read
+      model exists at `GET /v1/operations/work-items`, is exposed through
+      `operations:read` and MCP as a read-risk tool, and is verified with
+      `npm run test:api` against disposable PostgreSQL.
+- [x] Runtime checkpoint completed for `CC-08-002`: Assets context read API
+      exists at `GET /v1/assets/context`, is exposed through `assets:read` and
+      MCP as a read-risk tool, and is verified with `npm run test:api` against
+      disposable PostgreSQL.
+- [x] Runtime checkpoint completed for `CC-UI-004`: selected-area UI consumes
+      the verified `00`, `04`, and `08` read packets using shared
+      `CcDataTable`/`CcButton` paths. `npm run build:web` passed; Playwright
+      rendered desktop `00`, desktop `04`, desktop `08`, and mobile `08`
+      with no console/page errors or horizontal overflow. Evidence:
+      `docs/ux/evidence/cc-ui-004-00-desktop.png`,
+      `docs/ux/evidence/cc-ui-004-04-desktop.png`,
+      `docs/ux/evidence/cc-ui-004-08-desktop.png`, and
+      `docs/ux/evidence/cc-ui-004-08-mobile.png`.
+- [x] Architecture/UX audit checkpoint completed for `CC-AUDIT-001`:
+      `00 Ogolny` is now the canonical post-login dashboard at
+      `/areas?area=00-ogolny&view=overview`, `/dashboard` is a compatibility
+      alias into that same view, and rendered proof covered login, alias,
+      desktop `04`, desktop `08`, and mobile `08`. Evidence:
+      `docs/ux/evidence/cc-audit-001-post-login-00-dashboard.png`,
+      `docs/ux/evidence/cc-audit-001-dashboard-alias-00.png`,
+      `docs/ux/evidence/cc-audit-001-04-operations.png`,
+      `docs/ux/evidence/cc-audit-001-08-assets-desktop.png`, and
+      `docs/ux/evidence/cc-audit-001-08-assets-mobile.png`.
+- [ ] Continue V1 department systems after the `00 -> 04 -> 08` loop has the
+      next planning/runtime checkpoint. `03 Sales` read packet and board is
+      complete locally; the broader sequence remains `05 Relationships`,
+      `02 Product And Delivery`, `09 Technology/AI`, and `10 Legal/Standards`,
+      with writes behind explicit command contracts.
 - [ ] Use the CompanyCore business module map during upcoming product intake:
       `docs/architecture/companycore-business-module-map.md` now classifies
       future work as native core, provider-backed, future adapter, or derived

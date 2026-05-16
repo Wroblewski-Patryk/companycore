@@ -18,6 +18,7 @@ It answers:
 
 This document complements:
 
+- `docs/architecture/autonomous-company-operating-system.md`
 - `docs/architecture/department-management-systems-architecture.md`
 - `docs/architecture/companycore-business-module-map.md`
 - `docs/architecture/companycore-global-business-flow.md`
@@ -51,6 +52,12 @@ The best business systems share a few patterns:
 | Integrations behind adapters | Provider details stay in settings/adapters; department systems speak company language. |
 | Metrics tied to decisions | Metrics should trigger decisions, tasks, risks, controls, or improvements. |
 | Progressive depth | The owner should scan at executive level, then drill into records, workflow runs, tasks, and audit. |
+
+The updated architecture boundary is explicit: CompanyCore is not the AI.
+CompanyCore is the shared operating system that humans and AI agents use.
+Department packets and MCP tools make the system AI-compatible, but department
+backends must not become agent runtimes, chatbots, or autonomous AI
+orchestrators.
 
 CompanyCore V1 should therefore build one shared department system foundation
 and then specialize each department as its own management product. The
@@ -1101,17 +1108,26 @@ Output:
 
 ## Recommended Build Order
 
-The first 12 department implementations should be ordered by existing backend
-readiness and company leverage:
+The current owner-approved near-term focus is `00 Main`, `04 Operations`, then
+`08 Assets`. That focus takes priority over the older generic next-department
+selection because it creates the minimal company operating loop:
+
+```text
+00 Main intake/routing -> 04 Operations execution/control
+  -> 08 Assets evidence/source readiness
+```
+
+After that focused loop is stable, continue with the broader department order
+based on existing backend readiness and company leverage:
 
 | Order | Department | Reason |
 | --- | --- | --- |
 | 1 | 04 Operations | Already started; strongest fit with procedures, approvals, dependencies, and routines. |
 | 2 | 01 Strategy | Needed to steer every other department and agent proposal. |
 | 3 | 03 Sales | Connects market, CRM, discovery, offers, and revenue pipeline. |
-| 4 | 05 Relationships | Reuses clients, stakeholders, interactions, and relationship graph. |
-| 5 | 02 Product And Delivery | Connects promises, tasks, artifacts, and acceptance. |
-| 6 | 08 Assets And Resources | Makes Drive/resources/knowledge usable by humans and agents. |
+| 4 | 08 Assets And Resources | Makes Drive/resources/knowledge usable by humans and agents after `00` and `04`. |
+| 5 | 05 Relationships | Reuses clients, stakeholders, interactions, and relationship graph. |
+| 6 | 02 Product And Delivery | Connects promises, tasks, artifacts, and acceptance. |
 | 7 | 09 Technology And AI Infrastructure | Gives agents, MCP, integrations, and deployment health a management home. |
 | 8 | 10 Legal, Standards, And Decisions | Raises safety for AI, sales, finance, and workflow writes. |
 | 9 | 12 Executive Management | Consolidates approvals, escalation, and portfolio control after lower-level signals exist. |

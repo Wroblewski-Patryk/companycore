@@ -1536,6 +1536,7 @@ label {
 .area-operating-board,
 .area-capability-focus,
 .operations-system-panel,
+.assets-management-board,
 .area-detail-rail,
 .area-evidence-panel {
   padding: 1rem;
@@ -1713,7 +1714,8 @@ label {
 }
 
 .operations-system-panel,
-.main-intake-system-panel {
+.main-intake-system-panel,
+.assets-management-board {
   display: grid;
   gap: 0.9rem;
   overflow: hidden;
@@ -2065,6 +2067,67 @@ label {
 
 .main-intake-proposal-status.is-error {
   color: #a84242;
+}
+
+.department-packet-panel {
+  display: grid;
+  gap: 0.72rem;
+  min-width: 0;
+  border: 1px solid rgb(216 225 238 / 0.82);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.9);
+  padding: 0.78rem;
+}
+
+.department-packet-metrics {
+  display: grid;
+  gap: 0.5rem;
+}
+
+@media (min-width: 760px) {
+  .department-packet-metrics {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.department-packet-metrics span {
+  min-width: 0;
+  border: 1px solid rgb(216 225 238 / 0.82);
+  border-radius: 8px;
+  background: rgb(248 250 252 / 0.78);
+  padding: 0.56rem 0.65rem;
+}
+
+.department-packet-metrics small,
+.department-packet-metrics strong,
+.table-strong {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.department-packet-metrics small {
+  color: #51627f;
+  font-size: 0.6rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.department-packet-metrics strong {
+  margin-top: 0.1rem;
+  color: #071225;
+  font-size: 1rem;
+  font-weight: 950;
+}
+
+.table-strong {
+  color: #071225;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.assets-decision-strip {
+  margin-top: 0;
 }
 
 .operations-agent-packet > div:last-child {

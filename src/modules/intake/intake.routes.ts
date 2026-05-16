@@ -52,6 +52,14 @@ const routeProposalSchema = z.object({
   idempotencyKey: z.string().trim().min(1).max(220).optional()
 }).strict();
 
+const routeProposalReadQuerySchema = z.object({
+  status: z.string().min(1).optional(),
+  sourceModel: z.enum(sourceModels).optional(),
+  targetDepartmentKey: z.enum(canonicalDepartmentKeys).optional(),
+  risk: z.enum(riskLevels).optional(),
+  limit: z.coerce.number().int().min(1).max(200).default(100)
+}).strict();
+
 type IntakeItem = {
   id: string;
   family: string;
@@ -264,6 +272,93 @@ intakeRouter.post("/actions/propose-route", asyncHandler(async (req, res) => {
       auditLogId: result.auditLogId,
       idempotentReplay: false
     })
+  });
+}));
+
+intakeRouter.get("/route-proposals", asyncHandler(async (req, res) => {
+  const query = routeProposalReadQuerySchema.parse(req.query);
+  const workspaceId = req.auth!.workspaceId;
+  const decisions = await prisma.decision.findMany({
+    where: {
+      workspaceId,
+      source: "companycore_intake",
+      status: query.status
+    },
+    orderBy: { createdAt: "desc" },
+    take: query.limit
+  });
+  const decisionIds = decisions.map((decision) => decision.id);
+  const externalIds = decisions
+    .map((decision) => decision.externalId)
+    .filter((externalId): externalId is string => Boolean(externalId));
+
+  const [tasks, auditLogs, events] = await Promise.all([
+    prisma.task.findMany({
+      where: {
+        workspaceId,
+        source: "companycore_intake",
+        externalId: { in: externalIds }
+      },
+      orderBy: { createdAt: "desc" }
+    }),
+    prisma.auditLog.findMany({
+      where: {
+        workspaceId,
+        action: "intake.route_proposed",
+        resourceType: "intake_route_proposal",
+        resourceId: { in: decisionIds }
+      },
+      orderBy: { createdAt: "desc" }
+    }),
+    prisma.event.findMany({
+      where: {
+        workspaceId,
+        type: "intake.route_proposed",
+        resourceType: "intake_route_proposal",
+        resourceId: { in: decisionIds }
+      },
+      orderBy: { createdAt: "desc" }
+    })
+  ]);
+
+  const taskByExternalId = new Map(tasks.map((task) => [task.externalId, task]));
+  const auditByResourceId = firstBy(auditLogs, (auditLog) => auditLog.resourceId);
+  const eventByResourceId = firstBy(events, (event) => event.resourceId);
+
+  const proposals = decisions
+    .map((decision) => {
+      const auditLog = auditByResourceId.get(decision.id) ?? null;
+      const event = eventByResourceId.get(decision.id) ?? null;
+      const input = routeProposalInputFromAudit(auditLog?.inputPayload);
+      const task = decision.externalId ? taskByExternalId.get(decision.externalId) ?? null : null;
+
+      return routeProposalReadbackResponse({
+        decision,
+        auditLog,
+        event,
+        task,
+        input
+      });
+    })
+    .filter((proposal) => !query.sourceModel || proposal.proposal.sourceModel === query.sourceModel)
+    .filter((proposal) => !query.targetDepartmentKey || proposal.proposal.targetDepartmentKey === query.targetDepartmentKey)
+    .filter((proposal) => !query.risk || proposal.proposal.riskLevel === query.risk);
+
+  res.json({
+    data: {
+      summary: summarizeRouteProposals(proposals),
+      proposals,
+      agentPacket: {
+        mode: "read_only",
+        allowedActions: [
+          "read_route_proposals",
+          "inspect_route_proposal_evidence",
+          "propose_replacement_route",
+          "create_follow_up_task_through_existing_intake_command"
+        ],
+        blockedActions: routeProposalBlockedActions()
+      }
+    }
   });
 }));
 
@@ -639,6 +734,23 @@ function asInputJson(value: Record<string, unknown>) {
   return value as Prisma.InputJsonObject;
 }
 
+function asRecord(value: unknown) {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {};
+}
+
+function firstBy<T>(items: T[], keyFor: (item: T) => string | null | undefined) {
+  const map = new Map<string, T>();
+  for (const item of items) {
+    const key = keyFor(item);
+    if (key && !map.has(key)) {
+      map.set(key, item);
+    }
+  }
+  return map;
+}
+
 function routeProposalExternalId(input: RouteProposalInput, idempotencyKey: string) {
   return [
     "intake-route",
@@ -690,6 +802,22 @@ function sourceTitle(source: unknown, sourceModel: IntakeSourceModel) {
   return `${value ? String(value) : sourceModel}`;
 }
 
+function routeProposalInputFromAudit(value: unknown) {
+  const payload = asRecord(value);
+  return {
+    sourceModel: sourceModels.includes(payload.sourceModel as IntakeSourceModel) ? payload.sourceModel as IntakeSourceModel : null,
+    sourceId: typeof payload.sourceId === "string" ? payload.sourceId : null,
+    targetDepartmentKey: canonicalDepartmentKeys.includes(payload.targetDepartmentKey as IntakeDepartmentKey) ? payload.targetDepartmentKey as IntakeDepartmentKey : null,
+    classification: classificationValues.includes(payload.classification as RouteProposalInput["classification"]) ? payload.classification as RouteProposalInput["classification"] : null,
+    reason: typeof payload.reason === "string" ? payload.reason : null,
+    proposedNextAction: typeof payload.proposedNextAction === "string" ? payload.proposedNextAction : null,
+    riskLevel: riskLevels.includes(payload.riskLevel as RouteProposalInput["riskLevel"]) ? payload.riskLevel as RouteProposalInput["riskLevel"] : null,
+    requestOwnerDecision: typeof payload.requestOwnerDecision === "boolean" ? payload.requestOwnerDecision : null,
+    idempotencyKey: typeof payload.idempotencyKey === "string" ? payload.idempotencyKey : null,
+    sourceTitle: typeof payload.sourceTitle === "string" ? payload.sourceTitle : null
+  };
+}
+
 function routeProposalResponse(params: {
   decision: {
     id: string;
@@ -728,20 +856,121 @@ function routeProposalResponse(params: {
       auditLogId: params.auditLogId,
       idempotencyKey: params.idempotencyKey
     },
-    blockedActions: [
-      {
-        action: "ack",
-        reason: "Use POST /v1/agent-events/:id/ack only after the owner or assigned department handles the item."
-      },
-      {
-        action: "provider_write",
-        reason: "Provider retry, scope, delete, and write actions stay in provider-specific guarded routes."
-      },
-      {
-        action: "commercial_or_legal_action",
-        reason: "Invoice, discount, payment, legal, and ads changes require their own approval-aware command contracts."
-      }
-    ]
+    blockedActions: routeProposalBlockedActions()
+  };
+}
+
+function routeProposalReadbackResponse(params: {
+  decision: {
+    id: string;
+    title: string;
+    rationale: string | null;
+    outcome: string | null;
+    status: string;
+    externalId: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+  input: ReturnType<typeof routeProposalInputFromAudit>;
+  task: { id: string; title: string; status: string; createdAt: Date } | null;
+  auditLog: { id: string; correlationId: string; createdAt: Date } | null;
+  event: { id: string; correlationId: string | null; createdAt: Date } | null;
+}) {
+  const lifecycleState = params.decision.status === "proposed" && params.task
+    ? "task_draft_created"
+    : params.decision.status;
+
+  return {
+    proposal: {
+      id: params.decision.id,
+      title: params.decision.title,
+      sourceModel: params.input.sourceModel,
+      sourceId: params.input.sourceId,
+      sourceTitle: params.input.sourceTitle,
+      targetDepartmentKey: params.input.targetDepartmentKey,
+      classification: params.input.classification,
+      status: params.decision.status,
+      lifecycleState,
+      riskLevel: params.input.riskLevel,
+      reason: params.input.reason ?? params.decision.rationale,
+      proposedNextAction: params.input.proposedNextAction ?? params.decision.outcome,
+      ownerDecisionRequested: params.input.requestOwnerDecision,
+      createdAt: params.decision.createdAt.toISOString(),
+      updatedAt: params.decision.updatedAt.toISOString()
+    },
+    effects: {
+      sourceMutated: false,
+      agentEventAcknowledged: false,
+      providerStateMutated: false,
+      taskDraftCreated: Boolean(params.task),
+      ownerDecisionRequested: Boolean(params.input.requestOwnerDecision),
+      auditRecorded: Boolean(params.auditLog),
+      eventRecorded: Boolean(params.event)
+    },
+    evidence: {
+      decisionId: params.decision.id,
+      taskId: params.task?.id ?? null,
+      taskStatus: params.task?.status ?? null,
+      auditLogId: params.auditLog?.id ?? null,
+      eventId: params.event?.id ?? null,
+      correlationId: params.auditLog?.correlationId ?? params.event?.correlationId ?? null,
+      idempotencyKey: params.input.idempotencyKey,
+      externalId: params.decision.externalId
+    },
+    allowedActions: [
+      "read",
+      "inspect_evidence",
+      "propose_replacement_route",
+      "create_follow_up_task"
+    ],
+    blockedActions: routeProposalBlockedActions()
+  };
+}
+
+function routeProposalBlockedActions() {
+  return [
+    {
+      action: "ack",
+      reason: "Use POST /v1/agent-events/:id/ack only after the owner or assigned department handles the item."
+    },
+    {
+      action: "provider_write",
+      reason: "Provider retry, scope, delete, and write actions stay in provider-specific guarded routes."
+    },
+    {
+      action: "approval_decision",
+      reason: "Approvals require a dedicated approval decision command and proper authority."
+    },
+    {
+      action: "commercial_or_legal_action",
+      reason: "Invoice, discount, payment, legal, and ads changes require their own approval-aware command contracts."
+    }
+  ];
+}
+
+function summarizeRouteProposals(proposals: Array<ReturnType<typeof routeProposalReadbackResponse>>) {
+  const byStatus: Record<string, number> = {};
+  const byTargetDepartment: Record<string, number> = {};
+  const byRisk: Record<string, number> = {};
+
+  for (const proposal of proposals) {
+    byStatus[proposal.proposal.lifecycleState] = (byStatus[proposal.proposal.lifecycleState] ?? 0) + 1;
+    if (proposal.proposal.targetDepartmentKey) {
+      byTargetDepartment[proposal.proposal.targetDepartmentKey] = (byTargetDepartment[proposal.proposal.targetDepartmentKey] ?? 0) + 1;
+    }
+    if (proposal.proposal.riskLevel) {
+      byRisk[proposal.proposal.riskLevel] = (byRisk[proposal.proposal.riskLevel] ?? 0) + 1;
+    }
+  }
+
+  return {
+    total: proposals.length,
+    withTaskDraft: proposals.filter((proposal) => proposal.effects.taskDraftCreated).length,
+    withAuditEvidence: proposals.filter((proposal) => proposal.effects.auditRecorded).length,
+    withEventEvidence: proposals.filter((proposal) => proposal.effects.eventRecorded).length,
+    byStatus,
+    byTargetDepartment,
+    byRisk
   };
 }
 

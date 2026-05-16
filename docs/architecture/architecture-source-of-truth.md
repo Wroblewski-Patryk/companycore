@@ -62,6 +62,7 @@ architecture may be insufficient. The agent must not self-approve the change.
 At minimum, keep these files aligned:
 
 - `docs/architecture/system-architecture.md`
+- `docs/architecture/autonomous-company-operating-system.md`
 - `docs/architecture/tech-stack.md`
 - `docs/architecture/organizational-architecture-bridge.md`
 - `docs/architecture/companycore-business-module-map.md`
@@ -88,6 +89,8 @@ The approved v1 direction is:
 
 - API-first product foundation with a minimal owner-only web console for v1
   ClickUp setup
+- CompanyCore is the company operating system, not an embedded AI system;
+  humans use web UI and AI agents use API/MCP as external clients
 - PostgreSQL is the source of truth
 - API is the supported access layer for agents, automations, future dashboards,
   and future mobile clients

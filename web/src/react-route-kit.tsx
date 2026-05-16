@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { appRouteGroups, resolveRouteMeta, routeMatches } from "./app-route-registry";
+import { CcButton } from "./components/cc-button";
+import { CcDataTable, type CcDataTableProps, type CcTableColumn } from "./components/cc-data-table";
 
 export type IntegrationState = {
   configured: boolean;
@@ -103,12 +105,7 @@ export type DashboardState =
 
 export type NoticeTone = "info" | "success" | "warning" | "error";
 
-export type TableColumn<Row> = {
-  key: string;
-  header: string;
-  cell: (row: Row) => React.ReactNode;
-  className?: string;
-};
+export type TableColumn<Row> = CcTableColumn<Row>;
 
 export type TaskRecord = {
   id: string;
@@ -1942,7 +1939,7 @@ export function LocalNotice({
         <p className="text-sm leading-6">{detail}</p>
       </div>
       {action ? (
-        <a className="btn btn-sm" href={action.href}>{action.label}</a>
+        <CcButton href={action.href} size="sm">{action.label}</CcButton>
       ) : null}
     </div>
   );
@@ -1952,46 +1949,17 @@ export function DataTable<Row extends { id: string }>({
   columns,
   rows,
   emptyTitle,
-  emptyDetail
-}: {
-  columns: Array<TableColumn<Row>>;
-  rows: Row[];
-  emptyTitle: string;
-  emptyDetail: string;
-}) {
-  if (rows.length === 0) {
-    return (
-      <div className="rounded-company border border-dashed border-base-300 bg-base-200/45 p-5">
-        <LocalNotice
-          tone="info"
-          title={emptyTitle}
-          detail={emptyDetail}
-        />
-      </div>
-    );
-  }
-
+  emptyDetail,
+  ...tableProps
+}: CcDataTableProps<Row>) {
   return (
-    <div className="react-table-shell max-w-full overflow-x-auto rounded-company border border-base-300 bg-base-100">
-      <table className="table table-zebra table-pin-rows min-w-[640px]">
-        <thead>
-          <tr>
-            {columns.map((column) => (
-              <th className={column.className} key={column.key}>{column.header}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.id}>
-              {columns.map((column) => (
-                <td className={column.className} key={column.key}>{column.cell(row)}</td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <CcDataTable
+      columns={columns}
+      emptyDetail={emptyDetail}
+      emptyTitle={emptyTitle}
+      rows={rows}
+      {...tableProps}
+    />
   );
 }
 

@@ -19,6 +19,7 @@ export const capabilities = [
   "relationships:read",
   "sales:read",
   "operations:read",
+  "assets:read",
   "strategy:read",
   "operating-graph:read",
   "operating-model:read",
@@ -121,6 +122,7 @@ export const adapterManifest = {
     ],
     intake: [
       { method: "GET", path: "/v1/intake", capability: "intake:read" },
+      { method: "GET", path: "/v1/intake/route-proposals", capability: "intake:read" },
       { method: "POST", path: "/v1/intake/actions/propose-route", capability: "intake:write" }
     ],
     commercialExceptions: [
@@ -136,7 +138,11 @@ export const adapterManifest = {
       { method: "GET", path: "/v1/sales/context", capability: "sales:read" }
     ],
     operations: [
-      { method: "GET", path: "/v1/operations/context", capability: "operations:read" }
+      { method: "GET", path: "/v1/operations/context", capability: "operations:read" },
+      { method: "GET", path: "/v1/operations/work-items", capability: "operations:read" }
+    ],
+    assets: [
+      { method: "GET", path: "/v1/assets/context", capability: "assets:read" }
     ],
     strategy: [
       { method: "GET", path: "/v1/strategy/context", capability: "strategy:read" }

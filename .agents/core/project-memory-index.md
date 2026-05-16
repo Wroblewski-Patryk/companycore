@@ -85,6 +85,46 @@ continue from repository files alone:
   Access and autonomy, and Audit and feedback. Future Paperclip work should
   first close the business-plan/context-to-task loop through existing
   knowledge, task, ClickUp, MCP, event, approval, and audit foundations.
+- `docs/architecture/autonomous-company-operating-system.md`: accepted
+  explicit architecture boundary from 2026-05-16. CompanyCore is the company
+  operating system, not an embedded AI system. Humans use responsive web UI;
+  AI agents use API/MCP as external clients. Backend modules must not become
+  chatbots, personality engines, monolithic AI orchestrators, or raw provider
+  bypasses. The active near-term product loop is `00 Main -> 04 Operations ->
+  08 Assets`, supported by shared Tailwind/DaisyUI component primitives and
+  scoped task contracts.
+- `docs/planning/cc-ui-001-shared-component-inventory.md`,
+  `docs/planning/cc-00-001-route-proposal-lifecycle-readback-plan.md`,
+  `docs/planning/cc-04-001-operations-task-model-gap-audit.md`, and
+  `docs/planning/cc-08-001-assets-resource-system-spec.md`: completed first
+  planning/analysis checkpoint for the owner-approved `00 Main -> 04
+  Operations -> 08 Assets` loop. These files define shared UI primitive
+  requirements, route proposal readback, Operations task model gaps, and the
+  first Assets/resource board/read-packet contract. Next runtime work starts
+  with `CC-UI-002`, then `CC-UI-003`, `CC-00-002`, `CC-04-002`, and
+  `CC-08-002`. As of the same date, `CC-UI-002` has implemented the first
+  shared runtime primitive, `CcButton`, in `web/src/components/cc-button.tsx`;
+  future UI work should reuse it instead of direct DaisyUI button markup.
+  `CC-UI-003` has also implemented `CcDataTable` in
+  `web/src/components/cc-data-table.tsx`; future record/table views should use
+  that primitive or the compatible `DataTable` export from `react-route-kit`.
+  `CC-00-002` has implemented verified read-only route proposal lifecycle
+  readback at `GET /v1/intake/route-proposals`, exposed through `intake:read`
+  and MCP as a read-risk tool. `CC-04-002` has implemented verified read-only
+  Operations work item readback at `GET /v1/operations/work-items`, exposed
+  through `operations:read` and MCP as a read-risk tool. `CC-08-002` has
+  implemented verified read-only Assets context readback at
+  `GET /v1/assets/context`, exposed through `assets:read` and MCP as a
+  read-risk tool. `CC-UI-004` has completed the first selected-area UI
+  adoption checkpoint: `00 Main`, `04 Operations`, and `08 Assets` consume
+  those verified packets using shared `CcDataTable`/`CcButton` paths, with
+  web build and desktop/mobile rendered proof. `CC-AUDIT-001` then audited the
+  three priority sections against the accepted architecture and fixed the main
+  UX/routing mismatch: successful auth and `/dashboard` now open
+  `/areas?area=00-ogolny&view=overview`, making `00 Ogolny` the post-login
+  company dashboard while keeping `/dashboard` as a compatibility alias. Next
+  V1 department work should start from `05 Relationships` unless deployment
+  smoke is selected first.
 - `docs/architecture/companycore-business-module-map.md`: accepted
   model-level module map for scaling CompanyCore as the bridge for operating
   the company. It classifies future work as native core, provider-backed,
@@ -383,8 +423,9 @@ continue from repository files alone:
   ownership contract. As of 2026-05-15, user-facing web routes are React-owned
   and served from the Vite bundle in `public/react/index.html`. The legacy
   vanilla owner console files under `public/` are removed from active runtime
-  ownership. `/dashboard` is the canonical authenticated post-login route, and
-  `web/src/app-route-registry.ts` is the React route metadata source for
+  ownership. As of CC-AUDIT-001, `/areas?area=00-ogolny&view=overview` is the
+  canonical authenticated post-login route and `/dashboard` is a compatibility
+  alias. `web/src/app-route-registry.ts` is the React route metadata source for
   groups, aliases, shell navigation, and post-auth redirect normalization.
   `/areas` remains the all-areas workbench, while
   `/areas?area=:areaKey&view=:viewId` is the canonical selected-department

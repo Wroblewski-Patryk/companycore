@@ -110,7 +110,7 @@ function routeDescription(route: ManifestRoute) {
   }
 
   if (route.capability === "intake:read") {
-    return "Read the global 00 Main intake queue for agent output, provider signals, unassigned resources, approvals, risks, feedback, and routing candidates.";
+    return "Read the global 00 Main intake queue and route proposal lifecycle evidence for agent output, provider signals, unassigned resources, approvals, risks, feedback, and routing candidates.";
   }
 
   if (route.capability === "intake:write") {
@@ -135,6 +135,10 @@ function routeDescription(route: ManifestRoute) {
 
   if (route.capability === "operations:read") {
     return "Read the 04 Operations management context for procedures, dependencies, approvals, business functions, operational tasks, and safe agent handoff.";
+  }
+
+  if (route.capability === "assets:read") {
+    return "Read the 08 Assets and Resources context for files, folders, resources, knowledge, AI-readiness labels, relations, and blocked provider actions.";
   }
 
   if (route.capability === "strategy:read") {

@@ -8,6 +8,7 @@ import { agentLogsRouter } from "./modules/agent-logs/agent-logs.routes";
 import { agentEventsRouter } from "./modules/agent-events/agent-events.routes";
 import { agentsRouter } from "./modules/agents/agents.routes";
 import { apiKeysRouter } from "./modules/api-keys/api-keys.routes";
+import { assetsRouter } from "./modules/assets/assets.routes";
 import { authRouter } from "./modules/auth/auth.routes";
 import { clientsRouter } from "./modules/clients/clients.routes";
 import { companyOsRouter } from "./modules/company-os/company-os.routes";
@@ -41,6 +42,7 @@ import { workspacesRouter } from "./modules/workspaces/workspaces.routes";
 
 function mountProtectedRoutes(router: Router) {
   router.use("/projects", projectsRouter);
+  router.use("/assets", assetsRouter);
   router.use("/company-os", companyOsRouter);
   router.use("/commercial-exceptions", commercialExceptionsRouter);
   router.use("/connection", connectionRouter);

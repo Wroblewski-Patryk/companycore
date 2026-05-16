@@ -655,6 +655,13 @@ test("CompanyCore v1 protected API flow", async () => {
     && tool.requiresApproval === false
   )));
   assert.ok(mcpManifestWithIntakeBody.data.tools.some((tool) => (
+    tool.name === "companycore_get_intake_route_proposals"
+    && tool.path === "/v1/intake/route-proposals"
+    && tool.capability === "intake:read"
+    && tool.riskLevel === "read"
+    && tool.requiresApproval === false
+  )));
+  assert.ok(mcpManifestWithIntakeBody.data.tools.some((tool) => (
     tool.name === "companycore_post_intake_actions_propose_route"
     && tool.path === "/v1/intake/actions/propose-route"
     && tool.capability === "intake:write"
@@ -773,6 +780,79 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(repeatedRouteProposalBody.data.proposal.id, routeProposalBody.data.proposal.id);
   assert.equal(repeatedRouteProposalBody.data.effects.idempotentReplay, true);
   assert.equal(repeatedRouteProposalBody.data.evidence.taskId, routeProposalBody.data.evidence.taskId);
+
+  const routeProposalReadback = await request("/v1/intake/route-proposals?targetDepartmentKey=03-sprzedaz&limit=20", {
+    headers: authA
+  });
+  assert.equal(routeProposalReadback.status, 200);
+  const routeProposalReadbackBody = routeProposalReadback.body as {
+    data: {
+      summary: {
+        total: number;
+        withTaskDraft: number;
+        withAuditEvidence: number;
+        withEventEvidence: number;
+        byTargetDepartment: Record<string, number>;
+      };
+      proposals: Array<{
+        proposal: {
+          id: string;
+          sourceModel: string;
+          sourceId: string;
+          targetDepartmentKey: string;
+          lifecycleState: string;
+          riskLevel: string;
+          ownerDecisionRequested: boolean;
+        };
+        effects: {
+          sourceMutated: boolean;
+          agentEventAcknowledged: boolean;
+          providerStateMutated: boolean;
+          taskDraftCreated: boolean;
+          auditRecorded: boolean;
+          eventRecorded: boolean;
+        };
+        evidence: {
+          decisionId: string;
+          taskId: string | null;
+          auditLogId: string | null;
+          eventId: string | null;
+          correlationId: string | null;
+        };
+        blockedActions: Array<{ action: string; reason: string }>;
+      }>;
+      agentPacket: {
+        mode: string;
+        blockedActions: Array<{ action: string }>;
+      };
+    };
+  };
+  const readbackProposal = routeProposalReadbackBody.data.proposals.find((proposal) => proposal.proposal.id === proposalDecision.id);
+  assert.ok(readbackProposal);
+  assert.equal(readbackProposal.proposal.sourceModel, "AgentEventOutbox");
+  assert.equal(readbackProposal.proposal.sourceId, paperclipIntakeEvent.id);
+  assert.equal(readbackProposal.proposal.targetDepartmentKey, "03-sprzedaz");
+  assert.equal(readbackProposal.proposal.lifecycleState, "task_draft_created");
+  assert.equal(readbackProposal.proposal.riskLevel, "medium");
+  assert.equal(readbackProposal.proposal.ownerDecisionRequested, true);
+  assert.equal(readbackProposal.effects.sourceMutated, false);
+  assert.equal(readbackProposal.effects.agentEventAcknowledged, false);
+  assert.equal(readbackProposal.effects.providerStateMutated, false);
+  assert.equal(readbackProposal.effects.taskDraftCreated, true);
+  assert.equal(readbackProposal.effects.auditRecorded, true);
+  assert.equal(readbackProposal.effects.eventRecorded, true);
+  assert.equal(readbackProposal.evidence.taskId, routeProposalBody.data.evidence.taskId);
+  assert.equal(readbackProposal.evidence.auditLogId, routeProposalBody.data.evidence.auditLogId);
+  assert.ok(readbackProposal.evidence.eventId);
+  assert.ok(readbackProposal.evidence.correlationId);
+  assert.ok(routeProposalReadbackBody.data.summary.total >= 1);
+  assert.ok(routeProposalReadbackBody.data.summary.withTaskDraft >= 1);
+  assert.ok(routeProposalReadbackBody.data.summary.withAuditEvidence >= 1);
+  assert.ok(routeProposalReadbackBody.data.summary.withEventEvidence >= 1);
+  assert.ok(routeProposalReadbackBody.data.summary.byTargetDepartment["03-sprzedaz"] >= 1);
+  assert.equal(routeProposalReadbackBody.data.agentPacket.mode, "read_only");
+  assert.ok(routeProposalReadbackBody.data.agentPacket.blockedActions.some((action) => action.action === "provider_write"));
+  assert.ok(readbackProposal.blockedActions.some((action) => action.action === "approval_decision"));
 
   const foreignRouteProposal = await request("/v1/intake/actions/propose-route", {
     method: "POST",
@@ -1304,11 +1384,28 @@ test("CompanyCore v1 protected API flow", async () => {
       status: "active"
     }
   });
+  const operationsProject = await prisma.project.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Operations execution project",
+      description: "Work item project context for Operations.",
+      status: "active"
+    }
+  });
+  const operationsTaskList = await prisma.taskList.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      projectId: operationsProject.id,
+      name: "Operations backlog",
+      status: "active"
+    }
+  });
   const operationsResource = await prisma.resource.create({
     data: {
       workspaceId: ownerA.workspace.id,
       type: "system",
-      name: "Operations calendar"
+      name: "Operations calendar",
+      relatedProjectId: operationsProject.id
     }
   });
   const operationsDependency = await prisma.dependency.create({
@@ -1336,10 +1433,127 @@ test("CompanyCore v1 protected API flow", async () => {
   const operationsTask = await prisma.task.create({
     data: {
       workspaceId: ownerA.workspace.id,
+      projectId: operationsProject.id,
+      taskListId: operationsTaskList.id,
       title: "Operations procedure review",
       description: "Review SOP, dependency, and approval context.",
       status: "in_progress",
       priority: "high"
+    }
+  });
+  const operationsTaskDependency = await prisma.dependency.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      dependencyType: "task_blocker",
+      fromEntityType: "task",
+      fromEntityId: operationsTask.id,
+      toEntityType: "procedure",
+      toEntityId: operationsProcedure.id,
+      status: "blocked",
+      metadata: { blocker: "Procedure review is waiting on owner confirmation." }
+    }
+  });
+  const operationsTaskNote = await prisma.note.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      taskId: operationsTask.id,
+      projectId: operationsProject.id,
+      content: "Operations work item needs procedure evidence before execution.",
+      status: "active"
+    }
+  });
+  const operationsTaskEvent = await prisma.event.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      type: "operations.task.reviewed",
+      source: "companycore",
+      taskId: operationsTask.id,
+      resourceType: "task",
+      resourceId: operationsTask.id,
+      correlationId: "operations-work-item-proof-001"
+    }
+  });
+  const operationsPipeline = await prisma.pipeline.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Operations execution pipeline",
+      purpose: "Move operational work through review and execution.",
+      status: "active"
+    }
+  });
+  const operationsPipelineStage = await prisma.pipelineStage.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      pipelineId: operationsPipeline.id,
+      procedureId: operationsProcedure.id,
+      name: "Review",
+      status: "active",
+      position: 1
+    }
+  });
+  const operationsPipelineRun = await prisma.pipelineRun.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      pipelineId: operationsPipeline.id,
+      currentStageId: operationsPipelineStage.id,
+      initiatedByType: "user",
+      status: "running",
+      linkedTaskIds: [operationsTask.id],
+      linkedProjectId: operationsProject.id,
+      correlationId: "operations-work-item-proof-001"
+    }
+  });
+  const operationsStageRun = await prisma.stageRun.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      pipelineRunId: operationsPipelineRun.id,
+      pipelineStageId: operationsPipelineStage.id,
+      status: "running",
+      approvalStatus: "pending"
+    }
+  });
+  const operationsAgent = await prisma.agent.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Operations reviewer",
+      role: "operations-review"
+    }
+  });
+  const operationsAgentLog = await prisma.agentLog.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      agentId: operationsAgent.id,
+      level: "info",
+      message: "Reviewed operations task evidence.",
+      metadata: { taskId: operationsTask.id }
+    }
+  });
+  const existingOperationsArea = await prisma.operatingArea.findFirst({
+    where: { workspaceId: ownerA.workspace.id, key: "operations-administration" }
+  });
+  const operationsArea = existingOperationsArea ?? await prisma.operatingArea.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      key: "operations-administration",
+      name: "Operations Administration",
+      description: "Operations area for work item evidence.",
+      position: 4,
+      isSystem: true
+    }
+  });
+  const createdOperationsArea = !existingOperationsArea;
+  const operationsDriveFile = await prisma.googleDriveFile.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      operatingAreaId: operationsArea.id,
+      provider: "google_drive",
+      externalId: "operations-work-item-proof-drive-file",
+      name: "Operations SOP",
+      description: "Procedure evidence for operations work items.",
+      mimeType: "application/vnd.google-apps.document",
+      webViewLink: "https://drive.example/operations-sop",
+      syncStatus: "synced",
+      scanStatus: "scanned"
     }
   });
   const foreignOperationsProcedure = await prisma.procedure.create({
@@ -1435,13 +1649,408 @@ test("CompanyCore v1 protected API flow", async () => {
     && tool.riskLevel === "read"
     && tool.requiresApproval === false
   )));
+  assert.ok(operationsMcpManifestBody.data.tools.some((tool) => (
+    tool.name === "companycore_get_operations_work_items"
+    && tool.path === "/v1/operations/work-items"
+    && tool.capability === "operations:read"
+    && tool.riskLevel === "read"
+    && tool.requiresApproval === false
+  )));
 
+  const operationsWorkItemCountsBefore = {
+    tasks: await prisma.task.count({ where: { workspaceId: ownerA.workspace.id } }),
+    dependencies: await prisma.dependency.count({ where: { workspaceId: ownerA.workspace.id } }),
+    pipelineRuns: await prisma.pipelineRun.count({ where: { workspaceId: ownerA.workspace.id } }),
+    notes: await prisma.note.count({ where: { workspaceId: ownerA.workspace.id } }),
+    events: await prisma.event.count({ where: { workspaceId: ownerA.workspace.id } }),
+    agentLogs: await prisma.agentLog.count({ where: { workspaceId: ownerA.workspace.id } }),
+    googleDriveFiles: await prisma.googleDriveFile.count({ where: { workspaceId: ownerA.workspace.id } })
+  };
+  const operationsWorkItems = await request("/v1/operations/work-items?limit=50", { headers: authA });
+  assert.equal(operationsWorkItems.status, 200);
+  const operationsWorkItemsBody = operationsWorkItems.body as {
+    data: {
+      department: { canonicalKey: string; backendAreaKey: string };
+      summary: {
+        total: number;
+        open: number;
+        blocked: number;
+        withPipelineRunEvidence: number;
+        withDependencyEvidence: number;
+        withNotes: number;
+        withEvents: number;
+      };
+      operationsKnowledge: {
+        area: { id: string; key: string } | null;
+        driveFiles: Array<{ id: string; name: string; syncStatus: string; scanStatus: string }>;
+      };
+      workItems: Array<{
+        task: { id: string; normalizedStatus: string; completedAt: string | null; estimatedDurationMinutes: number | null };
+        responsibility: { status: string; evidence: Array<{ id: string; agentName: string | null }> };
+        hierarchy: { project: { id: string; name: string } | null; taskList: { id: string; name: string } | null };
+        operationalContext: { pipelineRuns: Array<{ id: string; currentStage: { procedure: { id: string } | null } | null; stageRuns: Array<{ id: string }> }> };
+        readiness: { blocked: boolean; dependencyCount: number; riskLevel: string; missingFields: string[] };
+        evidence: {
+          notes: Array<{ id: string; content: string }>;
+          events: Array<{ id: string; correlationId: string | null }>;
+          dependencies: Array<{ id: string; status: string }>;
+          projectResources: Array<{ id: string; name: string }>;
+        };
+      }>;
+      agentPacket: { mode: string; allowedActions: string[]; blockedActions: Array<{ action: string }> };
+    };
+  };
+  assert.equal(operationsWorkItemsBody.data.department.canonicalKey, "04-operacje");
+  assert.equal(operationsWorkItemsBody.data.department.backendAreaKey, "operations-administration");
+  assert.ok(operationsWorkItemsBody.data.summary.total >= 1);
+  assert.ok(operationsWorkItemsBody.data.summary.open >= 1);
+  assert.ok(operationsWorkItemsBody.data.summary.blocked >= 1);
+  assert.ok(operationsWorkItemsBody.data.summary.withPipelineRunEvidence >= 1);
+  assert.ok(operationsWorkItemsBody.data.summary.withDependencyEvidence >= 1);
+  assert.ok(operationsWorkItemsBody.data.summary.withNotes >= 1);
+  assert.ok(operationsWorkItemsBody.data.summary.withEvents >= 1);
+  assert.ok(operationsWorkItemsBody.data.operationsKnowledge.driveFiles.some((file) => (
+    file.id === operationsDriveFile.id
+    && file.syncStatus === "synced"
+    && file.scanStatus === "scanned"
+  )));
+  const operationsWorkItem = operationsWorkItemsBody.data.workItems.find((item) => item.task.id === operationsTask.id);
+  assert.ok(operationsWorkItem);
+  assert.equal(operationsWorkItem.task.normalizedStatus, "in_progress");
+  assert.equal(operationsWorkItem.task.estimatedDurationMinutes, null);
+  assert.equal(operationsWorkItem.responsibility.status, "not_modeled");
+  assert.ok(operationsWorkItem.responsibility.evidence.some((log) => log.id === operationsAgentLog.id));
+  assert.equal(operationsWorkItem.hierarchy.project?.id, operationsProject.id);
+  assert.equal(operationsWorkItem.hierarchy.taskList?.id, operationsTaskList.id);
+  assert.ok(operationsWorkItem.operationalContext.pipelineRuns.some((run) => (
+    run.id === operationsPipelineRun.id
+    && run.currentStage?.procedure?.id === operationsProcedure.id
+    && run.stageRuns.some((stageRun) => stageRun.id === operationsStageRun.id)
+  )));
+  assert.equal(operationsWorkItem.readiness.blocked, true);
+  assert.equal(operationsWorkItem.readiness.dependencyCount, 1);
+  assert.equal(operationsWorkItem.readiness.riskLevel, "high");
+  assert.ok(operationsWorkItem.readiness.missingFields.includes("owner_user_id"));
+  assert.ok(operationsWorkItem.evidence.dependencies.some((dependency) => dependency.id === operationsTaskDependency.id));
+  assert.ok(operationsWorkItem.evidence.notes.some((note) => note.id === operationsTaskNote.id));
+  assert.ok(operationsWorkItem.evidence.events.some((event) => event.id === operationsTaskEvent.id));
+  assert.ok(operationsWorkItem.evidence.projectResources.some((resource) => resource.id === operationsResource.id));
+  assert.equal(operationsWorkItemsBody.data.agentPacket.mode, "read_only");
+  assert.ok(operationsWorkItemsBody.data.agentPacket.allowedActions.includes("read_operations_work_items"));
+  assert.ok(operationsWorkItemsBody.data.agentPacket.blockedActions.some((action) => action.action === "assign_human_or_agent"));
+  const operationsWorkItemCountsAfter = {
+    tasks: await prisma.task.count({ where: { workspaceId: ownerA.workspace.id } }),
+    dependencies: await prisma.dependency.count({ where: { workspaceId: ownerA.workspace.id } }),
+    pipelineRuns: await prisma.pipelineRun.count({ where: { workspaceId: ownerA.workspace.id } }),
+    notes: await prisma.note.count({ where: { workspaceId: ownerA.workspace.id } }),
+    events: await prisma.event.count({ where: { workspaceId: ownerA.workspace.id } }),
+    agentLogs: await prisma.agentLog.count({ where: { workspaceId: ownerA.workspace.id } }),
+    googleDriveFiles: await prisma.googleDriveFile.count({ where: { workspaceId: ownerA.workspace.id } })
+  };
+  assert.deepEqual(operationsWorkItemCountsAfter, operationsWorkItemCountsBefore);
+  const foreignOperationsWorkItems = await request("/v1/operations/work-items?limit=50", { headers: authB });
+  assert.equal(foreignOperationsWorkItems.status, 200);
+  const foreignOperationsWorkItemsBody = foreignOperationsWorkItems.body as {
+    data: { workItems: Array<{ task: { id: string } }> };
+  };
+  assert.ok(!foreignOperationsWorkItemsBody.data.workItems.some((item) => item.task.id === operationsTask.id));
+
+  await prisma.googleDriveFile.delete({ where: { id: operationsDriveFile.id } });
+  if (createdOperationsArea) {
+    await prisma.operatingArea.delete({ where: { id: operationsArea.id } });
+  }
+  await prisma.stageRun.delete({ where: { id: operationsStageRun.id } });
+  await prisma.pipelineRun.delete({ where: { id: operationsPipelineRun.id } });
+  await prisma.pipelineStage.delete({ where: { id: operationsPipelineStage.id } });
+  await prisma.pipeline.delete({ where: { id: operationsPipeline.id } });
+  await prisma.agentLog.delete({ where: { id: operationsAgentLog.id } });
+  await prisma.agent.delete({ where: { id: operationsAgent.id } });
+  await prisma.event.delete({ where: { id: operationsTaskEvent.id } });
+  await prisma.note.delete({ where: { id: operationsTaskNote.id } });
+  await prisma.dependency.delete({ where: { id: operationsTaskDependency.id } });
   await prisma.task.delete({ where: { id: operationsTask.id } });
   await prisma.approval.delete({ where: { id: operationsApproval.id } });
   await prisma.dependency.delete({ where: { id: operationsDependency.id } });
   await prisma.resource.delete({ where: { id: operationsResource.id } });
+  await prisma.taskList.delete({ where: { id: operationsTaskList.id } });
+  await prisma.project.delete({ where: { id: operationsProject.id } });
   await prisma.businessFunction.delete({ where: { id: operationsBusinessFunction.id } });
   await prisma.procedure.deleteMany({ where: { id: { in: [operationsProcedure.id, foreignOperationsProcedure.id] } } });
+
+  const existingAssetsArea = await prisma.operatingArea.findFirst({
+    where: { workspaceId: ownerA.workspace.id, key: "assets-storage" }
+  });
+  const assetsContextArea = existingAssetsArea ?? await prisma.operatingArea.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      key: "assets-storage",
+      name: "Assets Storage",
+      description: "Assets and resources area.",
+      position: 8,
+      isSystem: true
+    }
+  });
+  const createdAssetsArea = !existingAssetsArea;
+  const assetsFolder = await prisma.operatingFolder.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      areaId: assetsContextArea.id,
+      key: "assets-proof-folder",
+      name: "Assets Proof Folder",
+      description: "Folder used by Assets context proof."
+    }
+  });
+  const assetsKnowledgeRoot = await prisma.knowledgeRoot.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      areaId: assetsContextArea.id,
+      folderId: assetsFolder.id,
+      provider: "google_drive",
+      name: "Assets knowledge root",
+      locator: { externalId: "assets-root" }
+    }
+  });
+  const assetsDriveFile = await prisma.googleDriveFile.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      operatingAreaId: assetsContextArea.id,
+      operatingFolderId: assetsFolder.id,
+      knowledgeRootId: assetsKnowledgeRoot.id,
+      provider: "google_drive",
+      externalId: "assets-context-proof-drive-file",
+      name: "Company architecture.md",
+      description: "Architecture knowledge used by agents through CompanyCore.",
+      mimeType: "text/markdown",
+      webViewLink: "https://drive.example/company-architecture",
+      syncStatus: "synced",
+      scanStatus: "scanned"
+    }
+  });
+  const assetsDriveSnapshot = await prisma.googleDriveContentSnapshot.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      googleDriveFileId: assetsDriveFile.id,
+      sourceRevisionId: "assets-context-proof-revision",
+      contentKind: "markdown",
+      extractedText: "CompanyCore is the company operating system.",
+      summary: "Architecture source of truth for CompanyCore.",
+      scanStatus: "completed"
+    }
+  });
+  const assetsProject = await prisma.project.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Assets readiness project",
+      status: "active"
+    }
+  });
+  const assetsResource = await prisma.resource.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      type: "architecture_doc",
+      name: "CompanyCore architecture document",
+      url: "https://docs.example/companycore-architecture",
+      accessLevel: "workspace",
+      relatedProjectId: assetsProject.id,
+      metadata: {
+        summary: "Architecture document ready for external AI context.",
+        tags: ["architecture", "companycore"],
+        extractedEntities: ["CompanyCore"]
+      }
+    }
+  });
+  const assetsArtifact = await prisma.artifact.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      resourceId: assetsResource.id,
+      artifactType: "document",
+      name: "Architecture artifact",
+      status: "active"
+    }
+  });
+  const assetsClient = await prisma.client.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Assets Client",
+      status: "active"
+    }
+  });
+  const assetsAgent = await prisma.agent.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Assets reader",
+      role: "knowledge"
+    }
+  });
+  const assetsKnowledgeItem = await prisma.knowledgeItem.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      title: "Assets knowledge note",
+      itemType: "knowledge_note",
+      summary: "Knowledge item linked to project, client, and agent.",
+      sourceProvider: "companycore",
+      sourceExternalId: "assets-context-proof-knowledge",
+      url: "https://docs.example/assets-knowledge",
+      projectId: assetsProject.id,
+      clientId: assetsClient.id,
+      agentId: assetsAgent.id,
+      status: "active"
+    }
+  });
+  const existingForeignAssetsArea = await prisma.operatingArea.findFirst({
+    where: { workspaceId: ownerB.workspace.id, key: "assets-storage" }
+  });
+  const foreignAssetsArea = existingForeignAssetsArea ?? await prisma.operatingArea.create({
+    data: {
+      workspaceId: ownerB.workspace.id,
+      key: "assets-storage",
+      name: "Foreign Assets Storage",
+      position: 8,
+      isSystem: true
+    }
+  });
+  const createdForeignAssetsArea = !existingForeignAssetsArea;
+  const foreignAssetsDriveFile = await prisma.googleDriveFile.create({
+    data: {
+      workspaceId: ownerB.workspace.id,
+      operatingAreaId: foreignAssetsArea.id,
+      provider: "google_drive",
+      externalId: "foreign-assets-context-proof-drive-file",
+      name: "Foreign assets file",
+      mimeType: "text/plain",
+      syncStatus: "synced",
+      scanStatus: "scanned"
+    }
+  });
+  const unauthenticatedAssetsContext = await request("/v1/assets/context");
+  assert.equal(unauthenticatedAssetsContext.status, 401);
+  const assetsCountsBefore = {
+    driveFiles: await prisma.googleDriveFile.count({ where: { workspaceId: ownerA.workspace.id } }),
+    snapshots: await prisma.googleDriveContentSnapshot.count({ where: { workspaceId: ownerA.workspace.id } }),
+    resources: await prisma.resource.count({ where: { workspaceId: ownerA.workspace.id } }),
+    knowledgeItems: await prisma.knowledgeItem.count({ where: { workspaceId: ownerA.workspace.id } }),
+    knowledgeRoots: await prisma.knowledgeRoot.count({ where: { workspaceId: ownerA.workspace.id } })
+  };
+  const assetsContext = await request("/v1/assets/context?areaKey=assets-storage&limit=50", { headers: authA });
+  assert.equal(assetsContext.status, 200);
+  const assetsContextBody = assetsContext.body as {
+    data: {
+      department: { canonicalKey: string; backendAreaKey: string };
+      summary: {
+        totalItems: number;
+        driveFiles: number;
+        contentSnapshots: number;
+        resources: number;
+        knowledgeItems: number;
+        knowledgeRoots: number;
+        aiReadyItems: number;
+        needsCleanup: number;
+        readiness: Record<string, number>;
+        byType: Record<string, number>;
+      };
+      folders: Array<{ id: string; name: string }>;
+      knowledgeRoots: Array<{ id: string; name: string; area: { key: string } | null }>;
+      knowledgeItems: Array<{ id: string; title: string; relations: { project: { id: string } | null; client: { id: string } | null; agent: { id: string } | null } }>;
+      resources: Array<{
+        id: string;
+        sourceModel: string;
+        sourceId: string;
+        name: string;
+        resourceType: string;
+        aiCompatibility: {
+          readiness: string;
+          summary: string | null;
+          aiContextReady: boolean;
+          contentSnapshot: { id: string; hasExtractedText: boolean; hasSummary: boolean } | null;
+        };
+        relations: { projects: Array<{ id: string }>; operatingArea?: { id: string; key: string } | null };
+        artifacts?: Array<{ id: string; name: string }>;
+      }>;
+      agentPacket: { mode: string; allowedActions: string[]; blockedActions: Array<{ action: string }> };
+    };
+  };
+  assert.equal(assetsContextBody.data.department.canonicalKey, "08-zasoby");
+  assert.equal(assetsContextBody.data.department.backendAreaKey, "assets-storage");
+  assert.ok(assetsContextBody.data.summary.totalItems >= 2);
+  assert.ok(assetsContextBody.data.summary.driveFiles >= 1);
+  assert.ok(assetsContextBody.data.summary.contentSnapshots >= 1);
+  assert.ok(assetsContextBody.data.summary.resources >= 1);
+  assert.ok(assetsContextBody.data.summary.knowledgeItems >= 1);
+  assert.ok(assetsContextBody.data.summary.knowledgeRoots >= 1);
+  assert.ok(assetsContextBody.data.summary.aiReadyItems >= 2);
+  assert.ok(assetsContextBody.data.summary.readiness.ai_context_ready >= 2);
+  assert.ok(assetsContextBody.data.summary.byType.markdown >= 1);
+  assert.ok(assetsContextBody.data.summary.byType.architecture_doc >= 1);
+  assert.ok(assetsContextBody.data.knowledgeRoots.some((root) => root.id === assetsKnowledgeRoot.id && root.area?.key === "assets-storage"));
+  assert.ok(assetsContextBody.data.knowledgeItems.some((item) => (
+    item.id === assetsKnowledgeItem.id
+    && item.relations.project?.id === assetsProject.id
+    && item.relations.client?.id === assetsClient.id
+    && item.relations.agent?.id === assetsAgent.id
+  )));
+  const driveAssetItem = assetsContextBody.data.resources.find((item) => item.sourceId === assetsDriveFile.id);
+  assert.ok(driveAssetItem);
+  assert.equal(driveAssetItem.sourceModel, "GoogleDriveFile");
+  assert.equal(driveAssetItem.resourceType, "markdown");
+  assert.equal(driveAssetItem.aiCompatibility.readiness, "ai_context_ready");
+  assert.equal(driveAssetItem.aiCompatibility.contentSnapshot?.id, assetsDriveSnapshot.id);
+  assert.equal(driveAssetItem.aiCompatibility.contentSnapshot?.hasExtractedText, true);
+  assert.equal(driveAssetItem.relations.operatingArea?.key, "assets-storage");
+  const resourceAssetItem = assetsContextBody.data.resources.find((item) => item.sourceId === assetsResource.id);
+  assert.ok(resourceAssetItem);
+  assert.equal(resourceAssetItem.sourceModel, "Resource");
+  assert.equal(resourceAssetItem.resourceType, "architecture_doc");
+  assert.equal(resourceAssetItem.aiCompatibility.aiContextReady, true);
+  assert.ok(resourceAssetItem.relations.projects.some((project) => project.id === assetsProject.id));
+  assert.ok(resourceAssetItem.artifacts?.some((artifact) => artifact.id === assetsArtifact.id));
+  assert.equal(assetsContextBody.data.agentPacket.mode, "read_only");
+  assert.ok(assetsContextBody.data.agentPacket.allowedActions.includes("read_assets_context"));
+  assert.ok(assetsContextBody.data.agentPacket.blockedActions.some((action) => action.action === "delete_move_or_share_provider_file"));
+  const assetsCountsAfter = {
+    driveFiles: await prisma.googleDriveFile.count({ where: { workspaceId: ownerA.workspace.id } }),
+    snapshots: await prisma.googleDriveContentSnapshot.count({ where: { workspaceId: ownerA.workspace.id } }),
+    resources: await prisma.resource.count({ where: { workspaceId: ownerA.workspace.id } }),
+    knowledgeItems: await prisma.knowledgeItem.count({ where: { workspaceId: ownerA.workspace.id } }),
+    knowledgeRoots: await prisma.knowledgeRoot.count({ where: { workspaceId: ownerA.workspace.id } })
+  };
+  assert.deepEqual(assetsCountsAfter, assetsCountsBefore);
+  const foreignAssetsContext = await request("/v1/assets/context?limit=50", { headers: authB });
+  assert.equal(foreignAssetsContext.status, 200);
+  const foreignAssetsContextBody = foreignAssetsContext.body as {
+    data: { resources: Array<{ sourceId: string }> };
+  };
+  assert.ok(foreignAssetsContextBody.data.resources.some((item) => item.sourceId === foreignAssetsDriveFile.id));
+  assert.ok(!foreignAssetsContextBody.data.resources.some((item) => item.sourceId === assetsDriveFile.id));
+  const assetsMcpManifest = await request("/v1/mcp/manifest", { headers: authA });
+  assert.equal(assetsMcpManifest.status, 200);
+  const assetsMcpManifestBody = assetsMcpManifest.body as {
+    data: { tools: Array<{ name: string; path: string; capability: string; riskLevel: string; requiresApproval: boolean }> };
+  };
+  assert.ok(assetsMcpManifestBody.data.tools.some((tool) => (
+    tool.name === "companycore_get_assets_context"
+    && tool.path === "/v1/assets/context"
+    && tool.capability === "assets:read"
+    && tool.riskLevel === "read"
+    && tool.requiresApproval === false
+  )));
+
+  await prisma.googleDriveFile.delete({ where: { id: foreignAssetsDriveFile.id } });
+  if (createdForeignAssetsArea) {
+    await prisma.operatingArea.delete({ where: { id: foreignAssetsArea.id } });
+  }
+  await prisma.knowledgeItem.delete({ where: { id: assetsKnowledgeItem.id } });
+  await prisma.agent.delete({ where: { id: assetsAgent.id } });
+  await prisma.client.delete({ where: { id: assetsClient.id } });
+  await prisma.artifact.delete({ where: { id: assetsArtifact.id } });
+  await prisma.resource.delete({ where: { id: assetsResource.id } });
+  await prisma.project.delete({ where: { id: assetsProject.id } });
+  await prisma.googleDriveContentSnapshot.delete({ where: { id: assetsDriveSnapshot.id } });
+  await prisma.googleDriveFile.delete({ where: { id: assetsDriveFile.id } });
+  await prisma.knowledgeRoot.delete({ where: { id: assetsKnowledgeRoot.id } });
+  await prisma.operatingFolder.delete({ where: { id: assetsFolder.id } });
+  if (createdAssetsArea) {
+    await prisma.operatingArea.delete({ where: { id: assetsContextArea.id } });
+  }
 
   const strategyContextArea = await prisma.operatingArea.findFirstOrThrow({
     where: { workspaceId: ownerA.workspace.id, key: "strategy-governance" }

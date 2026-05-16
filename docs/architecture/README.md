@@ -29,15 +29,16 @@ Those belong elsewhere:
 
 1. `architecture-source-of-truth.md`
 2. `system-architecture.md`
-3. `tech-stack.md`
-4. `organizational-architecture-bridge.md`
-5. `companycore-business-module-map.md`
-6. `companycore-global-business-flow.md`
-7. `department-management-systems-architecture.md`
-8. `department-management-systems-v1-blueprint.md`
-9. `company-os-definition-editing-contract.md`
-10. `company-os-workflow-definition-command-contract.md`
-11. any project-specific architecture or ADR files added later
+3. `autonomous-company-operating-system.md`
+4. `tech-stack.md`
+5. `organizational-architecture-bridge.md`
+6. `companycore-business-module-map.md`
+7. `companycore-global-business-flow.md`
+8. `department-management-systems-architecture.md`
+9. `department-management-systems-v1-blueprint.md`
+10. `company-os-definition-editing-contract.md`
+11. `company-os-workflow-definition-command-contract.md`
+12. any project-specific architecture or ADR files added later
 
 ## Architecture Rules
 

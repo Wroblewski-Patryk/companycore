@@ -48,9 +48,10 @@ route branching.
 
 ## Acceptance Criteria
 
-- `/dashboard` is the canonical post-auth landing path.
-- `/`, `/react-dashboard`, and auth default redirects resolve to the dashboard
-  route.
+- Superseded by CC-AUDIT-001: `/areas?area=00-ogolny&view=overview` is the
+  canonical post-auth landing path.
+- `/dashboard` and `/react-dashboard` remain compatibility aliases that resolve
+  to the `00 Ogolny` dashboard route.
 - Existing route aliases still render their intended React views.
 - The shared React shell navigation uses the central route registry.
 - Mobile and desktop route proofs show no console/page errors and no

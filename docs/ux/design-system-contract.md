@@ -186,12 +186,20 @@ product state. Do not introduce a second route-local shell for React surfaces.
 
 - The accepted UXA-009 migration foundation is React + Vite + Tailwind CSS +
   DaisyUI, built from `web/` into generated `public/react/` assets.
+- Tailwind CSS and DaisyUI theme tokens are the required styling foundation for
+  shared web primitives. Repeated controls must be wrapped in project-specific
+  reusable React components before they spread across department views.
 - The current production owner console remains vanilla until each route is
   migrated intentionally. Do not rewrite multiple routes in one task unless a
   migration plan explicitly scopes that wave.
 - Wrap DaisyUI usage in project-specific React primitives where a pattern will
   repeat: app shell, buttons, alerts/toasts, tables, filters, module links,
   command panels, empty states, and form fields.
+- Reusable primitives must support variants instead of cloned components. For
+  example, one button primitive may support icon-left, icon-right, icon-only,
+  loading, disabled, danger, primary, secondary, and ghost variants; one table
+  primitive should own pagination, loading, empty, error, density, and mobile
+  collapse behavior for every table that adopts it.
 - Use DaisyUI component classes for known primitives, then tune with
   CompanyCore tokens instead of creating unrelated page-local class recipes.
 - Preserve the existing vanilla patterns until their React replacement has

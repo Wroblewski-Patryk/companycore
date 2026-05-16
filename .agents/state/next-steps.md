@@ -4,19 +4,35 @@ Last updated: 2026-05-16
 
 ## NOW
 
-1. Continue V1 department systems with the next bounded slice.
-   - Source: `docs/planning/mvp-next-commits.md`.
-   - Implementation audit:
-     `docs/planning/dms-13-systems-v1-implementation-audit.md`.
-   - `03 Sales` department packet and board is now locally verified. Preferred
-     next order: `05 Relationships`, `02 Product And Delivery`, `08 Assets`,
-     `09 Technology/AI`, and `10 Legal/Standards`; use a guarded `04 Operations`
-     planning/procedure command contract only if operations writes become more
-     urgent.
-   - Keep writes behind explicit command contracts and API tests.
-   - Apply DMS-V1-005: shared CompanyCore shell, but department-specific
-     primary board, desktop layout, mobile attention queue, source records,
-     state model, and Paperclip boundaries.
+1. Continue V1 department systems with `DMS-NEXT-004` Relationships Management
+   read packet and board, unless deployment smoke is selected first.
+   - Source:
+     `docs/planning/companycore-00-04-08-operating-loop-plan.md`.
+   - `CC-UI-001`, `CC-00-001`, `CC-04-001`, and `CC-08-001` are now complete
+     as planning/analysis checkpoints with task contracts and diff hygiene.
+   - `CC-UI-002` shared action/button primitive and `CC-UI-003` shared
+     table/list primitive are complete.
+   - `CC-00-002` route proposal lifecycle readback API is complete and
+     verified with `npm run test:api` against disposable PostgreSQL.
+   - `CC-04-002` Operations task read model v1 is complete and verified with
+     `npm run test:api` against disposable PostgreSQL.
+   - `CC-08-002` Assets context read API is complete and verified with
+     `npm run test:api` against disposable PostgreSQL.
+   - `CC-UI-004` selected-area UI adoption is complete and verified:
+     `00 Main` consumes route proposal lifecycle readback, `04 Operations`
+     consumes Operations work items, and `08 Assets` consumes Assets context
+     through shared `CcDataTable`/`CcButton` paths.
+   - `CC-AUDIT-001` architecture/UX audit is complete and verified:
+     successful auth and `/dashboard` now open
+     `/areas?area=00-ogolny&view=overview`, so `00 Ogolny` is the company
+     dashboard after login. Evidence screenshots live under
+     `docs/ux/evidence/cc-audit-001-*.png`.
+   - CompanyCore remains the company operating system; AI agents remain
+     external API/MCP clients.
+   - Keep writes behind explicit command contracts, audit/events, and API
+     tests.
+   - Next department work should reuse the same selected-area packet pattern
+     instead of creating page-local table/action variants.
 
 ## NEXT
 
@@ -110,6 +126,11 @@ Last updated: 2026-05-16
 15. V1AREA capability actions.
    - Add create/edit/filter actions only where an existing backend contract
      already supports the selected capability safely.
+16. Resume broader department sequencing after the `00 -> 04 -> 08`
+    checkpoint.
+   - `03 Sales` is locally verified. The broader next sequence remains
+     `05 Relationships`, `02 Product And Delivery`, `09 Technology/AI`, and
+     `10 Legal/Standards`, unless the owner updates the focus again.
 
 ## LATER
 

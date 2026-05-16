@@ -4,6 +4,10 @@ CompanyCore is the operational core for LuckySparrow. It stores company
 projects, goals, targets, tasks, CRM context, decisions, notes, AI agent
 metadata, agent logs, integration state, and system events. PostgreSQL is the
 source of truth, and the HTTP API is the supported integration access layer.
+CompanyCore is the company operating system, not an embedded AI system. Humans
+use it through the web UI, while AI agents use it through API/MCP as external
+clients. The accepted boundary is documented in
+`docs/architecture/autonomous-company-operating-system.md`.
 The long-term direction is an AI-first organizational operating system that
 connects humans, agents, processes, tasks, governance, memory, workflows,
 knowledge, KPIs, resources, and decisions into one organizational graph. The
@@ -26,7 +30,9 @@ coherent management surface is documented in
 - Web: owner-only console for workspace setup, operating model visibility,
   integrations, data workbenches, relationship review, Company OS surfaces, and
   MCP/API key management. Before V2 visuals, the web console must become the
-  reliable human control plane for the backend and MCP tools.
+  reliable human control plane for the backend and MCP tools. Web UI work must
+  stay responsive across mobile, tablet, and desktop while reusing the shared
+  Tailwind/DaisyUI component system.
 - Mobile: no native app before V2. Mobile web must remain usable for owner
   checks and core actions, but native mobile product work is deferred.
 - Jobs or workers: the backend owns a lightweight in-process ClickUp
@@ -46,6 +52,8 @@ coherent management surface is documented in
 - MCP is the preferred agent tool interface above the API. MCP servers should
   wrap CompanyCore HTTP routes and inherit the same workspace, capability,
   validation, approval, event, and audit boundaries.
+- AI agents are clients of CompanyCore, not a backend subsystem that owns
+  CompanyCore behavior, personality, or decision authority.
 - Significant state changes should emit events.
 - Schema changes must use migrations before production data becomes valuable.
 

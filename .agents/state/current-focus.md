@@ -4,6 +4,35 @@ Last updated: 2026-05-16
 
 ## Active Focus
 
+Current owner-approved focus: CompanyCore is now explicitly recorded as the
+company operating system, not an embedded AI system. Humans use responsive web
+UI and AI agents use API/MCP as external clients. The active near-term mission
+is the `00 Main -> 04 Operations -> 08 Assets` operating loop from
+`docs/planning/companycore-00-04-08-operating-loop-plan.md`, starting with
+shared component inventory (`CC-UI-001`) so future screens reuse
+Tailwind/DaisyUI primitives instead of accumulating page-local UI variants.
+The first planning/analysis checkpoint in this loop is complete as of
+2026-05-16: `CC-UI-001`, `CC-00-001`, `CC-04-001`, and `CC-08-001` are saved
+under `docs/planning/` with task contracts. `CC-UI-002` introduced the shared
+`CcButton` primitive and `CC-UI-003` introduced the shared `CcDataTable`
+primitive. `CC-00-002` is now verified: `GET /v1/intake/route-proposals`
+exposes read-only route proposal lifecycle evidence under `intake:read` and
+MCP. `CC-04-002` is now verified: `GET /v1/operations/work-items` exposes a
+read-only Operations work item packet under `operations:read` and MCP. The
+`CC-08-002` Assets context read API is now verified: `GET /v1/assets/context`
+exposes a read-only Assets packet under `assets:read` and MCP. `CC-UI-004`
+then completed the selected-area UI adoption checkpoint: `00 Main` renders
+route proposal lifecycle readback, `04 Operations` renders Operations work
+items, and `08 Assets` renders the Assets resource packet using shared
+`CcDataTable`/`CcButton` paths. `CC-AUDIT-001` then audited the three
+priority sections and closed the main UX/architecture mismatch: successful
+auth and the `/dashboard` compatibility alias now open
+`/areas?area=00-ogolny&view=overview`, so `00 Ogolny` is the first company
+dashboard after login. `npm run build:web`, `npm run build:server`, rendered
+route proof, and `git diff --check` passed. The next active slice should
+continue V1 department systems with `05 Relationships` unless production
+deployment smoke is selected first.
+
 Current DMS focus: the first `00 Main` intake API/web panel, proposal-only
 route command, shared department shell, department subsystem registry, Finance
 system spec, commercial exception runtime API, Finance context runtime API,

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { CcButton } from "./components/cc-button";
 import {
   DataTable as SharedDataTable,
   LocalNotice as SharedLocalNotice,
@@ -80,7 +81,7 @@ import type {
   TaskRecord,
   TasksWorkbenchState
 } from "./react-route-kit";
-import { canonicalPostAuthPath, routeMatches, type AppRouteMeta } from "./app-route-registry";
+import { canonicalGeneralDashboardPath, canonicalPostAuthPath, routeMatches, type AppRouteMeta } from "./app-route-registry";
 import "./styles.css";
 
 type AttentionItem = {
@@ -263,6 +264,219 @@ type IntakeData = {
   workspaceId: string;
   summary: IntakeSummary;
   items: IntakeItem[];
+};
+
+type IntakeRouteProposalReadback = {
+  proposal: {
+    id: string;
+    title: string;
+    sourceModel: string | null;
+    sourceId: string | null;
+    sourceTitle: string | null;
+    targetDepartmentKey: string | null;
+    classification: string | null;
+    status: string;
+    lifecycleState: string;
+    riskLevel: string | null;
+    reason: string | null;
+    proposedNextAction: string | null;
+    ownerDecisionRequested: boolean | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+  effects: {
+    taskDraftCreated: boolean;
+    auditRecorded: boolean;
+    eventRecorded: boolean;
+  };
+  evidence: {
+    decisionId: string;
+    taskId: string | null;
+    taskStatus: string | null;
+    auditLogId: string | null;
+    eventId: string | null;
+    correlationId: string | null;
+    idempotencyKey: string | null;
+    externalId: string | null;
+  };
+  blockedActions: Array<{ action: string; reason: string }>;
+};
+
+type IntakeRouteProposalData = {
+  summary: {
+    total: number;
+    withTaskDraft: number;
+    withAuditEvidence: number;
+    withEventEvidence: number;
+    byStatus: Record<string, number>;
+    byTargetDepartment: Record<string, number>;
+    byRisk: Record<string, number>;
+  };
+  proposals: IntakeRouteProposalReadback[];
+  agentPacket: {
+    mode: string;
+    allowedActions: string[];
+    blockedActions: Array<{ action: string; reason: string }>;
+  };
+};
+
+type OperationsWorkItemsData = {
+  department: {
+    canonicalKey: string;
+    backendAreaKey: string;
+    name: string;
+    purpose: string;
+  };
+  summary: {
+    total: number;
+    open: number;
+    blocked: number;
+    overdue: number;
+    withProject: number;
+    withTaskList: number;
+    withPipelineRunEvidence: number;
+    withDependencyEvidence: number;
+    withNotes: number;
+    withEvents: number;
+    byStatus: Record<string, number>;
+    byPriority: Record<string, number>;
+  };
+  operationsKnowledge: {
+    area: { id: string; key: string; name: string } | null;
+    driveFiles: Array<{
+      id: string;
+      name: string;
+      mimeType: string;
+      isFolder: boolean;
+      syncStatus: string;
+      scanStatus: string;
+      webViewLink: string | null;
+      modifiedTime: string | null;
+    }>;
+  };
+  workItems: Array<{
+    task: {
+      id: string;
+      title: string;
+      description: string | null;
+      status: string;
+      normalizedStatus: string;
+      priority: string;
+      dueDate: string | null;
+      source: string | null;
+      updatedAt: string;
+    };
+    responsibility: {
+      status: string;
+      evidence: Array<{ id: string; agentName: string | null; level: string; message: string; createdAt: string }>;
+    };
+    hierarchy: {
+      project: { id: string; name: string; status: string } | null;
+      taskList: { id: string; name: string; status: string } | null;
+    };
+    operationalContext: {
+      pipelineRuns: Array<{ id: string; status: string; pipeline: { id: string; name: string; status: string } }>;
+    };
+    readiness: {
+      blocked: boolean;
+      overdue: boolean;
+      dependencyCount: number;
+      riskLevel: string;
+      missingFields: string[];
+    };
+    evidence: {
+      notes: Array<{ id: string; status: string; source: string | null }>;
+      events: Array<{ id: string; type: string; source: string | null }>;
+      dependencies: Array<{ id: string; type: string; status: string; from: string | null; to: string | null }>;
+      projectResources: Array<{ id: string; type: string; name: string; url: string | null; accessLevel: string }>;
+    };
+  }>;
+  agentPacket: {
+    mode: string;
+    allowedActions: string[];
+    blockedActions: Array<{ action: string; reason: string }>;
+  };
+};
+
+type AssetsContextData = {
+  department: {
+    canonicalKey: string;
+    backendAreaKey: string;
+    name: string;
+    purpose: string;
+  };
+  summary: {
+    totalItems: number;
+    driveFiles: number;
+    unassignedDriveFiles: number;
+    driveFilesMissingDescription: number;
+    contentSnapshots: number;
+    resources: number;
+    knowledgeItems: number;
+    knowledgeRoots: number;
+    aiReadyItems: number;
+    needsCleanup: number;
+    readiness: Record<string, number>;
+    byType: Record<string, number>;
+  };
+  folders: Array<{
+    id: string;
+    name: string;
+    department: string | null;
+    syncStatus: string;
+    scanStatus: string;
+    webViewLink: string | null;
+  }>;
+  knowledgeRoots: Array<{
+    id: string;
+    name: string;
+    provider: string;
+    area: { id: string; key: string; name: string } | null;
+  }>;
+  knowledgeItems: Array<{
+    id: string;
+    title: string;
+    itemType: string;
+    summary: string | null;
+    status: string;
+    sourceProvider: string | null;
+    url: string | null;
+  }>;
+  resources: Array<{
+    id: string;
+    sourceModel: string;
+    sourceId: string;
+    name: string;
+    resourceType: string;
+    source: {
+      provider: string | null;
+      webViewLink: string | null;
+      mimeType: string | null;
+      isFolder: boolean;
+    };
+    organization: {
+      department: string | null;
+      visibility: string;
+      status: string;
+      tags: string[];
+    };
+    aiCompatibility: {
+      readiness: string;
+      summary: string | null;
+      aiContextReady: boolean;
+    };
+    freshness: {
+      modifiedTime: string | null;
+      syncStatus: string;
+      scanStatus: string;
+      needsCleanup: boolean;
+    };
+  }>;
+  agentPacket: {
+    mode: string;
+    allowedActions: string[];
+    blockedActions: Array<{ action: string; reason: string }>;
+  };
 };
 
 type FinanceContextData = {
@@ -758,6 +972,18 @@ async function loadAreaOperatingGraph(areaKey: string) {
 
 async function loadGlobalIntake(query = "limit=80") {
   return ownerApi<IntakeData>(`/v1/intake?${query}`);
+}
+
+async function loadIntakeRouteProposals(query = "limit=80") {
+  return ownerApi<IntakeRouteProposalData>(`/v1/intake/route-proposals?${query}`);
+}
+
+async function loadOperationsWorkItems(query = "limit=80") {
+  return ownerApi<OperationsWorkItemsData>(`/v1/operations/work-items?${query}`);
+}
+
+async function loadAssetsContext(query = "limit=80") {
+  return ownerApi<AssetsContextData>(`/v1/assets/context?${query}`);
 }
 
 async function loadFinanceContext(query = "limit=80") {
@@ -1518,9 +1744,9 @@ function StatePanel({ state, onRetry }: { state: DashboardState; onRetry: () => 
           <p className="text-sm">{content.detail}</p>
         </div>
         {content.href ? (
-          <a className="btn btn-sm" href={content.href}>{content.action}</a>
+          <CcButton href={content.href} size="sm">{content.action}</CcButton>
         ) : content.action ? (
-          <button className="btn btn-sm" type="button" onClick={onRetry}>{content.action}</button>
+          <CcButton size="sm" onClick={onRetry}>{content.action}</CcButton>
         ) : null}
       </div>
     </section>
@@ -1545,14 +1771,42 @@ function DataTable<Row extends { id: string }>({
   columns,
   rows,
   emptyTitle,
-  emptyDetail
+  emptyDetail,
+  loading = false,
+  error = null,
+  density,
+  mobileMode,
+  rowActions,
+  getRowLabel,
+  tableMinWidthClassName
 }: {
   columns: Array<TableColumn<Row>>;
   rows: Row[];
   emptyTitle: string;
   emptyDetail: string;
+  loading?: boolean;
+  error?: string | null;
+  density?: "compact" | "comfortable";
+  mobileMode?: "scroll" | "cards";
+  rowActions?: (row: Row) => React.ReactNode;
+  getRowLabel?: (row: Row) => string;
+  tableMinWidthClassName?: string;
 }) {
-  return <SharedDataTable columns={columns} rows={rows} emptyTitle={emptyTitle} emptyDetail={emptyDetail} />;
+  return (
+    <SharedDataTable
+      columns={columns}
+      rows={rows}
+      emptyTitle={emptyTitle}
+      emptyDetail={emptyDetail}
+      loading={loading}
+      error={error}
+      density={density}
+      mobileMode={mobileMode}
+      rowActions={rowActions}
+      getRowLabel={getRowLabel}
+      tableMinWidthClassName={tableMinWidthClassName}
+    />
+  );
 }
 
 function CommandPanel({ connection }: { connection: ConnectionData }) {
@@ -2216,20 +2470,20 @@ function AreaSidebar({
 }) {
   return (
     <aside className="area-sidebar" aria-label="LuckySparrow company areas">
-      <a className="area-sidebar-brand" href="/dashboard">
+      <a className="area-sidebar-brand" href={canonicalGeneralDashboardPath}>
         <span className="atlas-brand-mark">
           <i className="ph-bold ph-cube" aria-hidden="true"></i>
         </span>
         <span>
           <strong>LuckySparrow</strong>
-          <small>Company Atlas</small>
+          <small>00 dashboard</small>
         </span>
       </a>
 
       <nav className="area-sidebar-nav" aria-label="Dzialy">
-        <a className="area-atlas-link is-active" href="/dashboard">
+        <a className="area-atlas-link is-active" href={canonicalGeneralDashboardPath}>
           <i className="ph-bold ph-map-trifold" aria-hidden="true"></i>
-          <span>Company Atlas</span>
+          <span>00 Dashboard</span>
         </a>
         <p className="area-sidebar-kicker">Dzialy</p>
         {areas.map((area) => {
@@ -2289,7 +2543,7 @@ function AreaSidebar({
 function MobileAppBar({ workspaceName }: { workspaceName: string }) {
   return (
     <header className="mobile-atlas-appbar">
-      <a className="mobile-icon-link" href="/dashboard" aria-label="Open atlas">
+      <a className="mobile-icon-link" href={canonicalGeneralDashboardPath} aria-label="Open 00 dashboard">
         <i className="ph-bold ph-list" aria-hidden="true"></i>
       </a>
       <div className="mobile-appbar-title">
@@ -2321,7 +2575,7 @@ function DashboardHeader({
   return (
     <header className="atlas-header">
       <div>
-        <p>LuckySparrow / Company Atlas</p>
+        <p>LuckySparrow / 00 dashboard</p>
         <h1>{selectedArea.label}</h1>
       </div>
       <label className="atlas-search">
@@ -2354,7 +2608,7 @@ function MobileAreaSelector({
     <section className="mobile-area-strip" aria-label="Dzialy">
       <div className="mobile-area-strip-heading">
         <h2>Dzialy</h2>
-        <a href="/dashboard">
+        <a href={canonicalGeneralDashboardPath}>
           <i className="ph-bold ph-map-trifold" aria-hidden="true"></i>
           Map
         </a>
@@ -2386,10 +2640,10 @@ function MobileCompanySummary({
   const coverage = ownershipCoverage(areas);
   const decisions = reviewCount(areas);
   return (
-    <section className="mobile-company-summary" aria-label="Company Atlas summary">
+    <section className="mobile-company-summary" aria-label="00 dashboard summary">
       <div className="mobile-summary-heading">
         <div>
-          <h1>Company Atlas</h1>
+          <h1>00 Dashboard</h1>
           <p>Area-first company control</p>
         </div>
         <a href="/areas">Open priority <i className="ph-bold ph-caret-right" aria-hidden="true"></i></a>
@@ -2673,13 +2927,17 @@ function normalizeIntakeDepartmentKey(value: string) {
 
 function MainIntakeSystemPanel({
   intake,
+  routeProposals,
   status,
+  routeProposalStatus,
   connection,
   onRefresh,
   onSelectCapability
 }: {
   intake: IntakeData | null;
+  routeProposals: IntakeRouteProposalData | null;
   status: "idle" | "loading" | "ready" | "error";
+  routeProposalStatus: "idle" | "loading" | "ready" | "error";
   connection: ConnectionData;
   onRefresh: () => void;
   onSelectCapability: (capability: string) => void;
@@ -2748,6 +3006,12 @@ function MainIntakeSystemPanel({
         <a href="/v1/intake?family=unassigned_resource">Unassigned resources</a>
         <a href="/v1/intake?risk=critical">Critical risk</a>
       </div>
+
+      <IntakeRouteProposalLifecyclePanel
+        routeProposals={routeProposals}
+        status={routeProposalStatus}
+        onSelectCapability={onSelectCapability}
+      />
 
       <div className="operations-system-grid">
         <MainIntakeSection
@@ -2824,6 +3088,83 @@ function MainIntakeSystemPanel({
       });
     }
   }
+}
+
+function IntakeRouteProposalLifecyclePanel({
+  routeProposals,
+  status,
+  onSelectCapability
+}: {
+  routeProposals: IntakeRouteProposalData | null;
+  status: "idle" | "loading" | "ready" | "error";
+  onSelectCapability: (capability: string) => void;
+}) {
+  const rows = (routeProposals?.proposals ?? []).slice(0, 8).map((proposal) => ({
+    id: proposal.proposal.id,
+    title: proposal.proposal.sourceTitle || proposal.proposal.title,
+    target: proposal.proposal.targetDepartmentKey || "needs review",
+    lifecycle: proposal.proposal.lifecycleState,
+    risk: proposal.proposal.riskLevel || "review",
+    evidence: [
+      proposal.effects.taskDraftCreated ? "task" : "",
+      proposal.effects.auditRecorded ? "audit" : "",
+      proposal.effects.eventRecorded ? "event" : ""
+    ].filter(Boolean).join(" / ") || "decision",
+    updatedAt: proposal.proposal.updatedAt,
+    reason: proposal.proposal.reason || proposal.proposal.proposedNextAction || "No route rationale recorded"
+  }));
+
+  const metrics = [
+    { label: "Proposals", value: routeProposals?.summary.total ?? 0 },
+    { label: "Task drafts", value: routeProposals?.summary.withTaskDraft ?? 0 },
+    { label: "Audit", value: routeProposals?.summary.withAuditEvidence ?? 0 },
+    { label: "Events", value: routeProposals?.summary.withEventEvidence ?? 0 }
+  ];
+
+  return (
+    <article className="department-packet-panel" aria-label="Route proposal lifecycle packet">
+      <div className="area-layer-panel-title">
+        <i className="ph-bold ph-signpost" aria-hidden="true"></i>
+        <h3>Route proposal lifecycle</h3>
+        <span>{status === "loading" ? "loading" : `${rows.length} rows`}</span>
+      </div>
+      <div className="department-packet-metrics">
+        {metrics.map((metric) => (
+          <span key={metric.label}>
+            <small>{metric.label}</small>
+            <strong>{metric.value}</strong>
+          </span>
+        ))}
+      </div>
+      <DataTable
+        columns={[
+          { key: "title", header: "Signal", cell: (row) => <span className="table-strong">{row.title}</span> },
+          { key: "target", header: "Department", cell: (row) => formatIntakeLabel(row.target) },
+          { key: "lifecycle", header: "Lifecycle", cell: (row) => formatIntakeLabel(row.lifecycle) },
+          { key: "risk", header: "Risk", cell: (row) => <span className={intakeRiskClass(row.risk)}>{formatIntakeLabel(row.risk)}</span> },
+          { key: "evidence", header: "Evidence", cell: (row) => row.evidence }
+        ]}
+        rows={rows}
+        emptyTitle="No route proposals yet"
+        emptyDetail="Use global intake to create a guarded route proposal before a signal becomes department work."
+        loading={status === "loading"}
+        error={status === "error" ? "Route proposal readback is unavailable." : null}
+        density="compact"
+        mobileMode="cards"
+        getRowLabel={(row) => row.title}
+        rowActions={(row) => (
+          <CcButton
+            iconLeft="ph-arrow-square-out"
+            onClick={() => onSelectCapability("decisions")}
+            size="sm"
+            variant="ghost"
+          >
+            Decisions
+          </CcButton>
+        )}
+      />
+    </article>
+  );
 }
 
 function MainIntakeSection({
@@ -3268,11 +3609,15 @@ function OperationsManagementSystemPanel({
   area,
   context,
   connection,
+  workItems,
+  workItemsStatus,
   onSelectCapability
 }: {
   area: AreaViewState;
   context: AreaDetailContext;
   connection: ConnectionData;
+  workItems: OperationsWorkItemsData | null;
+  workItemsStatus: "idle" | "loading" | "ready" | "error";
   onSelectCapability: (capability: string) => void;
 }) {
   if (area.key !== "04-operacje") {
@@ -3383,6 +3728,12 @@ function OperationsManagementSystemPanel({
         ))}
       </div>
 
+      <OperationsWorkItemPacket
+        workItems={workItems}
+        status={workItemsStatus}
+        onSelectCapability={onSelectCapability}
+      />
+
       <div className="operations-system-grid">
         <OperationsSystemSection
           title="Planning board"
@@ -3421,6 +3772,84 @@ function OperationsManagementSystemPanel({
         </article>
       </div>
     </section>
+  );
+}
+
+function OperationsWorkItemPacket({
+  workItems,
+  status,
+  onSelectCapability
+}: {
+  workItems: OperationsWorkItemsData | null;
+  status: "idle" | "loading" | "ready" | "error";
+  onSelectCapability: (capability: string) => void;
+}) {
+  const rows = (workItems?.workItems ?? []).slice(0, 10).map((item) => ({
+    id: item.task.id,
+    title: item.task.title,
+    status: item.task.normalizedStatus,
+    priority: item.task.priority,
+    risk: item.readiness.riskLevel,
+    project: item.hierarchy.project?.name || item.hierarchy.taskList?.name || "Needs ownership",
+    evidence: [
+      item.evidence.dependencies.length ? `${item.evidence.dependencies.length} deps` : "",
+      item.operationalContext.pipelineRuns.length ? `${item.operationalContext.pipelineRuns.length} runs` : "",
+      item.evidence.projectResources.length ? `${item.evidence.projectResources.length} resources` : ""
+    ].filter(Boolean).join(" / ") || "task record",
+    due: item.task.dueDate ? new Date(item.task.dueDate).toLocaleDateString() : "No due date"
+  }));
+  const summary = workItems?.summary;
+  const metrics = [
+    { label: "Open", value: summary?.open ?? 0 },
+    { label: "Blocked", value: summary?.blocked ?? 0 },
+    { label: "Overdue", value: summary?.overdue ?? 0 },
+    { label: "With evidence", value: (summary?.withPipelineRunEvidence ?? 0) + (summary?.withDependencyEvidence ?? 0) }
+  ];
+
+  return (
+    <article className="department-packet-panel" aria-label="Operations work item packet">
+      <div className="area-layer-panel-title">
+        <i className="ph-bold ph-list-checks" aria-hidden="true"></i>
+        <h3>Operations work items</h3>
+        <span>{status === "loading" ? "loading" : `${rows.length} rows`}</span>
+      </div>
+      <div className="department-packet-metrics">
+        {metrics.map((metric) => (
+          <span key={metric.label}>
+            <small>{metric.label}</small>
+            <strong>{metric.value}</strong>
+          </span>
+        ))}
+      </div>
+      <DataTable
+        columns={[
+          { key: "title", header: "Task", cell: (row) => <span className="table-strong">{row.title}</span> },
+          { key: "status", header: "Status", cell: (row) => formatIntakeLabel(row.status) },
+          { key: "priority", header: "Priority", cell: (row) => formatIntakeLabel(row.priority) },
+          { key: "risk", header: "Risk", cell: (row) => formatIntakeLabel(row.risk) },
+          { key: "project", header: "Owner context", cell: (row) => row.project },
+          { key: "evidence", header: "Evidence", cell: (row) => row.evidence }
+        ]}
+        rows={rows}
+        emptyTitle="No work items in Operations"
+        emptyDetail="Create or import task records before Operations can show the execution packet."
+        loading={status === "loading"}
+        error={status === "error" ? "Operations work item packet is unavailable." : null}
+        density="compact"
+        mobileMode="cards"
+        getRowLabel={(row) => row.title}
+        rowActions={() => (
+          <CcButton
+            iconLeft="ph-list-magnifying-glass"
+            onClick={() => onSelectCapability("tasks")}
+            size="sm"
+            variant="ghost"
+          >
+            Tasks
+          </CcButton>
+        )}
+      />
+    </article>
   );
 }
 
@@ -3463,6 +3892,145 @@ function OperationsSystemSection({
         </div>
       )}
     </article>
+  );
+}
+
+function AssetsManagementSystemPanel({
+  assets,
+  status,
+  onSelectCapability
+}: {
+  assets: AssetsContextData | null;
+  status: "idle" | "loading" | "ready" | "error";
+  onSelectCapability: (capability: string) => void;
+}) {
+  const summary = assets?.summary;
+  const resources = assets?.resources ?? [];
+  const knowledgeItems = assets?.knowledgeItems ?? [];
+  const folders = assets?.folders ?? [];
+  const roots = assets?.knowledgeRoots ?? [];
+  const rows = resources.slice(0, 10).map((resource) => ({
+    id: resource.id,
+    name: resource.name,
+    type: resource.resourceType,
+    readiness: resource.aiCompatibility.readiness,
+    source: resource.source.provider || resource.sourceModel,
+    status: resource.organization.status,
+    visibility: resource.organization.visibility,
+    cleanup: resource.freshness.needsCleanup ? "Needs cleanup" : "Ready",
+    link: resource.source.webViewLink
+  }));
+  const metrics = [
+    { label: "Items", value: summary?.totalItems ?? 0, icon: "ph-archive" },
+    { label: "AI ready", value: summary?.aiReadyItems ?? 0, icon: "ph-robot" },
+    { label: "Cleanup", value: summary?.needsCleanup ?? 0, icon: "ph-broom" },
+    { label: "Folders", value: folders.length, icon: "ph-folder-open" },
+    { label: "Knowledge", value: knowledgeItems.length + roots.length, icon: "ph-books" }
+  ];
+
+  return (
+    <section className="assets-management-board" id="assets-management-board" aria-label="08 Assets and resources management board">
+      <div className="operations-system-header">
+        <div>
+          <p className="atlas-kicker">08 Assets And Resource Management System</p>
+          <h2>Files, knowledge, resources, AI context readiness</h2>
+          <p>
+            Read-only Assets context keeps documents, folders, prompts, repositories,
+            and knowledge sources visible for humans and external AI clients without provider writes.
+          </p>
+        </div>
+        <a className="atlas-primary-action" href="/v1/assets/context">
+          <i className="ph-bold ph-database" aria-hidden="true"></i>
+          API packet
+        </a>
+      </div>
+
+      <div className="main-intake-status-row">
+        <span className={`main-intake-status is-${status}`}>
+          <i className="ph-bold ph-pulse" aria-hidden="true"></i>
+          {status === "loading" ? "Loading assets" : status === "error" ? "Assets unavailable" : "Read-only assets"}
+        </span>
+        <span className="main-intake-status is-ready">
+          <i className="ph-bold ph-lock-key" aria-hidden="true"></i>
+          No provider file writes
+        </span>
+      </div>
+
+      <div className="operations-system-metrics" aria-label="Assets system metrics">
+        {metrics.map((metric) => (
+          <span key={metric.label}>
+            <i className={`ph-bold ${metric.icon}`} aria-hidden="true"></i>
+            <small>{metric.label}</small>
+            <strong>{metric.value}</strong>
+          </span>
+        ))}
+      </div>
+
+      <article className="department-packet-panel" aria-label="Assets context table">
+        <div className="area-layer-panel-title">
+          <i className="ph-bold ph-folder-simple-star" aria-hidden="true"></i>
+          <h3>Agent-readable resource packet</h3>
+          <span>{status === "loading" ? "loading" : `${rows.length} rows`}</span>
+        </div>
+        <DataTable
+          columns={[
+            { key: "name", header: "Resource", cell: (row) => <span className="table-strong">{row.name}</span> },
+            { key: "type", header: "Type", cell: (row) => formatIntakeLabel(row.type) },
+            { key: "readiness", header: "AI readiness", cell: (row) => formatIntakeLabel(row.readiness) },
+            { key: "source", header: "Source", cell: (row) => row.source },
+            { key: "visibility", header: "Visibility", cell: (row) => formatIntakeLabel(row.visibility) },
+            { key: "cleanup", header: "Cleanup", cell: (row) => row.cleanup }
+          ]}
+          rows={rows}
+          emptyTitle="No assets in this packet"
+          emptyDetail="Scope Drive files, resources, or knowledge items to Assets before using them as company memory."
+          loading={status === "loading"}
+          error={status === "error" ? "Assets context packet is unavailable." : null}
+          density="compact"
+          mobileMode="cards"
+          getRowLabel={(row) => row.name}
+          rowActions={(row) => row.link ? (
+            <CcButton href={row.link} iconRight="ph-arrow-square-out" size="sm" variant="ghost">
+              Open
+            </CcButton>
+          ) : (
+            <CcButton iconLeft="ph-books" onClick={() => onSelectCapability("knowledge")} size="sm" variant="ghost">
+              Knowledge
+            </CcButton>
+          )}
+        />
+      </article>
+
+      <div className="sales-decision-strip assets-decision-strip">
+        <article>
+          <strong>Folder tree</strong>
+          {folders.length === 0 ? <span>No folder scope is visible yet.</span> : folders.slice(0, 4).map((folder) => (
+            <span key={folder.id}>{folder.name} / {folder.syncStatus}</span>
+          ))}
+        </article>
+        <article>
+          <strong>Knowledge roots</strong>
+          {roots.length === 0 ? <span>No knowledge root is configured yet.</span> : roots.slice(0, 4).map((root) => (
+            <span key={root.id}>{root.name} / {root.provider}</span>
+          ))}
+        </article>
+        <article>
+          <strong>Blocked actions</strong>
+          {(assets?.agentPacket.blockedActions ?? []).slice(0, 4).map((action) => (
+            <span key={action.action}>{action.action.replace(/_/g, " ")}</span>
+          ))}
+        </article>
+      </div>
+
+      <div className="finance-decision-strip sales-handoff-strip">
+        <article>
+          <strong>Next owner views</strong>
+          <button type="button" onClick={() => onSelectCapability("knowledge")}>Knowledge</button>
+          <button type="button" onClick={() => onSelectCapability("resources")}>Resources</button>
+          <button type="button" onClick={() => onSelectCapability("tasks")}>Tasks</button>
+        </article>
+      </div>
+    </section>
   );
 }
 
@@ -5564,7 +6132,7 @@ function AreaDetailHero({
             Review system
             <i className="ph-bold ph-caret-right" aria-hidden="true"></i>
           </a>
-          <a className="atlas-secondary-action" href="/dashboard">Back to atlas</a>
+          <a className="atlas-secondary-action" href={canonicalGeneralDashboardPath}>Back to 00 dashboard</a>
         </div>
       </div>
       <div className="area-detail-sigil" aria-label={`${area.label} status`}>
@@ -6573,6 +7141,18 @@ function AreaDetailView({
     status: "idle" | "loading" | "ready" | "error";
     data: IntakeData | null;
   }>({ status: "idle", data: null });
+  const [routeProposalState, setRouteProposalState] = useState<{
+    status: "idle" | "loading" | "ready" | "error";
+    data: IntakeRouteProposalData | null;
+  }>({ status: "idle", data: null });
+  const [operationsWorkState, setOperationsWorkState] = useState<{
+    status: "idle" | "loading" | "ready" | "error";
+    data: OperationsWorkItemsData | null;
+  }>({ status: "idle", data: null });
+  const [assetsState, setAssetsState] = useState<{
+    status: "idle" | "loading" | "ready" | "error";
+    data: AssetsContextData | null;
+  }>({ status: "idle", data: null });
   const [financeState, setFinanceState] = useState<{
     status: "idle" | "loading" | "ready" | "error";
     data: FinanceContextData | null;
@@ -6608,11 +7188,13 @@ function AreaDetailView({
   useEffect(() => {
     if (selectedArea.key !== "00-ogolny") {
       setIntakeState({ status: "idle", data: null });
+      setRouteProposalState({ status: "idle", data: null });
       return;
     }
 
     let cancelled = false;
     setIntakeState({ status: "loading", data: null });
+    setRouteProposalState({ status: "loading", data: null });
     loadGlobalIntake()
       .then((data) => {
         if (!cancelled) {
@@ -6622,6 +7204,67 @@ function AreaDetailView({
       .catch(() => {
         if (!cancelled) {
           setIntakeState({ status: "error", data: null });
+        }
+      });
+    loadIntakeRouteProposals()
+      .then((data) => {
+        if (!cancelled) {
+          setRouteProposalState({ status: "ready", data });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setRouteProposalState({ status: "error", data: null });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedArea.key]);
+
+  useEffect(() => {
+    if (selectedArea.key !== "04-operacje") {
+      setOperationsWorkState({ status: "idle", data: null });
+      return;
+    }
+
+    let cancelled = false;
+    setOperationsWorkState({ status: "loading", data: null });
+    loadOperationsWorkItems()
+      .then((data) => {
+        if (!cancelled) {
+          setOperationsWorkState({ status: "ready", data });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setOperationsWorkState({ status: "error", data: null });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedArea.key]);
+
+  useEffect(() => {
+    if (selectedArea.key !== "08-zasoby") {
+      setAssetsState({ status: "idle", data: null });
+      return;
+    }
+
+    let cancelled = false;
+    setAssetsState({ status: "loading", data: null });
+    loadAssetsContext()
+      .then((data) => {
+        if (!cancelled) {
+          setAssetsState({ status: "ready", data });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setAssetsState({ status: "error", data: null });
         }
       });
 
@@ -6694,12 +7337,15 @@ function AreaDetailView({
   const lanes = useMemo(() => areaDetailLanes(selectedArea, context, connection), [selectedArea, context, connection]);
   const isOperationsSystem = selectedArea.key === "04-operacje";
   const isMainSystem = selectedArea.key === "00-ogolny";
+  const isAssetsSystem = selectedArea.key === "08-zasoby";
   const isFinanceSystem = selectedArea.key === "07-finanse";
   const isSalesSystem = selectedArea.key === "03-sprzedaz";
   const departmentSpecialPanel = isMainSystem ? (
     <MainIntakeSystemPanel
       intake={intakeState.data}
+      routeProposals={routeProposalState.data}
       status={intakeState.status}
+      routeProposalStatus={routeProposalState.status}
       connection={connection}
       onRefresh={reloadIntake}
       onSelectCapability={selectCapability}
@@ -6709,6 +7355,14 @@ function AreaDetailView({
       area={selectedArea}
       context={context}
       connection={connection}
+      workItems={operationsWorkState.data}
+      workItemsStatus={operationsWorkState.status}
+      onSelectCapability={selectCapability}
+    />
+  ) : isAssetsSystem ? (
+    <AssetsManagementSystemPanel
+      assets={assetsState.data}
+      status={assetsState.status}
       onSelectCapability={selectCapability}
     />
   ) : isFinanceSystem ? (
@@ -6740,9 +7394,13 @@ function AreaDetailView({
       return;
     }
     setIntakeState({ status: "loading", data: intakeState.data });
+    setRouteProposalState({ status: "loading", data: routeProposalState.data });
     loadGlobalIntake()
       .then((data) => setIntakeState({ status: "ready", data }))
       .catch(() => setIntakeState({ status: "error", data: intakeState.data }));
+    loadIntakeRouteProposals()
+      .then((data) => setRouteProposalState({ status: "ready", data }))
+      .catch(() => setRouteProposalState({ status: "error", data: routeProposalState.data }));
   }
 
   return (
@@ -6768,7 +7426,7 @@ function AreaDetailView({
               context={context}
               connection={connection}
               lanes={lanes}
-              showOperatingBoard={!isOperationsSystem && !isMainSystem && !isFinanceSystem && !isSalesSystem}
+              showOperatingBoard={!isOperationsSystem && !isMainSystem && !isAssetsSystem && !isFinanceSystem && !isSalesSystem}
               specialPanel={departmentSpecialPanel}
               onSelectCapability={selectCapability}
             />
@@ -11318,7 +11976,7 @@ function PublicHomeRoute() {
         <div className="public-home-preview" aria-label="CompanyCore operating preview">
           <div className="public-preview-topline">
             <span>LuckySparrow</span>
-            <strong>Company Atlas</strong>
+            <strong>00 Dashboard</strong>
             <em>Ready</em>
           </div>
           <div className="public-preview-map">
@@ -11419,7 +12077,7 @@ function AuthRoute({ mode }: { mode: "login" | "register" }) {
           </p>
           <div className="public-auth-signals">
             {[
-              ["Company Atlas", "All 00-12 areas"],
+              ["00 Dashboard", "All 00-12 areas"],
               ["Area detail", "Goals, tasks, knowledge"],
               ["AI guardrails", "MCP and owner approval"],
               ["Evidence", "Tables, Drive, providers"]
@@ -13431,18 +14089,24 @@ function ClickUpSettingsRoute() {
   );
 }
 
-function ReadyDashboard({ connection }: { connection: ConnectionData }) {
-  return <AreaFirstDashboard connection={connection} />;
-}
-
 function ReactDashboardApp() {
-  const [dashboardState, reload] = useDashboardState();
+  useEffect(() => {
+    window.location.replace(canonicalGeneralDashboardPath);
+  }, []);
 
-  if (dashboardState.status === "ready") {
-    return <ReadyDashboard connection={dashboardState.connection} />;
-  }
-
-  return <DashboardStatePanel state={dashboardState} onRetry={reload} />;
+  return (
+    <main className="min-h-screen bg-base-200 text-base-content">
+      <section className="mx-auto flex min-h-screen max-w-3xl items-center px-4">
+        <div className="alert alert-info shadow-sm" role="status">
+          <i className="ph-bold ph-map-trifold text-xl" aria-hidden="true"></i>
+          <div>
+            <strong>Opening 00 dashboard</strong>
+            <p className="text-sm">CompanyCore is loading the main company operating view.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
 }
 
 function ReactTasksApp() {
@@ -13599,7 +14263,7 @@ const appRouteComponents: AppRouteComponent[] = [
     component: UnifiedSettingsRoute
   },
   {
-    meta: { id: "dashboard", href: "/dashboard", title: "Company Atlas", aliases: ["/react-dashboard"] },
+    meta: { id: "dashboard", href: "/dashboard", title: "00 Ogolny Dashboard", aliases: ["/react-dashboard"] },
     component: ReactDashboardApp
   }
 ];

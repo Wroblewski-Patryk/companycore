@@ -1,13 +1,26 @@
 import { Router } from "express";
+import { z } from "zod";
 import { prisma } from "../../db/prisma";
 import { asyncHandler } from "../../middleware/async-handler";
 import { resolveDepartmentEntry } from "../../operating-model/department-registry";
 
 const OPERATIONS_DEPARTMENT_KEY = "04-operacje";
 const OPERATIONS_LIMIT = 12;
+const WORK_ITEM_LIMIT = 100;
+
+const workItemsQuerySchema = z.object({
+  status: z.enum(["todo", "in_progress", "blocked", "done", "archived"]).optional(),
+  priority: z.string().min(1).optional(),
+  source: z.string().min(1).optional(),
+  limit: z.coerce.number().int().min(1).max(200).default(WORK_ITEM_LIMIT)
+}).strict();
 
 function asJsonArray(value: unknown) {
   return Array.isArray(value) ? value : [];
+}
+
+function asStringArray(value: unknown) {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
 }
 
 function taskLooksOperational(task: { title: string; description: string | null }) {
@@ -15,7 +28,345 @@ function taskLooksOperational(task: { title: string; description: string | null 
   return ["operation", "operacje", "procedure", "procedura", "dependency", "approval", "routine", "sop"].some((term) => text.includes(term));
 }
 
+function normalizedTaskStatus(status: string) {
+  const statusMap: Record<string, string> = {
+    todo: "backlog",
+    in_progress: "in_progress",
+    blocked: "blocked",
+    done: "completed",
+    archived: "archived"
+  };
+
+  return statusMap[status] ?? status;
+}
+
+function taskRiskLevel(task: { status: string; dueDate: Date | null }, dependencyCount: number) {
+  if (task.status === "blocked" || dependencyCount > 0) {
+    return "high";
+  }
+
+  if (task.dueDate && task.dueDate.getTime() < Date.now() && task.status !== "done" && task.status !== "archived") {
+    return "medium";
+  }
+
+  return "low";
+}
+
+function taskReadiness(task: { status: string; dueDate: Date | null; projectId: string | null; taskListId: string | null }, dependencyCount: number) {
+  const missingFields = [
+    task.projectId ? null : "project",
+    task.taskListId ? null : "task_list",
+    "owner_user_id",
+    "assigned_agent_id",
+    "reviewer_id",
+    "estimated_duration_minutes",
+    "related_resources"
+  ].filter((field): field is string => Boolean(field));
+
+  return {
+    blocked: task.status === "blocked" || dependencyCount > 0,
+    overdue: Boolean(task.dueDate && task.dueDate.getTime() < Date.now() && task.status !== "done" && task.status !== "archived"),
+    dependencyCount,
+    riskLevel: taskRiskLevel(task, dependencyCount),
+    missingFields
+  };
+}
+
+function jsonReferencesTask(value: unknown, task: { id: string; externalId: string | null }) {
+  const text = JSON.stringify(value ?? {});
+  return text.includes(task.id) || Boolean(task.externalId && text.includes(task.externalId));
+}
+
+function mapBlockedOperationsActions() {
+  return [
+    {
+      action: "change_task_status",
+      reason: "Task status changes must use the existing task command route or a future audited Operations command."
+    },
+    {
+      action: "assign_human_or_agent",
+      reason: "Human and AI-agent assignment needs an explicit responsibility model before writes are exposed."
+    },
+    {
+      action: "create_checklist_or_subtask",
+      reason: "Checklists and subtasks need a shared task-detail contract instead of page-local structures."
+    },
+    {
+      action: "mutate_pipeline_or_procedure",
+      reason: "Pipeline and procedure changes must use Company OS workflow-definition draft and activation commands."
+    },
+    {
+      action: "execute_provider_operation",
+      reason: "Provider-side operations must stay behind integration-specific approval-aware commands."
+    }
+  ];
+}
+
 export const operationsRouter = Router();
+
+operationsRouter.get("/work-items", asyncHandler(async (req, res) => {
+  const workspaceId = req.auth!.workspaceId;
+  const query = workItemsQuerySchema.parse(req.query);
+  const department = resolveDepartmentEntry(OPERATIONS_DEPARTMENT_KEY);
+  const operationsArea = await prisma.operatingArea.findFirst({
+    where: {
+      workspaceId,
+      key: department?.backendAreaKey ?? "operations-administration"
+    }
+  });
+
+  const tasks = await prisma.task.findMany({
+    where: {
+      workspaceId,
+      ...(query.status ? { status: query.status } : {}),
+      ...(query.priority ? { priority: query.priority } : {}),
+      ...(query.source ? { source: query.source } : {})
+    },
+    orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
+    take: query.limit,
+    include: {
+      project: true,
+      goal: true,
+      target: true,
+      taskList: true,
+      notes: { orderBy: { createdAt: "desc" }, take: 5 },
+      events: { orderBy: { createdAt: "desc" }, take: 8 }
+    }
+  });
+
+  const taskIds = tasks.map((task) => task.id);
+  const projectIds = Array.from(new Set(tasks.map((task) => task.projectId).filter((id): id is string => Boolean(id))));
+
+  const [
+    dependencies,
+    pipelineRuns,
+    agentLogs,
+    projectResources,
+    operationsDriveFiles
+  ] = await Promise.all([
+    taskIds.length
+      ? prisma.dependency.findMany({
+        where: {
+          workspaceId,
+          OR: [
+            { fromEntityType: "task", fromEntityId: { in: taskIds } },
+            { toEntityType: "task", toEntityId: { in: taskIds } }
+          ]
+        },
+        orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
+        take: 200,
+        include: { fromResource: true, toResource: true }
+      })
+      : Promise.resolve([]),
+    prisma.pipelineRun.findMany({
+      where: { workspaceId },
+      orderBy: { updatedAt: "desc" },
+      take: 100,
+      include: {
+        pipeline: true,
+        currentStage: { include: { procedure: true } },
+        stageRuns: {
+          orderBy: { updatedAt: "desc" },
+          take: 8,
+          include: { pipelineStage: { include: { procedure: true } } }
+        }
+      }
+    }),
+    prisma.agentLog.findMany({
+      where: { workspaceId },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+      include: { agent: true }
+    }),
+    projectIds.length
+      ? prisma.resource.findMany({
+        where: { workspaceId, relatedProjectId: { in: projectIds } },
+        orderBy: { updatedAt: "desc" },
+        take: 100
+      })
+      : Promise.resolve([]),
+    operationsArea
+      ? prisma.googleDriveFile.findMany({
+        where: { workspaceId, operatingAreaId: operationsArea.id, trashed: false },
+        orderBy: [{ isFolder: "desc" }, { modifiedTime: "desc" }, { updatedAt: "desc" }],
+        take: 12
+      })
+      : Promise.resolve([])
+  ]);
+
+  const workItems = tasks.map((task) => {
+    const taskDependencies = dependencies.filter((dependency) => (
+      (dependency.fromEntityType === "task" && dependency.fromEntityId === task.id)
+      || (dependency.toEntityType === "task" && dependency.toEntityId === task.id)
+    ));
+    const taskPipelineRuns = pipelineRuns.filter((run) => asStringArray(run.linkedTaskIds).includes(task.id));
+    const taskAgentLogs = agentLogs.filter((log) => jsonReferencesTask(log.metadata, task)).slice(0, 5);
+    const taskResources = projectResources.filter((resource) => resource.relatedProjectId === task.projectId).slice(0, 8);
+    const readiness = taskReadiness(task, taskDependencies.length);
+
+    return {
+      task: {
+        id: task.id,
+        title: task.title,
+        description: task.description,
+        status: task.status,
+        normalizedStatus: normalizedTaskStatus(task.status),
+        priority: task.priority ?? "medium",
+        dueDate: task.dueDate?.toISOString() ?? null,
+        startDate: null,
+        estimatedEndDate: null,
+        completedAt: task.status === "done" ? task.updatedAt.toISOString() : null,
+        estimatedDurationMinutes: null,
+        actualDurationMinutes: null,
+        trackedTimeMinutes: null,
+        source: task.source,
+        externalId: task.externalId,
+        createdAt: task.createdAt.toISOString(),
+        updatedAt: task.updatedAt.toISOString()
+      },
+      responsibility: {
+        ownerUserId: null,
+        assignedAgentId: null,
+        reviewerId: null,
+        teamId: null,
+        status: "not_modeled",
+        evidence: taskAgentLogs.map((log) => ({
+          id: log.id,
+          agentId: log.agentId,
+          agentName: log.agent?.name ?? null,
+          level: log.level,
+          message: log.message,
+          createdAt: log.createdAt.toISOString()
+        }))
+      },
+      hierarchy: {
+        project: task.project ? { id: task.project.id, name: task.project.name, status: task.project.status } : null,
+        goal: task.goal ? { id: task.goal.id, title: task.goal.title, status: task.goal.status } : null,
+        target: task.target ? { id: task.target.id, title: task.target.title, status: task.target.status } : null,
+        taskList: task.taskList ? { id: task.taskList.id, name: task.taskList.name, status: task.taskList.status } : null
+      },
+      operationalContext: {
+        pipelineRuns: taskPipelineRuns.map((run) => ({
+          id: run.id,
+          status: run.status,
+          pipeline: { id: run.pipeline.id, name: run.pipeline.name, status: run.pipeline.status },
+          currentStage: run.currentStage ? {
+            id: run.currentStage.id,
+            name: run.currentStage.name,
+            status: run.currentStage.status,
+            procedure: run.currentStage.procedure ? {
+              id: run.currentStage.procedure.id,
+              name: run.currentStage.procedure.name,
+              status: run.currentStage.procedure.status
+            } : null
+          } : null,
+          stageRuns: run.stageRuns.map((stageRun) => ({
+            id: stageRun.id,
+            status: stageRun.status,
+            approvalStatus: stageRun.approvalStatus,
+            stageName: stageRun.pipelineStage.name,
+            procedureName: stageRun.pipelineStage.procedure?.name ?? null
+          })),
+          correlationId: run.correlationId
+        }))
+      },
+      readiness,
+      evidence: {
+        notes: task.notes.map((note) => ({
+          id: note.id,
+          content: note.content,
+          status: note.status,
+          source: note.source,
+          createdAt: note.createdAt.toISOString()
+        })),
+        events: task.events.map((event) => ({
+          id: event.id,
+          type: event.type,
+          source: event.source,
+          actorType: event.actorType,
+          resourceType: event.resourceType,
+          resourceId: event.resourceId,
+          correlationId: event.correlationId,
+          createdAt: event.createdAt.toISOString()
+        })),
+        dependencies: taskDependencies.map((dependency) => ({
+          id: dependency.id,
+          type: dependency.dependencyType,
+          status: dependency.status,
+          from: dependency.fromResource?.name ?? dependency.fromEntityType ?? null,
+          to: dependency.toResource?.name ?? dependency.toEntityType ?? null,
+          metadata: dependency.metadata
+        })),
+        projectResources: taskResources.map((resource) => ({
+          id: resource.id,
+          type: resource.type,
+          name: resource.name,
+          url: resource.url,
+          accessLevel: resource.accessLevel
+        }))
+      }
+    };
+  });
+
+  const byStatus = workItems.reduce<Record<string, number>>((counts, item) => {
+    counts[item.task.status] = (counts[item.task.status] ?? 0) + 1;
+    return counts;
+  }, {});
+  const byPriority = workItems.reduce<Record<string, number>>((counts, item) => {
+    counts[item.task.priority] = (counts[item.task.priority] ?? 0) + 1;
+    return counts;
+  }, {});
+
+  return res.json({
+    data: {
+      department: {
+        canonicalKey: department?.canonicalKey ?? OPERATIONS_DEPARTMENT_KEY,
+        backendAreaKey: department?.backendAreaKey ?? "operations-administration",
+        name: "Operations Management System",
+        purpose: "Turn current company work into supervised, evidence-backed execution without creating a second task manager."
+      },
+      summary: {
+        total: workItems.length,
+        open: workItems.filter((item) => !["done", "archived"].includes(item.task.status)).length,
+        blocked: workItems.filter((item) => item.readiness.blocked).length,
+        overdue: workItems.filter((item) => item.readiness.overdue).length,
+        withProject: workItems.filter((item) => Boolean(item.hierarchy.project)).length,
+        withTaskList: workItems.filter((item) => Boolean(item.hierarchy.taskList)).length,
+        withPipelineRunEvidence: workItems.filter((item) => item.operationalContext.pipelineRuns.length > 0).length,
+        withDependencyEvidence: workItems.filter((item) => item.evidence.dependencies.length > 0).length,
+        withNotes: workItems.filter((item) => item.evidence.notes.length > 0).length,
+        withEvents: workItems.filter((item) => item.evidence.events.length > 0).length,
+        byStatus,
+        byPriority
+      },
+      operationsKnowledge: {
+        area: operationsArea ? { id: operationsArea.id, key: operationsArea.key, name: operationsArea.name } : null,
+        driveFiles: operationsDriveFiles.map((file) => ({
+          id: file.id,
+          name: file.name,
+          mimeType: file.mimeType,
+          isFolder: file.isFolder,
+          syncStatus: file.syncStatus,
+          scanStatus: file.scanStatus,
+          webViewLink: file.webViewLink,
+          modifiedTime: file.modifiedTime?.toISOString() ?? null
+        }))
+      },
+      workItems,
+      agentPacket: {
+        mode: "read_only",
+        allowedActions: [
+          "read_operations_work_items",
+          "inspect_task",
+          "inspect_task_evidence",
+          "inspect_pipeline_run_evidence",
+          "inspect_operations_drive_context"
+        ],
+        blockedActions: mapBlockedOperationsActions()
+      }
+    }
+  });
+}));
 
 operationsRouter.get("/context", asyncHandler(async (req, res) => {
   const workspaceId = req.auth!.workspaceId;

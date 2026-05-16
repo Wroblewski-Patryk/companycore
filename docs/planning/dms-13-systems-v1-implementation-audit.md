@@ -58,6 +58,10 @@ Implemented read packets already include:
    differentiated.
 5. Money, legal, permissions, external provider, and AI autonomy actions stay
    blocked until explicit command contracts, tests, and audit evidence exist.
+6. CompanyCore is the operating system. AI agents are API/MCP clients, not
+   embedded backend intelligence.
+7. The current owner-approved near-term focus is `00 Main -> 04 Operations ->
+   08 Assets`; the broader department sequence resumes after that checkpoint.
 
 ## Implementation Readiness Summary
 
@@ -697,17 +701,26 @@ First implementation slice:
 
 ## Recommended V1 Build Order
 
+Owner-approved active loop:
+
+1. `00 Main` intake, routing, owner review, and Paperclip output review.
+2. `04 Operations` task/procedure/execution control and safe proposal
+   commands.
+3. `08 Assets And Knowledge` source, file, resource, and AI-readiness
+   management.
+
+Broader department order after the active loop:
+
 1. `03 Sales` read packet and Sales board.
 2. `05 Relationships` read packet and relationship management board.
 3. `02 Product And Delivery` read packet and delivery board.
-4. `08 Assets And Knowledge` read packet and asset board.
-5. `09 Technology And AI` read packet and technology/agent health board.
-6. `10 Legal And Standards` read packet and standards/legal board.
-7. `06 People/Agents And Roles` roster and authority packet.
-8. `11 Innovation And Growth` source audit, then context packet.
-9. `12 Executive Management` aggregate packet after enough department packets
+4. `09 Technology And AI` read packet and technology/agent health board.
+5. `10 Legal And Standards` read packet and standards/legal board.
+6. `06 People/Agents And Roles` roster and authority packet.
+7. `11 Innovation And Growth` source audit, then context packet.
+8. `12 Executive Management` aggregate packet after enough department packets
    exist.
-10. Finance write planning, invoice/payment schema, and money commands only
+9. Finance write planning, invoice/payment schema, and money commands only
    after pricing policy and owner approval rules are resolved.
 
 `00 Main`, `01 Strategy`, `04 Operations`, and `07 Finance` already have enough

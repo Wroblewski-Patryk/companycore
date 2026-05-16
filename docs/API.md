@@ -1045,6 +1045,215 @@ Safe response shape:
 }
 ```
 
+## Operations Work Items
+
+```http
+GET /v1/operations/work-items
+```
+
+Required capability:
+
+```text
+operations:read
+```
+
+Query parameters:
+
+- `status`: optional current task status filter: `todo`, `in_progress`,
+  `blocked`, `done`, or `archived`.
+- `priority`: optional task priority filter.
+- `source`: optional task source filter.
+- `limit`: optional result limit, default `100`, maximum `200`.
+
+`GET /v1/operations/work-items` returns a read-only Operations work item packet
+over the existing task engine. It normalizes current `Task`, `Project`,
+`TaskList`, `Goal`, `Target`, `PipelineRun`, `StageRun`, `Procedure`,
+`Dependency`, `Note`, `Event`, `AgentLog`, `Resource`, and scoped Drive
+evidence without adding a second task manager or mutating records.
+
+Safe response shape:
+
+```json
+{
+  "data": {
+    "department": {
+      "canonicalKey": "04-operacje",
+      "backendAreaKey": "operations-administration",
+      "name": "Operations Management System"
+    },
+    "summary": {
+      "total": 12,
+      "open": 8,
+      "blocked": 2,
+      "overdue": 1,
+      "withPipelineRunEvidence": 3,
+      "withDependencyEvidence": 2,
+      "withNotes": 5,
+      "withEvents": 7
+    },
+    "operationsKnowledge": {
+      "area": { "id": "uuid", "key": "operations-administration" },
+      "driveFiles": []
+    },
+    "workItems": [
+      {
+        "task": {
+          "id": "uuid",
+          "title": "Operations procedure review",
+          "status": "in_progress",
+          "normalizedStatus": "in_progress",
+          "priority": "high",
+          "dueDate": null,
+          "estimatedDurationMinutes": null
+        },
+        "responsibility": {
+          "ownerUserId": null,
+          "assignedAgentId": null,
+          "reviewerId": null,
+          "teamId": null,
+          "status": "not_modeled",
+          "evidence": []
+        },
+        "hierarchy": {
+          "project": null,
+          "goal": null,
+          "target": null,
+          "taskList": null
+        },
+        "operationalContext": {
+          "pipelineRuns": []
+        },
+        "readiness": {
+          "blocked": false,
+          "overdue": false,
+          "dependencyCount": 0,
+          "riskLevel": "low",
+          "missingFields": ["owner_user_id", "assigned_agent_id"]
+        },
+        "evidence": {
+          "notes": [],
+          "events": [],
+          "dependencies": [],
+          "projectResources": []
+        }
+      }
+    ],
+    "agentPacket": {
+      "mode": "read_only",
+      "allowedActions": ["read_operations_work_items", "inspect_task"],
+      "blockedActions": [
+        {
+          "action": "assign_human_or_agent",
+          "reason": "Human and AI-agent assignment needs an explicit responsibility model before writes are exposed."
+        }
+      ]
+    }
+  }
+}
+```
+
+## Assets Context
+
+```http
+GET /v1/assets/context
+```
+
+Required capability:
+
+```text
+assets:read
+```
+
+Query parameters:
+
+- `areaKey`: optional operating-area key, default `assets-storage`.
+- `type`: optional resource taxonomy filter such as `document`, `markdown`,
+  `spreadsheet`, `image`, `prompt`, `architecture_doc`, `repository`,
+  `api_reference`, `deployment_doc`, `knowledge_note`, `contract`, or
+  `brand_asset`.
+- `readiness`: optional AI-readiness label filter: `not_indexed`,
+  `metadata_ready`, `content_ready`, `summary_ready`, `relation_ready`, or
+  `ai_context_ready`.
+- `limit`: optional result limit, default `100`, maximum `200`.
+
+`GET /v1/assets/context` returns the read-only `08 Assets And Resources`
+packet for humans and external AI/MCP clients. It aggregates current Google
+Drive files/folders, content snapshots, Resource records, Knowledge Roots,
+Knowledge Items, operating-area scope, resource relations, readiness labels,
+and blocked provider actions. AI readiness means external-client compatibility;
+CompanyCore does not run embedded AI in this endpoint.
+
+Safe response shape:
+
+```json
+{
+  "data": {
+    "department": {
+      "canonicalKey": "08-zasoby",
+      "backendAreaKey": "assets-storage",
+      "name": "Assets And Resources Management System"
+    },
+    "summary": {
+      "totalItems": 24,
+      "driveFiles": 18,
+      "unassignedDriveFiles": 2,
+      "driveFilesMissingDescription": 5,
+      "contentSnapshots": 12,
+      "resources": 6,
+      "knowledgeItems": 4,
+      "knowledgeRoots": 2,
+      "aiReadyItems": 8,
+      "needsCleanup": 16,
+      "readiness": {
+        "not_indexed": 3,
+        "metadata_ready": 5,
+        "content_ready": 2,
+        "summary_ready": 4,
+        "relation_ready": 2,
+        "ai_context_ready": 8
+      },
+      "byType": {
+        "document": 10,
+        "architecture_doc": 2
+      }
+    },
+    "folders": [],
+    "knowledgeRoots": [],
+    "knowledgeItems": [],
+    "resources": [
+      {
+        "sourceModel": "GoogleDriveFile",
+        "sourceId": "uuid",
+        "name": "Company architecture.md",
+        "resourceType": "markdown",
+        "aiCompatibility": {
+          "readiness": "ai_context_ready",
+          "summary": "Architecture source of truth for CompanyCore.",
+          "aiContextReady": true
+        },
+        "relations": {
+          "tasks": [],
+          "projects": [],
+          "pipelines": [],
+          "clients": [],
+          "agents": []
+        }
+      }
+    ],
+    "agentPacket": {
+      "mode": "read_only",
+      "allowedActions": ["read_assets_context", "inspect_resource_metadata"],
+      "blockedActions": [
+        {
+          "action": "delete_move_or_share_provider_file",
+          "reason": "Provider-side delete, move, share, and permission changes need explicit Google Drive command contracts and owner approval."
+        }
+      ]
+    }
+  }
+}
+```
+
 ## Strategy Context
 
 ```http
@@ -2431,6 +2640,97 @@ The MCP manifest exposes this endpoint as `companycore_get_intake` when the key
 has `intake:read`. The canonical MCP profiles include `intake:read` so
 Paperclip can inspect background work and route it through CompanyCore instead
 of reading provider tables directly.
+
+```http
+GET /v1/intake/route-proposals
+GET /intake/route-proposals
+```
+
+Required capability:
+
+```text
+intake:read
+```
+
+Returns read-only lifecycle evidence for `00 Main` route proposals created by
+`POST /v1/intake/actions/propose-route`. The endpoint reads the existing
+`Decision`, optional draft `Task`, `AuditLog`, and `Event` records and does not
+acknowledge agent events, mutate provider state, decide approvals, or execute
+department work.
+
+Query:
+
+| Name | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `status` | string | unset | Filters proposal `Decision.status`, such as `proposed`. |
+| `sourceModel` | string | unset | Filters the original source model recorded in audit input payload. |
+| `targetDepartmentKey` | string | unset | Filters canonical target department key. |
+| `risk` | string | unset | Filters `low`, `medium`, `high`, or `critical`. |
+| `limit` | number | `100` | Maximum `200`. |
+
+Safe response shape:
+
+```json
+{
+  "data": {
+    "summary": {
+      "total": 1,
+      "withTaskDraft": 1,
+      "withAuditEvidence": 1,
+      "withEventEvidence": 1,
+      "byStatus": { "task_draft_created": 1 },
+      "byTargetDepartment": { "03-sprzedaz": 1 },
+      "byRisk": { "medium": 1 }
+    },
+    "proposals": [
+      {
+        "proposal": {
+          "id": "decision-uuid",
+          "sourceModel": "AgentEventOutbox",
+          "sourceId": "event-uuid",
+          "targetDepartmentKey": "03-sprzedaz",
+          "classification": "route_to_department",
+          "status": "proposed",
+          "lifecycleState": "task_draft_created",
+          "riskLevel": "medium",
+          "ownerDecisionRequested": true
+        },
+        "effects": {
+          "sourceMutated": false,
+          "agentEventAcknowledged": false,
+          "providerStateMutated": false,
+          "taskDraftCreated": true,
+          "auditRecorded": true,
+          "eventRecorded": true
+        },
+        "evidence": {
+          "decisionId": "decision-uuid",
+          "taskId": "task-uuid",
+          "auditLogId": "audit-log-uuid",
+          "eventId": "event-uuid",
+          "correlationId": "intake-route:decision-uuid"
+        },
+        "blockedActions": [
+          {
+            "action": "provider_write",
+            "reason": "Provider retry, scope, delete, and write actions stay in provider-specific guarded routes."
+          }
+        ]
+      }
+    ],
+    "agentPacket": {
+      "mode": "read_only",
+      "allowedActions": ["read_route_proposals", "inspect_route_proposal_evidence"],
+      "blockedActions": [
+        {
+          "action": "approval_decision",
+          "reason": "Approvals require a dedicated approval decision command and proper authority."
+        }
+      ]
+    }
+  }
+}
+```
 
 ```http
 POST /v1/intake/actions/propose-route

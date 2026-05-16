@@ -8,9 +8,11 @@ CompanyCore web UI is React-owned. The backend may still serve static files,
 health endpoints, and JSON APIs, but user-facing web routes must render through
 the Vite React bundle in `public/react/index.html`.
 
-As of 2026-05-15, `/` is the canonical public home route and `/dashboard` is
-the canonical authenticated post-login landing route. `/react-dashboard`
-remains a temporary compatibility alias for the private Company Atlas view.
+As of 2026-05-16, `/` is the canonical public home route and
+`/areas?area=00-ogolny&view=overview` is the canonical authenticated
+post-login landing route. `/dashboard` and `/react-dashboard` remain temporary
+compatibility aliases that redirect to the `00 Ogolny` selected-area
+dashboard.
 
 React route metadata now lives in `web/src/app-route-registry.ts`. That file is
 the source of truth for route groups, canonical hrefs, aliases, prefix matches,

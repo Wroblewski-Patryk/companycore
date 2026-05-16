@@ -37,7 +37,7 @@ CompanyCore V1 has three web layers:
 
 | View | Route | Purpose | V1 status | Primary components |
 | --- | --- | --- | --- | --- |
-| Company Atlas | `/dashboard` | Whole-company command map across 00-12 areas. | V1 canonical | company decision board, area map, health signals, next action |
+| 00 Ogolny Dashboard | `/areas?area=00-ogolny&view=overview` (`/dashboard` compatibility alias) | Whole-company command map and orchestration layer across 00-12 areas. | V1 canonical | company decision board, area map, health signals, next action |
 | Operations Cockpit | `/operations` | Cross-perspective supervision for clients, tasks, files/tables, and AI handoff. | V1 canonical | four-lane command surface, quick create, department evidence, AI handoff |
 | Department Management System | `/areas?area=:areaKey&view=:viewId` | Canonical department operating room for one area. | V1 canonical base; `00 Main` and `04 Operacje` have first dedicated read-only management panels | department identity, command brief, subsystem tabs, board, evidence rail |
 | Unified Settings | `/settings` | Configure connectors, agent keys, and MCP handoff fields. | V1 canonical | integration settings, agent keys, MCP instructions |
