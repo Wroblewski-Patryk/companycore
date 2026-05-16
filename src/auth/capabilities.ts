@@ -18,6 +18,7 @@ export const capabilities = [
   "finance:read",
   "relationships:read",
   "operations:read",
+  "strategy:read",
   "operating-graph:read",
   "operating-model:read",
   "operating-model:write",
@@ -132,6 +133,9 @@ export const adapterManifest = {
     ],
     operations: [
       { method: "GET", path: "/v1/operations/context", capability: "operations:read" }
+    ],
+    strategy: [
+      { method: "GET", path: "/v1/strategy/context", capability: "strategy:read" }
     ],
     operatingGraph: [
       { method: "GET", path: "/v1/operating-graph/areas/:areaKey", capability: "operating-graph:read" }

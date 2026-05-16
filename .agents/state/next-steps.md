@@ -4,13 +4,13 @@ Last updated: 2026-05-16
 
 ## NOW
 
-1. Continue outside the completed V1OPS group with the next department system
-   slice.
+1. Deploy and smoke the verified `01 Strategy` read packet.
    - Source: `docs/planning/mvp-next-commits.md`.
-   - Preferred order: a read-only `01 Strategy` department packet, then a
-     guarded `04 Operations` planning/procedure command contract if the owner
-     wants operation writes next.
-   - Keep writes behind explicit command contracts and API tests.
+   - `GET /v1/strategy/context` is locally verified with `strategy:read`,
+     MCP exposure, profile coverage, workspace isolation, no-mutation proof,
+     and scoped-key denial.
+   - Next release checkpoint: production rollout, public health, and protected
+     owner-auth route smoke.
 
 ## NEXT
 

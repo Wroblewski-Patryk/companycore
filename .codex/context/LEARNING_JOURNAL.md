@@ -502,3 +502,26 @@ fixes for this repository.
   `src/tests/api.test.ts` asserts the repaired secret and refresh body. `npm
   run test:api` passed against workspace-local PostgreSQL on
   `127.0.0.1:55476`.
+
+### 2026-05-16 - Windows embedded PostgreSQL validation needs explicit locale and database creation
+- Context: DMS-01-005A ran `npm run test:api` against the bundled embedded
+  PostgreSQL binaries from the Paperclip workspace.
+- Symptom: `initdb` failed under the Windows `Polish_Poland.1250` locale, and
+  Prisma migration deploy failed when the target `companycore_test` database
+  did not exist. PowerShell also rejected using the same file for both
+  `RedirectStandardOutput` and `RedirectStandardError`.
+- Root cause: The embedded PostgreSQL package includes `initdb.exe` and
+  `postgres.exe`, but not `createdb.exe`; PowerShell requires separate stdout
+  and stderr redirect paths; the default Windows locale was not accepted by
+  PostgreSQL text-search configuration discovery.
+- Guardrail: For future portable PostgreSQL validation on Windows, initialize
+  with `initdb --locale=C --encoding=UTF8`, start `postgres.exe` with separate
+  stdout/stderr log files, create the test database through
+  `npx prisma db execute --url postgresql://postgres@127.0.0.1:<port>/postgres?schema=public --stdin`,
+  then run `npm run test:api`.
+- Preferred pattern: Stop only the validation-owned PostgreSQL process, confirm
+  no process command line references the validation data directory or port, and
+  remove only the validation-owned `.tmp` directory and logs.
+- Evidence: DMS-01-005A passed `npm run test:api` on
+  `127.0.0.1:55496` after applying this sequence, then removed
+  `.tmp/companycore-strategy001-pg*`.

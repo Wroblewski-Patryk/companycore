@@ -133,6 +133,10 @@ function routeDescription(route: ManifestRoute) {
     return "Read the 04 Operations management context for procedures, dependencies, approvals, business functions, operational tasks, and safe agent handoff.";
   }
 
+  if (route.capability === "strategy:read") {
+    return "Read the 01 Strategy management context for goals, targets, metrics, risks, decisions, strategic knowledge, documents, tasks, and safe agent planning handoff.";
+  }
+
   if (route.capability === "operating-graph:read") {
     return "Read one selected department operating graph with goals, targets, metrics, workflows, tasks, knowledge, sources, evidence, and readiness gaps.";
   }

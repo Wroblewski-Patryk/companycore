@@ -7,11 +7,11 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] Continue outside the completed V1OPS group with the next department
-      system slice:
-      preferred order is a read-only `01 Strategy` department packet, then a
-      guarded `04 Operations` planning/procedure command contract if the owner
-      wants operation writes next.
+- [ ] Deploy and smoke the verified `01 Strategy` read packet:
+      `GET /v1/strategy/context` is locally verified with `strategy:read`,
+      MCP exposure, profile coverage, workspace isolation, no-mutation proof,
+      and scoped-key denial. Next release checkpoint is a production rollout
+      plus protected route smoke.
 
 ### NEXT
 
@@ -133,6 +133,19 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       `agentPacket.mode=read_only`, and `blockedActions=4`. Temporary local
       and VPS rollout artifacts were removed. Task contract:
       `docs/planning/v1ops-production-operations-context-smoke-task-contract.md`.
+
+- [x] DMS-01-005A Strategy context read API:
+      protected read-only `GET /v1/strategy/context` now returns the
+      `01-strategia` Strategy Management packet with goals, targets, metrics,
+      risks/controls, decisions, decision logs, strategic knowledge, Drive
+      documents, strategic tasks, summary counts, allowed read actions, and
+      blocked write actions. The route is exposed through `strategy:read`,
+      MCP manifest tooling, and read-oriented MCP key profiles. Validation
+      passed with `npm run build:server`, `npm run test:api` against
+      validation-owned PostgreSQL on `127.0.0.1:55496`, and
+      `git diff --check`. Validation PostgreSQL and temporary artifacts were
+      cleaned up. Task contract:
+      `docs/planning/v1-strategy-context-read-api-task-contract.md`.
 
 - [x] V1COS-001 Company OS area-aware foundation:
       `/react-company-os` now connects Company OS evidence and guarded

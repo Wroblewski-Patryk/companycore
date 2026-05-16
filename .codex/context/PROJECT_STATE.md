@@ -137,6 +137,17 @@ Last updated: 2026-05-16
   `/v1/operations/context` returned `04-operacje`,
   `operations-administration`, `summary.procedures=7`,
   `agentPacket.mode=read_only`, and `blockedActions=4`.
+  As of 2026-05-16, DMS-01-005A added protected read-only
+  `GET /v1/strategy/context` as the backend Strategy Management packet for
+  `01-strategia`. The route aggregates existing goals, targets, metrics,
+  risks/controls, decision logs, decisions, strategic knowledge, Drive
+  documents, strategic tasks, summary counts, and a read-only agent packet with
+  blocked strategy-write actions. It is exposed through `strategy:read`, MCP
+  manifest tooling, and read-oriented MCP key profiles. `npm run build:server`,
+  `npm run test:api` against validation-owned PostgreSQL on
+  `127.0.0.1:55496`, and `git diff --check` passed. The validation database
+  process and temporary files were removed after the run. Production smoke for
+  this new Strategy route is the next release checkpoint.
   As of 2026-05-16, DMS-00-003 implemented the first backend slice of
   `00 Main`: protected read-only `GET /v1/intake`. It aggregates existing
   agent events, provider inbox rows, unassigned Drive/provider resources,

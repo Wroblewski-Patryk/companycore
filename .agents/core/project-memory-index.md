@@ -157,6 +157,14 @@ continue from repository files alone:
   `operations-administration`, `summary.procedures=7`,
   `agentPacket.mode=read_only`, and `blockedActions=4`. Previous backend
   `5f1fc71` is retained stopped as rollback.
+  As of DMS-01-005A, `GET /v1/strategy/context` provides the read-only backend
+  packet for `01 Strategy`: goals, targets, metrics, risks/controls, decision
+  logs, decisions, strategic knowledge, Drive documents, strategic tasks,
+  summary counts, allowed read actions, and blocked strategy-write actions. It
+  is exposed through `strategy:read` and MCP. `npm run build:server`,
+  `npm run test:api` passed on validation-owned PostgreSQL
+  `127.0.0.1:55496`, and `git diff --check` passed. Production smoke remains
+  pending after deploy.
 - `docs/architecture/department-management-systems-v1-blueprint.md`:
   detailed V1 blueprint for `00 Main` plus the 12 operating department
   management systems. As of 2026-05-16, future department work should use this

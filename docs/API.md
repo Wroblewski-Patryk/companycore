@@ -1011,6 +1011,71 @@ Safe response shape:
 }
 ```
 
+## Strategy Context
+
+```http
+GET /v1/strategy/context
+```
+
+Required capability:
+
+```text
+strategy:read
+```
+
+`GET /v1/strategy/context` returns the read-only `01 Strategy`
+management packet for owners and MCP agents. It aggregates existing goals,
+targets, metrics, risks, controls, decisions, decision logs, strategic
+knowledge, Drive files, and follow-up tasks without changing strategic
+direction, priorities, portfolio choices, goals, targets, documents, tasks, or
+provider state.
+
+Safe response shape:
+
+```json
+{
+  "data": {
+    "department": {
+      "canonicalKey": "01-strategia",
+      "backendAreaKey": "strategy-governance",
+      "name": "Strategy Management System"
+    },
+    "summary": {
+      "goals": 4,
+      "activeGoals": 4,
+      "targets": 8,
+      "activeTargets": 6,
+      "activeMetrics": 5,
+      "activeRisks": 2,
+      "decisionLogs": 3,
+      "activeDecisions": 2,
+      "openTasks": 7,
+      "strategicTasks": 3,
+      "strategyKnowledgeItems": 2,
+      "strategyDriveFiles": 2
+    },
+    "goals": [],
+    "metrics": [],
+    "risks": [],
+    "decisionLogs": [],
+    "decisions": [],
+    "knowledgeItems": [],
+    "driveFiles": [],
+    "tasks": [],
+    "agentPacket": {
+      "mode": "read_only",
+      "allowedActions": ["read_strategy_context", "inspect_goal"],
+      "blockedActions": [
+        {
+          "action": "create_or_change_strategy",
+          "reason": "Strategic direction changes require an explicit owner-approved command contract."
+        }
+      ]
+    }
+  }
+}
+```
+
 ## Company OS
 
 Company OS records are exposed through a mostly read-oriented,

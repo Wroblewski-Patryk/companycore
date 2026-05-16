@@ -1265,6 +1265,251 @@ test("CompanyCore v1 protected API flow", async () => {
   await prisma.businessFunction.delete({ where: { id: operationsBusinessFunction.id } });
   await prisma.procedure.deleteMany({ where: { id: { in: [operationsProcedure.id, foreignOperationsProcedure.id] } } });
 
+  const strategyContextArea = await prisma.operatingArea.findFirstOrThrow({
+    where: { workspaceId: ownerA.workspace.id, key: "strategy-governance" }
+  });
+  const strategyGoal = await prisma.goal.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      title: "Strategy growth priority",
+      description: "Define the owner strategy and priority portfolio.",
+      status: "active"
+    }
+  });
+  const strategyTarget = await prisma.target.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      goalId: strategyGoal.id,
+      title: "Strategy KPI target",
+      description: "Measure the strategy outcome.",
+      metric: "qualified opportunities",
+      targetValue: 10,
+      currentValue: 2,
+      status: "active"
+    }
+  });
+  const strategyTask = await prisma.task.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      goalId: strategyGoal.id,
+      targetId: strategyTarget.id,
+      title: "Strategy roadmap review",
+      description: "Review goals, KPI targets, risks, and decisions.",
+      status: "todo",
+      priority: "high"
+    }
+  });
+  const strategyMetric = await prisma.metric.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Strategy KPI velocity",
+      category: "strategy",
+      measurementType: "count",
+      unit: "items",
+      targetValue: 10,
+      currentValue: 2,
+      status: "active"
+    }
+  });
+  const strategyRisk = await prisma.risk.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Strategy focus drift",
+      description: "Too many priorities can slow execution.",
+      category: "strategy",
+      riskLevel: "high",
+      likelihood: "medium",
+      impact: "high",
+      status: "active"
+    }
+  });
+  const strategyControl = await prisma.control.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      riskId: strategyRisk.id,
+      name: "Strategy weekly review control",
+      controlType: "review",
+      verificationMethod: "Owner review notes",
+      status: "active"
+    }
+  });
+  const strategyDecisionLog = await prisma.decisionLog.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      context: "Strategy market focus",
+      optionsConsidered: ["broad services", "focused AI operations"],
+      chosenOption: "focused AI operations",
+      reason: "Better positioning and delivery leverage.",
+      decidedByType: "user",
+      consequences: "Prioritize CompanyCore and Paperclip integration work."
+    }
+  });
+  const strategyDecision = await prisma.decision.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      title: "Strategy offer positioning",
+      rationale: "Keep offer focused around autonomous company operations.",
+      outcome: "approved",
+      status: "active"
+    }
+  });
+  const strategyKnowledgeItem = await prisma.knowledgeItem.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      title: "Strategy brief",
+      itemType: "strategy_note",
+      summary: "Owner strategy, goals, and constraints for Paperclip planning.",
+      sourceProvider: "test",
+      sourceExternalId: "strategy-brief"
+    }
+  });
+  const strategyDriveFile = await prisma.googleDriveFile.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      externalId: "strategy-drive-file",
+      name: "Strategy roadmap document",
+      description: "Strategy planning source document.",
+      mimeType: "application/vnd.google-apps.document",
+      webViewLink: "https://drive.example/strategy",
+      operatingAreaId: strategyContextArea.id,
+      syncStatus: "synced",
+      scanStatus: "completed"
+    }
+  });
+  const foreignStrategyGoal = await prisma.goal.create({
+    data: {
+      workspaceId: ownerB.workspace.id,
+      title: "Foreign strategy goal",
+      description: "Must not leak into workspace A strategy context.",
+      status: "active"
+    }
+  });
+
+  const unauthenticatedStrategyContext = await request("/v1/strategy/context");
+  assert.equal(unauthenticatedStrategyContext.status, 401);
+  const strategyCountsBefore = {
+    goals: await prisma.goal.count({ where: { workspaceId: ownerA.workspace.id } }),
+    targets: await prisma.target.count({ where: { workspaceId: ownerA.workspace.id } }),
+    metrics: await prisma.metric.count({ where: { workspaceId: ownerA.workspace.id } }),
+    risks: await prisma.risk.count({ where: { workspaceId: ownerA.workspace.id } }),
+    controls: await prisma.control.count({ where: { workspaceId: ownerA.workspace.id } }),
+    decisionLogs: await prisma.decisionLog.count({ where: { workspaceId: ownerA.workspace.id } }),
+    decisions: await prisma.decision.count({ where: { workspaceId: ownerA.workspace.id } }),
+    knowledgeItems: await prisma.knowledgeItem.count({ where: { workspaceId: ownerA.workspace.id } }),
+    driveFiles: await prisma.googleDriveFile.count({ where: { workspaceId: ownerA.workspace.id } }),
+    tasks: await prisma.task.count({ where: { workspaceId: ownerA.workspace.id } }),
+    auditLogs: await prisma.auditLog.count({ where: { workspaceId: ownerA.workspace.id } }),
+    events: await prisma.event.count({ where: { workspaceId: ownerA.workspace.id } })
+  };
+  const strategyContext = await request("/v1/strategy/context", { headers: authA });
+  assert.equal(strategyContext.status, 200);
+  const strategyContextBody = strategyContext.body as {
+    data: {
+      department: { canonicalKey: string; backendAreaKey: string };
+      summary: {
+        goals: number;
+        activeGoals: number;
+        targets: number;
+        activeTargets: number;
+        activeMetrics: number;
+        activeRisks: number;
+        decisionLogs: number;
+        activeDecisions: number;
+        strategicTasks: number;
+        strategyKnowledgeItems: number;
+        strategyDriveFiles: number;
+      };
+      goals: Array<{ id: string; targets: Array<{ id: string }>; tasks: Array<{ id: string }> }>;
+      metrics: Array<{ id: string; name: string }>;
+      risks: Array<{ id: string; controls: Array<{ id: string }> }>;
+      decisionLogs: Array<{ id: string; chosenOption: string }>;
+      decisions: Array<{ id: string; title: string }>;
+      knowledgeItems: Array<{ id: string; title: string }>;
+      driveFiles: Array<{ id: string; operatingAreaKey: string | null }>;
+      tasks: Array<{ id: string; title: string }>;
+      agentPacket: { mode: string; allowedActions: string[]; blockedActions: Array<{ action: string }> };
+    };
+  };
+  assert.equal(strategyContextBody.data.department.canonicalKey, "01-strategia");
+  assert.equal(strategyContextBody.data.department.backendAreaKey, "strategy-governance");
+  assert.ok(strategyContextBody.data.summary.goals >= 1);
+  assert.ok(strategyContextBody.data.summary.activeGoals >= 1);
+  assert.ok(strategyContextBody.data.summary.targets >= 1);
+  assert.ok(strategyContextBody.data.summary.activeTargets >= 1);
+  assert.ok(strategyContextBody.data.summary.activeMetrics >= 1);
+  assert.ok(strategyContextBody.data.summary.activeRisks >= 1);
+  assert.ok(strategyContextBody.data.summary.decisionLogs >= 1);
+  assert.ok(strategyContextBody.data.summary.activeDecisions >= 1);
+  assert.ok(strategyContextBody.data.summary.strategicTasks >= 1);
+  assert.ok(strategyContextBody.data.summary.strategyKnowledgeItems >= 1);
+  assert.ok(strategyContextBody.data.summary.strategyDriveFiles >= 1);
+  assert.ok(strategyContextBody.data.goals.some((goal) => (
+    goal.id === strategyGoal.id
+    && goal.targets.some((target) => target.id === strategyTarget.id)
+    && goal.tasks.some((task) => task.id === strategyTask.id)
+  )));
+  assert.ok(strategyContextBody.data.metrics.some((metric) => metric.id === strategyMetric.id));
+  assert.ok(strategyContextBody.data.risks.some((risk) => (
+    risk.id === strategyRisk.id
+    && risk.controls.some((control) => control.id === strategyControl.id)
+  )));
+  assert.ok(strategyContextBody.data.decisionLogs.some((decisionLog) => decisionLog.id === strategyDecisionLog.id));
+  assert.ok(strategyContextBody.data.decisions.some((decision) => decision.id === strategyDecision.id));
+  assert.ok(strategyContextBody.data.knowledgeItems.some((item) => item.id === strategyKnowledgeItem.id));
+  assert.ok(strategyContextBody.data.driveFiles.some((file) => (
+    file.id === strategyDriveFile.id
+    && file.operatingAreaKey === "strategy-governance"
+  )));
+  assert.ok(strategyContextBody.data.tasks.some((task) => task.id === strategyTask.id));
+  assert.equal(strategyContextBody.data.agentPacket.mode, "read_only");
+  assert.ok(strategyContextBody.data.agentPacket.allowedActions.includes("read_strategy_context"));
+  assert.ok(strategyContextBody.data.agentPacket.blockedActions.some((action) => action.action === "create_or_change_strategy"));
+  const strategyCountsAfter = {
+    goals: await prisma.goal.count({ where: { workspaceId: ownerA.workspace.id } }),
+    targets: await prisma.target.count({ where: { workspaceId: ownerA.workspace.id } }),
+    metrics: await prisma.metric.count({ where: { workspaceId: ownerA.workspace.id } }),
+    risks: await prisma.risk.count({ where: { workspaceId: ownerA.workspace.id } }),
+    controls: await prisma.control.count({ where: { workspaceId: ownerA.workspace.id } }),
+    decisionLogs: await prisma.decisionLog.count({ where: { workspaceId: ownerA.workspace.id } }),
+    decisions: await prisma.decision.count({ where: { workspaceId: ownerA.workspace.id } }),
+    knowledgeItems: await prisma.knowledgeItem.count({ where: { workspaceId: ownerA.workspace.id } }),
+    driveFiles: await prisma.googleDriveFile.count({ where: { workspaceId: ownerA.workspace.id } }),
+    tasks: await prisma.task.count({ where: { workspaceId: ownerA.workspace.id } }),
+    auditLogs: await prisma.auditLog.count({ where: { workspaceId: ownerA.workspace.id } }),
+    events: await prisma.event.count({ where: { workspaceId: ownerA.workspace.id } })
+  };
+  assert.deepEqual(strategyCountsAfter, strategyCountsBefore);
+  const foreignStrategyContext = await request("/v1/strategy/context", { headers: authB });
+  assert.equal(foreignStrategyContext.status, 200);
+  const foreignStrategyContextBody = foreignStrategyContext.body as {
+    data: { goals: Array<{ id: string }> };
+  };
+  assert.ok(foreignStrategyContextBody.data.goals.some((goal) => goal.id === foreignStrategyGoal.id));
+  assert.ok(!foreignStrategyContextBody.data.goals.some((goal) => goal.id === strategyGoal.id));
+  const strategyMcpManifest = await request("/v1/mcp/manifest", { headers: authA });
+  assert.equal(strategyMcpManifest.status, 200);
+  const strategyMcpManifestBody = strategyMcpManifest.body as {
+    data: { tools: Array<{ name: string; path: string; capability: string; riskLevel: string; requiresApproval: boolean }> };
+  };
+  assert.ok(strategyMcpManifestBody.data.tools.some((tool) => (
+    tool.name === "companycore_get_strategy_context"
+    && tool.path === "/v1/strategy/context"
+    && tool.capability === "strategy:read"
+    && tool.riskLevel === "read"
+    && tool.requiresApproval === false
+  )));
+
+  await prisma.googleDriveFile.delete({ where: { id: strategyDriveFile.id } });
+  await prisma.knowledgeItem.delete({ where: { id: strategyKnowledgeItem.id } });
+  await prisma.decision.delete({ where: { id: strategyDecision.id } });
+  await prisma.decisionLog.delete({ where: { id: strategyDecisionLog.id } });
+  await prisma.control.delete({ where: { id: strategyControl.id } });
+  await prisma.risk.delete({ where: { id: strategyRisk.id } });
+  await prisma.metric.delete({ where: { id: strategyMetric.id } });
+  await prisma.task.delete({ where: { id: strategyTask.id } });
+  await prisma.target.delete({ where: { id: strategyTarget.id } });
+  await prisma.goal.deleteMany({ where: { id: { in: [strategyGoal.id, foreignStrategyGoal.id] } } });
+
   const ownerAWorkspacesInitial = await request("/v1/workspaces", { headers: authA });
   assert.equal(ownerAWorkspacesInitial.status, 200);
   const ownerAWorkspacesInitialBody = ownerAWorkspacesInitial.body as {
@@ -3554,6 +3799,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(companyOsReaderProfile.scopes.includes("finance:read"));
   assert.ok(companyOsReaderProfile.scopes.includes("relationships:read"));
   assert.ok(companyOsReaderProfile.scopes.includes("operations:read"));
+  assert.ok(companyOsReaderProfile.scopes.includes("strategy:read"));
   assert.ok(!companyOsReaderProfile.scopes.includes("company-os:definition:write"));
   assert.ok(!companyOsReaderProfile.scopes.includes("company-os:workflow-definition:write"));
   assert.ok(!companyOsReaderProfile.scopes.includes("company-os:workflow-definition:activate"));
@@ -3583,6 +3829,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(createdProfileKeyBody.data.scopes.includes("finance:read"));
   assert.ok(createdProfileKeyBody.data.scopes.includes("relationships:read"));
   assert.ok(createdProfileKeyBody.data.scopes.includes("operations:read"));
+  assert.ok(createdProfileKeyBody.data.scopes.includes("strategy:read"));
   assert.ok(!createdProfileKeyBody.data.scopes.includes("company-os:definition:write"));
   assert.ok(!createdProfileKeyBody.data.scopes.includes("company-os:workflow-definition:write"));
   assert.ok(!createdProfileKeyBody.data.scopes.includes("company-os:workflow-definition:activate"));
@@ -3610,6 +3857,10 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(profileMcpManifestBody.data.tools.some((tool) => (
     tool.path === "/v1/operations/context"
     && tool.capability === "operations:read"
+  )));
+  assert.ok(profileMcpManifestBody.data.tools.some((tool) => (
+    tool.path === "/v1/strategy/context"
+    && tool.capability === "strategy:read"
   )));
   assert.ok(!profileMcpManifestBody.data.tools.some((tool) => tool.capability === "company-os:definition:write"));
   assert.ok(!profileMcpManifestBody.data.tools.some((tool) => tool.capability === "company-os:workflow-definition:write"));
@@ -3774,6 +4025,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(!scopedConnectionBody.data.capabilities.includes("commercial-exceptions:read"));
   assert.ok(!scopedConnectionBody.data.capabilities.includes("finance:read"));
   assert.ok(!scopedConnectionBody.data.capabilities.includes("operations:read"));
+  assert.ok(!scopedConnectionBody.data.capabilities.includes("strategy:read"));
   assert.ok(!scopedConnectionBody.data.capabilities.includes("notes:write"));
   assert.ok(scopedConnectionBody.data.mcpManifest.tools.some((tool) => (
     tool.path === "/v1/company-os"
@@ -3787,6 +4039,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(!scopedConnectionBody.data.mcpManifest.tools.some((tool) => tool.capability === "commercial-exceptions:read"));
   assert.ok(!scopedConnectionBody.data.mcpManifest.tools.some((tool) => tool.capability === "finance:read"));
   assert.ok(!scopedConnectionBody.data.mcpManifest.tools.some((tool) => tool.capability === "operations:read"));
+  assert.ok(!scopedConnectionBody.data.mcpManifest.tools.some((tool) => tool.capability === "strategy:read"));
 
   const scopedMcpManifest = await request("/v1/mcp/manifest", {
     headers: scopedAuth
@@ -3809,6 +4062,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(!scopedMcpManifestBody.data.tools.some((tool) => tool.capability === "commercial-exceptions:read"));
   assert.ok(!scopedMcpManifestBody.data.tools.some((tool) => tool.capability === "finance:read"));
   assert.ok(!scopedMcpManifestBody.data.tools.some((tool) => tool.capability === "operations:read"));
+  assert.ok(!scopedMcpManifestBody.data.tools.some((tool) => tool.capability === "strategy:read"));
 
   const deniedScopedCommercialExceptions = await request("/v1/commercial-exceptions", {
     headers: scopedAuth
@@ -3825,6 +4079,11 @@ test("CompanyCore v1 protected API flow", async () => {
   });
   assert.equal(deniedScopedOperationsContext.status, 403);
   assert.equal((deniedScopedOperationsContext.body as { error: string }).error, "forbidden");
+  const deniedScopedStrategyContext = await request("/v1/strategy/context", {
+    headers: scopedAuth
+  });
+  assert.equal(deniedScopedStrategyContext.status, 403);
+  assert.equal((deniedScopedStrategyContext.body as { error: string }).error, "forbidden");
 
   const scopedReadCompanyOs = await request("/v1/company-os/approvals", {
     headers: scopedAuth

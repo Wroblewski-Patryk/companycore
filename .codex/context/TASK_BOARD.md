@@ -22,8 +22,13 @@
     Start with a read-only review queue and classification/routing model.
 ## In Progress
 
-- No active implementation task is currently in progress after the
-  V1OPS-005 production operations context smoke.
+- DMS-01-005B Production Strategy Context Smoke.
+  - Stage: release
+  - Owner: Ops/Release + QA/Test
+  - Priority: P1
+  - Source: `docs/planning/v1-strategy-context-read-api-task-contract.md`
+  - Goal: deploy the verified `GET /v1/strategy/context` backend slice and
+    prove public health plus protected owner-auth route smoke in production.
 
 ## Blocked
 
@@ -104,6 +109,21 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- DMS-01-005A Strategy Management System Read Packet API.
+  - Evidence:
+    Protected read-only `GET /v1/strategy/context` now returns the
+    `01-strategia` Strategy Management packet with goals, targets, metrics,
+    risks/controls, decision logs, decisions, strategic knowledge, Drive
+    documents, tasks, summary counts, and a read-only agent handoff. The route
+    is exposed through `strategy:read`, MCP manifest tooling, and read-oriented
+    MCP key profiles.
+  - Validation:
+    `npm run build:server`; `npm run test:api` with validation-owned
+    PostgreSQL on `127.0.0.1:55496`; `git diff --check`; validation
+    PostgreSQL and temporary artifacts cleaned up.
+  - Task contract:
+    `docs/planning/v1-strategy-context-read-api-task-contract.md`.
 
 - V1OPS-005 Production Operations Context Smoke.
   - Evidence:
