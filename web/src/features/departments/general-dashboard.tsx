@@ -46,9 +46,9 @@ export function GeneralDashboard() {
           <span className="badge badge-primary">{t("general.routesActiveWork")}</span>
         </div>
         <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
-          {plannedDepartments.map((department) => (
-            <div className="rounded-company border border-dashed border-base-300 bg-base-200/60 p-3 text-sm text-company-muted" key={department}>
-              <strong className="block text-company-ink">{department}</strong>
+          {plannedDepartments.map((departmentKey) => (
+            <div className="rounded-company border border-dashed border-base-300 bg-base-200/60 p-3 text-sm text-company-muted" key={departmentKey}>
+              <strong className="block text-company-ink">{t(departmentKey)}</strong>
               {t("general.plannedManagementSystem")}
             </div>
           ))}

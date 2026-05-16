@@ -33,14 +33,14 @@ export const coreAreas: CoreArea[] = [
 ];
 
 export const plannedDepartments = [
-  "01 Strategy",
-  "02 Product",
-  "03 Sales",
-  "05 Relationships",
-  "06 People / Agents",
-  "07 Finance",
-  "09 Technology",
-  "10 Legal",
-  "11 Innovation",
-  "12 Management"
-];
+  "departments.01",
+  "departments.02",
+  "departments.03",
+  "departments.05",
+  "departments.06",
+  "departments.07",
+  "departments.09",
+  "departments.10",
+  "departments.11",
+  "departments.12"
+] as const;

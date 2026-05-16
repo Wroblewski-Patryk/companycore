@@ -362,3 +362,15 @@ contract. Runtime implementation happens in the next stage.
 
 This task intentionally precedes `DMS-NEXT-004` so future department screens do
 not multiply inline strings, raw error handling, and bespoke form behavior.
+
+## Post-Implementation Audit
+
+- Audit report:
+  `docs/planning/web-qa-001-post-implementation-audit-2026-05-16.md`.
+- Corrections made: extracted `web/src/i18n/locales.ts`, localized the planned
+  department map labels, and normalized API errors for string, nested, and
+  backend `internal_server_error` payloads.
+- Additional verification: Browser home smoke, Playwright fallback journey
+  proof on temporary port `3236`, `npm run build:web`, `npm run build:server`,
+  `npm run validate`, old-route `404` checks, desktop/tablet/mobile overflow
+  checks, and cleanup checks.

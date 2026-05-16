@@ -224,6 +224,15 @@
     Expected negative-test network statuses were `401`, `409`, and `500`;
     no page errors occurred. Temporary server was stopped and no
     `chrome-headless-shell` process remained.
+  - Post-audit: 2026-05-16 audit report
+    `docs/planning/web-qa-001-post-implementation-audit-2026-05-16.md`
+    fixed locale contract extraction, planned department label localization,
+    and API error normalization for string, nested, and backend
+    `internal_server_error` payloads. Additional proof passed on temporary
+    port `3236`: Browser home smoke, Playwright old-route `404`, auth,
+    private redirect, 00/04/08 packet journey, desktop/tablet/mobile overflow
+    checks, zero unnamed visible controls, `npm run build:web`,
+    `npm run build:server`, and `npm run validate`.
 
 - ORG-ARCH-002 Unified organizational operating system architecture.
   - Evidence:

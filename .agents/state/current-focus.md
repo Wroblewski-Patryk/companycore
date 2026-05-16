@@ -38,9 +38,13 @@ foundation. `WEB-QA-001` then implemented the shared web quality foundation:
 default-English i18n, selectable/persisted Polish, `<html lang>` sync, typed
 API errors, user-facing auth and packet errors, shared notice feedback, shared
 form fields, localized validation, translated table states, and a
-layout/auth/department/API module split. Department work can now continue only
-through a scoped department-system contract, with `05 Relationships` still the
-likely next department unless production deployment smoke is selected first.
+layout/auth/department/API module split. The post-implementation audit fixed
+locale contract extraction, planned department label localization, and API
+error normalization for string, nested, and backend `internal_server_error`
+payloads, then passed Browser, Playwright, build, validation, responsive, and
+accessibility smoke gates. Department work can now continue only through a
+scoped department-system contract, with `05 Relationships` still the likely
+next department unless production deployment smoke is selected first.
 
 Current DMS focus: the first `00 Main` intake API/web panel, proposal-only
 route command, shared department shell, department subsystem registry, Finance

@@ -31,11 +31,14 @@ Last updated: 2026-05-16
      runtime now contains only public home, auth, `00 General`, `04
      Operations`, and `08 Assets`; old private workbench paths are no longer
      React app routes while backend APIs remain available.
-   - `WEB-QA-001` is complete and verified: active React web now has
-     default-English i18n, selectable/persisted Polish, `<html lang>` sync,
-     typed API errors, friendly auth and packet errors, shared notice feedback,
-     shared form fields, localized validation, translated table states, and a
-     layout/auth/department/API module split.
+    - `WEB-QA-001` is complete and verified: active React web now has
+      default-English i18n, selectable/persisted Polish, `<html lang>` sync,
+      typed API errors, friendly auth and packet errors, shared notice feedback,
+      shared form fields, localized validation, translated table states, and a
+      layout/auth/department/API module split. Its post-implementation audit
+      also fixed locale contract extraction, planned department label
+      localization, and API error normalization for string, nested, and backend
+      `internal_server_error` payloads.
    - CompanyCore remains the company operating system; AI agents remain
      external API/MCP clients.
    - Keep writes behind explicit command contracts, audit/events, and API

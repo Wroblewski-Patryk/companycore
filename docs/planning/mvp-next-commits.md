@@ -82,6 +82,14 @@ synchronized with `.codex/context/TASK_BOARD.md`.
       reload persistence,
       auth errors without raw codes, field `aria-invalid`/`aria-describedby`,
       post-login `00 General`, Operations error, and mobile `08 Assets`.
+- [x] Post-implementation audit completed for `WEB-QA-001`: fixed locale
+      contract extraction, planned department label localization, and API
+      error normalization for backend string, nested, and
+      `internal_server_error` payloads. Validation: Browser home smoke,
+      Playwright fallback on temporary port `3236` for old route cleanup,
+      auth, private redirect, 00/04/08 journeys, desktop/tablet/mobile
+      overflow/accessibility smoke, `npm run build:web`,
+      `npm run build:server`, and `npm run validate`.
 - [ ] Continue V1 department systems after the `00 -> 04 -> 08` loop has the
       next planning/runtime checkpoint. `03 Sales` read packet and board is
       complete locally; the broader sequence remains `05 Relationships`,

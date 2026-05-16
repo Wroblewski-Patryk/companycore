@@ -95,7 +95,13 @@ Last updated: 2026-05-16
   labels, and `main.tsx` has been reduced to route/provider composition over
   layout/auth/department/API modules. `npm run build:web`,
   `npm run build:server`, `npm run validate`, Browser home smoke, and
-  Playwright fallback interaction proof passed.
+  Playwright fallback interaction proof passed. The 2026-05-16
+  post-implementation audit then fixed three follow-up gaps: locale constants
+  now live in `web/src/i18n/locales.ts`, planned department labels are
+  translated through dictionary keys, and the API client normalizes string,
+  nested, and backend `internal_server_error` payloads into user-facing
+  messages. Audit report:
+  `docs/planning/web-qa-001-post-implementation-audit-2026-05-16.md`.
   `npm run build:web`, `npm run build:server`, Playwright route proof, and
   `git diff --check` passed. The next runtime slice should rebuild any new web
   surface only through a scoped department-system task contract, with `05

@@ -43,6 +43,27 @@ function codeFromStatus(status: number) {
   return "request_failed";
 }
 
+function codeFromBody(body: unknown, status: number) {
+  if (!body || typeof body !== "object") {
+    return codeFromStatus(status);
+  }
+
+  const error = (body as { error?: unknown }).error;
+  const rawCode = typeof error === "string"
+    ? error
+    : error && typeof error === "object" && typeof (error as { code?: unknown }).code === "string"
+      ? (error as { code: string }).code
+      : null;
+
+  if (!rawCode) {
+    return codeFromStatus(status);
+  }
+  if (rawCode === "internal_server_error") {
+    return "server_error";
+  }
+  return rawCode;
+}
+
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = ownerToken();
   const headers = new Headers(options.headers);
@@ -66,7 +87,7 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
 
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const errorCode = typeof body?.error === "string" ? body.error : codeFromStatus(response.status);
+    const errorCode = codeFromBody(body, response.status);
     if (authErrorCodes.has(errorCode)) {
       clearOwnerToken();
     }

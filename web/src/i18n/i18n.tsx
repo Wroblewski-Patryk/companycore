@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { Locale, MessageKey, messages } from "./messages";
-
-const storageKey = "companycoreLocale";
-const supportedLocales: Locale[] = ["en", "pl"];
+import { defaultLocale, localeStorageKey, supportedLocales, type Locale } from "./locales";
+import { MessageKey, messages } from "./messages";
 
 type TranslateParams = Record<string, string | number>;
 type Translate = (key: MessageKey, params?: TranslateParams) => string;
@@ -16,8 +14,8 @@ type LanguageContextValue = {
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 function readInitialLocale(): Locale {
-  const stored = window.localStorage.getItem(storageKey);
-  return supportedLocales.includes(stored as Locale) ? stored as Locale : "en";
+  const stored = window.localStorage.getItem(localeStorageKey);
+  return supportedLocales.includes(stored as Locale) ? stored as Locale : defaultLocale;
 }
 
 function interpolate(template: string, params?: TranslateParams) {
@@ -34,7 +32,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(readInitialLocale);
 
   useEffect(() => {
-    window.localStorage.setItem(storageKey, locale);
+    window.localStorage.setItem(localeStorageKey, locale);
     document.documentElement.lang = locale;
   }, [locale]);
 

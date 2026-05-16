@@ -1,3 +1,5 @@
+import type { Locale } from "./locales";
+
 export const messages = {
   en: {
     "app.name": "CompanyCore",
@@ -51,6 +53,16 @@ export const messages = {
     "areas.08.label": "08 Assets",
     "areas.08.eyebrow": "Knowledge and files",
     "areas.08.description": "Resource memory for files, documents, knowledge packets, AI-readiness, relations, and provider-safe context.",
+    "departments.01": "01 Strategy",
+    "departments.02": "02 Product",
+    "departments.03": "03 Sales",
+    "departments.05": "05 Relationships",
+    "departments.06": "06 People / Agents",
+    "departments.07": "07 Finance",
+    "departments.09": "09 Technology",
+    "departments.10": "10 Legal",
+    "departments.11": "11 Innovation",
+    "departments.12": "12 Management",
     "general.title": "Company dashboard",
     "general.description": "This is the only authenticated start screen. It connects all departments without exposing unfinished v0 workspaces, and routes attention into the two active management systems.",
     "general.departmentMap": "12 department map",
@@ -143,15 +155,25 @@ export const messages = {
     "errors.network_error": "CompanyCore nie może połączyć się z serwerem. Sprawdź połączenie i spróbuj ponownie.",
     "errors.server_error": "CompanyCore napotkał problem serwera. Spróbuj za chwilę.",
     "errors.unknown_error": "Coś poszło nie tak. Spróbuj ponownie.",
-    "areas.00.label": "00 General",
+    "areas.00.label": "00 Ogólny",
     "areas.00.eyebrow": "Dashboard firmy",
     "areas.00.description": "Pierwszy ekran po logowaniu. Łączy działy firmy, propozycje routingu, priorytety i sygnały zarządcze.",
-    "areas.04.label": "04 Operations",
+    "areas.04.label": "04 Operacje",
     "areas.04.eyebrow": "Wykonywanie pracy",
     "areas.04.description": "Tablica zadań i workflow dla elementów pracy, gotowości, odpowiedzialności, blokad i bezpiecznego handoffu AI.",
-    "areas.08.label": "08 Assets",
+    "areas.08.label": "08 Zasoby",
     "areas.08.eyebrow": "Wiedza i pliki",
     "areas.08.description": "Pamięć zasobów: pliki, dokumenty, pakiety wiedzy, gotowość AI, relacje i kontekst bezpieczny dla providerów.",
+    "departments.01": "01 Strategia",
+    "departments.02": "02 Produkt",
+    "departments.03": "03 Sprzedaż",
+    "departments.05": "05 Relacje",
+    "departments.06": "06 Ludzie / Agenci",
+    "departments.07": "07 Finanse",
+    "departments.09": "09 Technologia",
+    "departments.10": "10 Prawo",
+    "departments.11": "11 Innowacje",
+    "departments.12": "12 Zarządzanie",
     "general.title": "Dashboard firmy",
     "general.description": "To jedyny ekran startowy po logowaniu. Łączy wszystkie działy bez pokazywania niedokończonych widoków v0 i kieruje uwagę do dwóch aktywnych systemów zarządzania.",
     "general.departmentMap": "Mapa 12 działów",
@@ -203,5 +225,8 @@ export const messages = {
   }
 } as const;
 
-export type Locale = keyof typeof messages;
+const _localeCoverage: Record<Locale, unknown> = messages;
+void _localeCoverage;
+
+export type { Locale } from "./locales";
 export type MessageKey = keyof typeof messages.en;

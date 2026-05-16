@@ -171,7 +171,12 @@ continue from repository files alone:
   split. `main.tsx` now owns provider wrapping and route selection only.
   Browser home smoke passed; Browser form fill failed on email input, so
   Playwright fallback completed the interaction proof. Future department UI
-  should reuse this foundation.
+  should reuse this foundation. A 2026-05-16 post-implementation audit is
+  recorded in
+  `docs/planning/web-qa-001-post-implementation-audit-2026-05-16.md`; it fixed
+  locale contract extraction, planned department label localization, and API
+  error normalization for string, nested, and backend `internal_server_error`
+  payloads, then passed Browser, Playwright, build, and validation gates.
 - `docs/architecture/companycore-business-module-map.md`: accepted
   model-level module map for scaling CompanyCore as the bridge for operating
   the company. It classifies future work as native core, provider-backed,
