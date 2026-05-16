@@ -97,7 +97,7 @@ deep per-department behavior.
 | ID | Task | Type | Owner | Depends on | Output | Validation |
 | --- | --- | --- | --- | --- | --- | --- |
 | DMS-SHELL-001 | Extract shared Department Management Shell component | frontend | Frontend | DMS-V1-002 | Reusable identity bar, command brief, tabs, board, evidence rail, improvement loop | build + route proof |
-| DMS-SHELL-002 | Add department-specific copy and subsystem registry | frontend/product | Frontend + Product Docs | DMS-SHELL-001 | Static config for 00-12 purpose, subsystems, blocked actions, agent handoff copy | source review |
+| DMS-SHELL-002 | Add department-specific copy and subsystem registry | frontend/product | Frontend + Product Docs | DMS-SHELL-001 | Completed static config and rendered registry for 00-12 purpose, subsystems, blocked actions, and agent handoff copy | build + browser proof |
 | DMS-SHELL-003 | Wire shared shell to operating graph fallback | frontend/backend | Frontend | DMS-SHELL-001 | Each department shell consumes AOG/connection data consistently | Playwright all departments |
 | DMS-SHELL-004 | Add honest empty/degraded/error states | frontend | Frontend + QA | DMS-SHELL-003 | Department views explain missing data without fake records | responsive proof |
 | DMS-SHELL-005 | Implement department packet read model v1 | backend | Backend | DMS-V1-003, DMS-SHELL-003 | `GET /v1/department-systems/:areaKey` or AOG extension | API tests |

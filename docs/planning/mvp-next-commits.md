@@ -15,9 +15,6 @@ synchronized with `.codex/context/TASK_BOARD.md`.
       commercial exceptions before invoice or payment writes exist.
 ### NEXT
 
-- [ ] DMS-SHELL-002 Department-specific subsystem registry:
-      add static config for `00`-`12` department purposes, subsystem tabs,
-      blocked actions, and agent handoff copy on top of the shared shell.
 - [ ] DMS-00-007 Paperclip background output review proof:
       prove a controlled Paperclip-like item appears in `00 Main`, receives a
       route proposal, remains source-safe, and can be handed off to department
@@ -103,6 +100,16 @@ The section below is retained as execution evidence. It is not the active
 queue. Future work must start from `Active Queue`, `.codex/context/TASK_BOARD.md`,
 and `docs/operations/v1-function-coverage-ledger.csv`.
 
+- [x] DMS-SHELL-002 Department Subsystem Registry:
+      added a typed 13-department registry, rendered it inside the shared
+      selected-area shell, and gave each department system name, value role,
+      owner question, agent handoff, first safe action, blocked actions, and
+      three subsystem cards. `npm run build:web` and `git diff --check`
+      passed. Playwright proof on `http://127.0.0.1:3211` verified
+      `01-strategia`, `06-kadry`, `07-finanse`, and `12-zarzadzanie` with no
+      console errors or horizontal overflow.
+      Task contract:
+      `docs/planning/dms-shell-002-department-subsystem-registry-task-contract.md`.
 - [x] DMS-00-006 First Safe Global Intake Route Command:
       implemented proposal-only `POST /v1/intake/actions/propose-route`,
       `intake:write`, MCP exposure, API tests, and the `00 Main` web

@@ -85,6 +85,14 @@ Last updated: 2026-05-16
   `127.0.0.1:55480`. Playwright proof on `http://127.0.0.1:3210` created a
   route proposal, found no console errors or horizontal overflow, and confirmed
   the source agent event remained `pending`.
+  As of 2026-05-16, DMS-SHELL-002 added department-specific subsystem
+  registry copy to the shared selected-area shell. Every `00`-`12` department
+  now has a system name, value role, owner question, first safe action, agent
+  handoff, blocked actions, and subsystem cards. `npm run build:web` and
+  `git diff --check` passed. Playwright real-backend proof on
+  `http://127.0.0.1:3211` verified `01-strategia`, `06-kadry`,
+  `07-finanse`, and `12-zarzadzanie` with no console errors and no horizontal
+  overflow.
 
 ## Product Decisions (Confirmed)
 - 2026-05-07: CRM and pipelines are separate domain concepts. Pipelines are a

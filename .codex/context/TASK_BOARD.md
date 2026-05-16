@@ -12,14 +12,6 @@
     `00 Main`, receives a route proposal, remains source-safe, and can be
     handed to the next department/system review without bypassing
     CompanyCore.
-- DMS-SHELL-002 Department-specific subsystem registry.
-  - Stage: planning
-  - Owner: Frontend Builder + Product Docs
-  - Priority: P1
-  - Source:
-    `docs/planning/dms-shell-001-shared-department-management-shell-task-contract.md`
-  - Goal: add static config for `00`-`12` department purposes, subsystem tabs,
-    blocked actions, and agent handoff copy on top of the shared shell.
 - DMS-07-001 Finance system spec.
   - Stage: planning
   - Owner: Product Docs + Backend Builder + Security
@@ -155,6 +147,20 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- DMS-SHELL-002 Department Subsystem Registry.
+  - Evidence: `web/src/main.tsx` now defines a typed registry for all `00`-`12`
+    department systems and renders `DepartmentSubsystemRegistry` inside the
+    shared shell. Each department has system name, value role, owner question,
+    first safe action, agent handoff, blocked actions, and three subsystem
+    cards. `web/src/styles.css` adds the shared registry styling.
+  - Validation: `npm run build:web` and `git diff --check` passed.
+    Playwright real-backend proof on `http://127.0.0.1:3211` verified
+    `01-strategia`, `06-kadry`, `07-finanse`, and `12-zarzadzanie`, with no
+    console errors or horizontal overflow. Temporary validation backend and
+    PostgreSQL processes were stopped.
+  - Task contract:
+    `docs/planning/dms-shell-002-department-subsystem-registry-task-contract.md`.
 
 - DMS-00-006 First Safe Global Intake Route Command.
   - Evidence: `POST /v1/intake/actions/propose-route` now validates source

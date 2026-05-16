@@ -906,6 +906,159 @@ label {
   line-height: 1.65;
 }
 
+.department-owner-question {
+  color: #2364d2;
+  font-weight: 850;
+}
+
+.department-subsystem-registry {
+  display: grid;
+  gap: 0.82rem;
+  min-width: 0;
+  border: 1px solid #d8e1ee;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.92);
+  padding: 0.95rem;
+  box-shadow: 0 18px 54px rgb(7 18 37 / 0.06);
+}
+
+.department-system-brief {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.department-system-brief article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.62rem;
+  border: 1px solid rgb(216 225 238 / 0.85);
+  border-radius: 8px;
+  background: rgb(248 250 252 / 0.92);
+  padding: 0.78rem;
+}
+
+.department-system-brief i {
+  color: #2364d2;
+  font-size: 1.2rem;
+}
+
+.department-system-brief strong,
+.department-system-brief small {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.department-system-brief strong {
+  color: #071225;
+  font-size: 0.78rem;
+  font-weight: 950;
+}
+
+.department-system-brief small {
+  margin-top: 0.22rem;
+  color: #51627f;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.department-subsystem-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.department-subsystem-card {
+  display: grid;
+  align-content: start;
+  gap: 0.36rem;
+  min-width: 0;
+  border: 1px solid rgb(216 225 238 / 0.86);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 0.78rem;
+}
+
+.department-subsystem-card span {
+  justify-self: start;
+  border-radius: 999px;
+  background: rgb(35 100 210 / 0.08);
+  padding: 0.22rem 0.42rem;
+  color: #2364d2;
+  font-size: 0.58rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.department-subsystem-card.is-control span {
+  background: rgb(184 119 0 / 0.12);
+  color: #8a5a00;
+}
+
+.department-subsystem-card.is-learning span {
+  background: rgb(22 132 91 / 0.12);
+  color: #16845b;
+}
+
+.department-subsystem-card.is-infrastructure span {
+  background: rgb(7 18 37 / 0.08);
+  color: #30405c;
+}
+
+.department-subsystem-card strong {
+  color: #071225;
+  font-size: 0.82rem;
+  font-weight: 950;
+  line-height: 1.25;
+}
+
+.department-subsystem-card p {
+  color: #51627f;
+  font-size: 0.7rem;
+  font-weight: 690;
+  line-height: 1.45;
+}
+
+.department-blocked-actions {
+  display: grid;
+  gap: 0.55rem;
+  border-top: 1px solid rgb(216 225 238 / 0.88);
+  padding-top: 0.78rem;
+}
+
+.department-blocked-actions > strong {
+  color: #071225;
+  font-size: 0.72rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.department-blocked-actions > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.42rem;
+}
+
+.department-blocked-actions span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  border: 1px solid rgb(216 225 238 / 0.92);
+  border-radius: 999px;
+  background: rgb(248 250 252 / 0.96);
+  padding: 0.34rem 0.52rem;
+  color: #51627f;
+  font-size: 0.64rem;
+  font-weight: 850;
+}
+
+.department-blocked-actions i {
+  color: #b87700;
+}
+
 .area-detail-actions {
   display: flex;
   flex-wrap: wrap;
@@ -2416,6 +2569,7 @@ label {
   }
 
   .area-detail-hero,
+  .department-subsystem-registry,
   .area-operating-board,
   .area-capability-focus,
   .area-detail-rail,
@@ -2441,6 +2595,11 @@ label {
   .area-detail-actions {
     gap: 0.42rem;
     margin-top: 0.72rem;
+  }
+
+  .department-system-brief,
+  .department-subsystem-grid {
+    grid-template-columns: 1fr;
   }
 
   .area-detail-sigil {

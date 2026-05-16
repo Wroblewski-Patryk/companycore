@@ -4,28 +4,29 @@ Last updated: 2026-05-16
 
 ## NOW
 
-1. DMS-SHELL-002 Department-specific subsystem registry.
-   - Source:
-     `docs/planning/dms-shell-001-shared-department-management-shell-task-contract.md`.
-   - Add static config for `00`-`12` department purposes, subsystem tabs,
-     blocked actions, and agent handoff copy on top of the shared shell.
-2. DMS-07-001 Finance system spec.
+1. DMS-07-001 Finance system spec.
    - Source:
      `docs/planning/dms-money-pricing-discount-source-inventory.md`.
    - Define the Finance management board, price-list/hourly-value read model,
      owner decisions, and guardrails before invoice/payment or autonomous
      pricing writes.
-3. DMS-03-005 Discount/commercial exception read model.
+2. DMS-03-005 Discount/commercial exception read model.
    - Source:
      `docs/planning/dms-money-pricing-discount-source-inventory.md`.
    - Represent discounts including 100 percent discount as owner-reviewed
      commercial exceptions connected to client/deal/work context.
-4. DMS-00-007 Paperclip background output review proof.
+3. DMS-00-007 Paperclip background output review proof.
    - Source:
      `docs/planning/dms-00-global-intake-route-command-task-contract.md`.
    - Prove a controlled Paperclip-like background item appears in `00 Main`,
      receives a route proposal, stays source-safe, and can be handed off to a
      department/system review path.
+4. DMS-SHELL-003 Wire shared shell to operating graph fallback.
+   - Source:
+     `docs/planning/dms-shell-002-department-subsystem-registry-task-contract.md`.
+   - Use the shared subsystem registry plus current AOG fallback to make each
+     department shell consume graph/connection data consistently before packet
+     API work.
 
 ## NEXT
 

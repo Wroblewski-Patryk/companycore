@@ -168,6 +168,13 @@ Last updated: 2026-05-16
   Validation-owned backend/PostgreSQL processes on `3210`, `55476`, and
   `55480` were stopped; pre-existing `chrome-headless-shell` processes from an
   earlier run were left untouched.
+- DMS-SHELL-002 frontend proof on 2026-05-16 passed `npm run build:web`,
+  `git diff --check`, and Playwright real-backend route checks on
+  `http://127.0.0.1:3211` for `01-strategia`, `06-kadry`, `07-finanse`, and
+  `12-zarzadzanie`. Each route rendered its department system/subsystem
+  markers, console errors were empty, and horizontal overflow was false.
+  Validation-owned backend/PostgreSQL processes on `3211` and `55480` were
+  stopped after proof.
 - Production CompanyCore, Jarvis, and Paperclip health were green in the latest
   v1 handoff evidence.
 - CompanyCore public health currently reports image

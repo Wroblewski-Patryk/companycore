@@ -1632,6 +1632,22 @@ type AreaCapability = {
   href: string;
 };
 
+type DepartmentSubsystem = {
+  name: string;
+  purpose: string;
+  layer: "strategy" | "demand" | "delivery" | "support" | "control" | "learning" | "infrastructure";
+};
+
+type DepartmentSystemConfig = {
+  systemName: string;
+  valueRole: string;
+  ownerQuestion: string;
+  agentHandoff: string;
+  firstSafeAction: string;
+  blockedActions: string[];
+  subsystems: DepartmentSubsystem[];
+};
+
 type LayerKey = "goals" | "workflows" | "tasks" | "knowledge" | "sources";
 
 const canonicalAreas: CanonicalArea[] = [
@@ -1660,6 +1676,182 @@ const areaCapabilities: AreaCapability[] = [
   { id: "decisions", label: "Decisions", icon: "ph-seal-check", href: "/react-company-os" },
   { id: "ai", label: "AI", icon: "ph-robot", href: "/react-agent-tools" }
 ];
+
+const departmentSystemRegistry: Record<string, DepartmentSystemConfig> = {
+  "00-ogolny": {
+    systemName: "Company Orchestration System",
+    valueRole: "Receives every unclassified signal and turns it into a safe department path.",
+    ownerQuestion: "What needs owner attention, routing, or a decision before the company acts?",
+    agentHandoff: "Agents may surface evidence and propose routes; execution stays inside approved department commands.",
+    firstSafeAction: "Review intake and create a route proposal.",
+    blockedActions: ["auto-acknowledge agent output", "provider retry", "approval decision", "invoice or discount write"],
+    subsystems: [
+      { name: "Global intake", purpose: "Owner ideas, provider signals, Paperclip output, risks, and feedback.", layer: "control" },
+      { name: "Routing desk", purpose: "Classification, department proposal, owner decision request, and handoff evidence.", layer: "delivery" },
+      { name: "Company health", purpose: "Cross-department blockers, stale evidence, pending approvals, and system readiness.", layer: "strategy" }
+    ]
+  },
+  "01-strategia": {
+    systemName: "Strategy Management System",
+    valueRole: "Keeps company direction, priorities, KPIs, decisions, and portfolio choices coherent.",
+    ownerQuestion: "Which goal, risk, or decision should steer the next company move?",
+    agentHandoff: "Agents can summarize goals, risks, and decision gaps, then propose planning tasks.",
+    firstSafeAction: "Create or review a strategic planning task.",
+    blockedActions: ["change company strategy autonomously", "close goals without evidence", "hide strategic risks"],
+    subsystems: [
+      { name: "Goals and targets", purpose: "Strategic outcomes, KPIs, target states, and operating priorities.", layer: "strategy" },
+      { name: "Roadmap and portfolio", purpose: "Sequencing of initiatives, commitments, and opportunity tradeoffs.", layer: "strategy" },
+      { name: "Decision and risk memory", purpose: "Durable rationale, assumptions, risk review, and strategy evidence.", layer: "control" }
+    ]
+  },
+  "02-produkt": {
+    systemName: "Product And Delivery Management System",
+    valueRole: "Turns promises into scoped products, services, plans, acceptance, and delivery evidence.",
+    ownerQuestion: "What value is promised, being built, blocked, tested, or ready for acceptance?",
+    agentHandoff: "Agents can prepare specs, task drafts, acceptance evidence, and delivery gap proposals.",
+    firstSafeAction: "Review backlog or delivery evidence and create a scoped task.",
+    blockedActions: ["change client scope without approval", "mark acceptance without proof", "ship unverified work"],
+    subsystems: [
+      { name: "Offer and catalog", purpose: "Services, products, packages, deliverables, and promise boundaries.", layer: "demand" },
+      { name: "Delivery planning", purpose: "Backlog, milestones, execution plans, task breakdown, and dependencies.", layer: "delivery" },
+      { name: "Acceptance evidence", purpose: "Tests, review artifacts, client acceptance, and delivery closure.", layer: "control" }
+    ]
+  },
+  "03-sprzedaz": {
+    systemName: "Sales Management System",
+    valueRole: "Finds, qualifies, discovers, offers, follows up, and converts valuable work.",
+    ownerQuestion: "Which lead, discovery, offer, price, or follow-up needs action now?",
+    agentHandoff: "Agents can research leads, draft discovery notes, prepare offers, and flag commercial exceptions.",
+    firstSafeAction: "Create a follow-up, discovery, or offer-prep task.",
+    blockedActions: ["quote autonomously", "apply discount autonomously", "send binding offers without owner approval"],
+    subsystems: [
+      { name: "Lead and opportunity pipeline", purpose: "Prospects, qualification, current client work, and sales stages.", layer: "demand" },
+      { name: "Discovery and offer", purpose: "Needs, scope, proposal drafts, price context, and next commercial action.", layer: "demand" },
+      { name: "Discount context", purpose: "Commercial exceptions such as 100 percent discounts with owner review.", layer: "control" }
+    ]
+  },
+  "04-operacje": {
+    systemName: "Operations Management System",
+    valueRole: "Keeps routines, procedures, dependencies, controls, and delivery rhythm executable.",
+    ownerQuestion: "Which procedure, dependency, routine, or approval is blocking smooth operations?",
+    agentHandoff: "Agents can inspect procedures and propose improvement tasks; operational writes remain command-gated.",
+    firstSafeAction: "Review procedure/dependency evidence and create an operations improvement task.",
+    blockedActions: ["bypass approvals", "change SOPs without evidence", "treat unowned work as operations by default"],
+    subsystems: [
+      { name: "Planning and routines", purpose: "Recurring operations, business functions, schedules, and operating rhythm.", layer: "delivery" },
+      { name: "SOPs and procedures", purpose: "Procedures, steps, dependencies, controls, and quality gates.", layer: "control" },
+      { name: "Improvement queue", purpose: "Operational defects, retros, fixes, and standards updates.", layer: "learning" }
+    ]
+  },
+  "05-relacje": {
+    systemName: "Relationship Management System",
+    valueRole: "Maintains clients, stakeholders, support, success signals, referrals, and archived learning.",
+    ownerQuestion: "Which client, stakeholder, follow-up, support item, or archive insight needs attention?",
+    agentHandoff: "Agents can prepare relationship summaries, follow-up drafts, archive insights, and support tasks.",
+    firstSafeAction: "Review relationship health and create a follow-up task.",
+    blockedActions: ["message clients autonomously", "delete archive evidence", "treat support as sales without context"],
+    subsystems: [
+      { name: "Active clients", purpose: "Current clients, stakeholders, interactions, health, and support.", layer: "support" },
+      { name: "Archived clients", purpose: "Historical client work, old outcomes, lessons, and process improvement evidence.", layer: "learning" },
+      { name: "Success and referrals", purpose: "Feedback, satisfaction, retention, referrals, and expansion opportunities.", layer: "support" }
+    ]
+  },
+  "06-kadry": {
+    systemName: "People/Agents And Role Management System",
+    valueRole: "Maps humans and AI agents to roles, responsibilities, capacity, authority, and escalation.",
+    ownerQuestion: "Who or which agent owns this work, has capacity, and can escalate safely?",
+    agentHandoff: "Paperclip can use the roster to plan staffing proposals but cannot create authority for itself.",
+    firstSafeAction: "Review role/capacity gaps and create a staffing or agent-setup task.",
+    blockedActions: ["grant permissions autonomously", "create unsupervised agents", "treat PAEI as permission"],
+    subsystems: [
+      { name: "Human and agent roster", purpose: "People, AI units, statuses, responsibilities, and ownership.", layer: "support" },
+      { name: "Capacity and escalation", purpose: "Availability, workload, escalation paths, and decision ownership.", layer: "control" },
+      { name: "Authority and permissions", purpose: "Capabilities, scopes, service keys, approvals, and least privilege.", layer: "infrastructure" }
+    ]
+  },
+  "07-finanse": {
+    systemName: "Finance And Billing Management System",
+    valueRole: "Connects delivered value to prices, labor value, discounts, invoices, payments, and margin.",
+    ownerQuestion: "Which work needs price context, discount review, invoice readiness, or payment follow-up?",
+    agentHandoff: "Agents may surface pricing conflicts and draft estimates; commercial writes need owner approval.",
+    firstSafeAction: "Review price/discount context and create a finance follow-up task.",
+    blockedActions: ["invoice autonomously", "choose pricing policy autonomously", "apply discounts without approval"],
+    subsystems: [
+      { name: "Price list and hourly value", purpose: "Service models, labor value, cost assumptions, and margin context.", layer: "control" },
+      { name: "Discount and exceptions", purpose: "100 percent discounts, owner approvals, and commercial rationale.", layer: "control" },
+      { name: "Invoice and payment readiness", purpose: "Delivered value, invoice draft state, receivables, and closure.", layer: "delivery" }
+    ]
+  },
+  "08-zasoby": {
+    systemName: "Assets And Resource Management System",
+    valueRole: "Keeps files, folders, prompts, repos, resources, tools, and knowledge sources addressable.",
+    ownerQuestion: "Which resource is missing, stale, unscoped, or needed for delivery?",
+    agentHandoff: "Agents can read scoped resources and propose cleanup; provider writes stay in guarded routes.",
+    firstSafeAction: "Review unassigned or stale resources and create a cleanup task.",
+    blockedActions: ["delete provider files", "move provider folders without scope approval", "trust stale evidence blindly"],
+    subsystems: [
+      { name: "Files and folders", purpose: "Drive roots, imported files, scope ownership, and freshness.", layer: "infrastructure" },
+      { name: "Reusable resources", purpose: "Prompts, templates, assets, repositories, and tool references.", layer: "support" },
+      { name: "Source freshness", purpose: "Stale, unmapped, untrusted, and missing evidence review.", layer: "control" }
+    ]
+  },
+  "09-technologia": {
+    systemName: "Technology And AI Infrastructure Management System",
+    valueRole: "Runs integrations, MCP, API keys, deployment health, observability, and AI infrastructure.",
+    ownerQuestion: "Which integration, key, MCP tool, agent capability, or runtime signal needs action?",
+    agentHandoff: "Agents can inspect manifest and health; tool access is capability-scoped and supervised.",
+    firstSafeAction: "Review integration/MCP health and create a technical follow-up task.",
+    blockedActions: ["expose secrets", "expand service-key scope without review", "let agents bypass HTTP/MCP"],
+    subsystems: [
+      { name: "MCP and API access", purpose: "Tool catalog, service keys, scopes, manifests, and supervision.", layer: "infrastructure" },
+      { name: "Integration health", purpose: "Provider settings, webhooks, sync status, retry queues, and readiness.", layer: "infrastructure" },
+      { name: "Runtime observability", purpose: "Health, audit, logs, deploy metadata, and incident signals.", layer: "control" }
+    ]
+  },
+  "10-prawo": {
+    systemName: "Legal, Standards, And Decision Management System",
+    valueRole: "Keeps standards, policies, controls, risks, decisions, and compliance boundaries visible.",
+    ownerQuestion: "Which rule, decision, risk, standard, or approval boundary applies here?",
+    agentHandoff: "Agents can cite standards and propose policy updates; legal/compliance changes require owner review.",
+    firstSafeAction: "Review applicable standard/risk and create a governance task.",
+    blockedActions: ["make legal commitments autonomously", "archive standards without audit", "ignore active risk controls"],
+    subsystems: [
+      { name: "Policies and standards", purpose: "Operating rules, standards, templates, and governance expectations.", layer: "control" },
+      { name: "Risks and controls", purpose: "Risk register, controls, mitigations, compliance evidence, and blockers.", layer: "control" },
+      { name: "Decision memory", purpose: "Decision logs, rationale, approvals, and future review triggers.", layer: "learning" }
+    ]
+  },
+  "11-innowacje": {
+    systemName: "Innovation And Growth Management System",
+    valueRole: "Turns experiments, feedback, market signals, and retros into better offers and systems.",
+    ownerQuestion: "Which idea, feedback signal, experiment, or improvement should be tested next?",
+    agentHandoff: "Agents can cluster feedback and propose experiments; changes still enter the company task loop.",
+    firstSafeAction: "Create an experiment or improvement proposal task.",
+    blockedActions: ["launch paid ads without approval", "change offers from one signal", "skip feedback evidence"],
+    subsystems: [
+      { name: "Feedback loop", purpose: "Post-delivery surveys, retros, client notes, and learning signals.", layer: "learning" },
+      { name: "Experiments", purpose: "Hypotheses, tests, outcomes, and growth opportunities.", layer: "learning" },
+      { name: "Improvement pipeline", purpose: "Standards, processes, offers, and system updates derived from evidence.", layer: "delivery" }
+    ]
+  },
+  "12-zarzadzanie": {
+    systemName: "Executive Management System",
+    valueRole: "Gives the owner cross-department command, approvals, escalation, and portfolio control.",
+    ownerQuestion: "Which department, approval, blocker, portfolio item, or agent autonomy decision needs the owner?",
+    agentHandoff: "Agents can prepare briefs and escalation proposals; owner authority remains explicit.",
+    firstSafeAction: "Review cross-department health and decide the next priority.",
+    blockedActions: ["approve on behalf of owner", "hide department blockers", "expand autonomy without evidence"],
+    subsystems: [
+      { name: "Owner command", purpose: "Top priorities, decisions, blockers, approvals, and escalation.", layer: "strategy" },
+      { name: "Portfolio health", purpose: "Department readiness, stale data, risk, delivery, and finance signals.", layer: "control" },
+      { name: "Agent autonomy review", purpose: "What agents can read, propose, execute, or must escalate.", layer: "infrastructure" }
+    ]
+  }
+};
+
+function departmentSystemConfig(areaKey: string) {
+  return departmentSystemRegistry[areaKey] ?? departmentSystemRegistry["00-ogolny"];
+}
 
 function normalizeAreaMatcherValue(value: string) {
   return value
@@ -4804,29 +4996,26 @@ function AreaDetailHero({
   context: AreaDetailContext;
   connection: ConnectionData;
 }) {
+  const departmentConfig = departmentSystemConfig(area.key);
   const metrics = [
     { label: "Tables", value: `${context.tables.length}`, icon: "ph-database" },
     { label: "Records", value: `${context.tableRecordsCount}`, icon: "ph-stack" },
     { label: "Drive", value: `${context.driveItems.length}`, icon: "ph-cloud" },
     { label: "Provider", value: `${context.providerMappings.length}`, icon: "ph-plugs-connected" }
   ];
-  const isOperationsSystem = area.key === "04-operacje";
 
   return (
     <section className="area-detail-hero">
       <div className="area-detail-hero-copy">
         <p className="atlas-kicker">
-          {connection.workspace.name} / {isOperationsSystem ? "Operations Management System" : area.lens}
+          {connection.workspace.name} / {departmentConfig.systemName}
         </p>
         <h1>{area.label}</h1>
-        <p>
-          {isOperationsSystem
-            ? "Plan the company rhythm, inspect procedures, control dependencies, watch approvals, and prepare safe AI handoff from one operations command surface."
-            : area.backendArea?.description || area.detail}
-        </p>
+        <p>{departmentConfig.valueRole}</p>
+        <p className="department-owner-question">{departmentConfig.ownerQuestion}</p>
         <div className="area-detail-actions">
-          <a className="atlas-primary-action" href={isOperationsSystem ? "#operations-system" : "/react-company-os"}>
-            {isOperationsSystem ? "Manage operations" : "Review operating system"}
+          <a className="atlas-primary-action" href={area.key === "04-operacje" ? "#operations-system" : "#department-subsystems"}>
+            Review system
             <i className="ph-bold ph-caret-right" aria-hidden="true"></i>
           </a>
           <a className="atlas-secondary-action" href="/dashboard">Back to atlas</a>
@@ -4846,6 +5035,63 @@ function AreaDetailHero({
             <small>{metric.label}</small>
           </span>
         ))}
+      </div>
+    </section>
+  );
+}
+
+function DepartmentSubsystemRegistry({
+  area,
+  connection
+}: {
+  area: AreaViewState;
+  connection: ConnectionData;
+}) {
+  const config = departmentSystemConfig(area.key);
+  const mcpReady = Boolean(connection.mcpManifest?.tools?.length);
+
+  return (
+    <section className="department-subsystem-registry" id="department-subsystems" aria-label={`${area.label} subsystem registry`}>
+      <div className="area-detail-section-heading">
+        <p className="atlas-kicker">Department system</p>
+        <h2>{config.systemName}</h2>
+        <span>{config.subsystems.length} subsystems</span>
+      </div>
+      <div className="department-system-brief">
+        <article>
+          <i className="ph-bold ph-compass-tool" aria-hidden="true"></i>
+          <span>
+            <strong>First safe action</strong>
+            <small>{config.firstSafeAction}</small>
+          </span>
+        </article>
+        <article>
+          <i className="ph-bold ph-robot" aria-hidden="true"></i>
+          <span>
+            <strong>{mcpReady ? "Agent handoff ready" : "Agent handoff review"}</strong>
+            <small>{config.agentHandoff}</small>
+          </span>
+        </article>
+      </div>
+      <div className="department-subsystem-grid">
+        {config.subsystems.map((subsystem) => (
+          <article className={`department-subsystem-card is-${subsystem.layer}`} key={subsystem.name}>
+            <span>{subsystem.layer}</span>
+            <strong>{subsystem.name}</strong>
+            <p>{subsystem.purpose}</p>
+          </article>
+        ))}
+      </div>
+      <div className="department-blocked-actions" aria-label="Blocked department actions">
+        <strong>Blocked until explicit command contract</strong>
+        <div>
+          {config.blockedActions.map((action) => (
+            <span key={action}>
+              <i className="ph-bold ph-lock-key" aria-hidden="true"></i>
+              {action}
+            </span>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -5431,6 +5677,7 @@ function DepartmentManagementShell({
     <section className="department-management-shell" aria-label={`${selectedArea.label} department management shell`}>
       <AreaDetailHero area={selectedArea} context={context} connection={connection} />
       {specialPanel}
+      <DepartmentSubsystemRegistry area={selectedArea} connection={connection} />
       <AreaCapabilityRail activeCapability={activeCapability} onSelectCapability={onSelectCapability} />
       {showOperatingBoard ? <AreaOperatingBoard lanes={lanes} /> : null}
       <AreaCapabilityFocus

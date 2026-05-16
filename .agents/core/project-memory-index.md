@@ -209,6 +209,14 @@ continue from repository files alone:
   Playwright proof for desktop `00`, `01`, `04` plus mobile `04` passed. The
   next shell step is DMS-SHELL-002: department-specific subsystem registry and
   copy for `00`-`12`.
+- `docs/planning/dms-shell-002-department-subsystem-registry-task-contract.md`:
+  department subsystem registry handoff. As of 2026-05-16, every `00`-`12`
+  selected-area shell has static management-system identity, value role, owner
+  question, first safe action, agent handoff, blocked actions, and subsystem
+  cards through `departmentSystemRegistry` and `DepartmentSubsystemRegistry`.
+  `06 Kadry` is People/Agents And Role Management System. Browser proof passed
+  for representative departments; backend department packets remain future
+  scope.
 - `docs/architecture/web-layer-react-ownership.md`: current web route
   ownership contract. As of 2026-05-15, user-facing web routes are React-owned
   and served from the Vite bundle in `public/react/index.html`. The legacy
