@@ -2,15 +2,6 @@
 
 ## Ready
 
-- DMS-03-005A Commercial exception read API.
-  - Stage: implementation
-  - Owner: Backend Builder + Security + QA/Test
-  - Priority: P1
-  - Source:
-    `docs/planning/dms-03-commercial-exception-read-model-spec.md`
-  - Goal: implement protected read-only
-    `GET /v1/commercial-exceptions` with `100%` discount packet support,
-    workspace isolation, no mutation on read, and explicit blocked actions.
 - DMS-07-002 Price-list and hourly-value read model.
   - Stage: planning
   - Owner: Backend Builder + Product Docs + Security
@@ -147,6 +138,21 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- DMS-03-005A Commercial Exception Read API.
+  - Evidence:
+    `src/modules/commercial-exceptions/commercial-exceptions.routes.ts`
+    implements protected read-only `GET /v1/commercial-exceptions`; the route
+    is mounted in `src/app.ts`, exposed through
+    `commercial-exceptions:read`, included in MCP manifests and agent key
+    profiles, and documented in `docs/API.md`.
+  - Validation: `npm run build:server`, `git diff --check`, and
+    `npm run test:api` passed against portable PostgreSQL on
+    `127.0.0.1:55481`. The API test covers unauthenticated denial, scoped-key
+    denial, MCP exposure, workspace isolation, no mutation on read, `100%`
+    discount packet values, missing-source status, and blocked actions.
+  - Task contract:
+    `docs/planning/dms-03-commercial-exception-read-api-task-contract.md`.
 
 - DMS-03-005 Discount/Commercial Exception Read Model Spec.
   - Evidence:

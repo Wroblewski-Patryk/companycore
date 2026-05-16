@@ -110,6 +110,16 @@ Last updated: 2026-05-16
   `100%` discount packet requirements. Runtime API and web panels remain
   future work; discount, invoice, payment, and final commercial term writes
   stay blocked.
+  As of 2026-05-16, DMS-03-005A implemented the protected read-only
+  commercial exception runtime API. `GET /v1/commercial-exceptions` derives
+  source-backed discount/pro-bono/commercial-exception packets from existing
+  approvals, decisions, deals, tasks, notes, interactions, risks, and agent
+  events; exposes `commercial-exceptions:read` through the adapter and MCP
+  manifests; includes the tool in Paperclip-safe MCP profiles; and returns
+  explicit blocked actions for discounts, invoices, payment status, and final
+  terms. `npm run build:server`, `git diff --check`, and `npm run test:api`
+  passed against portable PostgreSQL on `127.0.0.1:55481`; the validation
+  database was stopped after the run.
 
 ## Product Decisions (Confirmed)
 - 2026-05-07: CRM and pipelines are separate domain concepts. Pipelines are a

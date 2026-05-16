@@ -588,6 +588,39 @@ GET /v1/mcp/manifest
 GET /mcp/manifest
 ```
 
+## Commercial Exceptions
+
+`GET /v1/commercial-exceptions` is the protected read-only Sales/Finance
+view for discounts, pro-bono work, and commercial exceptions before any
+quote, discount, invoice, payment, or final-term write command exists.
+
+Supported query parameters:
+
+- `clientId`
+- `dealId`
+- `status`
+- `exceptionType`
+- `risk`
+- `includeArchived`
+- `limit`
+
+The endpoint derives a workspace-scoped packet from existing approvals,
+decisions, deals, tasks, notes, interactions, risks, and agent events. It
+returns gross value, discount percent/value, final value, reason category,
+approval state, risk flags, invoice-readiness state, source references,
+allowed review actions, and blocked high-risk actions.
+
+Read guarantees:
+
+- no source records are mutated on read
+- foreign workspace sources are not visible
+- `100%` discounts are represented as commercial exceptions, not as missing
+  revenue
+- missing client, gross value, reason, or approval evidence is surfaced as
+  `needs_source` or `needs_owner_decision`
+- agents may review or propose follow-up work, but may not apply discounts,
+  send invoices, mark payments, or quote final terms from this endpoint
+
 Required capability:
 
 ```text

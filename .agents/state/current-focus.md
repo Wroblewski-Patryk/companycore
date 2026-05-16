@@ -1,8 +1,15 @@
 # Current Focus
 
-Last updated: 2026-05-14
+Last updated: 2026-05-16
 
 ## Active Focus
+
+Current DMS focus: the first `00 Main` intake API/web panel, proposal-only
+route command, shared department shell, department subsystem registry, Finance
+system spec, and commercial exception runtime API are verified locally. The
+next backend slice is DMS-07-002 read-only Finance context, followed by
+DMS-00-007 Paperclip background output review proof and DMS-SHELL-003 graph
+fallback consistency.
 
 WEBFOUND-002/003/004, WEBFOUND-005, WEBFOUND-007, WEBFOUND-008A, WEBFOUND-008B, WEBFOUND-009, WEBFOUND-010, WEBFOUND-011, WEBFOUND-012, WEBFOUND-013, WEBFOUND-014, ACF-MAINT-001, V2VIS-001, and ACF-PROD-001 are now complete. The
 pre-V2 foundation has token-scoped multi-workspace owner switching, a workspace

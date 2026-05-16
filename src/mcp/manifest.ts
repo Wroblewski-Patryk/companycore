@@ -117,6 +117,10 @@ function routeDescription(route: ManifestRoute) {
     return "Create proposal-only global intake classification and routing evidence without acknowledging agent events, mutating providers, approving work, invoicing, discounting, deleting, or executing commercial/legal actions.";
   }
 
+  if (route.capability === "commercial-exceptions:read") {
+    return "Read source-backed discounts, pro bono work, commercial exceptions, invoice-readiness blockers, and owner-decision requirements without applying discounts, sending invoices, marking payments, or quoting final terms.";
+  }
+
   if (route.capability === "relationships:read") {
     return "Read the workspace relationship graph with direct, inferred, provider-derived, review, and unsupported relationship context.";
   }

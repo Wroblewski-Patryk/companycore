@@ -11,6 +11,7 @@ import { apiKeysRouter } from "./modules/api-keys/api-keys.routes";
 import { authRouter } from "./modules/auth/auth.routes";
 import { clientsRouter } from "./modules/clients/clients.routes";
 import { companyOsRouter } from "./modules/company-os/company-os.routes";
+import { commercialExceptionsRouter } from "./modules/commercial-exceptions/commercial-exceptions.routes";
 import { connectionRouter } from "./modules/connection/connection.routes";
 import { dealsRouter } from "./modules/deals/deals.routes";
 import { decisionsRouter } from "./modules/decisions/decisions.routes";
@@ -37,6 +38,7 @@ import { workspacesRouter } from "./modules/workspaces/workspaces.routes";
 function mountProtectedRoutes(router: Router) {
   router.use("/projects", projectsRouter);
   router.use("/company-os", companyOsRouter);
+  router.use("/commercial-exceptions", commercialExceptionsRouter);
   router.use("/connection", connectionRouter);
   router.use("/workspaces", workspacesRouter);
   router.use("/mcp", mcpRouter);

@@ -468,6 +468,8 @@ test("CompanyCore v1 protected API flow", async () => {
 
   const unauthenticatedIntake = await request("/v1/intake");
   assert.equal(unauthenticatedIntake.status, 401);
+  const unauthenticatedCommercialExceptions = await request("/v1/commercial-exceptions");
+  assert.equal(unauthenticatedCommercialExceptions.status, 401);
 
   const paperclipIntakeEvent = await prisma.agentEventOutbox.create({
     data: {
@@ -806,6 +808,186 @@ test("CompanyCore v1 protected API flow", async () => {
   await prisma.agentEventOutbox.deleteMany({
     where: { id: { in: [paperclipIntakeEvent.id, jarvisIntakeEvent.id, foreignIntakeEvent.id] } }
   });
+
+  const commercialClient = await prisma.client.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      name: "Current discount client",
+      email: "discount-client@example.com",
+      status: "active",
+      source: "companycore_test"
+    }
+  });
+  const commercialDeal = await prisma.deal.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      clientId: commercialClient.id,
+      title: "Current client service work",
+      value: "1200.00",
+      currency: "PLN",
+      source: "companycore_test"
+    }
+  });
+  const commercialApproval = await prisma.approval.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      requestedByType: "agent",
+      requestedById: "paperclip",
+      requestedForAction: "invoice.discount.apply 100% portfolio trial discount",
+      resourceType: "deal",
+      resourceId: commercialDeal.id,
+      riskLevel: "high",
+      decisionReason: "Portfolio trial for current client; owner review required before invoice."
+    }
+  });
+  const commercialNote = await prisma.note.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      clientId: commercialClient.id,
+      dealId: commercialDeal.id,
+      content: "Apply 100% discount as portfolio trial evidence after delivery feedback loop.",
+      source: "companycore_test"
+    }
+  });
+  const missingSourceTask = await prisma.task.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      title: "100% discount candidate without client",
+      description: "Free service request needs source, gross value, and owner decision.",
+      source: "companycore_test"
+    }
+  });
+  const commercialAgentEvent = await prisma.agentEventOutbox.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      eventType: "paperclip_commercial_exception_candidate",
+      targetAgent: "paperclip",
+      payload: {
+        clientName: "Current discount client",
+        proposedDiscount: "100%",
+        requestedAction: "discount_review"
+      }
+    }
+  });
+  const foreignCommercialNote = await prisma.note.create({
+    data: {
+      workspaceId: ownerB.workspace.id,
+      content: "Foreign workspace 100% discount note must not leak.",
+      source: "companycore_test"
+    }
+  });
+
+  const commercialCountsBefore = {
+    approvals: await prisma.approval.count({ where: { workspaceId: ownerA.workspace.id } }),
+    notes: await prisma.note.count({ where: { workspaceId: ownerA.workspace.id } }),
+    tasks: await prisma.task.count({ where: { workspaceId: ownerA.workspace.id } }),
+    agentEvents: await prisma.agentEventOutbox.count({ where: { workspaceId: ownerA.workspace.id } })
+  };
+  const commercialExceptions = await request("/v1/commercial-exceptions?limit=50", { headers: authA });
+  assert.equal(commercialExceptions.status, 200);
+  const commercialExceptionsBody = commercialExceptions.body as {
+    data: {
+      summary: {
+        total: number;
+        hundredPercentDiscounts: number;
+        invoiceReadinessBlocked: number;
+      };
+      exceptions: Array<{
+        sourceFamily: string;
+        sourceId: string;
+        status: string;
+        clientId: string | null;
+        dealId: string | null;
+        grossValue: number | null;
+        discountPercent: number | null;
+        discountValue: number | null;
+        finalValue: number | null;
+        risk: string;
+        riskFlags: string[];
+        invoiceReadiness: string;
+        allowedActions: string[];
+        blockedActions: Array<{ action: string; reason: string }>;
+      }>;
+      agentPacket: {
+        mode: string;
+        blockedActions: Array<{ action: string; reason: string }>;
+      };
+    };
+  };
+  assert.ok(commercialExceptionsBody.data.summary.total >= 4);
+  assert.ok(commercialExceptionsBody.data.summary.hundredPercentDiscounts >= 3);
+  assert.ok(commercialExceptionsBody.data.summary.invoiceReadinessBlocked >= 1);
+  const noteException = commercialExceptionsBody.data.exceptions.find((item) => item.sourceId === commercialNote.id);
+  assert.ok(noteException);
+  assert.equal(noteException.clientId, commercialClient.id);
+  assert.equal(noteException.dealId, commercialDeal.id);
+  assert.equal(noteException.grossValue, 1200);
+  assert.equal(noteException.discountPercent, 100);
+  assert.equal(noteException.discountValue, 1200);
+  assert.equal(noteException.finalValue, 0);
+  assert.equal(noteException.status, "needs_owner_decision");
+  assert.ok(noteException.riskFlags.includes("missing_owner_approval"));
+  assert.ok(noteException.blockedActions.some((action) => action.action === "send_invoice"));
+  const approvalException = commercialExceptionsBody.data.exceptions.find((item) => item.sourceId === commercialApproval.id);
+  assert.ok(approvalException);
+  assert.equal(approvalException.sourceFamily, "approval");
+  assert.equal(approvalException.dealId, commercialDeal.id);
+  assert.equal(approvalException.discountPercent, 100);
+  assert.ok(["needs_source", "needs_owner_decision"].includes(approvalException.status));
+  const taskException = commercialExceptionsBody.data.exceptions.find((item) => item.sourceId === missingSourceTask.id);
+  assert.ok(taskException);
+  assert.equal(taskException.status, "needs_source");
+  assert.ok(taskException.riskFlags.includes("missing_client"));
+  assert.ok(taskException.riskFlags.includes("missing_gross_value"));
+  assert.ok(commercialExceptionsBody.data.exceptions.some((item) => item.sourceId === commercialAgentEvent.id));
+  assert.ok(!commercialExceptionsBody.data.exceptions.some((item) => item.sourceId === foreignCommercialNote.id));
+  assert.equal(commercialExceptionsBody.data.agentPacket.mode, "read_only");
+  assert.ok(commercialExceptionsBody.data.agentPacket.blockedActions.some((action) => action.action === "apply_discount"));
+
+  const commercialClientFilter = await request(`/v1/commercial-exceptions?clientId=${commercialClient.id}`, { headers: authA });
+  assert.equal(commercialClientFilter.status, 200);
+  const commercialClientFilterBody = commercialClientFilter.body as {
+    data: { exceptions: Array<{ clientId: string | null; sourceId: string }> };
+  };
+  assert.ok(commercialClientFilterBody.data.exceptions.length >= 1);
+  assert.ok(commercialClientFilterBody.data.exceptions.every((item) => item.clientId === commercialClient.id));
+
+  const commercialCountsAfter = {
+    approvals: await prisma.approval.count({ where: { workspaceId: ownerA.workspace.id } }),
+    notes: await prisma.note.count({ where: { workspaceId: ownerA.workspace.id } }),
+    tasks: await prisma.task.count({ where: { workspaceId: ownerA.workspace.id } }),
+    agentEvents: await prisma.agentEventOutbox.count({ where: { workspaceId: ownerA.workspace.id } })
+  };
+  assert.deepEqual(commercialCountsAfter, commercialCountsBefore);
+  const commercialApprovalAfterRead = await prisma.approval.findUniqueOrThrow({ where: { id: commercialApproval.id } });
+  assert.equal(commercialApprovalAfterRead.status, "pending");
+
+  const foreignCommercialExceptions = await request("/v1/commercial-exceptions?limit=50", { headers: authB });
+  assert.equal(foreignCommercialExceptions.status, 200);
+  const foreignCommercialExceptionsBody = foreignCommercialExceptions.body as {
+    data: { exceptions: Array<{ sourceId: string }> };
+  };
+  assert.ok(!foreignCommercialExceptionsBody.data.exceptions.some((item) => item.sourceId === commercialNote.id));
+
+  const commercialMcpManifest = await request("/v1/mcp/manifest", { headers: authA });
+  assert.equal(commercialMcpManifest.status, 200);
+  const commercialMcpManifestBody = commercialMcpManifest.body as {
+    data: { tools: Array<{ name: string; path: string; capability: string; riskLevel: string; requiresApproval: boolean }> };
+  };
+  assert.ok(commercialMcpManifestBody.data.tools.some((tool) => (
+    tool.name === "companycore_get_commercial_exceptions"
+    && tool.path === "/v1/commercial-exceptions"
+    && tool.capability === "commercial-exceptions:read"
+    && tool.riskLevel === "read"
+    && tool.requiresApproval === false
+  )));
+
+  await prisma.agentEventOutbox.delete({ where: { id: commercialAgentEvent.id } });
+  await prisma.task.delete({ where: { id: missingSourceTask.id } });
+  await prisma.approval.delete({ where: { id: commercialApproval.id } });
+  await prisma.note.deleteMany({ where: { id: { in: [commercialNote.id, foreignCommercialNote.id] } } });
+  await prisma.deal.delete({ where: { id: commercialDeal.id } });
+  await prisma.client.delete({ where: { id: commercialClient.id } });
 
   const ownerAWorkspacesInitial = await request("/v1/workspaces", { headers: authA });
   assert.equal(ownerAWorkspacesInitial.status, 200);
@@ -3076,6 +3258,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(companyOsReaderProfile.riskLevel, "low");
   assert.ok(companyOsReaderProfile.scopes.includes("mcp:read"));
   assert.ok(companyOsReaderProfile.scopes.includes("company-os:read"));
+  assert.ok(companyOsReaderProfile.scopes.includes("commercial-exceptions:read"));
   assert.ok(companyOsReaderProfile.scopes.includes("relationships:read"));
   assert.ok(!companyOsReaderProfile.scopes.includes("company-os:definition:write"));
   assert.ok(!companyOsReaderProfile.scopes.includes("company-os:workflow-definition:write"));
@@ -3102,6 +3285,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(createdProfileKeyBody.data.profile.id, "mcp_company_os_reader");
   assert.ok(createdProfileKeyBody.data.scopes.includes("mcp:read"));
   assert.ok(createdProfileKeyBody.data.scopes.includes("company-os:read"));
+  assert.ok(createdProfileKeyBody.data.scopes.includes("commercial-exceptions:read"));
   assert.ok(createdProfileKeyBody.data.scopes.includes("relationships:read"));
   assert.ok(!createdProfileKeyBody.data.scopes.includes("company-os:definition:write"));
   assert.ok(!createdProfileKeyBody.data.scopes.includes("company-os:workflow-definition:write"));
@@ -3118,6 +3302,10 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(profileMcpManifestBody.data.tools.some((tool) => (
     tool.path === "/v1/relationships/graph"
     && tool.capability === "relationships:read"
+  )));
+  assert.ok(profileMcpManifestBody.data.tools.some((tool) => (
+    tool.path === "/v1/commercial-exceptions"
+    && tool.capability === "commercial-exceptions:read"
   )));
   assert.ok(!profileMcpManifestBody.data.tools.some((tool) => tool.capability === "company-os:definition:write"));
   assert.ok(!profileMcpManifestBody.data.tools.some((tool) => tool.capability === "company-os:workflow-definition:write"));
@@ -3279,6 +3467,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(!scopedConnectionBody.data.capabilities.includes("company-os:definition:write"));
   assert.ok(!scopedConnectionBody.data.capabilities.includes("company-os:workflow-definition:write"));
   assert.ok(!scopedConnectionBody.data.capabilities.includes("company-os:workflow-definition:activate"));
+  assert.ok(!scopedConnectionBody.data.capabilities.includes("commercial-exceptions:read"));
   assert.ok(!scopedConnectionBody.data.capabilities.includes("notes:write"));
   assert.ok(scopedConnectionBody.data.mcpManifest.tools.some((tool) => (
     tool.path === "/v1/company-os"
@@ -3289,6 +3478,7 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(!scopedConnectionBody.data.mcpManifest.tools.some((tool) => tool.capability === "company-os:definition:write"));
   assert.ok(!scopedConnectionBody.data.mcpManifest.tools.some((tool) => tool.capability === "company-os:workflow-definition:write"));
   assert.ok(!scopedConnectionBody.data.mcpManifest.tools.some((tool) => tool.capability === "company-os:workflow-definition:activate"));
+  assert.ok(!scopedConnectionBody.data.mcpManifest.tools.some((tool) => tool.capability === "commercial-exceptions:read"));
 
   const scopedMcpManifest = await request("/v1/mcp/manifest", {
     headers: scopedAuth
@@ -3308,6 +3498,13 @@ test("CompanyCore v1 protected API flow", async () => {
     && tool.capability === "company-os:read"
     && tool.requiresApproval === false
   )));
+  assert.ok(!scopedMcpManifestBody.data.tools.some((tool) => tool.capability === "commercial-exceptions:read"));
+
+  const deniedScopedCommercialExceptions = await request("/v1/commercial-exceptions", {
+    headers: scopedAuth
+  });
+  assert.equal(deniedScopedCommercialExceptions.status, 403);
+  assert.equal((deniedScopedCommercialExceptions.body as { error: string }).error, "forbidden");
 
   const scopedReadCompanyOs = await request("/v1/company-os/approvals", {
     headers: scopedAuth

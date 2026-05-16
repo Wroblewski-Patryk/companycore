@@ -217,6 +217,16 @@ continue from repository files alone:
   and DMS-03-005A backend API handoff. Future implementation should derive
   candidates from existing approvals, decisions, deals, tasks, notes,
   interactions, risks, and intake/agent proposals without mutating sources.
+- `docs/planning/dms-03-commercial-exception-read-api-task-contract.md`:
+  commercial exception runtime handoff. As of 2026-05-16, DMS-03-005A
+  implements protected read-only `GET /v1/commercial-exceptions`, exposes
+  `commercial-exceptions:read` through capabilities, MCP, and agent key
+  profiles, and verifies auth, scoped-key denial, workspace isolation,
+  no-mutation reads, `100%` discount packet math, missing-source status, and
+  blocked discount/invoice/payment/final-term actions through
+  `npm run test:api` on portable PostgreSQL `127.0.0.1:55481`. Future work
+  should continue with DMS-07-002 read-only Finance context before web panels
+  or finance write commands.
 - `docs/planning/dms-shell-001-shared-department-management-shell-task-contract.md`:
   active shared-shell handoff. As of 2026-05-16, selected-area department
   routes render through `DepartmentManagementShell`, with

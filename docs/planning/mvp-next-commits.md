@@ -7,10 +7,6 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] DMS-03-005A Commercial exception read API:
-      implement protected read-only `GET /v1/commercial-exceptions` with
-      `100%` discount packet support, workspace isolation, no mutation on
-      read, and explicit blocked actions.
 - [ ] DMS-07-002 Price-list and hourly-value read model:
       implement protected read-only finance context from the Finance system
       spec before Finance web, invoice readiness, or autonomous pricing work.
@@ -101,6 +97,16 @@ The section below is retained as execution evidence. It is not the active
 queue. Future work must start from `Active Queue`, `.codex/context/TASK_BOARD.md`,
 and `docs/operations/v1-function-coverage-ledger.csv`.
 
+- [x] DMS-03-005A Commercial exception read API:
+      implemented protected read-only `GET /v1/commercial-exceptions`,
+      `commercial-exceptions:read`, MCP exposure, Paperclip-safe profile
+      access, API docs, and regression coverage for auth, workspace isolation,
+      no mutation on read, `100%` discount packet math, missing-source status,
+      and blocked actions. `npm run build:server`, `git diff --check`, and
+      `npm run test:api` passed against portable PostgreSQL on
+      `127.0.0.1:55481`.
+      Task contract:
+      `docs/planning/dms-03-commercial-exception-read-api-task-contract.md`.
 - [x] DMS-07-001 Finance system spec:
       defined the Finance Management System board, first safe web shape,
       protected read-only `GET /v1/finance/context` target, pricing model and

@@ -14,6 +14,7 @@ export const capabilities = [
   "mcp:read",
   "intake:read",
   "intake:write",
+  "commercial-exceptions:read",
   "relationships:read",
   "operating-graph:read",
   "operating-model:read",
@@ -117,6 +118,9 @@ export const adapterManifest = {
     intake: [
       { method: "GET", path: "/v1/intake", capability: "intake:read" },
       { method: "POST", path: "/v1/intake/actions/propose-route", capability: "intake:write" }
+    ],
+    commercialExceptions: [
+      { method: "GET", path: "/v1/commercial-exceptions", capability: "commercial-exceptions:read" }
     ],
     relationships: [
       { method: "GET", path: "/v1/relationships/graph", capability: "relationships:read" }
