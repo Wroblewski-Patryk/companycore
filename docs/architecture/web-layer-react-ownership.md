@@ -1,6 +1,6 @@
 # Web Layer React Ownership
 
-Last updated: 2026-05-15
+Last updated: 2026-05-16
 
 ## Decision
 
@@ -14,14 +14,18 @@ post-login landing route. `/dashboard` and `/react-dashboard` remain temporary
 compatibility aliases that redirect to the `00 Ogolny` selected-area
 dashboard.
 
+As of WEB-CORE-001 on 2026-05-16, the active React web product has been
+intentionally narrowed. The only active web views are public home, login,
+registration, `00 General`, `04 Operations`, and `08 Assets`. Historical v0/v1
+workbenches such as settings, data, relationships, tasks, pipeline,
+Company OS cockpit, and MCP catalog are not active web screens. Their backend
+APIs remain in place for future department-system rebuilds.
+
 React route metadata now lives in `web/src/app-route-registry.ts`. That file is
-the source of truth for route groups, canonical hrefs, aliases, prefix matches,
+the source of truth for the current active route set, compatibility aliases,
 shell navigation entries, route titles, and safe post-auth redirect
-normalization. The route registry also carries lightweight UX maturity markers;
-the human-readable view maturity source is
-`docs/ux/v1-web-view-index-2026-05-15.md`. Future web views must extend the
-registry and the view index instead of adding page-local sidebar links or
-manual route checks.
+normalization. Future web views must extend the registry and the view index
+only after a scoped department-system task accepts them.
 
 The legacy vanilla owner console files under `public/` are removed from the
 active runtime path:
@@ -41,22 +45,21 @@ The Express web host serves the React bundle for:
 - `/auth/register`
 - `/dashboard`
 - `/areas`
-- `/relationships`
-- `/data`
-- `/data/:table`
-- `/tasks-adapter`
-- `/pipeline`
-- `/settings`
-- `/settings/account`
-- `/settings/integrations`
-- `/settings/drive`
-- `/settings/api`
-- `/react-agent-tools`
-- `/react-company-os`
-- `/react-areas`
 - `/react-dashboard`
-- `/react-integrations`
-- `/react-tasks`
+
+Active private route behavior:
+
+- `/areas?area=00-ogolny&view=overview`: canonical `00 General` dashboard.
+- `/areas?area=04-operacje&view=overview`: `04 Operations`.
+- `/areas?area=08-zasoby&view=overview`: `08 Assets`.
+- `/dashboard`, `/react-dashboard`, and bare `/areas`: compatibility entries
+  that normalize to the `00 General` dashboard.
+- `/operations`: compatibility entry that normalizes to the `04 Operations`
+  selected-area view.
+
+Old private web paths may still be served by the SPA fallback, but they must
+show an archived-route notice instead of their former screen body. They are not
+active product views.
 
 API hosts still use the existing JSON API behavior. Protected backend contracts
 remain under `/v1/*` and root protected compatibility routes.
@@ -64,12 +67,13 @@ remain under `/v1/*` and root protected compatibility routes.
 ## Implementation Rules
 
 - New web UI must be implemented in `web/src/` using React, Tailwind, DaisyUI,
-  and existing shared route-kit helpers.
+  and existing shared CompanyCore primitives.
 - Do not reintroduce page-local vanilla JavaScript for product routes.
 - Shared data fetching, auth redirect behavior, and route primitives should
   live in React helpers or route-kit modules, not global browser scripts.
 - Add new authenticated views through `web/src/app-route-registry.ts` first,
-  then bind the route component in `web/src/main.tsx`.
+  then bind the route component in `web/src/main.tsx`. Do this only from an
+  accepted department-system task contract.
 - Shared shell navigation must be derived from the route registry so desktop
   and mobile route chrome stay consistent.
 - React views must consume existing backend endpoints. UI may simplify a
@@ -79,55 +83,36 @@ remain under `/v1/*` and root protected compatibility routes.
 
 ## Current React Coverage
 
-The first consolidation slice covers the active web routing layer and baseline
-React views for:
+The current active React coverage is:
 
-- owner login and registration
-- Company Atlas dashboard
-- operating areas
-- relationship graph review
-- data table browsing
-- tasks workbench
-- pipeline / CRM
-- integration health
-- Google Drive status and imported files
-- agent API keys
-- account context
-- ClickUp bridge status
-- Company OS cockpit
-- MCP tool surface
+- public home;
+- owner login;
+- owner registration;
+- `00 General` post-login dashboard;
+- `04 Operations` management read view;
+- `08 Assets` management read view;
+- archived-route notice for old private web paths.
 
-These routes are not equally finished. `docs/ux/v1-web-view-index-2026-05-15.md`
-classifies each active route as `V1 canonical`, `V1 foundation`, `V0 rebuild`,
-`V0 compatibility`, or `V2 deferred`. As of 2026-05-15, only `/dashboard` and
-`/areas?area=:areaKey&view=:viewId` are V1 canonical surfaces.
+These views consume existing backend contracts where applicable. The removed
+web views are not deleted from backend architecture; they are simply not active
+as user-facing screens until rebuilt as department-specific management systems.
 
 ## Area Detail Routing
 
-The area-first V1 surface uses `/areas` for two related but distinct jobs:
+The active area-first surface uses `/areas?area=:areaKey&view=overview` for
+the approved management systems. Only these department keys are active in web:
 
-- `/areas`: all-areas operating workbench for reviewing coverage, ownership,
-  mapping queues, and lifecycle controls.
-- `/areas?area=:areaKey&view=:viewId`: canonical selected-department view
-  opened from the Company Atlas dashboard.
+- `00-ogolny`
+- `04-operacje`
+- `08-zasoby`
 
-The selected-department view must stay area-first. Capability views such as
-`overview`, `goals`, `workflows`, `tasks`, `knowledge`, `resources`,
-`decisions`, and `ai` are contextual tabs inside the selected area, not new
-global sidebar modules.
+Other `00`-`12` departments may be displayed as planned architecture context
+inside `00 General`, but they must not open unfinished web screens before a
+new scoped implementation task rebuilds them.
 
 ## Known Follow-Up
 
-The legacy ClickUp token discovery and list-selection form is intentionally not
-copied as vanilla. The current React `/settings` route shows real ClickUp
-connection status from `/v1/connection`; a later React slice should rebuild the
-guided connector form against:
-
-- `POST /v1/integration-settings/clickup/discover`
-- `PUT /v1/integration-settings/clickup`
-- `POST /v1/integration-settings/clickup/maintenance/run`
-
-The Google Drive React route currently exposes readiness, imported files, and
-safe import/reconcile actions. A later React slice should rebuild the full OAuth
-client, folder discovery, selection, and exchange workflow if owner re-consent
-must happen through the browser UI.
+Settings, data, relationship review, tasks, pipeline, Company OS cockpit, MCP
+catalog, and connector workbenches are future rebuild candidates, not active
+web surfaces. Reintroduce them only through a department-specific management
+system or explicit admin/settings task contract.

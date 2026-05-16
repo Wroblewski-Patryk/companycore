@@ -32,6 +32,22 @@ V0 means:
 - the view should be rebuilt into a clearer V1 user journey or removed if it
   no longer earns its place.
 
+## Active Web Scope As Of WEB-CORE-001
+
+As of 2026-05-16, the active web runtime is intentionally narrowed to the
+approved current product slice:
+
+- public home;
+- owner login;
+- owner registration;
+- `00 General` at `/areas?area=00-ogolny&view=overview`;
+- `04 Operations` at `/areas?area=04-operacje&view=overview`;
+- `08 Assets` at `/areas?area=08-zasoby&view=overview`.
+
+Former v0/v1 workbenches are not active web screens. Their backend APIs remain
+available for future department-system rebuilds, but the web shell must not
+surface them until a new scoped task accepts and verifies them.
+
 ## Status Vocabulary
 
 | Status | Meaning | Rule |
@@ -52,11 +68,11 @@ V0 means:
 | 00 Ogolny Dashboard | `/areas?area=00-ogolny&view=overview` | `V1 canonical` | `docs/architecture/autonomous-company-operating-system.md`; `docs/planning/cc-00-04-08-architecture-ux-audit.md` | `docs/ux/evidence/cc-audit-001-post-login-00-dashboard.png` | `docs/ux/evidence/cc-audit-001-08-assets-mobile.png` | What matters across the company, which department owns it, and what should I open next? | `docs/planning/cc-00-04-08-architecture-ux-audit-task-contract.md` |
 | Selected Area Operating Room | `/areas?area=:areaKey&view=:viewId` | `V1 canonical` | `docs/ux/v1-area-detail-canonical-spec-2026-05-15.md` | `docs/ux/assets/companycore-v1-area-detail-desktop-canonical.png` | `docs/ux/assets/companycore-v1-area-detail-mobile-canonical.png` | What is happening inside this department, where is the proof, and what can I decide or delegate next? | `docs/planning/v1-area-detail-canonical-task-contract.md`; `docs/planning/v1-selected-area-knowledge-depth-task-contract.md`; `docs/planning/v1-selected-area-tasks-depth-task-contract.md`; `docs/ux/evidence/v1-area-knowledge-depth-desktop.png`; `docs/ux/evidence/v1-area-knowledge-depth-mobile.png`; `docs/ux/evidence/v1-area-tasks-depth-desktop.png`; `docs/ux/evidence/v1-area-tasks-depth-mobile.png` |
 | Department Management Systems | `/areas?area=:areaKey&view=:viewId` for all 00-12 departments | `V1 target architecture` | `docs/ux/v1-department-management-systems-view-map.md` | to be generated per department | to be generated per department | How do I manage this department as a system with subsystems, evidence, actions, metrics, and AI handoff? | `docs/architecture/department-management-systems-architecture.md`; `docs/ux/v1-department-system-prompt-pack.md` |
-| Unified Settings | `/settings` plus `/settings/integrations`, `/settings/drive`, `/settings/api`, and `/react-agent-tools` section entries | `V1 canonical` | `docs/ux/v1-settings-canonical-spec-2026-05-15.md` | `docs/ux/assets/companycore-v1-settings-desktop-canonical.png` | `docs/ux/assets/companycore-v1-settings-mobile-canonical.png` | Where do I paste connector credentials, set active/sync policy, create Jarvis/Paperclip keys, and find MCP handoff fields without entering operational queues? | `docs/planning/v1-settings-react-implementation-task-contract.md`; `docs/ux/evidence/v1-settings-unified-proof-desktop.png`; `docs/ux/evidence/v1-settings-unified-proof-mobile.png`; `docs/ux/evidence/v1-settings-real-backend-desktop.png`; `docs/ux/evidence/v1-settings-drive-save-real-backend-desktop.png`; `docs/ux/evidence/v1-settings-real-backend-mobile.png` |
-| Operations Cockpit | `/operations` | `V1 canonical` | `docs/planning/v1-operations-cockpit-task-contract.md` | `docs/ux/evidence/v1-operations-cockpit-real-backend-desktop.png` | `docs/ux/evidence/v1-operations-cockpit-real-backend-mobile.png` | What do I need to supervise now across clients, tasks, department evidence, files, and AI-agent handoff? | `docs/planning/v1-operations-cockpit-task-contract.md`; `docs/ux/assets/companycore-v1-operations-cockpit-concept.png`; `docs/ux/evidence/v1-operations-cockpit-real-backend-desktop.png`; `docs/ux/evidence/v1-operations-cockpit-real-backend-mobile.png` |
-| Tasks & Delivery | `/tasks-adapter` | `V1 canonical` | `docs/planning/v1-tasks-delivery-workbench-task-contract.md` | `docs/ux/evidence/v1-tasks-delivery-real-backend-desktop.png` | `docs/ux/evidence/v1-tasks-delivery-real-backend-mobile.png` | What execution pressure needs owner direction, and what task can I create or move now? | `docs/planning/v1-tasks-delivery-workbench-task-contract.md`; `docs/ux/assets/companycore-v1-tasks-delivery-concept.png`; `docs/ux/evidence/v1-tasks-delivery-real-backend-desktop.png`; `docs/ux/evidence/v1-tasks-delivery-real-backend-mobile.png` |
-| Data Evidence Browser | `/data` and `/data/:table` | `V1 foundation` | `docs/planning/v1-data-evidence-browser-task-contract.md` | `docs/ux/evidence/v1-data-evidence-browser-desktop.png` | `docs/ux/evidence/v1-data-evidence-browser-mobile.png` | Which department owns this evidence, can agents read it, what is empty, and where do I inspect records? | `docs/planning/v1-data-evidence-browser-task-contract.md`; `docs/ux/evidence/v1-data-evidence-browser-desktop.png`; `docs/ux/evidence/v1-data-evidence-browser-mobile.png` |
-| Relationship Provenance Review | `/relationships?area=:areaKey` | `V1 foundation` | `docs/planning/v1-relationship-provenance-review-task-contract.md` | `docs/ux/evidence/v1-relationship-provenance-desktop.png` | `docs/ux/evidence/v1-relationship-provenance-mobile.png` | Which links can I or an AI agent trust, which are provider-derived or inferred, and what still needs review? | `docs/planning/v1-relationship-provenance-review-task-contract.md`; `docs/ux/evidence/v1-relationship-provenance-desktop.png`; `docs/ux/evidence/v1-relationship-provenance-mobile.png` |
+| Unified Settings | `/settings` plus `/settings/integrations`, `/settings/drive`, `/settings/api`, and `/react-agent-tools` section entries | `Archived web surface` | `docs/ux/v1-settings-canonical-spec-2026-05-15.md` | historical only | historical only | This screen family is not active in the current web runtime. | Backend contracts remain for future rebuild; old web route now shows the archived-route notice. |
+| Operations Cockpit | `/operations` | `V0 compatibility` | `docs/planning/v1-operations-cockpit-task-contract.md` | historical only | historical only | `/operations` is now an alias into the active `04 Operations` selected-area view. | Rebuild any broader cockpit only from a new task contract. |
+| Tasks & Delivery | `/tasks-adapter` | `Archived web surface` | `docs/planning/v1-tasks-delivery-workbench-task-contract.md` | historical only | historical only | This screen is not active in the current web runtime. | Backend task APIs remain for future Operations rebuilds. |
+| Data Evidence Browser | `/data` and `/data/:table` | `Archived web surface` | `docs/planning/v1-data-evidence-browser-task-contract.md` | historical only | historical only | This screen is not active in the current web runtime. | Backend data APIs remain for future department-specific evidence views. |
+| Relationship Provenance Review | `/relationships?area=:areaKey` | `Archived web surface` | `docs/planning/v1-relationship-provenance-review-task-contract.md` | historical only | historical only | This screen is not active in the current web runtime. | Backend relationship graph APIs remain for future relationship-system rebuilds. |
 
 ## Active Route Index
 
@@ -69,27 +85,15 @@ and Paperclip/AI packets: `docs/ux/v1-department-system-prompt-pack.md`.
 | Route | Current Status | V1 Direction | Keep / Rebuild / Remove |
 | --- | --- | --- | --- |
 | `/` | `V1 canonical` | Public CompanyCore home on the public layout. | Keep as public entry; do not require owner auth. |
-| `/react-dashboard` | `V0 compatibility` | Dashboard alias only. | Keep temporarily, remove once no references use it. |
-| `/dashboard` | `V0 compatibility` | Compatibility alias into `/areas?area=00-ogolny&view=overview`. | Keep temporarily; do not build a second dashboard surface. |
-| `/operations` | `V1 canonical` | Owner supervision cockpit for clients, tasks, department files/tables, and AI-agent handoff. | Keep as the cross-perspective command surface; deepen downstream workbenches instead of turning it into raw admin CRUD. |
-| `/areas?area=:areaKey&view=:viewId` | `V1 canonical` | Department operating room with capability tabs. | Keep and deepen capability views. |
-| `/areas` | `V0 rebuild` | All-areas mapping/lifecycle workbench; useful but not canonical owner flow. | Keep for admin/mapping, simplify later. |
-| `/react-areas` | `V0 compatibility` | Alias to `/areas`. | Remove after route references are cleaned. |
-| `/relationships` | `V1 foundation` | Area-scoped relationship provenance, confidence, review, and unsupported-family view. | Keep and deepen only through existing graph/read contracts or explicit command-shaped relationship fixes. |
-| `/data` and `/data/:table` | `V1 foundation` | Evidence browser tied to areas, workflows, source routes, and agent-readable context. | Keep and deepen with typed table actions only where existing backend contracts support them. |
-| `/tasks-adapter` | `V1 canonical` | Area-scoped execution pressure, priorities, task creation, status movement, and owner/AI task handoff. | Keep as the delivery workbench; add deeper area ownership only after a backend relation exists. |
-| `/react-tasks` | `V0 compatibility` | Alias to tasks workbench. | Remove after references are cleaned. |
-| `/pipeline` | `V0 rebuild` | Sales/operations workflow pressure tied to areas and decisions. | Rebuild as V1 workflow/pipeline capability. |
-| `/settings/integrations` | `V1 canonical` | Tab-aware entry into unified settings `Integrations`, with ClickUp selected by default. | Keep as section entry; move operational review queues to dedicated work views. |
-| `/react-integrations` | `V0 compatibility` | Alias to integration readiness. | Remove after references are cleaned. |
-| `/settings` | `V1 canonical` | Canonical unified settings entry with sections for Integrations, Agent keys, and MCP. | Keep as contextual connector settings, not a sync dashboard. |
-| `/settings/drive` | `V1 canonical` | Section-aware entry into unified settings `Integrations`, with Google Drive selected. | Keep settings fields here; move deep content-quality reviews to dedicated work views. |
-| `/settings/api` | `V1 canonical` | Section-aware entry into unified settings `Agent keys`, preserving owner/AI least-privilege safety. | Keep minimal Jarvis/Paperclip key setup. |
-| `/react-agent-tools` | `V1 canonical` | Section-aware entry into unified settings `MCP`, preserving manifest URL and local command fields. | Keep large MCP catalog outside the first settings view. |
-| `/react-company-os` | `V1 foundation` | Company OS command/evidence cockpit. | Keep, contextualize from selected areas. |
-| `/settings/account` | `V0 rebuild` | Quiet workspace/account/admin settings. | Rebuild after core owner journeys. |
-| `/auth/login` | `V1 canonical` | Owner entry into Company Atlas on the public layout. | Keep and extend only inside public auth shell. |
-| `/auth/register` | `V1 canonical` | Workspace bootstrap on the public layout. | Keep and extend only inside public auth shell. |
+| `/auth/login` | `V1 canonical` | Owner entry into `00 General`. | Keep and extend only inside public auth shell. |
+| `/auth/register` | `V1 canonical` | Workspace bootstrap. | Keep and extend only inside public auth shell. |
+| `/areas?area=00-ogolny&view=overview` | `V1 canonical` | Company dashboard after login, connecting the 12 planned departments while only opening verified active systems. | Keep as the only authenticated home/dashboard. |
+| `/dashboard` and `/react-dashboard` | `V0 compatibility` | Alias into `/areas?area=00-ogolny&view=overview`. | Keep temporarily; do not build a second dashboard surface. |
+| `/areas` | `V0 compatibility` | Bare selected-area entry normalizes to `00 General`. | Keep only as compatibility. |
+| `/areas?area=04-operacje&view=overview` | `V1 canonical` | Operations management system over verified work item packet. | Keep and deepen only through Operations task contracts. |
+| `/operations` | `V0 compatibility` | Alias into `/areas?area=04-operacje&view=overview`. | Keep temporarily; do not restore the old cockpit. |
+| `/areas?area=08-zasoby&view=overview` | `V1 canonical` | Assets and knowledge management system over verified resource packet. | Keep and deepen only through Assets task contracts. |
+| Old private web paths such as `/settings`, `/settings/api`, `/settings/drive`, `/relationships`, `/data`, `/tasks-adapter`, `/pipeline`, `/react-agent-tools`, and `/react-company-os` | `Archived web surface` | Backend remains available, but the web view is removed from active runtime. | Rebuild only from a new accepted department-system or admin/settings task contract. |
 
 ## Primary User Journeys
 

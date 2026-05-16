@@ -27,12 +27,17 @@ Last updated: 2026-05-16
      `/areas?area=00-ogolny&view=overview`, so `00 Ogolny` is the company
      dashboard after login. Evidence screenshots live under
      `docs/ux/evidence/cc-audit-001-*.png`.
+   - `WEB-CORE-001` web cleanup is complete and verified: the active web
+     runtime now contains only public home, auth, `00 General`, `04
+     Operations`, and `08 Assets`; old private workbench paths show an
+     archived-route notice while backend APIs remain available.
    - CompanyCore remains the company operating system; AI agents remain
      external API/MCP clients.
    - Keep writes behind explicit command contracts, audit/events, and API
      tests.
-   - Next department work should reuse the same selected-area packet pattern
-     instead of creating page-local table/action variants.
+   - Next department work must first reintroduce any needed web surface through
+     the route registry, a task contract, and the same selected-area packet
+     pattern instead of restoring old page-local workbenches.
 
 ## NEXT
 

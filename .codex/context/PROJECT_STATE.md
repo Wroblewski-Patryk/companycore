@@ -60,9 +60,17 @@ Last updated: 2026-05-16
   `docs/ux/evidence/cc-audit-001-dashboard-alias-00.png`,
   `docs/ux/evidence/cc-audit-001-04-operations.png`,
   `docs/ux/evidence/cc-audit-001-08-assets-desktop.png`, and
-  `docs/ux/evidence/cc-audit-001-08-assets-mobile.png`. The next runtime
-  slice should continue V1 department systems with `05 Relationships` unless
-  deployment smoke is selected first.
+  `docs/ux/evidence/cc-audit-001-08-assets-mobile.png`. `WEB-CORE-001` then
+  cleaned the active React web runtime: `web/src/main.tsx` and
+  `web/src/app-route-registry.ts` now expose only public home, owner login,
+  owner registration, `00 General`, `04 Operations`, and `08 Assets`.
+  Historical v0/v1 paths such as settings, data, relationships, tasks,
+  pipeline, Company OS cockpit, and MCP tools now show an archived-route notice
+  instead of their former screen bodies; backend APIs were not removed.
+  `npm run build:web`, `npm run build:server`, Playwright route proof, and
+  `git diff --check` passed. The next runtime slice should rebuild any new web
+  surface only through a scoped department-system task contract, with `05
+  Relationships` remaining the next likely department after deployment smoke.
   As of 2026-05-16, the V1 unified React settings module, AOG-BE-001
   selected-area operating graph read API, V1 operations cockpit, and V1
   tasks/delivery workbench are locally verified. `npm run test:api` passed

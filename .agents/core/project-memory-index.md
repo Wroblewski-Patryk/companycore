@@ -123,8 +123,13 @@ continue from repository files alone:
   UX/routing mismatch: successful auth and `/dashboard` now open
   `/areas?area=00-ogolny&view=overview`, making `00 Ogolny` the post-login
   company dashboard while keeping `/dashboard` as a compatibility alias. Next
-  V1 department work should start from `05 Relationships` unless deployment
-  smoke is selected first.
+  WEB-CORE-001 narrowed the active React web runtime to public home, auth,
+  `00 General`, `04 Operations`, and `08 Assets` only. Old private web paths
+  such as settings, data, relationships, tasks, pipeline, Company OS cockpit,
+  and MCP catalog now show an archived-route notice instead of their former
+  screen bodies; backend APIs remain available for future rebuilds. Next V1
+  department work should start from `05 Relationships` only through a scoped
+  department-system task contract unless deployment smoke is selected first.
 - `docs/architecture/companycore-business-module-map.md`: accepted
   model-level module map for scaling CompanyCore as the bridge for operating
   the company. It classifies future work as native core, provider-backed,

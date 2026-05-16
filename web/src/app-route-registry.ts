@@ -4,13 +4,10 @@ export type AppRouteMeta = {
   label: string;
   title: string;
   icon: string;
-  area?: string;
   aliases?: string[];
   match?: "exact" | "prefix";
   private?: boolean;
-  uxStage?: "v1-canonical" | "v1-foundation" | "v0-rebuild" | "v0-compatibility" | "v2-deferred";
   canonicalSource?: string;
-  rebuildNote?: string;
 };
 
 export type AppRouteGroup = {
@@ -19,8 +16,9 @@ export type AppRouteGroup = {
   routes: AppRouteMeta[];
 };
 
-export const canonicalDashboardPath = "/dashboard";
 export const canonicalGeneralDashboardPath = "/areas?area=00-ogolny&view=overview";
+export const canonicalOperationsPath = "/areas?area=04-operacje&view=overview";
+export const canonicalAssetsPath = "/areas?area=08-zasoby&view=overview";
 
 export const publicHomeRoute: AppRouteMeta = {
   id: "home",
@@ -29,209 +27,8 @@ export const publicHomeRoute: AppRouteMeta = {
   title: "CompanyCore",
   icon: "ph-house",
   private: false,
-  uxStage: "v1-canonical",
-  canonicalSource: "docs/ux/v1-web-view-index-2026-05-15.md"
+  canonicalSource: "docs/architecture/autonomous-company-operating-system.md"
 };
-
-export const appRouteGroups: AppRouteGroup[] = [
-  {
-    id: "command",
-    label: "Command",
-    routes: [
-      {
-        id: "operations",
-        href: "/operations",
-        label: "Operations cockpit",
-        title: "Operations Cockpit",
-        icon: "ph-house-line",
-        private: true,
-        uxStage: "v1-canonical",
-        canonicalSource: "docs/planning/v1-operations-cockpit-task-contract.md",
-        rebuildNote: "Derived V1 workbench for clients, tasks, files/tables, and AI handoff."
-      },
-      {
-        id: "dashboard",
-        href: canonicalDashboardPath,
-        label: "00 dashboard",
-        title: "00 Ogolny Dashboard",
-        icon: "ph-map-trifold",
-        aliases: ["/react-dashboard"],
-        private: true,
-        uxStage: "v1-canonical",
-        canonicalSource: "docs/architecture/autonomous-company-operating-system.md",
-        rebuildNote: "/dashboard is a compatibility alias that opens the 00 Ogolny selected-area dashboard."
-      }
-    ]
-  },
-  {
-    id: "areas",
-    label: "Areas",
-    routes: [
-      {
-        id: "areas",
-        href: "/areas",
-        label: "Areas & resources",
-        title: "Areas",
-        icon: "ph-buildings",
-        aliases: ["/react-areas"],
-        private: true,
-        uxStage: "v1-canonical",
-        canonicalSource: "docs/ux/v1-area-detail-canonical-spec-2026-05-15.md",
-        rebuildNote: "/areas is the V0 all-areas workbench; /areas?area=:areaKey is the V1 selected-area view."
-      },
-      {
-        id: "relationships",
-        href: "/relationships",
-        label: "Relationship review",
-        title: "Relationships",
-        icon: "ph-graph",
-        private: true,
-        uxStage: "v1-foundation",
-        canonicalSource: "docs/planning/v1-relationship-provenance-review-task-contract.md",
-        rebuildNote: "V1 provenance review for relationship confidence, area focus, review gaps, and unsupported families."
-      },
-      {
-        id: "data",
-        href: "/data",
-        label: "Company data",
-        title: "Data",
-        icon: "ph-database",
-        match: "prefix",
-        private: true,
-        uxStage: "v1-foundation",
-        canonicalSource: "docs/planning/v1-data-evidence-browser-task-contract.md",
-        rebuildNote: "V1 evidence browser for department-owned tables, records, source routes, and agent-readable context."
-      }
-    ]
-  },
-  {
-    id: "workflows",
-    label: "Workflows",
-    routes: [
-      {
-        id: "tasks",
-        href: "/tasks-adapter",
-        label: "Tasks & delivery",
-        title: "Tasks",
-        icon: "ph-list-checks",
-        aliases: ["/react-tasks"],
-        private: true,
-        uxStage: "v1-canonical",
-        canonicalSource: "docs/planning/v1-tasks-delivery-workbench-task-contract.md",
-        rebuildNote: "V1 tasks and delivery workbench for execution pressure, task creation, status movement, and AI handoff."
-      },
-      {
-        id: "pipeline",
-        href: "/pipeline",
-        label: "Pipeline / CRM",
-        title: "Pipeline",
-        icon: "ph-flow-arrow",
-        private: true,
-        uxStage: "v0-rebuild",
-        rebuildNote: "Rebuild around sales/operations workflow pressure and selected-area ownership."
-      },
-      {
-        id: "company-os",
-        href: "/react-company-os",
-        label: "Company OS",
-        title: "Company OS",
-        icon: "ph-circles-four",
-        private: true,
-        uxStage: "v1-foundation",
-        canonicalSource: "docs/planning/v1-company-os-area-foundation-task-contract.md",
-        rebuildNote: "V1 foundation for area-aware Company OS governance, runtime evidence, guarded commands, and department handoff."
-      }
-    ]
-  },
-  {
-    id: "integrations-agents",
-    label: "Integrations & agents",
-    routes: [
-      {
-        id: "settings",
-        href: "/settings",
-        label: "Workspace settings",
-        title: "Settings",
-        icon: "ph-sliders-horizontal",
-        private: true,
-        uxStage: "v1-canonical",
-        canonicalSource: "docs/ux/v1-settings-canonical-spec-2026-05-15.md"
-      },
-      {
-        id: "integration-health",
-        href: "/settings/integrations",
-        label: "Integrations",
-        title: "Integrations",
-        icon: "ph-plugs-connected",
-        aliases: ["/react-integrations"],
-        private: true,
-        uxStage: "v1-canonical",
-        canonicalSource: "docs/ux/v1-settings-canonical-spec-2026-05-15.md",
-        rebuildNote: "Section-aware entry into the unified V1 settings Integrations tab."
-      },
-      {
-        id: "clickup",
-        href: "/settings/integrations",
-        label: "ClickUp bridge",
-        title: "ClickUp Bridge",
-        icon: "ph-kanban",
-        private: true,
-        uxStage: "v1-canonical",
-        canonicalSource: "docs/ux/v1-settings-canonical-spec-2026-05-15.md",
-        rebuildNote: "ClickUp opens the unified V1 settings Integrations tab with ClickUp selected by default."
-      },
-      {
-        id: "drive",
-        href: "/settings/drive",
-        label: "Google Drive",
-        title: "Google Drive",
-        icon: "ph-cloud",
-        private: true,
-        uxStage: "v1-canonical",
-        canonicalSource: "docs/ux/v1-settings-canonical-spec-2026-05-15.md",
-        rebuildNote: "Section-aware entry into the unified V1 settings Integrations tab with Google Drive selected."
-      },
-      {
-        id: "agent-access",
-        href: "/settings/api",
-        label: "Agent access",
-        title: "Agent Access",
-        icon: "ph-key",
-        private: true,
-        uxStage: "v1-canonical",
-        canonicalSource: "docs/ux/v1-settings-canonical-spec-2026-05-15.md",
-        rebuildNote: "Section-aware entry into the unified V1 settings Agent keys tab."
-      },
-      {
-        id: "agent-tools",
-        href: "/react-agent-tools",
-        label: "MCP",
-        title: "Agent Tools",
-        icon: "ph-robot",
-        private: true,
-        uxStage: "v1-canonical",
-        canonicalSource: "docs/ux/v1-settings-canonical-spec-2026-05-15.md",
-        rebuildNote: "Section-aware entry into the unified V1 settings MCP tab."
-      }
-    ]
-  },
-  {
-    id: "workspace",
-    label: "Workspace",
-    routes: [
-      {
-        id: "account",
-        href: "/settings/account",
-        label: "Account & readiness",
-        title: "Account",
-        icon: "ph-user-circle",
-        private: true,
-        uxStage: "v0-rebuild",
-        rebuildNote: "Rebuild as quiet workspace/admin settings flow after core owner journeys."
-      }
-    ]
-  }
-];
 
 export const publicRoutes: AppRouteMeta[] = [
   publicHomeRoute,
@@ -242,8 +39,7 @@ export const publicRoutes: AppRouteMeta[] = [
     title: "Sign in",
     icon: "ph-sign-in",
     private: false,
-    uxStage: "v1-canonical",
-    canonicalSource: "docs/ux/v1-web-view-index-2026-05-15.md"
+    canonicalSource: "docs/architecture/web-layer-react-ownership.md"
   },
   {
     id: "register",
@@ -252,8 +48,45 @@ export const publicRoutes: AppRouteMeta[] = [
     title: "Create account",
     icon: "ph-user-plus",
     private: false,
-    uxStage: "v1-canonical",
-    canonicalSource: "docs/ux/v1-web-view-index-2026-05-15.md"
+    canonicalSource: "docs/architecture/web-layer-react-ownership.md"
+  }
+];
+
+export const appRouteGroups: AppRouteGroup[] = [
+  {
+    id: "companycore-core",
+    label: "CompanyCore",
+    routes: [
+      {
+        id: "dashboard",
+        href: canonicalGeneralDashboardPath,
+        label: "00 General",
+        title: "00 General Dashboard",
+        icon: "ph-map-trifold",
+        aliases: ["/dashboard", "/react-dashboard", "/areas"],
+        private: true,
+        canonicalSource: "docs/architecture/autonomous-company-operating-system.md"
+      },
+      {
+        id: "operations",
+        href: canonicalOperationsPath,
+        label: "04 Operations",
+        title: "04 Operations",
+        icon: "ph-list-checks",
+        aliases: ["/operations"],
+        private: true,
+        canonicalSource: "docs/planning/cc-04-002-operations-work-item-read-model-task-contract.md"
+      },
+      {
+        id: "assets",
+        href: canonicalAssetsPath,
+        label: "08 Assets",
+        title: "08 Assets",
+        icon: "ph-folder-open",
+        private: true,
+        canonicalSource: "docs/planning/cc-08-002-assets-context-read-api-task-contract.md"
+      }
+    ]
   }
 ];
 
@@ -292,20 +125,31 @@ export function canonicalPostAuthPath(pathname?: string | null) {
     return canonicalGeneralDashboardPath;
   }
 
+  const [rawPath, rawQuery = ""] = targetPath.split("?");
+  if (normalizeRoutePath(rawPath) === "/areas") {
+    const params = new URLSearchParams(rawQuery);
+    const area = params.get("area");
+    if (area === "04-operacje") {
+      return canonicalOperationsPath;
+    }
+    if (area === "08-zasoby") {
+      return canonicalAssetsPath;
+    }
+    return canonicalGeneralDashboardPath;
+  }
+
   const route = resolveRouteMeta(targetPath);
   if (!route || route.private === false) {
     return canonicalGeneralDashboardPath;
   }
 
-  if (route.id === "dashboard") {
-    return canonicalGeneralDashboardPath;
+  if (route.id === "operations") {
+    return canonicalOperationsPath;
   }
 
-  const currentPath = normalizeRoutePath(targetPath);
-  const aliases = (route.aliases || []).map(normalizeRoutePath);
-  if (currentPath === "/" || aliases.includes(currentPath)) {
-    return route.href;
+  if (route.id === "assets") {
+    return canonicalAssetsPath;
   }
 
-  return targetPath.startsWith("/") ? targetPath : currentPath;
+  return canonicalGeneralDashboardPath;
 }

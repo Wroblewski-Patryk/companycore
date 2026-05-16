@@ -11,9 +11,10 @@ synchronized with `.codex/context/TASK_BOARD.md`.
       Management read packet and board, unless deployment smoke is selected
       first. The owner-approved `00 Main -> 04 Operations -> 08 Assets`
       checkpoint is now complete through shared primitives, verified backend
-      packets, selected-area UI adoption, and CC-AUDIT-001 post-login
-      dashboard proof. CompanyCore remains the operating system; AI agents
-      remain external API/MCP clients.
+      packets, selected-area UI adoption, CC-AUDIT-001 post-login dashboard
+      proof, and WEB-CORE-001 active web cleanup. CompanyCore remains the
+      operating system; AI agents remain external API/MCP clients. Do not
+      restore old private workbench screens without a scoped task contract.
 
 ### NEXT
 
@@ -56,6 +57,14 @@ synchronized with `.codex/context/TASK_BOARD.md`.
       `docs/ux/evidence/cc-audit-001-04-operations.png`,
       `docs/ux/evidence/cc-audit-001-08-assets-desktop.png`, and
       `docs/ux/evidence/cc-audit-001-08-assets-mobile.png`.
+- [x] Web cleanup checkpoint completed for `WEB-CORE-001`: active React web
+      now contains only public home, owner auth, `00 General`, `04 Operations`,
+      and `08 Assets`. Old private paths such as settings, data,
+      relationships, tasks, pipeline, Company OS, and MCP tools now show an
+      archived-route notice rather than their former v0/v1 screens. Backend
+      APIs remain untouched for future rebuilds. Validation: `npm run
+      build:web`, `npm run build:server`, Playwright route proof, and
+      `git diff --check`.
 - [ ] Continue V1 department systems after the `00 -> 04 -> 08` loop has the
       next planning/runtime checkpoint. `03 Sales` read packet and board is
       complete locally; the broader sequence remains `05 Relationships`,

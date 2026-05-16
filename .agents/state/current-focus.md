@@ -29,9 +29,14 @@ priority sections and closed the main UX/architecture mismatch: successful
 auth and the `/dashboard` compatibility alias now open
 `/areas?area=00-ogolny&view=overview`, so `00 Ogolny` is the first company
 dashboard after login. `npm run build:web`, `npm run build:server`, rendered
-route proof, and `git diff --check` passed. The next active slice should
-continue V1 department systems with `05 Relationships` unless production
-deployment smoke is selected first.
+route proof, and `git diff --check` passed. `WEB-CORE-001` then narrowed the
+active web runtime to the owner-approved current surfaces only: public home,
+auth, `00 General`, `04 Operations`, and `08 Assets`. Old private web
+workbenches now render an archived-route notice instead of their former UI,
+while backend APIs remain available for future rebuilds. The next active slice
+should continue only through a scoped department-system contract, with `05
+Relationships` still the likely next department unless production deployment
+smoke is selected first.
 
 Current DMS focus: the first `00 Main` intake API/web panel, proposal-only
 route command, shared department shell, department subsystem registry, Finance
