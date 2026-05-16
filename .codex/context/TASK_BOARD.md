@@ -73,6 +73,74 @@
 
 ## Backlog
 
+- UOS-BE-001 Current Backend Capability Audit.
+  - Stage: analysis
+  - Owner: Product Docs + Backend Builder + AI Integration
+  - Priority: P1
+  - Source:
+    `docs/planning/unified-org-backend-implementation-program.md`
+  - Queue position: after current DMS/web active queue.
+  - Goal: map current Prisma schema, route modules, capability scopes, MCP
+    manifest entries, agent key profiles, department packets, tasks,
+    workflows, approvals, events, audit, resources, and knowledge to the
+    unified organizational operating-system target before any schema work.
+  - Acceptance: produce
+    `docs/planning/uos-backend-current-capability-audit.md` with supported,
+    partial, missing, blocked, read-model, schema, command, MCP, web, and
+    mobile implications.
+- UOS-BE-002 Organizational Contract Types.
+  - Stage: planning
+  - Owner: Product Docs + Backend Builder + Frontend Builder + AI Integration
+  - Priority: P1
+  - Source:
+    `docs/planning/unified-org-backend-implementation-program.md`
+  - Queue position: after `UOS-BE-001`.
+  - Goal: define stable backend DTO/domain vocabulary for actor,
+    workforceMember, humanProfile, agentProfile, rank, role, department,
+    supervisor, authorityContext, visibilityScope, workloadState, and
+    blockedAction so backend, web, future mobile, and MCP share one language.
+  - Acceptance: create `docs/planning/uos-organizational-contract-types.md`
+    without runtime code changes.
+- UOS-BE-010 Workforce Read Packet Without Migration.
+  - Stage: implementation
+  - Owner: Backend Builder + QA/Test + AI Integration
+  - Priority: P1
+  - Source:
+    `docs/planning/unified-org-backend-implementation-program.md`
+  - Queue position: after `UOS-BE-002`.
+  - Goal: expose read-only `GET /v1/workforce/context` by composing current
+    users, agents, company roles, service-key profile summaries, capabilities,
+    business functions, operating areas, events, and agent logs; add
+    `workforce:read` and MCP read exposure.
+  - Acceptance: API tests prove owner auth, service key auth, scoped denial,
+    workspace isolation, MCP manifest exposure, no mutation, and no secret
+    leakage.
+- UOS-BE-011 People/Agents Authority Packet For `06`.
+  - Stage: implementation
+  - Owner: Backend Builder + QA/Test + AI Integration
+  - Priority: P1
+  - Source:
+    `docs/planning/unified-org-backend-implementation-program.md`
+  - Queue position: after `UOS-BE-010`.
+  - Goal: expose read-only `GET /v1/people-agents/context` over workforce,
+    roles, agent profiles, service-key profile summaries, allowed tools,
+    escalation targets, permission risks, and blocked authority actions for
+    future `06 People/Agents And Roles`.
+  - Acceptance: read packet answers who exists, what role/authority they have,
+    what is missing, and what remains blocked; no hiring, agent creation,
+    key-minting, or permission edits.
+- UOS-BE-012 Workforce Schema Decision.
+  - Stage: planning
+  - Owner: Product Docs + Backend Builder + DB/Migrations + AI Integration
+  - Priority: P1
+  - Source:
+    `docs/planning/unified-org-backend-implementation-program.md`
+  - Queue position: after `UOS-BE-011`.
+  - Goal: decide whether to continue read-model-only, add
+    `workforce_members`/`human_profiles`/`agent_profiles`, or add a narrower
+    rank/supervisor layer after read packet evidence.
+  - Acceptance: create `docs/planning/uos-workforce-schema-decision.md` and
+    record the accepted migration direction before any schema change.
 - AOG-BE-002 Target metric relation.
   - Stage: planning
   - Owner: Backend Builder
@@ -124,6 +192,16 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- UOS-000 Unified Organizational OS backend program queue alignment.
+  - Evidence:
+    `docs/planning/unified-org-backend-implementation-program.md` defines the
+    backend-first execution waves and task contracts for turning the accepted
+    unified human/AI workforce and organizational world-state architecture
+    into implementation work. The program is queued after the current
+    DMS/web work and starts with `UOS-BE-001`, `UOS-BE-002`, `UOS-BE-010`,
+    `UOS-BE-011`, and `UOS-BE-012`, preserving the current active queue.
+  - Validation: source-of-truth queue update and `git diff --check`.
 
 - WEB-QA-001 Web language, message, and form foundation.
   - Evidence: active React web now has default-English i18n with Polish

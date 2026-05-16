@@ -46,21 +46,42 @@ Last updated: 2026-05-16
 
 ## NEXT
 
-1. Use the CompanyCore business module map during upcoming product intake.
+1. Unified Organizational OS backend program after current active work.
+   - Source:
+     `docs/planning/unified-org-backend-implementation-program.md`.
+   - Do not move it ahead of the current DMS/web queue unless the owner
+     explicitly switches focus.
+   - First execution sequence:
+     `UOS-BE-001 Current Backend Capability Audit`,
+     `UOS-BE-002 Organizational Contract Types`,
+     `UOS-BE-010 Workforce Read Packet Without Migration`,
+     `UOS-BE-011 People/Agents Authority Packet For 06`,
+     and `UOS-BE-012 Workforce Schema Decision`.
+   - Goal: make the backend expose one organizational world state for humans
+     and AI agents, then let web/mobile/MCP consume the same contracts without
+     duplicating HR, agent, task, permission, or department subsystems.
+2. Backend-first implementation rules for the UOS program.
+   - Start with audits, read packets, and DTO contracts before migrations.
+   - Add schema only after read packet evidence proves the exact need.
+   - Add frontend only where active `00`, `04`, or `08` routes need it to
+     consume a verified backend contract.
+   - Add MCP tools/resources only from the same API contracts, with capability
+     filtering, blocked actions, approval metadata, events, and audit.
+3. Use the CompanyCore business module map during upcoming product intake.
    - Source: `docs/architecture/companycore-business-module-map.md`.
    - Apply it before settings, Drive, ClickUp, CRM, pipeline, knowledge,
      resource, or agent work so each slice is classified as native core,
      provider-backed, future adapter, or derived view.
    - This is a planning guardrail, not a runtime task that displaces the next
      production proof.
-2. Use the CompanyCore global business flow during upcoming CRM, marketing,
+4. Use the CompanyCore global business flow during upcoming CRM, marketing,
    delivery, finance, support, feedback, graph, dashboard, or AI-agent intake.
    - Source: `docs/architecture/companycore-global-business-flow.md`.
    - Map the request to the 13-stage value pipeline before adding runtime
      surfaces.
    - Start with read models and visualization before adding write behavior,
      billing/payment commands, survey flows, or generic graph relations.
-3. Use the department management systems architecture before generating or
+5. Use the department management systems architecture before generating or
    implementing department views.
    - Source: `docs/architecture/department-management-systems-architecture.md`.
    - Detailed blueprint:
@@ -69,7 +90,7 @@ Last updated: 2026-05-16
    - Prompt pack: `docs/ux/v1-department-system-prompt-pack.md`.
    - Generate one department spec at a time, then implement one read-only
      department shell before adding writes.
-4. Review and apply the Department Management Systems V1 Blueprint.
+6. Review and apply the Department Management Systems V1 Blueprint.
    - Source:
      `docs/architecture/department-management-systems-v1-blueprint.md`.
    - It defines `00 Main` orchestration, the 12 operating department systems,
@@ -78,12 +99,12 @@ Last updated: 2026-05-16
    - Recommended order after user review: deepen `04 Operations`, then build
      read-only `01 Strategy`, `03 Sales`, `05 Relationships`, and
      `02 Product And Delivery` systems.
-5. Use the V1 Department Systems Global Implementation Plan.
+7. Use the V1 Department Systems Global Implementation Plan.
    - Source:
      `docs/planning/v1-department-systems-global-implementation-plan.md`.
    - Follow its waves and task IDs for web, backend, Paperclip, QA,
      production, and closeout work.
-6. Plan the minimum company control loop command layer.
+8. Plan the minimum company control loop command layer.
    - Source:
      `docs/architecture/department-management-systems-v1-blueprint.md`.
    - `00 Main` is the global intake for owner ideas, client requests,
@@ -93,50 +114,50 @@ Last updated: 2026-05-16
      implementation is the verified `00 Main` read-only panel. DMS-00-006 now
      implements proposal-only classification and routing; the next AI-facing
      proof is DMS-00-007.
-7. Implement pricing, discounts, current client work, and archived clients from
+9. Implement pricing, discounts, current client work, and archived clients from
    the completed inventory.
    - Source:
      `docs/planning/dms-money-pricing-discount-source-inventory.md`.
    - Use `DMS-07-001`, `DMS-03-005`, `DMS-03-006`, and `DMS-05-002` as the
      next scoped steps. Keep agents in analysis/proposal mode until pricing,
      invoice, payment, and discount write contracts are explicit.
-8. Production smoke for the locally verified V1 routes is complete.
+10. Production smoke for the locally verified V1 routes is complete.
    - Source:
      `docs/planning/v1-production-smoke-rollout-task-contract.md`.
    - Production now runs
      `5f1fc71e44d09cb1780d29b2579c85023205efb9`; authenticated smoke covered
      `/operations`, `/tasks-adapter`, AOG, settings, `/data`, `04 Operacje`,
      and `/react-company-os`.
-9. AOG-BE-002 through AOG-BE-006 backend graph follow-ups.
+11. AOG-BE-002 through AOG-BE-006 backend graph follow-ups.
    - After deployed AOG read proof is complete, plan and implement:
      `Target.metricId`,
      goal/workflow bridge, normalized workflow-task links, knowledge/source
      link contract, and read-only MCP exposure. Keep write relations
      command-shaped and avoid generic edge CRUD.
-10. AGRUN-010 Upstream Agent Source Merge Execution.
+12. AGRUN-010 Upstream Agent Source Merge Execution.
    - Blocked until upstream write access or an approved fork/PR route exists.
-11. Production push-to-running-image smoke after the next deploy.
+13. Production push-to-running-image smoke after the next deploy.
    - Build metadata restoration is implemented locally; after deploy, compare
      public `/health` `build.commit` with the pushed commit before claiming
      auto-deploy proof.
-12. Production AOG/settings smoke.
+14. Production AOG/settings smoke.
    - After the next deploy, compare public `/health` build metadata with the
      pushed commit.
    - Smoke `/v1/operating-graph/areas/01-strategia` and authenticated settings
      before raising production confidence.
-13. V1 operations route-depth slices.
+15. V1 operations route-depth slices.
    - Deepen one existing-contract workbench from the operations cockpit:
      compatibility alias cleanup, then one department-specific read model or
      safe command contract.
-14. Production smoke for locally verified V1 command surfaces.
+16. Production smoke for locally verified V1 command surfaces.
    - After the next deploy, compare public `/health` build metadata with the
      pushed commit.
    - Smoke `/v1/operating-graph/areas/01-strategia`, authenticated settings,
      authenticated `/operations`, and authenticated `/tasks-adapter`.
-15. V1AREA capability actions.
+17. V1AREA capability actions.
    - Add create/edit/filter actions only where an existing backend contract
      already supports the selected capability safely.
-16. Resume broader department sequencing after `WEB-QA-001` and the
+18. Resume broader department sequencing after `WEB-QA-001` and the
     `00 -> 04 -> 08`
     checkpoint.
    - `03 Sales` is locally verified. The broader next sequence remains

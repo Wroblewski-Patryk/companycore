@@ -29,6 +29,13 @@ Last updated: 2026-05-16
   resources, escalate issues, and operate through shared API/MCP boundaries.
   This is a documentation/source-of-truth update only; runtime schema and UI
   changes remain future scoped task contracts.
+  As a follow-up planning checkpoint,
+  `docs/planning/unified-org-backend-implementation-program.md` now queues the
+  backend-first execution program after the current DMS/web work. It starts
+  with audit and DTO contracts, then read-only workforce and People/Agents
+  packets, then a migration decision, so the backend can move toward the
+  unified organizational OS without disrupting the active web scope or adding
+  premature schema.
   The first loop checkpoint is complete: `CC-UI-001` documented shared
   component gaps and primitive contracts; `CC-00-001` documented route
   proposal lifecycle readback; `CC-04-001` audited Operations task model gaps;

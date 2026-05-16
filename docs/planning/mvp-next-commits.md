@@ -87,6 +87,15 @@ synchronized with `.codex/context/TASK_BOARD.md`.
       complete locally; the broader sequence remains `05 Relationships`,
       `02 Product And Delivery`, `09 Technology/AI`, and `10 Legal/Standards`,
       with writes behind explicit command contracts.
+- [ ] Unified Organizational OS backend program after current active work:
+      use `docs/planning/unified-org-backend-implementation-program.md` as the
+      execution map for turning the accepted unified human/AI workforce and
+      organizational world-state architecture into backend contracts. Do not
+      move it ahead of the current DMS/web queue unless the owner explicitly
+      switches focus. First sequence: `UOS-BE-001` current backend capability
+      audit, `UOS-BE-002` organizational contract types, `UOS-BE-010`
+      workforce read packet without migration, `UOS-BE-011` People/Agents
+      authority packet for `06`, and `UOS-BE-012` workforce schema decision.
 - [ ] Use the CompanyCore business module map during upcoming product intake:
       `docs/architecture/companycore-business-module-map.md` now classifies
       future work as native core, provider-backed, future adapter, or derived
