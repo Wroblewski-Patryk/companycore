@@ -7,11 +7,11 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NOW
 
-- [ ] Production smoke for V1OPS-004 after deployment:
-      compare public `/health` metadata with the pushed commit, then smoke
-      protected `GET /v1/operations/context` with owner credentials or an
-      `operations:read` key before claiming production readiness for the
-      completed V1OPS group.
+- [ ] Continue outside the completed V1OPS group with the next department
+      system slice:
+      preferred order is a read-only `01 Strategy` department packet, then a
+      guarded `04 Operations` planning/procedure command contract if the owner
+      wants operation writes next.
 
 ### NEXT
 
@@ -121,6 +121,18 @@ and `docs/operations/v1-function-coverage-ledger.csv`.
       PostgreSQL on `127.0.0.1:55495`, and `git diff --check`. Validation
       PostgreSQL and temporary artifacts were cleaned up. Task contract:
       `docs/planning/v1-operations-context-read-api-task-contract.md`.
+
+- [x] V1OPS-005 Production operations context smoke:
+      manual VPS rollover deployed commit
+      `9ff18820cb00bb2164904b947c2ef2a48e5d3b14`; production now runs
+      `backend-rnqqkhl3o3dut4qv56mlxly2-manual-9ff1882`, with
+      `backend-rnqqkhl3o3dut4qv56mlxly2-manual-5f1fc71` retained stopped as
+      rollback. Public web/API health returned the expected commit. Protected
+      `GET /v1/operations/context` returned `04-operacje`,
+      `operations-administration`, `summary.procedures=7`,
+      `agentPacket.mode=read_only`, and `blockedActions=4`. Temporary local
+      and VPS rollout artifacts were removed. Task contract:
+      `docs/planning/v1ops-production-operations-context-smoke-task-contract.md`.
 
 - [x] V1COS-001 Company OS area-aware foundation:
       `/react-company-os` now connects Company OS evidence and guarded

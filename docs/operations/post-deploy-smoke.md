@@ -2,6 +2,48 @@
 
 Use this file to record the minimum checks after each deploy.
 
+## Production V1OPS Operations Context Rollover
+
+- Timestamp: 2026-05-16
+- Environment: production VPS Docker backend
+- Commit: `9ff18820cb00bb2164904b947c2ef2a48e5d3b14`
+- Image:
+  `rnqqkhl3o3dut4qv56mlxly2_backend:9ff18820cb00bb2164904b947c2ef2a48e5d3b14`
+- Running container:
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-9ff1882`
+- Replaced container:
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-5f1fc71`, retained stopped as
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-5f1fc71-previous-9ff1882`.
+- Local/source checks:
+  - V1OPS-004 `npm run build:server`: passed.
+  - V1OPS-004 `npm run test:api`: passed against validation-owned PostgreSQL
+    on `127.0.0.1:55495`.
+  - V1OPS-004 `git diff --check`: passed.
+- Rollover checks:
+  - Docker image build from the pushed commit archive for `9ff1882` passed.
+  - Canary container returned local `/health` with the expected commit before
+    traffic rollover.
+  - Final routed container returned local `/health` with the expected commit.
+  - Production Postgres container stayed running.
+- Public smoke:
+  - `GET https://api.companycore.luckysparrow.ch/health` returned `status=ok`
+    with the expected build commit and image.
+  - `GET https://companycore.luckysparrow.ch/health` returned `status=ok`
+    with the same build commit and image.
+- Protected smoke:
+  - Owner login succeeded without recording token material.
+  - `GET /v1/operations/context` returned `200` with
+    `department.canonicalKey=04-operacje`,
+    `department.backendAreaKey=operations-administration`,
+    `summary.procedures=7`, `agentPacket.mode=read_only`, and
+    `blockedActions=4`.
+- Cleanup:
+  - Temporary local archive and rollout script were removed.
+  - Temporary VPS archive and rollout script were removed from `/tmp`.
+- Residual risks:
+  - No production smoke defect was found.
+  - Future operations writes remain gated by explicit command contracts.
+
 ## Production V1 Company OS Area Foundation Rollover
 
 - Timestamp: 2026-05-16

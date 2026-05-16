@@ -23,7 +23,7 @@
 ## In Progress
 
 - No active implementation task is currently in progress after the
-  V1OPS-004 Operations context read API proof.
+  V1OPS-005 production operations context smoke.
 
 ## Blocked
 
@@ -104,6 +104,23 @@
   auto-deploy webhook administration task.
 
 ## Done
+
+- V1OPS-005 Production Operations Context Smoke.
+  - Evidence:
+    Manual VPS rollover deployed commit
+    `9ff18820cb00bb2164904b947c2ef2a48e5d3b14`. Production now runs
+    `backend-rnqqkhl3o3dut4qv56mlxly2-manual-9ff1882`; previous backend
+    `backend-rnqqkhl3o3dut4qv56mlxly2-manual-5f1fc71` is retained stopped as
+    `backend-rnqqkhl3o3dut4qv56mlxly2-manual-5f1fc71-previous-9ff1882`.
+    Public web/API health returned the expected commit. Protected
+    `/v1/operations/context` returned `04-operacje`,
+    `operations-administration`, `summary.procedures=7`,
+    `agentPacket.mode=read_only`, and `blockedActions=4`.
+  - Validation:
+    canary local health, final local health, public web/API health, protected
+    owner-auth route smoke, and local/VPS rollout artifact cleanup.
+  - Task contract:
+    `docs/planning/v1ops-production-operations-context-smoke-task-contract.md`.
 
 - V1OPS-004 V1 Operations Context Read API.
   - Evidence:

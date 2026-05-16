@@ -150,6 +150,13 @@ continue from repository files alone:
   read actions, and blocked write actions. It is exposed through
   `operations:read` and MCP. `npm run test:api` passed on validation-owned
   PostgreSQL `127.0.0.1:55495`; production smoke remains pending after deploy.
+  As of V1OPS-005, that operations context is deployed and verified in
+  production at commit `9ff18820cb00bb2164904b947c2ef2a48e5d3b14`. Public
+  web/API health reported the expected commit and protected
+  `/v1/operations/context` returned `04-operacje`,
+  `operations-administration`, `summary.procedures=7`,
+  `agentPacket.mode=read_only`, and `blockedActions=4`. Previous backend
+  `5f1fc71` is retained stopped as rollback.
 - `docs/architecture/department-management-systems-v1-blueprint.md`:
   detailed V1 blueprint for `00 Main` plus the 12 operating department
   management systems. As of 2026-05-16, future department work should use this

@@ -127,8 +127,16 @@ Last updated: 2026-05-16
   read-oriented MCP key profiles. `npm run build:server`,
   `npm run test:api` against validation-owned PostgreSQL on
   `127.0.0.1:55495`, and `git diff --check` passed. The validation database
-  process and temporary files were removed after the run. Production smoke for
-  this new route remains the next release step after deployment.
+  process and temporary files were removed after the run. V1OPS-005 then
+  deployed the commit to production through the accepted manual VPS rollover
+  path. Production now runs
+  `9ff18820cb00bb2164904b947c2ef2a48e5d3b14` in
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-9ff1882`; previous backend
+  `backend-rnqqkhl3o3dut4qv56mlxly2-manual-5f1fc71` is retained stopped as
+  rollback. Public web/API health returned the expected commit, and protected
+  `/v1/operations/context` returned `04-operacje`,
+  `operations-administration`, `summary.procedures=7`,
+  `agentPacket.mode=read_only`, and `blockedActions=4`.
   As of 2026-05-16, DMS-00-003 implemented the first backend slice of
   `00 Main`: protected read-only `GET /v1/intake`. It aggregates existing
   agent events, provider inbox rows, unassigned Drive/provider resources,

@@ -4,12 +4,13 @@ Last updated: 2026-05-16
 
 ## NOW
 
-1. Run production smoke for V1OPS-004 after deployment.
+1. Continue outside the completed V1OPS group with the next department system
+   slice.
    - Source: `docs/planning/mvp-next-commits.md`.
-   - Compare public `/health` metadata with the pushed commit.
-   - Smoke protected `GET /v1/operations/context` with owner credentials or an
-     `operations:read` key.
-   - Mark V1OPS production readiness only after the deployed route is proven.
+   - Preferred order: a read-only `01 Strategy` department packet, then a
+     guarded `04 Operations` planning/procedure command contract if the owner
+     wants operation writes next.
+   - Keep writes behind explicit command contracts and API tests.
 
 ## NEXT
 

@@ -164,9 +164,8 @@ to MCP-capable agents through a new read capability.
 - How tested: `npm run build:server`, `npm run test:api` with
   `DATABASE_URL=postgresql://postgres@127.0.0.1:55495/postgres`, and
   `git diff --check`.
-- What is incomplete: production deployment/smoke for this new route remains
-  the next release step; no frontend consumption was added in this backend
-  slice.
+- What is incomplete: no frontend consumption was added in this backend slice;
+  production deployment/smoke is covered by V1OPS-005.
 - Next steps: deploy the pushed commit and smoke public health plus protected
   `/v1/operations/context`; then continue outside V1OPS with the next
   department-specific read model or safe command contract.
