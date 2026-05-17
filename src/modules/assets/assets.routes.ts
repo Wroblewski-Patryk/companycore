@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../../db/prisma";
+import { IntegrationError } from "../../integrations/errors";
+import { getGoogleDriveClientForWorkspace } from "../../integrations/google-drive/google-drive.auth";
 import { toJsonInput } from "../../integrations/integration-settings.service";
 import { asyncHandler } from "../../middleware/async-handler";
 import { isCanonicalDepartmentKey, resolveDepartmentEntry } from "../../operating-model/department-registry";
@@ -22,6 +24,8 @@ const updateFolderSchema = z.object({
   parentExternalId: z.string().trim().min(1).nullable().optional(),
   departmentKey: z.string().trim().min(1).nullable().optional()
 }).strict();
+
+const uuidSchema = z.string().uuid();
 
 type ReadinessLabel = "not_indexed" | "metadata_ready" | "content_ready" | "summary_ready" | "relation_ready" | "ai_context_ready";
 
@@ -530,6 +534,46 @@ assetsRouter.patch("/folders/:id", asyncHandler(async (req, res) => {
   return res.json({
     data: folderResponse(updatedFolder, shouldCascadeScope || movingToChild ? descendantIds.length : 1)
   });
+}));
+
+assetsRouter.get("/files/:id/preview", asyncHandler(async (req, res) => {
+  const workspaceId = req.auth!.workspaceId;
+  const fileId = uuidSchema.parse(req.params.id);
+  const file = await prisma.googleDriveFile.findFirst({
+    where: {
+      id: fileId,
+      workspaceId,
+      provider: "google_drive",
+      trashed: false
+    }
+  });
+
+  if (!file) {
+    return res.status(404).json({ error: "not_found" });
+  }
+
+  if (file.isFolder || !driveResourceType(file).startsWith("image")) {
+    return res.status(415).json({ error: "unsupported_media_type" });
+  }
+
+  try {
+    const client = await getGoogleDriveClientForWorkspace(workspaceId);
+    const media = await client.downloadFileMedia(file.externalId);
+    const contentType = media.contentType.startsWith("image/") ? media.contentType : file.mimeType;
+    if (!contentType.startsWith("image/")) {
+      return res.status(415).json({ error: "unsupported_media_type" });
+    }
+
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Cache-Control", "private, max-age=300");
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.send(media.bytes);
+  } catch (error) {
+    if (error instanceof IntegrationError) {
+      return res.status(error.status).json({ error: error.code });
+    }
+    throw error;
+  }
 }));
 
 assetsRouter.get("/context", asyncHandler(async (req, res) => {

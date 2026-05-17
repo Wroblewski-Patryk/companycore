@@ -47,6 +47,17 @@
 
 ## Recent Checkpoints
 
+- 2026-05-17: Assets authenticated Drive image previews implemented.
+  `08 Assets -> Files/Folders` now renders Google Drive image resources through
+  CompanyCore instead of relying on direct Drive image URLs. Added
+  `GET /v1/assets/files/:id/preview` under `assets:read`; it is
+  workspace-scoped, limited to image media, and streams Drive bytes through the
+  stored OAuth connection. The frontend fetches that preview with the owner
+  token and renders blob URLs in cards and the preview panel. Validation:
+  `npm run build:server`, `npm run build:web`, `npm run validate`, dummy-url
+  `npx prisma validate`, `git diff --check`, and Playwright static React proof
+  on port `3395` passed. Proof verified bearer auth on the preview request,
+  image blob render, no desktop overflow, and no console/page errors.
 - 2026-05-17: Operations and Assets smart filters implemented.
   `04 Operations -> Tasks` and `Calendar` now share a due-date filter for all
   dates, overdue, today, this week, and unscheduled tasks. `08 Assets -> Files

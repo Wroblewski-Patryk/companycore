@@ -147,6 +147,7 @@ export const adapterManifest = {
     ],
     assets: [
       { method: "GET", path: "/v1/assets/context", capability: "assets:read" },
+      { method: "GET", path: "/v1/assets/files/:id/preview", capability: "assets:read" },
       { method: "PATCH", path: "/v1/assets/folders/:id", capability: "assets:write" }
     ],
     strategy: [

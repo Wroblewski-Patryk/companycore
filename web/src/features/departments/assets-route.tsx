@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { api } from "../../api/client";
+import { ownerToken } from "../../api/auth-token";
 import { userErrorMessage } from "../../api/errors";
 import { CcButton } from "../../components/cc-button";
 import { CcField } from "../../components/cc-field";
@@ -38,6 +39,9 @@ function sourceLink(resource: AssetResource) {
 }
 
 function sourceContentLink(resource: AssetResource) {
+  if (resource.sourceModel === "GoogleDriveFile" && resource.sourceId && previewKind(resource) === "image") {
+    return `/v1/assets/files/${resource.sourceId}/preview`;
+  }
   return sourceRecord(resource)?.webContentLink || sourceRecord(resource)?.thumbnailLink || null;
 }
 
@@ -400,7 +404,16 @@ function AssetCard({
     <button className={`roost-file-card grid gap-2 rounded-company border p-3 text-left transition hover:border-primary hover:bg-primary/5 ${selected ? "is-selected border-primary/50 bg-primary/10" : "border-base-300"}`} onClick={onSelect} type="button">
       <div className="flex items-start gap-3">
         {thumbnail ? (
-          <img alt="" className="h-10 w-10 shrink-0 rounded-company border border-base-300 object-cover" src={thumbnail} />
+          <AuthenticatedImage
+            alt=""
+            className="h-10 w-10 shrink-0 rounded-company border border-base-300 object-cover"
+            fallback={(
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-company border border-base-300 bg-base-200/80">
+                <i className={`ph-bold ${resourceIcon(resource)} ${resourceIconTone(resource)}`} aria-hidden="true"></i>
+              </span>
+            )}
+            src={thumbnail}
+          />
         ) : (
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-company border border-base-300 bg-base-200/80">
             <i className={`ph-bold ${resourceIcon(resource)} ${resourceIconTone(resource)}`} aria-hidden="true"></i>
@@ -645,6 +658,78 @@ function CsvPreview({ rows }: { rows: string[][] }) {
   );
 }
 
+function AuthenticatedImage({
+  src,
+  alt,
+  className,
+  fallback
+}: {
+  src: string | null;
+  alt: string;
+  className: string;
+  fallback: React.ReactNode;
+}) {
+  const [imageSrc, setImageSrc] = useState<string | null>(src && !src.startsWith("/") ? src : null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    let objectUrl: string | null = null;
+    setFailed(false);
+
+    if (!src) {
+      setImageSrc(null);
+      return () => {
+        active = false;
+      };
+    }
+
+    if (!src.startsWith("/")) {
+      setImageSrc(src);
+      return () => {
+        active = false;
+      };
+    }
+
+    const headers = new Headers();
+    const token = ownerToken();
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+
+    fetch(src, { headers })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("image_preview_failed");
+        }
+        return response.blob();
+      })
+      .then((blob) => {
+        if (!active) return;
+        objectUrl = URL.createObjectURL(blob);
+        setImageSrc(objectUrl);
+      })
+      .catch(() => {
+        if (!active) return;
+        setFailed(true);
+        setImageSrc(null);
+      });
+
+    return () => {
+      active = false;
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [src]);
+
+  if (failed || !imageSrc) {
+    return <>{fallback}</>;
+  }
+
+  return <img alt={alt} className={className} onError={() => setFailed(true)} src={imageSrc} />;
+}
+
 function FileContentEditor({
   resource,
   onClose,
@@ -779,7 +864,20 @@ function FilePreviewPanel({
           <pre className="whitespace-pre-wrap break-words rounded-company bg-base-200/60 p-3 font-mono text-xs leading-6 text-company-ink">{text}</pre>
         ) : kind === "image" && imageUrl ? (
           <div className="grid h-full place-items-center">
-            <img alt={resource.name} className="max-h-full max-w-full rounded-company object-contain" src={imageUrl} />
+            <AuthenticatedImage
+              alt={resource.name}
+              className="max-h-full max-w-full rounded-company object-contain"
+              fallback={(
+                <div className="grid h-full min-h-64 place-items-center text-center">
+                  <div>
+                    <i className="ph-bold ph-image-broken text-4xl text-company-muted" aria-hidden="true"></i>
+                    <h3 className="mt-3 font-black text-company-ink">{t("assets.imagePreviewFailed")}</h3>
+                    <p className="mt-1 text-sm text-company-muted">{t("assets.imagePreviewFailed.detail")}</p>
+                  </div>
+                </div>
+              )}
+              src={imageUrl}
+            />
           </div>
         ) : kind === "pdf" && openUrl ? (
           <div className="grid h-full min-h-72 place-items-center text-center">

@@ -90,6 +90,10 @@ Last updated: 2026-05-17
       Tasks/Calendar now share due-date scope filtering, and Assets
       Files/Folders can filter by preview type including folders, Markdown,
       CSV, JSON, images, PDF, text, and unsupported files.
+    - `ASSETS-IMAGE-PREVIEW-004` is complete and verified locally: Drive image
+      files now render through a workspace-scoped authenticated CompanyCore
+      preview route and frontend blob rendering instead of fragile direct
+      Drive image URLs.
    - CompanyCore remains the company operating system; AI agents remain
      external API/MCP clients.
    - Keep writes behind explicit command contracts, audit/events, and API

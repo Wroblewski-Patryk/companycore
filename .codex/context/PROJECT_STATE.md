@@ -303,6 +303,17 @@ Last updated: 2026-05-17
   type filtering, desktop/mobile no horizontal overflow, and no console/page
   errors. Browser plugin proof was attempted first but timed out during the
   mocked-server validation path.
+  ASSETS-IMAGE-PREVIEW-004 then fixed the real Drive image preview path for
+  `08 Assets -> Files/Folders`: Google Drive image resources no longer depend
+  on direct public Drive URLs in `<img>`. CompanyCore exposes
+  `GET /v1/assets/files/:id/preview` under `assets:read`, verifies workspace
+  ownership, limits the stream to image media, downloads bytes through the
+  stored Google Drive OAuth client, and returns private cacheable image media.
+  The React Assets view fetches that route with the owner bearer token and
+  renders object URLs in file cards and the preview panel. `npm run
+  build:server`, `npm run build:web`, `npm run validate`, dummy-url
+  `npx prisma validate`, `git diff --check`, and Playwright proof on port
+  `3395` passed.
   OPS-SURFACE-001 then polished the Roost visual hierarchy of `04 Operations`
   after owner feedback that the content area felt too uniformly dark compared
   with the sidebar. `web/src/styles.css` now defines reusable Roost workbench
