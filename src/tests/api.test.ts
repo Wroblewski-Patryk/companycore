@@ -2092,6 +2092,8 @@ test("CompanyCore v1 protected API flow", async () => {
   };
   const assetsContext = await request("/v1/assets/context?areaKey=assets-storage&limit=50", { headers: authA });
   assert.equal(assetsContext.status, 200);
+  const assetsRefreshContext = await request("/v1/assets/context?areaKey=assets-storage&limit=50&refresh=1", { headers: authA });
+  assert.equal(assetsRefreshContext.status, 200);
   const assetsContextBody = assetsContext.body as {
     data: {
       department: { canonicalKey: string; backendAreaKey: string };

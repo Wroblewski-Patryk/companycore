@@ -12,6 +12,7 @@ const querySchema = z.object({
   type: z.string().min(1).optional(),
   readiness: z.enum(["not_indexed", "metadata_ready", "content_ready", "summary_ready", "relation_ready", "ai_context_ready"]).optional(),
   areaKey: z.string().min(1).optional(),
+  refresh: z.coerce.number().int().optional(),
   limit: z.coerce.number().int().min(1).max(200).default(DEFAULT_LIMIT)
 }).strict();
 

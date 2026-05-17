@@ -225,6 +225,13 @@
     save/refresh through `PATCH /v1/assets/folders/:id`, mobile files view,
     and no console/page errors. `npm run test:api` was attempted but blocked
     before test execution because local `DATABASE_URL` is not configured.
+  - Hotfix 2026-05-17:
+    Assets UI refresh now works with the strict backend query contract:
+    `/v1/assets/context` accepts the web cache-busting `refresh` query
+    parameter. This fixes the owner-visible `Something went wrong. Try again.`
+    failure on `08 Assets -> Dashboard` and `Files and folders` after the
+    folder-tree deploy. `npm run validate`, `npm run build:server`,
+    `npm run build:web`, and `git diff --check` passed.
 - OPS-SURFACE-001 Operations Roost work-surface polish.
   - Evidence:
     The Operations content area now uses dedicated Roost workbench layering
