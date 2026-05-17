@@ -54,11 +54,11 @@ function DepartmentSidebar({
             ].filter(Boolean).join(" ")}>
               {isEnabled ? (
                 <a
-                  className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] gap-3 rounded-l-company px-3 py-2.5 text-sm no-underline"
+                  className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-l-company px-3 py-2.5 text-sm no-underline"
                   href={area.href}
                   title={t("sidebar.openMain")}
                 >
-                  <i className={`ph-bold ${area.icon} mt-1`} aria-hidden="true"></i>
+                  <i className={`ph-bold ${area.icon}`} aria-hidden="true"></i>
                   <span className="min-w-0">
                     <strong className="block truncate">{label}</strong>
                     <small className={isActive ? "text-primary-content/75" : "text-neutral-content/55"}>{t(area.eyebrowKey)}</small>
@@ -67,10 +67,10 @@ function DepartmentSidebar({
               ) : (
                 <div
                   aria-disabled="true"
-                  className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] gap-3 rounded-company px-3 py-2.5 text-sm"
+                  className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-company px-3 py-2.5 text-sm"
                   title={t("sidebar.planned")}
                 >
-                  <i className={`ph-bold ${area.icon} mt-1`} aria-hidden="true"></i>
+                  <i className={`ph-bold ${area.icon}`} aria-hidden="true"></i>
                   <span className="min-w-0">
                     <strong className="block truncate">{label}</strong>
                     <small>{t(area.eyebrowKey)}</small>
