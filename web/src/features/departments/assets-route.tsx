@@ -67,7 +67,8 @@ function formatDate(value?: string | null) {
 }
 
 function departmentForResource(resource: AssetResource): CoreAreaKey | "unassigned" {
-  return backendAreaToDepartmentKey(resource.organization?.department)
+  return resource.organization?.departmentCanonical
+    || backendAreaToDepartmentKey(resource.organization?.department)
     || backendAreaToDepartmentKey(resource.relations?.operatingArea?.key)
     || "unassigned";
 }
@@ -388,7 +389,10 @@ function FolderEditModal({
 }) {
   const { t } = useLanguage();
   const currentParent = sourceParentExternalId(folder) || "";
-  const [parentExternalId, setParentExternalId] = useState(currentParent);
+  const knownParentIds = useMemo(() => new Set(allFolders.map(sourceExternalId).filter((id): id is string => Boolean(id))), [allFolders]);
+  const currentParentIsManaged = Boolean(currentParent && knownParentIds.has(currentParent));
+  const initialParentExternalId = currentParentIsManaged ? currentParent : "";
+  const [parentExternalId, setParentExternalId] = useState(initialParentExternalId);
   const [departmentKey, setDepartmentKey] = useState<CoreAreaKey | "unassigned">(departmentForResource(folder));
   const [saveState, setSaveState] = useState<"idle" | "saving" | "error">("idle");
   const [error, setError] = useState("");
@@ -405,11 +409,12 @@ function FolderEditModal({
     setError("");
 
     try {
+      const parentChanged = parentExternalId !== initialParentExternalId;
       await api(`/v1/assets/folders/${folderId}`, {
         method: "PATCH",
         body: JSON.stringify({
           name: String(form.get("name") || "").trim(),
-          parentExternalId: parentExternalId || null,
+          ...(parentChanged ? { parentExternalId: parentExternalId || null } : {}),
           ...(canAssignDepartment ? { departmentKey: departmentKey === "unassigned" ? null : departmentKey } : {})
         })
       });
@@ -456,7 +461,9 @@ function FolderEditModal({
                 return <option key={candidate.id} value={externalId}>{candidate.name}</option>;
               })}
           </select>
-          <span className="mt-1 text-xs text-company-muted">{t("assets.parentFolderHint")}</span>
+          <span className="mt-1 text-xs text-company-muted">
+            {currentParent && !currentParentIsManaged ? t("assets.externalParentHint") : t("assets.parentFolderHint")}
+          </span>
         </label>
 
         <label className="form-control">

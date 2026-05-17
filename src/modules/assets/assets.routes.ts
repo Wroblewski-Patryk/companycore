@@ -3,7 +3,7 @@ import { z } from "zod";
 import { prisma } from "../../db/prisma";
 import { toJsonInput } from "../../integrations/integration-settings.service";
 import { asyncHandler } from "../../middleware/async-handler";
-import { resolveDepartmentEntry } from "../../operating-model/department-registry";
+import { isCanonicalDepartmentKey, resolveDepartmentEntry } from "../../operating-model/department-registry";
 
 const ASSETS_DEPARTMENT_KEY = "08-zasoby";
 const DEFAULT_LIMIT = 100;
@@ -34,6 +34,21 @@ function textMetadata(value: unknown, key: string) {
   const record = metadataRecord(value);
   const nested = record[key];
   return typeof nested === "string" && nested.trim().length > 0 ? nested : null;
+}
+
+function canonicalDepartmentMetadata(value: unknown) {
+  const candidate = textMetadata(value, "companycoreDepartmentKey");
+  return candidate && isCanonicalDepartmentKey(candidate) ? candidate : null;
+}
+
+function withCanonicalDepartmentMetadata(value: unknown, departmentKey: string | null) {
+  const next = { ...metadataRecord(value) };
+  if (departmentKey) {
+    next.companycoreDepartmentKey = departmentKey;
+  } else {
+    delete next.companycoreDepartmentKey;
+  }
+  return next;
 }
 
 function driveResourceType(file: { isFolder: boolean; mimeType: string; name: string }) {
@@ -207,7 +222,7 @@ async function descendantExternalIds(workspaceId: string, rootExternalId: string
   return [...externalIds];
 }
 
-async function driveFolderScopeRoot(workspaceId: string, folder: { externalId: string; parentExternalId: string | null; operatingAreaId: string | null }) {
+async function driveFolderScopeRoot(workspaceId: string, folder: { externalId: string; parentExternalId: string | null; operatingAreaId: string | null; rawMetadata?: unknown }) {
   let current = folder;
   const visited = new Set<string>();
 
@@ -224,7 +239,8 @@ async function driveFolderScopeRoot(workspaceId: string, folder: { externalId: s
       select: {
         externalId: true,
         parentExternalId: true,
-        operatingAreaId: true
+        operatingAreaId: true,
+        rawMetadata: true
       }
     });
     if (!parent) {
@@ -234,6 +250,28 @@ async function driveFolderScopeRoot(workspaceId: string, folder: { externalId: s
   }
 
   return current;
+}
+
+async function managedParentFolder(workspaceId: string, parentExternalId: string | null) {
+  if (!parentExternalId) {
+    return null;
+  }
+
+  return prisma.googleDriveFile.findFirst({
+    where: {
+      workspaceId,
+      provider: "google_drive",
+      externalId: parentExternalId,
+      isFolder: true,
+      trashed: false
+    },
+    select: {
+      externalId: true,
+      parentExternalId: true,
+      operatingAreaId: true,
+      rawMetadata: true
+    }
+  });
 }
 
 async function updateRootScopeMapping(workspaceId: string, folderExternalId: string, operatingAreaId: string | null) {
@@ -293,6 +331,7 @@ function folderResponse(folder: {
   externalId: string;
   parentExternalId: string | null;
   operatingArea?: { id: string; key: string; name: string } | null;
+  rawMetadata?: unknown;
 }, updatedCount: number) {
   return {
     id: folder.id,
@@ -302,6 +341,7 @@ function folderResponse(folder: {
     department: folder.operatingArea ? {
       id: folder.operatingArea.id,
       key: folder.operatingArea.key,
+      canonicalKey: canonicalDepartmentMetadata(folder.rawMetadata),
       name: folder.operatingArea.name
     } : null,
     updatedCount
@@ -332,6 +372,7 @@ assetsRouter.patch("/folders/:id", asyncHandler(async (req, res) => {
   const descendantIds = await descendantExternalIds(workspaceId, folder.externalId);
   let nextParentExternalId = folder.parentExternalId;
   let inheritedAreaId = folder.operatingAreaId;
+  let inheritedCanonicalDepartmentKey = canonicalDepartmentMetadata(folder.rawMetadata);
   let movingToChild = false;
 
   if (input.parentExternalId !== undefined) {
@@ -341,37 +382,30 @@ assetsRouter.patch("/folders/:id", asyncHandler(async (req, res) => {
         return res.status(409).json({ error: "folder_parent_cycle" });
       }
 
-      const parent = await prisma.googleDriveFile.findFirst({
-        where: {
-          workspaceId,
-          provider: "google_drive",
-          externalId: input.parentExternalId,
-          isFolder: true,
-          trashed: false
-        },
-        select: {
-          externalId: true,
-          parentExternalId: true,
-          operatingAreaId: true
-        }
-      });
+      const parent = await managedParentFolder(workspaceId, input.parentExternalId);
       if (!parent) {
         return res.status(404).json({ error: "parent_folder_not_found" });
       }
 
       const scopeRoot = await driveFolderScopeRoot(workspaceId, parent);
       inheritedAreaId = scopeRoot.operatingAreaId ?? parent.operatingAreaId;
+      inheritedCanonicalDepartmentKey = canonicalDepartmentMetadata(scopeRoot.rawMetadata)
+        ?? canonicalDepartmentMetadata(parent.rawMetadata);
       movingToChild = true;
     }
   }
 
-  if (nextParentExternalId && input.departmentKey !== undefined) {
+  const nextManagedParent = await managedParentFolder(workspaceId, nextParentExternalId);
+  const hasManagedParent = Boolean(nextManagedParent);
+
+  if (nextParentExternalId && hasManagedParent && input.departmentKey !== undefined) {
     return res.status(409).json({ error: "department_assignment_requires_root_folder" });
   }
 
-  if (!nextParentExternalId && input.departmentKey !== undefined) {
+  if ((!nextParentExternalId || !hasManagedParent) && input.departmentKey !== undefined) {
     if (input.departmentKey === null) {
       inheritedAreaId = null;
+      inheritedCanonicalDepartmentKey = null;
     } else {
       const department = resolveDepartmentEntry(input.departmentKey);
       if (!department) {
@@ -391,6 +425,7 @@ assetsRouter.patch("/folders/:id", asyncHandler(async (req, res) => {
         return res.status(404).json({ error: "department_area_not_found" });
       }
       inheritedAreaId = area.id;
+      inheritedCanonicalDepartmentKey = department.canonicalKey;
     }
   }
 
@@ -400,26 +435,37 @@ assetsRouter.patch("/folders/:id", asyncHandler(async (req, res) => {
     },
     data: {
       ...(input.name !== undefined ? { name: input.name } : {}),
-      ...(input.parentExternalId !== undefined ? { parentExternalId: input.parentExternalId } : {})
+      ...(input.parentExternalId !== undefined ? { parentExternalId: input.parentExternalId } : {}),
+      ...(input.departmentKey !== undefined || input.parentExternalId !== undefined ? {
+        rawMetadata: toJsonInput(withCanonicalDepartmentMetadata(folder.rawMetadata, inheritedCanonicalDepartmentKey))
+      } : {})
     }
   });
 
-  const shouldCascadeScope = input.parentExternalId !== undefined || (!nextParentExternalId && input.departmentKey !== undefined);
+  const shouldCascadeScope = input.parentExternalId !== undefined || ((!nextParentExternalId || !hasManagedParent) && input.departmentKey !== undefined);
   if (shouldCascadeScope) {
-    await prisma.googleDriveFile.updateMany({
+    const descendants = await prisma.googleDriveFile.findMany({
       where: {
         workspaceId,
         provider: "google_drive",
         externalId: { in: descendantIds }
       },
-      data: {
-        operatingAreaId: inheritedAreaId
+      select: {
+        id: true,
+        rawMetadata: true
       }
     });
+    await prisma.$transaction(descendants.map((descendant) => prisma.googleDriveFile.update({
+      where: { id: descendant.id },
+      data: {
+        operatingAreaId: inheritedAreaId,
+        rawMetadata: toJsonInput(withCanonicalDepartmentMetadata(descendant.rawMetadata, inheritedCanonicalDepartmentKey))
+      }
+    })));
   }
 
   if (input.parentExternalId !== undefined || input.departmentKey !== undefined) {
-    await updateRootScopeMapping(workspaceId, folder.externalId, nextParentExternalId ? null : inheritedAreaId);
+    await updateRootScopeMapping(workspaceId, folder.externalId, nextParentExternalId && hasManagedParent ? null : inheritedAreaId);
   }
 
   const updatedFolder = await prisma.googleDriveFile.findFirstOrThrow({
@@ -532,6 +578,7 @@ assetsRouter.get("/context", asyncHandler(async (req, res) => {
       },
       organization: {
         department: file.operatingArea?.key ?? null,
+        departmentCanonical: canonicalDepartmentMetadata(file.rawMetadata),
         folder: file.operatingFolder?.name ?? null,
         table: file.operatingTable?.name ?? null,
         storageLocation: file.storageLocation?.name ?? null,
@@ -678,6 +725,7 @@ assetsRouter.get("/context", asyncHandler(async (req, res) => {
           name: file.name,
           parentExternalId: file.parentExternalId,
           department: file.operatingArea?.key ?? null,
+          departmentCanonical: canonicalDepartmentMetadata(file.rawMetadata),
           syncStatus: file.syncStatus,
           scanStatus: file.scanStatus,
           webViewLink: file.webViewLink

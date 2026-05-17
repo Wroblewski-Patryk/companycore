@@ -2216,6 +2216,72 @@ test("CompanyCore v1 protected API flow", async () => {
   });
   assert.equal(childDepartmentPatch.status, 409);
 
+  const existingRelationsArea = await prisma.operatingArea.findFirst({
+    where: { workspaceId: ownerA.workspace.id, key: "sales-crm" }
+  });
+  const relationsArea = existingRelationsArea ?? await prisma.operatingArea.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      key: "sales-crm",
+      name: "Sales CRM",
+      position: 3,
+      isSystem: true
+    }
+  });
+  const createdRelationsArea = !existingRelationsArea;
+  const orphanDriveFolder = await prisma.googleDriveFile.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      operatingAreaId: assetsContextArea.id,
+      provider: "google_drive",
+      externalId: "assets-context-orphan-folder",
+      parentExternalId: "drive-parent-outside-import",
+      name: "Client Relations Source",
+      mimeType: "application/vnd.google-apps.folder",
+      isFolder: true,
+      syncStatus: "synced",
+      scanStatus: "scanned"
+    }
+  });
+  const orphanDriveFile = await prisma.googleDriveFile.create({
+    data: {
+      workspaceId: ownerA.workspace.id,
+      operatingAreaId: assetsContextArea.id,
+      provider: "google_drive",
+      externalId: "assets-context-orphan-child-file",
+      parentExternalId: orphanDriveFolder.externalId,
+      name: "Client relation note.txt",
+      mimeType: "text/plain",
+      syncStatus: "synced",
+      scanStatus: "scanned"
+    }
+  });
+  const orphanFolderPatch = await request(`/v1/assets/folders/${orphanDriveFolder.id}`, {
+    method: "PATCH",
+    headers: authA,
+    body: JSON.stringify({ departmentKey: "05-relacje" })
+  });
+  assert.equal(orphanFolderPatch.status, 200);
+  assert.equal((orphanFolderPatch.body as { data: { department: null | { key: string; canonicalKey?: string } } }).data.department?.key, "sales-crm");
+  assert.equal((orphanFolderPatch.body as { data: { department: null | { canonicalKey?: string } } }).data.department?.canonicalKey, "05-relacje");
+  const orphanContext = await request("/v1/assets/context?areaKey=all&limit=200", { headers: authA });
+  assert.equal(orphanContext.status, 200);
+  const orphanContextBody = orphanContext.body as {
+    data: {
+      resources: Array<{ sourceId: string; organization?: { department?: string | null; departmentCanonical?: string | null } }>;
+    };
+  };
+  assert.ok(orphanContextBody.data.resources.some((item) => (
+    item.sourceId === orphanDriveFolder.id
+    && item.organization?.department === "sales-crm"
+    && item.organization?.departmentCanonical === "05-relacje"
+  )));
+  assert.ok(orphanContextBody.data.resources.some((item) => (
+    item.sourceId === orphanDriveFile.id
+    && item.organization?.department === "sales-crm"
+    && item.organization?.departmentCanonical === "05-relacje"
+  )));
+
   const cycleFolderPatch = await request(`/v1/assets/folders/${assetsRootFolder.id}`, {
     method: "PATCH",
     headers: authA,
@@ -2257,6 +2323,11 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.equal(childAfterRootPatch.operatingAreaId, assetsContextArea.id);
   assert.equal(nestedAfterRootPatch.operatingAreaId, assetsContextArea.id);
 
+  await prisma.googleDriveFile.delete({ where: { id: orphanDriveFile.id } });
+  await prisma.googleDriveFile.delete({ where: { id: orphanDriveFolder.id } });
+  if (createdRelationsArea) {
+    await prisma.operatingArea.delete({ where: { id: relationsArea.id } });
+  }
   await prisma.googleDriveFile.delete({ where: { id: foreignAssetsDriveFile.id } });
   if (createdForeignAssetsArea) {
     await prisma.operatingArea.delete({ where: { id: foreignAssetsArea.id } });

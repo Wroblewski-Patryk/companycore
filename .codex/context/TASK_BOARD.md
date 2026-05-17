@@ -57,6 +57,15 @@
   `/health` report the exact deployed commit. Production smoke after redeploy:
   owner login, `08 Assets -> dashboard`, `08 Assets -> files`, and
   `04 Operations -> tasks` loaded without the generic error.
+- 2026-05-17: Assets folder department edit fix implemented. Folder assignment
+  now preserves canonical department keys in Google Drive file metadata so
+  shared backend areas such as `sales-crm` can still distinguish `03 Sales`
+  from `05 Relationships`, and Drive folders whose parent is outside the
+  imported tree are treated as editable source roots in the web folder form.
+  Validation: `npm run build:server`, `npm run build:web`, `npm run validate`,
+  and `git diff --check` passed. `npm run test:api` remains blocked locally by
+  missing `DATABASE_URL`, but API regression coverage was added for the orphan
+  source-root assignment case.
 
 ## Blocked
 

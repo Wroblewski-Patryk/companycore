@@ -157,6 +157,7 @@ export type AssetResource = {
   webViewLink?: string | null;
   organization?: {
     department?: string | null;
+    departmentCanonical?: CoreAreaKey | null;
     folder?: string | null;
     table?: string | null;
     storageLocation?: string | null;
