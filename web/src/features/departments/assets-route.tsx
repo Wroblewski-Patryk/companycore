@@ -20,6 +20,18 @@ type AssetKindFilter = "all" | "folders" | "files";
 type AssetTypeFilter = "all" | "folder" | "markdown" | "csv" | "json" | "image" | "pdf" | "text" | "unsupported";
 type AssetSort = "name" | "modified" | "type" | "source";
 
+const assetTypeFilters: Array<{ id: AssetTypeFilter; icon: string }> = [
+  { id: "all", icon: "ph-squares-four" },
+  { id: "folder", icon: "ph-folder" },
+  { id: "markdown", icon: "ph-file-md" },
+  { id: "csv", icon: "ph-table" },
+  { id: "json", icon: "ph-brackets-curly" },
+  { id: "image", icon: "ph-image" },
+  { id: "pdf", icon: "ph-file-pdf" },
+  { id: "text", icon: "ph-file-text" },
+  { id: "unsupported", icon: "ph-dots-three-circle" }
+];
+
 function currentAssetsView(): AssetsView {
   return new URLSearchParams(window.location.search).get("view") === "files" ? "files" : "overview";
 }
@@ -149,6 +161,16 @@ function previewKind(resource: AssetResource) {
   if (type === "markdown" || contentKind === "markdown" || name.endsWith(".md") || name.endsWith(".markdown")) return "markdown";
   if (contentKind === "plain_text" || mimeType.startsWith("text/") || name.endsWith(".txt")) return "text";
   return "unsupported";
+}
+
+function assetTypeCounts(resources: AssetResource[]) {
+  const counts = new Map<AssetTypeFilter, number>();
+  assetTypeFilters.forEach((filter) => counts.set(filter.id, filter.id === "all" ? resources.length : 0));
+  resources.forEach((resource) => {
+    const kind = previewKind(resource) as AssetTypeFilter;
+    counts.set(kind, (counts.get(kind) || 0) + 1);
+  });
+  return counts;
 }
 
 function isEditableTextResource(resource: AssetResource) {
@@ -385,6 +407,44 @@ function RootFolderSelector({
   );
 }
 
+function AssetTypeFilterRail({
+  counts,
+  value,
+  onChange
+}: {
+  counts: Map<AssetTypeFilter, number>;
+  value: AssetTypeFilter;
+  onChange: (value: AssetTypeFilter) => void;
+}) {
+  const { t } = useLanguage();
+  return (
+    <div className="grid gap-1.5" aria-label={t("assets.typeQuickFilters")} role="group">
+      <span className="text-xs font-black uppercase text-company-muted">{t("assets.typeQuickFilters")}</span>
+      <div className="flex flex-wrap gap-1.5">
+        {assetTypeFilters.map((filter) => {
+          const count = counts.get(filter.id) || 0;
+          const active = value === filter.id;
+          if (filter.id !== "all" && count === 0 && !active) return null;
+          return (
+            <button
+              aria-pressed={active}
+              className={`btn btn-sm shrink-0 gap-1.5 ${active ? "btn-primary" : "btn-outline"}`}
+              data-asset-type-filter={filter.id}
+              key={filter.id}
+              onClick={() => onChange(filter.id)}
+              type="button"
+            >
+              <i className={`ph-bold ${filter.icon}`} aria-hidden="true"></i>
+              <span>{t(`assets.typeFilter.${filter.id}`)}</span>
+              <span className={`badge badge-sm ${active ? "border-primary-content/40 bg-primary-content/20 text-primary-content" : "badge-outline"}`}>{count}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function AssetCard({
   resource,
   folderByExternalId,
@@ -400,6 +460,8 @@ function AssetCard({
   const department = inheritedDepartment(resource, folderByExternalId);
   const summary = resourceSummary(resource).replace(/\s+/g, " ").trim();
   const thumbnail = previewKind(resource) === "image" ? sourceContentLink(resource) : null;
+  const pathParts = resourcePath(resource, folderByExternalId);
+  const parentPath = pathParts.slice(0, -1).join(" / ");
   return (
     <button className={`roost-file-card grid gap-2 rounded-company border p-3 text-left transition hover:border-primary hover:bg-primary/5 ${selected ? "is-selected border-primary/50 bg-primary/10" : "border-base-300"}`} onClick={onSelect} type="button">
       <div className="flex items-start gap-3">
@@ -425,6 +487,12 @@ function AssetCard({
         </span>
       </div>
       {summary ? <p className="line-clamp-2 text-xs leading-5 text-company-muted">{summary}</p> : null}
+      {parentPath ? (
+        <div className="flex min-w-0 items-center gap-1.5 text-xs text-company-muted" title={parentPath}>
+          <i className="ph-bold ph-tree-structure shrink-0" aria-hidden="true"></i>
+          <span className="truncate">{parentPath}</span>
+        </div>
+      ) : null}
       <div className="flex items-center justify-between gap-2 text-xs text-company-muted">
         <span className="truncate">{department === "unassigned" ? t("state.unassigned") : departmentLabel(department, t)}</span>
         <span className="shrink-0">{formatDate(resource.freshness?.modifiedTime)}</span>
@@ -464,7 +532,7 @@ function FolderTree({
     const selected = selectedResourceId === resource.id;
     return (
       <button className={`grid grid-cols-[auto_minmax(0,1fr)] items-center gap-2 rounded-company py-1.5 pr-2 text-left text-sm ${selected ? "bg-primary/10 text-company-ink" : "hover:bg-base-200/70"}`} key={resource.id} onClick={() => onSelectResource(resource)} style={{ paddingLeft: `${0.6 + depth * 0.75}rem` }} type="button">
-        <i className={`ph-bold ${resourceIcon(resource)} text-company-muted`} aria-hidden="true"></i>
+        <i className={`ph-bold ${resourceIcon(resource)} ${resourceIconTone(resource)}`} aria-hidden="true"></i>
         <span className="truncate">{resource.name}</span>
       </button>
     );
@@ -949,22 +1017,26 @@ function AssetsFilesView({ packet, onRefresh }: { packet: AssetsPacket; onRefres
     || Boolean(selectedFolderExternalId)
     || selectedRootIds.length !== rootIds.length;
 
-  const filteredResources = useMemo(() => {
+  const scopedResources = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     return resources.filter((resource) => {
       const rootExternalId = rootExternalIdForResource(resource, folderByExternalId);
       const rootMatch = roots.length === 0 || (rootExternalId ? selectedRootSet.has(rootExternalId) : selectedRootIds.length === 0);
       const kindMatch = kindFilter === "all" || (kindFilter === "folders" ? isFolder(resource) : !isFolder(resource));
-      const typeMatch = typeFilter === "all" || previewKind(resource) === typeFilter;
       const folderMatch = query.trim()
         ? true
         : !selectedFolderExternalId
           || sourceParentExternalId(resource) === selectedFolderExternalId
           || sourceExternalId(resource) === selectedFolderExternalId;
       const textMatch = !normalizedQuery || [resource.name, resourceType(resource), sourceProvider(resource), resourceSummary(resource)].join(" ").toLowerCase().includes(normalizedQuery);
-      return rootMatch && kindMatch && typeMatch && folderMatch && textMatch;
+      return rootMatch && kindMatch && folderMatch && textMatch;
     }).sort((left, right) => compareAssets(left, right, sort));
-  }, [resources, folderByExternalId, roots.length, selectedRootSet, selectedRootIds.length, kindFilter, typeFilter, query, selectedFolderExternalId, sort]);
+  }, [resources, folderByExternalId, roots.length, selectedRootSet, selectedRootIds.length, kindFilter, query, selectedFolderExternalId, sort]);
+
+  const typeCounts = useMemo(() => assetTypeCounts(scopedResources), [scopedResources]);
+  const filteredResources = useMemo(() => (
+    scopedResources.filter((resource) => typeFilter === "all" || previewKind(resource) === typeFilter)
+  ), [scopedResources, typeFilter]);
 
   const selectedResource = filteredResources.find((resource) => resource.id === selectedResourceId) || filteredResources[0] || null;
   const selectedFolder = selectedFolderExternalId ? folderByExternalId.get(selectedFolderExternalId) : null;
@@ -1018,7 +1090,13 @@ function AssetsFilesView({ packet, onRefresh }: { packet: AssetsPacket; onRefres
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h1 className="text-xl font-black text-company-ink">{selectedFolder ? selectedFolder.name : t("assets.filesFoldersTitle")}</h1>
-                <p className="text-sm text-company-muted">{t("assets.visibleItems", { count: filteredResources.length })}</p>
+                <p className="text-sm text-company-muted">{t("assets.visibleItemsDetailed", { visible: filteredResources.length, total: scopedResources.length })}</p>
+                {selectedFolder ? (
+                  <div className="mt-2 inline-flex max-w-full items-center gap-1.5 rounded-company border border-base-300 bg-base-200/45 px-2 py-1 text-xs text-company-muted">
+                    <i className="ph-bold ph-tree-structure shrink-0" aria-hidden="true"></i>
+                    <span className="truncate">{resourcePath(selectedFolder, folderByExternalId).join(" / ")}</span>
+                  </div>
+                ) : null}
               </div>
               <div className="join">
                 {(["all", "folders", "files"] as AssetKindFilter[]).map((kind) => (
@@ -1026,16 +1104,11 @@ function AssetsFilesView({ packet, onRefresh }: { packet: AssetsPacket; onRefres
                 ))}
               </div>
             </div>
-            <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_12rem_12rem]">
+            <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_12rem]">
               <label className="input input-bordered flex min-w-0 items-center gap-2">
                 <i className="ph-bold ph-magnifying-glass text-company-muted" aria-hidden="true"></i>
                 <input className="grow" onChange={(event) => setQuery(event.target.value)} placeholder={t("assets.searchPlaceholder")} type="search" value={query} />
               </label>
-              <select aria-label={t("assets.typeFilter.label")} className="select select-bordered" onChange={(event) => setTypeFilter(event.target.value as AssetTypeFilter)} value={typeFilter}>
-                {(["all", "folder", "markdown", "csv", "json", "image", "pdf", "text", "unsupported"] as AssetTypeFilter[]).map((type) => (
-                  <option key={type} value={type}>{t(`assets.typeFilter.${type}`)}</option>
-                ))}
-              </select>
               <select aria-label={t("assets.sort.label")} className="select select-bordered" onChange={(event) => setSort(event.target.value as AssetSort)} value={sort}>
                 <option value="name">{t("assets.sort.name")}</option>
                 <option value="modified">{t("assets.sort.modified")}</option>
@@ -1043,6 +1116,7 @@ function AssetsFilesView({ packet, onRefresh }: { packet: AssetsPacket; onRefres
                 <option value="source">{t("assets.sort.source")}</option>
               </select>
             </div>
+            <AssetTypeFilterRail counts={typeCounts} onChange={setTypeFilter} value={typeFilter} />
             {hasActiveAssetFilters ? (
               <div className="flex justify-end">
                 <CcButton iconLeft="ph-x-circle" onClick={clearAssetFilters} size="sm" variant="ghost">{t("assets.clearFilters")}</CcButton>

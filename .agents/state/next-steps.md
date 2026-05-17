@@ -227,6 +227,12 @@ Last updated: 2026-05-17
    - `03 Sales` is locally verified. The broader next sequence remains
      `05 Relationships`, `02 Product And Delivery`, `09 Technology/AI`, and
      `10 Legal/Standards`, unless the owner updates the focus again.
+19. Production smoke `08 Assets -> Files and folders` after the next deploy.
+   - Source:
+     `docs/planning/assets-files-folders-premium-audit-task-contract.md`.
+   - Verify real Drive folder density, type filters, image previews, Markdown
+     previews, and card path context in production before deeper file/folder
+     work.
 
 ## LATER
 

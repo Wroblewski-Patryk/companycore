@@ -1246,6 +1246,26 @@ of rediscovering them.
   verified preset/scope update behavior across desktop, tablet, and mobile
   with no overflow, console issues, or failed requests.
 
+### 2026-05-17 - Useful Filter Chips For Dense Workbenches
+- Type: reusable_pattern
+- Context: Dense workbenches can feel premium by helping users narrow real
+  records quickly, not by adding decorative counters or badges.
+- Decision: When a view has a small, meaningful taxonomy in the current data
+  set, expose it as compact action chips with icons and scoped counts. Hide
+  zero-count chips unless they are the active filter, and keep the current
+  result scope visible as `{visible} of {total}`. Preserve context on result
+  cards, such as folder path or parent list, when filtering can mix records
+  from multiple containers.
+- Reuse when: Files, folders, tasks, lists, clients, assets, or other
+  department records need quick narrowing by type/status/source and the options
+  are derived from the current packet.
+- Avoid when: The taxonomy has many values, requires search, or counts would
+  become decorative instead of actionable.
+- Evidence: ASSETS-FILES-PREMIUM-005 added scoped type chips, useful zero-count
+  hiding, visible scope copy, and card folder paths to `08 Assets -> Files and
+  folders`; Playwright fallback verified image and Markdown filter flows on
+  desktop and mobile without overflow or console/page errors.
+
 ### 2026-05-14 - V2 Visual Readiness Gate
 - Type: delivery_gate_pattern
 - Context: Company City and gamification are attractive V2 directions, but

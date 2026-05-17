@@ -180,7 +180,10 @@ continue from repository files alone:
   by adding an authenticated `assets:read` preview route and frontend blob
   renderer, so images no longer rely on direct public Drive URLs. Build,
   validate, schema validation, and mocked Playwright proof passed on
-  2026-05-17.
+  2026-05-17. ASSETS-FILES-PREMIUM-005 then polished the same workbench with
+  useful one-click type filters, visible scope counts, folder path context on
+  cards, and typed folder-tree icons. `npm run build:web`, `npm run validate`,
+  `git diff --check`, and Playwright fallback proof passed on 2026-05-17.
 - `docs/planning/web-foundation-quality-audit-2026-05-16.md` and
   `docs/planning/web-foundation-quality-audit-task-contract.md`: active web
   foundation quality audit. It reviewed `web/src/main.tsx`,

@@ -3632,6 +3632,15 @@ Last updated: 2026-05-17
   empty filters and Google Drive OAuth repair/refresh client persistence were
   fixed and covered by the API gate. Production graph smoke remains pending
   after deploy.
+- 2026-05-17: Completed ASSETS-FILES-PREMIUM-005 for `08 Assets -> Files and
+  folders`. The workbench now has useful type-filter chips with scoped counts
+  and hidden zero-count options, `{visible} of {total}` scope copy, folder path
+  context on resource cards, and typed icons in the folder tree. Validation
+  passed: `npm run build:web`, `npm run validate`, `git diff --check`, and
+  Playwright fallback rendered proof on temporary port `3396` with image and
+  Markdown filter interactions, authenticated image preview rendering,
+  desktop/mobile no horizontal overflow, and no console/page errors. Browser
+  plugin setup timed out, so Playwright fallback was used.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

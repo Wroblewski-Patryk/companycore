@@ -43,10 +43,19 @@
 ## In Progress
 
 - No active implementation task is currently in progress after the
-  OPS-MGMT-002 Operations management center deepening checkpoint.
+  ASSETS-FILES-PREMIUM-005 Assets files/folders premium workbench checkpoint.
 
 ## Recent Checkpoints
 
+- 2026-05-17: Assets Files/Folders premium workbench polish implemented.
+  `08 Assets -> Files and folders` now has useful type-filter chips with
+  scoped counts and hidden zero-count options, visible `{visible} of {total}`
+  scope copy, folder path context on resource cards, and typed icons in the
+  folder tree. Validation: `npm run build:web`, `npm run validate`,
+  `git diff --check`, and Playwright fallback rendered proof on temporary port
+  `3396` passed for image filtering, authenticated image preview rendering,
+  Markdown filtering/preview, desktop/mobile no overflow, and no console/page
+  errors. Browser plugin setup timed out, so Playwright fallback was used.
 - 2026-05-17: Assets authenticated Drive image previews implemented.
   `08 Assets -> Files/Folders` now renders Google Drive image resources through
   CompanyCore instead of relying on direct Drive image URLs. Added

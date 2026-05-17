@@ -206,6 +206,15 @@ Last updated: 2026-05-17
 
 ## Runtime Health
 
+- ASSETS-FILES-PREMIUM-005 local proof on 2026-05-17 passed
+  `npm run build:web`, `npm run validate`, `git diff --check`, and Playwright
+  fallback rendered proof on `http://127.0.0.1:3396`. The proof verified
+  `08 Assets -> Files and folders` image and Markdown type filters, useful
+  zero-count filter hiding, card folder-path context, authenticated image
+  preview rendering, desktop/mobile no horizontal overflow, and no
+  console/page errors. Browser plugin setup timed out, so Playwright fallback
+  was used; screenshots were saved outside the repo under the user temp
+  directory.
 - DMS-00-005 planning proof on 2026-05-16 passed source review and
   `git diff --check`. The first safe global intake write boundary is now
   documented as proposal-only `POST /v1/intake/actions/propose-route`; source
