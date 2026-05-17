@@ -14,6 +14,7 @@ import { departmentLabel } from "./department-labels";
 
 type OperationsView = "tasks" | "calendar";
 type CalendarMode = "day" | "week" | "month";
+type TaskPriorityFilter = "all" | string;
 
 const fallbackStatuses: OperationsStatusColumn[] = [
   { key: "todo", label: "To do" },
@@ -128,6 +129,23 @@ function taskBelongsToList(task: OperationsWorkItem, listId: string) {
   return task.hierarchy?.taskList?.id === listId;
 }
 
+function taskMatchesFilters(row: OperationsWorkItem, query: string, priorityFilter: TaskPriorityFilter) {
+  const normalizedQuery = query.trim().toLowerCase();
+  const priority = (row.task.priority || "normal").toLowerCase();
+  const priorityMatch = priorityFilter === "all" || priority === priorityFilter;
+  if (!priorityMatch) return false;
+  if (!normalizedQuery) return true;
+  return [
+    row.task.title,
+    row.task.description,
+    row.task.status,
+    row.task.priority,
+    row.task.source,
+    row.hierarchy?.taskList?.name,
+    row.hierarchy?.project?.name
+  ].filter(Boolean).join(" ").toLowerCase().includes(normalizedQuery);
+}
+
 function listDepartmentKey(list: OperationsTaskList) {
   return list.areaAssignment?.department?.key ?? null;
 }
@@ -204,6 +222,36 @@ function TaskCard({
       </div> : null}
       {!isMonth && !isCalendar ? <span className="truncate text-xs text-company-muted">{row.hierarchy?.project?.name || row.hierarchy?.taskList?.name || row.task.source || "native"}</span> : null}
     </button>
+  );
+}
+
+function OperationsTaskFilterBar({
+  query,
+  priorityFilter,
+  visibleCount,
+  onQueryChange,
+  onPriorityFilterChange
+}: {
+  query: string;
+  priorityFilter: TaskPriorityFilter;
+  visibleCount: number;
+  onQueryChange: (value: string) => void;
+  onPriorityFilterChange: (value: TaskPriorityFilter) => void;
+}) {
+  const { t } = useLanguage();
+  return (
+    <div className="roost-work-panel grid gap-2 rounded-company p-2.5 md:grid-cols-[minmax(0,1fr)_12rem_auto] md:items-center">
+      <label className="input input-bordered input-sm flex min-w-0 items-center gap-2 bg-base-200/40">
+        <i className="ph-bold ph-magnifying-glass text-company-muted" aria-hidden="true"></i>
+        <span className="sr-only">{t("operations.searchTasks")}</span>
+        <input className="grow" onChange={(event) => onQueryChange(event.target.value)} placeholder={t("operations.searchTasks")} type="search" value={query} />
+      </label>
+      <select aria-label={t("operations.priorityFilter")} className="select select-bordered select-sm" onChange={(event) => onPriorityFilterChange(event.target.value)} value={priorityFilter}>
+        <option value="all">{t("operations.allPriorities")}</option>
+        {priorityOptions.map((priority) => <option key={priority} value={priority}>{priority}</option>)}
+      </select>
+      <span className="justify-self-start whitespace-nowrap text-xs font-bold text-company-muted md:justify-self-end">{t("operations.matchingTasks", { count: visibleCount })}</span>
+    </div>
   );
 }
 
@@ -685,7 +733,11 @@ function OperationsBoard({
   setSelectedTask,
   onCreateTask,
   onRefresh,
-  onOpenWorkflowSettings
+  onOpenWorkflowSettings,
+  taskQuery,
+  priorityFilter,
+  onTaskQueryChange,
+  onPriorityFilterChange
 }: {
   rows: OperationsWorkItem[];
   statuses: OperationsStatusColumn[];
@@ -694,6 +746,10 @@ function OperationsBoard({
   onCreateTask: (defaultTaskListId?: string) => void;
   onRefresh: () => void;
   onOpenWorkflowSettings: () => void;
+  taskQuery: string;
+  priorityFilter: TaskPriorityFilter;
+  onTaskQueryChange: (value: string) => void;
+  onPriorityFilterChange: (value: TaskPriorityFilter) => void;
 }) {
   const { t } = useLanguage();
   const [draggedTaskId, setDraggedTaskId] = useState("");
@@ -747,8 +803,8 @@ function OperationsBoard({
   }
 
   return (
-    <div className="roost-work-surface grid h-full min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)] rounded-company p-3">
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+    <div className="roost-work-surface grid h-full min-h-0 min-w-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-3 rounded-company p-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
             <h2 className="truncate text-xl font-black text-company-ink">{selectedLabel}</h2>
             <p className="line-clamp-1 text-sm text-company-muted">{t("operations.boardDescription")}</p>
@@ -760,6 +816,13 @@ function OperationsBoard({
         </div>
 
         {moveError ? <CcNotice tone="error" title={moveError} live /> : null}
+        <OperationsTaskFilterBar
+          onPriorityFilterChange={onPriorityFilterChange}
+          onQueryChange={onTaskQueryChange}
+          priorityFilter={priorityFilter}
+          query={taskQuery}
+          visibleCount={visibleRows.length}
+        />
 
         {selectedListIds.length === 0 ? (
           <div className="roost-empty-state grid min-h-0 place-items-center rounded-company p-8 text-center">
@@ -886,15 +949,23 @@ function CalendarUnscheduledPanel({ rows, setSelectedTask }: { rows: OperationsW
 function OperationsCalendar({
   rows,
   selectedListIds,
+  taskQuery,
+  priorityFilter,
   setSelectedTask,
   onCreateTask,
-  onOpenWorkflowSettings
+  onOpenWorkflowSettings,
+  onTaskQueryChange,
+  onPriorityFilterChange
 }: {
   rows: OperationsWorkItem[];
   selectedListIds: string[];
+  taskQuery: string;
+  priorityFilter: TaskPriorityFilter;
   setSelectedTask: (task: OperationsWorkItem) => void;
   onCreateTask: () => void;
   onOpenWorkflowSettings: () => void;
+  onTaskQueryChange: (value: string) => void;
+  onPriorityFilterChange: (value: TaskPriorityFilter) => void;
 }) {
   const { t } = useLanguage();
   const [mode, setMode] = useState<CalendarMode>("week");
@@ -937,7 +1008,7 @@ function OperationsCalendar({
   }
 
   return (
-    <section className="roost-work-surface grid h-full min-h-0 grid-rows-[auto_auto_minmax(0,1fr)_auto] gap-4 rounded-company p-4">
+    <section className="roost-work-surface grid h-full min-h-0 grid-rows-[auto_auto_auto_minmax(0,1fr)_auto] gap-4 rounded-company p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-black text-company-ink">{t("operations.calendarTitle")}</h2>
@@ -991,6 +1062,14 @@ function OperationsCalendar({
           }} type="button">{t("operations.calendar.today")}</button>
         </div>
       </div>
+
+      <OperationsTaskFilterBar
+        onPriorityFilterChange={onPriorityFilterChange}
+        onQueryChange={onTaskQueryChange}
+        priorityFilter={priorityFilter}
+        query={taskQuery}
+        visibleCount={rows.length}
+      />
 
       {selectedListIds.length === 0 ? (
         <div className="roost-empty-state grid min-h-0 place-items-center rounded-company p-8 text-center">
@@ -1069,6 +1148,8 @@ export function OperationsRoute() {
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
   const [isCreateListOpen, setIsCreateListOpen] = useState(false);
   const [isWorkflowSettingsOpen, setIsWorkflowSettingsOpen] = useState(false);
+  const [taskQuery, setTaskQuery] = useState("");
+  const [priorityFilter, setPriorityFilter] = useState<TaskPriorityFilter>("all");
   const packet = useOwnerPacket<OperationsPacket>(`/v1/operations/work-items?limit=200&refresh=${refreshKey}`, true, t);
   const rows = useMemo(() => (packet.data?.workItems || []).map((item) => ({ ...item, id: item.task.id })), [packet.data?.workItems]);
   const taskLists = packet.data?.taskLists || [];
@@ -1076,7 +1157,8 @@ export function OperationsRoute() {
   const statuses = packet.data?.statuses?.length ? packet.data.statuses : fallbackStatuses;
   const selectableListIds = selectableTaskListIds(taskLists);
   const selectedSet = new Set(selectedListIds);
-  const filteredRows = rows.filter((row) => selectedSet.has(row.hierarchy?.taskList?.id || "unassigned"));
+  const taskFilteredRows = useMemo(() => rows.filter((row) => taskMatchesFilters(row, taskQuery, priorityFilter)), [rows, taskQuery, priorityFilter]);
+  const filteredRows = taskFilteredRows.filter((row) => selectedSet.has(row.hierarchy?.taskList?.id || "unassigned"));
 
   useEffect(() => {
     if (packet.status !== "ready") return;
@@ -1123,19 +1205,27 @@ export function OperationsRoute() {
             <OperationsCalendar
               rows={filteredRows}
               selectedListIds={selectedListIds}
+              taskQuery={taskQuery}
+              priorityFilter={priorityFilter}
               setSelectedTask={setSelectedTask}
               onCreateTask={() => openCreateTask(selectedListIds.length === 1 ? selectedListIds[0] : undefined)}
               onOpenWorkflowSettings={() => setIsWorkflowSettingsOpen(true)}
+              onTaskQueryChange={setTaskQuery}
+              onPriorityFilterChange={setPriorityFilter}
             />
           ) : (
             <OperationsBoard
-              rows={rows}
+              rows={taskFilteredRows}
               statuses={statuses}
               selectedListIds={selectedListIds}
               setSelectedTask={setSelectedTask}
               onCreateTask={openCreateTask}
               onRefresh={refresh}
               onOpenWorkflowSettings={() => setIsWorkflowSettingsOpen(true)}
+              taskQuery={taskQuery}
+              priorityFilter={priorityFilter}
+              onTaskQueryChange={setTaskQuery}
+              onPriorityFilterChange={setPriorityFilter}
             />
           )}
         </section>

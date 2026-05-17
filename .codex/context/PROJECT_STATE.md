@@ -277,6 +277,14 @@ Last updated: 2026-05-17
   search/no-match/empty states, Calendar unscheduled work, Assets Markdown,
   CSV, JSON, SVG image preview, desktop/mobile no horizontal overflow, and no
   console/page errors.
+  OPS-ASSETS-DENSE-003 then added dense-data controls over the same packets:
+  Tasks and Calendar share one Operations task filter bar for text search and
+  priority filtering, and Assets files/folders can sort visible cards by name,
+  modified date, type, or source. `npm run build:web`, `npm run validate`,
+  `git diff --check`, and Playwright static React proof on port `3387` passed
+  for Operations task search, priority filtering, Calendar task filtering,
+  Assets modified/type sorting, CSV/JSON previews, desktop/mobile no
+  horizontal overflow, and no console/page errors.
   OPS-SURFACE-001 then polished the Roost visual hierarchy of `04 Operations`
   after owner feedback that the content area felt too uniformly dark compared
   with the sidebar. `web/src/styles.css` now defines reusable Roost workbench

@@ -16,6 +16,7 @@ import { backendAreaToDepartmentKey, departmentLabel } from "./department-labels
 
 type AssetsView = "overview" | "files";
 type AssetKindFilter = "all" | "folders" | "files";
+type AssetSort = "name" | "modified" | "type" | "source";
 
 function currentAssetsView(): AssetsView {
   return new URLSearchParams(window.location.search).get("view") === "files" ? "files" : "overview";
@@ -112,6 +113,21 @@ function resourceKindLabel(resource: AssetResource, t: Translate) {
   if (kind === "pdf") return t("assets.preview.pdf");
   if (kind === "text") return t("assets.preview.text");
   return resourceType(resource);
+}
+
+function compareAssets(left: AssetResource, right: AssetResource, sort: AssetSort) {
+  if (sort === "modified") {
+    const leftTime = left.freshness?.modifiedTime ? new Date(left.freshness.modifiedTime).getTime() : 0;
+    const rightTime = right.freshness?.modifiedTime ? new Date(right.freshness.modifiedTime).getTime() : 0;
+    return rightTime - leftTime || left.name.localeCompare(right.name);
+  }
+  if (sort === "type") {
+    return resourceType(left).localeCompare(resourceType(right)) || left.name.localeCompare(right.name);
+  }
+  if (sort === "source") {
+    return sourceProvider(left).localeCompare(sourceProvider(right)) || left.name.localeCompare(right.name);
+  }
+  return left.name.localeCompare(right.name);
 }
 
 function previewKind(resource: AssetResource) {
@@ -807,6 +823,7 @@ function AssetsFilesView({ packet, onRefresh }: { packet: AssetsPacket; onRefres
   const rootIds = roots.map((root) => root.externalId);
   const [selectedRootIds, setSelectedRootIds] = useState<string[]>(rootIds);
   const [kindFilter, setKindFilter] = useState<AssetKindFilter>("all");
+  const [sort, setSort] = useState<AssetSort>("name");
   const [query, setQuery] = useState("");
   const [selectedFolderExternalId, setSelectedFolderExternalId] = useState<string | null>(null);
   const [selectedResourceId, setSelectedResourceId] = useState(resources[0]?.id || "");
@@ -839,8 +856,8 @@ function AssetsFilesView({ packet, onRefresh }: { packet: AssetsPacket; onRefres
           || sourceExternalId(resource) === selectedFolderExternalId;
       const textMatch = !normalizedQuery || [resource.name, resourceType(resource), sourceProvider(resource), resourceSummary(resource)].join(" ").toLowerCase().includes(normalizedQuery);
       return rootMatch && kindMatch && folderMatch && textMatch;
-    });
-  }, [resources, folderByExternalId, roots.length, selectedRootSet, selectedRootIds.length, kindFilter, query, selectedFolderExternalId]);
+    }).sort((left, right) => compareAssets(left, right, sort));
+  }, [resources, folderByExternalId, roots.length, selectedRootSet, selectedRootIds.length, kindFilter, query, selectedFolderExternalId, sort]);
 
   const selectedResource = filteredResources.find((resource) => resource.id === selectedResourceId) || filteredResources[0] || null;
   const selectedFolder = selectedFolderExternalId ? folderByExternalId.get(selectedFolderExternalId) : null;
@@ -893,10 +910,18 @@ function AssetsFilesView({ packet, onRefresh }: { packet: AssetsPacket; onRefres
                 ))}
               </div>
             </div>
-            <label className="input input-bordered flex items-center gap-2">
-              <i className="ph-bold ph-magnifying-glass text-company-muted" aria-hidden="true"></i>
-              <input className="grow" onChange={(event) => setQuery(event.target.value)} placeholder={t("assets.searchPlaceholder")} type="search" value={query} />
-            </label>
+            <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_12rem]">
+              <label className="input input-bordered flex min-w-0 items-center gap-2">
+                <i className="ph-bold ph-magnifying-glass text-company-muted" aria-hidden="true"></i>
+                <input className="grow" onChange={(event) => setQuery(event.target.value)} placeholder={t("assets.searchPlaceholder")} type="search" value={query} />
+              </label>
+              <select aria-label={t("assets.sort.label")} className="select select-bordered" onChange={(event) => setSort(event.target.value as AssetSort)} value={sort}>
+                <option value="name">{t("assets.sort.name")}</option>
+                <option value="modified">{t("assets.sort.modified")}</option>
+                <option value="type">{t("assets.sort.type")}</option>
+                <option value="source">{t("assets.sort.source")}</option>
+              </select>
+            </div>
           </div>
 
           <div className="overflow-y-auto xl:min-h-0">

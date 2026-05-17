@@ -169,8 +169,10 @@ continue from repository files alone:
   primary file actions. OPS-ASSETS-REFINE-002 then added shared selector
   search/no-match states, Calendar Workflow access and empty-selection parity,
   and Assets resource path/source/depth context beside file previews.
-  Build/validate and mocked desktop/mobile Playwright proof passed on
-  2026-05-17.
+  OPS-ASSETS-DENSE-003 then added shared task search/priority filtering across
+  Tasks and Calendar plus Assets file/folder card sorting by name, modified
+  date, type, or source. Build/validate and mocked desktop/mobile Playwright
+  proof passed on 2026-05-17.
 - `docs/planning/web-foundation-quality-audit-2026-05-16.md` and
   `docs/planning/web-foundation-quality-audit-task-contract.md`: active web
   foundation quality audit. It reviewed `web/src/main.tsx`,

@@ -47,6 +47,16 @@
 
 ## Recent Checkpoints
 
+- 2026-05-17: Operations and Assets dense-data controls implemented.
+  `04 Operations -> Tasks` and `Calendar` now share one task filter bar for
+  text search and priority filtering, so the same narrowed task set is visible
+  across board and calendar workflows. `08 Assets -> Files and folders` now
+  sorts visible resource cards by name, modified date, type, or source.
+  Validation: `npm run build:web`, `npm run validate`, `git diff --check`,
+  and Playwright static React proof on temporary port `3387` passed for
+  Operations task search, priority filtering, Calendar task filtering, Assets
+  modified/type sorting, CSV and JSON previews, no desktop/mobile overflow,
+  and no console/page errors.
 - 2026-05-17: Operations and Assets workbench refinement implemented.
   Shared `CcResourceSelector` now supports search and no-match states, so
   Operations lists and Assets root-folder filters scale better with dense real

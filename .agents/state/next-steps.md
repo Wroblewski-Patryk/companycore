@@ -80,6 +80,9 @@ Last updated: 2026-05-17
       Workflow access and empty-selection parity, and Assets previews show
       resource path/source/depth context. `npm run build:web`, `npm run
       validate`, `git diff --check`, and mocked Playwright proofs passed.
+    - `OPS-ASSETS-DENSE-003` is complete and verified locally: Tasks and
+      Calendar share one task text/priority filter, and Assets files/folders
+      can sort visible cards by name, modified date, type, or source.
    - CompanyCore remains the company operating system; AI agents remain
      external API/MCP clients.
    - Keep writes behind explicit command contracts, audit/events, and API
