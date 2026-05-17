@@ -128,18 +128,24 @@ function DueBadge({ dueDate, overdue }: { dueDate?: string | null; overdue?: boo
 function TaskCard({
   row,
   onOpen,
-  onDragStart
+  onDragStart,
+  onDragEnd,
+  isDragging
 }: {
   row: OperationsWorkItem;
   onOpen: () => void;
-  onDragStart?: () => void;
+  onDragStart?: (event: DragEvent<HTMLButtonElement>) => void;
+  onDragEnd?: () => void;
+  isDragging?: boolean;
 }) {
   return (
     <button
-      className={`grid gap-2 rounded-company border p-3 text-left shadow-sm transition hover:border-primary hover:bg-primary/5 hover:shadow-md ${statusTone(row.task.status)}`}
+      className={`grid gap-2 rounded-company border p-3 text-left shadow-sm transition hover:border-primary hover:bg-primary/5 hover:shadow-md ${isDragging ? "opacity-55 ring-2 ring-primary/25" : ""} ${statusTone(row.task.status)}`}
       draggable
+      data-task-card-id={row.id}
       onClick={onOpen}
       onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
       type="button"
     >
       <div className="flex items-start justify-between gap-2">
@@ -394,6 +400,7 @@ function OperationsBoard({
   const { t } = useLanguage();
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
   const [draggedTaskId, setDraggedTaskId] = useState("");
+  const [dragOverStatus, setDragOverStatus] = useState("");
   const [moveError, setMoveError] = useState("");
   const unassignedList = taskLists.find((list) => list.id === "unassigned");
   const realLists = taskLists.filter((list) => list.id !== "all" && list.id !== "unassigned" && rows.some((row) => taskBelongsToList(row, list.id)));
@@ -446,7 +453,11 @@ function OperationsBoard({
   async function moveTaskToStatus(status: string) {
     if (!draggedTaskId) return;
     const task = rows.find((row) => row.id === draggedTaskId);
-    if (!task || task.task.status === status) return;
+    if (!task || task.task.status === status) {
+      setDraggedTaskId("");
+      setDragOverStatus("");
+      return;
+    }
     setMoveError("");
     try {
       await api(`/v1/operations/work-items/${task.id}`, {
@@ -458,7 +469,20 @@ function OperationsBoard({
       setMoveError(userErrorMessage(error, t));
     } finally {
       setDraggedTaskId("");
+      setDragOverStatus("");
     }
+  }
+
+  function startTaskDrag(event: DragEvent<HTMLButtonElement>, taskId: string) {
+    setDraggedTaskId(taskId);
+    setDragOverStatus("");
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", taskId);
+  }
+
+  function clearTaskDrag() {
+    setDraggedTaskId("");
+    setDragOverStatus("");
   }
 
   function renderListButton(list: OperationsTaskList) {
@@ -530,17 +554,44 @@ function OperationsBoard({
         <div className="grid min-h-0 auto-cols-[minmax(15rem,1fr)] grid-flow-col gap-3 overflow-x-auto pb-3 xl:auto-cols-[minmax(16rem,1fr)]">
           {statuses.map((status) => {
             const columnRows = visibleRows.filter((row) => row.task.status === status.key);
+            const draggedTask = draggedTaskId ? visibleRows.find((row) => row.id === draggedTaskId) : null;
+            const isDropTarget = dragOverStatus === status.key && !!draggedTask && draggedTask.task.status !== status.key;
             return (
               <section
-                className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] rounded-company border border-base-300 bg-base-200/55 p-3"
+                className={`grid min-h-0 grid-rows-[auto_minmax(0,1fr)] rounded-company border p-3 transition ${isDropTarget ? "border-primary bg-primary/10 shadow-company-soft ring-2 ring-primary/20" : "border-base-300 bg-base-200/55"}`}
+                data-status-column={status.key}
                 key={status.key}
-                onDragOver={(event: DragEvent<HTMLElement>) => event.preventDefault()}
+                onDragEnter={() => setDragOverStatus(status.key)}
+                onDragOver={(event: DragEvent<HTMLElement>) => {
+                  event.preventDefault();
+                  event.dataTransfer.dropEffect = "move";
+                  if (dragOverStatus !== status.key) setDragOverStatus(status.key);
+                }}
+                onDragLeave={(event: DragEvent<HTMLElement>) => {
+                  if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
+                  setDragOverStatus((current) => current === status.key ? "" : current);
+                }}
                 onDrop={() => void moveTaskToStatus(status.key)}
               >
                 <h3 className="pb-3 text-sm font-black uppercase text-company-muted">{status.label}</h3>
                 <div className="grid content-start gap-2 overflow-y-auto pr-1">
+                  {isDropTarget ? (
+                    <div className="grid min-h-20 place-items-center rounded-company border border-dashed border-primary/70 bg-primary/10 px-3 text-center text-sm font-bold text-primary shadow-inner" data-drop-placeholder={status.key}>
+                      <span className="flex items-center gap-2">
+                        <i className="ph-bold ph-arrow-down" aria-hidden="true"></i>
+                        {t("operations.dropHere")}
+                      </span>
+                    </div>
+                  ) : null}
                   {columnRows.length ? columnRows.map((row) => (
-                    <TaskCard key={row.id} row={row} onOpen={() => setSelectedTask(row)} onDragStart={() => setDraggedTaskId(row.id)} />
+                    <TaskCard
+                      key={row.id}
+                      row={row}
+                      isDragging={draggedTaskId === row.id}
+                      onOpen={() => setSelectedTask(row)}
+                      onDragStart={(event) => startTaskDrag(event, row.id)}
+                      onDragEnd={clearTaskDrag}
+                    />
                   )) : (
                     <div className="grid min-h-24 place-items-center rounded-company border border-dashed border-base-300 bg-base-100/55 px-3 text-center text-sm text-company-muted">
                       {t("operations.emptyColumn")}

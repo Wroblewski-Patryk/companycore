@@ -193,6 +193,20 @@
 
 ## Done
 
+- OPS-DND-001 Operations drag-and-drop drop target feedback.
+  - Evidence:
+    `docs/planning/operations-dnd-drop-target-feedback-task-contract.md`
+    records the scoped interaction slice. `04 Operations -> Tasks` now dims
+    the dragged task card, highlights the hovered target status column, and
+    renders a localized `Drop here` placeholder before the owner releases the
+    card. The drop still uses the existing
+    `/v1/operations/work-items/:id` status update command.
+  - Validation: `npm run validate`; `git diff --check`; Playwright fallback on
+    a Vite mocked Operations packet verified hover placeholder/highlight,
+    `PATCH { "status": "done" }`, task movement into the target column, no
+    horizontal overflow, and no console/page errors. No
+    `chrome-headless-shell` validation process remained.
+
 - WEB-THEME-001 Brand theme foundation.
   - Evidence:
     `docs/planning/web-brand-theme-foundation-task-contract.md` records the
