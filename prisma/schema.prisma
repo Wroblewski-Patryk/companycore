@@ -28,6 +28,33 @@ enum AgentStatus {
   retired
 }
 
+enum WorkforceEntityType {
+  human
+  agent
+}
+
+enum WorkforceEntityStatus {
+  active
+  inactive
+  paused
+  archived
+}
+
+enum WorkforceRuntimeMode {
+  manual
+  semi_autonomous
+  autonomous
+}
+
+enum WorkforcePersonalityProfile {
+  analytical
+  creative
+  executive
+  supportive
+  researcher
+  custom
+}
+
 enum WorkspaceRole {
   owner
 }
@@ -211,6 +238,7 @@ model Workspace {
   notes                        Note[]
   decisions                    Decision[]
   agents                       Agent[]
+  workforceEntities            WorkforceEntity[]
   agentLogs                    AgentLog[]
   events                       Event[]
   processes                    Process[]
@@ -1607,6 +1635,44 @@ model Agent {
   updatedAt   DateTime    @updatedAt @map("updated_at")
 
   @@map("agents")
+}
+
+model WorkforceEntity {
+  id                         String                      @id @default(uuid()) @db.Uuid
+  workspaceId                String                      @map("workspace_id") @db.Uuid
+  workspace                  Workspace                   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  type                       WorkforceEntityType
+  status                     WorkforceEntityStatus       @default(active)
+  name                       String
+  slug                       String
+  description                String?
+  avatar                     String?
+  department                 String?
+  role                       String?
+  managerId                  String?                     @map("manager_id") @db.Uuid
+  manager                    WorkforceEntity?            @relation("WorkforceEntityManager", fields: [managerId], references: [id], onDelete: SetNull)
+  directReports              WorkforceEntity[]           @relation("WorkforceEntityManager")
+  personalityProfile         WorkforcePersonalityProfile @default(supportive) @map("personality_profile")
+  model                      String?
+  runtimeMode                WorkforceRuntimeMode        @default(manual) @map("runtime_mode")
+  paperclipAgentId           String?                     @map("paperclip_agent_id")
+  synchronizationEnabled     Boolean                     @default(false) @map("synchronization_enabled")
+  generatedFiles             Json                        @default("{}") @map("generated_files")
+  syncStatus                 String                      @default("not_synced") @map("sync_status")
+  syncLog                    Json                        @default("[]") @map("sync_log")
+  lastSyncedAt               DateTime?                   @map("last_synced_at")
+  source                     String                      @default("companycore")
+  externalId                 String?                     @map("external_id")
+  createdAt                  DateTime                    @default(now()) @map("created_at")
+  updatedAt                  DateTime                    @updatedAt @map("updated_at")
+
+  @@unique([workspaceId, slug])
+  @@unique([workspaceId, source, externalId])
+  @@index([workspaceId, type])
+  @@index([workspaceId, status])
+  @@index([workspaceId, department])
+  @@index([workspaceId, managerId])
+  @@map("workforce_entities")
 }
 
 model AgentLog {

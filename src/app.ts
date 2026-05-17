@@ -39,6 +39,7 @@ import { clickUpWebhooksRouter } from "./modules/webhooks/clickup-webhooks.route
 import { healthRouter } from "./health/health.routes";
 import { interactionsRouter } from "./modules/interactions/interactions.routes";
 import { workspacesRouter } from "./modules/workspaces/workspaces.routes";
+import { workforceRouter } from "./modules/workforce/workforce.routes";
 
 function mountProtectedRoutes(router: Router) {
   router.use("/projects", projectsRouter);
@@ -51,6 +52,7 @@ function mountProtectedRoutes(router: Router) {
   router.use("/operating-graph", operatingGraphRouter);
   router.use("/operating-model", operatingModelRouter);
   router.use("/operations", operationsRouter);
+  router.use("/workforce", workforceRouter);
   router.use("/relationships", relationshipsRouter);
   router.use("/sales", salesRouter);
   router.use("/strategy", strategyRouter);

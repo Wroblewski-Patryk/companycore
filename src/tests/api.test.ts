@@ -62,6 +62,7 @@ async function resetDatabase() {
   await prisma.operatingFolder.deleteMany();
   await prisma.operatingArea.deleteMany();
   await prisma.agentLog.deleteMany();
+  await prisma.workforceEntity.deleteMany();
   await prisma.decision.deleteMany();
   await prisma.note.deleteMany();
   await prisma.deal.deleteMany();
@@ -466,6 +467,46 @@ test("CompanyCore v1 protected API flow", async () => {
   const ownerB = await registerOwner("owner-b@example.com", "Workspace B");
   const authA = { Authorization: `Bearer ${ownerA.token}` };
   const authB = { Authorization: `Bearer ${ownerB.token}` };
+
+  const initialWorkforce = await request("/v1/workforce", { headers: authA });
+  assert.equal(initialWorkforce.status, 200);
+  assert.equal((initialWorkforce.body as { data: { summary: { humans: number } } }).data.summary.humans, 1);
+
+  const workforceAgent = await request("/v1/workforce", {
+    method: "POST",
+    headers: authA,
+    body: JSON.stringify({
+      type: "agent",
+      status: "active",
+      name: "Paperclip Operations Agent",
+      department: "06-kadry",
+      role: "Operations runtime worker",
+      personalityProfile: "analytical",
+      runtimeMode: "semi_autonomous",
+      model: "gpt-5.4",
+      paperclipAgentId: "paperclip-ops",
+      synchronizationEnabled: true
+    })
+  });
+  assert.equal(workforceAgent.status, 201);
+  const workforceAgentBody = workforceAgent.body as {
+    data: { id: string; generatedFiles: Record<string, string>; syncStatus: string };
+  };
+  assert.ok(workforceAgentBody.data.generatedFiles["agent.md"].includes("Paperclip Operations Agent"));
+  assert.equal(workforceAgentBody.data.syncStatus, "not_synced");
+
+  const workforceSync = await request(`/v1/workforce/${workforceAgentBody.data.id}/actions/sync`, {
+    method: "POST",
+    headers: authA
+  });
+  assert.equal(workforceSync.status, 200);
+  const workforceSyncBody = workforceSync.body as { data: { entity: { syncStatus: string }; outboxId: string } };
+  assert.equal(workforceSyncBody.data.entity.syncStatus, "queued");
+  assert.ok(workforceSyncBody.data.outboxId);
+
+  const workforceB = await request("/v1/workforce", { headers: authB });
+  assert.equal(workforceB.status, 200);
+  assert.equal((workforceB.body as { data: { summary: { agents: number } } }).data.summary.agents, 0);
 
   const unauthenticatedIntake = await request("/v1/intake");
   assert.equal(unauthenticatedIntake.status, 401);
@@ -8634,6 +8675,8 @@ test("CompanyCore v1 protected API flow", async () => {
   assert.ok(eventTypes.includes("interaction_created"));
   assert.ok(eventTypes.includes("decision_created"));
   assert.ok(eventTypes.includes("agent_created"));
+  assert.ok(eventTypes.includes("workforce_entity_created"));
+  assert.ok(eventTypes.includes("workforce_entity_sync_requested"));
   assert.ok(eventTypes.includes("task_synced_from_clickup"));
   assert.ok(eventTypes.includes("sync_succeeded"));
 });

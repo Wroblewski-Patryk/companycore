@@ -18,6 +18,7 @@ export type AppRouteGroup = {
 
 export const canonicalGeneralDashboardPath = "/areas?area=00-ogolny&view=overview";
 export const canonicalOperationsPath = "/areas?area=04-operacje&view=tasks";
+export const canonicalPeopleAgentsPath = "/areas?area=06-kadry&view=directory";
 export const canonicalAssetsPath = "/areas?area=08-zasoby&view=overview";
 
 export const publicHomeRoute: AppRouteMeta = {
@@ -76,6 +77,16 @@ export const appRouteGroups: AppRouteGroup[] = [
         aliases: ["/operations"],
         private: true,
         canonicalSource: "docs/planning/cc-04-002-operations-work-item-read-model-task-contract.md"
+      },
+      {
+        id: "people-agents",
+        href: canonicalPeopleAgentsPath,
+        label: "06 People / Agents",
+        title: "06 People / Agents",
+        icon: "ph-users-three",
+        aliases: ["/people-agents", "/workforce"],
+        private: true,
+        canonicalSource: "docs/architecture/unified-organizational-operating-system.md"
       },
       {
         id: "assets",
@@ -151,6 +162,9 @@ export function canonicalPostAuthPath(pathname?: string | null) {
       const view = params.get("view");
       return view === "calendar" ? "/areas?area=04-operacje&view=calendar" : canonicalOperationsPath;
     }
+    if (area === "06-kadry") {
+      return canonicalPeopleAgentsPath;
+    }
     if (area === "08-zasoby") {
       const view = params.get("view");
       return view === "files" ? "/areas?area=08-zasoby&view=files" : canonicalAssetsPath;
@@ -165,6 +179,10 @@ export function canonicalPostAuthPath(pathname?: string | null) {
 
   if (route.id === "operations") {
     return canonicalOperationsPath;
+  }
+
+  if (route.id === "people-agents") {
+    return canonicalPeopleAgentsPath;
   }
 
   if (route.id === "assets") {

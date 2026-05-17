@@ -20,6 +20,8 @@ export const capabilities = [
   "sales:read",
   "operations:read",
   "operations:write",
+  "workforce:read",
+  "workforce:write",
   "assets:read",
   "assets:write",
   "strategy:read",
@@ -144,6 +146,14 @@ export const adapterManifest = {
       { method: "GET", path: "/v1/operations/work-items", capability: "operations:read" },
       { method: "PATCH", path: "/v1/operations/task-lists/:id", capability: "operations:write" },
       { method: "PATCH", path: "/v1/operations/work-items/:id", capability: "operations:write" }
+    ],
+    workforce: [
+      { method: "GET", path: "/v1/workforce", capability: "workforce:read" },
+      { method: "GET", path: "/v1/workforce/:id", capability: "workforce:read" },
+      { method: "POST", path: "/v1/workforce", capability: "workforce:write" },
+      { method: "PATCH", path: "/v1/workforce/:id", capability: "workforce:write" },
+      { method: "DELETE", path: "/v1/workforce/:id", capability: "workforce:write" },
+      { method: "POST", path: "/v1/workforce/:id/actions/sync", capability: "workforce:write" }
     ],
     assets: [
       { method: "GET", path: "/v1/assets/context", capability: "assets:read" },

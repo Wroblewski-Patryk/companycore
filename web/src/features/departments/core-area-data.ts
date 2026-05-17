@@ -1,7 +1,8 @@
 import {
   canonicalAssetsPath,
   canonicalGeneralDashboardPath,
-  canonicalOperationsPath
+  canonicalOperationsPath,
+  canonicalPeopleAgentsPath
 } from "../../app-route-registry";
 import { CoreArea } from "../../types";
 
@@ -75,10 +76,15 @@ export const coreAreas: CoreArea[] = [
     key: "06-kadry",
     labelKey: "departments.06",
     eyebrowKey: "departments.06.eyebrow",
+    href: canonicalPeopleAgentsPath,
     descriptionKey: "departments.06.description",
     icon: "ph-users-three",
-    enabled: false,
-    views: [{ key: "overview", labelKey: "views.default.overview", icon: "ph-gauge", enabled: false }]
+    enabled: true,
+    views: [
+      { key: "directory", labelKey: "views.06.directory", href: canonicalPeopleAgentsPath, icon: "ph-users-three", enabled: true },
+      { key: "sync", labelKey: "views.06.sync", icon: "ph-arrows-clockwise", enabled: false },
+      { key: "competencies", labelKey: "views.06.competencies", icon: "ph-brain", enabled: false }
+    ]
   },
   {
     key: "07-finanse",
@@ -147,7 +153,6 @@ export const plannedDepartments = [
   "departments.02",
   "departments.03",
   "departments.05",
-  "departments.06",
   "departments.07",
   "departments.09",
   "departments.10",

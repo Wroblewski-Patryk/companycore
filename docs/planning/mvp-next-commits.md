@@ -28,6 +28,16 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 
 ### NEXT
 
+- [x] Runtime checkpoint completed for `DMS-06-WORKFORCE-001`:
+      `06 People & Agents` now has `workforce_entities`, `/v1/workforce`,
+      generated markdown resources, manual Paperclip sync queue, capability
+      manifest/profile updates, seed/register backfill, operating-model catalog
+      entries, and an active `/areas?area=06-kadry&view=directory` UI.
+      Validation: Prisma generate, local-url Prisma validate,
+      `npm run build:server`, `npm run build:web`, `npm run validate`,
+      `git diff --check`, and Playwright fallback desktop/mobile proof passed.
+      Full `npm run test:api` remains pending until PostgreSQL validation is
+      available.
 - [x] Planning checkpoint completed for the first `00 -> 04 -> 08` wave:
       `CC-UI-001`, `CC-00-001`, `CC-04-001`, and `CC-08-001` are documented
       and verified with `git diff --check`.

@@ -47,6 +47,31 @@
 
 ## Recent Checkpoints
 
+- 2026-05-17: Responsive shell and People/Agents link fix implemented.
+  `/people-agents` and `/workforce` now normalize to
+  `/areas?area=06-kadry&view=directory`, so the `06 People & Agents` view has
+  a simple direct entry point after redeploy. The shared authenticated shell
+  now keeps the desktop sidebar intact while adding a mobile/tablet department
+  drawer and a horizontal quick department strip for active modules. Validation:
+  `npm run build:web`, `npm run build:server`, `git diff --check`, and
+  Playwright fallback proof passed for desktop, tablet, and mobile
+  People/Agents plus mobile `00 General`; no horizontal overflow, console
+  errors, or failed requests were observed. Browser plugin setup timed out, so
+  Playwright fallback was used.
+- 2026-05-17: People & Agents workforce foundation implemented.
+  `06 Kadry -> People & Agents` is now active at
+  `/areas?area=06-kadry&view=directory`. Added workspace-scoped
+  `workforce_entities`, `/v1/workforce` CRUD/archive/manual-sync routes,
+  `workforce:read` and `workforce:write` capabilities, generated
+  `agent.md`/`personality.md`/`environment.md`, owner/seed backfill, operating
+  model catalog entries, and a React directory/detail/edit/sync/files view.
+  Manual sync currently queues a `paperclip_agent_config_sync_requested`
+  outbox event for the external Paperclip runtime. Validation: Prisma
+  generate, local-url Prisma validate, `npm run build:server`,
+  `npm run build:web`, `npm run validate`, `git diff --check`, and Playwright
+  fallback desktop/mobile proof passed. API regression coverage was added, but
+  full `npm run test:api` remains pending because local Docker/PostgreSQL
+  validation was unavailable.
 - 2026-05-17: Google Drive Assets coverage fix implemented.
   `08 Assets -> Files and folders` now requests a larger `limit=1000` packet,
   and `/v1/assets/context` reads Drive folders and non-folder files separately

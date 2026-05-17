@@ -109,12 +109,16 @@ User / WorkforceMember
   -> Agent profile
 ```
 
-The current `users` and `agents` tables are foundations, not competing systems.
-Future workforce work should add a shared member layer only through scoped
-contracts after read-model audits prove the exact need. The target shared
-attributes are type, department, role, rank, supervisor, visibility scope,
-active status, context access, and workload state. Human-specific employment
-and account metadata belongs in a human profile; AI-specific model/provider,
+The current `users` and `agents` tables remain foundations, not competing
+systems. As of 2026-05-17, `workforce_entities` is the first shared workforce
+layer for `06 People & Agents`. It stores the workspace-scoped roster for
+humans and AI agents, including type, lifecycle status, name/slug, description,
+avatar, department, role, manager link, personality profile, model,
+runtime mode, Paperclip runtime ID, sync opt-in state, generated markdown
+resources, and sync evidence. Human auth and existing agent registry behavior
+remain separate foundations; richer HR, skills, rank, capacity, ClickUp account
+mapping, and RBAC derivation require future scoped contracts. Human-specific
+employment/account metadata belongs in a human profile; AI-specific provider,
 MCP identity, connected systems, skills, tools, constraints, memory, and
 behavior metadata belongs in an agent profile.
 

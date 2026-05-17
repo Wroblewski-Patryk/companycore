@@ -237,6 +237,13 @@ export const operatingTables = [
     description: "Human, agent, and system roles with responsibilities, permissions, tools, and escalation"
   },
   {
+    areaKey: "people-roles",
+    tableName: "workforce_entities",
+    apiSlug: "workforce",
+    name: "Workforce entities",
+    description: "Unified human and AI-agent roster used as the CompanyCore source of truth for Paperclip runtime sync"
+  },
+  {
     areaKey: "sales-crm",
     tableName: "stakeholders",
     apiSlug: "stakeholders",

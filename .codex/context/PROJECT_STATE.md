@@ -56,6 +56,20 @@ Last updated: 2026-05-17
   and unscheduled tasks. `npm run build:web` passed; Playwright fallback on
   temporary mocked API port `3248` verified desktop board, modal, calendar, and
   mobile board rendering with no console/page errors.
+  On 2026-05-17, DMS-06-WORKFORCE-001 opened the first `06 People & Agents`
+  runtime slice. Prisma now includes `workforce_entities` as the unified
+  human/AI roster; `/v1/workforce` provides capability-gated CRUD/archive and
+  manual sync; saved entities regenerate `agent.md`, `personality.md`, and
+  `environment.md`; manual Paperclip sync queues a
+  `paperclip_agent_config_sync_requested` outbox event instead of writing
+  directly to the runtime. The active React route
+  `/areas?area=06-kadry&view=directory` renders the workforce directory,
+  filters, detail edit form, sync tab, and generated-file preview. Validation:
+  Prisma generate, Prisma validate with local validation URL,
+  `npm run build:server`, `npm run build:web`, `npm run validate`,
+  `git diff --check`, and Playwright fallback desktop/mobile proof passed.
+  Full `npm run test:api` remains pending because local Docker/PostgreSQL
+  validation was unavailable.
   As of 2026-05-16, the architectural direction is expanded in
   `docs/architecture/unified-organizational-operating-system.md`: CompanyCore
   is the unified organizational world state and operational source of truth,

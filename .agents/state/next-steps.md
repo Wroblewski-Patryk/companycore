@@ -4,6 +4,19 @@ Last updated: 2026-05-17
 
 ## NOW
 
+1. Deploy and smoke `DMS-06-WORKFORCE-001` when the next release window opens.
+   - Source:
+     `docs/planning/people-agents-workforce-v1-task-contract.md`.
+   - Local implementation is complete with partial database-test confidence:
+     `workforce_entities`, `/v1/workforce`, generated markdown resources,
+     capability manifest/profile updates, seed/register backfill, and
+     `/areas?area=06-kadry&view=directory`.
+   - Before declaring target verified, run migrations, rerun full
+     `npm run test:api` with a healthy PostgreSQL validation database, smoke
+     the real owner UI, and verify Paperclip consumes the queued
+     `paperclip_agent_config_sync_requested` event in a separate integration
+     task.
+
 1. Continue V1 department systems with `DMS-NEXT-004` Relationships Management
    read packet and board, unless deployment smoke is selected first.
    - Source:

@@ -72,6 +72,7 @@ const operatingTables = [
   ["operations-administration", "dependencies", "dependencies", "Dependencies"],
   ["operations-administration", "business_functions", "business-functions", "Business functions"],
   ["people-roles", "company_roles", "company-roles", "Company roles"],
+  ["people-roles", "workforce_entities", "workforce", "Workforce entities"],
   ["sales-crm", "stakeholders", "stakeholders", "Stakeholders"],
   ["assets-storage", "resources", "resources", "Resources"],
   ["assets-storage", "artifacts", "artifacts", "Artifacts"],
@@ -974,6 +975,153 @@ async function ensureCompanyOsFoundation(workspaceId: string) {
   }
 }
 
+function generatedWorkforceFiles(entity: {
+  name: string;
+  type: "human" | "agent";
+  role?: string | null;
+  department?: string | null;
+  personalityProfile: string;
+  runtimeMode: string;
+  model?: string | null;
+  paperclipAgentId?: string | null;
+}) {
+  return {
+    "agent.md": `# ${entity.name}
+
+## Identity
+- Type: ${entity.type}
+- Role: ${entity.role || "Unassigned"}
+- Department: ${entity.department || "06-kadry"}
+
+## Responsibilities
+Responsibilities are defined by CompanyCore tasks, roles, and governance.
+
+## Runtime
+- Runtime mode: ${entity.runtimeMode}
+- Model: ${entity.model || "not configured"}
+- Paperclip agent ID: ${entity.paperclipAgentId || "not linked"}
+`,
+    "personality.md": `# ${entity.name} Personality
+
+## Profile
+- Personality profile: ${entity.personalityProfile}
+
+## Communication Style
+Managed by CompanyCore.
+
+## Decision Style
+Follow CompanyCore authority, evidence, and approval guardrails.
+`,
+    "environment.md": `# ${entity.name} Environment
+
+CompanyCore/Roost is the organizational source of truth. Paperclip is the external runtime for synchronized agents.
+`
+  };
+}
+
+async function ensureWorkforceFoundation(workspaceId: string, owner: { id: string; email: string; name: string | null }) {
+  await prisma.workforceEntity.upsert({
+    where: {
+      workspaceId_source_externalId: {
+        workspaceId,
+        source: "user",
+        externalId: owner.id
+      }
+    },
+    update: {
+      name: owner.name || owner.email,
+      department: "06-kadry",
+      role: "Owner",
+      personalityProfile: "executive",
+      runtimeMode: "manual",
+      generatedFiles: generatedWorkforceFiles({
+        name: owner.name || owner.email,
+        type: "human",
+        role: "Owner",
+        department: "06-kadry",
+        personalityProfile: "executive",
+        runtimeMode: "manual"
+      })
+    },
+    create: {
+      workspaceId,
+      type: "human",
+      status: "active",
+      name: owner.name || owner.email,
+      slug: `owner-${owner.id.slice(0, 8)}`,
+      department: "06-kadry",
+      role: "Owner",
+      personalityProfile: "executive",
+      runtimeMode: "manual",
+      synchronizationEnabled: false,
+      generatedFiles: generatedWorkforceFiles({
+        name: owner.name || owner.email,
+        type: "human",
+        role: "Owner",
+        department: "06-kadry",
+        personalityProfile: "executive",
+        runtimeMode: "manual"
+      }),
+      source: "user",
+      externalId: owner.id
+    }
+  });
+
+  const agentRoles = companyRoleSeeds.filter((role) => role.type === "agent");
+  for (const role of agentRoles) {
+    const slug = role.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    await prisma.workforceEntity.upsert({
+      where: {
+        workspaceId_source_externalId: {
+          workspaceId,
+          source: "seed",
+          externalId: slug
+        }
+      },
+      update: {
+        name: role.name,
+        department: "06-kadry",
+        role: role.name,
+        description: role.responsibilities.join(", "),
+        generatedFiles: generatedWorkforceFiles({
+          name: role.name,
+          type: "agent",
+          role: role.name,
+          department: "06-kadry",
+          personalityProfile: "supportive",
+          runtimeMode: "semi_autonomous",
+          paperclipAgentId: slug
+        })
+      },
+      create: {
+        workspaceId,
+        type: "agent",
+        status: "active",
+        name: role.name,
+        slug,
+        description: role.responsibilities.join(", "),
+        department: "06-kadry",
+        role: role.name,
+        personalityProfile: role.name.includes("Documentation") ? "researcher" : role.name.includes("CEO") ? "executive" : "supportive",
+        runtimeMode: "semi_autonomous",
+        paperclipAgentId: slug,
+        synchronizationEnabled: true,
+        generatedFiles: generatedWorkforceFiles({
+          name: role.name,
+          type: "agent",
+          role: role.name,
+          department: "06-kadry",
+          personalityProfile: "supportive",
+          runtimeMode: "semi_autonomous",
+          paperclipAgentId: slug
+        }),
+        source: "seed",
+        externalId: slug
+      }
+    });
+  }
+}
+
 async function main() {
   const key = process.env.SEED_API_KEY ?? "dev-companycore-key";
   const ownerEmail = process.env.SEED_OWNER_EMAIL ?? "owner@example.com";
@@ -1022,6 +1170,7 @@ async function main() {
 
   await ensureSeedOperatingModel(workspace.id);
   await ensureCompanyOsFoundation(workspace.id);
+  await ensureWorkforceFoundation(workspace.id, owner);
 
   const keyHash = hashApiKey(key);
   const existingApiKey = await prisma.apiKey.findFirst({

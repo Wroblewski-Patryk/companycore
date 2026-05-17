@@ -1,6 +1,6 @@
 # Unified Organizational Operating System Architecture
 
-Last updated: 2026-05-16
+Last updated: 2026-05-17
 
 ## Purpose
 
@@ -31,7 +31,7 @@ The current implementation already contains important foundations:
 
 | Area | Current foundation | Direction |
 | --- | --- | --- |
-| Workforce identity | `users`, `agents`, service API keys, `company_roles` | converge toward one organizational actor/workforce abstraction while preserving human auth and agent profile details |
+| Workforce identity | `users`, `agents`, `workforce_entities`, service API keys, `company_roles` | use `workforce_entities` as the first shared human/AI roster while preserving human auth and agent profile/runtime details |
 | Departments | `operating_areas`, `business_functions`, 00-12 department registry | use departments as management-system lenses over shared CompanyCore records |
 | Roles and authority | `company_roles`, API scopes, capabilities, service-key profiles | evolve into rank, role, department, and project-context derived permissions |
 | Tasks | `tasks`, `task_lists`, ClickUp sync, Operations read packets | evolve from todo/status records into recursive delegated work items |
@@ -55,9 +55,12 @@ WorkforceMember
   -> Agent profile
 ```
 
-The current `User` and `Agent` tables remain valid foundations, but future
-schema work should introduce a unifying workforce/member layer only when a
-scoped task proves that read packets and role relations are no longer enough.
+The current `User` and `Agent` tables remain valid foundations. The first
+approved unifying layer is `workforce_entities`, introduced for
+`06 People & Agents` as a workspace-scoped roster and configuration source for
+humans and AI agents. It is intentionally not a full HR/ERP model: skills,
+competencies, rank, capacity, employment metadata, ClickUp assignee mapping,
+and derived RBAC remain future scoped contracts.
 
 Target shared properties:
 
@@ -73,6 +76,13 @@ Target shared properties:
 | `active_status` | active, paused, retired, archived, or similar lifecycle |
 | `context_access` | knowledge, resource, and operational context boundaries |
 | `workload_state` | availability, capacity, blockers, assigned workload |
+
+Current `workforce_entities` V1 attributes are narrower: `type`, `status`,
+`name`, `slug`, `description`, `avatar`, `department`, `role`, `manager_id`,
+`personality_profile`, `model`, `runtime_mode`, `paperclip_agent_id`,
+`synchronization_enabled`, generated markdown files, sync status, sync log, and
+timestamps. CompanyCore/Roost owns these values; Paperclip consumes them as a
+runtime target through explicit sync events.
 
 Human-specific profile data belongs in a human profile layer:
 

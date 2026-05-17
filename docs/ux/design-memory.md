@@ -34,6 +34,25 @@ of rediscovering them.
 
 ## Entries
 
+### 2026-05-17 - Responsive Department Shell
+- Type: responsive_rule
+- Context: The desktop sidebar worked well, but mobile and tablet users lost
+  practical department navigation because the sidebar disappeared below the
+  desktop breakpoint.
+- Decision: Keep the full desktop sidebar at large widths. On mobile and
+  tablet, expose the same department navigation through a header drawer and a
+  horizontal quick strip for active modules. Direct module aliases such as
+  `/people-agents` may normalize into canonical `/areas?...` routes when they
+  improve post-deploy access without creating duplicate screens.
+- Reuse when: Adding or reactivating future department systems in the shared
+  authenticated shell.
+- Avoid when: A route needs a task-specific wizard or modal navigation; keep
+  those inside the route body, not the global shell.
+- Evidence: WEB-SHELL-RESP-001 verified desktop People/Agents, tablet
+  People/Agents drawer, mobile People/Agents drawer and quick navigation, and
+  mobile `00 General` with no horizontal overflow, console errors, or failed
+  requests.
+
 ### 2026-05-17 - Root Resource Tree Selector
 - Type: reusable_management_pattern
 - Context: Assets files/folders needed a more usable information architecture

@@ -141,6 +141,14 @@ function routeDescription(route: ManifestRoute) {
     return "Update a CompanyCore Operations work item through the governed task element adapter instead of writing directly to the tasks table or provider database.";
   }
 
+  if (route.capability === "workforce:read") {
+    return "Read the 06 People and Agents source-of-truth context for humans, AI agents, roles, runtime modes, generated markdown files, and Paperclip synchronization state.";
+  }
+
+  if (route.capability === "workforce:write") {
+    return "Create or update CompanyCore workforce entities and request manual Paperclip runtime synchronization while preserving CompanyCore as the source of truth.";
+  }
+
   if (route.capability === "assets:read") {
     return "Read the 08 Assets and Resources context for files, folders, resources, knowledge, AI-readiness labels, relations, and blocked provider actions.";
   }

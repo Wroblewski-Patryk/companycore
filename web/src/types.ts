@@ -136,6 +136,46 @@ export type OperationsPacket = {
   };
 };
 
+export type WorkforceEntity = {
+  id: string;
+  type: "human" | "agent";
+  status: "active" | "inactive" | "paused" | "archived";
+  name: string;
+  slug: string;
+  description?: string | null;
+  avatar?: string | null;
+  department?: string | null;
+  role?: string | null;
+  managerId?: string | null;
+  manager?: { id: string; name: string; slug: string } | null;
+  personalityProfile: "analytical" | "creative" | "executive" | "supportive" | "researcher" | "custom";
+  model?: string | null;
+  runtimeMode: "manual" | "semi_autonomous" | "autonomous";
+  paperclipAgentId?: string | null;
+  synchronizationEnabled: boolean;
+  syncStatus?: string;
+  syncLog?: Array<{ at?: string; status?: string; message?: string; outboxId?: string }>;
+  generatedFiles?: Record<string, string>;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type WorkforcePacket = {
+  summary?: Record<string, unknown>;
+  entities?: WorkforceEntity[];
+  dictionaries?: {
+    types?: WorkforceEntity["type"][];
+    statuses?: WorkforceEntity["status"][];
+    runtimeModes?: WorkforceEntity["runtimeMode"][];
+    personalityProfiles?: WorkforceEntity["personalityProfile"][];
+  };
+  agentPacket?: {
+    mode?: string;
+    allowedActions?: string[];
+    blockedActions?: Array<string | { action?: string; reason?: string }>;
+  };
+};
+
 export type AssetResource = {
   id: string;
   sourceModel?: string;

@@ -105,7 +105,13 @@ continue from repository files alone:
   exposure. Future implementation must first audit and extend current
   `users`, `agents`, `company_roles`, `business_functions`, tasks, workflow,
   approval, event, audit, API, and MCP foundations before adding broad new
-  workforce or permission tables.
+  workforce or permission tables. As of 2026-05-17,
+  `DMS-06-WORKFORCE-001` adds the first scoped workforce table:
+  `workforce_entities`. It powers `/v1/workforce` and
+  `/areas?area=06-kadry&view=directory` as a unified human/AI roster with
+  generated `agent.md`, `personality.md`, and `environment.md` resources plus a
+  manual Paperclip sync outbox event. It does not replace `users`, human auth,
+  existing `agents`, service keys, or future RBAC/skills contracts.
 - `docs/architecture/autonomous-company-operating-system.md`: accepted
   explicit architecture boundary from 2026-05-16. CompanyCore is the company
   operating system, not an embedded AI system. Humans use responsive web UI;

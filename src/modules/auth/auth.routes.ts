@@ -7,6 +7,7 @@ import { hashPassword, verifyPassword } from "../../auth/password";
 import { createAuthToken } from "../../auth/token";
 import { asyncHandler } from "../../middleware/async-handler";
 import { ensureOperatingModelForWorkspace } from "../../operating-model/catalog";
+import { createWorkforceEntity } from "../workforce/workforce.service";
 
 const registerSchema = z.object({
   email: z.string().email().transform((value) => value.toLowerCase()),
@@ -59,6 +60,17 @@ authRouter.post("/register", asyncHandler(async (req, res) => {
     const token = createAuthToken({
       userId: result.user.id,
       workspaceId: result.workspace.id
+    });
+
+    await createWorkforceEntity(result.workspace.id, {
+      type: "human",
+      status: "active",
+      name: result.user.name || result.user.email,
+      department: "06-kadry",
+      role: "Owner",
+      personalityProfile: "executive",
+      runtimeMode: "manual",
+      synchronizationEnabled: false
     });
 
     res.status(201).json({
