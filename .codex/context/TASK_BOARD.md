@@ -206,6 +206,26 @@
 
 ## Done
 
+- ASSETS-FILES-001 Assets files and folders management view.
+  - Evidence:
+    `08 Assets -> Files and folders` is now an active web view backed by
+    `/v1/assets/context?areaKey=all&limit=200`. The view uses the shared
+    `CcResourceSelector` pattern for department filtering, keeps the Assets
+    dashboard as summary counters plus an entry action, removes the old Assets
+    dashboard table, and renders a file/folder explorer with folder rail,
+    search, all/folders/files switch, resource cards, AI-readiness badges,
+    department labels, source metadata, and an inspect/open detail panel.
+    Operations list filtering now reuses the same selector component instead
+    of carrying a local duplicate.
+  - Validation: `npm run validate`; `npm run build:web`; `npm run
+    build:server`; `git diff --check`; `npx prisma validate` with an explicit
+    temporary `DATABASE_URL`; Playwright fallback on temporary mocked API port
+    `3301` verified no table on Assets dashboard, files/folders route render,
+    shared selector checkbox, search filtering, folder filtering, desktop and
+    mobile rendering, no horizontal overflow, and no console/page errors.
+    `npm run test:api` was attempted but blocked before tests by missing
+    local `DATABASE_URL` for `prisma migrate deploy`.
+
 - OPS-RESOURCE-SELECTOR-001 Operations resource selector cleanup.
   - Evidence:
     `04 Operations -> Tasks` now treats the list picker header as a reusable

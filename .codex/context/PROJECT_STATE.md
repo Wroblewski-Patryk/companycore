@@ -214,6 +214,22 @@ Last updated: 2026-05-17
   action, and decoupled the selector from task-count logic so the pattern can
   be reused by future department resources. `npm run build:web`, `npm run
   validate`, and Playwright fallback on mocked API port `3297` passed.
+  ASSETS-FILES-001 then implemented the first useful `08 Assets -> Files and
+  folders` management view. The Assets dashboard now keeps summary counters
+  and an entry action instead of a generic table; the files view reads
+  `/v1/assets/context?areaKey=all&limit=200`, uses the shared resource
+  selector for department filtering, and renders folder navigation, search,
+  all/folders/files switching, source-backed resource cards, readiness badges,
+  department labels, and a detail/open panel. The Assets API now supports the
+  explicit read-only `areaKey=all` context and includes Drive
+  `parentExternalId` in resource source metadata. `npm run validate`,
+  `npm run build:web`, `npm run build:server`, `git diff --check`, and
+  `npx prisma validate` with a temporary `DATABASE_URL` passed. Playwright
+  fallback on mocked API port `3301` verified dashboard/table cleanup,
+  desktop/mobile files view rendering, search, folder filtering, no horizontal
+  overflow, and no console/page errors. `npm run test:api` was attempted but
+  blocked before test execution by missing local `DATABASE_URL` for Prisma
+  migrate deploy.
   As of 2026-05-16, DMS-OPS-001 added the first concrete Department Management
   System slice for `04 Operacje` on the selected-area route. It is a read-only
   Operations Management System board for planning, procedures, procedure

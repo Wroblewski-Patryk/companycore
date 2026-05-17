@@ -152,7 +152,8 @@ export function canonicalPostAuthPath(pathname?: string | null) {
       return view === "calendar" ? "/areas?area=04-operacje&view=calendar" : canonicalOperationsPath;
     }
     if (area === "08-zasoby") {
-      return canonicalAssetsPath;
+      const view = params.get("view");
+      return view === "files" ? "/areas?area=08-zasoby&view=files" : canonicalAssetsPath;
     }
     return canonicalGeneralDashboardPath;
   }

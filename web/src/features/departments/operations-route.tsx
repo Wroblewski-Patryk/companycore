@@ -4,11 +4,13 @@ import { userErrorMessage } from "../../api/errors";
 import { CcButton } from "../../components/cc-button";
 import { CcField } from "../../components/cc-field";
 import { CcNotice } from "../../components/cc-notice";
+import { CcResourceSelector, type CcResourceSelectorGroup } from "../../components/cc-resource-selector";
 import { CcTextInput } from "../../components/cc-text-input";
 import { Shell } from "../../layout/shell";
 import { useOwnerPacket } from "../../hooks/use-owner-packet";
-import { MessageKey, Translate, useLanguage } from "../../i18n/i18n";
+import { useLanguage } from "../../i18n/i18n";
 import { CoreAreaKey, OperationsDepartment, OperationsPacket, OperationsStatusColumn, OperationsTaskList, OperationsWorkItem } from "../../types";
+import { departmentLabel } from "./department-labels";
 
 type OperationsView = "tasks" | "calendar";
 type CalendarMode = "day" | "week" | "month";
@@ -100,18 +102,6 @@ function taskBelongsToList(task: OperationsWorkItem, listId: string) {
   if (listId === "all") return true;
   if (listId === "unassigned") return !task.hierarchy?.taskList?.id;
   return task.hierarchy?.taskList?.id === listId;
-}
-
-function departmentLabelKey(key: CoreAreaKey): MessageKey {
-  if (key === "00-ogolny") return "areas.00.label";
-  if (key === "04-operacje") return "areas.04.label";
-  if (key === "08-zasoby") return "areas.08.label";
-  const number = key.slice(0, 2);
-  return `departments.${number}` as MessageKey;
-}
-
-function departmentLabel(key: CoreAreaKey, t: Translate) {
-  return t(departmentLabelKey(key));
 }
 
 function listDepartmentKey(list: OperationsTaskList) {
@@ -610,112 +600,54 @@ function OperationsListSelector({
   onCreateList: () => void;
 }) {
   const { t } = useLanguage();
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
   const unassignedList = taskLists.find((list) => list.id === "unassigned");
   const realLists = selectableTaskLists(taskLists);
   const selectableListIds = selectableTaskListIds(taskLists);
-  const selectedSet = new Set(selectedListIds);
-  const allSelected = selectableListIds.length > 0 && selectableListIds.every((id) => selectedSet.has(id));
-  const groups = departments.map((department) => ({
+  const groups: CcResourceSelectorGroup[] = departments.map((department) => ({
     id: department.key,
-    name: departmentLabel(department.key, t),
-    lists: realLists.filter((list) => listDepartmentKey(list) === department.key)
-  })).filter((group) => group.lists.length > 0);
+    title: departmentLabel(department.key, t),
+    items: realLists.filter((list) => listDepartmentKey(list) === department.key).map((list) => ({
+      id: list.id,
+      title: list.name,
+      detail: list.areaAssignment?.department?.key ? departmentLabel(list.areaAssignment.department.key, t) : list.project?.name || list.source || t("state.native"),
+      actionLabel: t("operations.editList"),
+      actionIcon: "ph-gear-six",
+      onAction: () => setSelectedList(list)
+    }))
+  })).filter((group) => group.items.length > 0);
   const noDepartment = realLists.filter((list) => !listDepartmentKey(list));
 
-  useEffect(() => {
-    setOpenGroups((current) => {
-      const next = { ...current };
-      groups.forEach((group) => {
-        if (next[group.id] === undefined) next[group.id] = true;
-      });
-      if (next.unassigned === undefined) next.unassigned = true;
-      return next;
-    });
-  }, [groups.map((group) => group.id).join("|")]);
-
-  function toggleAllLists(checked: boolean) {
-    setSelectedListIds(checked ? selectableListIds : []);
-  }
-
-  function toggleList(listId: string, checked: boolean) {
-    const next = new Set(selectedSet);
-    if (checked) next.add(listId);
-    else next.delete(listId);
-    setSelectedListIds(Array.from(next));
-  }
-
-  function renderListButton(list: OperationsTaskList) {
-    const checked = selectedSet.has(list.id);
-    return (
-      <div className={`grid grid-cols-[2rem_minmax(0,1fr)_2rem] items-stretch rounded-company ${checked ? "bg-primary/10" : "hover:bg-base-200"}`} key={list.id}>
-        <label className="grid place-items-center">
-          <input className="checkbox checkbox-primary checkbox-xs" checked={checked} onChange={(event) => toggleList(list.id, event.target.checked)} type="checkbox" />
-        </label>
-        <button className="grid min-w-0 gap-0.5 px-1 py-2 text-left" onClick={() => toggleList(list.id, !checked)} type="button">
-          <strong className="truncate text-sm">{list.name}</strong>
-          <span className="truncate text-xs text-company-muted">{list.areaAssignment?.department?.key ? departmentLabel(list.areaAssignment.department.key, t) : list.project?.name || list.source || t("state.native")}</span>
-        </button>
-        <button className="text-company-muted hover:text-company-ink" aria-label={t("operations.editList")} onClick={() => setSelectedList(list)} type="button">
-          <i className="ph-bold ph-gear-six" aria-hidden="true"></i>
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <aside className="grid min-h-0 content-start gap-3 overflow-y-auto rounded-company border border-base-300 bg-base-100 p-3">
-      <div className="sticky top-0 z-10 grid gap-2 rounded-company border border-base-300 bg-base-100/95 p-2.5 shadow-sm backdrop-blur" data-list-select-all>
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-xs font-black uppercase text-company-muted">{t("operations.lists")}</span>
-          <CcButton ariaLabel={t("operations.newList")} iconLeft="ph-plus" onClick={onCreateList} size="xs" variant="primary">{t("operations.newList")}</CcButton>
-        </div>
-        <label className={`grid cursor-pointer grid-cols-[2rem_minmax(0,1fr)_auto] items-center rounded-company border py-1.5 pr-1.5 transition ${allSelected ? "border-primary/40 bg-primary/10" : "border-base-300 bg-base-200/70 hover:bg-base-200"}`}>
-          <span className="grid place-items-center">
-            <input className="checkbox checkbox-primary checkbox-xs" checked={allSelected} onChange={(event) => toggleAllLists(event.target.checked)} type="checkbox" />
-          </span>
-          <span className="min-w-0">
-            <strong className="block truncate text-sm text-company-ink">{t("operations.allTasks")}</strong>
-            <small className="block truncate text-xs text-company-muted">{t("operations.visibleResources", { count: selectableListIds.length })}</small>
-          </span>
-          <button
-            className="btn btn-ghost btn-xs"
-            disabled={selectedListIds.length === 0}
-            onClick={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              toggleAllLists(false);
-            }}
-            type="button"
-          >
-            {t("operations.clearLists")}
-          </button>
-        </label>
-      </div>
-
-      {groups.map((group) => (
-        <section className="grid gap-1" key={group.id}>
-          <button className="flex items-center justify-between rounded-company px-2 py-1 text-left text-xs font-black uppercase text-company-muted hover:bg-base-200" onClick={() => setOpenGroups((current) => ({ ...current, [group.id]: !current[group.id] }))} type="button">
-            {group.name}
-            <i className={`ph-bold ${openGroups[group.id] ? "ph-caret-up" : "ph-caret-down"}`} aria-hidden="true"></i>
-          </button>
-          {openGroups[group.id] ? <div className="grid gap-1">{group.lists.map(renderListButton)}</div> : null}
-        </section>
-      ))}
-
-      <section className="grid gap-1 border-t border-base-300 pt-2">
-        <button className="flex items-center justify-between rounded-company px-2 py-1 text-left text-xs font-black uppercase text-company-muted hover:bg-base-200" onClick={() => setOpenGroups((current) => ({ ...current, unassigned: !current.unassigned }))} type="button">
-          {t("operations.unassigned")}
-          <i className={`ph-bold ${openGroups.unassigned ? "ph-caret-up" : "ph-caret-down"}`} aria-hidden="true"></i>
-        </button>
-        {openGroups.unassigned ? (
-          <div className="grid gap-1">
-            {noDepartment.map(renderListButton)}
-            {unassignedList ? renderListButton(unassignedList) : null}
-          </div>
-        ) : null}
-      </section>
-    </aside>
+    <CcResourceSelector
+      allDetail={t("operations.visibleResources", { count: selectableListIds.length })}
+      allLabel={t("operations.allTasks")}
+      clearLabel={t("operations.clearLists")}
+      createLabel={t("operations.newList")}
+      groups={groups}
+      onCreate={onCreateList}
+      onSelectedIdsChange={setSelectedListIds}
+      selectedIds={selectedListIds}
+      title={t("operations.lists")}
+      ungroupedItems={[
+        ...noDepartment.map((list) => ({
+          id: list.id,
+          title: list.name,
+          detail: list.project?.name || list.source || t("state.native"),
+          actionLabel: t("operations.editList"),
+          actionIcon: "ph-gear-six",
+          onAction: () => setSelectedList(list)
+        })),
+        ...(unassignedList ? [{
+          id: unassignedList.id,
+          title: unassignedList.name,
+          detail: t("operations.unassigned"),
+          actionLabel: t("operations.editList"),
+          actionIcon: "ph-gear-six",
+          onAction: () => setSelectedList(unassignedList)
+        }] : [])
+      ]}
+      ungroupedTitle={t("operations.unassigned")}
+    />
   );
 }
 

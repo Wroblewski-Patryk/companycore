@@ -175,7 +175,8 @@ assetsRouter.get("/context", asyncHandler(async (req, res) => {
   const query = querySchema.parse(req.query);
   const department = resolveDepartmentEntry(ASSETS_DEPARTMENT_KEY);
   const areaKey = query.areaKey ?? department?.backendAreaKey ?? "assets-storage";
-  const assetsArea = await prisma.operatingArea.findFirst({
+  const allAreas = areaKey === "all";
+  const assetsArea = allAreas ? null : await prisma.operatingArea.findFirst({
     where: { workspaceId, key: areaKey }
   });
 
@@ -256,6 +257,7 @@ assetsRouter.get("/context", asyncHandler(async (req, res) => {
       source: {
         provider: file.provider,
         externalId: file.externalId,
+        parentExternalId: file.parentExternalId,
         webViewLink: file.webViewLink,
         mimeType: file.mimeType,
         isFolder: file.isFolder

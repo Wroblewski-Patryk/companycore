@@ -99,7 +99,7 @@ export const coreAreas: CoreArea[] = [
     enabled: true,
     views: [
       { key: "overview", labelKey: "views.08.overview", href: canonicalAssetsPath, icon: "ph-gauge", enabled: true },
-      { key: "files", labelKey: "views.08.files", icon: "ph-folders", enabled: false },
+      { key: "files", labelKey: "views.08.files", href: "/areas?area=08-zasoby&view=files", icon: "ph-folders", enabled: true },
       { key: "knowledge", labelKey: "views.08.knowledge", icon: "ph-book-open-text", enabled: false },
       { key: "graph", labelKey: "views.08.graph", icon: "ph-graph", enabled: false }
     ]

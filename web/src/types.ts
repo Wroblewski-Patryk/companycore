@@ -138,20 +138,82 @@ export type OperationsPacket = {
 
 export type AssetResource = {
   id: string;
+  sourceModel?: string;
+  sourceId?: string;
   name: string;
   type?: string;
+  resourceType?: string;
   status?: string;
   owner?: string | null;
   aiContextReady?: boolean;
-  source?: string;
-  webViewLink?: string;
+  source?: {
+    provider?: string | null;
+    externalId?: string | null;
+    parentExternalId?: string | null;
+    webViewLink?: string | null;
+    mimeType?: string | null;
+    isFolder?: boolean;
+  } | string | null;
+  webViewLink?: string | null;
+  organization?: {
+    department?: string | null;
+    folder?: string | null;
+    table?: string | null;
+    storageLocation?: string | null;
+    knowledgeRoot?: string | null;
+    visibility?: string | null;
+    status?: string | null;
+    tags?: string[];
+  };
+  aiCompatibility?: {
+    readiness?: string;
+    summary?: string | null;
+    extractedEntities?: unknown[];
+    aiContextReady?: boolean;
+    contentSnapshot?: {
+      id: string;
+      contentKind?: string;
+      scanStatus?: string;
+      hasExtractedText?: boolean;
+      hasSummary?: boolean;
+      createdAt?: string;
+    } | null;
+  };
+  relations?: {
+    tasks?: Array<{ id: string; title?: string; status?: string }>;
+    projects?: Array<{ id: string; name?: string; status?: string }>;
+    pipelines?: Array<{ id: string; name?: string; status?: string }>;
+    clients?: Array<{ id: string; name?: string; status?: string }>;
+    agents?: Array<{ id: string; name?: string; status?: string }>;
+    operatingArea?: { id: string; key: string; name: string } | null;
+    process?: { id: string; name: string; status?: string } | null;
+  };
+  artifacts?: Array<{ id: string; type?: string; name?: string; status?: string }>;
+  freshness?: {
+    modifiedTime?: string | null;
+    syncStatus?: string | null;
+    scanStatus?: string | null;
+    needsCleanup?: boolean;
+  };
 };
 
 export type AssetsPacket = {
+  department?: { canonicalKey?: string; backendAreaKey?: string; name?: string; purpose?: string };
   summary?: Record<string, unknown>;
+  folders?: Array<{
+    id: string;
+    name: string;
+    parentExternalId?: string | null;
+    department?: string | null;
+    syncStatus?: string | null;
+    scanStatus?: string | null;
+    webViewLink?: string | null;
+  }>;
+  knowledgeRoots?: Array<{ id: string; name: string; provider?: string | null }>;
+  knowledgeItems?: Array<{ id: string; title: string; itemType?: string; status?: string }>;
   resources?: AssetResource[];
-  blockedActions?: string[];
-  agentPacket?: { mode?: string; instructions?: string[] };
+  blockedActions?: Array<string | { action?: string; reason?: string }>;
+  agentPacket?: { mode?: string; instructions?: string[]; allowedActions?: string[]; blockedActions?: Array<string | { action?: string; reason?: string }> };
 };
 
 export type CoreAreaKey =
