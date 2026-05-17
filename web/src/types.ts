@@ -156,6 +156,40 @@ export type WorkforceEntity = {
   syncStatus?: string;
   syncLog?: Array<{ at?: string; status?: string; message?: string; outboxId?: string }>;
   generatedFiles?: Record<string, string>;
+  directReportCount?: number;
+  readiness?: {
+    score: number;
+    total: number;
+    status: string;
+    riskLevel: string;
+    missingFields: string[];
+    nextAction: string;
+    items: Array<{ key: string; label: string; done: boolean; detail: string }>;
+  };
+  authority?: {
+    mode: string;
+    riskLevel: string;
+    recommendedProfiles: Array<{ id: string; label: string; riskLevel: string; description: string; scopes: string[] }>;
+    visibleScopeSample: string[];
+    supportedCapabilities: string[];
+    blockedActions: Array<string | { action?: string; reason?: string }>;
+  };
+  work?: {
+    assignmentModel: string;
+    summary: { matched: number; active: number; blocked: number; overdue: number; taskLists: number };
+    evidence: Array<{
+      id: string;
+      title: string;
+      status: string;
+      priority?: string;
+      dueDate?: string | null;
+      updatedAt?: string;
+      project?: { id: string; name: string; status?: string } | null;
+      taskList?: { id: string; name: string; status?: string } | null;
+    }>;
+    taskLists: Array<{ id: string; name: string; status?: string; count: number }>;
+    gaps: Array<{ key: string; label: string; detail: string }>;
+  };
   createdAt?: string;
   updatedAt?: string;
 };
@@ -168,6 +202,7 @@ export type WorkforcePacket = {
     statuses?: WorkforceEntity["status"][];
     runtimeModes?: WorkforceEntity["runtimeMode"][];
     personalityProfiles?: WorkforceEntity["personalityProfile"][];
+    departments?: Array<{ key: string; backendAreaKey: string; position: number }>;
   };
   agentPacket?: {
     mode?: string;

@@ -12,9 +12,10 @@ import { WorkforceEntity, WorkforcePacket } from "../../types";
 
 type TypeFilter = "all" | WorkforceEntity["type"];
 type StatusFilter = "all" | WorkforceEntity["status"];
-type DetailTab = "profile" | "sync" | "files";
+type DetailTab = "profile" | "work" | "authority" | "files";
 type ScopeFilter = "all" | "humans" | "agents" | "attention";
-type SortKey = "name" | "department" | "updated" | "sync";
+type SortKey = "name" | "department" | "updated" | "work";
+type DensityMode = "comfortable" | "compact";
 type RouteNotice = { tone: "success" | "error"; title: string };
 
 const runtimeLabels: Record<WorkforceEntity["runtimeMode"], string> = {
@@ -39,30 +40,20 @@ function badgeTone(value?: string) {
   return "badge-outline";
 }
 
-function syncLabel(entity: WorkforceEntity) {
-  if (entity.type !== "agent") return "human record";
-  if (!entity.synchronizationEnabled) return "sync off";
-  return entity.syncStatus || "not_synced";
-}
-
 function typeLabel(type: WorkforceEntity["type"]) {
   return type === "human" ? "Human" : "Agent";
 }
 
-function isSyncBlocked(entity: WorkforceEntity) {
-  return entity.type === "agent" && (!entity.synchronizationEnabled || !entity.paperclipAgentId);
-}
-
 function needsAttention(entity: WorkforceEntity) {
-  return !entity.role
+  return entity.readiness?.status === "needs_attention" || !entity.role
     || !entity.description
-    || entity.status !== "active"
-    || isSyncBlocked(entity)
-    || entity.syncStatus === "failed"
-    || entity.syncStatus === "stale";
+    || entity.status !== "active";
 }
 
 function readinessItems(entity: WorkforceEntity) {
+  if (entity.readiness?.items?.length) {
+    return entity.readiness.items;
+  }
   return [
     {
       label: "Role assigned",
@@ -72,7 +63,7 @@ function readinessItems(entity: WorkforceEntity) {
     {
       label: "Responsibilities written",
       done: Boolean(entity.description?.trim()),
-      detail: entity.description ? "Description feeds generated markdown." : "Add responsibilities before sync."
+      detail: entity.description ? "Description feeds management context." : "Add responsibilities before assigning work."
     },
     {
       label: "Active status",
@@ -80,16 +71,18 @@ function readinessItems(entity: WorkforceEntity) {
       detail: entity.status === "active" ? "Available for work." : `Current status: ${entity.status}.`
     },
     {
-      label: "Runtime link",
-      done: entity.type === "human" || Boolean(entity.paperclipAgentId),
-      detail: entity.type === "human" ? "Human records do not need Paperclip." : entity.paperclipAgentId || "Link a Paperclip agent ID."
-    },
-    {
-      label: "Sync enabled",
-      done: entity.type === "human" || entity.synchronizationEnabled,
-      detail: entity.type === "human" ? "Human record only." : entity.synchronizationEnabled ? "Manual sync can be queued." : "Enable sync before runtime update."
+      label: "Authority boundary",
+      done: entity.type === "human" || entity.runtimeMode !== "autonomous",
+      detail: entity.type === "human" ? "Human workspace authority." : entity.runtimeMode === "autonomous" ? "Review autonomous authority." : "Supervised runtime mode."
     }
   ];
+}
+
+function blockedActionText(action: string | { action?: string; reason?: string }) {
+  return typeof action === "string" ? { action, reason: "" } : {
+    action: action.action || "blocked_action",
+    reason: action.reason || ""
+  };
 }
 
 function EntityAvatar({ entity }: { entity: WorkforceEntity }) {
@@ -116,7 +109,6 @@ function entityMatches(entity: WorkforceEntity, query: string, type: TypeFilter,
     entity.slug,
     entity.role,
     entity.department,
-    entity.paperclipAgentId,
     entity.model
   ].filter(Boolean).join(" ").toLowerCase().includes(normalized);
 }
@@ -129,8 +121,8 @@ function sortEntities(entities: WorkforceEntity[], sort: SortKey) {
     if (sort === "department") {
       return `${a.department || ""} ${a.name}`.localeCompare(`${b.department || ""} ${b.name}`);
     }
-    if (sort === "sync") {
-      return syncLabel(a).localeCompare(syncLabel(b)) || a.name.localeCompare(b.name);
+    if (sort === "work") {
+      return (b.work?.summary.active ?? 0) - (a.work?.summary.active ?? 0) || a.name.localeCompare(b.name);
     }
     return a.name.localeCompare(b.name);
   });
@@ -145,18 +137,20 @@ function defaultEntity(): Partial<WorkforceEntity> {
     role: "",
     personalityProfile: "supportive",
     runtimeMode: "semi_autonomous",
-    synchronizationEnabled: true
+    synchronizationEnabled: false
   };
 }
 
 function WorkforceForm({
   entity,
   managers,
+  dictionaries,
   onClose,
   onSaved
 }: {
   entity?: WorkforceEntity | null;
   managers: WorkforceEntity[];
+  dictionaries?: WorkforcePacket["dictionaries"];
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -164,6 +158,10 @@ function WorkforceForm({
   const [saveState, setSaveState] = useState<"idle" | "saving" | "error">("idle");
   const [error, setError] = useState("");
   const values = entity || defaultEntity();
+  const departments = dictionaries?.departments || [];
+  const statuses = dictionaries?.statuses || ["active", "inactive", "paused", "archived"];
+  const runtimeModes = dictionaries?.runtimeModes || Object.keys(runtimeLabels) as WorkforceEntity["runtimeMode"][];
+  const personalityProfiles = dictionaries?.personalityProfiles || ["analytical", "creative", "executive", "supportive", "researcher", "custom"];
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -182,8 +180,8 @@ function WorkforceForm({
       personalityProfile: String(form.get("personalityProfile") || "supportive"),
       model: String(form.get("model") || "") || null,
       runtimeMode: String(form.get("runtimeMode") || "manual"),
-      paperclipAgentId: String(form.get("paperclipAgentId") || "") || null,
-      synchronizationEnabled: form.get("synchronizationEnabled") === "on"
+      paperclipAgentId: null,
+      synchronizationEnabled: false
     };
 
     setSaveState("saving");
@@ -235,12 +233,17 @@ function WorkforceForm({
           <label className="form-control">
             <span className="label"><span className="label-text font-bold">Status</span></span>
             <select className="select select-bordered" defaultValue={values.status || "active"} name="status">
-              {["active", "inactive", "paused", "archived"].map((status) => <option key={status} value={status}>{status}</option>)}
+              {statuses.map((status) => <option key={status} value={status}>{status}</option>)}
             </select>
           </label>
-          <CcField label="Department">
-            {({ id }) => <CcTextInput defaultValue={values.department || "06-kadry"} id={id} name="department" />}
-          </CcField>
+          <label className="form-control">
+            <span className="label"><span className="label-text font-bold">Department</span></span>
+            <select className="select select-bordered" defaultValue={values.department || "06-kadry"} name="department">
+              {departments.length ? departments.map((department) => (
+                <option key={department.key} value={department.key}>{department.key}</option>
+              )) : <option value={values.department || "06-kadry"}>{values.department || "06-kadry"}</option>}
+            </select>
+          </label>
           <CcField label="Role">
             {({ id }) => <CcTextInput defaultValue={values.role || ""} id={id} name="role" />}
           </CcField>
@@ -263,25 +266,18 @@ function WorkforceForm({
           <label className="form-control">
             <span className="label"><span className="label-text font-bold">Personality profile</span></span>
             <select className="select select-bordered" defaultValue={values.personalityProfile || "supportive"} name="personalityProfile">
-              {["analytical", "creative", "executive", "supportive", "researcher", "custom"].map((profile) => <option key={profile} value={profile}>{profile}</option>)}
+              {personalityProfiles.map((profile) => <option key={profile} value={profile}>{profile}</option>)}
             </select>
           </label>
           <label className="form-control">
             <span className="label"><span className="label-text font-bold">Runtime mode</span></span>
             <select className="select select-bordered" defaultValue={values.runtimeMode || "manual"} name="runtimeMode">
-              {Object.entries(runtimeLabels).map(([mode, label]) => <option key={mode} value={mode}>{label}</option>)}
+              {runtimeModes.map((mode) => <option key={mode} value={mode}>{runtimeLabels[mode]}</option>)}
             </select>
           </label>
           <CcField label="Model">
             {({ id }) => <CcTextInput defaultValue={values.model || ""} id={id} name="model" placeholder="gpt-5.4, claude, local..." />}
           </CcField>
-          <CcField label="Paperclip agent ID">
-            {({ id }) => <CcTextInput defaultValue={values.paperclipAgentId || ""} id={id} name="paperclipAgentId" />}
-          </CcField>
-          <label className="label cursor-pointer justify-start gap-3 md:col-span-2">
-            <input className="toggle toggle-primary" defaultChecked={Boolean(values.synchronizationEnabled)} name="synchronizationEnabled" type="checkbox" />
-            <span className="label-text font-bold">Enable Paperclip synchronization</span>
-          </label>
         </section>
 
         <div className="flex justify-end gap-2 border-t border-base-300 pt-4">
@@ -316,14 +312,12 @@ function DetailPanel({
   tab,
   setTab,
   onEdit,
-  onSync,
   onArchive
 }: {
   entity: WorkforceEntity | null;
   tab: DetailTab;
   setTab: (tab: DetailTab) => void;
   onEdit: (entity: WorkforceEntity) => void;
-  onSync: (entity: WorkforceEntity) => void;
   onArchive: (entity: WorkforceEntity) => void;
 }) {
   if (!entity) {
@@ -332,7 +326,7 @@ function DetailPanel({
         <div>
           <i className="ph-bold ph-user-list text-4xl text-company-muted" aria-hidden="true"></i>
           <h2 className="mt-3 font-black text-company-ink">Select a person or agent</h2>
-          <p className="mt-1 text-sm text-company-muted">Profiles, sync state, and generated Paperclip files appear here.</p>
+          <p className="mt-1 text-sm text-company-muted">Profiles, work context, authority, and generated files appear here.</p>
         </div>
       </aside>
     );
@@ -346,7 +340,7 @@ function DetailPanel({
           <div className="min-w-0">
             <h2 className="truncate text-xl font-black text-company-ink">{entity.name}</h2>
             <p className="text-sm text-company-muted">{entity.role || "Unassigned role"} - {entity.department || "06-kadry"}</p>
-            <p className="mt-1 text-xs font-bold uppercase text-company-muted">{typeLabel(entity.type)} / {runtimeLabels[entity.runtimeMode]} / {syncLabel(entity)}</p>
+            <p className="mt-1 text-xs font-bold uppercase text-company-muted">{typeLabel(entity.type)} / {runtimeLabels[entity.runtimeMode]} / {entity.work?.summary.active ?? 0} active work</p>
           </div>
         </div>
         <div className="flex shrink-0 gap-2">
@@ -358,7 +352,7 @@ function DetailPanel({
       </header>
 
       <div className="join">
-        {(["profile", "sync", "files"] as DetailTab[]).map((item) => (
+        {(["profile", "work", "authority", "files"] as DetailTab[]).map((item) => (
           <button className={`btn join-item btn-sm ${tab === item ? "btn-primary" : "btn-outline"}`} key={item} onClick={() => setTab(item)} type="button">{item}</button>
         ))}
       </div>
@@ -370,9 +364,10 @@ function DetailPanel({
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="font-black text-company-ink">Configuration readiness</h3>
                 <span className="text-sm font-bold text-company-muted">
-                  {readinessItems(entity).filter((item) => item.done).length} / {readinessItems(entity).length} ready
+                  {entity.readiness?.score ?? readinessItems(entity).filter((item) => item.done).length} / {entity.readiness?.total ?? readinessItems(entity).length} ready
                 </span>
               </div>
+              {entity.readiness?.nextAction ? <p className="mt-2 text-sm font-bold text-primary">{entity.readiness.nextAction}</p> : null}
               <div className="mt-3 grid gap-2">
                 {readinessItems(entity).map((item) => (
                   <div className="flex items-start gap-2 rounded-company bg-base-100/70 p-2 text-sm" key={item.label}>
@@ -390,36 +385,89 @@ function DetailPanel({
               <div><dt className="font-bold text-company-muted">Manager</dt><dd>{entity.manager?.name || "No manager"}</dd></div>
               <div><dt className="font-bold text-company-muted">Personality</dt><dd>{entity.personalityProfile}</dd></div>
               <div><dt className="font-bold text-company-muted">Model</dt><dd>{entity.model || "Not configured"}</dd></div>
-              <div><dt className="font-bold text-company-muted">Paperclip ID</dt><dd className="break-all">{entity.paperclipAgentId || "Not linked"}</dd></div>
-              <div><dt className="font-bold text-company-muted">Sync enabled</dt><dd>{entity.synchronizationEnabled ? "yes" : "no"}</dd></div>
+              <div><dt className="font-bold text-company-muted">Direct reports</dt><dd>{entity.directReportCount ?? 0}</dd></div>
               <div className="md:col-span-2"><dt className="font-bold text-company-muted">Description</dt><dd className="mt-1 leading-6">{entity.description || "No responsibilities written yet."}</dd></div>
             </dl>
           </section>
         ) : null}
 
-        {tab === "sync" ? (
+        {tab === "work" ? (
           <section className="grid gap-4">
             <div className="rounded-company border border-base-300 bg-base-200/45 p-3">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h3 className="font-black text-company-ink">Paperclip runtime sync</h3>
-                  <p className="text-sm text-company-muted">CompanyCore remains source of truth; Paperclip receives generated files and config.</p>
-                </div>
-                <CcButton disabled={entity.type !== "agent" || !entity.synchronizationEnabled} iconLeft="ph-arrows-clockwise" onClick={() => onSync(entity)} variant="primary">Manual sync</CcButton>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="font-black text-company-ink">Work and responsibility</h3>
+                <span className="text-sm font-bold text-company-muted">{entity.work?.assignmentModel || "not modeled"}</span>
               </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <span className={`badge ${badgeTone(entity.syncStatus)}`}>{entity.syncStatus || "not_synced"}</span>
-                <span className="badge badge-outline">{entity.paperclipAgentId || entity.slug}</span>
+              <div className="mt-3 grid gap-2 sm:grid-cols-4">
+                {[
+                  ["Active", entity.work?.summary.active ?? 0],
+                  ["Blocked", entity.work?.summary.blocked ?? 0],
+                  ["Overdue", entity.work?.summary.overdue ?? 0],
+                  ["Lists", entity.work?.summary.taskLists ?? 0]
+                ].map(([label, value]) => (
+                  <div className="rounded-company bg-base-100/70 p-2" key={label}>
+                    <p className="text-xs font-bold uppercase text-company-muted">{label}</p>
+                    <p className="text-lg font-black text-company-ink">{value}</p>
+                  </div>
+                ))}
               </div>
             </div>
+            {(entity.work?.gaps || []).map((gap) => (
+              <CcNotice key={gap.key} tone="warning" title={gap.label} detail={gap.detail} />
+            ))}
             <div className="grid gap-2">
-              {(entity.syncLog || []).length ? entity.syncLog!.slice().reverse().map((entry, index) => (
-                <div className="rounded-company border border-base-300 bg-base-100 p-3 text-sm" key={`${entry.at}-${index}`}>
-                  <strong className="text-company-ink">{entry.status || "log"}</strong>
-                  <p className="text-company-muted">{entry.message || "Sync event recorded."}</p>
-                  {entry.at ? <span className="text-xs text-company-muted">{entry.at}</span> : null}
+              {(entity.work?.evidence || []).length ? entity.work!.evidence.map((task) => (
+                <div className="rounded-company border border-base-300 bg-base-100/75 p-3 text-sm" key={task.id}>
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                      <strong className="text-company-ink">{task.title}</strong>
+                      <p className="text-company-muted">{task.project?.name || "No project"} / {task.taskList?.name || "No list"}</p>
+                    </div>
+                    <span className={`badge ${badgeTone(task.status)}`}>{task.status}</span>
+                  </div>
+                  <p className="mt-2 text-xs text-company-muted">{task.priority || "medium"} priority{task.dueDate ? ` / due ${task.dueDate.slice(0, 10)}` : ""}</p>
                 </div>
-              )) : <p className="text-sm text-company-muted">No sync log yet.</p>}
+              )) : <p className="text-sm text-company-muted">No matching work evidence yet. Direct assignment is not modeled in this V1 slice.</p>}
+            </div>
+          </section>
+        ) : null}
+
+        {tab === "authority" ? (
+          <section className="grid gap-4">
+            <div className="rounded-company border border-base-300 bg-base-200/45 p-3">
+              <h3 className="font-black text-company-ink">Authority boundary</h3>
+              <p className="mt-1 text-sm text-company-muted">{entity.authority?.mode || "not modeled"} / risk {entity.authority?.riskLevel || "unknown"}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {(entity.authority?.visibleScopeSample || []).slice(0, 8).map((scope) => (
+                  <span className="badge badge-outline" key={scope}>{scope}</span>
+                ))}
+              </div>
+            </div>
+            {(entity.authority?.recommendedProfiles || []).length ? (
+              <div className="grid gap-2">
+                <h4 className="font-black text-company-ink">Recommended access profiles</h4>
+                {entity.authority!.recommendedProfiles.map((profile) => (
+                  <div className="rounded-company border border-base-300 bg-base-100/75 p-3 text-sm" key={profile.id}>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <strong>{profile.label}</strong>
+                      <span className={`badge ${badgeTone(profile.riskLevel)}`}>{profile.riskLevel}</span>
+                    </div>
+                    <p className="mt-1 text-company-muted">{profile.description}</p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+            <div className="grid gap-2">
+              <h4 className="font-black text-company-ink">Blocked actions</h4>
+              {(entity.authority?.blockedActions || []).map((blocked) => {
+                const item = blockedActionText(blocked);
+                return (
+                  <div className="rounded-company border border-base-300 bg-base-100/75 p-3 text-sm" key={item.action}>
+                    <strong className="text-company-ink">{item.action}</strong>
+                    {item.reason ? <p className="text-company-muted">{item.reason}</p> : null}
+                  </div>
+                );
+              })}
             </div>
           </section>
         ) : null}
@@ -438,6 +486,7 @@ export function PeopleAgentsRoute() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [scopeFilter, setScopeFilter] = useState<ScopeFilter>("all");
   const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [density, setDensity] = useState<DensityMode>("comfortable");
   const [selectedId, setSelectedId] = useState("");
   const [detailTab, setDetailTab] = useState<DetailTab>("profile");
   const [editingEntity, setEditingEntity] = useState<WorkforceEntity | null | undefined>(undefined);
@@ -464,21 +513,9 @@ export function PeopleAgentsRoute() {
     setSortKey("name");
   }
 
-  async function syncEntity(entity: WorkforceEntity) {
-    setNotice("");
-    try {
-      await api(`/v1/workforce/${entity.id}/actions/sync`, { method: "POST" });
-      setNotice({ tone: "success", title: "Paperclip synchronization was queued." });
-      refresh();
-      setDetailTab("sync");
-    } catch (error) {
-      setNotice({ tone: "error", title: userErrorMessage(error, t) });
-    }
-  }
-
   async function archiveEntity(entity: WorkforceEntity) {
     if (!window.confirm(`Archive ${entity.name}? This keeps the record but removes it from active workforce use.`)) return;
-    setNotice("");
+    setNotice(null);
     try {
       await api(`/v1/workforce/${entity.id}`, { method: "DELETE" });
       setNotice({ tone: "success", title: `${entity.name} was archived.` });
@@ -546,9 +583,16 @@ export function PeopleAgentsRoute() {
                 <option value="name">Name</option>
                 <option value="department">Department</option>
                 <option value="updated">Updated</option>
-                <option value="sync">Sync state</option>
+                <option value="work">Active work</option>
               </select>
               <CcButton className="whitespace-nowrap md:col-span-2 2xl:col-span-1" disabled={!hasActiveFilters} iconLeft="ph-x-circle" onClick={clearFilters} size="sm" variant="ghost">Clear</CcButton>
+              </div>
+              <div className="flex flex-wrap gap-2 border-t border-base-300/70 pt-2">
+                {(["comfortable", "compact"] as DensityMode[]).map((mode) => (
+                  <button className={`btn btn-xs ${density === mode ? "btn-primary" : "btn-outline"}`} key={mode} onClick={() => setDensity(mode)} type="button">
+                    {mode}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -556,13 +600,13 @@ export function PeopleAgentsRoute() {
                 {filtered.length ? (
                   <div className="grid gap-2">
                     {filtered.map((entity) => (
-                      <button className={`grid gap-2 rounded-company border p-3 text-left transition hover:border-primary hover:bg-primary/5 ${selected?.id === entity.id ? "border-primary/60 bg-primary/10" : "border-base-300 bg-base-100/70"}`} key={entity.id} onClick={() => {
+                      <button className={`grid gap-2 rounded-company border text-left transition hover:border-primary hover:bg-primary/5 ${density === "compact" ? "p-2" : "p-3"} ${selected?.id === entity.id ? "border-primary/60 bg-primary/10" : "border-base-300 bg-base-100/70"}`} key={entity.id} onClick={() => {
                         setSelectedId(entity.id);
                         setDetailTab("profile");
                       }} type="button">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex min-w-0 items-start gap-3">
-                            <EntityAvatar entity={entity} />
+                            {density === "comfortable" ? <EntityAvatar entity={entity} /> : null}
                             <div className="min-w-0">
                               <strong className="block truncate text-company-ink">{entity.name}</strong>
                               <span className="block truncate text-sm text-company-muted">{entity.role || "Unassigned role"} - {entity.department || "06-kadry"}</span>
@@ -573,11 +617,11 @@ export function PeopleAgentsRoute() {
                         <div className="grid gap-1 text-xs text-company-muted sm:grid-cols-3">
                           <span className="truncate"><strong className="text-company-ink">{typeLabel(entity.type)}</strong></span>
                           <span className="truncate">{runtimeLabels[entity.runtimeMode]}</span>
-                          <span className="truncate">{syncLabel(entity)}</span>
+                          <span className="truncate">{entity.work?.summary.active ?? 0} active work</span>
                         </div>
                         {needsAttention(entity) ? (
                           <p className="text-xs font-bold text-warning">
-                            {isSyncBlocked(entity) ? "Runtime link needs setup" : "Profile needs completion"}
+                            {entity.readiness?.nextAction || "Profile needs completion"}
                           </p>
                         ) : null}
                       </button>
@@ -595,7 +639,7 @@ export function PeopleAgentsRoute() {
               </div>
             </main>
 
-            <DetailPanel entity={selected} onArchive={archiveEntity} onEdit={setEditingEntity} onSync={syncEntity} setTab={setDetailTab} tab={detailTab} />
+            <DetailPanel entity={selected} onArchive={archiveEntity} onEdit={setEditingEntity} setTab={setDetailTab} tab={detailTab} />
         </section>
       ) : null}
 
@@ -603,6 +647,7 @@ export function PeopleAgentsRoute() {
         <WorkforceForm
           entity={editingEntity}
           managers={entities}
+          dictionaries={packet.data?.dictionaries}
           onClose={() => setEditingEntity(undefined)}
           onSaved={refresh}
         />

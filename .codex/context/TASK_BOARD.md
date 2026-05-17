@@ -47,6 +47,15 @@
 
 ## Recent Checkpoints
 
+- 2026-05-18: People/Agents Directory non-Paperclip tooling implemented.
+  `/v1/workforce` now returns management-focused readiness, authority,
+  inferred work responsibility, direct report count, and canonical department
+  dictionaries. The Directory now exposes `profile`, `work`, `authority`, and
+  `files` tabs, uses backend dictionaries in the form, adds compact roster
+  density, and hides Paperclip sync from the visible UI for this slice.
+  Validation: `npm run build:server`, `npm run build:web`, `npm run validate`,
+  `git diff --check`, and Playwright fallback proof passed for desktop, tablet,
+  and mobile with no horizontal overflow, console errors, or failed requests.
 - 2026-05-18: People/Agents Directory UX/backend-data audit published.
   `docs/ux/people-agents-directory-ux-backend-audit-2026-05-18.md` critically
   reviews the current `06 People & Agents -> Directory` against backend

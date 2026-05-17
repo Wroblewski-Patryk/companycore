@@ -8,6 +8,9 @@ import {
 } from "@prisma/client";
 import { prisma } from "../../db/prisma";
 import { toJsonInput } from "../../integrations/integration-settings.service";
+import { agentKeyProfiles } from "../../auth/agent-key-profiles";
+import { capabilities } from "../../auth/capabilities";
+import { departmentRegistry, resolveDepartmentEntry } from "../../operating-model/department-registry";
 import { createEvent } from "../events/event.service";
 
 export const workforceEntityTypes = ["human", "agent"] as const satisfies WorkforceEntityType[];
@@ -138,6 +141,194 @@ function withGeneratedFiles<T extends WorkforceEntity>(entity: T) {
   };
 }
 
+function entityReadiness(entity: WorkforceEntity & { _count?: { directReports?: number } }) {
+  const items = [
+    {
+      key: "role",
+      label: "Role assigned",
+      done: Boolean(entity.role),
+      detail: entity.role || "Add the working role."
+    },
+    {
+      key: "responsibilities",
+      label: "Responsibilities written",
+      done: Boolean(entity.description?.trim()),
+      detail: entity.description ? "Description feeds management context." : "Add responsibilities before assigning work."
+    },
+    {
+      key: "department",
+      label: "Canonical department",
+      done: Boolean(entity.department && resolveDepartmentEntry(entity.department)),
+      detail: entity.department && resolveDepartmentEntry(entity.department)
+        ? resolveDepartmentEntry(entity.department)!.canonicalKey
+        : "Select one of the canonical 00-12 departments."
+    },
+    {
+      key: "active_status",
+      label: "Active status",
+      done: entity.status === "active",
+      detail: entity.status === "active" ? "Available for work." : `Current status: ${entity.status}.`
+    },
+    {
+      key: "authority_boundary",
+      label: "Authority boundary",
+      done: entity.type === "human" || entity.runtimeMode !== "autonomous",
+      detail: entity.type === "human"
+        ? "Human authority is governed by workspace role and future RBAC."
+        : entity.runtimeMode === "autonomous"
+          ? "Autonomous mode needs explicit authority review."
+          : "Agent stays inside manual or semi-autonomous supervision."
+    }
+  ];
+  const missingFields = items.filter((item) => !item.done).map((item) => item.key);
+  const riskLevel = entity.status !== "active" || entity.runtimeMode === "autonomous" ? "medium" : missingFields.length ? "low" : "ready";
+
+  return {
+    score: items.filter((item) => item.done).length,
+    total: items.length,
+    status: missingFields.length ? "needs_attention" : "ready",
+    riskLevel,
+    missingFields,
+    nextAction: missingFields.includes("role")
+      ? "Assign a role before routing work."
+      : missingFields.includes("responsibilities")
+        ? "Write responsibilities so generated context and management decisions are grounded."
+        : missingFields.includes("department")
+          ? "Choose a canonical department."
+          : missingFields.includes("authority_boundary")
+            ? "Review autonomous authority before operational use."
+            : "Ready for normal management workflows.",
+    items
+  };
+}
+
+function entityAuthority(entity: WorkforceEntity) {
+  const recommendedProfiles = entity.type === "agent"
+    ? agentKeyProfiles.filter((profile) => (
+      profile.recommendedFor.some((target) => {
+        const haystack = `${entity.name} ${entity.role ?? ""}`.toLowerCase();
+        return haystack.includes(target.replace(/\s+agent$/i, "").toLowerCase())
+          || target.toLowerCase().includes("agent");
+      })
+    )).slice(0, 3)
+    : [];
+  const profileScopes = Array.from(new Set(recommendedProfiles.flatMap((profile) => profile.scopes))).slice(0, 12);
+
+  return {
+    mode: entity.type === "human" ? "human_workspace_authority" : "profile_not_bound",
+    riskLevel: entity.runtimeMode === "autonomous" ? "high" : recommendedProfiles.some((profile) => profile.riskLevel === "high") ? "medium" : "low",
+    recommendedProfiles: recommendedProfiles.map((profile) => ({
+      id: profile.id,
+      label: profile.label,
+      riskLevel: profile.riskLevel,
+      description: profile.description,
+      scopes: profile.scopes
+    })),
+    visibleScopeSample: entity.type === "agent" ? profileScopes : ["workspace_owner"],
+    supportedCapabilities: capabilities.filter((capability) => (
+      capability.startsWith("workforce:")
+      || capability.startsWith("operations:")
+      || capability.startsWith("tasks:")
+      || capability === "events:read"
+    )),
+    blockedActions: [
+      {
+        action: "assign_work_without_assignment_model",
+        reason: "CompanyCore can infer department responsibility, but direct human/agent task assignment still needs a dedicated responsibility model."
+      },
+      {
+        action: "expand_permissions_from_directory",
+        reason: "Capability and API-key changes must remain in dedicated audited access-management flows."
+      },
+      {
+        action: "autonomous_hr_decisions",
+        reason: "Hiring, firing, pay, access expansion, and authority changes need future RBAC and owner approval contracts."
+      }
+    ]
+  };
+}
+
+function normalizeText(value: string | null | undefined) {
+  return (value ?? "").toLowerCase();
+}
+
+function entityWorkSummary(entity: WorkforceEntity, tasks: Array<{
+  id: string;
+  title: string;
+  description: string | null;
+  status: string;
+  priority: string | null;
+  dueDate: Date | null;
+  updatedAt: Date;
+  taskList: { id: string; name: string; description: string | null; status: string } | null;
+  project: { id: string; name: string; status: string } | null;
+}>) {
+  const department = entity.department ? resolveDepartmentEntry(entity.department) : null;
+  const terms = [
+    entity.name,
+    entity.slug,
+    entity.role,
+    entity.department,
+    department?.canonicalKey,
+    department?.backendAreaKey,
+    ...(department?.hintTerms ?? [])
+  ].filter((term): term is string => Boolean(term && term.length > 2)).map((term) => term.toLowerCase());
+
+  const matched = tasks.filter((task) => {
+    const text = [
+      task.title,
+      task.description,
+      task.taskList?.name,
+      task.taskList?.description,
+      task.project?.name
+    ].map(normalizeText).join(" ");
+    return terms.some((term) => text.includes(term));
+  }).slice(0, 8);
+  const active = matched.filter((task) => !["done", "archived"].includes(task.status));
+  const blocked = matched.filter((task) => task.status === "blocked");
+  const overdue = matched.filter((task) => task.dueDate && task.dueDate.getTime() < Date.now() && !["done", "archived"].includes(task.status));
+  const taskLists = new Map<string, { id: string; name: string; status: string; count: number }>();
+  matched.forEach((task) => {
+    if (!task.taskList) return;
+    const existing = taskLists.get(task.taskList.id);
+    taskLists.set(task.taskList.id, {
+      id: task.taskList.id,
+      name: task.taskList.name,
+      status: task.taskList.status,
+      count: (existing?.count ?? 0) + 1
+    });
+  });
+
+  return {
+    assignmentModel: "inferred_from_department_role_and_text",
+    summary: {
+      matched: matched.length,
+      active: active.length,
+      blocked: blocked.length,
+      overdue: overdue.length,
+      taskLists: taskLists.size
+    },
+    evidence: matched.map((task) => ({
+      id: task.id,
+      title: task.title,
+      status: task.status,
+      priority: task.priority ?? "medium",
+      dueDate: task.dueDate?.toISOString() ?? null,
+      updatedAt: task.updatedAt.toISOString(),
+      project: task.project ? { id: task.project.id, name: task.project.name, status: task.project.status } : null,
+      taskList: task.taskList ? { id: task.taskList.id, name: task.taskList.name, status: task.taskList.status } : null
+    })),
+    taskLists: Array.from(taskLists.values()),
+    gaps: [
+      {
+        key: "direct_assignment_model",
+        label: "Direct assignment is not modeled yet",
+        detail: "This tab shows inferred responsibility from department, role, and task text. A future assignment model should replace inference."
+      }
+    ]
+  };
+}
+
 export async function listWorkforceEntities(workspaceId: string, filters: {
   type?: WorkforceEntityType;
   status?: WorkforceEntityStatus;
@@ -161,7 +352,10 @@ export async function listWorkforceEntities(workspaceId: string, filters: {
     prisma.workforceEntity.findMany({
       where,
       orderBy: [{ type: "asc" }, { name: "asc" }],
-      include: { manager: { select: { id: true, name: true, slug: true } } }
+      include: {
+        manager: { select: { id: true, name: true, slug: true } },
+        _count: { select: { directReports: true } }
+      }
     }),
     Promise.all([
       prisma.workforceEntity.count({ where: { workspaceId } }),
@@ -171,6 +365,15 @@ export async function listWorkforceEntities(workspaceId: string, filters: {
       prisma.workforceEntity.count({ where: { workspaceId, syncStatus: "queued" } })
     ])
   ]);
+  const tasks = await prisma.task.findMany({
+    where: { workspaceId },
+    orderBy: { updatedAt: "desc" },
+    take: 200,
+    include: {
+      taskList: true,
+      project: true
+    }
+  });
 
   const [total, humans, agents, syncEnabled, syncQueued] = counts;
   return {
@@ -182,12 +385,23 @@ export async function listWorkforceEntities(workspaceId: string, filters: {
       syncQueued,
       visible: entities.length
     },
-    entities: entities.map(withGeneratedFiles),
+    entities: entities.map((entity) => ({
+      ...withGeneratedFiles(entity),
+      readiness: entityReadiness(entity),
+      authority: entityAuthority(entity),
+      work: entityWorkSummary(entity, tasks),
+      directReportCount: entity._count.directReports
+    })),
     dictionaries: {
       types: workforceEntityTypes,
       statuses: workforceEntityStatuses,
       runtimeModes: workforceRuntimeModes,
-      personalityProfiles: workforcePersonalityProfiles
+      personalityProfiles: workforcePersonalityProfiles,
+      departments: departmentRegistry.map((department) => ({
+        key: department.canonicalKey,
+        backendAreaKey: department.backendAreaKey,
+        position: department.position
+      }))
     },
     agentPacket: {
       mode: "source_of_truth",
