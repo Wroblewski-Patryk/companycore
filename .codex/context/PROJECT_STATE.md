@@ -230,6 +230,15 @@ Last updated: 2026-05-17
   overflow, and no console/page errors. `npm run test:api` was attempted but
   blocked before test execution by missing local `DATABASE_URL` for Prisma
   migrate deploy.
+  OPS-SURFACE-001 then polished the Roost visual hierarchy of `04 Operations`
+  after owner feedback that the content area felt too uniformly dark compared
+  with the sidebar. `web/src/styles.css` now defines reusable Roost workbench
+  surface utilities for route shells, panels, task cards, status accents, and
+  empty states; Operations tasks/calendar apply those utilities so the board,
+  columns, cards, and empty states read as distinct layers. `npm run
+  build:web` passed, and Playwright fallback on mocked API port `3297`
+  verified desktop task board, desktop calendar, mobile task board, no
+  horizontal overflow, and no console/page errors.
   As of 2026-05-16, DMS-OPS-001 added the first concrete Department Management
   System slice for `04 Operacje` on the selected-area route. It is a read-only
   Operations Management System board for planning, procedures, procedure

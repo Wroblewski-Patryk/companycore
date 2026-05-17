@@ -75,7 +75,7 @@ export function CcResourceSelector({
   function renderItem(item: CcResourceSelectorItem) {
     const checked = selectedSet.has(item.id);
     return (
-      <div className={`grid grid-cols-[2rem_minmax(0,1fr)_2rem] items-stretch rounded-company ${checked ? "bg-primary/10" : "hover:bg-base-200"}`} key={item.id}>
+      <div className={`grid grid-cols-[2rem_minmax(0,1fr)_2rem] items-stretch rounded-company ${checked ? "bg-primary/10" : "hover:bg-base-200/70"}`} key={item.id}>
         <label className="grid place-items-center">
           <input className="checkbox checkbox-primary checkbox-xs" checked={checked} onChange={(event) => toggleItem(item.id, event.target.checked)} type="checkbox" />
         </label>
@@ -93,13 +93,13 @@ export function CcResourceSelector({
   }
 
   return (
-    <aside className="grid max-h-[28rem] min-h-0 content-start gap-3 overflow-y-auto rounded-company border border-base-300 bg-base-100 p-3 xl:max-h-none">
-      <div className="sticky top-0 z-10 grid gap-2 rounded-company border border-base-300 bg-base-100/95 p-2.5 shadow-sm backdrop-blur" data-resource-selector>
+    <aside className="roost-work-surface grid max-h-[28rem] min-h-0 content-start gap-3 overflow-y-auto rounded-company p-3 xl:max-h-none">
+      <div className="roost-work-panel sticky top-0 z-10 grid gap-2 rounded-company p-2.5 shadow-sm backdrop-blur" data-resource-selector>
         <div className="flex items-center justify-between gap-2">
           <span className="text-xs font-black uppercase text-company-muted">{title}</span>
           {onCreate && createLabel ? <CcButton ariaLabel={createLabel} iconLeft={createIcon} onClick={onCreate} size="xs" variant="primary">{createLabel}</CcButton> : null}
         </div>
-        <label className={`grid cursor-pointer grid-cols-[2rem_minmax(0,1fr)_auto] items-center rounded-company border py-1.5 pr-1.5 transition ${allSelected ? "border-primary/40 bg-primary/10" : "border-base-300 bg-base-200/70 hover:bg-base-200"}`}>
+        <label className={`grid cursor-pointer grid-cols-[2rem_minmax(0,1fr)_auto] items-center rounded-company border py-1.5 pr-1.5 transition ${allSelected ? "border-primary/40 bg-primary/10" : "border-base-300/80 bg-base-200/45 hover:bg-base-200/70"}`}>
           <span className="grid place-items-center">
             <input className="checkbox checkbox-primary checkbox-xs" checked={allSelected} onChange={(event) => toggleAll(event.target.checked)} type="checkbox" />
           </span>

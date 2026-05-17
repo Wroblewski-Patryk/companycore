@@ -206,6 +206,19 @@
 
 ## Done
 
+- OPS-SURFACE-001 Operations Roost work-surface polish.
+  - Evidence:
+    The Operations content area now uses dedicated Roost workbench layering
+    instead of nested same-value dark backgrounds. `web/src/styles.css`
+    defines reusable work-surface, work-panel, muted-panel, task-card,
+    status-accent, and empty-state utilities; `04 Operations -> Tasks` and
+    `Calendar` apply those utilities to the board shell, selector, lanes,
+    task cards, empty states, and calendar panels.
+  - Validation: `npm run build:web`; Playwright fallback on temporary mocked
+    API port `3297` verified desktop task board, desktop calendar, mobile task
+    board, no horizontal overflow, and no console/page errors. Screenshots
+    were saved outside the repo in the temp proof directory.
+
 - ASSETS-FILES-001 Assets files and folders management view.
   - Evidence:
     `08 Assets -> Files and folders` is now an active web view backed by

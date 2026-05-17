@@ -84,10 +84,10 @@ function monthFromInput(value: string) {
 }
 
 function statusTone(status?: string) {
-  if (status === "blocked") return "border-error/35 bg-error/5";
-  if (status === "done" || status === "archived") return "border-success/25 bg-success/5";
-  if (status === "in_progress") return "border-primary/35 bg-primary/5";
-  return "border-base-300 bg-base-100";
+  if (status === "blocked") return "roost-task-card--blocked";
+  if (status === "done" || status === "archived") return "roost-task-card--done";
+  if (status === "in_progress") return "roost-task-card--progress";
+  return "";
 }
 
 function priorityTone(priority?: string | null) {
@@ -159,7 +159,7 @@ function TaskCard({
   const isCalendar = density === "calendar";
   return (
     <button
-      className={`grid rounded-company border text-left shadow-sm transition hover:border-primary hover:bg-primary/5 hover:shadow-md ${isMonth ? "gap-1 px-2 py-1.5" : isCalendar ? "gap-1.5 p-2.5" : "gap-2 p-3"} ${isDragging ? "opacity-55 ring-2 ring-primary/25" : ""} ${statusTone(row.task.status)}`}
+      className={`roost-task-card grid rounded-company border text-left transition hover:border-primary ${isMonth ? "gap-1 px-2 py-1.5" : isCalendar ? "gap-1.5 p-2.5" : "gap-2 p-3"} ${isDragging ? "opacity-55 ring-2 ring-primary/25" : ""} ${statusTone(row.task.status)}`}
       draggable={draggable}
       data-task-card-id={row.id}
       onClick={onOpen}
@@ -716,7 +716,7 @@ function OperationsBoard({
   }
 
   return (
-    <div className="grid h-full min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)] rounded-company border border-base-300 bg-base-100 p-3">
+    <div className="roost-work-surface grid h-full min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)] rounded-company p-3">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
             <h2 className="truncate text-xl font-black text-company-ink">{selectedLabel}</h2>
@@ -737,7 +737,7 @@ function OperationsBoard({
             const isDropTarget = dragOverStatus === status.key && !!draggedTask && draggedTask.task.status !== status.key;
             return (
               <section
-                className={`grid min-h-0 grid-rows-[auto_minmax(0,1fr)] rounded-company border p-3 transition ${isDropTarget ? "border-primary bg-primary/10 shadow-company-soft ring-2 ring-primary/20" : "border-base-300 bg-base-200/55"}`}
+                className={`grid min-h-0 grid-rows-[auto_minmax(0,1fr)] rounded-company p-3 transition ${isDropTarget ? "border border-primary bg-primary/10 shadow-company-soft ring-2 ring-primary/20" : "roost-work-panel"}`}
                 data-status-column={status.key}
                 key={status.key}
                 onDragEnter={() => setDragOverStatus(status.key)}
@@ -772,7 +772,7 @@ function OperationsBoard({
                       onDragEnd={clearTaskDrag}
                     />
                   )) : (
-                    <div className="grid min-h-24 place-items-center rounded-company border border-dashed border-base-300 bg-base-100/55 px-3 text-center text-sm text-company-muted">
+                    <div className="roost-empty-state grid min-h-24 place-items-center rounded-company px-3 text-center text-sm text-company-muted">
                       {t("operations.emptyColumn")}
                     </div>
                   )}
@@ -800,13 +800,13 @@ function CalendarColumn({
 }) {
   const { t } = useLanguage();
   return (
-    <section className="grid min-w-40 min-h-0 grid-rows-[auto_minmax(0,1fr)] rounded-company border border-base-300 bg-base-200/55 p-3 lg:min-w-0">
+    <section className="roost-work-panel grid min-w-40 min-h-0 grid-rows-[auto_minmax(0,1fr)] rounded-company p-3 lg:min-w-0">
       <h3 className="pb-3 text-sm font-black text-company-ink">{title}</h3>
       <div className="grid content-start gap-2 overflow-y-auto pr-1">
         {rows.length ? rows.map((row) => (
           <CalendarTaskPill key={row.id} row={row} onOpen={() => setSelectedTask(row)} />
         )) : (
-          <div className="grid min-h-24 place-items-center rounded-company border border-dashed border-base-300 bg-base-100/55 px-3 text-center text-sm text-company-muted">
+          <div className="roost-empty-state grid min-h-24 place-items-center rounded-company px-3 text-center text-sm text-company-muted">
             {t("operations.emptyCalendar")}
           </div>
         )}
@@ -856,7 +856,7 @@ function OperationsCalendar({ rows, setSelectedTask, onCreateTask }: { rows: Ope
   }
 
   return (
-    <section className="grid h-full min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-4 rounded-company border border-base-300 bg-base-100 p-4">
+    <section className="roost-work-surface grid h-full min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-4 rounded-company p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-black text-company-ink">{t("operations.calendarTitle")}</h2>
@@ -882,7 +882,7 @@ function OperationsCalendar({ rows, setSelectedTask, onCreateTask }: { rows: Ope
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-company border border-base-300 bg-base-200/55 p-2">
+      <div className="roost-work-panel flex flex-wrap items-center justify-between gap-2 rounded-company p-2">
         <div className="join">
           <button aria-label={t("operations.calendar.previous")} className="btn btn-outline btn-sm join-item" onClick={() => moveRange(-1)} title={t("operations.calendar.previous")} type="button">
             <i className="ph-bold ph-caret-left" aria-hidden="true"></i>
@@ -906,14 +906,14 @@ function OperationsCalendar({ rows, setSelectedTask, onCreateTask }: { rows: Ope
       </div>
 
       {mode === "day" ? (
-        <div className="grid min-h-0 grid-cols-[5rem_minmax(0,1fr)] overflow-y-auto rounded-company border border-base-300">
-          <div className="border-b border-base-300 bg-base-200/60 px-3 py-4 text-xs font-black text-company-muted">{new Intl.DateTimeFormat(undefined, { weekday: "short", day: "numeric" }).format(anchorDate)}</div>
+        <div className="roost-work-panel grid min-h-0 grid-cols-[5rem_minmax(0,1fr)] overflow-y-auto rounded-company">
+          <div className="border-b border-base-300/70 bg-base-200/35 px-3 py-4 text-xs font-black text-company-muted">{new Intl.DateTimeFormat(undefined, { weekday: "short", day: "numeric" }).format(anchorDate)}</div>
           <div className="grid gap-2 border-b border-base-300 p-3">
             {dayRows.length ? dayRows.map((row) => <CalendarTaskPill key={row.id} row={row} onOpen={() => setSelectedTask(row)} />) : <span className="text-sm text-company-muted">{t("operations.emptyCalendar")}</span>}
           </div>
           {Array.from({ length: 12 }, (_, index) => index + 8).map((hour) => (
             <div className="contents" key={hour}>
-              <div className="border-b border-base-300 bg-base-200/60 px-3 py-4 text-xs font-black text-company-muted">{`${hour}:00`}</div>
+              <div className="border-b border-base-300/70 bg-base-200/35 px-3 py-4 text-xs font-black text-company-muted">{`${hour}:00`}</div>
               <div className="border-b border-base-300 p-3"></div>
             </div>
           ))}
@@ -932,12 +932,12 @@ function OperationsCalendar({ rows, setSelectedTask, onCreateTask }: { rows: Ope
       {mode === "month" ? (
         <div className="grid min-h-0 grid-cols-7 gap-2 overflow-y-auto">
           {Array.from({ length: monthOffset }, (_, index) => (
-            <div aria-hidden="true" className="min-h-24 rounded-company border border-base-300/50 bg-base-200/20" key={`blank-${index}`}></div>
+            <div aria-hidden="true" className="roost-work-panel-muted min-h-24 rounded-company opacity-60" key={`blank-${index}`}></div>
           ))}
           {monthDays.map((day) => {
             const dayRows = datedRows.filter((row) => sameDay(new Date(row.task.dueDate!), day));
             return (
-              <div className="grid min-h-24 content-start rounded-company border border-base-300 bg-base-200/45 p-2 text-left" key={day.toISOString()}>
+              <div className="roost-work-panel grid min-h-24 content-start rounded-company p-2 text-left" key={day.toISOString()}>
                 <span className="text-sm font-black text-company-ink">{day.getDate()}</span>
                 {dayRows.length ? (
                   <span className="mt-2 grid gap-1">

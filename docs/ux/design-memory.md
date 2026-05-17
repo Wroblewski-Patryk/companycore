@@ -34,6 +34,29 @@ of rediscovering them.
 
 ## Entries
 
+### 2026-05-17 - Roost Work Surface Layering
+- Type: visual_direction
+- Context: The owner accepted the Roost sidebar but flagged the Operations
+  content area as too uniformly dark after the task board, filters, columns,
+  and cards all used neighboring dark `base-*` backgrounds.
+- Decision: Dense Roost work surfaces should use three visible layers instead
+  of nested same-value dark panels: a route work surface, quieter lanes/panels,
+  and slightly elevated task/resource cards. Use subtle mixed dark surfaces,
+  thin outlines, low-opacity top light, and status-tinted card accents. Avoid
+  making every nested container `bg-base-100` or `bg-base-200/55`; that
+  collapses hierarchy and makes the content feel heavier than the sidebar.
+- Reuse when: Polishing Operations, Assets, calendars, kanban boards, file
+  explorers, future relationship queues, delivery boards, or any dense
+  Roost-branded workbench with repeated cards inside columns.
+- Avoid when: A surface is a modal, simple form, public hero, or light
+  compatibility theme route where these dark Roost workbench utilities would
+  be visually out of place.
+- Evidence: `web/src/styles.css` now defines `roost-work-surface`,
+  `roost-work-panel`, `roost-work-panel-muted`, `roost-task-card`, status card
+  accents, and `roost-empty-state`; `04 Operations -> Tasks/Calendar`
+  Playwright proof on mocked API port `3297` verified desktop/mobile rendering
+  without overflow or console/page errors.
+
 ### 2026-05-17 - Roost Brand Operating Center
 - Type: visual_direction
 - Context: The owner supplied a dedicated brand definition for Roost as the
