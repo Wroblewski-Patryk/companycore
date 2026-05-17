@@ -78,3 +78,24 @@ and imagery with more consistency.
 - Imagery / illustration:
 - Interaction tone:
 ```
+
+## Roost Mapping
+
+### Chosen Personality Tokens
+
+- Primary: Technical Sharpness, Premium Restraint.
+- Secondary: Calm Utility.
+
+### Translation Notes
+
+- Typography: Inter by default, crisp weights, compact hierarchy, micro labels
+  in uppercase with measured tracking.
+- Color: dark operating-center base with indigo, blue, and cyan digital light;
+  green only for healthy state.
+- Surfaces: modular dark glass, thin outlines, subtle depth, restrained glow.
+- Motion: smooth fades, focus glow, sync/data-flow cues, and calm transitions.
+- Imagery / illustration: outline geometry, nest/orbit/module connection
+  motifs, and future logo exploration around sparrow, nest, `R`, orbit, and
+  system nodes.
+- Interaction tone: confident, practical, and command-oriented; no playful
+  bounce, no cyberpunk noise, no fake status theater.

@@ -85,6 +85,112 @@ not drift into generic default UI.
 
 ## CompanyCore Canonical Visual Direction
 
+### 2026-05-17 Roost Brand Direction
+
+Roost is the target product brand for the LuckySparrow operating center. It is
+the digital nest for humans, AI agents, processes, knowledge, tasks,
+pipelines, and company resources. The visual thesis is a cinematic dark
+operations cockpit: quiet, modular, outline-first, system-intelligent, and
+practical.
+
+This direction does not approve a broad unverified restyle of every current
+screen. It defines the target system for new surfaces and future scoped
+migrations. The current compatibility theme may remain in place until a
+surface has Roost parity evidence.
+
+#### Product Character
+
+- Brand feeling: controlled, intelligent, modular, futuristic, operational.
+- Trust posture: calm command center for humans and AI agents.
+- Energy level: focused, composed, alive through subtle system motion.
+- Keywords: Roost, digital nest, operating center, autonomous organization,
+  human/AI collaboration, MCP/API readiness, ordered command.
+
+#### Visual Thesis
+
+- One-sentence direction: Roost should feel like a cinematic dark operating
+  center for an autonomous company, with clear hierarchy, thin outlines,
+  modular surfaces, and subtle digital light.
+- Why this fits the product: LuckySparrow needs one practical center where
+  company knowledge, tasks, resources, processes, and agents can be operated
+  without making the UI feel like a generic ERP or noisy task app.
+
+#### Typography
+
+- Heading style: Inter `600-700`, compact, confident, never oversized inside
+  operational panels.
+- Body style: Inter, neutral, readable, about `150%` line height.
+- Density: medium-to-compact on desktop, a little more spacious on touch
+  surfaces.
+- What to avoid: negative tracking, decorative display fonts, browser-default
+  control text, and uppercase beyond micro labels.
+
+#### Color Strategy
+
+- Primary mood: nocturnal operating center with graphite surfaces and digital
+  indigo/blue/cyan light.
+- Accent usage: indigo for active/CTA/focus, blue for information, cyan for
+  AI/MCP/sync/data flow, green for healthy systems.
+- Surface strategy: dark base, dark cards, thin borders, restrained glass
+  material, and glow only as functional emphasis.
+- Contrast posture: text-first and AA-oriented; never rely on color alone for
+  status.
+
+#### Decorative Asset Strategy
+
+- Background style: subtle light, depth, dark surfaces, and optional
+  operational/cockpit imagery when the route needs a strong brand signal.
+- Illustration or motif style: outline geometry, orbit/nest/system
+  connections, sparrow/R/orbit/module motifs for logo exploration.
+- Raster assets allowed: yes for approved hero, atmosphere, logo exploration,
+  and brand imagery.
+- SVG assets allowed: yes for icons, marks, routes, connections, and UI
+  overlays.
+- Approximation tolerance: low for logo and core brand surfaces; avoid generic
+  gradients as a substitute for intended imagery.
+
+#### Shape And Spacing
+
+- Radius language: `rounded-2xl` for Roost cards unless a dense tool surface
+  needs smaller corners; keep controls predictable.
+- Border vs shadow preference: thin border first, soft shadow/glow second.
+- Spacing rhythm: modular, clean, scannable, with enough depth to separate
+  command, data, and action zones.
+- Container feel: modular cards and panels, not nested card stacks.
+
+#### Motion
+
+- Motion character: smooth, quiet, system-like.
+- Motion use cases: fade, focus glow, sync/data-flow cues, selected-module
+  transitions, and depth motion.
+- Motion to avoid: flashy effects, gaming bounce, and decorative loops.
+
+#### UX Priorities
+
+- What must feel effortless: seeing what matters now, what is blocked, and
+  what the next action is.
+- What should feel premium: command surfaces, agent/MCP readiness, resource
+  systems, and cross-department operating views.
+- What should feel fast: navigation, filtering, command feedback, and local
+  state changes.
+
+#### Surface Notes
+
+- Mobile: prioritize command summary, next action, and compact module
+  switching before dense maps or large panels.
+- Tablet: support split operational views when readable; otherwise stack
+  command before exploration.
+- Desktop: use full cockpit density with persistent orientation, modular
+  panels, and clear command hierarchy.
+
+#### Explicit Avoids
+
+- Avoid neon cyberpunk, gaming chaos, and hacker cliches.
+- Avoid strong gradient backgrounds everywhere.
+- Avoid thick borders, heavy black shadows, and noisy color palettes.
+- Avoid unnecessary labels, fake metrics, or decorative status chips.
+- Avoid switching icon families without a documented missing-icon gap.
+
 ### 2026-05-14 Direction Update
 
 The approved direction is a cinematic-realistic `Company City Map`: CompanyCore

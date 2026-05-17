@@ -34,17 +34,45 @@ of rediscovering them.
 
 ## Entries
 
+### 2026-05-17 - Roost Brand Operating Center
+- Type: visual_direction
+- Context: The owner supplied a dedicated brand definition for Roost as the
+  LuckySparrow operating center: a digital nest for humans, AI agents,
+  processes, knowledge, tasks, pipelines, and company resources.
+- Decision: Treat Roost as the target brand direction for future UI work.
+  Roost should feel like a cinematic dark operations cockpit with Inter
+  typography, indigo/blue/cyan digital light, thin outlines, dark glass
+  surfaces, modular cards, subtle glow, outline icons, and calm system motion.
+  The DaisyUI `roost` theme and Tailwind/CSS Roost tokens in
+  `web/src/styles.css` are the code-level theme source. The existing
+  `companycore` theme remains a compatibility default until a scoped route
+  migration has visual proof.
+- Reuse when: Designing or implementing new Roost-branded screens,
+  redesigned department systems, AI/MCP readiness surfaces, command centers,
+  dashboards, public brand surfaces, logo exploration, or future dark UI
+  migration slices.
+- Avoid when: A task only fixes a narrow bug in an existing light surface and
+  does not have scope for visual QA. Do not use Roost as permission for neon
+  cyberpunk, gaming chaos, heavy shadows, thick borders, or gradient-heavy
+  backgrounds.
+- Evidence:
+  `docs/planning/roost-brand-theme-foundation-task-contract.md`,
+  `docs/ux/design-system-contract.md`, `docs/ux/visual-direction-brief.md`,
+  `tailwind.config.mjs`, and `web/src/styles.css`.
+
 ### 2026-05-17 - CompanyCore Brand Theme Tokens
 - Type: visual_direction
 - Context: The owner requested a reusable brand/theme foundation for the active
   Tailwind/DaisyUI web layer so future department views can feel modern,
   minimal, outline-oriented, and premium without one-off styling.
 - Decision: Use the DaisyUI `companycore` theme plus Tailwind v4 `@theme`
-  tokens as the shared visual source for web UI. Body copy uses Inter,
-  headings use Sora, Phosphor remains the primary icon family, and the default
-  look is white panels, quiet blue-gray page surfaces, crisp outline borders,
-  calm spacing, visible focus rings, compact labels, and subtle elevation only
-  where it clarifies overlays or selected panels.
+  tokens as the compatibility visual source for existing light web UI. Body
+  copy uses Inter. Roost later superseded the Sora heading experiment for new
+  work, so `font-heading` now resolves to Inter. Phosphor remains the primary
+  icon family, and the compatibility look is white panels, quiet blue-gray page
+  surfaces, crisp outline borders, calm spacing, visible focus rings, compact
+  labels, and subtle elevation only where it clarifies overlays or selected
+  panels.
 - Reuse when: Building or polishing public home, auth, private shell,
   department dashboards, Operations, Assets, future Relationship/Product/Sales
   screens, settings, forms, tables, cards, modals, and filters.

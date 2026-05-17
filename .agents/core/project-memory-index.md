@@ -33,13 +33,18 @@ continue from repository files alone:
 - `docs/operations/`: release, deploy, smoke, rollback, and target-environment
   evidence.
 - `docs/ux/`: approved visual direction, design-system rules, reusable UX
-  memory, and pattern guidance. As of 2026-05-17, the active web brand
-  foundation is the DaisyUI `companycore` theme plus Tailwind tokens in
-  `web/src/styles.css`: Inter body text, Sora headings, Phosphor Icons as the
-  primary icon family, outline-first surfaces, calm spacing, visible focus
-  rings, and reusable `cc-*` utilities. High-level dashboard and map work must
-  still preserve the accepted Company City strategic-map direction unless a
-  new decision supersedes it.
+  memory, and pattern guidance. As of 2026-05-17, Roost is the target brand
+  direction for the LuckySparrow operating center: cinematic dark UI,
+  outline-first modular surfaces, Inter typography, indigo/blue/cyan digital
+  light, subtle glow, calm system motion, and human/AI operating-center
+  language. The DaisyUI `roost` theme and Roost Tailwind/CSS tokens live in
+  `web/src/styles.css` and `tailwind.config.mjs`. The earlier DaisyUI
+  `companycore` theme remains the current compatibility default until a scoped
+  visual migration has route-level proof. Phosphor Icons remains the installed
+  primary icon family; Lucide/Heroicons are direction references only unless a
+  future task approves another icon set. High-level dashboard and map work
+  must still preserve the accepted Company City strategic-map direction unless
+  a new decision supersedes it.
 - `docs/planning/human-agent-web-architecture-map.md`: current V2
   human-agent web direction. As of 2026-05-14, `/react-agent-tools` exposes
   the owner-visible MCP tool surface, and `/react-company-os` includes the

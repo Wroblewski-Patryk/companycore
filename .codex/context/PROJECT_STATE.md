@@ -152,12 +152,26 @@ Last updated: 2026-05-17
   WEB-THEME-001 then defined the first explicit CompanyCore brand theme
   foundation for the active React web layer. `web/src/styles.css` now owns the
   DaisyUI `companycore` palette, Tailwind font/color/radius/spacing/shadow
-  tokens, Inter body typography, Sora heading typography, shared focus ring,
+  tokens, Inter body typography, the original Sora heading experiment, shared focus ring,
   outline-first DaisyUI primitive tuning, and reusable `cc-*` panel/label/icon
   utilities. `web/index.html` loads the font families and keeps Phosphor as the
   primary icon family. `npm run build:web`, `git diff --check`, and Playwright
   Vite render proof passed; evidence screenshot:
   `docs/ux/evidence/web-theme-001-public-home-desktop.png`.
+  ROOST-BRAND-001 then converted the owner-provided Roost brand notes into
+  durable source of truth and code-addressable theme properties. Roost is now
+  recorded as the target LuckySparrow operating-center brand: a cinematic dark
+  digital nest for humans, AI agents, processes, knowledge, tasks, pipelines,
+  and company resources. `web/src/styles.css` defines the DaisyUI `roost`
+  theme, Roost CSS variables, brand gradient, dark glass panel utility, and
+  Roost label utility; `tailwind.config.mjs` exposes Roost colors/radius; and
+  `web/index.html` now loads Inter only. `companycore` remains the current
+  compatibility default until a scoped route migration has responsive visual
+  proof. Documentation source of truth:
+  `docs/planning/roost-brand-theme-foundation-task-contract.md`,
+  `docs/ux/design-system-contract.md`, `docs/ux/visual-direction-brief.md`,
+  `docs/ux/brand-personality-tokens.md`, and `docs/ux/design-memory.md`.
+  Validation: `npm run build:web` and `git diff --check` passed.
   As of 2026-05-16, the V1 unified React settings module, AOG-BE-001
   selected-area operating graph read API, V1 operations cockpit, and V1
   tasks/delivery workbench are locally verified. `npm run test:api` passed

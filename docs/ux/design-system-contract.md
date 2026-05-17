@@ -35,7 +35,58 @@ Every meaningful UI change should preserve or improve:
 
 ## Brand Theme Foundation
 
-CompanyCore's active visual foundation is a modern, minimal, outline-first
+Roost is the target brand and visual system for the LuckySparrow operating
+center. Roost is the digital nest where humans, AI agents, processes,
+knowledge, tasks, pipelines, and company resources coordinate. It is not a
+classic ERP and not another task manager; it is the operating center for an
+autonomous organization, designed for both the web UI and API/MCP clients.
+
+Roost should communicate control without chaos, modernity without cyberpunk
+excess, minimalism, modularity, system intelligence, and the feeling of an
+ordered command center. The UI should feel like an operations center,
+system-management layer, modern cockpit, and autonomous-company interface.
+Avoid gaming chaos, neon cyberpunk, and exaggerated hacker styling.
+
+The canonical target theme is the DaisyUI `roost` theme in
+`web/src/styles.css`, backed by Tailwind v4 `@theme` tokens. The legacy
+DaisyUI `companycore` theme remains the current compatibility default until a
+scoped visual migration verifies existing routes against the Roost dark UI.
+Future new or redesigned UI should use Roost tokens first and should not add
+page-local color systems.
+
+Roost core palette:
+
+- Primary: `#6366F1` for active elements, CTA, links, focus, and active modules.
+- Secondary: `#3B82F6` for information, hover, supporting accents, and charts.
+- Accent: `#06B6D4` for AI, MCP, synchronization, animation, and data flow.
+- Success: `#10B981` for online, healthy processes, and working pipelines.
+- Base surfaces: `base-100 #0D1117`, `base-200 #161B22`,
+  `base-300 #21262D`, and neutral `#1F2937`.
+- Text: primary `#E5E7EB`, secondary `#9CA3AF`, muted `#6B7280`.
+- Brand gradient:
+  `linear-gradient(135deg, #6366F1 0%, #3B82F6 50%, #06B6D4 100%)`.
+
+Roost typography:
+
+- Default family: `Inter`.
+- Headings: weight `600-700`; use restrained scale inside dashboards and
+  tool surfaces.
+- Body text: neutral, readable, about `150%` line height.
+- UI labels: uppercase only for micro labels, with `0.08em-0.12em` tracking.
+
+Roost surfaces and components:
+
+- Cards: dark glass, light blur, subtle border, `rounded-2xl`, and very soft
+  glow only where it clarifies hierarchy.
+- Borders: default to `rgba(255,255,255,0.06)` or the tokenized equivalent.
+- Shadows: soft and restrained; avoid heavy black shadows.
+- Icons: outline-only, thin stroke, minimalist, geometric, and consistent.
+  Phosphor remains the approved installed icon family; Lucide/Heroicons-style
+  references are direction only unless a future task approves another icon set.
+- Motion: calm, system-like fades, glow, subtle movement, smooth transitions,
+  and depth motion. Avoid flashy and gaming bounce effects.
+
+The existing CompanyCore foundation is a modern, minimal, outline-first
 management console. It should feel precise and premium because information is
 easy to scan, controls are predictable, and spacing is calm. Do not add fake
 metric counters, decorative badges, or heavy visual effects to make a surface
@@ -62,7 +113,8 @@ Core palette:
 Typography:
 
 - Body: `Inter` through the `font-sans` token.
-- Headings: `Sora` through the `font-heading` token.
+- Headings: `Inter` through the `font-heading` token. Roost supersedes the
+  earlier Sora heading experiment for new work.
 - Use heading typography for page titles, section titles, and major module
   labels only. Dense panels, cards, tables, and forms should keep type compact
   and readable.

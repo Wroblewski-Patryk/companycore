@@ -193,6 +193,20 @@
 
 ## Done
 
+- ROOST-BRAND-001 Roost brand definition and theme tokens.
+  - Evidence:
+    `docs/planning/roost-brand-theme-foundation-task-contract.md` records the
+    scoped brand/theme slice. Roost is now the target LuckySparrow operating
+    center brand for future work: cinematic dark UI, outline-first modular
+    surfaces, Inter typography, indigo/blue/cyan accents, dark glass, subtle
+    glow, calm system motion, and human/AI operating-center language.
+    `web/src/styles.css` defines the DaisyUI `roost` theme, Roost variables,
+    brand gradient, dark glass panel utility, and label utility;
+    `tailwind.config.mjs` exposes Roost theme tokens; UX docs and registers
+    record the decision. `companycore` remains the compatibility default until
+    a scoped visual migration has route-level proof.
+  - Validation: `npm run build:web`; `git diff --check`.
+
 - OPS-TASK-CREATE-001 Operations new task creation.
   - Evidence:
     `docs/planning/operations-new-task-creation-task-contract.md` records the
