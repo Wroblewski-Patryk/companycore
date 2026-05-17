@@ -2,10 +2,12 @@ import { prisma } from "../../db/prisma";
 import { IntegrationError } from "../errors";
 import { getGoogleDriveSettingsForWorkspace, toJsonInput, type GoogleDriveIntegrationConfig } from "../integration-settings.service";
 import { GoogleDriveClient, type GoogleDriveFileMetadata } from "./google-drive.client";
-import { refreshGoogleDriveFileContent, upsertGoogleDriveFileFromMetadata } from "./google-drive.content";
+import { isGoogleDriveTextFile, refreshGoogleDriveFileContent, upsertGoogleDriveFileFromMetadata } from "./google-drive.content";
 import { getGoogleDriveClientForWorkspace } from "./google-drive.auth";
 
 export type GoogleDriveImportMode = "merge" | "skip_existing" | "replace_selected_folders" | "inspect_only";
+
+const DEFAULT_MAX_PAGES_PER_FOLDER = 50;
 
 export type GoogleDriveImportResult = {
   provider: "google_drive";
@@ -227,7 +229,7 @@ async function fetchSelectedFolderFiles(input: {
     scannedFolders.add(folderId);
 
     let pageToken: string | undefined;
-    for (let page = 0; page < (input.maxPagesPerFolder ?? 10); page += 1) {
+    for (let page = 0; page < (input.maxPagesPerFolder ?? DEFAULT_MAX_PAGES_PER_FOLDER); page += 1) {
       const response = await input.client.listFiles({
         query: `'${folderId.replace(/'/g, "\\'")}' in parents and trashed = false`,
         pageToken
@@ -269,7 +271,8 @@ function toGoogleDriveFileCreate(
 
 function isContentRefreshSupported(file: GoogleDriveFileMetadata) {
   return file.mimeType === "application/vnd.google-apps.document"
-    || file.mimeType === "application/vnd.google-apps.spreadsheet";
+    || file.mimeType === "application/vnd.google-apps.spreadsheet"
+    || isGoogleDriveTextFile(file);
 }
 
 function toGoogleDriveFileUpdate(file: GoogleDriveFileMetadata, config: GoogleDriveIntegrationConfig) {

@@ -3641,6 +3641,20 @@ Last updated: 2026-05-17
   Markdown filter interactions, authenticated image preview rendering,
   desktop/mobile no horizontal overflow, and no console/page errors. Browser
   plugin setup timed out, so Playwright fallback was used.
+- 2026-05-17: Completed ASSETS-GDRIVE-006 for Google Drive coverage in
+  `08 Assets -> Files and folders`. Backend review found that
+  `/v1/assets/context` applied one shared folder-first limit capped at 200,
+  which could make production Drive imports look folder-complete but
+  file-incomplete. The route now fetches Drive folders separately from
+  non-folder Drive files, defaults to 500, accepts up to 1000, and the web
+  workbench requests `limit=1000`. Selected-folder import now scans up to 50
+  pages per folder by default and refreshes supported Markdown, CSV, JSON, and
+  text media snapshots during import. Validation passed: `npm run
+  build:server`, `npm run build:web`, `npm run validate`, dummy-url `npx
+  prisma validate`, and `git diff --check`. `src/tests/api.test.ts` includes a
+  new low-limit regression, but full `npm run test:api` remains pending until
+  a validation `DATABASE_URL` is configured; Docker availability probing timed
+  out in this session.
 
 ## Working Agreements
 - Keep task board and project state synchronized.

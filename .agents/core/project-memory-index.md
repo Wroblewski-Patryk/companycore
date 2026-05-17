@@ -184,6 +184,14 @@ continue from repository files alone:
   useful one-click type filters, visible scope counts, folder path context on
   cards, and typed folder-tree icons. `npm run build:web`, `npm run validate`,
   `git diff --check`, and Playwright fallback proof passed on 2026-05-17.
+  ASSETS-GDRIVE-006 then fixed a likely real-data coverage gap: Assets context
+  now fetches Drive folders and non-folder Drive files separately, accepts a
+  1000-item cap, the web workbench requests `limit=1000`, selected-folder
+  import scans up to 50 pages per folder by default, and import refreshes
+  Markdown/CSV/JSON/text snapshots through the shared Google Drive text-file
+  predicate. Build, validation, schema validation, and diff hygiene passed;
+  full API test execution still needs a configured validation PostgreSQL
+  database.
 - `docs/planning/web-foundation-quality-audit-2026-05-16.md` and
   `docs/planning/web-foundation-quality-audit-task-contract.md`: active web
   foundation quality audit. It reviewed `web/src/main.tsx`,

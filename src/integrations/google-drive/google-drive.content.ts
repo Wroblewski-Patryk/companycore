@@ -177,7 +177,7 @@ export async function updateGoogleDriveTextFileContent(input: {
   content: string;
 }) {
   const file = await getWorkspaceDriveFile(input.workspaceId, input.fileId);
-  if (!isDriveTextFile(file)) {
+  if (!isGoogleDriveTextFile(file)) {
     throw new IntegrationError("unsupported_file_type", 422, "Only Drive text, Markdown, CSV, and JSON files can be edited as file media.");
   }
 
@@ -290,7 +290,7 @@ async function extractSnapshot(input: {
     };
   }
 
-  if (isDriveTextFile(input.file)) {
+  if (isGoogleDriveTextFile(input.file)) {
     const text = await input.client.downloadFileText(input.file.externalId);
     const contentKind = contentKindForTextFile(input.file);
     return {
@@ -317,7 +317,7 @@ async function extractSnapshot(input: {
   };
 }
 
-function isDriveTextFile(file: Pick<GoogleDriveFile, "mimeType" | "name">) {
+export function isGoogleDriveTextFile(file: Pick<GoogleDriveFile, "mimeType" | "name">) {
   const name = file.name.toLowerCase();
   return editableTextMimeTypes.has(file.mimeType)
     || name.endsWith(".md")

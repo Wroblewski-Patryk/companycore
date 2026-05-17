@@ -1162,7 +1162,7 @@ export function AssetsRoute() {
   const { t } = useLanguage();
   const activeView = currentAssetsView();
   const [refreshKey, setRefreshKey] = useState(0);
-  const packet = useOwnerPacket<AssetsPacket>(`/v1/assets/context?areaKey=all&limit=200&refresh=${refreshKey}`, true, t);
+  const packet = useOwnerPacket<AssetsPacket>(`/v1/assets/context?areaKey=all&limit=1000&refresh=${refreshKey}`, true, t);
 
   return (
     <Shell activeArea="08-zasoby">

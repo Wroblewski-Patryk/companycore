@@ -2165,6 +2165,19 @@ test("CompanyCore v1 protected API flow", async () => {
     folder.id === assetsChildFolder.id
     && folder.parentExternalId === assetsRootFolder.externalId
   )));
+  const limitedAssetsContext = await request("/v1/assets/context?areaKey=assets-storage&limit=1", { headers: authA });
+  assert.equal(limitedAssetsContext.status, 200);
+  const limitedAssetsContextBody = limitedAssetsContext.body as {
+    data: {
+      folders: Array<{ id: string }>;
+      resources: Array<{ sourceModel: string; source?: { isFolder?: boolean } }>;
+    };
+  };
+  assert.ok(limitedAssetsContextBody.data.folders.length >= 1);
+  assert.ok(limitedAssetsContextBody.data.resources.some((item) => (
+    item.sourceModel === "GoogleDriveFile"
+    && item.source?.isFolder === false
+  )));
   const nestedAssetItem = assetsContextBody.data.resources.find((item) => item.sourceId === assetsNestedFile.id);
   assert.ok(nestedAssetItem);
   assert.equal(nestedAssetItem.source?.parentExternalId, assetsChildFolder.externalId);

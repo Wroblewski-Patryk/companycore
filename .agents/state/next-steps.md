@@ -230,9 +230,12 @@ Last updated: 2026-05-17
 19. Production smoke `08 Assets -> Files and folders` after the next deploy.
    - Source:
      `docs/planning/assets-files-folders-premium-audit-task-contract.md`.
-   - Verify real Drive folder density, type filters, image previews, Markdown
-     previews, and card path context in production before deeper file/folder
-     work.
+     `docs/planning/assets-google-drive-sync-coverage-task-contract.md`.
+   - Verify real Drive folder density, file count coverage after the
+     folder/file split, type filters, image previews, Markdown previews, and
+     card path context in production before deeper file/folder work.
+   - Rerun full `npm run test:api` first when a validation PostgreSQL
+     `DATABASE_URL` is available.
 
 ## LATER
 

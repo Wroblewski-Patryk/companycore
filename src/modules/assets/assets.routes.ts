@@ -8,7 +8,8 @@ import { asyncHandler } from "../../middleware/async-handler";
 import { isCanonicalDepartmentKey, resolveDepartmentEntry } from "../../operating-model/department-registry";
 
 const ASSETS_DEPARTMENT_KEY = "08-zasoby";
-const DEFAULT_LIMIT = 100;
+const DEFAULT_LIMIT = 500;
+const MAX_CONTEXT_LIMIT = 1000;
 const CONTENT_PREVIEW_LIMIT = 24_000;
 
 const querySchema = z.object({
@@ -16,7 +17,7 @@ const querySchema = z.object({
   readiness: z.enum(["not_indexed", "metadata_ready", "content_ready", "summary_ready", "relation_ready", "ai_context_ready"]).optional(),
   areaKey: z.string().min(1).optional(),
   refresh: z.coerce.number().int().optional(),
-  limit: z.coerce.number().int().min(1).max(200).default(DEFAULT_LIMIT)
+  limit: z.coerce.number().int().min(1).max(MAX_CONTEXT_LIMIT).default(DEFAULT_LIMIT)
 }).strict();
 
 const updateFolderSchema = z.object({
@@ -586,8 +587,23 @@ assetsRouter.get("/context", asyncHandler(async (req, res) => {
     where: { workspaceId, key: areaKey }
   });
 
+  const driveFileWhere = {
+    workspaceId,
+    trashed: false,
+    ...(assetsArea ? { operatingAreaId: assetsArea.id } : {})
+  };
+  const driveFileInclude = {
+    operatingArea: true,
+    operatingFolder: true,
+    operatingTable: true,
+    storageLocation: true,
+    knowledgeRoot: true,
+    contentSnapshots: { orderBy: { createdAt: "desc" }, take: 1 }
+  } as const;
+
   const [
-    driveFiles,
+    driveFolders,
+    driveFilesOnly,
     resources,
     knowledgeItems,
     knowledgeRoots,
@@ -595,20 +611,21 @@ assetsRouter.get("/context", asyncHandler(async (req, res) => {
   ] = await Promise.all([
     prisma.googleDriveFile.findMany({
       where: {
-        workspaceId,
-        trashed: false,
-        ...(assetsArea ? { operatingAreaId: assetsArea.id } : {})
+        ...driveFileWhere,
+        isFolder: true
       },
-      orderBy: [{ isFolder: "desc" }, { modifiedTime: "desc" }, { updatedAt: "desc" }],
+      orderBy: [{ name: "asc" }, { updatedAt: "desc" }],
       take: query.limit,
-      include: {
-        operatingArea: true,
-        operatingFolder: true,
-        operatingTable: true,
-        storageLocation: true,
-        knowledgeRoot: true,
-        contentSnapshots: { orderBy: { createdAt: "desc" }, take: 1 }
-      }
+      include: driveFileInclude
+    }),
+    prisma.googleDriveFile.findMany({
+      where: {
+        ...driveFileWhere,
+        isFolder: false
+      },
+      orderBy: [{ modifiedTime: "desc" }, { updatedAt: "desc" }, { name: "asc" }],
+      take: query.limit,
+      include: driveFileInclude
     }),
     prisma.resource.findMany({
       where: { workspaceId },
@@ -649,6 +666,8 @@ assetsRouter.get("/context", asyncHandler(async (req, res) => {
       prisma.knowledgeRoot.count({ where: { workspaceId } })
     ])
   ]);
+
+  const driveFiles = [...driveFolders, ...driveFilesOnly];
 
   const driveResourceItems = driveFiles.map((file) => {
     const latestSnapshot = file.contentSnapshots[0] ?? null;

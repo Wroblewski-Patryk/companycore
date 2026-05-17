@@ -43,10 +43,23 @@
 ## In Progress
 
 - No active implementation task is currently in progress after the
-  ASSETS-FILES-PREMIUM-005 Assets files/folders premium workbench checkpoint.
+  ASSETS-GDRIVE-006 Google Drive coverage checkpoint.
 
 ## Recent Checkpoints
 
+- 2026-05-17: Google Drive Assets coverage fix implemented.
+  `08 Assets -> Files and folders` now requests a larger `limit=1000` packet,
+  and `/v1/assets/context` reads Drive folders and non-folder files separately
+  so folder-first ordering cannot consume the whole context limit. Google Drive
+  selected-folder import now scans up to 50 pages per folder by default and
+  refreshes supported text media snapshots for Markdown, CSV, JSON, and text
+  files during import. Validation: `npm run build:server`, `npm run
+  build:web`, `npm run validate`, dummy-url `npx prisma validate`, and
+  `git diff --check` passed. `src/tests/api.test.ts` gained a regression that
+  `limit=1` Assets context still returns at least one folder and one non-folder
+  Drive file, but full `npm run test:api` could not run in this session because
+  `DATABASE_URL` was not configured and Docker timed out during availability
+  probing.
 - 2026-05-17: Assets Files/Folders premium workbench polish implemented.
   `08 Assets -> Files and folders` now has useful type-filter chips with
   scoped counts and hidden zero-count options, visible `{visible} of {total}`
