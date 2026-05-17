@@ -47,6 +47,17 @@
 
 ## Recent Checkpoints
 
+- 2026-05-18: Application foundation audit published.
+  `docs/planning/application-foundation-audit-2026-05-18.md` reviews backend,
+  Prisma, auth/permissions, integrations, web, UX, tests, deployment,
+  operations, and project-governance foundations. No P0 blocker was found.
+  The next recommended hardening wave is `FOUNDATION-001` reliable local API
+  test database runner, then API error envelope standardization,
+  scoped-by-default API key creation, route/capability drift tests, and
+  auth/API abuse controls. Validation: `npm run validate`, dummy-url
+  `npx prisma validate`, `npm audit --json`, and `git diff --check` passed.
+  Full API tests remain blocked by local Docker timeout and missing default
+  `DATABASE_URL` shell setup.
 - 2026-05-18: People/Agents Directory non-Paperclip tooling implemented.
   `/v1/workforce` now returns management-focused readiness, authority,
   inferred work responsibility, direct report count, and canonical department
@@ -224,6 +235,17 @@
   source-root assignment case.
 
 ## Blocked
+
+- FOUNDATION-001 Reliable local API test database runner.
+  - Stage: planning
+  - Owner: QA/Test + Backend Builder + Ops/Release
+  - Priority: P1
+  - Source: `docs/planning/application-foundation-audit-2026-05-18.md`.
+  - Blocked by: current local Docker daemon commands timed out and
+    `DATABASE_URL` is not configured by default in the shell.
+  - Goal: make full API integration tests one-command reliable by starting or
+    verifying a disposable PostgreSQL, setting `DATABASE_URL`, running
+    migrations/tests, and cleaning validation-owned resources.
 
 - AGRUN-010 Upstream Agent Source Merge Execution
   - Stage: planning

@@ -4,6 +4,17 @@ Last updated: 2026-05-17
 
 ## NOW
 
+1. Implement `FOUNDATION-001` reliable local API test database runner.
+   - Source:
+     `docs/planning/application-foundation-audit-2026-05-18.md`.
+   - Why now: broad app growth is safer only when full API integration tests
+     are one-command reliable. The audit verified build/schema/dependency
+     health but confirmed that local `npm run test:api` remains blocked by
+     missing default `DATABASE_URL` shell setup and Docker daemon timeouts.
+   - Acceptance: one command starts or verifies disposable PostgreSQL, sets
+     `DATABASE_URL`, runs migrations and API tests, records output, and cleans
+     validation-owned resources without leaving orphaned processes.
+
 1. Deploy and smoke `DMS-06-WORKFORCE-001` when the next release window opens.
    - Source:
      `docs/planning/people-agents-workforce-v1-task-contract.md`.
