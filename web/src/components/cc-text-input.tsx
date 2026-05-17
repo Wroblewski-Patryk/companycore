@@ -8,7 +8,7 @@ export function CcTextInput({ className, invalid = false, ...props }: CcTextInpu
   return (
     <input
       aria-invalid={invalid || undefined}
-      className={["input input-bordered", invalid ? "input-error" : "", className].filter(Boolean).join(" ")}
+      className={["input input-bordered w-full", invalid ? "input-error" : "", className].filter(Boolean).join(" ")}
       {...props}
     />
   );

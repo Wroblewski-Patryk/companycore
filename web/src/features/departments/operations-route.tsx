@@ -106,6 +106,17 @@ function listDepartmentKey(list: OperationsTaskList) {
   return list.areaAssignment?.department?.key ?? null;
 }
 
+function selectableTaskLists(taskLists: OperationsTaskList[]) {
+  return taskLists.filter((list) => list.id !== "all" && list.id !== "unassigned");
+}
+
+function selectableTaskListIds(taskLists: OperationsTaskList[]) {
+  return [
+    ...selectableTaskLists(taskLists).map((list) => list.id),
+    ...(taskLists.some((list) => list.id === "unassigned") ? ["unassigned"] : [])
+  ];
+}
+
 function PriorityBadge({ priority }: { priority?: string | null }) {
   const tone = priorityTone(priority);
   return (
@@ -164,13 +175,86 @@ function TaskCard({
   );
 }
 
+function TaskFields({
+  mode,
+  taskLists,
+  statuses,
+  item,
+  defaultTaskListId
+}: {
+  mode: "create" | "edit";
+  taskLists: OperationsTaskList[];
+  statuses: OperationsStatusColumn[];
+  item?: OperationsWorkItem;
+  defaultTaskListId?: string;
+}) {
+  const { t } = useLanguage();
+  const lists = selectableTaskLists(taskLists);
+  const defaultList = item?.hierarchy?.taskList?.id
+    ?? (defaultTaskListId && lists.some((list) => list.id === defaultTaskListId) ? defaultTaskListId : lists[0]?.id)
+    ?? "";
+
+  return (
+    <section className="grid gap-4">
+      <CcField label={t("operations.titleField")} required>
+        {({ id, describedBy, invalid }) => (
+          <CcTextInput
+            aria-describedby={describedBy}
+            aria-invalid={invalid}
+            autoFocus={mode === "create"}
+            defaultValue={item?.task.title || ""}
+            id={id}
+            name="title"
+            required
+          />
+        )}
+      </CcField>
+
+      <label className="form-control">
+        <span className="label"><span className="label-text font-bold"><i className="ph-bold ph-text-align-left mr-1" aria-hidden="true"></i>{t("operations.descriptionField")}</span></span>
+        <textarea className="textarea textarea-bordered min-h-32 w-full" name="description" defaultValue={item?.task.description || ""}></textarea>
+      </label>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <label className="form-control">
+          <span className="label"><span className="label-text font-bold">{t("operations.taskListField")}</span></span>
+          <select className="select select-bordered w-full" name="taskListId" defaultValue={defaultList}>
+            <option value="">{t("operations.unassigned")}</option>
+            {lists.map((list) => <option key={list.id} value={list.id}>{list.name}</option>)}
+          </select>
+        </label>
+
+        <label className="form-control">
+          <span className="label"><span className="label-text font-bold">{t("table.status")}</span></span>
+          <select className="select select-bordered w-full" name="status" defaultValue={item?.task.status || statuses[0]?.key || "todo"}>
+            {statuses.map((status) => <option key={status.key} value={status.key}>{status.label}</option>)}
+          </select>
+        </label>
+
+        <label className="form-control">
+          <span className="label"><span className="label-text font-bold">{t("table.priority")}</span></span>
+          <select className="select select-bordered w-full" name="priority" defaultValue={item?.task.priority || "medium"}>
+            {priorityOptions.map((priority) => <option key={priority} value={priority}>{priority}</option>)}
+          </select>
+        </label>
+
+        <CcField label={t("table.dueDate")}>
+          {({ id }) => <CcTextInput id={id} name="dueDate" type="date" defaultValue={inputDate(item?.task.dueDate)} />}
+        </CcField>
+      </div>
+    </section>
+  );
+}
+
 function TaskPreviewModal({
   item,
+  taskLists,
   statuses,
   onClose,
   onSaved
 }: {
   item: OperationsWorkItem;
+  taskLists: OperationsTaskList[];
   statuses: OperationsStatusColumn[];
   onClose: () => void;
   onSaved: () => void;
@@ -184,6 +268,7 @@ function TaskPreviewModal({
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const dueDate = String(form.get("dueDate") || "");
+    const taskListId = String(form.get("taskListId") || "");
     setSaveState("saving");
     setError("");
 
@@ -195,6 +280,7 @@ function TaskPreviewModal({
           description: String(form.get("description") || ""),
           status: String(form.get("status") || "todo"),
           priority: String(form.get("priority") || ""),
+          taskListId: taskListId || null,
           dueDate: dueDate ? new Date(`${dueDate}T00:00:00.000Z`).toISOString() : null
         })
       });
@@ -227,33 +313,7 @@ function TaskPreviewModal({
 
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_20rem]">
           <section className="grid gap-4">
-            <CcField label={t("operations.titleField")}>
-              {({ id }) => <CcTextInput id={id} name="title" defaultValue={item.task.title} required />}
-            </CcField>
-
-            <label className="form-control">
-              <span className="label"><span className="label-text font-bold"><i className="ph-bold ph-text-align-left mr-1" aria-hidden="true"></i>{t("operations.descriptionField")}</span></span>
-              <textarea className="textarea textarea-bordered min-h-32" name="description" defaultValue={item.task.description || ""}></textarea>
-            </label>
-
-            <div className="grid gap-4 md:grid-cols-3">
-              <label className="form-control">
-                <span className="label"><span className="label-text font-bold">{t("table.status")}</span></span>
-                <select className="select select-bordered" name="status" defaultValue={item.task.status || "todo"}>
-                  {statuses.map((status) => <option key={status.key} value={status.key}>{status.label}</option>)}
-                </select>
-              </label>
-              <label className="form-control">
-                <span className="label"><span className="label-text font-bold">{t("table.priority")}</span></span>
-                <select className="select select-bordered" name="priority" defaultValue={item.task.priority || "normal"}>
-                  {priorityOptions.map((priority) => <option key={priority} value={priority}>{priority}</option>)}
-                </select>
-              </label>
-              <CcField label={t("table.dueDate")}>
-                {({ id }) => <CcTextInput id={id} name="dueDate" type="date" defaultValue={inputDate(item.task.dueDate)} />}
-              </CcField>
-            </div>
-
+            <TaskFields item={item} mode="edit" statuses={statuses} taskLists={taskLists} />
             {error ? <CcNotice tone="error" title={error} live /> : null}
           </section>
 
@@ -308,10 +368,6 @@ function TaskCreateModal({
   const { t } = useLanguage();
   const [saveState, setSaveState] = useState<"idle" | "saving" | "error">("idle");
   const [error, setError] = useState("");
-  const creatableLists = taskLists.filter((list) => list.id !== "all" && list.id !== "unassigned");
-  const defaultList = defaultTaskListId && creatableLists.some((list) => list.id === defaultTaskListId)
-    ? defaultTaskListId
-    : creatableLists[0]?.id || "";
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -355,43 +411,7 @@ function TaskCreateModal({
           </CcButton>
         </div>
 
-        <CcField label={t("operations.titleField")} required>
-          {({ id, describedBy, invalid }) => <CcTextInput aria-describedby={describedBy} aria-invalid={invalid} autoFocus id={id} name="title" required />}
-        </CcField>
-
-        <label className="form-control">
-          <span className="label"><span className="label-text font-bold"><i className="ph-bold ph-text-align-left mr-1" aria-hidden="true"></i>{t("operations.descriptionField")}</span></span>
-          <textarea className="textarea textarea-bordered min-h-28" name="description"></textarea>
-        </label>
-
-        <div className="grid gap-3 sm:grid-cols-2">
-          <label className="form-control">
-            <span className="label"><span className="label-text font-bold">{t("operations.taskListField")}</span></span>
-            <select className="select select-bordered" name="taskListId" defaultValue={defaultList}>
-              <option value="">{t("operations.unassigned")}</option>
-              {creatableLists.map((list) => <option key={list.id} value={list.id}>{list.name}</option>)}
-            </select>
-          </label>
-
-          <label className="form-control">
-            <span className="label"><span className="label-text font-bold">{t("table.status")}</span></span>
-            <select className="select select-bordered" name="status" defaultValue={statuses[0]?.key || "todo"}>
-              {statuses.map((status) => <option key={status.key} value={status.key}>{status.label}</option>)}
-            </select>
-          </label>
-
-          <label className="form-control">
-            <span className="label"><span className="label-text font-bold">{t("table.priority")}</span></span>
-            <select className="select select-bordered" name="priority" defaultValue="medium">
-              {priorityOptions.map((priority) => <option key={priority} value={priority}>{priority}</option>)}
-            </select>
-          </label>
-
-          <label className="form-control">
-            <span className="label"><span className="label-text font-bold">{t("table.due")}</span></span>
-            <input className="input input-bordered" name="dueDate" type="date" />
-          </label>
-        </div>
+        <TaskFields defaultTaskListId={defaultTaskListId} mode="create" statuses={statuses} taskLists={taskLists} />
 
         {error ? <CcNotice tone="error" title={error} live /> : null}
 
@@ -404,13 +424,49 @@ function TaskCreateModal({
   );
 }
 
+function TaskListFields({
+  list,
+  departments
+}: {
+  list?: OperationsTaskList | null;
+  departments: OperationsDepartment[];
+}) {
+  const { t } = useLanguage();
+  return (
+    <>
+      <CcField label={t("operations.listName")} required>
+        {({ id }) => <CcTextInput autoFocus={!list} id={id} name="name" defaultValue={list?.name || ""} required />}
+      </CcField>
+      <label className="form-control">
+        <span className="label"><span className="label-text font-bold">{t("operations.descriptionField")}</span></span>
+        <textarea className="textarea textarea-bordered min-h-24 w-full" name="description" defaultValue={list?.description || ""}></textarea>
+      </label>
+      <div className="grid gap-4 md:grid-cols-2">
+        <label className="form-control">
+          <span className="label"><span className="label-text font-bold">{t("table.status")}</span></span>
+          <select className="select select-bordered w-full" name="status" defaultValue={list?.status || "active"}>
+            {["active", "paused", "archived"].map((status) => <option key={status} value={status}>{status}</option>)}
+          </select>
+        </label>
+        <label className="form-control">
+          <span className="label"><span className="label-text font-bold">{t("operations.departmentAssignment")}</span></span>
+          <select className="select select-bordered w-full" name="departmentKey" defaultValue={list?.areaAssignment?.department?.key || ""}>
+            <option value="">{t("operations.noDepartment")}</option>
+            {departments.map((department) => <option key={department.key} value={department.key}>{departmentLabel(department.key, t)}</option>)}
+          </select>
+        </label>
+      </div>
+    </>
+  );
+}
+
 function TaskListModal({
   list,
   departments,
   onClose,
   onSaved
 }: {
-  list: OperationsTaskList;
+  list?: OperationsTaskList | null;
   departments: OperationsDepartment[];
   onClose: () => void;
   onSaved: () => void;
@@ -418,6 +474,7 @@ function TaskListModal({
   const { t } = useLanguage();
   const [saveState, setSaveState] = useState<"idle" | "saving" | "error">("idle");
   const [error, setError] = useState("");
+  const isCreate = !list;
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -426,15 +483,29 @@ function TaskListModal({
     setError("");
 
     try {
-      await api(`/v1/operations/task-lists/${list.id}`, {
-        method: "PATCH",
-        body: JSON.stringify({
-          name: String(form.get("name") || ""),
-          description: String(form.get("description") || ""),
-          status: String(form.get("status") || "active"),
-          departmentKey: String(form.get("departmentKey") || "") || null
-        })
-      });
+      const payload = {
+        name: String(form.get("name") || ""),
+        description: String(form.get("description") || ""),
+        status: String(form.get("status") || "active")
+      };
+      const departmentKey = String(form.get("departmentKey") || "") || null;
+      if (isCreate) {
+        const response = await api<{ data?: OperationsTaskList }>("/v1/task-lists", {
+          method: "POST",
+          body: JSON.stringify({ ...payload, source: "companycore" })
+        });
+        if (response.data?.id && departmentKey) {
+          await api(`/v1/operations/task-lists/${response.data.id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ departmentKey })
+          });
+        }
+      } else {
+        await api(`/v1/operations/task-lists/${list!.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ ...payload, departmentKey })
+        });
+      }
       onSaved();
       onClose();
     } catch (saveError) {
@@ -448,77 +519,47 @@ function TaskListModal({
       <form className="grid w-full max-w-2xl gap-4 rounded-company border border-base-300 bg-base-100 p-5 shadow-2xl" onSubmit={onSubmit}>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-black uppercase text-primary">{list.source || t("state.native")}</p>
-            <h2 className="text-2xl font-black text-company-ink" id="operations-list-modal-title">{t("operations.editList")}</h2>
+            <p className="text-xs font-black uppercase text-primary">{list?.source || t("state.native")}</p>
+            <h2 className="text-2xl font-black text-company-ink" id="operations-list-modal-title">{t(isCreate ? "operations.createList" : "operations.editList")}</h2>
           </div>
           <CcButton ariaLabel={t("operations.closeTask")} onClick={onClose} size="sm" variant="ghost">
             <i className="ph-bold ph-x" aria-hidden="true"></i>
             <span className="sr-only">{t("operations.closeTask")}</span>
           </CcButton>
         </div>
-        <CcField label={t("operations.listName")}>
-          {({ id }) => <CcTextInput id={id} name="name" defaultValue={list.name} required />}
-        </CcField>
-        <label className="form-control">
-          <span className="label"><span className="label-text font-bold">{t("operations.descriptionField")}</span></span>
-          <textarea className="textarea textarea-bordered min-h-24" name="description" defaultValue={list.description || ""}></textarea>
-        </label>
-        <div className="grid gap-4 md:grid-cols-2">
-          <label className="form-control">
-            <span className="label"><span className="label-text font-bold">{t("table.status")}</span></span>
-            <select className="select select-bordered" name="status" defaultValue={list.status || "active"}>
-              {["active", "paused", "archived"].map((status) => <option key={status} value={status}>{status}</option>)}
-            </select>
-          </label>
-          <label className="form-control">
-            <span className="label"><span className="label-text font-bold">{t("operations.departmentAssignment")}</span></span>
-            <select className="select select-bordered" name="departmentKey" defaultValue={list.areaAssignment?.department?.key || ""}>
-              <option value="">{t("operations.noDepartment")}</option>
-              {departments.map((department) => <option key={department.key} value={department.key}>{departmentLabel(department.key, t)}</option>)}
-            </select>
-          </label>
-        </div>
+        <TaskListFields departments={departments} list={list} />
         {error ? <CcNotice tone="error" title={error} live /> : null}
         <div className="flex flex-wrap justify-end gap-2 border-t border-base-300 pt-4">
           <CcButton onClick={onClose} variant="ghost">{t("operations.cancel")}</CcButton>
-          <CcButton loading={saveState === "saving"} type="submit" variant="primary">{t("operations.saveList")}</CcButton>
+          <CcButton loading={saveState === "saving"} type="submit" variant="primary">{t(isCreate ? "operations.createList" : "operations.saveList")}</CcButton>
         </div>
       </form>
     </div>
   );
 }
 
-function OperationsBoard({
-  rows,
+function OperationsListSelector({
   taskLists,
   departments,
-  statuses,
+  rows,
   selectedListIds,
   setSelectedListIds,
-  setSelectedTask,
   setSelectedList,
-  onCreateTask,
-  onRefresh
+  onCreateList
 }: {
-  rows: OperationsWorkItem[];
   taskLists: OperationsTaskList[];
   departments: OperationsDepartment[];
-  statuses: OperationsStatusColumn[];
+  rows: OperationsWorkItem[];
   selectedListIds: string[];
   setSelectedListIds: (listIds: string[]) => void;
-  setSelectedTask: (task: OperationsWorkItem) => void;
   setSelectedList: (list: OperationsTaskList) => void;
-  onCreateTask: (defaultTaskListId?: string) => void;
-  onRefresh: () => void;
+  onCreateList: () => void;
 }) {
   const { t } = useLanguage();
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
-  const [draggedTaskId, setDraggedTaskId] = useState("");
-  const [dragOverStatus, setDragOverStatus] = useState("");
-  const [moveError, setMoveError] = useState("");
   const unassignedList = taskLists.find((list) => list.id === "unassigned");
-  const realLists = taskLists.filter((list) => list.id !== "all" && list.id !== "unassigned" && rows.some((row) => taskBelongsToList(row, list.id)));
-  const selectableListIds = [...realLists.map((list) => list.id), ...(unassignedList ? [unassignedList.id] : [])];
+  const realLists = selectableTaskLists(taskLists);
+  const selectableListIds = selectableTaskListIds(taskLists);
   const selectedSet = new Set(selectedListIds);
   const allSelected = selectableListIds.length > 0 && selectableListIds.every((id) => selectedSet.has(id));
   const groups = departments.map((department) => ({
@@ -527,11 +568,7 @@ function OperationsBoard({
     lists: realLists.filter((list) => listDepartmentKey(list) === department.key)
   })).filter((group) => group.lists.length > 0);
   const noDepartment = realLists.filter((list) => !listDepartmentKey(list));
-  const visibleRows = rows.filter((row) => {
-    const listId = row.hierarchy?.taskList?.id || "unassigned";
-    return selectedSet.has(listId);
-  });
-  const selectedLabel = allSelected ? t("operations.allTasks") : t("operations.selectedLists", { count: selectedSet.size });
+  const emptyListIds = new Set(realLists.filter((list) => !rows.some((row) => taskBelongsToList(row, list.id))).map((list) => list.id));
 
   useEffect(() => {
     setOpenGroups((current) => {
@@ -548,15 +585,101 @@ function OperationsBoard({
     setSelectedListIds(checked ? selectableListIds : []);
   }
 
+  function selectOnlyEmptyLists() {
+    setSelectedListIds(Array.from(emptyListIds));
+  }
+
   function toggleList(listId: string, checked: boolean) {
     const next = new Set(selectedSet);
-    if (checked) {
-      next.add(listId);
-    } else {
-      next.delete(listId);
-    }
+    if (checked) next.add(listId);
+    else next.delete(listId);
     setSelectedListIds(Array.from(next));
   }
+
+  function renderListButton(list: OperationsTaskList) {
+    const checked = selectedSet.has(list.id);
+    const isEmpty = list.id !== "unassigned" && emptyListIds.has(list.id);
+    return (
+      <div className={`grid grid-cols-[2rem_minmax(0,1fr)_2rem] items-stretch rounded-company ${checked ? "bg-primary/10" : "hover:bg-base-200"}`} key={list.id}>
+        <label className="grid place-items-center">
+          <input className="checkbox checkbox-primary checkbox-xs" checked={checked} onChange={(event) => toggleList(list.id, event.target.checked)} type="checkbox" />
+        </label>
+        <button className="grid min-w-0 gap-0.5 px-1 py-2 text-left" onClick={() => toggleList(list.id, !checked)} type="button">
+          <strong className="truncate text-sm">{list.name}</strong>
+          <span className="truncate text-xs text-company-muted">{isEmpty ? t("operations.emptyList") : list.areaAssignment?.department?.key ? departmentLabel(list.areaAssignment.department.key, t) : list.project?.name || list.source || t("state.native")}</span>
+        </button>
+        <button className="text-company-muted hover:text-company-ink" aria-label={t("operations.editList")} onClick={() => setSelectedList(list)} type="button">
+          <i className="ph-bold ph-gear-six" aria-hidden="true"></i>
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <aside className="grid min-h-0 content-start gap-3 overflow-y-auto rounded-company border border-base-300 bg-base-100 p-3">
+      <div className="sticky top-0 z-10 grid gap-2 rounded-company border border-base-300 bg-base-100/95 p-2 shadow-sm backdrop-blur" data-list-select-all>
+        <div className="grid grid-cols-2 gap-1 rounded-company bg-base-200 p-1">
+          <button className={`btn btn-xs ${allSelected ? "btn-primary" : "btn-ghost"}`} onClick={() => toggleAllLists(true)} type="button">{t("operations.allTasks")}</button>
+          <button className={`btn btn-xs ${selectedListIds.length === 0 ? "btn-primary" : "btn-ghost"}`} onClick={() => toggleAllLists(false)} type="button">{t("operations.clearLists")}</button>
+        </div>
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+          <button className="btn btn-outline btn-xs" onClick={selectOnlyEmptyLists} disabled={!emptyListIds.size} type="button">{t("operations.emptyLists")}</button>
+          <CcButton ariaLabel={t("operations.newList")} iconLeft="ph-plus" onClick={onCreateList} size="sm" variant="primary">{t("operations.newList")}</CcButton>
+        </div>
+      </div>
+
+      {groups.map((group) => (
+        <section className="grid gap-1" key={group.id}>
+          <button className="flex items-center justify-between rounded-company px-2 py-1 text-left text-xs font-black uppercase text-company-muted hover:bg-base-200" onClick={() => setOpenGroups((current) => ({ ...current, [group.id]: !current[group.id] }))} type="button">
+            {group.name}
+            <i className={`ph-bold ${openGroups[group.id] ? "ph-caret-up" : "ph-caret-down"}`} aria-hidden="true"></i>
+          </button>
+          {openGroups[group.id] ? <div className="grid gap-1">{group.lists.map(renderListButton)}</div> : null}
+        </section>
+      ))}
+
+      <section className="grid gap-1 border-t border-base-300 pt-2">
+        <button className="flex items-center justify-between rounded-company px-2 py-1 text-left text-xs font-black uppercase text-company-muted hover:bg-base-200" onClick={() => setOpenGroups((current) => ({ ...current, unassigned: !current.unassigned }))} type="button">
+          {t("operations.unassigned")}
+          <i className={`ph-bold ${openGroups.unassigned ? "ph-caret-up" : "ph-caret-down"}`} aria-hidden="true"></i>
+        </button>
+        {openGroups.unassigned ? (
+          <div className="grid gap-1">
+            {noDepartment.map(renderListButton)}
+            {unassignedList ? renderListButton(unassignedList) : null}
+          </div>
+        ) : null}
+      </section>
+    </aside>
+  );
+}
+
+function OperationsBoard({
+  rows,
+  statuses,
+  selectedListIds,
+  setSelectedTask,
+  onCreateTask,
+  onRefresh
+}: {
+  rows: OperationsWorkItem[];
+  statuses: OperationsStatusColumn[];
+  selectedListIds: string[];
+  setSelectedTask: (task: OperationsWorkItem) => void;
+  onCreateTask: (defaultTaskListId?: string) => void;
+  onRefresh: () => void;
+}) {
+  const { t } = useLanguage();
+  const [draggedTaskId, setDraggedTaskId] = useState("");
+  const [dragOverStatus, setDragOverStatus] = useState("");
+  const [moveError, setMoveError] = useState("");
+  const selectedSet = new Set(selectedListIds);
+  const visibleRows = rows.filter((row) => {
+    const listId = row.hierarchy?.taskList?.id || "unassigned";
+    return selectedSet.has(listId);
+  });
+  const allSelected = selectedListIds.length > 0 && visibleRows.length === rows.length;
+  const selectedLabel = allSelected ? t("operations.allTasks") : t("operations.selectedLists", { count: selectedSet.size });
 
   async function moveTaskToStatus(status: string) {
     if (!draggedTaskId) return;
@@ -593,59 +716,8 @@ function OperationsBoard({
     setDragOverStatus("");
   }
 
-  function renderListButton(list: OperationsTaskList) {
-    const checked = selectedSet.has(list.id);
-    return (
-      <div className={`grid grid-cols-[2rem_minmax(0,1fr)_2rem] items-stretch rounded-company ${checked ? "bg-primary/10" : "hover:bg-base-200"}`} key={list.id}>
-        <label className="grid place-items-center">
-          <input className="checkbox checkbox-primary checkbox-xs" checked={checked} onChange={(event) => toggleList(list.id, event.target.checked)} type="checkbox" />
-        </label>
-        <button className="grid min-w-0 gap-0.5 px-1 py-2 text-left" onClick={() => toggleList(list.id, !checked)} type="button">
-          <strong className="truncate text-sm">{list.name}</strong>
-          <span className="truncate text-xs text-company-muted">{list.areaAssignment?.department?.key ? departmentLabel(list.areaAssignment.department.key, t) : list.project?.name || list.source || t("state.native")}</span>
-        </button>
-        <button className="text-company-muted hover:text-company-ink" aria-label={t("operations.editList")} onClick={() => setSelectedList(list)} type="button">
-          <i className="ph-bold ph-gear-six" aria-hidden="true"></i>
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <section className="grid h-[calc(100vh-12.5rem)] min-h-[34rem] gap-4 xl:grid-cols-[17rem_minmax(0,1fr)]">
-      <aside className="grid min-h-0 content-start gap-3 overflow-y-auto rounded-company border border-base-300 bg-base-100 p-3">
-        <label className="sticky top-0 z-10 grid grid-cols-[2rem_minmax(0,1fr)] items-center rounded-company border border-base-300 bg-base-100/95 px-1 py-2 shadow-sm backdrop-blur hover:bg-base-200" data-list-select-all>
-          <input className="checkbox checkbox-primary checkbox-sm" checked={allSelected} onChange={(event) => toggleAllLists(event.target.checked)} type="checkbox" />
-          <span className="grid min-w-0 gap-0.5">
-            <strong className="block text-sm">{t("operations.allTasks")}</strong>
-          </span>
-        </label>
-
-        {groups.map((group) => (
-          <section className="grid gap-1" key={group.id}>
-            <button className="flex items-center justify-between rounded-company px-2 py-1 text-left text-xs font-black uppercase text-company-muted hover:bg-base-200" onClick={() => setOpenGroups((current) => ({ ...current, [group.id]: !current[group.id] }))} type="button">
-              {group.name}
-              <i className={`ph-bold ${openGroups[group.id] ? "ph-caret-up" : "ph-caret-down"}`} aria-hidden="true"></i>
-            </button>
-            {openGroups[group.id] ? <div className="grid gap-1">{group.lists.map(renderListButton)}</div> : null}
-          </section>
-        ))}
-
-        <section className="grid gap-1 border-t border-base-300 pt-2">
-          <button className="flex items-center justify-between rounded-company px-2 py-1 text-left text-xs font-black uppercase text-company-muted hover:bg-base-200" onClick={() => setOpenGroups((current) => ({ ...current, unassigned: !current.unassigned }))} type="button">
-            {t("operations.unassigned")}
-            <i className={`ph-bold ${openGroups.unassigned ? "ph-caret-up" : "ph-caret-down"}`} aria-hidden="true"></i>
-          </button>
-          {openGroups.unassigned ? (
-            <div className="grid gap-1">
-              {noDepartment.map(renderListButton)}
-              {unassignedList ? renderListButton(unassignedList) : null}
-            </div>
-          ) : null}
-        </section>
-      </aside>
-
-      <div className="grid min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)] rounded-company border border-base-300 bg-base-100 p-3">
+    <div className="grid h-full min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)] rounded-company border border-base-300 bg-base-100 p-3">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
             <h2 className="truncate text-xl font-black text-company-ink">{selectedLabel}</h2>
@@ -710,8 +782,7 @@ function OperationsBoard({
             );
           })}
         </div>
-      </div>
-    </section>
+    </div>
   );
 }
 
@@ -721,48 +792,6 @@ function CalendarTaskPill({ row, onOpen }: { row: OperationsWorkItem; onOpen: ()
       <strong className="line-clamp-1 block text-company-ink">{row.task.title}</strong>
       <span className="mt-1 flex gap-1"><PriorityBadge priority={row.task.priority} /></span>
     </button>
-  );
-}
-
-function OperationsCalendarFilters({
-  taskLists,
-  selectedListIds,
-  setSelectedListIds
-}: {
-  taskLists: OperationsTaskList[];
-  selectedListIds: string[];
-  setSelectedListIds: (listIds: string[]) => void;
-}) {
-  const { t } = useLanguage();
-  const selectableLists = taskLists.filter((list) => list.id !== "all");
-  const selectableIds = selectableLists.map((list) => list.id);
-  const selectedSet = new Set(selectedListIds);
-  const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedSet.has(id));
-
-  function toggleAll(checked: boolean) {
-    setSelectedListIds(checked ? selectableIds : []);
-  }
-
-  function toggleList(listId: string, checked: boolean) {
-    const next = new Set(selectedSet);
-    if (checked) next.add(listId);
-    else next.delete(listId);
-    setSelectedListIds(Array.from(next));
-  }
-
-  return (
-    <div className="flex min-w-0 flex-wrap items-center gap-2 rounded-company border border-base-300 bg-base-100 p-2">
-      <label className="flex items-center gap-2 rounded-company px-2 py-1 text-sm font-bold hover:bg-base-200">
-        <input className="checkbox checkbox-primary checkbox-sm" checked={allSelected} onChange={(event) => toggleAll(event.target.checked)} type="checkbox" />
-        {t("operations.allTasks")}
-      </label>
-      {selectableLists.map((list) => (
-        <label className="flex min-w-0 items-center gap-2 rounded-company px-2 py-1 text-sm hover:bg-base-200" key={list.id}>
-          <input className="checkbox checkbox-primary checkbox-xs" checked={selectedSet.has(list.id)} onChange={(event) => toggleList(list.id, event.target.checked)} type="checkbox" />
-          <span className="max-w-48 truncate">{list.name}</span>
-        </label>
-      ))}
-    </div>
   );
 }
 
@@ -786,7 +815,7 @@ function OperationsCalendar({ rows, setSelectedTask, onCreateTask }: { rows: Ope
   const monthOffset = monthDays[0] ? ((monthDays[0].getDay() || 7) - 1) : 0;
 
   return (
-    <section className="grid h-[calc(100vh-12.5rem)] min-h-[34rem] grid-rows-[auto_minmax(0,1fr)] gap-4 rounded-company border border-base-300 bg-base-100 p-4">
+    <section className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-4 rounded-company border border-base-300 bg-base-100 p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-black text-company-ink">{t("operations.calendarTitle")}</h2>
@@ -820,11 +849,11 @@ function OperationsCalendar({ rows, setSelectedTask, onCreateTask }: { rows: Ope
       ) : null}
 
       {mode === "week" ? (
-        <div className="grid min-h-0 grid-cols-7 gap-3 overflow-x-auto">
+        <div className="grid min-h-0 auto-cols-[minmax(8rem,1fr)] grid-flow-col gap-3 overflow-x-auto lg:grid-flow-row lg:grid-cols-7 lg:auto-cols-auto">
           {weekDays.map((day) => {
             const dayRows = datedRows.filter((row) => sameDay(new Date(row.task.dueDate!), day));
             return (
-              <section className="grid min-w-40 content-start gap-2 overflow-y-auto rounded-company border border-base-300 bg-base-200/55 p-3" key={day.toISOString()}>
+              <section className="grid min-w-32 content-start gap-2 overflow-y-auto rounded-company border border-base-300 bg-base-200/55 p-3 lg:min-w-0" key={day.toISOString()}>
                 <h3 className="text-sm font-black text-company-ink">{new Intl.DateTimeFormat(undefined, { weekday: "short", day: "numeric" }).format(day)}</h3>
                 {dayRows.length ? dayRows.map((row) => <CalendarTaskPill key={row.id} row={row} onOpen={() => setSelectedTask(row)} />) : <span className="text-sm text-company-muted">{t("operations.emptyCalendar")}</span>}
               </section>
@@ -869,12 +898,13 @@ export function OperationsRoute() {
   const [selectedList, setSelectedList] = useState<OperationsTaskList | null>(null);
   const [createTaskListId, setCreateTaskListId] = useState<string | null>(null);
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
+  const [isCreateListOpen, setIsCreateListOpen] = useState(false);
   const packet = useOwnerPacket<OperationsPacket>(`/v1/operations/work-items?limit=200&refresh=${refreshKey}`, true, t);
   const rows = useMemo(() => (packet.data?.workItems || []).map((item) => ({ ...item, id: item.task.id })), [packet.data?.workItems]);
   const taskLists = packet.data?.taskLists || [];
   const departments = packet.data?.departments || [];
   const statuses = packet.data?.statuses?.length ? packet.data.statuses : fallbackStatuses;
-  const selectableListIds = taskLists.filter((list) => list.id !== "all").map((list) => list.id);
+  const selectableListIds = selectableTaskListIds(taskLists);
   const selectedSet = new Set(selectedListIds);
   const filteredRows = rows.filter((row) => selectedSet.has(row.hierarchy?.taskList?.id || "unassigned"));
 
@@ -908,31 +938,36 @@ export function OperationsRoute() {
     <Shell activeArea="04-operacje">
       {packet.status === "loading" ? <CcNotice tone="loading" title={t("table.loading.title")} detail={t("table.loading.detail")} /> : null}
       {packet.status === "error" ? <CcNotice tone="error" title={packet.error || t("operations.packetError")} live /> : null}
-      {packet.status === "ready" && activeView === "calendar" ? (
-        <OperationsCalendarFilters taskLists={taskLists} selectedListIds={selectedListIds} setSelectedListIds={setSelectedListIds} />
-      ) : null}
 
       {packet.status === "ready" ? (
-        activeView === "calendar" ? (
-          <OperationsCalendar rows={filteredRows} setSelectedTask={setSelectedTask} onCreateTask={() => openCreateTask(selectedListIds.length === 1 ? selectedListIds[0] : undefined)} />
-        ) : (
-          <OperationsBoard
-            rows={rows}
-            taskLists={taskLists}
+        <section className="grid h-[calc(100vh-12.5rem)] min-h-[34rem] gap-4 xl:grid-cols-[17rem_minmax(0,1fr)]">
+          <OperationsListSelector
             departments={departments}
-            statuses={statuses}
+            onCreateList={() => setIsCreateListOpen(true)}
+            rows={rows}
             selectedListIds={selectedListIds}
-            setSelectedListIds={setSelectedListIds}
-            setSelectedTask={setSelectedTask}
             setSelectedList={setSelectedList}
-            onCreateTask={openCreateTask}
-            onRefresh={refresh}
+            setSelectedListIds={setSelectedListIds}
+            taskLists={taskLists}
           />
-        )
+          {activeView === "calendar" ? (
+            <OperationsCalendar rows={filteredRows} setSelectedTask={setSelectedTask} onCreateTask={() => openCreateTask(selectedListIds.length === 1 ? selectedListIds[0] : undefined)} />
+          ) : (
+            <OperationsBoard
+              rows={rows}
+              statuses={statuses}
+              selectedListIds={selectedListIds}
+              setSelectedTask={setSelectedTask}
+              onCreateTask={openCreateTask}
+              onRefresh={refresh}
+            />
+          )}
+        </section>
       ) : null}
 
-      {selectedTask ? <TaskPreviewModal item={selectedTask} statuses={statuses} onClose={() => setSelectedTask(null)} onSaved={refresh} /> : null}
+      {selectedTask ? <TaskPreviewModal item={selectedTask} statuses={statuses} taskLists={taskLists} onClose={() => setSelectedTask(null)} onSaved={refresh} /> : null}
       {isCreateTaskOpen ? <TaskCreateModal taskLists={taskLists} statuses={statuses} defaultTaskListId={createTaskListId || undefined} onClose={() => setIsCreateTaskOpen(false)} onSaved={refresh} /> : null}
+      {isCreateListOpen ? <TaskListModal departments={departments} onClose={() => setIsCreateListOpen(false)} onSaved={refresh} /> : null}
       {selectedList ? <TaskListModal list={selectedList} departments={departments} onClose={() => setSelectedList(null)} onSaved={refresh} /> : null}
     </Shell>
   );

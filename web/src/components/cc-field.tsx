@@ -19,8 +19,8 @@ export function CcField({
   const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;
 
   return (
-    <div className="form-control">
-      <label className="label" htmlFor={id}>
+    <div className="form-control grid gap-1">
+      <label className="label py-0" htmlFor={id}>
         <span className="label-text font-bold">
           {label}
           {required ? <span aria-hidden="true"> *</span> : null}
