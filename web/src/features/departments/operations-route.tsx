@@ -11,7 +11,7 @@ import { MessageKey, Translate, useLanguage } from "../../i18n/i18n";
 import { CoreAreaKey, OperationsDepartment, OperationsPacket, OperationsStatusColumn, OperationsTaskList, OperationsWorkItem } from "../../types";
 
 type OperationsView = "tasks" | "calendar";
-type CalendarMode = "today" | "week" | "month";
+type CalendarMode = "day" | "week" | "month";
 
 const fallbackStatuses: OperationsStatusColumn[] = [
   { key: "todo", label: "To do" },
@@ -53,16 +53,32 @@ function sameDay(left: Date, right: Date) {
   return startOfDay(left).getTime() === startOfDay(right).getTime();
 }
 
-function daysInCurrentMonth() {
-  const now = new Date();
-  const first = new Date(now.getFullYear(), now.getMonth(), 1);
-  const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+function daysInMonth(value: Date) {
+  const first = new Date(value.getFullYear(), value.getMonth(), 1);
+  const days = new Date(value.getFullYear(), value.getMonth() + 1, 0).getDate();
   return Array.from({ length: days }, (_, index) => new Date(first.getFullYear(), first.getMonth(), index + 1));
 }
 
-function dayDistance(value?: string | null) {
-  if (!value) return Number.POSITIVE_INFINITY;
-  return Math.round((startOfDay(new Date(value)).getTime() - startOfDay().getTime()) / 86_400_000);
+function addDays(value: Date, amount: number) {
+  const next = new Date(value);
+  next.setDate(next.getDate() + amount);
+  return next;
+}
+
+function addMonths(value: Date, amount: number) {
+  const next = new Date(value);
+  next.setMonth(next.getMonth() + amount, 1);
+  return next;
+}
+
+function inputMonth(value: Date) {
+  return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function monthFromInput(value: string) {
+  const [year, month] = value.split("-").map(Number);
+  if (!year || !month) return new Date();
+  return new Date(year, month - 1, 1);
 }
 
 function statusTone(status?: string) {
@@ -798,46 +814,98 @@ function CalendarTaskPill({ row, onOpen }: { row: OperationsWorkItem; onOpen: ()
 function OperationsCalendar({ rows, setSelectedTask, onCreateTask }: { rows: OperationsWorkItem[]; setSelectedTask: (task: OperationsWorkItem) => void; onCreateTask: () => void }) {
   const { t } = useLanguage();
   const [mode, setMode] = useState<CalendarMode>("week");
+  const [anchorDate, setAnchorDate] = useState(() => startOfDay());
   const calendarLabels: Record<CalendarMode, string> = {
-    today: t("operations.calendar.today"),
+    day: t("operations.calendar.day"),
     week: t("operations.calendar.week"),
     month: t("operations.calendar.month")
   };
+  const modeIcons: Record<CalendarMode, string> = {
+    day: "ph-calendar-blank",
+    week: "ph-columns",
+    month: "ph-calendar-dots"
+  };
+  const step = mode === "day" ? 1 : mode === "week" ? 7 : 1;
   const datedRows = rows.filter((row) => row.task.dueDate);
-  const todayRows = datedRows.filter((row) => sameDay(new Date(row.task.dueDate!), new Date()));
-  const weekStart = startOfWeek();
+  const dayRows = datedRows.filter((row) => sameDay(new Date(row.task.dueDate!), anchorDate));
+  const weekStart = startOfWeek(anchorDate);
   const weekDays = Array.from({ length: 7 }, (_, index) => {
     const day = new Date(weekStart);
     day.setDate(weekStart.getDate() + index);
     return day;
   });
-  const monthDays = daysInCurrentMonth();
+  const monthDays = daysInMonth(anchorDate);
   const monthOffset = monthDays[0] ? ((monthDays[0].getDay() || 7) - 1) : 0;
+  const rangeLabel = mode === "day"
+    ? new Intl.DateTimeFormat(undefined, { weekday: "long", month: "short", day: "numeric", year: "numeric" }).format(anchorDate)
+    : mode === "week"
+      ? `${new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(weekDays[0])} - ${new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(weekDays[6])}`
+      : new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" }).format(anchorDate);
+
+  function moveRange(direction: -1 | 1) {
+    setAnchorDate((current) => mode === "month" ? addMonths(current, direction) : addDays(current, step * direction));
+  }
+
+  function updateDateInput(value: string) {
+    if (!value) return;
+    setAnchorDate(startOfDay(new Date(`${value}T00:00:00`)));
+  }
 
   return (
-    <section className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-4 rounded-company border border-base-300 bg-base-100 p-4">
+    <section className="grid h-full min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-4 rounded-company border border-base-300 bg-base-100 p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-black text-company-ink">{t("operations.calendarTitle")}</h2>
           <p className="text-sm text-company-muted">{t("operations.calendarDescription")}</p>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-2">
-          <CcButton onClick={onCreateTask} iconLeft="ph-plus" variant="primary">{t("operations.newTask")}</CcButton>
-          <div className="join">
-            {(["today", "week", "month"] as CalendarMode[]).map((option) => (
-              <button className={`btn join-item btn-sm ${mode === option ? "btn-primary" : "btn-outline"}`} key={option} onClick={() => setMode(option)} type="button">
-                {calendarLabels[option]}
+          <CcButton onClick={onCreateTask} iconLeft="ph-plus" size="sm" variant="primary">{t("operations.newTask")}</CcButton>
+          <div className="join" aria-label={t("operations.calendar.viewSwitch")}>
+            {(["day", "week", "month"] as CalendarMode[]).map((option) => (
+              <button
+                aria-label={calendarLabels[option]}
+                className={`tooltip btn join-item btn-sm w-11 ${mode === option ? "btn-primary" : "btn-outline"}`}
+                data-tip={calendarLabels[option]}
+                key={option}
+                onClick={() => setMode(option)}
+                title={calendarLabels[option]}
+                type="button"
+              >
+                <i className={`ph-bold ${modeIcons[option]}`} aria-hidden="true"></i>
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      {mode === "today" ? (
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-company border border-base-300 bg-base-200/55 p-2">
+        <div className="join">
+          <button aria-label={t("operations.calendar.previous")} className="btn btn-outline btn-sm join-item" onClick={() => moveRange(-1)} title={t("operations.calendar.previous")} type="button">
+            <i className="ph-bold ph-caret-left" aria-hidden="true"></i>
+          </button>
+          <button className="btn btn-outline btn-sm join-item min-w-36 cursor-default justify-start md:min-w-56" type="button">
+            <i className="ph-bold ph-clock-counter-clockwise" aria-hidden="true"></i>
+            <span className="truncate">{rangeLabel}</span>
+          </button>
+          <button aria-label={t("operations.calendar.next")} className="btn btn-outline btn-sm join-item" onClick={() => moveRange(1)} title={t("operations.calendar.next")} type="button">
+            <i className="ph-bold ph-caret-right" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          {mode === "month" ? (
+            <input aria-label={t("operations.calendar.pickMonth")} className="input input-bordered input-sm w-36" onChange={(event) => setAnchorDate(monthFromInput(event.target.value))} type="month" value={inputMonth(anchorDate)} />
+          ) : (
+            <input aria-label={mode === "day" ? t("operations.calendar.pickDay") : t("operations.calendar.pickWeek")} className="input input-bordered input-sm w-36" onChange={(event) => updateDateInput(event.target.value)} type="date" value={inputDate(anchorDate.toISOString())} />
+          )}
+          <button className="btn btn-ghost btn-sm" onClick={() => setAnchorDate(startOfDay())} type="button">{t("operations.calendar.today")}</button>
+        </div>
+      </div>
+
+      {mode === "day" ? (
         <div className="grid min-h-0 grid-cols-[5rem_minmax(0,1fr)] overflow-y-auto rounded-company border border-base-300">
-          <div className="border-b border-base-300 bg-base-200/60 px-3 py-4 text-xs font-black text-company-muted">Today</div>
+          <div className="border-b border-base-300 bg-base-200/60 px-3 py-4 text-xs font-black text-company-muted">{new Intl.DateTimeFormat(undefined, { weekday: "short", day: "numeric" }).format(anchorDate)}</div>
           <div className="grid gap-2 border-b border-base-300 p-3">
-            {todayRows.length ? todayRows.map((row) => <CalendarTaskPill key={row.id} row={row} onOpen={() => setSelectedTask(row)} />) : <span className="text-sm text-company-muted">{t("operations.emptyCalendar")}</span>}
+            {dayRows.length ? dayRows.map((row) => <CalendarTaskPill key={row.id} row={row} onOpen={() => setSelectedTask(row)} />) : <span className="text-sm text-company-muted">{t("operations.emptyCalendar")}</span>}
           </div>
           {Array.from({ length: 12 }, (_, index) => index + 8).map((hour) => (
             <div className="contents" key={hour}>

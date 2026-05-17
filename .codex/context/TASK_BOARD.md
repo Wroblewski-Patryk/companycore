@@ -73,6 +73,19 @@
 
 ## Backlog
 
+- V1X-PAPERCLIP-ASSISTANT-001 Paperclip corner assistant concept.
+  - Stage: intake
+  - Owner: Product Docs + Frontend Builder + AI Integration + Security
+  - Priority: P2
+  - Source:
+    `docs/planning/v1x-paperclip-corner-assistant-task-contract.md`
+  - Goal: preserve the future V1.x idea for a virtual helper in the corner of
+    the CompanyCore panel: a messenger-style Paperclip bridge that can later
+    become the human-facing entry point for approved integrations such as
+    ClickUp, Google Drive, and other providers.
+  - Guardrail: this is not active runtime scope. Future implementation must
+    keep Paperclip as an external API/MCP client, start read/proposal-only, and
+    pass UX, architecture, security, and AI-safety review before code.
 - UOS-BE-001 Current Backend Capability Audit.
   - Stage: analysis
   - Owner: Product Docs + Backend Builder + AI Integration

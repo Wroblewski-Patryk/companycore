@@ -13,11 +13,11 @@ export function PublicLayout({
   const { t } = useLanguage();
 
   return (
-    <main className="min-h-screen bg-base-100 text-base-content" data-theme="companycore">
+    <main className="min-h-screen bg-base-100 text-base-content" data-theme="roost">
       <header className="border-b border-base-300 bg-base-100 px-4 py-3">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
           <a className="flex items-center gap-3 font-black no-underline text-company-ink" href="/">
-            <span className="grid h-10 w-10 place-items-center rounded-company bg-neutral text-neutral-content">CC</span>
+            <span className="grid h-10 w-10 place-items-center rounded-company bg-neutral text-neutral-content">R</span>
             <span>{t("app.name")}</span>
           </a>
           <nav className="flex flex-wrap items-end gap-2">

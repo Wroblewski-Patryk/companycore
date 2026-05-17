@@ -158,11 +158,11 @@ export function Shell({
   }
 
   return (
-    <main className="min-h-screen bg-base-200 text-base-content" data-theme="companycore">
+    <main className="min-h-screen bg-base-200 text-base-content" data-theme="roost">
       <div className="grid min-h-screen lg:grid-cols-[17rem_minmax(0,1fr)]">
         <aside className="sticky top-0 hidden h-screen overflow-y-auto border-r border-base-300 bg-neutral p-4 text-neutral-content lg:block">
           <a className="flex items-center gap-3 no-underline text-neutral-content" href={canonicalGeneralDashboardPath}>
-            <span className="grid h-10 w-10 place-items-center rounded-company bg-primary font-black">CC</span>
+            <span className="grid h-10 w-10 place-items-center rounded-company bg-primary font-black">R</span>
             <span>
               <strong className="block">{t("app.name")}</strong>
               <small className="text-neutral-content/65">{t("app.operatingSystem")}</small>
@@ -195,7 +195,7 @@ export function Shell({
           <header className="sticky top-0 z-10 border-b border-base-300 bg-base-100/95 px-4 py-3 backdrop-blur lg:px-8">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <a className="flex items-center gap-2 font-black no-underline text-company-ink lg:hidden" href={canonicalGeneralDashboardPath}>
-                <span className="grid h-9 w-9 place-items-center rounded-company bg-neutral text-neutral-content">CC</span>
+                <span className="grid h-9 w-9 place-items-center rounded-company bg-neutral text-neutral-content">R</span>
                 <span>{t("app.name")}</span>
               </a>
               <div className="ml-auto dropdown dropdown-end">

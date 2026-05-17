@@ -3532,6 +3532,14 @@ Last updated: 2026-05-17
   one-task priority selection, seven-step evidence, and mode rotation.
 - Treat deployment docs and smoke checks as part of done-state for runtime
   changes.
+- Future V1.x idea captured on 2026-05-17: consider a corner virtual
+  assistant/communicator in the CompanyCore panel that exposes Paperclip as a
+  supervised helper and possible integration bridge for ClickUp, Google Drive,
+  and later providers. This is proposed future scope only; implementation must
+  preserve CompanyCore as the operating system, keep Paperclip as an external
+  API/MCP client, and start with a UX/architecture/security/AI-safety spec.
+  Source:
+  `docs/planning/v1x-paperclip-corner-assistant-task-contract.md`.
 
 ## Canonical Context
 - `.codex/context/PROJECT_STATE.md`

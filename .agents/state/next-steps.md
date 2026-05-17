@@ -198,11 +198,19 @@ Last updated: 2026-05-17
 
 ## LATER
 
-1. ACF-UX-002 Company City Dashboard / Gamified Strategic Map.
+1. V1X-PAPERCLIP-ASSISTANT-001 Paperclip corner assistant concept.
+   - Source:
+     `docs/planning/v1x-paperclip-corner-assistant-task-contract.md`.
+   - Future V1.x candidate: a small virtual helper/communicator in the corner
+     of the CompanyCore panel, exposing Paperclip as a supervised conversation
+     and integration bridge for ClickUp, Google Drive, and later providers.
+   - Keep it out of active implementation until a UX spec, architecture
+     decision, permission model, and AI-safety test plan exist.
+2. ACF-UX-002 Company City Dashboard / Gamified Strategic Map.
    - Deferred to V2 readiness gate.
-2. ACF-OPS-001 Auto-Deploy Proof Or Manual Path Acceptance.
-3. ACF-QA-001 Lint And Split Test Gates.
-4. AGRUN-010 Upstream Agent Source Merge Execution, blocked until upstream
+3. ACF-OPS-001 Auto-Deploy Proof Or Manual Path Acceptance.
+4. ACF-QA-001 Lint And Split Test Gates.
+5. AGRUN-010 Upstream Agent Source Merge Execution, blocked until upstream
    write access or an approved fork/PR route exists.
 
 ## Selection Rules

@@ -160,6 +160,16 @@ synchronized with `.codex/context/TASK_BOARD.md`.
 - [ ] Production AOG/settings smoke after the next deploy:
       compare `/health` metadata with the pushed commit, then smoke
       `/v1/operating-graph/areas/01-strategia` and authenticated settings.
+### FUTURE V1.X
+
+- [ ] V1X-PAPERCLIP-ASSISTANT-001 Paperclip corner assistant concept:
+      preserve the owner idea for a future V1.x virtual helper in the corner of
+      the CompanyCore panel. It should be evaluated as a messenger-style
+      Paperclip bridge and future integration entry point for ClickUp, Google
+      Drive, and later providers. Do not implement until a design spec,
+      architecture/security review, permission model, and AI-safety test plan
+      exist.
+
 ### DEFERRED TO V2
 
 - [ ] ACF-UX-002 Company City Dashboard / Gamified Strategic Map:
