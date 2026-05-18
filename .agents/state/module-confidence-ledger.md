@@ -2,6 +2,18 @@
 
 Last updated: 2026-05-18
 
+People/Agents Paperclip director note: DMS-06-WORKFORCE-001 is VERIFIED for
+the local Paperclip director extension. The 2026-05-18
+read-only Paperclip audit captured the 13 director agents, UUIDs, departments,
+manager relationship to `00 AIA`, runtime status, model, skill library names,
+and knowledge/tool counts. The local implementation adds workforce index
+columns, richer generated markdown, idempotent seed upsert, and a denser
+Directory roster. Evidence: `npm run validate`, `npm run test:api:local` with
+25 migrations and 6/6 API tests, disposable PostgreSQL seed smoke proving 13
+active Paperclip directors with 0 active legacy seed agents and 0 bad manager
+links, plus rendered desktop/tablet/mobile Directory proof with no horizontal
+overflow.
+
 React web consolidation note: REACT-WEB-001 is PARTIAL with medium
 confidence. `npm run validate` passed; Playwright proved the signed-out and
 mocked signed-in React route set with no legacy scripts, no old shell, no

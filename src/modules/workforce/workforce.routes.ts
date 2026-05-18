@@ -32,7 +32,14 @@ const createSchema = z.object({
   model: z.string().trim().max(120).nullable().optional(),
   runtimeMode: z.nativeEnum(WorkforceRuntimeMode).optional(),
   paperclipAgentId: z.string().trim().max(180).nullable().optional(),
-  synchronizationEnabled: z.boolean().optional()
+  synchronizationEnabled: z.boolean().optional(),
+  hierarchyLevel: z.string().trim().max(120).nullable().optional(),
+  bigFiveProfile: z.record(z.number().min(0).max(5)).optional(),
+  skillIndex: z.array(z.string().trim().min(1).max(160)).max(80).optional(),
+  knowledgeIndex: z.array(z.string().trim().min(1).max(180)).max(120).optional(),
+  toolIndex: z.array(z.string().trim().min(1).max(180)).max(160).optional(),
+  authorityScope: z.array(z.string().trim().min(1).max(180)).max(120).optional(),
+  paperclipProfile: z.record(z.unknown()).optional()
 }).strict();
 
 const updateSchema = createSchema.partial();

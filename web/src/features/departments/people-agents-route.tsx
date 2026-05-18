@@ -12,9 +12,9 @@ import { WorkforceEntity, WorkforcePacket } from "../../types";
 
 type TypeFilter = "all" | WorkforceEntity["type"];
 type StatusFilter = "all" | WorkforceEntity["status"];
-type DetailTab = "profile" | "work" | "authority" | "files";
-type ScopeFilter = "all" | "humans" | "agents" | "attention";
-type SortKey = "name" | "department" | "updated" | "work";
+type DetailTab = "profile" | "access" | "work" | "authority" | "files";
+type ScopeFilter = "all" | "humans" | "agents" | "directors" | "attention";
+type SortKey = "name" | "department" | "updated" | "work" | "tools" | "knowledge";
 type DensityMode = "comfortable" | "compact";
 type RouteNotice = { tone: "success" | "error"; title: string };
 
@@ -42,6 +42,25 @@ function badgeTone(value?: string) {
 
 function typeLabel(type: WorkforceEntity["type"]) {
   return type === "human" ? "Human" : "Agent";
+}
+
+function listCount(value?: string[]) {
+  return Array.isArray(value) ? value.length : 0;
+}
+
+function bigFiveSummary(entity: WorkforceEntity) {
+  const profile = entity.bigFiveProfile || {};
+  const traits = Object.entries(profile).filter(([, value]) => typeof value === "number");
+  if (!traits.length) return "Big5 missing";
+  return traits
+    .sort((a, b) => Number(b[1]) - Number(a[1]))
+    .slice(0, 2)
+    .map(([key, value]) => `${key.slice(0, 1).toUpperCase()}${key.slice(1, 3)} ${value}`)
+    .join(" / ");
+}
+
+function paperclipRuntime(entity: WorkforceEntity) {
+  return entity.paperclipProfile?.runtimeStatus || entity.syncStatus || "not linked";
 }
 
 function needsAttention(entity: WorkforceEntity) {
@@ -99,6 +118,7 @@ function EntityAvatar({ entity }: { entity: WorkforceEntity }) {
 function entityMatches(entity: WorkforceEntity, query: string, type: TypeFilter, status: StatusFilter, scope: ScopeFilter) {
   if (scope === "humans" && entity.type !== "human") return false;
   if (scope === "agents" && entity.type !== "agent") return false;
+  if (scope === "directors" && entity.hierarchyLevel !== "department_director" && entity.hierarchyLevel !== "executive_root") return false;
   if (scope === "attention" && !needsAttention(entity)) return false;
   if (type !== "all" && entity.type !== type) return false;
   if (status !== "all" && entity.status !== status) return false;
@@ -109,7 +129,11 @@ function entityMatches(entity: WorkforceEntity, query: string, type: TypeFilter,
     entity.slug,
     entity.role,
     entity.department,
-    entity.model
+    entity.model,
+    entity.hierarchyLevel,
+    ...(entity.skillIndex || []),
+    ...(entity.knowledgeIndex || []),
+    ...(entity.toolIndex || [])
   ].filter(Boolean).join(" ").toLowerCase().includes(normalized);
 }
 
@@ -124,6 +148,12 @@ function sortEntities(entities: WorkforceEntity[], sort: SortKey) {
     if (sort === "work") {
       return (b.work?.summary.active ?? 0) - (a.work?.summary.active ?? 0) || a.name.localeCompare(b.name);
     }
+    if (sort === "tools") {
+      return listCount(b.toolIndex) - listCount(a.toolIndex) || a.name.localeCompare(b.name);
+    }
+    if (sort === "knowledge") {
+      return listCount(b.knowledgeIndex) - listCount(a.knowledgeIndex) || a.name.localeCompare(b.name);
+    }
     return a.name.localeCompare(b.name);
   });
 }
@@ -137,8 +167,21 @@ function defaultEntity(): Partial<WorkforceEntity> {
     role: "",
     personalityProfile: "supportive",
     runtimeMode: "semi_autonomous",
-    synchronizationEnabled: false
+    synchronizationEnabled: false,
+    hierarchyLevel: "department_director",
+    bigFiveProfile: { openness: 4, conscientiousness: 4, extraversion: 3, agreeableness: 4, neuroticism: 2 },
+    skillIndex: [],
+    knowledgeIndex: [],
+    toolIndex: [],
+    authorityScope: []
   };
+}
+
+function splitIndex(value: FormDataEntryValue | null) {
+  return String(value || "")
+    .split(/\n|,/)
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
 function WorkforceForm({
@@ -180,8 +223,20 @@ function WorkforceForm({
       personalityProfile: String(form.get("personalityProfile") || "supportive"),
       model: String(form.get("model") || "") || null,
       runtimeMode: String(form.get("runtimeMode") || "manual"),
-      paperclipAgentId: null,
-      synchronizationEnabled: false
+      paperclipAgentId: String(form.get("paperclipAgentId") || "") || null,
+      synchronizationEnabled: Boolean(form.get("synchronizationEnabled")),
+      hierarchyLevel: String(form.get("hierarchyLevel") || "") || null,
+      bigFiveProfile: {
+        openness: Number(form.get("bigFiveOpenness") || 0),
+        conscientiousness: Number(form.get("bigFiveConscientiousness") || 0),
+        extraversion: Number(form.get("bigFiveExtraversion") || 0),
+        agreeableness: Number(form.get("bigFiveAgreeableness") || 0),
+        neuroticism: Number(form.get("bigFiveNeuroticism") || 0)
+      },
+      skillIndex: splitIndex(form.get("skillIndex")),
+      knowledgeIndex: splitIndex(form.get("knowledgeIndex")),
+      toolIndex: splitIndex(form.get("toolIndex")),
+      authorityScope: splitIndex(form.get("authorityScope"))
     };
 
     setSaveState("saving");
@@ -278,6 +333,47 @@ function WorkforceForm({
           <CcField label="Model">
             {({ id }) => <CcTextInput defaultValue={values.model || ""} id={id} name="model" placeholder="gpt-5.4, claude, local..." />}
           </CcField>
+          <CcField label="Paperclip agent ID">
+            {({ id }) => <CcTextInput defaultValue={values.paperclipAgentId || ""} id={id} name="paperclipAgentId" placeholder="Runtime UUID or slug" />}
+          </CcField>
+          <CcField label="Hierarchy level">
+            {({ id }) => <CcTextInput defaultValue={values.hierarchyLevel || ""} id={id} name="hierarchyLevel" placeholder="executive_root, department_director..." />}
+          </CcField>
+          <label className="form-control">
+            <span className="label"><span className="label-text font-bold">Paperclip sync</span></span>
+            <span className="flex min-h-12 items-center gap-3 rounded-company border border-base-300 bg-base-100 px-3">
+              <input className="checkbox checkbox-primary" defaultChecked={Boolean(values.synchronizationEnabled)} name="synchronizationEnabled" type="checkbox" />
+              <span className="text-sm font-bold text-company-ink">Enable generated file sync queue</span>
+            </span>
+          </label>
+          <fieldset className="grid gap-2 rounded-company border border-base-300 p-3 md:col-span-2">
+            <legend className="px-1 text-sm font-bold text-company-muted">Big Five</legend>
+            <div className="grid gap-2 sm:grid-cols-5">
+              {[
+                ["bigFiveOpenness", "Openness", values.bigFiveProfile?.openness],
+                ["bigFiveConscientiousness", "Conscientiousness", values.bigFiveProfile?.conscientiousness],
+                ["bigFiveExtraversion", "Extraversion", values.bigFiveProfile?.extraversion],
+                ["bigFiveAgreeableness", "Agreeableness", values.bigFiveProfile?.agreeableness],
+                ["bigFiveNeuroticism", "Neuroticism", values.bigFiveProfile?.neuroticism]
+              ].map(([name, label, value]) => (
+                <label className="form-control" key={String(name)}>
+                  <span className="label"><span className="label-text text-xs font-bold">{label}</span></span>
+                  <input className="input input-bordered" defaultValue={Number(value || 0)} max={5} min={0} name={String(name)} step={1} type="number" />
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          {[
+            ["skillIndex", "Skills index", values.skillIndex],
+            ["knowledgeIndex", "Knowledge index", values.knowledgeIndex],
+            ["toolIndex", "Tools index", values.toolIndex],
+            ["authorityScope", "Authority scope", values.authorityScope]
+          ].map(([name, label, value]) => (
+            <label className="form-control md:col-span-2" key={String(name)}>
+              <span className="label"><span className="label-text font-bold">{label}</span></span>
+              <textarea className="textarea textarea-bordered min-h-20" defaultValue={Array.isArray(value) ? value.join("\n") : ""} name={String(name)}></textarea>
+            </label>
+          ))}
         </section>
 
         <div className="flex justify-end gap-2 border-t border-base-300 pt-4">
@@ -340,7 +436,7 @@ function DetailPanel({
           <div className="min-w-0">
             <h2 className="truncate text-xl font-black text-company-ink">{entity.name}</h2>
             <p className="text-sm text-company-muted">{entity.role || "Unassigned role"} - {entity.department || "06-kadry"}</p>
-            <p className="mt-1 text-xs font-bold uppercase text-company-muted">{typeLabel(entity.type)} / {runtimeLabels[entity.runtimeMode]} / {entity.work?.summary.active ?? 0} active work</p>
+            <p className="mt-1 text-xs font-bold uppercase text-company-muted">{typeLabel(entity.type)} / {runtimeLabels[entity.runtimeMode]} / Paperclip {paperclipRuntime(entity)}</p>
           </div>
         </div>
         <div className="flex shrink-0 gap-2">
@@ -352,7 +448,7 @@ function DetailPanel({
       </header>
 
       <div className="join">
-        {(["profile", "work", "authority", "files"] as DetailTab[]).map((item) => (
+        {(["profile", "access", "work", "authority", "files"] as DetailTab[]).map((item) => (
           <button className={`btn join-item btn-sm ${tab === item ? "btn-primary" : "btn-outline"}`} key={item} onClick={() => setTab(item)} type="button">{item}</button>
         ))}
       </div>
@@ -385,9 +481,50 @@ function DetailPanel({
               <div><dt className="font-bold text-company-muted">Manager</dt><dd>{entity.manager?.name || "No manager"}</dd></div>
               <div><dt className="font-bold text-company-muted">Personality</dt><dd>{entity.personalityProfile}</dd></div>
               <div><dt className="font-bold text-company-muted">Model</dt><dd>{entity.model || "Not configured"}</dd></div>
+              <div><dt className="font-bold text-company-muted">Hierarchy</dt><dd>{entity.hierarchyLevel || "Not configured"}</dd></div>
+              <div><dt className="font-bold text-company-muted">Paperclip</dt><dd className="break-all">{entity.paperclipAgentId || "Not linked"}</dd></div>
               <div><dt className="font-bold text-company-muted">Direct reports</dt><dd>{entity.directReportCount ?? 0}</dd></div>
+              <div><dt className="font-bold text-company-muted">Big Five</dt><dd>{bigFiveSummary(entity)}</dd></div>
               <div className="md:col-span-2"><dt className="font-bold text-company-muted">Description</dt><dd className="mt-1 leading-6">{entity.description || "No responsibilities written yet."}</dd></div>
             </dl>
+          </section>
+        ) : null}
+
+        {tab === "access" ? (
+          <section className="grid gap-4">
+            <div className="grid gap-2 sm:grid-cols-3">
+              {[
+                ["Skills", entity.skillIndex || []],
+                ["Knowledge", entity.knowledgeIndex || []],
+                ["Tools", entity.toolIndex || []]
+              ].map(([label, values]) => (
+                <div className="rounded-company border border-base-300 bg-base-200/45 p-3" key={String(label)}>
+                  <p className="text-xs font-bold uppercase text-company-muted">{label}</p>
+                  <p className="mt-1 text-2xl font-black text-company-ink">{Array.isArray(values) ? values.length : 0}</p>
+                </div>
+              ))}
+            </div>
+            {[
+              ["Skills", entity.skillIndex || []],
+              ["Knowledge", entity.knowledgeIndex || []],
+              ["Tools", entity.toolIndex || []],
+              ["Authority", entity.authorityScope || []]
+            ].map(([label, values]) => (
+              <div className="rounded-company border border-base-300 bg-base-100/75 p-3" key={String(label)}>
+                <h3 className="font-black text-company-ink">{label}</h3>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {(Array.isArray(values) && values.length ? values : ["Not configured"]).map((item) => (
+                    <span className="rounded-company border border-base-300 bg-base-200/70 px-2 py-1 text-xs font-bold text-company-muted" key={item}>{item}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+            {entity.paperclipProfile?.url ? (
+              <a className="btn btn-outline justify-start" href={entity.paperclipProfile.url} rel="noreferrer" target="_blank">
+                <i className="ph-bold ph-arrow-square-out" aria-hidden="true"></i>
+                <span>Open Paperclip profile</span>
+              </a>
+            ) : null}
           </section>
         ) : null}
 
@@ -483,7 +620,7 @@ export function PeopleAgentsRoute() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
   const [scopeFilter, setScopeFilter] = useState<ScopeFilter>("all");
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [density, setDensity] = useState<DensityMode>("comfortable");
@@ -498,7 +635,7 @@ export function PeopleAgentsRoute() {
     [entities, query, typeFilter, statusFilter, scopeFilter, sortKey]
   );
   const selected = filtered.find((entity) => entity.id === selectedId) || filtered[0] || null;
-  const hasActiveFilters = query.trim().length > 0 || typeFilter !== "all" || statusFilter !== "all" || scopeFilter !== "all" || sortKey !== "name";
+  const hasActiveFilters = query.trim().length > 0 || typeFilter !== "all" || statusFilter !== "active" || scopeFilter !== "all" || sortKey !== "name";
   const attentionCount = entities.filter(needsAttention).length;
 
   function refresh() {
@@ -508,7 +645,7 @@ export function PeopleAgentsRoute() {
   function clearFilters() {
     setQuery("");
     setTypeFilter("all");
-    setStatusFilter("all");
+    setStatusFilter("active");
     setScopeFilter("all");
     setSortKey("name");
   }
@@ -552,6 +689,7 @@ export function PeopleAgentsRoute() {
                   ["all", "All"],
                   ["humans", "Humans"],
                   ["agents", "Agents"],
+                  ["directors", "Directors"],
                   ["attention", `Needs attention${attentionCount ? ` (${attentionCount})` : ""}`]
                 ] as Array<[ScopeFilter, string]>).map(([scope, label]) => (
                   <button
@@ -584,6 +722,8 @@ export function PeopleAgentsRoute() {
                 <option value="department">Department</option>
                 <option value="updated">Updated</option>
                 <option value="work">Active work</option>
+                <option value="tools">Tools</option>
+                <option value="knowledge">Knowledge</option>
               </select>
               <CcButton className="whitespace-nowrap md:col-span-2 2xl:col-span-1" disabled={!hasActiveFilters} iconLeft="ph-x-circle" onClick={clearFilters} size="sm" variant="ghost">Clear</CcButton>
               </div>
@@ -614,10 +754,18 @@ export function PeopleAgentsRoute() {
                           </div>
                           <span className={`badge badge-sm shrink-0 ${badgeTone(entity.status)}`}>{entity.status}</span>
                         </div>
-                        <div className="grid gap-1 text-xs text-company-muted sm:grid-cols-3">
+                        <div className="grid gap-1 text-xs text-company-muted sm:grid-cols-3 lg:grid-cols-6">
                           <span className="truncate"><strong className="text-company-ink">{typeLabel(entity.type)}</strong></span>
-                          <span className="truncate">{runtimeLabels[entity.runtimeMode]}</span>
+                          <span className="truncate">{entity.hierarchyLevel || runtimeLabels[entity.runtimeMode]}</span>
+                          <span className="truncate">Paperclip {paperclipRuntime(entity)}</span>
+                          <span className="truncate">{listCount(entity.skillIndex)} skills</span>
+                          <span className="truncate">{listCount(entity.knowledgeIndex)} knowledge</span>
+                          <span className="truncate">{listCount(entity.toolIndex)} tools</span>
                           <span className="truncate">{entity.work?.summary.active ?? 0} active work</span>
+                        </div>
+                        <div className="grid gap-1 text-xs text-company-muted sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                          <span className="truncate">Manager: {entity.manager?.name || "No manager"}</span>
+                          <span className="truncate">{bigFiveSummary(entity)}</span>
                         </div>
                         {needsAttention(entity) ? (
                           <p className="text-xs font-bold text-warning">

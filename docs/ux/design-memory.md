@@ -1411,3 +1411,13 @@ of rediscovering them.
   desktop, tablet, and mobile with bridge/approval/MCP markers present, no
   overflow, no console issues, no failed requests, and zero unnamed visible
   controls.
+### 2026-05-18 - People/Agents Directory Access Indexes
+
+- Workforce management screens should privilege operational columns over
+  decorative counters: manager, hierarchy, runtime status, skills, knowledge,
+  tools, Big Five summary, and readiness should be visible in the roster before
+  opening details.
+- For AI agents, `skills`, `knowledge`, and `tools` are source-of-truth indexes
+  in CompanyCore first. They may be simple names in V1, but the UI should treat
+  them as actionable management data and leave room for future resource-linked
+  records.

@@ -127,6 +127,15 @@ continue from repository files alone:
   generated `agent.md`, `personality.md`, and `environment.md` resources plus a
   manual Paperclip sync outbox event. It does not replace `users`, human auth,
   existing `agents`, service keys, or future RBAC/skills contracts.
+  As of 2026-05-18, `PEOPLE-AGENTS-PAPERCLIP-001` extends that foundation with
+  Paperclip director source-of-truth fields: hierarchy level, Big Five,
+  skill/knowledge/tool indexes, authority scope, and Paperclip runtime profile.
+  Seed upserts the 13 director agents from Paperclip (00 AIA plus 01-12
+  department directors), links 01-12 to 00 AIA, archives old non-director seed
+  workforce agents, and keeps CompanyCore/Roost as the source of truth for the
+  generated markdown context. The Directory roster now defaults to active
+  records and exposes director, manager, runtime, Big Five, and access-index
+  scanning.
 - `docs/architecture/autonomous-company-operating-system.md`: accepted
   explicit architecture boundary from 2026-05-16. CompanyCore is the company
   operating system, not an embedded AI system. Humans use responsive web UI;

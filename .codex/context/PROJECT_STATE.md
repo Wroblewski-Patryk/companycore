@@ -82,6 +82,20 @@ Last updated: 2026-05-18
   `npm run test:api:local` passed against disposable PostgreSQL with all 24
   migrations and 6/6 API integration subtests. The validation container was
   removed afterwards.
+  On 2026-05-18, PEOPLE-AGENTS-PAPERCLIP-001 started the Paperclip director
+  roster extension for `06 People & Agents`. A read-only Paperclip audit
+  visited the 13 director agents across dashboard, instructions, skills,
+  knowledge, tools, and configuration. The implementation adds hierarchy,
+  Big Five, skill/knowledge/tool indexes, authority scope, and Paperclip
+  runtime profile fields to `workforce_entities`; seeds 00 AIA plus 01-12
+  directors as Paperclip-sourced workforce agents; enriches generated
+  `agent.md`, `personality.md`, and `environment.md`; and improves the
+  Directory list for manager, runtime, access-index, and director scanning.
+  Validation passed: `npm run validate`, `npm run test:api:local` with all 25
+  migrations and 6/6 API tests, disposable PostgreSQL migration + seed smoke
+  proving 13 active Paperclip directors, 0 active legacy seed agents, 0 bad
+  manager links, Big Five present, and generated files present, plus rendered
+  desktop/tablet/mobile UI proof with no horizontal overflow.
   As of 2026-05-16, the architectural direction is expanded in
   `docs/architecture/unified-organizational-operating-system.md`: CompanyCore
   is the unified organizational world state and operational source of truth,

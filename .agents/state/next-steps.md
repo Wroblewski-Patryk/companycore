@@ -4,6 +4,14 @@ Last updated: 2026-05-18
 
 ## NOW
 
+1. Production-smoke `PEOPLE-AGENTS-PAPERCLIP-001` after redeploy.
+   - Source:
+     `docs/planning/people-agents-paperclip-directors-task-contract.md`.
+   - Local verification passed. After deploy, smoke that the 13 Paperclip
+     director agents appear as active workforce records, old non-director seed
+     agents are archived, and `/people-agents` opens the improved active
+     Directory list.
+
 1. Deploy and smoke `DMS-06-WORKFORCE-001` when the next release window opens.
    - Source:
      `docs/planning/people-agents-workforce-v1-task-contract.md`.
@@ -116,6 +124,25 @@ Last updated: 2026-05-18
      pattern instead of restoring old page-local workbenches.
 
 ## NEXT
+
+1. Decide and implement external identity mapping before ClickUp assignee or
+   Google Drive sharing writes.
+   - Source:
+     `docs/planning/user-identity-integration-mapping-audit-2026-05-18.md`.
+   - Goal: make ClickUp user IDs, Google Drive permission IDs/emails, future
+     provider accounts, internal humans, AI agents, external collaborators,
+     and client employees converge through one CompanyCore identity-resolution
+     layer.
+   - First execution sequence:
+     `UIM-BE-001 External Identity Mapping Schema Decision`,
+     `UIM-BE-002 External Identity Read API`,
+     `UIM-BE-003 ClickUp Assignee Import`,
+     `UIM-BE-004 Task Assignment Command`,
+     `UIM-BE-005 Google Drive Permission Import`,
+     and `UIM-BE-006 Google Drive Share Command`.
+   - Do not add provider-specific assignee/share fields directly to `tasks` or
+     `google_drive_files` before this decision, because that would fragment
+     the future people/client/agent model.
 
 1. Unified Organizational OS backend program after current active work.
    - Source:

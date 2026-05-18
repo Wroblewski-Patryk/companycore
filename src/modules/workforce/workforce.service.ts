@@ -33,6 +33,13 @@ export type WorkforceEntityInput = {
   runtimeMode?: WorkforceRuntimeMode;
   paperclipAgentId?: string | null;
   synchronizationEnabled?: boolean;
+  hierarchyLevel?: string | null;
+  bigFiveProfile?: unknown;
+  skillIndex?: unknown;
+  knowledgeIndex?: unknown;
+  toolIndex?: unknown;
+  authorityScope?: unknown;
+  paperclipProfile?: unknown;
 };
 
 export type WorkforceEntityUpdate = Partial<Omit<WorkforceEntityInput, "type">> & {
@@ -72,9 +79,41 @@ function asSyncLog(value: unknown) {
   return Array.isArray(value) ? value.slice(-19) : [];
 }
 
-export function generateWorkforceMarkdown(entity: Pick<WorkforceEntity,
-  "name" | "description" | "department" | "role" | "personalityProfile" | "runtimeMode" | "model" | "paperclipAgentId" | "type"
->) {
+function asStringList(value: unknown) {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string" && item.trim().length > 0) : [];
+}
+
+function listMarkdown(value: unknown) {
+  const items = asStringList(value);
+  return items.length ? items.map((item) => `- ${item}`).join("\n") : "- Not configured";
+}
+
+function bigFiveMarkdown(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return "- Not configured";
+  const entries = Object.entries(value as Record<string, unknown>).filter(([, score]) => typeof score === "number");
+  return entries.length ? entries.map(([trait, score]) => `- ${trait}: ${score}/5`).join("\n") : "- Not configured";
+}
+
+type WorkforceMarkdownEntity = {
+  name: string;
+  description?: string | null;
+  department?: string | null;
+  role?: string | null;
+  personalityProfile: WorkforcePersonalityProfile;
+  runtimeMode: WorkforceRuntimeMode;
+  model?: string | null;
+  paperclipAgentId?: string | null;
+  type: WorkforceEntityType;
+  hierarchyLevel?: string | null;
+  bigFiveProfile?: unknown;
+  skillIndex?: unknown;
+  knowledgeIndex?: unknown;
+  toolIndex?: unknown;
+  authorityScope?: unknown;
+  paperclipProfile?: unknown;
+};
+
+export function generateWorkforceMarkdown(entity: WorkforceMarkdownEntity) {
   const responsibilities = entity.description?.trim() || "Responsibilities are defined by the role, assigned tasks, and CompanyCore governance.";
   const communicationStyle = {
     analytical: "Precise, evidence-led, and careful about uncertainty.",
@@ -100,9 +139,22 @@ export function generateWorkforceMarkdown(entity: Pick<WorkforceEntity,
 - Type: ${entity.type}
 - Role: ${entity.role || "Unassigned"}
 - Department: ${entity.department || "06-kadry"}
+- Hierarchy level: ${entity.hierarchyLevel || "not configured"}
 
 ## Responsibilities
 ${responsibilities}
+
+## Skills
+${listMarkdown(entity.skillIndex)}
+
+## Knowledge Access
+${listMarkdown(entity.knowledgeIndex)}
+
+## Tools
+${listMarkdown(entity.toolIndex)}
+
+## Authority Scope
+${listMarkdown(entity.authorityScope)}
 
 ## Runtime
 - Runtime mode: ${entity.runtimeMode}
@@ -113,6 +165,9 @@ ${responsibilities}
 
 ## Profile
 - Personality profile: ${entity.personalityProfile}
+
+## Big Five
+${bigFiveMarkdown(entity.bigFiveProfile)}
 
 ## Communication Style
 ${communicationStyle}
@@ -128,8 +183,26 @@ CompanyCore, now evolving toward Roost, is the organizational source of truth fo
 ## Organization
 The entity belongs to ${entity.department || "06 People / Agents"} and operates through CompanyCore records, tasks, resources, events, and governed API/MCP access.
 
+## Operating Map
+- 00 General: executive coordination and company-level routing.
+- 01 Strategy: direction, decisions, positioning, and operating model.
+- 02 Product: product definition, UX, requirements, and delivery framing.
+- 03 Revenue: sales, marketing, growth, and market feedback.
+- 04 Operations: work execution, routines, workflows, and delivery health.
+- 05 Relationships: customers, partners, stakeholders, and account context.
+- 06 People / Agents: humans, digital workers, roles, skills, hierarchy, and profiles.
+- 07 Finance: cost, revenue, budgets, metrics, and financial controls.
+- 08 Assets: files, folders, resources, knowledge, and storage.
+- 09 Technology: architecture, code, infrastructure, and technical reliability.
+- 10 Legal: privacy, contracts, compliance, and security boundaries.
+- 11 Innovation: experiments, portfolio exploration, and new capability discovery.
+- 12 Management: executive decisions, ownership, approvals, and company governance.
+
 ## Paperclip
-Paperclip is the external agent runtime. CompanyCore owns the configuration and synchronization packet; Paperclip executes with the latest synchronized context instead of becoming the source of truth.
+Paperclip is the external agent runtime. CompanyCore owns people, agent configuration, hierarchy, skills, knowledge access, tool access, generated markdown, and synchronization packets. Paperclip executes with the latest synchronized context instead of becoming the source of truth.
+
+## Runtime Profile
+${entity.paperclipProfile && typeof entity.paperclipProfile === "object" ? JSON.stringify(entity.paperclipProfile, null, 2) : "No Paperclip profile captured yet."}
 `
   };
 }
@@ -178,6 +251,24 @@ function entityReadiness(entity: WorkforceEntity & { _count?: { directReports?: 
         : entity.runtimeMode === "autonomous"
           ? "Autonomous mode needs explicit authority review."
           : "Agent stays inside manual or semi-autonomous supervision."
+    },
+    {
+      key: "runtime_indexes",
+      label: "Runtime indexes captured",
+      done: entity.type === "human" || (
+        asStringList(entity.skillIndex).length > 0
+        && asStringList(entity.knowledgeIndex).length > 0
+        && asStringList(entity.toolIndex).length > 0
+      ),
+      detail: entity.type === "human"
+        ? "Human records can use manual access notes until RBAC expands."
+        : "Agents need skill, knowledge, and tool indexes before reliable runtime sync."
+    },
+    {
+      key: "big_five",
+      label: "Big Five profile captured",
+      done: Boolean(entity.bigFiveProfile && typeof entity.bigFiveProfile === "object" && Object.keys(entity.bigFiveProfile as Record<string, unknown>).length >= 5),
+      detail: "Big Five remains a compact JSON profile until the future personality model expands."
     }
   ];
   const missingFields = items.filter((item) => !item.done).map((item) => item.key);
@@ -444,15 +535,40 @@ export async function createWorkforceEntity(workspaceId: string, input: Workforc
     runtimeMode: input.runtimeMode ?? "manual",
     model: input.model ?? null,
     paperclipAgentId: input.paperclipAgentId ?? null,
-    type: input.type
+    type: input.type,
+    hierarchyLevel: input.hierarchyLevel ?? null,
+    bigFiveProfile: input.bigFiveProfile ?? {},
+    skillIndex: input.skillIndex ?? [],
+    knowledgeIndex: input.knowledgeIndex ?? [],
+    toolIndex: input.toolIndex ?? [],
+    authorityScope: input.authorityScope ?? [],
+    paperclipProfile: input.paperclipProfile ?? {}
   });
 
   const entity = await prisma.workforceEntity.create({
     data: {
       workspaceId,
-      ...input,
+      type: input.type,
+      status: input.status,
+      name: input.name,
       slug,
+      description: input.description,
+      avatar: input.avatar,
       department: input.department ?? "06-kadry",
+      role: input.role,
+      managerId: input.managerId,
+      personalityProfile: input.personalityProfile,
+      model: input.model,
+      runtimeMode: input.runtimeMode,
+      paperclipAgentId: input.paperclipAgentId,
+      synchronizationEnabled: input.synchronizationEnabled,
+      hierarchyLevel: input.hierarchyLevel,
+      bigFiveProfile: toJsonInput(input.bigFiveProfile ?? {}),
+      skillIndex: toJsonInput(input.skillIndex ?? []),
+      knowledgeIndex: toJsonInput(input.knowledgeIndex ?? []),
+      toolIndex: toJsonInput(input.toolIndex ?? []),
+      authorityScope: toJsonInput(input.authorityScope ?? []),
+      paperclipProfile: toJsonInput(input.paperclipProfile ?? {}),
       generatedFiles: toJsonInput(generatedFiles)
     }
   });
@@ -492,14 +608,40 @@ export async function updateWorkforceEntity(workspaceId: string, id: string, inp
     runtimeMode: input.runtimeMode ?? existing.runtimeMode,
     model: input.model === undefined ? existing.model : input.model,
     paperclipAgentId: input.paperclipAgentId === undefined ? existing.paperclipAgentId : input.paperclipAgentId,
-    type: input.type ?? existing.type
+    type: input.type ?? existing.type,
+    hierarchyLevel: input.hierarchyLevel === undefined ? existing.hierarchyLevel : input.hierarchyLevel,
+    bigFiveProfile: input.bigFiveProfile === undefined ? existing.bigFiveProfile : input.bigFiveProfile,
+    skillIndex: input.skillIndex === undefined ? existing.skillIndex : input.skillIndex,
+    knowledgeIndex: input.knowledgeIndex === undefined ? existing.knowledgeIndex : input.knowledgeIndex,
+    toolIndex: input.toolIndex === undefined ? existing.toolIndex : input.toolIndex,
+    authorityScope: input.authorityScope === undefined ? existing.authorityScope : input.authorityScope,
+    paperclipProfile: input.paperclipProfile === undefined ? existing.paperclipProfile : input.paperclipProfile
   };
   const generatedFiles = generateWorkforceMarkdown(next);
 
   const entity = await prisma.workforceEntity.update({
     where: { id: existing.id },
     data: {
-      ...input,
+      ...(input.type !== undefined ? { type: input.type } : {}),
+      ...(input.status !== undefined ? { status: input.status } : {}),
+      ...(input.name !== undefined ? { name: input.name } : {}),
+      ...(input.description !== undefined ? { description: input.description } : {}),
+      ...(input.avatar !== undefined ? { avatar: input.avatar } : {}),
+      ...(input.department !== undefined ? { department: input.department } : {}),
+      ...(input.role !== undefined ? { role: input.role } : {}),
+      ...(input.managerId !== undefined ? { managerId: input.managerId } : {}),
+      ...(input.personalityProfile !== undefined ? { personalityProfile: input.personalityProfile } : {}),
+      ...(input.model !== undefined ? { model: input.model } : {}),
+      ...(input.runtimeMode !== undefined ? { runtimeMode: input.runtimeMode } : {}),
+      ...(input.paperclipAgentId !== undefined ? { paperclipAgentId: input.paperclipAgentId } : {}),
+      ...(input.synchronizationEnabled !== undefined ? { synchronizationEnabled: input.synchronizationEnabled } : {}),
+      ...(input.hierarchyLevel !== undefined ? { hierarchyLevel: input.hierarchyLevel } : {}),
+      ...(input.bigFiveProfile !== undefined ? { bigFiveProfile: toJsonInput(input.bigFiveProfile) } : {}),
+      ...(input.skillIndex !== undefined ? { skillIndex: toJsonInput(input.skillIndex) } : {}),
+      ...(input.knowledgeIndex !== undefined ? { knowledgeIndex: toJsonInput(input.knowledgeIndex) } : {}),
+      ...(input.toolIndex !== undefined ? { toolIndex: toJsonInput(input.toolIndex) } : {}),
+      ...(input.authorityScope !== undefined ? { authorityScope: toJsonInput(input.authorityScope) } : {}),
+      ...(input.paperclipProfile !== undefined ? { paperclipProfile: toJsonInput(input.paperclipProfile) } : {}),
       ...(input.name || input.slug ? { slug: await uniqueSlug(workspaceId, input.name ?? existing.name, input.slug ?? existing.slug, existing.id) } : {}),
       generatedFiles: toJsonInput(generatedFiles),
       syncStatus: existing.syncStatus === "synced" ? "stale" : existing.syncStatus
@@ -556,7 +698,14 @@ export async function syncWorkforceEntity(workspaceId: string, id: string, reque
           role: existing.role,
           runtimeMode: existing.runtimeMode,
           model: existing.model,
-          paperclipAgentId: existing.paperclipAgentId
+          paperclipAgentId: existing.paperclipAgentId,
+          hierarchyLevel: existing.hierarchyLevel,
+          bigFiveProfile: existing.bigFiveProfile,
+          skillIndex: existing.skillIndex,
+          knowledgeIndex: existing.knowledgeIndex,
+          toolIndex: existing.toolIndex,
+          authorityScope: existing.authorityScope,
+          paperclipProfile: existing.paperclipProfile
         },
         generatedFiles
       }

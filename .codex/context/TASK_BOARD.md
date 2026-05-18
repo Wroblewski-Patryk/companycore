@@ -53,6 +53,18 @@
 
 ## Recent Checkpoints
 
+- 2026-05-18: Paperclip director roster extension implemented for
+  `06 People & Agents`. A read-only Paperclip audit captured 00 AIA plus 12
+  department directors. `workforce_entities` now stores hierarchy level,
+  Big Five, skill/knowledge/tool indexes, authority scope, and Paperclip
+  runtime profile. Seed upserts the 13 Paperclip director agents, links 01-12
+  to 00 AIA, and archives old non-director seed workforce agents. Generated
+  markdown now includes hierarchy, indexes, Big Five, organization context,
+  and the CompanyCore source-of-truth boundary. Directory now defaults to
+  active records and shows director filtering, manager, runtime, Big Five, and
+  access-index scanning. Validation passed: `npm run validate`,
+  `npm run test:api:local`, disposable PostgreSQL seed smoke, and rendered
+  desktop/tablet/mobile proof with no horizontal overflow.
 - 2026-05-18: Foundation P1 hardening wave implemented. Added
   `npm run test:api:local`, `npm run check:route-capabilities`, request IDs,
   security headers, API/auth rate limits, a compatible structured API error

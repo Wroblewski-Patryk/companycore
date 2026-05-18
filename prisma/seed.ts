@@ -984,7 +984,18 @@ function generatedWorkforceFiles(entity: {
   runtimeMode: string;
   model?: string | null;
   paperclipAgentId?: string | null;
+  description?: string | null;
+  hierarchyLevel?: string | null;
+  bigFiveProfile?: Record<string, number>;
+  skillIndex?: string[];
+  knowledgeIndex?: string[];
+  toolIndex?: string[];
 }) {
+  const responsibilities = entity.description || "Responsibilities are defined by CompanyCore tasks, roles, and governance.";
+  const bigFive = entity.bigFiveProfile
+    ? Object.entries(entity.bigFiveProfile).map(([key, value]) => `- ${key}: ${value}/5`).join("\n")
+    : "- Not configured";
+  const list = (items?: string[]) => items?.length ? items.map((item) => `- ${item}`).join("\n") : "- Not configured";
   return {
     "agent.md": `# ${entity.name}
 
@@ -992,9 +1003,19 @@ function generatedWorkforceFiles(entity: {
 - Type: ${entity.type}
 - Role: ${entity.role || "Unassigned"}
 - Department: ${entity.department || "06-kadry"}
+- Hierarchy level: ${entity.hierarchyLevel || "not configured"}
 
 ## Responsibilities
-Responsibilities are defined by CompanyCore tasks, roles, and governance.
+${responsibilities}
+
+## Skill Index
+${list(entity.skillIndex)}
+
+## Knowledge Index
+${list(entity.knowledgeIndex)}
+
+## Tool Index
+${list(entity.toolIndex)}
 
 ## Runtime
 - Runtime mode: ${entity.runtimeMode}
@@ -1006,6 +1027,9 @@ Responsibilities are defined by CompanyCore tasks, roles, and governance.
 ## Profile
 - Personality profile: ${entity.personalityProfile}
 
+## Big Five
+${bigFive}
+
 ## Communication Style
 Managed by CompanyCore.
 
@@ -1015,9 +1039,232 @@ Follow CompanyCore authority, evidence, and approval guardrails.
     "environment.md": `# ${entity.name} Environment
 
 CompanyCore/Roost is the organizational source of truth. Paperclip is the external runtime for synchronized agents.
+
+## Organization Context
+CompanyCore manages the 00-12 operating departments, workforce roster, responsibilities, permissions, knowledge, resources, tasks, events, and generated runtime files. Paperclip must consume synchronized context and must not become the source of truth for people, roles, skills, tools, or knowledge access.
 `
   };
 }
+
+const commonDirectorSkills = [
+  "APQC Process Map",
+  "Agent Personality Behavior Design",
+  "Customer Discovery Feedback Loop",
+  "DACI Governance Gates",
+  "Featherly CMS Delivery System",
+  "Legal Privacy Review",
+  "MCP Product Design",
+  "MECE Responsibility Design"
+] as const;
+
+const commonToolIndex = [
+  "Agent Events",
+  "Agent Logs",
+  "CompanyCore MCP bridge",
+  "Operations work items",
+  "Assets context",
+  "Tasks",
+  "Approvals"
+] as const;
+
+const paperclipDirectorSeeds = [
+  {
+    name: "00 AIA(AI Assistant)",
+    slug: "00-aia-ai-assistant",
+    role: "AI Assistant and Executive Coordination Hub",
+    title: "General - AI Assistant and Executive Coordination Hub",
+    department: "00-ogolny",
+    paperclipAgentId: "e48c5fab-70ec-4b6c-a1c0-e3ec4566bca1",
+    reportsToSlug: null,
+    hierarchyLevel: "executive_root",
+    personalityProfile: "executive",
+    bigFiveProfile: { openness: 4, conscientiousness: 5, extraversion: 3, agreeableness: 4, neuroticism: 2 },
+    toolCount: 71,
+    knowledgeCount: 2,
+    runtimeStatus: "idle",
+    description: "Executive coordination root for LuckySparrow: routes operator intent to the right chief, maintains the top-level operating map, and receives bottom-up reports from all 12 chiefs. Uses APQC, PAEI, and MECE to keep the company coherent."
+  },
+  {
+    name: "01 CSO(Chief Strategy Officer)",
+    slug: "01-cso-chief-strategy-officer",
+    role: "Chief Strategy Officer",
+    title: "Researcher - Chief Strategy Officer",
+    department: "01-strategia",
+    paperclipAgentId: "8adc0ced-7f18-4355-b26e-848ec46509ec",
+    reportsToSlug: "00-aia-ai-assistant",
+    hierarchyLevel: "department_director",
+    personalityProfile: "researcher",
+    bigFiveProfile: { openness: 5, conscientiousness: 4, extraversion: 3, agreeableness: 3, neuroticism: 2 },
+    toolCount: 20,
+    knowledgeCount: 7,
+    runtimeStatus: "paused"
+  },
+  {
+    name: "02 CPO(Chief Product Officer)",
+    slug: "02-cpo-chief-product-officer",
+    role: "Chief Product Officer",
+    title: "PM - Chief Product Officer",
+    department: "02-produkt",
+    paperclipAgentId: "5f421952-a0a2-46fa-8a1c-7d942f6d1c77",
+    reportsToSlug: "00-aia-ai-assistant",
+    hierarchyLevel: "department_director",
+    personalityProfile: "creative",
+    bigFiveProfile: { openness: 5, conscientiousness: 4, extraversion: 3, agreeableness: 4, neuroticism: 2 },
+    toolCount: 29,
+    knowledgeCount: 50,
+    runtimeStatus: "idle"
+  },
+  {
+    name: "03 CRO(Chief Revenue Officer)",
+    slug: "03-cro-chief-revenue-officer",
+    role: "Chief Revenue Officer",
+    title: "CMO - Chief Revenue Officer",
+    department: "03-sprzedaz",
+    paperclipAgentId: "9179eebb-e51c-4982-844f-146d3b021c46",
+    reportsToSlug: "00-aia-ai-assistant",
+    hierarchyLevel: "department_director",
+    personalityProfile: "executive",
+    bigFiveProfile: { openness: 4, conscientiousness: 4, extraversion: 5, agreeableness: 3, neuroticism: 2 },
+    toolCount: 14,
+    knowledgeCount: 147,
+    runtimeStatus: "idle"
+  },
+  {
+    name: "04 COO(Chief Operating Officer)",
+    slug: "04-coo-chief-operating-officer",
+    role: "Chief Operating Officer",
+    title: "DevOps - Chief Operating Officer",
+    department: "04-operacje",
+    paperclipAgentId: "a86877e6-6277-4754-9b32-512755428f48",
+    reportsToSlug: "00-aia-ai-assistant",
+    hierarchyLevel: "department_director",
+    personalityProfile: "analytical",
+    bigFiveProfile: { openness: 4, conscientiousness: 5, extraversion: 3, agreeableness: 3, neuroticism: 2 },
+    toolCount: 32,
+    knowledgeCount: 20,
+    runtimeStatus: "idle"
+  },
+  {
+    name: "05 CCO(Chief Customer Officer)",
+    slug: "05-cco-chief-customer-officer",
+    role: "Chief Customer Officer",
+    title: "General - Chief Customer Officer",
+    department: "05-relacje",
+    paperclipAgentId: "d181cf74-4b50-4936-90d1-e81981691d91",
+    reportsToSlug: "00-aia-ai-assistant",
+    hierarchyLevel: "department_director",
+    personalityProfile: "supportive",
+    bigFiveProfile: { openness: 4, conscientiousness: 4, extraversion: 4, agreeableness: 5, neuroticism: 2 },
+    toolCount: 14,
+    knowledgeCount: 522,
+    runtimeStatus: "idle"
+  },
+  {
+    name: "06 CHRO(Chief Human Resources Officer)",
+    slug: "06-chro-chief-human-resources-officer",
+    role: "Chief Human Resources Officer",
+    title: "General - Chief Human Resources Officer",
+    department: "06-kadry",
+    paperclipAgentId: "38b87a38-bfc2-4201-8690-62b7dec1898c",
+    reportsToSlug: "00-aia-ai-assistant",
+    hierarchyLevel: "department_director",
+    personalityProfile: "supportive",
+    bigFiveProfile: { openness: 4, conscientiousness: 4, extraversion: 4, agreeableness: 5, neuroticism: 2 },
+    toolCount: 106,
+    knowledgeCount: 11,
+    runtimeStatus: "idle"
+  },
+  {
+    name: "07 CFO(Chief Financial Officer)",
+    slug: "07-cfo-chief-financial-officer",
+    role: "Chief Financial Officer",
+    title: "CFO - Chief Financial Officer",
+    department: "07-finanse",
+    paperclipAgentId: "3757a439-1655-4272-b152-916024039068",
+    reportsToSlug: "00-aia-ai-assistant",
+    hierarchyLevel: "department_director",
+    personalityProfile: "analytical",
+    bigFiveProfile: { openness: 3, conscientiousness: 5, extraversion: 3, agreeableness: 3, neuroticism: 2 },
+    toolCount: 57,
+    knowledgeCount: 27,
+    runtimeStatus: "idle"
+  },
+  {
+    name: "08 CAO(Chief Assets Officer)",
+    slug: "08-cao-chief-assets-officer",
+    role: "Chief Assets Officer",
+    title: "General - Chief Assets Officer",
+    department: "08-zasoby",
+    paperclipAgentId: "c62a3b01-3ee7-462b-a080-4d8525c4f96b",
+    reportsToSlug: "00-aia-ai-assistant",
+    hierarchyLevel: "department_director",
+    personalityProfile: "analytical",
+    bigFiveProfile: { openness: 4, conscientiousness: 5, extraversion: 3, agreeableness: 4, neuroticism: 2 },
+    toolCount: 23,
+    knowledgeCount: 19,
+    runtimeStatus: "idle"
+  },
+  {
+    name: "09 CTO(Chief Technology Officer)",
+    slug: "09-cto-chief-technology-officer",
+    role: "Chief Technology Officer",
+    title: "CTO - Chief Technology Officer",
+    department: "09-technologia",
+    paperclipAgentId: "40feaabb-bde8-4413-80eb-e5f7d9baad23",
+    reportsToSlug: "00-aia-ai-assistant",
+    hierarchyLevel: "department_director",
+    personalityProfile: "analytical",
+    bigFiveProfile: { openness: 5, conscientiousness: 5, extraversion: 3, agreeableness: 3, neuroticism: 2 },
+    toolCount: 27,
+    knowledgeCount: 2,
+    runtimeStatus: "idle"
+  },
+  {
+    name: "10 CLO(Chief Legal Officer)",
+    slug: "10-clo-chief-legal-officer",
+    role: "Chief Legal Officer",
+    title: "Security - Chief Legal Officer",
+    department: "10-prawo",
+    paperclipAgentId: "438ddea0-4968-44d9-8ba2-86128ad28f3e",
+    reportsToSlug: "00-aia-ai-assistant",
+    hierarchyLevel: "department_director",
+    personalityProfile: "analytical",
+    bigFiveProfile: { openness: 3, conscientiousness: 5, extraversion: 2, agreeableness: 3, neuroticism: 2 },
+    toolCount: 58,
+    knowledgeCount: 25,
+    runtimeStatus: "idle"
+  },
+  {
+    name: "11 CINO(Chief Innovation Officer)",
+    slug: "11-cino-chief-innovation-officer",
+    role: "Chief Innovation Officer",
+    title: "Researcher - Chief Innovation Officer",
+    department: "11-innowacje",
+    paperclipAgentId: "e054757b-d8b5-439e-acff-b66430a2b46f",
+    reportsToSlug: "00-aia-ai-assistant",
+    hierarchyLevel: "department_director",
+    personalityProfile: "researcher",
+    bigFiveProfile: { openness: 5, conscientiousness: 4, extraversion: 3, agreeableness: 4, neuroticism: 2 },
+    toolCount: 31,
+    knowledgeCount: 161,
+    runtimeStatus: "idle"
+  },
+  {
+    name: "12 CEO(Chief Executive Officer)",
+    slug: "12-ceo-chief-executive-officer",
+    role: "Chief Executive Officer",
+    title: "CEO - Chief Executive Officer",
+    department: "12-zarzadzanie",
+    paperclipAgentId: "42c35233-d0a5-4f51-9105-fc9d113fb809",
+    reportsToSlug: "00-aia-ai-assistant",
+    hierarchyLevel: "department_director",
+    personalityProfile: "executive",
+    bigFiveProfile: { openness: 4, conscientiousness: 5, extraversion: 4, agreeableness: 3, neuroticism: 2 },
+    toolCount: 68,
+    knowledgeCount: 16,
+    runtimeStatus: "idle"
+  }
+] as const;
 
 async function ensureWorkforceFoundation(workspaceId: string, owner: { id: string; email: string; name: string | null }) {
   await prisma.workforceEntity.upsert({
@@ -1034,13 +1281,23 @@ async function ensureWorkforceFoundation(workspaceId: string, owner: { id: strin
       role: "Owner",
       personalityProfile: "executive",
       runtimeMode: "manual",
+      hierarchyLevel: "owner",
+      bigFiveProfile: { openness: 4, conscientiousness: 5, extraversion: 4, agreeableness: 4, neuroticism: 2 },
+      skillIndex: ["Company ownership", "Approval", "Strategy"],
+      knowledgeIndex: ["CompanyCore source of truth", "Workspace administration"],
+      toolIndex: ["CompanyCore web"],
       generatedFiles: generatedWorkforceFiles({
         name: owner.name || owner.email,
         type: "human",
         role: "Owner",
         department: "06-kadry",
         personalityProfile: "executive",
-        runtimeMode: "manual"
+        runtimeMode: "manual",
+        hierarchyLevel: "owner",
+        bigFiveProfile: { openness: 4, conscientiousness: 5, extraversion: 4, agreeableness: 4, neuroticism: 2 },
+        skillIndex: ["Company ownership", "Approval", "Strategy"],
+        knowledgeIndex: ["CompanyCore source of truth", "Workspace administration"],
+        toolIndex: ["CompanyCore web"]
       })
     },
     create: {
@@ -1054,71 +1311,150 @@ async function ensureWorkforceFoundation(workspaceId: string, owner: { id: strin
       personalityProfile: "executive",
       runtimeMode: "manual",
       synchronizationEnabled: false,
+      hierarchyLevel: "owner",
+      bigFiveProfile: { openness: 4, conscientiousness: 5, extraversion: 4, agreeableness: 4, neuroticism: 2 },
+      skillIndex: ["Company ownership", "Approval", "Strategy"],
+      knowledgeIndex: ["CompanyCore source of truth", "Workspace administration"],
+      toolIndex: ["CompanyCore web"],
       generatedFiles: generatedWorkforceFiles({
         name: owner.name || owner.email,
         type: "human",
         role: "Owner",
         department: "06-kadry",
         personalityProfile: "executive",
-        runtimeMode: "manual"
+        runtimeMode: "manual",
+        hierarchyLevel: "owner",
+        bigFiveProfile: { openness: 4, conscientiousness: 5, extraversion: 4, agreeableness: 4, neuroticism: 2 },
+        skillIndex: ["Company ownership", "Approval", "Strategy"],
+        knowledgeIndex: ["CompanyCore source of truth", "Workspace administration"],
+        toolIndex: ["CompanyCore web"]
       }),
       source: "user",
       externalId: owner.id
     }
   });
 
-  const agentRoles = companyRoleSeeds.filter((role) => role.type === "agent");
-  for (const role of agentRoles) {
-    const slug = role.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-    await prisma.workforceEntity.upsert({
+  await prisma.workforceEntity.updateMany({
+    where: { workspaceId, source: "seed", type: "agent" },
+    data: { status: "archived", synchronizationEnabled: false, syncStatus: "stale" }
+  });
+
+  const directorBySlug = new Map<string, { id: string }>();
+  for (const director of paperclipDirectorSeeds) {
+    const manager = director.reportsToSlug ? directorBySlug.get(director.reportsToSlug) : null;
+    const skillIndex = [...commonDirectorSkills];
+    const knowledgeIndex = [
+      `${director.department} department resources`,
+      "Company resources",
+      "Google Drive files",
+      "ClickUp tables",
+      "Tasks",
+      `${director.knowledgeCount} assigned Paperclip resources`
+    ];
+    const toolIndex = [
+      ...commonToolIndex,
+      `${director.toolCount} Paperclip recommended tools`
+    ];
+    const description = director.description
+      || `Owns department ${director.department} as ${director.role}. Delegates work top-down to future managers, reports progress bottom-up to 00 AIA, and runs the department with APQC, PAEI, and MECE discipline.`;
+    const generatedFiles = generatedWorkforceFiles({
+      name: director.name,
+      type: "agent",
+      role: director.role,
+      department: director.department,
+      personalityProfile: director.personalityProfile,
+      runtimeMode: "semi_autonomous",
+      model: "gpt-5.3-codex",
+      paperclipAgentId: director.paperclipAgentId,
+      description,
+      hierarchyLevel: director.hierarchyLevel,
+      bigFiveProfile: director.bigFiveProfile,
+      skillIndex,
+      knowledgeIndex,
+      toolIndex
+    });
+    const record = await prisma.workforceEntity.upsert({
       where: {
         workspaceId_source_externalId: {
           workspaceId,
-          source: "seed",
-          externalId: slug
+          source: "paperclip",
+          externalId: director.paperclipAgentId
         }
       },
       update: {
-        name: role.name,
-        department: "06-kadry",
-        role: role.name,
-        description: role.responsibilities.join(", "),
-        generatedFiles: generatedWorkforceFiles({
-          name: role.name,
-          type: "agent",
-          role: role.name,
-          department: "06-kadry",
-          personalityProfile: "supportive",
-          runtimeMode: "semi_autonomous",
-          paperclipAgentId: slug
-        })
+        name: director.name,
+        slug: director.slug,
+        status: "active",
+        department: director.department,
+        role: director.role,
+        description,
+        managerId: manager?.id ?? null,
+        personalityProfile: director.personalityProfile,
+        model: "gpt-5.3-codex",
+        runtimeMode: "semi_autonomous",
+        paperclipAgentId: director.paperclipAgentId,
+        synchronizationEnabled: true,
+        hierarchyLevel: director.hierarchyLevel,
+        bigFiveProfile: director.bigFiveProfile,
+        skillIndex,
+        knowledgeIndex,
+        toolIndex,
+        authorityScope: ["department_lead", "reports_to_aia", director.department],
+        paperclipProfile: {
+          url: `https://paperclip.luckysparrow.ch/LUC/agents/${director.slug}/dashboard`,
+          title: director.title,
+          runtimeStatus: director.runtimeStatus,
+          adapterType: "Codex (local)",
+          model: "gpt-5.3-codex",
+          scrapeDate: "2026-05-18",
+          toolCount: director.toolCount,
+          knowledgeCount: director.knowledgeCount,
+          manager: director.reportsToSlug
+        },
+        generatedFiles,
+        syncStatus: "stale",
+        source: "paperclip",
+        externalId: director.paperclipAgentId
       },
       create: {
         workspaceId,
         type: "agent",
         status: "active",
-        name: role.name,
-        slug,
-        description: role.responsibilities.join(", "),
-        department: "06-kadry",
-        role: role.name,
-        personalityProfile: role.name.includes("Documentation") ? "researcher" : role.name.includes("CEO") ? "executive" : "supportive",
+        name: director.name,
+        slug: director.slug,
+        description,
+        department: director.department,
+        role: director.role,
+        managerId: manager?.id ?? null,
+        personalityProfile: director.personalityProfile,
         runtimeMode: "semi_autonomous",
-        paperclipAgentId: slug,
+        model: "gpt-5.3-codex",
+        paperclipAgentId: director.paperclipAgentId,
         synchronizationEnabled: true,
-        generatedFiles: generatedWorkforceFiles({
-          name: role.name,
-          type: "agent",
-          role: role.name,
-          department: "06-kadry",
-          personalityProfile: "supportive",
-          runtimeMode: "semi_autonomous",
-          paperclipAgentId: slug
-        }),
-        source: "seed",
-        externalId: slug
+        hierarchyLevel: director.hierarchyLevel,
+        bigFiveProfile: director.bigFiveProfile,
+        skillIndex,
+        knowledgeIndex,
+        toolIndex,
+        authorityScope: ["department_lead", "reports_to_aia", director.department],
+        paperclipProfile: {
+          url: `https://paperclip.luckysparrow.ch/LUC/agents/${director.slug}/dashboard`,
+          title: director.title,
+          runtimeStatus: director.runtimeStatus,
+          adapterType: "Codex (local)",
+          model: "gpt-5.3-codex",
+          scrapeDate: "2026-05-18",
+          toolCount: director.toolCount,
+          knowledgeCount: director.knowledgeCount,
+          manager: director.reportsToSlug
+        },
+        generatedFiles,
+        syncStatus: "stale",
+        source: "paperclip",
+        externalId: director.paperclipAgentId
       }
     });
+    directorBySlug.set(director.slug, record);
   }
 }
 
