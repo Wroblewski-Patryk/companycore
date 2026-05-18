@@ -2,6 +2,7 @@ import { FormEvent, useMemo, useState } from "react";
 import { api } from "../../api/client";
 import { userErrorMessage } from "../../api/errors";
 import { CcButton } from "../../components/cc-button";
+import { CcDataTable, type CcTableColumn } from "../../components/cc-data-table";
 import { CcField } from "../../components/cc-field";
 import { CcNotice } from "../../components/cc-notice";
 import { CcTextInput } from "../../components/cc-text-input";
@@ -10,12 +11,10 @@ import { useOwnerPacket } from "../../hooks/use-owner-packet";
 import { useLanguage } from "../../i18n/i18n";
 import { WorkforceEntity, WorkforcePacket } from "../../types";
 
-type TypeFilter = "all" | WorkforceEntity["type"];
 type StatusFilter = "all" | WorkforceEntity["status"];
 type DetailTab = "profile" | "access" | "work" | "authority" | "files";
 type ScopeFilter = "all" | "humans" | "agents" | "directors" | "attention";
 type SortKey = "name" | "department" | "updated" | "work" | "tools" | "knowledge";
-type DensityMode = "comfortable" | "compact";
 type RouteNotice = { tone: "success" | "error"; title: string };
 
 const runtimeLabels: Record<WorkforceEntity["runtimeMode"], string> = {
@@ -146,12 +145,11 @@ function RowAction({
   );
 }
 
-function entityMatches(entity: WorkforceEntity, query: string, type: TypeFilter, status: StatusFilter, scope: ScopeFilter) {
+function entityMatches(entity: WorkforceEntity, query: string, status: StatusFilter, scope: ScopeFilter) {
   if (scope === "humans" && entity.type !== "human") return false;
   if (scope === "agents" && entity.type !== "agent") return false;
   if (scope === "directors" && entity.hierarchyLevel !== "department_director" && entity.hierarchyLevel !== "executive_root") return false;
   if (scope === "attention" && !needsAttention(entity)) return false;
-  if (type !== "all" && entity.type !== type) return false;
   if (status !== "all" && entity.status !== status) return false;
   const normalized = query.trim().toLowerCase();
   if (!normalized) return true;
@@ -668,11 +666,9 @@ export function PeopleAgentsRoute() {
   const { t } = useLanguage();
   const [refreshKey, setRefreshKey] = useState(0);
   const [query, setQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
   const [scopeFilter, setScopeFilter] = useState<ScopeFilter>("all");
   const [sortKey, setSortKey] = useState<SortKey>("name");
-  const [density, setDensity] = useState<DensityMode>("comfortable");
   const [selectedId, setSelectedId] = useState("");
   const [detailTab, setDetailTab] = useState<DetailTab>("profile");
   const [editingEntity, setEditingEntity] = useState<WorkforceEntity | null | undefined>(undefined);
@@ -680,12 +676,72 @@ export function PeopleAgentsRoute() {
   const packet = useOwnerPacket<WorkforcePacket>(`/v1/workforce?refresh=${refreshKey}`, true, t);
   const entities = packet.data?.entities || [];
   const filtered = useMemo(
-    () => sortEntities(entities.filter((entity) => entityMatches(entity, query, typeFilter, statusFilter, scopeFilter)), sortKey),
-    [entities, query, typeFilter, statusFilter, scopeFilter, sortKey]
+    () => sortEntities(entities.filter((entity) => entityMatches(entity, query, statusFilter, scopeFilter)), sortKey),
+    [entities, query, statusFilter, scopeFilter, sortKey]
   );
   const selected = selectedId ? entities.find((entity) => entity.id === selectedId) || null : null;
-  const hasActiveFilters = query.trim().length > 0 || typeFilter !== "all" || statusFilter !== "active" || scopeFilter !== "all" || sortKey !== "name";
+  const hasActiveFilters = query.trim().length > 0 || statusFilter !== "active" || scopeFilter !== "all" || sortKey !== "name";
   const attentionCount = entities.filter(needsAttention).length;
+  const tableColumns = useMemo<Array<CcTableColumn<WorkforceEntity>>>(() => [
+    {
+      key: "person",
+      header: "Person / Agent",
+      mobileLabel: "Record",
+      className: "min-w-[15rem]",
+      cell: (entity) => (
+        <div className="flex min-w-0 items-center gap-3">
+          <EntityAvatar entity={entity} />
+          <div className="min-w-0">
+            <strong className="block truncate text-company-ink">{entity.name}</strong>
+            <span className="block truncate text-xs text-company-muted">{entity.slug}</span>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: "kind",
+      header: "Kind",
+      mobileLabel: "Kind",
+      cell: (entity) => <span className="font-bold text-company-ink">{typeLabel(entity.type)}</span>
+    },
+    {
+      key: "role",
+      header: "Role / Department",
+      mobileLabel: "Role",
+      className: "min-w-[13rem]",
+      cell: (entity) => (
+        <div className="min-w-0">
+          <span className="block truncate text-company-ink">{entity.role || "Unassigned role"}</span>
+          <span className="block truncate text-xs text-company-muted">{entity.department || "06-kadry"}</span>
+        </div>
+      )
+    },
+    {
+      key: "manager",
+      header: "Manager",
+      mobileLabel: "Manager",
+      className: "min-w-[10rem]",
+      cell: (entity) => <span className="block truncate">{entity.manager?.name || "No manager"}</span>
+    },
+    {
+      key: "status",
+      header: "Status",
+      mobileLabel: "Status",
+      cell: (entity) => <span className={`badge badge-sm ${badgeTone(entity.status)}`}>{entity.status}</span>
+    },
+    {
+      key: "runtime",
+      header: "Runtime",
+      mobileLabel: "Runtime",
+      className: "min-w-[10rem]",
+      cell: (entity) => (
+        <div>
+          <span className="block text-company-ink">{entity.hierarchyLevel || runtimeLabels[entity.runtimeMode]}</span>
+          <span className="block text-xs text-company-muted">Paperclip {paperclipRuntime(entity)}</span>
+        </div>
+      )
+    }
+  ], []);
 
   function refresh() {
     setRefreshKey((current) => current + 1);
@@ -693,7 +749,6 @@ export function PeopleAgentsRoute() {
 
   function clearFilters() {
     setQuery("");
-    setTypeFilter("all");
     setStatusFilter("active");
     setScopeFilter("all");
     setSortKey("name");
@@ -750,7 +805,7 @@ export function PeopleAgentsRoute() {
               <div className="flex flex-wrap gap-2">
                 {([
                   ["all", "All"],
-                  ["humans", "Humans"],
+                  ["humans", "People"],
                   ["agents", "Agents"],
                   ["directors", "Directors"],
                   ["attention", `Needs attention${attentionCount ? ` (${attentionCount})` : ""}`]
@@ -765,17 +820,12 @@ export function PeopleAgentsRoute() {
                   </button>
                 ))}
               </div>
-              <div className="grid gap-2 md:grid-cols-2 2xl:grid-cols-[minmax(0,1fr)_10rem_10rem_10rem_max-content] 2xl:items-center">
+              <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_10rem_10rem_max-content] md:items-center">
               <label className="input input-bordered flex min-w-0 items-center gap-2 bg-base-100/65">
                 <i className="ph-bold ph-magnifying-glass text-company-muted" aria-hidden="true"></i>
                 <span className="sr-only">Search workforce</span>
                 <input className="grow" onChange={(event) => setQuery(event.target.value)} placeholder="Search people, agents, roles..." type="search" value={query} />
               </label>
-              <select aria-label="Type filter" className="select select-bordered" onChange={(event) => setTypeFilter(event.target.value as TypeFilter)} value={typeFilter}>
-                <option value="all">All types</option>
-                <option value="human">Humans</option>
-                <option value="agent">Agents</option>
-              </select>
               <select aria-label="Status filter" className="select select-bordered" onChange={(event) => setStatusFilter(event.target.value as StatusFilter)} value={statusFilter}>
                 <option value="all">All statuses</option>
                 {["active", "inactive", "paused", "archived"].map((status) => <option key={status} value={status}>{status}</option>)}
@@ -788,73 +838,31 @@ export function PeopleAgentsRoute() {
                 <option value="tools">Tools</option>
                 <option value="knowledge">Knowledge</option>
               </select>
-              <CcButton className="whitespace-nowrap md:col-span-2 2xl:col-span-1" disabled={!hasActiveFilters} iconLeft="ph-x-circle" onClick={clearFilters} size="sm" variant="ghost">Clear</CcButton>
-              </div>
-              <div className="flex flex-wrap gap-2 border-t border-base-300/70 pt-2">
-                {(["comfortable", "compact"] as DensityMode[]).map((mode) => (
-                  <button className={`btn btn-xs ${density === mode ? "btn-primary" : "btn-outline"}`} key={mode} onClick={() => setDensity(mode)} type="button">
-                    {mode}
-                  </button>
-                ))}
+              <CcButton className="whitespace-nowrap" disabled={!hasActiveFilters} iconLeft="ph-x-circle" onClick={clearFilters} size="sm" variant="ghost">Clear</CcButton>
               </div>
             </div>
 
             <div className="min-h-0 overflow-y-auto">
-                {filtered.length ? (
-                  <div className="grid gap-2">
-                    {filtered.map((entity) => (
-                      <article className={`grid gap-2 rounded-company border text-left transition hover:border-primary hover:bg-primary/5 ${density === "compact" ? "p-2" : "p-3"} ${selected?.id === entity.id ? "border-primary/60 bg-primary/10" : "border-base-300 bg-base-100/70"}`} key={entity.id}>
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                          <div className="flex min-w-0 items-start gap-3">
-                            {density === "comfortable" ? <EntityAvatar entity={entity} /> : null}
-                            <div className="min-w-0">
-                              <strong className="block break-words leading-5 text-company-ink">{entity.name}</strong>
-                              <span className="block break-words text-sm leading-5 text-company-muted">{entity.role || "Unassigned role"} - {entity.department || "06-kadry"}</span>
-                            </div>
-                          </div>
-                          <div className="flex w-full flex-wrap items-center justify-between gap-2 sm:w-auto sm:shrink-0 sm:justify-end">
-                            <span className={`badge badge-sm ${badgeTone(entity.status)}`}>{entity.status}</span>
-                            <div className="flex flex-wrap items-center justify-end gap-1">
-                              <RowAction icon="ph-eye" label="Preview" onClick={() => {
-                                setSelectedId(entity.id);
-                                setDetailTab("profile");
-                              }} tone="outline" />
-                              <RowAction icon="ph-pencil-simple" label="Edit" onClick={() => setEditingEntity(entity)} />
-                              <RowAction disabled={entity.status === "archived"} icon="ph-archive" label="Archive" onClick={() => archiveEntity(entity)} />
-                              <RowAction disabled={entity.source === "user"} icon="ph-trash" label={entity.source === "user" ? "User-backed owner record cannot be deleted" : "Delete"} onClick={() => deleteEntity(entity)} tone="error" />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="grid gap-1 text-xs text-company-muted sm:grid-cols-3 lg:grid-cols-6">
-                          <span className="truncate"><strong className="text-company-ink">{typeLabel(entity.type)}</strong></span>
-                          <span className="truncate">{entity.hierarchyLevel || runtimeLabels[entity.runtimeMode]}</span>
-                          <span className="truncate">Paperclip {paperclipRuntime(entity)}</span>
-                          <span className="truncate">{listCount(entity.skillIndex)} skills</span>
-                          <span className="truncate">{listCount(entity.knowledgeIndex)} knowledge</span>
-                          <span className="truncate">{listCount(entity.toolIndex)} tools</span>
-                          <span className="truncate">{entity.work?.summary.active ?? 0} active work</span>
-                        </div>
-                        <div className="grid gap-1 text-xs text-company-muted sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-                          <span className="truncate">Manager: {entity.manager?.name || "No manager"}</span>
-                          <span className="truncate">{bigFiveSummary(entity)}</span>
-                        </div>
-                        {needsAttention(entity) ? (
-                          <p className="text-xs font-bold text-warning">
-                            {entity.readiness?.nextAction || "Profile needs completion"}
-                          </p>
-                        ) : null}
-                      </article>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid h-full place-items-center rounded-company border border-dashed border-base-300 p-8 text-center">
-                    <div>
-                      <i className="ph-bold ph-users-three text-3xl text-company-muted" aria-hidden="true"></i>
-                      <h2 className="mt-3 font-black text-company-ink">No matching workforce entities</h2>
-                      <p className="mt-1 text-sm text-company-muted">Clear filters or create the first person/agent profile.</p>
-                    </div>
+              <CcDataTable
+                columns={tableColumns}
+                density="compact"
+                emptyTitle="No matching workforce entities"
+                emptyDetail="Clear filters or create the first person/agent profile."
+                getRowClassName={(entity) => needsAttention(entity) ? "bg-warning/5" : ""}
+                rows={filtered}
+                tableMinWidthClassName="min-w-[900px]"
+                rowActions={(entity) => (
+                  <div className="flex items-center gap-1">
+                    <RowAction icon="ph-eye" label="Preview" onClick={() => {
+                      setSelectedId(entity.id);
+                      setDetailTab("profile");
+                    }} tone="outline" />
+                    <RowAction icon="ph-pencil-simple" label="Edit" onClick={() => setEditingEntity(entity)} />
+                    <RowAction disabled={entity.status === "archived"} icon="ph-archive" label="Archive" onClick={() => archiveEntity(entity)} />
+                    <RowAction disabled={entity.source === "user"} icon="ph-trash" label={entity.source === "user" ? "User-backed owner record cannot be deleted" : "Delete"} onClick={() => deleteEntity(entity)} tone="error" />
                   </div>
                 )}
+              />
               </div>
             </main>
 

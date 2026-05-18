@@ -26,6 +26,27 @@ fixes for this repository.
 
 ## Entries
 
+### 2026-05-18 - Prefer Operational Tables For Flat Management Indexes
+- Context: `06 People & Agents -> Directory` had already moved away from a
+  permanent detail inspector, but the route-local roster still looked more
+  like cards than a management table and included redundant density controls.
+- Symptom: The owner could see data, but the view felt less like a practical HR
+  or agent-management tool because scanning, People/Agents separation, and
+  row-level actions were not the dominant structure.
+- Root cause: Route-local presentation kept accumulating display details
+  instead of using the shared management-table primitive as the first surface.
+- Guardrail: Flat management indexes should default to `CcDataTable` with one
+  backend-backed object per row, compact operational columns, explicit scope
+  chips, and a sticky action column.
+- Preferred pattern: Put Preview/Edit/Archive/Delete beside each row and keep
+  the table action column visible across desktop, tablet, and mobile.
+- Avoid: Bespoke card rosters, decorative counters, and density toggles unless
+  there is verified operator need.
+- Evidence: `PEOPLE-AGENTS-DIRECTORY-TABLE-UX-004` passed `npm run
+  build:web`, `npm run validate`, `npm run test:api:local`, `git diff
+  --check`, and responsive Playwright proof with one table, People = 1,
+  Agents = 13, visible row actions, and no overflow.
+
 ### 2026-05-17 - Treat Hanging Docker CLI As An Environment Blocker
 - Context: OPS-MGMT-002 attempted to run `npm run test:api` against a fresh
   PostgreSQL Docker container after adding the Operations task-list assignment

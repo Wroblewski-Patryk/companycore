@@ -1437,3 +1437,30 @@ of rediscovering them.
   modal previews over permanent right-side inspectors. This keeps Directory,
   Operations, and Assets modal behavior consistent: the base view remains a
   collection, while detailed inspection/editing is an intentional overlay.
+
+### 2026-05-18 - Operational Management Table Pattern
+- Type: reusable_pattern
+- Context: `06 People & Agents -> Directory` drifted toward card-like roster
+  presentation, duplicate filters, density toggles, and too many decorative
+  status snippets. The owner clarified that management systems should feel like
+  real tools: one row per worker, clear People/Agents split, and direct
+  row-level controls.
+- Decision: For flat management datasets, start with one reusable data table
+  rather than bespoke cards. Keep columns operational and backend-backed:
+  identity, type/kind, role or owner context, status, runtime or workflow
+  state, and local actions. Keep denser resource indexes such as skills,
+  knowledge, and tools in preview/detail unless they fit without pushing
+  actions off the first screen. Put Preview/Edit/Archive and destructive
+  controls in a sticky action column so they remain reachable on desktop,
+  tablet, and mobile. Avoid route-local density toggles unless there is a
+  proven operator need.
+- Reuse when: Building people, agent, CRM, relationship, resource, provider,
+  role, permission, task-list, or settings management indexes with one primary
+  object per row.
+- Avoid when: The primary workflow is hierarchical browsing, kanban execution,
+  calendar planning, or content preview; use tree, board, calendar, or
+  preview-first patterns there.
+- Evidence:
+  `docs/planning/people-agents-directory-table-refinement-task-contract.md`,
+  `web/src/components/cc-data-table.tsx`, and
+  `docs/ux/evidence/people-agents-directory-table-*.png`.

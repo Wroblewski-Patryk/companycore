@@ -54,7 +54,11 @@ continue from repository files alone:
 - `docs/ux/design-memory.md`: reusable UX decisions. As of 2026-05-18,
   management rosters should use deliberate Preview actions, row-local
   management controls, guarded destructive semantics, and detail-first selected
-  state on mobile/tablet.
+  state on mobile/tablet. Flat management indexes should start from the
+  reusable `CcDataTable` pattern: one backend-backed object per row, compact
+  operational columns, explicit scope chips such as People/Agents where useful,
+  and a sticky action column instead of route-local card rosters or density
+  toggles.
 - `docs/planning/foundation-p1-hardening-task-contract.md`: first P1
   hardening wave after the 2026-05-18 application foundation audit. It adds
   `npm run test:api:local`, route/capability drift validation inside
@@ -139,7 +143,9 @@ continue from repository files alone:
   workforce agents, and keeps CompanyCore/Roost as the source of truth for the
   generated markdown context. The Directory roster now defaults to active
   records and exposes director, manager, runtime, Big Five, and access-index
-  scanning.
+  scanning. The follow-up Directory table refinement moves the roster onto
+  shared `CcDataTable`, removes duplicate type/density controls, and records
+  sticky row actions as the reusable flat management-index pattern.
 - `docs/architecture/autonomous-company-operating-system.md`: accepted
   explicit architecture boundary from 2026-05-16. CompanyCore is the company
   operating system, not an embedded AI system. Humans use responsive web UI;

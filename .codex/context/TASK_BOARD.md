@@ -53,6 +53,18 @@
 
 ## Recent Checkpoints
 
+- 2026-05-18: People/Agents Directory table refinement implemented.
+  `06 People & Agents -> Directory` now uses the shared `CcDataTable` as a
+  real management table with one row per workforce entity, explicit People and
+  Agents scope chips, operational columns, and sticky row actions for
+  Preview/Edit/Archive/Delete. The redundant type select and
+  comfortable/compact density controls were removed. `CcDataTable` now
+  supports reusable row classing and sticky action columns for future flat
+  management indexes. Validation passed: `npm run build:web`,
+  `npm run validate`, `npm run test:api:local`, `git diff --check`, and
+  Playwright proof on desktop/tablet/mobile with exactly one table, no card
+  roster articles, People = 1 row, Agents = 13 rows, visible Preview action
+  without horizontal scrolling, no console issues, and no page overflow.
 - 2026-05-18: People/Agents Directory modal preview refinement implemented.
   The Directory now remains a single roster work surface by default; no profile
   details are visible until Preview is clicked. Preview opens a modal with the

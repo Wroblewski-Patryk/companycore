@@ -40,6 +40,7 @@ export type CcDataTableProps<Row extends { id: string }> = {
   pagination?: CcTablePagination;
   rowActions?: (row: Row) => React.ReactNode;
   getRowLabel?: (row: Row) => string;
+  getRowClassName?: (row: Row) => string;
   tableMinWidthClassName?: string;
 };
 
@@ -73,10 +74,12 @@ export function CcDataTable<Row extends { id: string }>({
   pagination,
   rowActions,
   getRowLabel,
+  getRowClassName,
   tableMinWidthClassName = "min-w-[640px]"
 }: CcDataTableProps<Row>) {
   const tableDensityClass = density === "compact" ? "table-sm" : "";
   const tableLabels = { ...defaultLabels, ...labels };
+  const actionColumnClass = "sticky right-0 z-10 bg-base-100 shadow-[-14px_0_18px_-18px_rgba(15,23,42,0.72)]";
 
   if (loading) {
     return (
@@ -110,16 +113,16 @@ export function CcDataTable<Row extends { id: string }>({
             {columns.map((column) => (
               <th className={column.className} key={column.key}>{column.header}</th>
             ))}
-            {rowActions ? <th>{tableLabels.actions}</th> : null}
+            {rowActions ? <th className={actionColumnClass}>{tableLabels.actions}</th> : null}
           </tr>
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.id}>
+            <tr className={getRowClassName?.(row)} key={row.id}>
               {columns.map((column) => (
                 <td className={column.className} key={column.key}>{column.cell(row)}</td>
               ))}
-              {rowActions ? <td>{rowActions(row)}</td> : null}
+              {rowActions ? <td className={actionColumnClass}>{rowActions(row)}</td> : null}
             </tr>
           ))}
         </tbody>
@@ -134,7 +137,7 @@ export function CcDataTable<Row extends { id: string }>({
           <div className="sm:hidden">
             <div className="grid gap-3">
               {rows.map((row) => (
-                <article className="rounded-company border border-base-300 bg-base-100 p-4" key={row.id}>
+                <article className={["rounded-company border border-base-300 bg-base-100 p-4", getRowClassName?.(row)].filter(Boolean).join(" ")} key={row.id}>
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <strong className="break-words text-sm">{getRowLabel?.(row) ?? row.id}</strong>
                     {rowActions ? <div className="flex flex-wrap justify-end gap-2">{rowActions(row)}</div> : null}

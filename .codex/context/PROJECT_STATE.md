@@ -115,6 +115,19 @@ Last updated: 2026-05-18
   by unavailable local storage in the in-app browser, so Playwright fallback
   verified the real local server on desktop/tablet/mobile with no console
   warnings or horizontal overflow.
+  `PEOPLE-AGENTS-DIRECTORY-TABLE-UX-004` then tightened the Directory into a
+  reusable management-table pattern. `06 People & Agents -> Directory` now
+  uses `CcDataTable` for one row per workforce entity, explicit People and
+  Agents scope chips, operational columns, and sticky row actions for
+  Preview/Edit/Archive/Delete. The redundant type select and
+  comfortable/compact density controls were removed. `CcDataTable` now also
+  supports reusable row classing and sticky action columns for future flat
+  management indexes. Validation passed: `npm run build:web`,
+  `npm run validate`, `npm run test:api:local` with all 25 migrations and 6/6
+  API tests, `git diff --check`, and Playwright desktop/tablet/mobile proof
+  with exactly one table, no card roster articles, People = 1, Agents = 13,
+  visible Preview action without horizontal scrolling, no console issues, and
+  no page overflow.
   As of 2026-05-16, the architectural direction is expanded in
   `docs/architecture/unified-organizational-operating-system.md`: CompanyCore
   is the unified organizational world state and operational source of truth,

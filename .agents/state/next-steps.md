@@ -8,12 +8,13 @@ Last updated: 2026-05-18
    - Source:
      `docs/planning/people-agents-paperclip-directors-task-contract.md`.
    - Local verification passed, including the follow-up Directory management
-     UX slice. After deploy, smoke that the owner appears as
+     UX/table slices. After deploy, smoke that the owner appears as
      `Patryk Wroblewski`, the 13 Paperclip director agents appear as active
      workforce records, old non-director seed agents are archived, row-local
-     Preview/Edit/Archive/Delete controls work, Preview opens a profile modal,
-     New/Edit open the refined form modal, and `/people-agents` opens the
-     improved active Directory list.
+     Preview/Edit/Archive/Delete controls are sticky and work, Preview opens a
+     profile modal, New/Edit open the refined form modal, and
+     `/people-agents` opens the improved active Directory table with one row
+     per workforce entity and visible People/Agents scope chips.
 
 1. Deploy and smoke `DMS-06-WORKFORCE-001` when the next release window opens.
    - Source:

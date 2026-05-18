@@ -2,6 +2,18 @@
 
 Last updated: 2026-05-18
 
+People/Agents Directory table note: REQ-PA-DIRECTORY-TABLE-UX-004 is VERIFIED
+locally. The Directory now uses the shared `CcDataTable` as one operational
+table with one row per workforce entity, explicit People/Agents scope chips,
+no density toggles, and sticky Preview/Edit/Archive/Delete row actions.
+`CcDataTable` gained reusable row classing and sticky action-column support
+for future flat management indexes. Evidence: `npm run build:web`,
+`npm run validate`, `npm run test:api:local` with 25 migrations and 6/6 API
+tests, `git diff --check`, and Playwright desktop/tablet/mobile proof with
+exactly one table, no card roster articles, People = 1, Agents = 13, visible
+Preview action without horizontal scroll, no console issues, and no page
+overflow. Screenshots: `docs/ux/evidence/people-agents-directory-table-*.png`.
+
 People/Agents Paperclip director note: DMS-06-WORKFORCE-001 is VERIFIED for
 the local Paperclip director extension. The 2026-05-18
 read-only Paperclip audit captured the 13 director agents, UUIDs, departments,
