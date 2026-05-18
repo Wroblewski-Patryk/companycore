@@ -107,6 +107,14 @@ Last updated: 2026-05-18
   analytical profile, and INTJ-aligned Big Five scores. Validation passed:
   `npm run validate`, `npm run test:api:local`, disposable PostgreSQL seed
   smoke, and rendered desktop/tablet/mobile proof with no overflow.
+  `PEOPLE-AGENTS-DIRECTORY-MODAL-UX-003` then adjusted the interaction model
+  to match the rest of the application: Directory is again a single roster
+  surface, profile Preview opens as a modal, and New/Edit use a refined modal
+  form with Identity, Runtime, and Access sections. `npm run validate` passed;
+  Browser plugin connection was attempted but authenticated proof was blocked
+  by unavailable local storage in the in-app browser, so Playwright fallback
+  verified the real local server on desktop/tablet/mobile with no console
+  warnings or horizontal overflow.
   As of 2026-05-16, the architectural direction is expanded in
   `docs/architecture/unified-organizational-operating-system.md`: CompanyCore
   is the unified organizational world state and operational source of truth,

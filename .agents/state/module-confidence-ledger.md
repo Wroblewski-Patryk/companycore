@@ -26,6 +26,15 @@ Evidence: `npm run validate`, `npm run test:api:local`, disposable PostgreSQL
 seed smoke, and rendered desktop/tablet/mobile proof under
 `docs/ux/evidence/people-agents-directory-management-*.png`.
 
+People/Agents modal preview note: REQ-PA-DIRECTORY-MODAL-UX-003 is VERIFIED
+locally. Directory is now roster-first with no permanent right-side inspector;
+Preview opens a profile modal, while New/Edit use a refined modal form grouped
+into Identity, Runtime, and Access sections. Evidence: `npm run validate`,
+Browser plugin connection attempt with authenticated proof blocked by missing
+local storage in the in-app browser, and Playwright fallback real-server proof
+on desktop/tablet/mobile under
+`docs/ux/evidence/people-agents-directory-modal-*.png`.
+
 React web consolidation note: REACT-WEB-001 is PARTIAL with medium
 confidence. `npm run validate` passed; Playwright proved the signed-out and
 mocked signed-in React route set with no legacy scripts, no old shell, no

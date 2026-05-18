@@ -53,6 +53,16 @@
 
 ## Recent Checkpoints
 
+- 2026-05-18: People/Agents Directory modal preview refinement implemented.
+  The Directory now remains a single roster work surface by default; no profile
+  details are visible until Preview is clicked. Preview opens a modal with the
+  existing profile/access/work/authority/files tabs, and New/Edit use a refined
+  modal form with Identity, Runtime, and Access sections. Validation passed:
+  `npm run validate`, Browser plugin connection attempt, and Playwright
+  fallback real-server proof on desktop/tablet/mobile with no console warnings
+  and no horizontal overflow. Docker Desktop was restarted through the app when
+  the daemon was initially unavailable; validation containers and browser
+  processes were cleaned up.
 - 2026-05-18: People/Agents Directory management presentation improved.
   `06 People & Agents -> Directory` now hides the detail inspector until an
   explicit Preview action, exposes row-local Preview/Edit/Archive/Delete

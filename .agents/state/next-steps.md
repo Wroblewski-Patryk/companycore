@@ -11,7 +11,8 @@ Last updated: 2026-05-18
      UX slice. After deploy, smoke that the owner appears as
      `Patryk Wroblewski`, the 13 Paperclip director agents appear as active
      workforce records, old non-director seed agents are archived, row-local
-     Preview/Edit/Archive/Delete controls work, and `/people-agents` opens the
+     Preview/Edit/Archive/Delete controls work, Preview opens a profile modal,
+     New/Edit open the refined form modal, and `/people-agents` opens the
      improved active Directory list.
 
 1. Deploy and smoke `DMS-06-WORKFORCE-001` when the next release window opens.

@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { api } from "../../api/client";
 import { userErrorMessage } from "../../api/errors";
 import { CcButton } from "../../components/cc-button";
@@ -288,126 +288,146 @@ function WorkforceForm({
   }
 
   return (
-    <div className="fixed inset-0 z-40 grid place-items-center bg-neutral/55 p-4" role="dialog" aria-modal="true" aria-labelledby="workforce-form-title">
-      <form className="roost-work-surface grid max-h-[92vh] w-full max-w-5xl gap-5 overflow-y-auto rounded-company p-5 shadow-2xl" onSubmit={submit}>
-        <div className="flex items-start justify-between gap-3">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-neutral/60 p-3 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="workforce-form-title">
+      <form className="roost-work-surface grid max-h-[92vh] w-full max-w-5xl grid-rows-[auto_minmax(0,1fr)_auto] gap-4 overflow-hidden rounded-company shadow-2xl" onSubmit={submit}>
+        <div className="flex items-start justify-between gap-3 border-b border-base-300 p-4 sm:p-5">
           <div>
             <p className="text-sm font-black uppercase text-primary">06 People / Agents</p>
             <h2 className="mt-1 text-2xl font-black text-company-ink" id="workforce-form-title">{entity ? "Edit workforce entity" : "New workforce entity"}</h2>
+            <p className="mt-1 text-sm text-company-muted">{entity ? "Update identity, responsibility, runtime access, and generated context." : "Create a human or AI workforce record connected to CompanyCore truth."}</p>
           </div>
           <button className="btn btn-ghost btn-sm btn-circle" aria-label="Close" onClick={onClose} type="button">
             <i className="ph-bold ph-x" aria-hidden="true"></i>
           </button>
         </div>
 
-        {error ? <CcNotice tone="error" title={error} live /> : null}
+        <div className="min-h-0 overflow-y-auto px-4 sm:px-5">
+          {error ? <CcNotice tone="error" title={error} live /> : null}
 
-        <section className="grid gap-4 md:grid-cols-2">
-          <CcField label="Name" required>
-            {({ id }) => <CcTextInput autoFocus={!entity} defaultValue={values.name || ""} id={id} name="name" required />}
-          </CcField>
-          <CcField label="Slug">
-            {({ id }) => <CcTextInput defaultValue={values.slug || ""} id={id} name="slug" />}
-          </CcField>
-          <label className="form-control">
-            <span className="label"><span className="label-text font-bold">Type</span></span>
-            <select className="select select-bordered" defaultValue={values.type || "agent"} name="type">
-              <option value="human">Human</option>
-              <option value="agent">Agent</option>
-            </select>
-          </label>
-          <label className="form-control">
-            <span className="label"><span className="label-text font-bold">Status</span></span>
-            <select className="select select-bordered" defaultValue={values.status || "active"} name="status">
-              {statuses.map((status) => <option key={status} value={status}>{status}</option>)}
-            </select>
-          </label>
-          <label className="form-control">
-            <span className="label"><span className="label-text font-bold">Department</span></span>
-            <select className="select select-bordered" defaultValue={values.department || "06-kadry"} name="department">
-              {departments.length ? departments.map((department) => (
-                <option key={department.key} value={department.key}>{department.key}</option>
-              )) : <option value={values.department || "06-kadry"}>{values.department || "06-kadry"}</option>}
-            </select>
-          </label>
-          <CcField label="Role">
-            {({ id }) => <CcTextInput defaultValue={values.role || ""} id={id} name="role" />}
-          </CcField>
-          <label className="form-control md:col-span-2">
-            <span className="label"><span className="label-text font-bold">Description / responsibilities</span></span>
-            <textarea className="textarea textarea-bordered min-h-28" defaultValue={values.description || ""} name="description"></textarea>
-          </label>
-          <CcField label="Avatar URL">
-            {({ id }) => <CcTextInput defaultValue={values.avatar || ""} id={id} name="avatar" />}
-          </CcField>
-          <label className="form-control">
-            <span className="label"><span className="label-text font-bold">Manager</span></span>
-            <select className="select select-bordered" defaultValue={values.managerId || ""} name="managerId">
-              <option value="">No manager</option>
-              {managers.filter((manager) => manager.id !== entity?.id).map((manager) => (
-                <option key={manager.id} value={manager.id}>{manager.name}</option>
-              ))}
-            </select>
-          </label>
-          <label className="form-control">
-            <span className="label"><span className="label-text font-bold">Personality profile</span></span>
-            <select className="select select-bordered" defaultValue={values.personalityProfile || "supportive"} name="personalityProfile">
-              {personalityProfiles.map((profile) => <option key={profile} value={profile}>{profile}</option>)}
-            </select>
-          </label>
-          <label className="form-control">
-            <span className="label"><span className="label-text font-bold">Runtime mode</span></span>
-            <select className="select select-bordered" defaultValue={values.runtimeMode || "manual"} name="runtimeMode">
-              {runtimeModes.map((mode) => <option key={mode} value={mode}>{runtimeLabels[mode]}</option>)}
-            </select>
-          </label>
-          <CcField label="Model">
-            {({ id }) => <CcTextInput defaultValue={values.model || ""} id={id} name="model" placeholder="gpt-5.4, claude, local..." />}
-          </CcField>
-          <CcField label="Paperclip agent ID">
-            {({ id }) => <CcTextInput defaultValue={values.paperclipAgentId || ""} id={id} name="paperclipAgentId" placeholder="Runtime UUID or slug" />}
-          </CcField>
-          <CcField label="Hierarchy level">
-            {({ id }) => <CcTextInput defaultValue={values.hierarchyLevel || ""} id={id} name="hierarchyLevel" placeholder="executive_root, department_director..." />}
-          </CcField>
-          <label className="form-control">
-            <span className="label"><span className="label-text font-bold">Paperclip sync</span></span>
-            <span className="flex min-h-12 items-center gap-3 rounded-company border border-base-300 bg-base-100 px-3">
-              <input className="checkbox checkbox-primary" defaultChecked={Boolean(values.synchronizationEnabled)} name="synchronizationEnabled" type="checkbox" />
-              <span className="text-sm font-bold text-company-ink">Enable generated file sync queue</span>
-            </span>
-          </label>
-          <fieldset className="grid gap-2 rounded-company border border-base-300 p-3 md:col-span-2">
-            <legend className="px-1 text-sm font-bold text-company-muted">Big Five</legend>
-            <div className="grid gap-2 sm:grid-cols-5">
-              {[
-                ["bigFiveOpenness", "Openness", values.bigFiveProfile?.openness],
-                ["bigFiveConscientiousness", "Conscientiousness", values.bigFiveProfile?.conscientiousness],
-                ["bigFiveExtraversion", "Extraversion", values.bigFiveProfile?.extraversion],
-                ["bigFiveAgreeableness", "Agreeableness", values.bigFiveProfile?.agreeableness],
-                ["bigFiveNeuroticism", "Neuroticism", values.bigFiveProfile?.neuroticism]
-              ].map(([name, label, value]) => (
-                <label className="form-control" key={String(name)}>
-                  <span className="label"><span className="label-text text-xs font-bold">{label}</span></span>
-                  <input className="input input-bordered" defaultValue={Number(value || 0)} max={5} min={0} name={String(name)} step={1} type="number" />
+          <section className="grid gap-4 py-4">
+            <div className="rounded-company border border-base-300 bg-base-100/60 p-3">
+              <h3 className="font-black text-company-ink">Identity and role</h3>
+              <div className="mt-3 grid gap-4 md:grid-cols-2">
+                <CcField label="Name" required>
+                  {({ id }) => <CcTextInput autoFocus={!entity} defaultValue={values.name || ""} id={id} name="name" required />}
+                </CcField>
+                <CcField label="Slug">
+                  {({ id }) => <CcTextInput defaultValue={values.slug || ""} id={id} name="slug" />}
+                </CcField>
+                <label className="form-control">
+                  <span className="label"><span className="label-text font-bold">Type</span></span>
+                  <select className="select select-bordered" defaultValue={values.type || "agent"} name="type">
+                    <option value="human">Human</option>
+                    <option value="agent">Agent</option>
+                  </select>
                 </label>
-              ))}
+                <label className="form-control">
+                  <span className="label"><span className="label-text font-bold">Status</span></span>
+                  <select className="select select-bordered" defaultValue={values.status || "active"} name="status">
+                    {statuses.map((status) => <option key={status} value={status}>{status}</option>)}
+                  </select>
+                </label>
+                <label className="form-control">
+                  <span className="label"><span className="label-text font-bold">Department</span></span>
+                  <select className="select select-bordered" defaultValue={values.department || "06-kadry"} name="department">
+                    {departments.length ? departments.map((department) => (
+                      <option key={department.key} value={department.key}>{department.key}</option>
+                    )) : <option value={values.department || "06-kadry"}>{values.department || "06-kadry"}</option>}
+                  </select>
+                </label>
+                <CcField label="Role">
+                  {({ id }) => <CcTextInput defaultValue={values.role || ""} id={id} name="role" />}
+                </CcField>
+                <label className="form-control md:col-span-2">
+                  <span className="label"><span className="label-text font-bold">Description / responsibilities</span></span>
+                  <textarea className="textarea textarea-bordered min-h-28" defaultValue={values.description || ""} name="description"></textarea>
+                </label>
+                <CcField label="Avatar URL">
+                  {({ id }) => <CcTextInput defaultValue={values.avatar || ""} id={id} name="avatar" />}
+                </CcField>
+                <label className="form-control">
+                  <span className="label"><span className="label-text font-bold">Manager</span></span>
+                  <select className="select select-bordered" defaultValue={values.managerId || ""} name="managerId">
+                    <option value="">No manager</option>
+                    {managers.filter((manager) => manager.id !== entity?.id).map((manager) => (
+                      <option key={manager.id} value={manager.id}>{manager.name}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
             </div>
-          </fieldset>
-          {[
-            ["skillIndex", "Skills index", values.skillIndex],
-            ["knowledgeIndex", "Knowledge index", values.knowledgeIndex],
-            ["toolIndex", "Tools index", values.toolIndex],
-            ["authorityScope", "Authority scope", values.authorityScope]
-          ].map(([name, label, value]) => (
-            <label className="form-control md:col-span-2" key={String(name)}>
-              <span className="label"><span className="label-text font-bold">{label}</span></span>
-              <textarea className="textarea textarea-bordered min-h-20" defaultValue={Array.isArray(value) ? value.join("\n") : ""} name={String(name)}></textarea>
-            </label>
-          ))}
-        </section>
 
-        <div className="flex justify-end gap-2 border-t border-base-300 pt-4">
+            <div className="rounded-company border border-base-300 bg-base-100/60 p-3">
+              <h3 className="font-black text-company-ink">Runtime and personality</h3>
+              <div className="mt-3 grid gap-4 md:grid-cols-2">
+                <label className="form-control">
+                  <span className="label"><span className="label-text font-bold">Personality profile</span></span>
+                  <select className="select select-bordered" defaultValue={values.personalityProfile || "supportive"} name="personalityProfile">
+                    {personalityProfiles.map((profile) => <option key={profile} value={profile}>{profile}</option>)}
+                  </select>
+                </label>
+                <label className="form-control">
+                  <span className="label"><span className="label-text font-bold">Runtime mode</span></span>
+                  <select className="select select-bordered" defaultValue={values.runtimeMode || "manual"} name="runtimeMode">
+                    {runtimeModes.map((mode) => <option key={mode} value={mode}>{runtimeLabels[mode]}</option>)}
+                  </select>
+                </label>
+                <CcField label="Model">
+                  {({ id }) => <CcTextInput defaultValue={values.model || ""} id={id} name="model" placeholder="gpt-5.4, claude, local..." />}
+                </CcField>
+                <CcField label="Paperclip agent ID">
+                  {({ id }) => <CcTextInput defaultValue={values.paperclipAgentId || ""} id={id} name="paperclipAgentId" placeholder="Runtime UUID or slug" />}
+                </CcField>
+                <CcField label="Hierarchy level">
+                  {({ id }) => <CcTextInput defaultValue={values.hierarchyLevel || ""} id={id} name="hierarchyLevel" placeholder="executive_root, department_director..." />}
+                </CcField>
+                <label className="form-control">
+                  <span className="label"><span className="label-text font-bold">Paperclip sync</span></span>
+                  <span className="flex min-h-12 items-center gap-3 rounded-company border border-base-300 bg-base-100 px-3">
+                    <input className="checkbox checkbox-primary" defaultChecked={Boolean(values.synchronizationEnabled)} name="synchronizationEnabled" type="checkbox" />
+                    <span className="text-sm font-bold text-company-ink">Enable generated file sync queue</span>
+                  </span>
+                </label>
+              </div>
+              <fieldset className="mt-4 grid gap-2 rounded-company border border-base-300 p-3">
+                <legend className="px-1 text-sm font-bold text-company-muted">Big Five</legend>
+                <div className="grid gap-2 sm:grid-cols-5">
+                  {[
+                    ["bigFiveOpenness", "Openness", values.bigFiveProfile?.openness],
+                    ["bigFiveConscientiousness", "Conscientiousness", values.bigFiveProfile?.conscientiousness],
+                    ["bigFiveExtraversion", "Extraversion", values.bigFiveProfile?.extraversion],
+                    ["bigFiveAgreeableness", "Agreeableness", values.bigFiveProfile?.agreeableness],
+                    ["bigFiveNeuroticism", "Neuroticism", values.bigFiveProfile?.neuroticism]
+                  ].map(([name, label, value]) => (
+                    <label className="form-control" key={String(name)}>
+                      <span className="label"><span className="label-text text-xs font-bold">{label}</span></span>
+                      <input className="input input-bordered" defaultValue={Number(value || 0)} max={5} min={0} name={String(name)} step={1} type="number" />
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            </div>
+
+            <div className="rounded-company border border-base-300 bg-base-100/60 p-3">
+              <h3 className="font-black text-company-ink">Access indexes</h3>
+              <div className="mt-3 grid gap-4 md:grid-cols-2">
+                {[
+                  ["skillIndex", "Skills index", values.skillIndex],
+                  ["knowledgeIndex", "Knowledge index", values.knowledgeIndex],
+                  ["toolIndex", "Tools index", values.toolIndex],
+                  ["authorityScope", "Authority scope", values.authorityScope]
+                ].map(([name, label, value]) => (
+                  <label className="form-control" key={String(name)}>
+                    <span className="label"><span className="label-text font-bold">{label}</span></span>
+                    <textarea className="textarea textarea-bordered min-h-24" defaultValue={Array.isArray(value) ? value.join("\n") : ""} name={String(name)}></textarea>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div className="flex flex-wrap justify-end gap-2 border-t border-base-300 p-4 sm:p-5">
           <CcButton onClick={onClose} type="button" variant="ghost">Cancel</CcButton>
           <CcButton loading={saveState === "saving"} type="submit" variant="primary">Save entity</CcButton>
         </div>
@@ -434,7 +454,7 @@ function MarkdownPreview({ files }: { files?: Record<string, string> }) {
   );
 }
 
-function DetailPanel({
+function DetailModal({
   entity,
   tab,
   setTab,
@@ -443,7 +463,7 @@ function DetailPanel({
   onDelete,
   onClose
 }: {
-  entity: WorkforceEntity | null;
+  entity: WorkforceEntity;
   tab: DetailTab;
   setTab: (tab: DetailTab) => void;
   onEdit: (entity: WorkforceEntity) => void;
@@ -451,25 +471,14 @@ function DetailPanel({
   onDelete: (entity: WorkforceEntity) => void;
   onClose: () => void;
 }) {
-  if (!entity) {
-    return (
-      <aside className="roost-work-surface grid place-items-center rounded-company p-5 text-center">
-        <div>
-          <i className="ph-bold ph-user-list text-4xl text-company-muted" aria-hidden="true"></i>
-          <h2 className="mt-3 font-black text-company-ink">Select a person or agent</h2>
-          <p className="mt-1 text-sm text-company-muted">Profiles, work context, authority, and generated files appear here.</p>
-        </div>
-      </aside>
-    );
-  }
-
   return (
-    <aside className="roost-work-surface grid min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-4 rounded-company p-4">
+    <div className="fixed inset-0 z-40 grid place-items-center bg-neutral/60 p-3 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="workforce-preview-title">
+    <aside className="roost-work-surface grid max-h-[92vh] w-full max-w-6xl min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-4 overflow-hidden rounded-company p-4 shadow-2xl sm:p-5">
       <header className="flex flex-col gap-3">
         <div className="flex min-w-0 items-start gap-3">
           <EntityAvatar entity={entity} />
           <div className="min-w-0">
-            <h2 className="break-words text-xl font-black leading-6 text-company-ink">{entity.name}</h2>
+            <h2 className="break-words text-xl font-black leading-6 text-company-ink sm:text-2xl" id="workforce-preview-title">{entity.name}</h2>
             <p className="text-sm text-company-muted">{entity.role || "Unassigned role"} - {entity.department || "06-kadry"}</p>
             <p className="mt-1 text-xs font-bold uppercase text-company-muted">{typeLabel(entity.type)} / {runtimeLabels[entity.runtimeMode]} / Paperclip {paperclipRuntime(entity)}</p>
           </div>
@@ -486,9 +495,9 @@ function DetailPanel({
         </div>
       </header>
 
-      <div className="join">
+      <div className="flex flex-wrap gap-2">
         {(["profile", "access", "work", "authority", "files"] as DetailTab[]).map((item) => (
-          <button className={`btn join-item btn-sm ${tab === item ? "btn-primary" : "btn-outline"}`} key={item} onClick={() => setTab(item)} type="button">{item}</button>
+          <button className={`btn btn-sm ${tab === item ? "btn-primary" : "btn-outline"}`} key={item} onClick={() => setTab(item)} type="button">{item}</button>
         ))}
       </div>
 
@@ -651,6 +660,7 @@ function DetailPanel({
         {tab === "files" ? <MarkdownPreview files={entity.generatedFiles} /> : null}
       </div>
     </aside>
+    </div>
   );
 }
 
@@ -667,23 +677,15 @@ export function PeopleAgentsRoute() {
   const [detailTab, setDetailTab] = useState<DetailTab>("profile");
   const [editingEntity, setEditingEntity] = useState<WorkforceEntity | null | undefined>(undefined);
   const [notice, setNotice] = useState<RouteNotice | null>(null);
-  const detailPanelRef = useRef<HTMLDivElement>(null);
   const packet = useOwnerPacket<WorkforcePacket>(`/v1/workforce?refresh=${refreshKey}`, true, t);
   const entities = packet.data?.entities || [];
   const filtered = useMemo(
     () => sortEntities(entities.filter((entity) => entityMatches(entity, query, typeFilter, statusFilter, scopeFilter)), sortKey),
     [entities, query, typeFilter, statusFilter, scopeFilter, sortKey]
   );
-  const selected = selectedId ? filtered.find((entity) => entity.id === selectedId) || null : null;
+  const selected = selectedId ? entities.find((entity) => entity.id === selectedId) || null : null;
   const hasActiveFilters = query.trim().length > 0 || typeFilter !== "all" || statusFilter !== "active" || scopeFilter !== "all" || sortKey !== "name";
   const attentionCount = entities.filter(needsAttention).length;
-
-  useEffect(() => {
-    if (!selectedId || typeof window === "undefined" || window.innerWidth >= 1280) return;
-    window.setTimeout(() => {
-      detailPanelRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
-    }, 0);
-  }, [selectedId]);
 
   function refresh() {
     setRefreshKey((current) => current + 1);
@@ -731,7 +733,7 @@ export function PeopleAgentsRoute() {
       {notice ? <CcNotice tone={notice.tone} title={notice.title} live /> : null}
 
       {packet.status === "ready" ? (
-        <section className={`grid min-h-[calc(100vh-10rem)] gap-4 ${selected ? "xl:grid-cols-[minmax(0,1.05fr)_minmax(24rem,0.95fr)]" : ""}`}>
+        <section className="grid min-h-[calc(100vh-10rem)] gap-4">
           <main className="roost-work-surface grid min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-3 rounded-company p-3">
             <header className="flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0">
@@ -856,20 +858,22 @@ export function PeopleAgentsRoute() {
               </div>
             </main>
 
-            {selected ? (
-              <div className="order-first xl:order-none" ref={detailPanelRef}>
-                <DetailPanel
-                  entity={selected}
-                  onArchive={archiveEntity}
-                  onClose={() => setSelectedId("")}
-                  onDelete={deleteEntity}
-                  onEdit={setEditingEntity}
-                  setTab={setDetailTab}
-                  tab={detailTab}
-                />
-              </div>
-            ) : null}
         </section>
+      ) : null}
+
+      {selected ? (
+        <DetailModal
+          entity={selected}
+          onArchive={archiveEntity}
+          onClose={() => setSelectedId("")}
+          onDelete={deleteEntity}
+          onEdit={(entity) => {
+            setSelectedId("");
+            setEditingEntity(entity);
+          }}
+          setTab={setDetailTab}
+          tab={detailTab}
+        />
       ) : null}
 
       {editingEntity !== undefined ? (

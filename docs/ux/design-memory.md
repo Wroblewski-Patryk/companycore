@@ -1433,3 +1433,7 @@ of rediscovering them.
 - On mobile/tablet, selected details should render before the long roster so a
   tap immediately shows the selected profile instead of sending the operator to
   the bottom of a list.
+- When a roster is already dense enough to be the primary work surface, prefer
+  modal previews over permanent right-side inspectors. This keeps Directory,
+  Operations, and Assets modal behavior consistent: the base view remains a
+  collection, while detailed inspection/editing is an intentional overlay.
