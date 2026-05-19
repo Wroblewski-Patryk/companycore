@@ -35,7 +35,7 @@ const createSchema = z.object({
   paperclipAgentId: z.string().trim().max(180).nullable().optional(),
   synchronizationEnabled: z.boolean().optional(),
   hierarchyLevel: z.string().trim().max(120).nullable().optional(),
-  bigFiveProfile: z.record(z.number().min(0).max(5)).optional(),
+  bigFiveProfile: z.record(z.number().min(0).max(1)).optional(),
   skillIndex: z.array(z.string().trim().min(1).max(160)).max(80).optional(),
   knowledgeIndex: z.array(z.string().trim().min(1).max(180)).max(120).optional(),
   toolIndex: z.array(z.string().trim().min(1).max(180)).max(160).optional(),

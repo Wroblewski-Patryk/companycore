@@ -65,7 +65,7 @@ continue from repository files alone:
   row action items, page input, and 10/25/50/100/250/500 page sizes. The
   People/Agents profile pattern now also uses a dependency-free Big Five radar
   visualization in workforce preview and edit contexts, paired with exact
-  numeric trait bars. As of 2026-05-19, complex management views must follow
+  normalized `0.00`-`1.00` trait controls and bars. As of 2026-05-19, complex management views must follow
   the composition standard captured from the People/Agents final audit:
   define the operator job, split collection/inspection/edit/destructive/state
   surfaces, reuse shared primitives first, keep first-viewport functionality

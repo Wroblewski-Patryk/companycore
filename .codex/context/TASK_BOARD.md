@@ -53,6 +53,19 @@
 
 ## Recent Checkpoints
 
+- 2026-05-19: People/Agents final UI polish implemented. Directory table now
+  uses `Name` instead of `Person / Agent`, removes generated initial-avatar
+  fallback squares from workforce rows and previews, and keeps checkbox/action
+  cells visually aligned with the rest of the row background. Big Five is now
+  normalized to a `0.00`-`1.00` scale across frontend controls, backend
+  validation, generated markdown, tests, and seeds. New/Edit modal fields use
+  consistent top labels and full-width form controls, with each Big Five trait
+  editable through a slider plus two-decimal number input. Validation passed:
+  `npm run validate`, `npm run test:api:local`, `git diff --check`, Browser
+  plugin attempt, and Playwright real-server render proof for Directory,
+  New modal, Preview modal, mobile Directory, no old header, no fallback avatar
+  span, same checkbox/action cell background, Big Five controls, and no
+  console errors or horizontal overflow.
 - 2026-05-19: People/Agents final UX audit and reusable complex management
   view standard published. The audit covers `06 People & Agents -> Directory`,
   workforce preview modal, and New/Edit modal, recording the durable

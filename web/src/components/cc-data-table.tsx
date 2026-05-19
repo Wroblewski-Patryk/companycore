@@ -237,9 +237,9 @@ export function CcDataTable<Row extends { id: string }>({
   const tableDensityClass = density === "compact" ? "table-sm" : "";
   const tableLabels = { ...defaultLabels, ...labels };
   const actionColumnClass = stickyActions
-    ? "sticky right-0 z-10 bg-base-100 shadow-[-14px_0_18px_-18px_rgba(15,23,42,0.72)]"
-    : "bg-base-100";
-  const selectColumnClass = "sticky left-0 z-10 w-12 bg-base-100";
+    ? "sticky right-0 z-10 bg-transparent shadow-[-14px_0_18px_-18px_rgba(15,23,42,0.72)]"
+    : "";
+  const selectColumnClass = "sticky left-0 z-10 w-12 bg-transparent";
   const [query, setQuery] = useState("");
   const [activeQuickFilter, setActiveQuickFilter] = useState(initialQuickFilter);
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>(initialColumnFilters || {});

@@ -29,15 +29,6 @@ const bigFiveTraits = [
   { key: "neuroticism", label: "Neuroticism", short: "N" }
 ] as const;
 
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("") || "CC";
-}
-
 function badgeTone(value?: string) {
   if (value === "active" || value === "synced") return "badge-success";
   if (value === "queued" || value === "stale" || value === "paused") return "badge-warning";
@@ -54,22 +45,32 @@ function bigFiveSummary(entity: WorkforceEntity) {
   const traits = Object.entries(profile).filter(([, value]) => typeof value === "number");
   if (!traits.length) return "Big5 missing";
   return traits
-    .sort((a, b) => Number(b[1]) - Number(a[1]))
+    .sort((a, b) => normalizeBigFiveScore(b[1]) - normalizeBigFiveScore(a[1]))
     .slice(0, 2)
-    .map(([key, value]) => `${key.slice(0, 1).toUpperCase()}${key.slice(1, 3)} ${value}`)
+    .map(([key, value]) => `${key.slice(0, 1).toUpperCase()}${key.slice(1, 3)} ${formatBigFiveScore(value)}`)
     .join(" / ");
 }
 
 function normalizedBigFive(profile?: Record<string, number>) {
   return bigFiveTraits.map((trait) => ({
     ...trait,
-    value: Math.min(5, Math.max(0, Number(profile?.[trait.key] ?? 0)))
+    value: normalizeBigFiveScore(profile?.[trait.key] ?? 0)
   }));
+}
+
+function normalizeBigFiveScore(value: unknown) {
+  const numeric = Number(value || 0);
+  const normalized = numeric > 1 ? numeric / 5 : numeric;
+  return Math.min(1, Math.max(0, normalized));
+}
+
+function formatBigFiveScore(value: unknown) {
+  return normalizeBigFiveScore(value).toFixed(2);
 }
 
 function radarPoint(index: number, value: number, radius = 78, center = 96) {
   const angle = -Math.PI / 2 + (index * 2 * Math.PI) / bigFiveTraits.length;
-  const distance = (value / 5) * radius;
+  const distance = value * radius;
   return {
     x: center + Math.cos(angle) * distance,
     y: center + Math.sin(angle) * distance
@@ -110,7 +111,7 @@ function BigFiveRadarChart({
           <h3 className="mt-1 font-black text-company-ink">Personality shape</h3>
         </div>
         <div className="text-right text-xs font-bold text-company-muted">
-          {strongest.map((trait) => `${trait.short} ${trait.value}`).join(" / ")}
+          {strongest.map((trait) => `${trait.short} ${trait.value.toFixed(2)}`).join(" / ")}
         </div>
       </div>
       <div className={`mt-3 grid gap-3 ${compact ? "" : "lg:grid-cols-[13rem_minmax(0,1fr)] lg:items-center"}`}>
@@ -121,17 +122,17 @@ function BigFiveRadarChart({
               <stop offset="100%" stopColor="rgb(14, 165, 233)" stopOpacity="0.14" />
             </linearGradient>
           </defs>
-          {[1, 2, 3, 4, 5].map((level) => (
+          {[0.2, 0.4, 0.6, 0.8, 1].map((level) => (
             <polygon
               className="fill-none stroke-base-300"
               key={level}
               points={radarRingPoints(level)}
-              strokeWidth={level === 5 ? 1.4 : 1}
+              strokeWidth={level === 1 ? 1.4 : 1}
             />
           ))}
           {bigFiveTraits.map((trait, index) => {
-            const edge = radarPoint(index, 5);
-            const label = radarPoint(index, 5.72);
+            const edge = radarPoint(index, 1);
+            const label = radarPoint(index, 1.08);
             return (
               <g key={trait.key}>
                 <line className="stroke-base-300" x1="96" x2={edge.x} y1="96" y2={edge.y} strokeWidth="1" />
@@ -158,9 +159,9 @@ function BigFiveRadarChart({
               <div>
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-bold text-company-ink">{trait.label}</span>
-                  <span className="font-black text-primary">{trait.value}/5</span>
+                  <span className="font-black text-primary">{trait.value.toFixed(2)}</span>
                 </div>
-                <progress className="progress progress-primary h-1.5 w-full" max={5} value={trait.value}></progress>
+                <progress className="progress progress-primary h-1.5 w-full" max={1} value={trait.value}></progress>
               </div>
               <span className="grid h-8 w-8 place-items-center rounded-company border border-base-300 bg-base-200/70 text-xs font-black text-company-muted">{trait.short}</span>
             </div>
@@ -220,11 +221,7 @@ function EntityAvatar({ entity }: { entity: WorkforceEntity }) {
   if (entity.avatar) {
     return <img alt="" className="h-11 w-11 rounded-company border border-base-300 object-cover" src={entity.avatar} />;
   }
-  return (
-    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-company border border-base-300 bg-base-200/70 text-sm font-black text-primary">
-      {initials(entity.name)}
-    </span>
-  );
+  return null;
 }
 
 function defaultEntity(): Partial<WorkforceEntity> {
@@ -238,7 +235,7 @@ function defaultEntity(): Partial<WorkforceEntity> {
     runtimeMode: "semi_autonomous",
     synchronizationEnabled: false,
     hierarchyLevel: "department_director",
-    bigFiveProfile: { openness: 4, conscientiousness: 4, extraversion: 3, agreeableness: 4, neuroticism: 2 },
+    bigFiveProfile: { openness: 0.8, conscientiousness: 0.8, extraversion: 0.6, agreeableness: 0.8, neuroticism: 0.4 },
     skillIndex: [],
     knowledgeIndex: [],
     toolIndex: [],
@@ -252,6 +249,9 @@ function splitIndex(value: FormDataEntryValue | null) {
     .map((item) => item.trim())
     .filter(Boolean);
 }
+
+const selectClassName = "select select-bordered w-full bg-base-100";
+const textareaClassName = "textarea textarea-bordered w-full";
 
 function WorkforceForm({
   entity,
@@ -279,11 +279,11 @@ function WorkforceForm({
   const isEditMode = mode === "edit" && Boolean(entity?.id);
   const [bigFiveDraft, setBigFiveDraft] = useState<Record<string, number>>(() => {
     const current = values.bigFiveProfile || {};
-    return Object.fromEntries(bigFiveTraits.map((trait) => [trait.key, Number(current[trait.key] ?? 0)]));
+    return Object.fromEntries(bigFiveTraits.map((trait) => [trait.key, normalizeBigFiveScore(current[trait.key])]));
   });
 
   function updateBigFiveValue(key: string, value: string) {
-    const nextValue = Math.min(5, Math.max(0, Number(value || 0)));
+    const nextValue = normalizeBigFiveScore(value);
     setBigFiveDraft((current) => ({ ...current, [key]: nextValue }));
   }
 
@@ -308,11 +308,11 @@ function WorkforceForm({
       synchronizationEnabled: Boolean(form.get("synchronizationEnabled")),
       hierarchyLevel: String(form.get("hierarchyLevel") || "") || null,
       bigFiveProfile: {
-        openness: Number(form.get("bigFiveOpenness") || 0),
-        conscientiousness: Number(form.get("bigFiveConscientiousness") || 0),
-        extraversion: Number(form.get("bigFiveExtraversion") || 0),
-        agreeableness: Number(form.get("bigFiveAgreeableness") || 0),
-        neuroticism: Number(form.get("bigFiveNeuroticism") || 0)
+        openness: normalizeBigFiveScore(form.get("bigFiveOpenness")),
+        conscientiousness: normalizeBigFiveScore(form.get("bigFiveConscientiousness")),
+        extraversion: normalizeBigFiveScore(form.get("bigFiveExtraversion")),
+        agreeableness: normalizeBigFiveScore(form.get("bigFiveAgreeableness")),
+        neuroticism: normalizeBigFiveScore(form.get("bigFiveNeuroticism"))
       },
       skillIndex: splitIndex(form.get("skillIndex")),
       knowledgeIndex: splitIndex(form.get("knowledgeIndex")),
@@ -376,46 +376,51 @@ function WorkforceForm({
                 <CcField label="Slug">
                   {({ id }) => <CcTextInput defaultValue={values.slug || ""} id={id} name="slug" />}
                 </CcField>
-                <label className="form-control">
-                  <span className="label"><span className="label-text font-bold">Type</span></span>
-                  <select className="select select-bordered" defaultValue={values.type || "agent"} name="type">
-                    <option value="human">Human</option>
-                    <option value="agent">Agent</option>
-                  </select>
-                </label>
-                <label className="form-control">
-                  <span className="label"><span className="label-text font-bold">Status</span></span>
-                  <select className="select select-bordered" defaultValue={values.status || "active"} name="status">
-                    {statuses.map((status) => <option key={status} value={status}>{status}</option>)}
-                  </select>
-                </label>
-                <label className="form-control">
-                  <span className="label"><span className="label-text font-bold">Department</span></span>
-                  <select className="select select-bordered" defaultValue={values.department || "06-kadry"} name="department">
-                    {departments.length ? departments.map((department) => (
-                      <option key={department.key} value={department.key}>{department.key}</option>
-                    )) : <option value={values.department || "06-kadry"}>{values.department || "06-kadry"}</option>}
-                  </select>
-                </label>
+                <CcField label="Type">
+                  {({ id }) => (
+                    <select className={selectClassName} defaultValue={values.type || "agent"} id={id} name="type">
+                      <option value="human">Human</option>
+                      <option value="agent">Agent</option>
+                    </select>
+                  )}
+                </CcField>
+                <CcField label="Status">
+                  {({ id }) => (
+                    <select className={selectClassName} defaultValue={values.status || "active"} id={id} name="status">
+                      {statuses.map((status) => <option key={status} value={status}>{status}</option>)}
+                    </select>
+                  )}
+                </CcField>
+                <CcField label="Department">
+                  {({ id }) => (
+                    <select className={selectClassName} defaultValue={values.department || "06-kadry"} id={id} name="department">
+                      {departments.length ? departments.map((department) => (
+                        <option key={department.key} value={department.key}>{department.key}</option>
+                      )) : <option value={values.department || "06-kadry"}>{values.department || "06-kadry"}</option>}
+                    </select>
+                  )}
+                </CcField>
                 <CcField label="Role">
                   {({ id }) => <CcTextInput defaultValue={values.role || ""} id={id} name="role" />}
                 </CcField>
-                <label className="form-control md:col-span-2">
-                  <span className="label"><span className="label-text font-bold">Description / responsibilities</span></span>
-                  <textarea className="textarea textarea-bordered min-h-28" defaultValue={values.description || ""} name="description"></textarea>
-                </label>
+                <div className="md:col-span-2">
+                  <CcField label="Description / responsibilities">
+                    {({ id }) => <textarea className={`${textareaClassName} min-h-28`} defaultValue={values.description || ""} id={id} name="description"></textarea>}
+                  </CcField>
+                </div>
                 <CcField label="Avatar URL">
                   {({ id }) => <CcTextInput defaultValue={values.avatar || ""} id={id} name="avatar" />}
                 </CcField>
-                <label className="form-control">
-                  <span className="label"><span className="label-text font-bold">Manager</span></span>
-                  <select className="select select-bordered" defaultValue={values.managerId || ""} name="managerId">
-                    <option value="">No manager</option>
-                    {managers.filter((manager) => manager.id !== entity?.id).map((manager) => (
-                      <option key={manager.id} value={manager.id}>{manager.name}</option>
-                    ))}
-                  </select>
-                </label>
+                <CcField label="Manager">
+                  {({ id }) => (
+                    <select className={selectClassName} defaultValue={values.managerId || ""} id={id} name="managerId">
+                      <option value="">No manager</option>
+                      {managers.filter((manager) => manager.id !== entity?.id).map((manager) => (
+                        <option key={manager.id} value={manager.id}>{manager.name}</option>
+                      ))}
+                    </select>
+                  )}
+                </CcField>
               </div>
             </div>
 
@@ -424,18 +429,20 @@ function WorkforceForm({
                 <h3 className="font-black text-company-ink">Runtime and personality</h3>
                 <p className="text-sm text-company-muted">Runtime metadata stays in CompanyCore; Paperclip remains the execution layer.</p>
                 <div className="mt-3 grid gap-4 md:grid-cols-2">
-                  <label className="form-control">
-                    <span className="label"><span className="label-text font-bold">Personality profile</span></span>
-                    <select className="select select-bordered" defaultValue={values.personalityProfile || "supportive"} name="personalityProfile">
-                      {personalityProfiles.map((profile) => <option key={profile} value={profile}>{profile}</option>)}
-                    </select>
-                  </label>
-                  <label className="form-control">
-                    <span className="label"><span className="label-text font-bold">Runtime mode</span></span>
-                    <select className="select select-bordered" defaultValue={values.runtimeMode || "manual"} name="runtimeMode">
-                      {runtimeModes.map((mode) => <option key={mode} value={mode}>{runtimeLabels[mode]}</option>)}
-                    </select>
-                  </label>
+                  <CcField label="Personality profile">
+                    {({ id }) => (
+                      <select className={selectClassName} defaultValue={values.personalityProfile || "supportive"} id={id} name="personalityProfile">
+                        {personalityProfiles.map((profile) => <option key={profile} value={profile}>{profile}</option>)}
+                      </select>
+                    )}
+                  </CcField>
+                  <CcField label="Runtime mode">
+                    {({ id }) => (
+                      <select className={selectClassName} defaultValue={values.runtimeMode || "manual"} id={id} name="runtimeMode">
+                        {runtimeModes.map((mode) => <option key={mode} value={mode}>{runtimeLabels[mode]}</option>)}
+                      </select>
+                    )}
+                  </CcField>
                   <CcField label="Model">
                     {({ id }) => <CcTextInput defaultValue={values.model || ""} id={id} name="model" placeholder="gpt-5.4, claude, local..." />}
                   </CcField>
@@ -445,31 +452,51 @@ function WorkforceForm({
                   <CcField label="Hierarchy level">
                     {({ id }) => <CcTextInput defaultValue={values.hierarchyLevel || ""} id={id} name="hierarchyLevel" placeholder="executive_root, department_director..." />}
                   </CcField>
-                  <label className="form-control">
-                    <span className="label"><span className="label-text font-bold">Paperclip sync</span></span>
-                    <span className="flex min-h-12 items-center gap-3 rounded-company border border-base-300 bg-base-100 px-3">
-                      <input className="checkbox checkbox-primary" defaultChecked={Boolean(values.synchronizationEnabled)} name="synchronizationEnabled" type="checkbox" />
-                      <span className="text-sm font-bold text-company-ink">Enable generated file sync queue</span>
-                    </span>
-                  </label>
-                </div>
-                <fieldset className="mt-4 grid gap-2 rounded-company border border-base-300 bg-base-200/30 p-3">
-                  <legend className="px-1 text-sm font-bold text-company-muted">Big Five values</legend>
-                  <div className="grid gap-2 sm:grid-cols-5 lg:grid-cols-1 xl:grid-cols-5">
-                    {bigFiveTraits.map((trait) => (
-                      <label className="form-control" key={trait.key}>
-                        <span className="label"><span className="label-text text-xs font-bold">{trait.label}</span></span>
-                        <input
-                          className="input input-bordered"
-                          max={5}
-                          min={0}
-                          name={`bigFive${trait.label}`}
-                          onChange={(event) => updateBigFiveValue(trait.key, event.target.value)}
-                          step={1}
-                          type="number"
-                          value={bigFiveDraft[trait.key] ?? 0}
-                        />
+                  <CcField label="Paperclip sync">
+                    {({ id }) => (
+                      <label className="flex min-h-12 w-full cursor-pointer items-center gap-3 rounded-company border border-base-300 bg-base-100 px-3" htmlFor={id}>
+                        <input className="checkbox checkbox-primary" defaultChecked={Boolean(values.synchronizationEnabled)} id={id} name="synchronizationEnabled" type="checkbox" />
+                        <span className="text-sm font-bold text-company-ink">Enable generated file sync queue</span>
                       </label>
+                    )}
+                  </CcField>
+                </div>
+                <fieldset className="mt-4 grid gap-3 rounded-company border border-base-300 bg-base-200/30 p-3">
+                  <legend className="px-1 text-sm font-bold text-company-muted">Big Five values, 0.00-1.00</legend>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {bigFiveTraits.map((trait) => (
+                      <CcField label={trait.label} key={trait.key}>
+                        {({ id }) => {
+                          const value = formatBigFiveScore(bigFiveDraft[trait.key]);
+                          return (
+                            <div className="grid gap-2">
+                              <div className="grid grid-cols-[minmax(0,1fr)_5rem] items-center gap-3">
+                                <input
+                                  aria-label={`${trait.label} slider`}
+                                  className="range range-primary range-xs"
+                                  max={1}
+                                  min={0}
+                                  onChange={(event) => updateBigFiveValue(trait.key, event.target.value)}
+                                  step={0.01}
+                                  type="range"
+                                  value={value}
+                                />
+                                <input
+                                  className="input input-bordered w-full text-right tabular-nums"
+                                  id={id}
+                                  max={1}
+                                  min={0}
+                                  name={`bigFive${trait.label}`}
+                                  onChange={(event) => updateBigFiveValue(trait.key, event.target.value)}
+                                  step={0.01}
+                                  type="number"
+                                  value={value}
+                                />
+                              </div>
+                            </div>
+                          );
+                        }}
+                      </CcField>
                     ))}
                   </div>
                 </fieldset>
@@ -487,15 +514,17 @@ function WorkforceForm({
                   ["toolIndex", "Tools index", values.toolIndex],
                   ["authorityScope", "Authority scope", values.authorityScope]
                 ].map(([name, label, value]) => (
-                  <label className="form-control" key={String(name)}>
-                    <span className="label"><span className="label-text font-bold">{label}</span></span>
-                    <textarea
-                      className="textarea textarea-bordered min-h-24"
-                      defaultValue={Array.isArray(value) ? value.join("\n") : ""}
-                      name={String(name)}
-                      placeholder="One item per line"
-                    ></textarea>
-                  </label>
+                  <CcField label={String(label)} key={String(name)}>
+                    {({ id }) => (
+                      <textarea
+                        className={`${textareaClassName} min-h-24`}
+                        defaultValue={Array.isArray(value) ? value.join("\n") : ""}
+                        id={id}
+                        name={String(name)}
+                        placeholder="One item per line"
+                      ></textarea>
+                    )}
+                  </CcField>
                 ))}
               </div>
             </div>
@@ -837,8 +866,8 @@ export function PeopleAgentsRoute() {
   const tableColumns = useMemo<Array<CcTableColumn<WorkforceEntity>>>(() => [
     {
       key: "person",
-      header: "Person / Agent",
-      mobileLabel: "Record",
+      header: "Name",
+      mobileLabel: "Name",
       required: true,
       sortable: true,
       sortValue: (entity) => entity.name,
@@ -855,12 +884,7 @@ export function PeopleAgentsRoute() {
       ].filter(Boolean).join(" "),
       className: "min-w-[13rem]",
       cell: (entity) => (
-        <div className="flex min-w-0 items-center gap-3">
-          <EntityAvatar entity={entity} />
-          <div className="min-w-0">
-            <strong className="block truncate text-company-ink">{entity.name}</strong>
-          </div>
-        </div>
+        <strong className="block min-w-0 truncate text-company-ink">{entity.name}</strong>
       )
     },
     {

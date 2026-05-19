@@ -489,11 +489,11 @@ test("CompanyCore v1 protected API flow", async () => {
       synchronizationEnabled: true,
       hierarchyLevel: "department_director",
       bigFiveProfile: {
-        openness: 4,
-        conscientiousness: 5,
-        extraversion: 3,
-        agreeableness: 4,
-        neuroticism: 2
+        openness: 0.8,
+        conscientiousness: 1,
+        extraversion: 0.6,
+        agreeableness: 0.8,
+        neuroticism: 0.4
       },
       skillIndex: ["APQC Process Map", "MECE Responsibility Design"],
       knowledgeIndex: ["04 Operations resources", "Company resources"],
@@ -513,10 +513,10 @@ test("CompanyCore v1 protected API flow", async () => {
   };
   assert.ok(workforceAgentBody.data.generatedFiles["agent.md"].includes("Paperclip Operations Agent"));
   assert.ok(workforceAgentBody.data.generatedFiles["agent.md"].includes("APQC Process Map"));
-  assert.ok(workforceAgentBody.data.generatedFiles["personality.md"].includes("openness: 4/5"));
+  assert.ok(workforceAgentBody.data.generatedFiles["personality.md"].includes("openness: 0.80"));
   assert.ok(workforceAgentBody.data.generatedFiles["environment.md"].includes("00 General"));
   assert.deepEqual(workforceAgentBody.data.skillIndex, ["APQC Process Map", "MECE Responsibility Design"]);
-  assert.equal(workforceAgentBody.data.bigFiveProfile.openness, 4);
+  assert.equal(workforceAgentBody.data.bigFiveProfile.openness, 0.8);
   assert.equal(workforceAgentBody.data.syncStatus, "not_synced");
 
   const workforceSync = await request(`/v1/workforce/${workforceAgentBody.data.id}/actions/sync`, {

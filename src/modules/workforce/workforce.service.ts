@@ -96,7 +96,21 @@ function listMarkdown(value: unknown) {
 function bigFiveMarkdown(value: unknown) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return "- Not configured";
   const entries = Object.entries(value as Record<string, unknown>).filter(([, score]) => typeof score === "number");
-  return entries.length ? entries.map(([trait, score]) => `- ${trait}: ${score}/5`).join("\n") : "- Not configured";
+  return entries.length ? entries.map(([trait, score]) => `- ${trait}: ${normalizeBigFiveScore(score).toFixed(2)}`).join("\n") : "- Not configured";
+}
+
+function normalizeBigFiveScore(value: unknown) {
+  const numeric = Number(value || 0);
+  const normalized = numeric > 1 ? numeric / 5 : numeric;
+  return Math.min(1, Math.max(0, normalized));
+}
+
+function normalizeBigFiveProfile(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>)
+      .map(([key, score]) => [key, typeof score === "number" ? normalizeBigFiveScore(score) : score])
+  );
 }
 
 type WorkforceMarkdownEntity = {
@@ -213,9 +227,11 @@ ${entity.paperclipProfile && typeof entity.paperclipProfile === "object" ? JSON.
 }
 
 function withGeneratedFiles<T extends WorkforceEntity>(entity: T) {
+  const bigFiveProfile = normalizeBigFiveProfile(entity.bigFiveProfile);
   return {
     ...entity,
-    generatedFiles: generateWorkforceMarkdown(entity)
+    bigFiveProfile,
+    generatedFiles: generateWorkforceMarkdown({ ...entity, bigFiveProfile })
   };
 }
 

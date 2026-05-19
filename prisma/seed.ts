@@ -993,7 +993,7 @@ function generatedWorkforceFiles(entity: {
 }) {
   const responsibilities = entity.description || "Responsibilities are defined by CompanyCore tasks, roles, and governance.";
   const bigFive = entity.bigFiveProfile
-    ? Object.entries(entity.bigFiveProfile).map(([key, value]) => `- ${key}: ${value}/5`).join("\n")
+    ? Object.entries(entity.bigFiveProfile).map(([key, value]) => `- ${key}: ${Number(value).toFixed(2)}`).join("\n")
     : "- Not configured";
   const list = (items?: string[]) => items?.length ? items.map((item) => `- ${item}`).join("\n") : "- Not configured";
   return {
@@ -1078,7 +1078,7 @@ const paperclipDirectorSeeds = [
     reportsToSlug: null,
     hierarchyLevel: "executive_root",
     personalityProfile: "executive",
-    bigFiveProfile: { openness: 4, conscientiousness: 5, extraversion: 3, agreeableness: 4, neuroticism: 2 },
+    bigFiveProfile: { openness: 0.8, conscientiousness: 1, extraversion: 0.6, agreeableness: 0.8, neuroticism: 0.4 },
     toolCount: 71,
     knowledgeCount: 2,
     runtimeStatus: "idle",
@@ -1094,7 +1094,7 @@ const paperclipDirectorSeeds = [
     reportsToSlug: "00-aia-ai-assistant",
     hierarchyLevel: "department_director",
     personalityProfile: "researcher",
-    bigFiveProfile: { openness: 5, conscientiousness: 4, extraversion: 3, agreeableness: 3, neuroticism: 2 },
+    bigFiveProfile: { openness: 1, conscientiousness: 0.8, extraversion: 0.6, agreeableness: 0.6, neuroticism: 0.4 },
     toolCount: 20,
     knowledgeCount: 7,
     runtimeStatus: "paused"
@@ -1109,7 +1109,7 @@ const paperclipDirectorSeeds = [
     reportsToSlug: "00-aia-ai-assistant",
     hierarchyLevel: "department_director",
     personalityProfile: "creative",
-    bigFiveProfile: { openness: 5, conscientiousness: 4, extraversion: 3, agreeableness: 4, neuroticism: 2 },
+    bigFiveProfile: { openness: 1, conscientiousness: 0.8, extraversion: 0.6, agreeableness: 0.8, neuroticism: 0.4 },
     toolCount: 29,
     knowledgeCount: 50,
     runtimeStatus: "idle"
@@ -1124,7 +1124,7 @@ const paperclipDirectorSeeds = [
     reportsToSlug: "00-aia-ai-assistant",
     hierarchyLevel: "department_director",
     personalityProfile: "executive",
-    bigFiveProfile: { openness: 4, conscientiousness: 4, extraversion: 5, agreeableness: 3, neuroticism: 2 },
+    bigFiveProfile: { openness: 0.8, conscientiousness: 0.8, extraversion: 1, agreeableness: 0.6, neuroticism: 0.4 },
     toolCount: 14,
     knowledgeCount: 147,
     runtimeStatus: "idle"
@@ -1139,7 +1139,7 @@ const paperclipDirectorSeeds = [
     reportsToSlug: "00-aia-ai-assistant",
     hierarchyLevel: "department_director",
     personalityProfile: "analytical",
-    bigFiveProfile: { openness: 4, conscientiousness: 5, extraversion: 3, agreeableness: 3, neuroticism: 2 },
+    bigFiveProfile: { openness: 0.8, conscientiousness: 1, extraversion: 0.6, agreeableness: 0.6, neuroticism: 0.4 },
     toolCount: 32,
     knowledgeCount: 20,
     runtimeStatus: "idle"
@@ -1154,7 +1154,7 @@ const paperclipDirectorSeeds = [
     reportsToSlug: "00-aia-ai-assistant",
     hierarchyLevel: "department_director",
     personalityProfile: "supportive",
-    bigFiveProfile: { openness: 4, conscientiousness: 4, extraversion: 4, agreeableness: 5, neuroticism: 2 },
+    bigFiveProfile: { openness: 0.8, conscientiousness: 0.8, extraversion: 0.8, agreeableness: 1, neuroticism: 0.4 },
     toolCount: 14,
     knowledgeCount: 522,
     runtimeStatus: "idle"
@@ -1169,7 +1169,7 @@ const paperclipDirectorSeeds = [
     reportsToSlug: "00-aia-ai-assistant",
     hierarchyLevel: "department_director",
     personalityProfile: "supportive",
-    bigFiveProfile: { openness: 4, conscientiousness: 4, extraversion: 4, agreeableness: 5, neuroticism: 2 },
+    bigFiveProfile: { openness: 0.8, conscientiousness: 0.8, extraversion: 0.8, agreeableness: 1, neuroticism: 0.4 },
     toolCount: 106,
     knowledgeCount: 11,
     runtimeStatus: "idle"
@@ -1184,7 +1184,7 @@ const paperclipDirectorSeeds = [
     reportsToSlug: "00-aia-ai-assistant",
     hierarchyLevel: "department_director",
     personalityProfile: "analytical",
-    bigFiveProfile: { openness: 3, conscientiousness: 5, extraversion: 3, agreeableness: 3, neuroticism: 2 },
+    bigFiveProfile: { openness: 0.6, conscientiousness: 1, extraversion: 0.6, agreeableness: 0.6, neuroticism: 0.4 },
     toolCount: 57,
     knowledgeCount: 27,
     runtimeStatus: "idle"
@@ -1199,7 +1199,7 @@ const paperclipDirectorSeeds = [
     reportsToSlug: "00-aia-ai-assistant",
     hierarchyLevel: "department_director",
     personalityProfile: "analytical",
-    bigFiveProfile: { openness: 4, conscientiousness: 5, extraversion: 3, agreeableness: 4, neuroticism: 2 },
+    bigFiveProfile: { openness: 0.8, conscientiousness: 1, extraversion: 0.6, agreeableness: 0.8, neuroticism: 0.4 },
     toolCount: 23,
     knowledgeCount: 19,
     runtimeStatus: "idle"
@@ -1214,7 +1214,7 @@ const paperclipDirectorSeeds = [
     reportsToSlug: "00-aia-ai-assistant",
     hierarchyLevel: "department_director",
     personalityProfile: "analytical",
-    bigFiveProfile: { openness: 5, conscientiousness: 5, extraversion: 3, agreeableness: 3, neuroticism: 2 },
+    bigFiveProfile: { openness: 1, conscientiousness: 1, extraversion: 0.6, agreeableness: 0.6, neuroticism: 0.4 },
     toolCount: 27,
     knowledgeCount: 2,
     runtimeStatus: "idle"
@@ -1229,7 +1229,7 @@ const paperclipDirectorSeeds = [
     reportsToSlug: "00-aia-ai-assistant",
     hierarchyLevel: "department_director",
     personalityProfile: "analytical",
-    bigFiveProfile: { openness: 3, conscientiousness: 5, extraversion: 2, agreeableness: 3, neuroticism: 2 },
+    bigFiveProfile: { openness: 0.6, conscientiousness: 1, extraversion: 0.4, agreeableness: 0.6, neuroticism: 0.4 },
     toolCount: 58,
     knowledgeCount: 25,
     runtimeStatus: "idle"
@@ -1244,7 +1244,7 @@ const paperclipDirectorSeeds = [
     reportsToSlug: "00-aia-ai-assistant",
     hierarchyLevel: "department_director",
     personalityProfile: "researcher",
-    bigFiveProfile: { openness: 5, conscientiousness: 4, extraversion: 3, agreeableness: 4, neuroticism: 2 },
+    bigFiveProfile: { openness: 1, conscientiousness: 0.8, extraversion: 0.6, agreeableness: 0.8, neuroticism: 0.4 },
     toolCount: 31,
     knowledgeCount: 161,
     runtimeStatus: "idle"
@@ -1259,7 +1259,7 @@ const paperclipDirectorSeeds = [
     reportsToSlug: "00-aia-ai-assistant",
     hierarchyLevel: "department_director",
     personalityProfile: "executive",
-    bigFiveProfile: { openness: 4, conscientiousness: 5, extraversion: 4, agreeableness: 3, neuroticism: 2 },
+    bigFiveProfile: { openness: 0.8, conscientiousness: 1, extraversion: 0.8, agreeableness: 0.6, neuroticism: 0.4 },
     toolCount: 68,
     knowledgeCount: 16,
     runtimeStatus: "idle"
@@ -1268,7 +1268,7 @@ const paperclipDirectorSeeds = [
 
 async function ensureWorkforceFoundation(workspaceId: string, owner: { id: string; email: string; name: string | null }) {
   const ownerDisplayName = owner.name || owner.email;
-  const ownerBigFive = { openness: 5, conscientiousness: 5, extraversion: 2, agreeableness: 3, neuroticism: 2 };
+  const ownerBigFive = { openness: 1, conscientiousness: 1, extraversion: 0.4, agreeableness: 0.6, neuroticism: 0.4 };
   const ownerSkills = ["Company ownership", "Strategy", "Systems design", "Product direction", "AI agent orchestration"];
   const ownerKnowledge = ["CompanyCore source of truth", "LuckySparrow operating model", "Paperclip runtime", "Workspace administration"];
   const ownerTools = ["CompanyCore web", "Paperclip", "ClickUp", "Google Drive"];

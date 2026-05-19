@@ -1496,7 +1496,9 @@ of rediscovering them.
 - Decision: Use a compact radar chart for Big Five profile shape in workforce
   preview and edit contexts. Keep the chart dependency-free with SVG, pair it
   with exact numeric bars, and keep it close to role/runtime/readiness context
-  instead of making it a decorative dashboard chart.
+  instead of making it a decorative dashboard chart. Store and edit Big Five
+  values on a normalized `0.00`-`1.00` scale; the form should pair a slider
+  with a two-decimal number input for each trait.
 - Reuse when: A person, agent, role, or capability profile needs quick shape
   comparison across a small fixed trait set.
 - Avoid when: The data is transactional, time-series, or too sparse to support
