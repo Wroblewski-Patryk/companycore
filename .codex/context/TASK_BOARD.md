@@ -53,6 +53,16 @@
 
 ## Recent Checkpoints
 
+- 2026-05-19: People/Agents preview modal polish implemented. The workforce
+  preview header now uses a structured profile summary instead of badge-heavy
+  runtime text, tabs use a compact tab control, the Access tab no longer shows
+  decorative Skills/Knowledge/Tools count cards, Work no longer shows
+  decorative summary counters, and Authority scope renders as factual list
+  rows instead of badges. Validation passed: `npm run validate`,
+  `git diff --check`, and Playwright real-server proof for profile/access/work/
+  authority/mobile preview with no console errors, no horizontal overflow, no
+  old `runtime idle` badge text, no old access counter grid, and no big numeric
+  counter cards.
 - 2026-05-19: People/Agents final UI polish implemented. Directory table now
   uses `Name` instead of `Person / Agent`, removes generated initial-avatar
   fallback squares from workforce rows and previews, and keeps checkbox/action

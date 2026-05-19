@@ -558,6 +558,23 @@ function MarkdownPreview({ files }: { files?: Record<string, string> }) {
   );
 }
 
+function DetailListSection({ title, items }: { title: string; items?: string[] }) {
+  const values = items?.length ? items : ["Not configured"];
+  return (
+    <section className="rounded-company border border-base-300 bg-base-100/75 p-3">
+      <h3 className="font-black text-company-ink">{title}</h3>
+      <ul className="mt-3 divide-y divide-base-300/70 text-sm">
+        {values.map((item) => (
+          <li className="flex items-start gap-2 py-2" key={item}>
+            <i className="ph-bold ph-dot-outline mt-0.5 text-primary" aria-hidden="true"></i>
+            <span className="break-words text-company-ink">{item}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 function DetailModal({
   entity,
   tab,
@@ -578,24 +595,33 @@ function DetailModal({
   return (
     <div className="fixed inset-0 z-40 grid place-items-center bg-neutral/60 p-3 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="workforce-preview-title">
     <aside className="roost-work-surface grid max-h-[92vh] w-full max-w-6xl min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-4 overflow-hidden rounded-company p-4 shadow-2xl sm:p-5">
-      <header className="grid gap-3 rounded-company border border-base-300 bg-base-100/50 p-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
-        <div className="flex min-w-0 items-start gap-3">
-          <EntityAvatar entity={entity} />
-          <div className="min-w-0 space-y-2">
-            <div>
-              <h2 className="break-words text-xl font-black leading-6 text-company-ink sm:text-2xl" id="workforce-preview-title">{entity.name}</h2>
-              <p className="text-sm text-company-muted">{entity.role || "Unassigned role"} / {entity.department || "06-kadry"}</p>
+      <header className="grid gap-4 rounded-company border border-base-300 bg-base-100/60 p-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
+        <div className="min-w-0">
+          <div className="flex min-w-0 items-start gap-3">
+            <EntityAvatar entity={entity} />
+            <div className="min-w-0">
+              <p className="text-xs font-black uppercase tracking-wide text-primary">{typeLabel(entity.type)} profile</p>
+              <h2 className="mt-1 break-words text-xl font-black leading-6 text-company-ink sm:text-2xl" id="workforce-preview-title">{entity.name}</h2>
+              <p className="mt-1 text-sm text-company-muted">{entity.role || "Unassigned role"}</p>
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              <span className="badge badge-outline">{typeLabel(entity.type)}</span>
-              <span className={`badge ${badgeTone(entity.status)}`}>{entity.status}</span>
-              <span className="badge badge-outline">{runtimeLabels[entity.runtimeMode]}</span>
-              <span className={`badge ${badgeTone(paperclipRuntime(entity))}`}>runtime {paperclipRuntime(entity)}</span>
-            </div>
-            <p className="text-xs font-bold uppercase text-company-muted">
-              {entity.hierarchyLevel || "No hierarchy"} / manager {entity.manager?.name || "none"} / {entity.directReportCount ?? 0} direct reports
-            </p>
           </div>
+          <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-2 xl:grid-cols-4">
+            {[
+              ["Department", entity.department || "06-kadry"],
+              ["Status", entity.status],
+              ["Runtime", runtimeLabels[entity.runtimeMode]],
+              ["Runtime state", paperclipRuntime(entity)],
+              ["Hierarchy", entity.hierarchyLevel || "No hierarchy"],
+              ["Manager", entity.manager?.name || "None"],
+              ["Direct reports", String(entity.directReportCount ?? 0)],
+              ["Source", entity.source || "companycore"]
+            ].map(([label, value]) => (
+              <div className="rounded-company border border-base-300 bg-base-100/75 px-3 py-2" key={label}>
+                <dt className="text-[0.68rem] font-black uppercase tracking-wide text-company-muted">{label}</dt>
+                <dd className="mt-0.5 break-words font-bold text-company-ink">{value}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
         <div className="flex flex-wrap justify-start gap-2 lg:justify-end">
           <CcButton iconLeft="ph-pencil-simple" onClick={() => onEdit(entity)} size="sm" variant="outline">Edit</CcButton>
@@ -609,9 +635,9 @@ function DetailModal({
         </div>
       </header>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="tabs tabs-boxed w-full overflow-x-auto bg-base-100/60">
         {(["profile", "access", "work", "authority", "files"] as DetailTab[]).map((item) => (
-          <button className={`btn btn-sm ${tab === item ? "btn-primary" : "btn-outline"}`} key={item} onClick={() => setTab(item)} type="button">{item}</button>
+          <button className={`tab whitespace-nowrap ${tab === item ? "tab-active" : ""}`} key={item} onClick={() => setTab(item)} type="button">{item}</button>
         ))}
       </div>
 
@@ -667,33 +693,18 @@ function DetailModal({
 
         {tab === "access" ? (
           <section className="grid gap-4">
-            <div className="grid gap-2 sm:grid-cols-3">
-              {[
-                ["Skills", entity.skillIndex || []],
-                ["Knowledge", entity.knowledgeIndex || []],
-                ["Tools", entity.toolIndex || []]
-              ].map(([label, values]) => (
-                <div className="rounded-company border border-base-300 bg-base-200/45 p-3" key={String(label)}>
-                  <p className="text-xs font-bold uppercase text-company-muted">{label}</p>
-                  <p className="mt-1 text-2xl font-black text-company-ink">{Array.isArray(values) ? values.length : 0}</p>
-                </div>
-              ))}
+            <div className="rounded-company border border-base-300 bg-base-200/35 p-3">
+              <h3 className="font-black text-company-ink">Access model</h3>
+              <p className="mt-1 text-sm leading-6 text-company-muted">
+                These are lightweight source-of-truth indexes for the current V1 record. Future slices can replace each list with linked skill, knowledge, tool, and permission resources.
+              </p>
             </div>
-            {[
-              ["Skills", entity.skillIndex || []],
-              ["Knowledge", entity.knowledgeIndex || []],
-              ["Tools", entity.toolIndex || []],
-              ["Authority", entity.authorityScope || []]
-            ].map(([label, values]) => (
-              <div className="rounded-company border border-base-300 bg-base-100/75 p-3" key={String(label)}>
-                <h3 className="font-black text-company-ink">{label}</h3>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {(Array.isArray(values) && values.length ? values : ["Not configured"]).map((item) => (
-                    <span className="rounded-company border border-base-300 bg-base-200/70 px-2 py-1 text-xs font-bold text-company-muted" key={item}>{item}</span>
-                  ))}
-                </div>
-              </div>
-            ))}
+            <div className="grid gap-3 lg:grid-cols-2">
+              <DetailListSection title="Skills" items={entity.skillIndex || []} />
+              <DetailListSection title="Knowledge" items={entity.knowledgeIndex || []} />
+              <DetailListSection title="Tools" items={entity.toolIndex || []} />
+              <DetailListSection title="Authority scope" items={entity.authorityScope || []} />
+            </div>
             {entity.paperclipProfile?.url ? (
               <a className="btn btn-outline justify-start" href={entity.paperclipProfile.url} rel="noreferrer" target="_blank">
                 <i className="ph-bold ph-arrow-square-out" aria-hidden="true"></i>
@@ -706,23 +717,13 @@ function DetailModal({
         {tab === "work" ? (
           <section className="grid gap-4">
             <div className="rounded-company border border-base-300 bg-base-200/45 p-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
                 <h3 className="font-black text-company-ink">Work and responsibility</h3>
-                <span className="text-sm font-bold text-company-muted">{entity.work?.assignmentModel || "not modeled"}</span>
+                <p className="text-sm font-bold text-company-muted">{entity.work?.assignmentModel || "not modeled"}</p>
               </div>
-              <div className="mt-3 grid gap-2 sm:grid-cols-4">
-                {[
-                  ["Active", entity.work?.summary.active ?? 0],
-                  ["Blocked", entity.work?.summary.blocked ?? 0],
-                  ["Overdue", entity.work?.summary.overdue ?? 0],
-                  ["Lists", entity.work?.summary.taskLists ?? 0]
-                ].map(([label, value]) => (
-                  <div className="rounded-company bg-base-100/70 p-2" key={label}>
-                    <p className="text-xs font-bold uppercase text-company-muted">{label}</p>
-                    <p className="text-lg font-black text-company-ink">{value}</p>
-                  </div>
-                ))}
-              </div>
+              <p className="mt-2 text-sm leading-6 text-company-muted">
+                Work evidence is shown as assignments and blockers when the backend can connect this profile to operational records. This tab should stay factual rather than estimating responsibility from decorative totals.
+              </p>
             </div>
             {(entity.work?.gaps || []).map((gap) => (
               <CcNotice key={gap.key} tone="warning" title={gap.label} detail={gap.detail} />
@@ -749,11 +750,13 @@ function DetailModal({
             <div className="rounded-company border border-base-300 bg-base-200/45 p-3">
               <h3 className="font-black text-company-ink">Authority boundary</h3>
               <p className="mt-1 text-sm text-company-muted">{entity.authority?.mode || "not modeled"} / risk {entity.authority?.riskLevel || "unknown"}</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {(entity.authority?.visibleScopeSample || []).slice(0, 8).map((scope) => (
-                  <span className="badge badge-outline" key={scope}>{scope}</span>
-                ))}
-              </div>
+              {(entity.authority?.visibleScopeSample || []).length ? (
+                <ul className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+                  {(entity.authority?.visibleScopeSample || []).slice(0, 8).map((scope) => (
+                    <li className="rounded-company border border-base-300 bg-base-100/75 px-3 py-2 font-bold text-company-ink" key={scope}>{scope}</li>
+                  ))}
+                </ul>
+              ) : null}
             </div>
             {(entity.authority?.recommendedProfiles || []).length ? (
               <div className="grid gap-2">

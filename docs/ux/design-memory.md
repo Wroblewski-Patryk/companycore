@@ -1524,8 +1524,11 @@ of rediscovering them.
   name/title and actions columns mandatory, keep row actions local, label all
   filters, avoid duplicate quick filters, hide lower-priority columns through
   column visibility, and put verbose runtime/generated/provider details in
-  preview tabs instead of row subtitles. Use modal previews/forms for
-  small-to-medium records and dedicated routes for long workflows.
+  preview tabs instead of row subtitles. Preview modals should avoid decorative
+  count cards and badge clusters; use structured profile fields and factual
+  lists unless a count directly changes the operator's next action. Use modal
+  previews/forms for small-to-medium records and dedicated routes for long
+  workflows.
 - Reuse when: Building or auditing any dense CompanyCore/Roost module:
   people, agents, roles, permissions, CRM, relationships, provider resources,
   tasks, operations, assets, settings indexes, or future department management
