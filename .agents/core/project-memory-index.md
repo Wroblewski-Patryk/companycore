@@ -885,6 +885,28 @@ Every autonomous run must start by answering:
 Only then select one scoped mission or checkpoint. Small tasks are useful as
 mission slices only when they are anchored to the release picture.
 
+## Docs-To-Lanes Rule
+
+Large documentation sets are not useful if agents only skim them. For broad
+work, convert source-of-truth docs into active responsibility lanes before
+implementation.
+
+The coordinator should map:
+
+- architecture docs to architecture, backend, frontend, data, integration, and
+  runtime ownership lanes
+- product and planning docs to requirements, acceptance criteria, priority, and
+  scope lanes
+- security docs to auth, permissions, secrets, abuse, and fail-closed lanes
+- UX docs, screenshots, and design memory to UI, interaction, accessibility,
+  and visual QA lanes
+- operations docs to deploy, smoke, rollback, observability, and release lanes
+- module ledgers to verification, evidence, blocker, and regression lanes
+
+Every active lane must have an owner, source paths, expected output, and proof.
+If the docs describe an important responsibility but no lane owns it, record a
+`missing_lane` learning and add that lane before continuing similar work.
+
 ## Handoff Requirement
 
 After substantial work, update the indexes and leave the next agent a clear

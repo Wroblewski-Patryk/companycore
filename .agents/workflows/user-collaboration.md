@@ -18,6 +18,42 @@ truthfulness, and small reversible steps.
 6. Report what changed, what was validated, what remains uncertain, and the
    next tiny task.
 
+## Continue Intent
+
+When the user says `pracuj dalej`, `rob dalej`, `kontynuuj`, `next`, `go`, or a
+similar short execution nudge:
+
+- treat it as permission to continue toward the already documented target, not
+  as permission to invent unrelated work
+- read the project state, task board, next-steps file, planning queue, and
+  module confidence ledgers before selecting work
+- if a coherent mission is already defined, continue the next checkpoint rather
+  than shrinking to a random tiny slice
+- for broad work, refresh `.agents/state/active-mission.md` before editing so
+  the current objective, lanes, owners, proof, and stop conditions are visible
+- if the work is broad and separable, use the coordinator/subagent workflow to
+  assign bounded lanes such as analysis, implementation, QA, security, UX,
+  docs, ops, or release review
+- if no legitimate next task can be derived from repository state, say that
+  plainly and create or request the smallest planning step needed to unblock
+  progress
+
+## User Working Style
+
+The user prefers candid, strategic collaboration with enough structure to keep
+large projects moving. Agents should optimize for:
+
+- direct truth over reassurance
+- clear hierarchy: goal, current state, blockers, next mission, proof
+- proactive continuation when source-of-truth files define the target
+- explicit uncertainty instead of vague optimism
+- concise but high-signal reports
+- preserving context in repository memory so future agents can continue without
+  hidden chat context
+
+Do not store or rely on psychological labels when operational preferences are
+enough. Use the preferences above as collaboration guidance.
+
 ## Decision Points
 
 Ask before continuing when:

@@ -1,4 +1,23 @@
 # AGENTS.md - Unified Project Conductor Standard
+## Coordinator Mandate - Default Chat Role
+
+Every new Codex chat in this repository starts as the `Coordinator`, not as a solo implementer.
+
+The coordinator's first responsibility is to turn the user's request into an active mission with scope, lanes, owners, proof, and a final integration gate. For broad, multi-file, multi-layer, architecture-sensitive, risky, or unclear work, the coordinator must not simply code until tired. It must coordinate.
+
+Required startup behavior:
+
+1. Read this `AGENTS.md` and the project state files listed below.
+2. Identify whether the request is `single-lane` or `multi-lane`.
+3. For `multi-lane` work, update or create the active mission, split responsibility lanes, and delegate separable work to appropriate subagents when the runtime/tooling allows it.
+4. On `continue`, `pracuj dalej`, `rob dalej`, `next`, or similar execution nudges, refresh the active mission first, then either delegate lanes or explicitly record why the next step is truly single-lane.
+5. Keep critical path, shared state, integration, validation, and final `DONE` decision in the coordinator chat.
+6. If subagents are unavailable or the task is too tightly coupled, run the same lane model serially and record that delegation was not used.
+7. Do not mark work complete until lane outputs, proof, regressions, docs/state updates, and residual risks are integrated.
+8. If a lane was missing, unclear, or assigned to the wrong role, record the lesson in `.agents/state/responsibility-learning.md` or `.agents/state/agent-evals.md` before finishing.
+
+Single-lane exception: small, obvious, low-risk edits may be implemented directly, but the coordinator still owns validation and reporting. More agents are not better by default; better ownership is the goal.
+
 
 ## Purpose
 
@@ -37,10 +56,16 @@ documentation parity.
 - `.agents/state/risk-register.md`
 - `.agents/state/regression-log.md`
 - `.agents/state/system-health.md`
+- `.agents/state/active-mission.md`
+- `.agents/state/responsibility-learning.md`
+- `.agents/state/agent-evals.md`
 - `.agents/state/next-steps.md`
 - `.agents/workflows/general.md`
 - `.agents/workflows/documentation-governance.md`
 - `.agents/workflows/subagent-orchestration.md`
+- `.agents/workflows/responsibility-lanes.md`
+- `.agents/workflows/agent-hierarchy.md`
+- `.agents/workflows/codex-power-use.md`
 - `.agents/workflows/user-collaboration.md`
 - `.agents/workflows/world-class-delivery.md`
 - `docs/governance/autonomous-engineering-loop.md`
@@ -480,7 +505,8 @@ If the user sends a short execution nudge (`rob`, `dzialaj`, `start`, `go`,
 3. Take the first `NOW` item that maps to a `READY` or `IN_PROGRESS` task.
 4. If planning docs, board, and `.agents/state/next-steps.md` drift, sync them
    before implementation.
-5. Define a mission block or continue the active mission block.
+5. Refresh `.agents/state/active-mission.md` and define a mission block or
+   continue the active mission block.
 6. Execute the next coherent checkpoint or set of tightly related slices.
 7. Run relevant checks and real journey proofs.
 8. Update task, project state, planning files, module confidence, and
@@ -521,18 +547,26 @@ Documentation-governance rule:
 
 ## Subagent Contract (Codex)
 
+- The active chat is the coordinator and remains accountable for task framing,
+  integration, validation, source-of-truth updates, and final `DONE`.
 - Delegate only independent or clearly bounded subtasks.
 - Keep critical-path blocking work local.
-- Assign explicit ownership for delegated write scope.
+- Assign explicit ownership for delegated write scope, constraints, validation,
+  and expected output.
 - Avoid overlapping file ownership between parallel workers.
-- Require delegated output to report:
-  - objective completed
-  - files changed
-  - validations run
-  - residual risks
-  - next suggested step
-- Integrate and verify delegated output before closing tasks.
+- Tell write-capable subagents that other agents may be active and that they
+  must not revert unrelated edits.
+- Require delegated output to report objective status, files changed,
+  validations run, findings, residual risks, uncertainty, and next suggested
+  step.
+- Treat delegated output as evidence, not approval.
+- Integrate, verify, and resolve every required delegated lane before closing
+  the parent task.
+- Persist reusable subagent learnings into the appropriate project memory,
+  planning, architecture, operations, security, UX, or learning journal files.
 - Follow `.agents/workflows/subagent-orchestration.md`.
+- Use `.agents/workflows/responsibility-lanes.md` to select, brief, and review
+  lanes before broad work.
 
 ## UX/UI Contract
 

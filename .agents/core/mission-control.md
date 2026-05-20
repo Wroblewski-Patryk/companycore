@@ -16,9 +16,36 @@ motion from current reality toward the release objective.
 A mission block is a bounded work session that may contain multiple small tasks
 when they belong to one coherent objective.
 
+The default execution shape is coordinator-first. The active chat is the
+mission coordinator. For broad or multi-layer work, it should hire bounded
+subagents for the responsibilities needed by the mission, integrate their
+results, and close the mission only after parent-level validation.
+
 Every mission must define current project state, target outcome, release
 objective, owned modules/files, included and excluded tasks, validation gates,
-checkpoint cadence, stop conditions, and expected handoff artifact.
+checkpoint cadence, stop conditions, expected handoff artifact, and
+responsibility lanes with assigned agents when subagents are useful.
+
+## Coordinator-First Default
+
+When the user asks to `pracuj dalej`, `rob dalej`, `kontynuuj`, `next`, `go`, or
+otherwise continue a documented objective, the agent should assume the
+coordinator role by default.
+
+The coordinator must translate architecture docs, planning docs, state files,
+ledgers, and prior evidence into active responsibility lanes; create or refresh
+`.agents/state/active-mission.md` before broad implementation starts; decide
+which lanes stay local and which can be delegated; brief each subagent with
+objective, ownership, non-goals, validation, and expected report; keep critical
+path, integration, acceptance, and final done-state local; treat subagent
+reports as evidence, not approval; and capture missing ownership, failed
+handoffs, repeated mistakes, or unclear responsibility as process learning.
+
+Typical lanes include product/requirements, architecture, backend, frontend,
+data/migrations, QA/test, security, UX, documentation, and ops/release.
+
+Do not spawn subagents just to look busy. Use them when the lanes are separable
+and when a coordinator can verify the integrated result.
 
 ## Work Unit Rules
 
@@ -30,6 +57,12 @@ checkpoint cadence, stop conditions, and expected handoff artifact.
   evidence, or a clear blocked handoff.
 - If the mission uncovers a higher-priority P0 defect, record it in the module
   confidence ledger and either switch with explanation or stop for a decision.
+- If subagents report that work was blocked because no lane owned a necessary
+  responsibility, update the mission plan and record the missing responsibility
+  in `.codex/context/LEARNING_JOURNAL.md`, `.agents/state/known-issues.md`,
+  or the relevant planning/state file.
+- On the next similar mission, include that responsibility as an explicit lane
+  before implementation begins.
 
 ## Checkpoint Cadence
 

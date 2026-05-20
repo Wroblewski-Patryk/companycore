@@ -43,6 +43,28 @@
 - Stop conditions:
 - Handoff expectation:
 
+## Responsibility Lanes
+
+| Lane | Owner | Source docs/state | Owned files/surfaces | Output | Validation/proof | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| Coordinator | Active chat | | Integration, task closure, source-of-truth updates | Mission packet, lane briefs, final acceptance | Parent validation gate | PLANNED |
+| Product/Requirements | Product Docs or coordinator | | | | | PLANNED |
+| Architecture | Architect or coordinator | | | | | PLANNED |
+| Implementation | Builder lane(s) | | | | | PLANNED |
+| QA/Test | QA/Test | | | | | PLANNED |
+| Security/Ops/UX | Specialist lane(s) as needed | | | | | PLANNED |
+| Documentation/Memory | Coordinator or docs lane | | | | | PLANNED |
+
+### Lane Checks
+- [ ] `.agents/state/active-mission.md` was created or refreshed for broad work.
+- [ ] `.agents/workflows/responsibility-lanes.md` was reviewed.
+- [ ] Every important responsibility from source docs has an owner or explicit omission.
+- [ ] No two write lanes own the same file or shared registry.
+- [ ] Each lane has expected output and validation/proof.
+- [ ] Missing or unclear ownership was recorded in `.agents/state/responsibility-learning.md`.
+- [ ] Process eval will be recorded in `.agents/state/agent-evals.md` if this
+      is broad, repeated, partial, or subagent-heavy work.
+
 ## Context
 Where this work sits in the current project flow and architecture.
 
@@ -308,6 +330,8 @@ Describe exactly what should be produced in the current stage only.
 - [ ] Relevant validations were run.
 - [ ] Docs or context were updated if repository truth changed.
 - [ ] Learning journal was updated if a recurring pitfall was confirmed.
+- [ ] Required responsibility lanes were integrated, rejected, or tracked as follow-up.
+- [ ] Parent validation ran after accepted lane integration.
 
 ## Result Report
 - Task summary:

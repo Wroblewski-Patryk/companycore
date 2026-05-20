@@ -28,6 +28,17 @@
 - UX changed:
 - Deployment changed:
 
+## Mission And Lanes
+
+- Active mission packet:
+- Mission status:
+- Coordinator-owned scope:
+- Delegated lanes completed:
+- Delegated lanes rejected or deferred:
+- Lane outputs integrated:
+- Missing responsibilities captured:
+- Responsibility learning entries:
+
 ## Validation
 
 - Commands run:
@@ -66,3 +77,4 @@
 - Do not touch:
 - Watch out for:
 - If blocked:
+- Next coordinator action:

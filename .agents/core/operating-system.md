@@ -34,13 +34,19 @@ For non-trivial work, read this order:
 18. `.agents/state/risk-register.md`
 19. `.agents/state/regression-log.md`
 20. `.agents/state/system-health.md`
-21. `.agents/state/next-steps.md`
-22. `.codex/context/PROJECT_STATE.md`
-23. `.codex/context/TASK_BOARD.md`
-24. `.codex/context/LEARNING_JOURNAL.md`
-25. `docs/planning/mvp-next-commits.md`
-26. `docs/planning/mvp-execution-plan.md`
-27. `docs/planning/open-decisions.md`
+21. `.agents/state/active-mission.md`
+22. `.agents/state/responsibility-learning.md`
+23. `.agents/state/agent-evals.md`
+24. `.agents/state/next-steps.md`
+25. `.agents/workflows/responsibility-lanes.md`
+26. `.agents/workflows/agent-hierarchy.md`
+27. `.agents/workflows/codex-power-use.md`
+28. `.codex/context/PROJECT_STATE.md`
+29. `.codex/context/TASK_BOARD.md`
+30. `.codex/context/LEARNING_JOURNAL.md`
+31. `docs/planning/mvp-next-commits.md`
+32. `docs/planning/mvp-execution-plan.md`
+33. `docs/planning/open-decisions.md`
 
 If these sources drift, canonical priority is:
 
@@ -55,6 +61,11 @@ If these sources drift, canonical priority is:
 
 - Work in bounded, reversible, evidence-backed missions with checkpointed
   slices.
+- Default to coordinator-first execution for broad or multi-layer work: the
+  active chat owns the mission, hires bounded subagents when lanes are
+  separable, integrates their outputs, and closes only after validation.
+- Use `.agents/workflows/codex-power-use.md` to decide when to run Ask First,
+  Best Of N, task queue capture, proof sweep, and process eval.
 - Choose exactly one mission objective per autonomous run.
 - Prefer stability, architecture alignment, no regressions, correct flows, UX,
   aesthetics, and only then new features.
@@ -68,6 +79,9 @@ If these sources drift, canonical priority is:
   `.agents/state/delivery-map.md` to translate ideas, architecture,
   references, screenshots, and notes into cross-layer build slices before
   implementation.
+- Convert large docs and architecture sets into active responsibility lanes.
+  Reading docs is not enough; each important responsibility needs an owner,
+  output, validation, and follow-up path.
 - Use `.agents/core/product-intake-and-decision-handshake.md` and
   `.agents/state/decision-register.md` when intent, assumptions, product
   rules, UX direction, data, integrations, or validation are unclear.
@@ -101,8 +115,11 @@ When the user sends a short execution nudge, the agent must:
    `.agents/state/next-steps.md`, `docs/planning/mvp-execution-plan.md`, or
    `docs/planning/open-decisions.md`.
 5. Write or update one task contract from `.codex/templates/task-template.md`.
-6. Execute one iteration through `.agents/core/execution-loop.md`.
-7. Update `.agents/state/*`, `.codex/context/*`, and relevant docs before
+6. For broad work, refresh `.agents/state/active-mission.md`, define a
+   coordinator mission, and split separable responsibilities into explicit
+   lanes before spawning subagents.
+7. Execute one iteration through `.agents/core/execution-loop.md`.
+8. Update `.agents/state/*`, `.codex/context/*`, and relevant docs before
    reporting completion.
 
 Do not rely on hidden chat memory to continue work. Future agents must be able

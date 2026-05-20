@@ -1,6 +1,36 @@
 # Module Confidence Ledger
 
-Last updated: 2026-05-19
+Last updated: 2026-05-20
+
+Dashboard/Operations/Workforce foundation note: DMS-FOUNDATION-001 is
+PARTIALLY_VERIFIED locally with high API/build confidence. The logged-in
+General dashboard now consumes a real `/v1/dashboard/command` packet with
+workspace-scoped signals across intake, operations, workforce, assets,
+approvals, risks, next actions, department health, and explicit blocked
+assignment/calendar actions. Operations task creation now uses
+`POST /v1/operations/work-items` instead of the generic task route, preserving
+relation checks, ClickUp create writeback, and event evidence. The React route
+entry point lazy-loads department/settings surfaces, and Vite now emits
+separate route chunks. Evidence: `npm run validate` passed with 173 manifest
+routes and 33 protected route files; `npm run test:api:local` passed with all
+25 migrations and 6/6 API tests, including dashboard command, MCP manifest,
+Operations work-item create, event evidence, and workspace isolation. Browser
+plugin cleanup was attempted; rendered private-route proof was not completed
+because the local validation server path hit environment/auth setup issues, so
+the frontend visual state remains a follow-up proof item.
+
+Authenticated shell density note: WEB-SHELL-DENSITY-001 is VERIFIED locally.
+`web/src/layout/shell.tsx` now uses denser Roost sidebar rows, lighter active
+department treatment, compact child-view rows, tighter workspace controls, a
+mobile current department/view control instead of the old partial quick strip,
+a fuller drawer hierarchy, and a quieter footer band while preserving all
+existing department labels, child views, routes, aria labels, disabled states,
+and the footer language selector. Evidence: `npm run build:web`,
+`npm run validate`, `git diff --check`, and Playwright fallback
+desktop/mobile shell proof with no page-level horizontal overflow, console
+warnings, or console errors. Browser plugin was attempted first but could not
+set up the signed-in private route because its page evaluation surface did not
+expose `sessionStorage`.
 
 People/Agents premium UX note: REQ-PA-DIRECTORY-PREMIUM-UX-006 is VERIFIED
 locally. The Directory now exposes visible table filter labels, a clearer
