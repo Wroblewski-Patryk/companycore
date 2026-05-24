@@ -115,6 +115,13 @@ Validation:
   no horizontal overflow, no separate `Home` nav item, language selector in the
   footer, `luckysparrow.ch` footer link present, and the orbit node set includes
   people, agents, processes, assets, tasks, and knowledge.
+- Follow-up production smoke passed after pushing commit
+  `af049dac14956dd0849b48d2ee5af951af2407a1`: public API health reported the
+  deployed commit, `https://roost.luckysparrow.ch/` rendered the concept-match
+  homepage, and Playwright production proof found no separate `Home` nav item,
+  footer language selector present, `luckysparrow.ch` footer link present, no
+  old department-list cards, no failed requests, no console errors, and no
+  horizontal overflow on desktop or mobile.
 
 Residual risk:
 
