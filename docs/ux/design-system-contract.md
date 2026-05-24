@@ -66,6 +66,10 @@ Roost core palette:
 - Brand gradient:
   `linear-gradient(135deg, #6366F1 0%, #3B82F6 50%, #06B6D4 100%)`.
 
+The full public-facing brand source of truth is
+`docs/ux/roost-brand-book.md`. Use it for Roost public pages, logo direction,
+homepage rhythm, footer attribution, and future brand-sensitive surfaces.
+
 Roost typography:
 
 - Default family: `Inter`.
