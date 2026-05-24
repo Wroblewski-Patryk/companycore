@@ -168,6 +168,11 @@ Current status as of 2026-05-24:
   application `Roost`; its Git Source now uses `Wroblewski-Patryk/Roost` on
   branch `main` with commit selector `HEAD`. No manual redeploy was triggered
   during the rename checkpoint.
+- The next normal push to `main` after the repository rename triggered a
+  Coolify deployment for `Roost`. Public health briefly returned `503` during
+  rollout and then recovered; `https://api.roost.luckysparrow.ch/health`
+  reported `status: ok` and build commit
+  `c5b9aca6d5470060344b8f83a4d3e020f24cc6b7`.
 
 Manual VPS/Coolify backend rollover remains the fallback release path. It must
 preserve the PostgreSQL volume, record the previous and new build commits or the

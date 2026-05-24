@@ -4,15 +4,6 @@ Last updated: 2026-05-24
 
 ## NOW
 
-1. Prove Coolify webhook/build metadata after the repository rename.
-   - Source:
-     `docs/planning/repository-rename-coolify-source-task-contract.md`.
-   - Local Git and Coolify source configuration now point to
-     `Wroblewski-Patryk/Roost`, branch `main`, commit selector `HEAD`.
-   - Use the next normal push to `main` or a deliberate manual redeploy to
-     verify that Coolify creates the expected deployment record and public
-     `/health` reports fresh build metadata.
-
 1. Production-smoke `PEOPLE-AGENTS-PAPERCLIP-001` after redeploy.
    - Source:
      `docs/planning/people-agents-paperclip-directors-task-contract.md`.

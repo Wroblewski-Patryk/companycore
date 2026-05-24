@@ -51,7 +51,7 @@ Update project source references after the GitHub repository rename from
 - Local and Coolify source configuration verified.
 - Current source-of-truth docs updated.
 - Diff hygiene check completed.
-- Residual deployment proof risk documented.
+- Coolify webhook/build metadata proof completed after the next push.
 
 ## Result Report
 
@@ -65,3 +65,7 @@ Update project source references after the GitHub repository rename from
 - A fresh Coolify readback confirmed the updated repository value.
 - No manual redeploy was triggered.
 - `git diff --check` completed with only existing line-ending warnings.
+- The next normal push to `main` triggered a Coolify deployment for `Roost`.
+  During rollout, public health briefly returned `503`, then recovered.
+  `https://api.roost.luckysparrow.ch/health` returned `status: ok` with
+  build commit `c5b9aca6d5470060344b8f83a4d3e020f24cc6b7`.

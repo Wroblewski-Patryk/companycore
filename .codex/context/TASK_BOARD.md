@@ -53,6 +53,10 @@
 
 ## Recent Checkpoints
 
+- 2026-05-24: Repository rename deployment proof completed. Pushing `main` to
+  `c5b9aca` triggered a Coolify deployment for `Roost`; public API health
+  briefly returned `503` during rollout and then recovered with `status: ok`
+  and build commit `c5b9aca6d5470060344b8f83a4d3e020f24cc6b7`.
 - 2026-05-24: Repository remote renamed locally for the GitHub repository
   rename from `Wroblewski-Patryk/companycore` to `Wroblewski-Patryk/Roost`.
   Local `origin` now uses `https://github.com/Wroblewski-Patryk/Roost.git`.

@@ -13,14 +13,14 @@ Last updated: 2026-05-24
 - Release objective or product milestone advanced: Keeps production source
   configuration pointed at the canonical repository before the next deployment
   proof.
-- First/next checkpoint: Use the next normal push to `main` or a deliberate
-  manual redeploy as the end-to-end proof that Coolify webhook routing and
-  build metadata still resolve after the rename.
+- First/next checkpoint: Continue with production smoke for the product
+  journeys changed in the release.
 - Stop conditions: If Coolify requires repository reauthorization or a
   destructive source recreation, stop for owner approval before changing the
   application.
 - Parent validation gate: `git remote -v`, `git ls-remote --heads origin main`,
-  Coolify Git Source readback, documentation update, and `git diff --check`.
+  Coolify Git Source readback, push to `main`, Coolify deployment proof,
+  public health build metadata, documentation update, and `git diff --check`.
 
 ## Source Rows
 
@@ -79,5 +79,6 @@ Last updated: 2026-05-24
 
 | Date | Checkpoint | Result | Evidence | Next action |
 | --- | --- | --- | --- | --- |
+| 2026-05-24 | Repository rename deployment proof | VERIFIED | Push to `main` at `c5b9aca`; Coolify `Roost` deployment in progress; `https://api.roost.luckysparrow.ch/health` returned `status: ok` with build commit `c5b9aca6d5470060344b8f83a4d3e020f24cc6b7` after rollout | Continue production smoke for changed product journeys |
 | 2026-05-24 | Repository rename and Coolify source alignment | VERIFIED | `git remote -v`; `git ls-remote --heads origin main`; Coolify `Roost -> Git Source` readback; `git diff --check` | Prove webhook/build metadata on next push or deliberate redeploy |
 | 2026-05-24 | Department catalog implemented | VERIFIED | `docs/planning/management-department-catalog-task-contract.md`; `npm run validate`; `npm run test:api:local`; browser rendered proof; `git diff --check` | Add dedicated department API subtest in a later hardening slice |
