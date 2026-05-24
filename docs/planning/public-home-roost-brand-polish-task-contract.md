@@ -96,6 +96,12 @@ Validation:
   no page errors, no horizontal overflow, no `Home` nav item, no language
   selector in the header, language selector present in the footer, and zero
   old department-list cards in the hero.
+- Production deployment smoke passed after pushing commit
+  `0bf78784a0806873ce5531223185769b40b1b433`: public API health reported that
+  commit, `https://roost.luckysparrow.ch/` returned `200`, and Playwright
+  production proof found the new hero, no `Home` nav item, footer language
+  selector, zero old department-list cards, no console warnings/errors, and no
+  horizontal overflow.
 - Evidence screenshots:
   `docs/ux/evidence/public-home-roost-desktop.png` and
   `docs/ux/evidence/public-home-roost-mobile.png`.
@@ -104,5 +110,5 @@ Residual risk:
 
 - The final logo SVG is still pending from the owner, so the public UI uses a
   restrained placeholder mark aligned to the Roost direction.
-- Production deploy smoke remains separate from this local implementation
-  proof.
+- No production smoke gap remains for the public homepage; deeper authenticated
+  journeys are outside this public-home task.
