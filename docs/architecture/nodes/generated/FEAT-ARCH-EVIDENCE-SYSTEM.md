@@ -95,6 +95,7 @@ Obsidian-first CSV registry and generated graph system for architecture evidence
 - contains -> [[PIPE-AUTO-0037|Check Architecture Delta Zero]] (partial)
 - contains -> [[PIPE-AUTO-0038|Sync Architecture Doc Baseline]] (partial)
 - contains -> [[PIPE-AUTO-0039|Build Architecture Registry Catalog]] (partial)
+- contains -> [[PIPE-AUTO-0040|Aog Deploy Smoke]] (partial)
 - [[AGENT-COORDINATOR|Coordinator agent role]] -> depends_on (partial)
 
 ## Chains

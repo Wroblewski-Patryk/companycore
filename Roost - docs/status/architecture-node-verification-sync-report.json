@@ -1,6 +1,6 @@
 {
-  "synchronizedAt": "2026-05-25T01:40:22.495Z",
-  "updated": 0,
+  "synchronizedAt": "2026-05-25T01:45:38.422Z",
+  "updated": 1,
   "files": [
     {
       "file": "docs/architecture/nodes/nodes.csv",
@@ -89,8 +89,8 @@
     },
     {
       "file": "docs/architecture/nodes/pipelines.csv",
-      "updated": 0,
-      "total": 39
+      "updated": 1,
+      "total": 40
     },
     {
       "file": "docs/architecture/nodes/cron_jobs.csv",

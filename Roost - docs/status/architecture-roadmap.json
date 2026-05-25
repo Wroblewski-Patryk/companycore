@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-25T01:40:36.365Z",
+  "generatedAt": "2026-05-25T01:45:51.038Z",
   "status": "GREEN",
   "previousHealthStatus": "GREEN",
   "metrics": {
@@ -19,9 +19,9 @@
     {
       "node_id": "AGENT-COORDINATOR",
       "node_name": "Coordinator agent role",
-      "impact_score": 469,
+      "impact_score": 470,
       "direct_out_count": 63,
-      "transitive_out_count": 343
+      "transitive_out_count": 344
     },
     {
       "node_id": "FEAT-AUTO-0020",
@@ -61,9 +61,9 @@
     {
       "node_id": "FEAT-ARCH-EVIDENCE-SYSTEM",
       "node_name": "Architecture Evidence System",
-      "impact_score": 160,
-      "direct_out_count": 51,
-      "transitive_out_count": 57
+      "impact_score": 163,
+      "direct_out_count": 52,
+      "transitive_out_count": 58
     },
     {
       "node_id": "COMP-SHELL",

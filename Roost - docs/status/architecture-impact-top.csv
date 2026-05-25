@@ -1,11 +1,11 @@
 node_id,node_name,type,module,feature,status,impact_score,direct_out_count,direct_in_count,transitive_out_count,transitive_in_count
-AGENT-COORDINATOR,Coordinator agent role,agent,agents,agent-workflow,verified,469,63,0,343,0
+AGENT-COORDINATOR,Coordinator agent role,agent,agents,agent-workflow,verified,470,63,0,344,0
 FEAT-AUTO-0020,Operating Model Coverage Expansion,feature,operating-model,operating-model-coverage,implemented,207,32,1,142,1
 TEST-API-LOCAL,npm run test:api:local,test,cross-app,cross-app,verified,197,7,72,111,101
 FEAT-AUTO-0006,Company Os Coverage Expansion,feature,company-os,company-os-coverage,implemented,186,25,1,135,1
 FEAT-ASSETS-CONTEXT,Assets Context Workbench,feature,assets,assets-context,verified,176,32,1,111,101
 FEAT-AUTO-0015,Integration Settings Coverage Expansion,feature,integration-settings,integration-settings-coverage,implemented,165,18,1,128,1
-FEAT-ARCH-EVIDENCE-SYSTEM,Architecture Evidence System,feature,architecture,architecture-evidence,implemented,160,51,1,57,1
+FEAT-ARCH-EVIDENCE-SYSTEM,Architecture Evidence System,feature,architecture,architecture-evidence,implemented,163,52,1,58,1
 COMP-SHELL,Authenticated Shell component,component,shell,cross-app,verified,160,21,7,111,101
 FEAT-PEOPLE-AGENTS-DIRECTORY,People and Agents Directory,feature,workforce,people-agents-directory,verified,150,19,1,111,101
 FEAT-OPERATIONS-WORK-ITEMS,Operations Work Items,feature,operations,operations-work-items,verified,144,16,1,111,101

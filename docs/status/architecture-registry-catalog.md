@@ -1,10 +1,10 @@
 # Architecture Registry Catalog
 
-Generated at: 2026-05-25T01:40:39.738Z
+Generated at: 2026-05-25T01:45:54.173Z
 
 - Total CSV files: 30
 - Missing files: 0
-- Total rows: 1755
+- Total rows: 1758
 
 | File | Exists | Rows | Headers |
 | --- | --- | ---: | ---: |
@@ -25,7 +25,7 @@ Generated at: 2026-05-25T01:40:39.738Z
 | `docs/architecture/nodes/migrations.csv` | yes | 31 | 26 |
 | `docs/architecture/nodes/integrations.csv` | yes | 13 | 26 |
 | `docs/architecture/nodes/middleware.csv` | yes | 5 | 26 |
-| `docs/architecture/nodes/pipelines.csv` | yes | 39 | 26 |
+| `docs/architecture/nodes/pipelines.csv` | yes | 40 | 26 |
 | `docs/architecture/nodes/cron_jobs.csv` | yes | 1 | 26 |
 | `docs/architecture/nodes/tests.csv` | yes | 13 | 26 |
 | `docs/architecture/nodes/docs.csv` | yes | 10 | 26 |
@@ -34,7 +34,7 @@ Generated at: 2026-05-25T01:40:39.738Z
 | `docs/architecture/nodes/prompts.csv` | yes | 1 | 26 |
 | `docs/architecture/nodes/events.csv` | yes | 2 | 26 |
 | `docs/architecture/nodes/workflows.csv` | yes | 2 | 26 |
-| `docs/architecture/relations/dependencies.csv` | yes | 760 | 10 |
+| `docs/architecture/relations/dependencies.csv` | yes | 761 | 10 |
 | `docs/architecture/chains/chains.csv` | yes | 34 | 15 |
 | `docs/testing/test-map.csv` | yes | 8 | 13 |
-| `docs/status/evidence-status.csv` | yes | 451 | 11 |
+| `docs/status/evidence-status.csv` | yes | 452 | 11 |

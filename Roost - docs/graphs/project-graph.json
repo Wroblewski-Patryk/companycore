@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-25T01:40:28.698Z",
+  "generatedAt": "2026-05-25T01:45:43.965Z",
   "nodes": [
     {
       "id": "FEAT-ARCH-EVIDENCE-SYSTEM",
@@ -6587,6 +6587,21 @@
       ]
     },
     {
+      "id": "PIPE-AUTO-0040",
+      "name": "Aog Deploy Smoke",
+      "type": "pipeline",
+      "status": "implemented",
+      "layer": "backend",
+      "module": "architecture",
+      "feature": "architecture-evidence",
+      "verificationStatus": "tested",
+      "riskLevel": "medium",
+      "filePath": "scripts/aog-deploy-smoke.mjs",
+      "tags": [
+        "#pipeline #auto"
+      ]
+    },
+    {
       "id": "CRON-AUTO-0001",
       "name": "Clickup.Maintenance Scheduler",
       "type": "cron_job",
@@ -12085,6 +12100,13 @@
       "id": "REL-AUTO-0727",
       "source": "FEAT-AUTO-0006",
       "target": "API-AUTO-0169",
+      "type": "contains",
+      "status": "partial"
+    },
+    {
+      "id": "REL-AUTO-0728",
+      "source": "FEAT-ARCH-EVIDENCE-SYSTEM",
+      "target": "PIPE-AUTO-0040",
       "type": "contains",
       "status": "partial"
     }

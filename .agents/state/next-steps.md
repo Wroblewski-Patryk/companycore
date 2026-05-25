@@ -36,6 +36,10 @@ Last updated: 2026-05-25
    - Public reachability proof for deployed runtime is complete (`/health` and
      web root both return `200`). Remaining blocker is protected key injection
      for deploy-time MCP/API smoke in this coordinator environment.
+   - Use one-command runner on target:
+     `COMPANYCORE_BASE_URL=https://api.roost.luckysparrow.ch COMPANYCORE_API_KEY=<key> npm run aog:deploy-smoke`
+     and set `COMPANYCORE_DEPLOY_SMOKE_ALLOW_REGISTRATION=true` only if
+     smoke-user registration is approved on production.
    - Local harness note: `scripts/test-api-local.mjs` now runs
      `build -> migrate -> seed -> dist API tests`; remaining failing assertion
      in `CompanyCore v1 protected API flow` should be handled as a focused

@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-05-25T01:40:34.798Z",
+  "generatedAt": "2026-05-25T01:45:49.575Z",
   "status": "passed",
   "summary": {
     "hotspotCount": 25,
-    "highestRiskScore": 469
+    "highestRiskScore": 475
   },
   "globalRiskSignals": {
     "evidenceQueue": 0,
@@ -21,11 +21,11 @@
       "module": "agents",
       "feature": "agent-workflow",
       "status": "verified",
-      "risk_score": 469,
-      "impact_score": 469,
-      "impact_delta": 0,
-      "transitive_out_count": 343,
-      "reasons": "high_transitive_impact;wide_change_surface"
+      "risk_score": 475,
+      "impact_score": 470,
+      "impact_delta": 1,
+      "transitive_out_count": 344,
+      "reasons": "impact_delta:1;high_transitive_impact;wide_change_surface"
     },
     {
       "node_id": "FEAT-AUTO-0020",
@@ -67,6 +67,19 @@
       "reasons": "high_transitive_impact;wide_change_surface"
     },
     {
+      "node_id": "FEAT-ARCH-EVIDENCE-SYSTEM",
+      "node_name": "Architecture Evidence System",
+      "type": "feature",
+      "module": "architecture",
+      "feature": "architecture-evidence",
+      "status": "implemented",
+      "risk_score": 178,
+      "impact_score": 163,
+      "impact_delta": 3,
+      "transitive_out_count": 58,
+      "reasons": "impact_delta:3;high_transitive_impact;wide_change_surface"
+    },
+    {
       "node_id": "FEAT-ASSETS-CONTEXT",
       "node_name": "Assets Context Workbench",
       "type": "feature",
@@ -90,19 +103,6 @@
       "impact_score": 165,
       "impact_delta": 0,
       "transitive_out_count": 128,
-      "reasons": "high_transitive_impact;wide_change_surface"
-    },
-    {
-      "node_id": "FEAT-ARCH-EVIDENCE-SYSTEM",
-      "node_name": "Architecture Evidence System",
-      "type": "feature",
-      "module": "architecture",
-      "feature": "architecture-evidence",
-      "status": "implemented",
-      "risk_score": 160,
-      "impact_score": 160,
-      "impact_delta": 0,
-      "transitive_out_count": 57,
       "reasons": "high_transitive_impact;wide_change_surface"
     },
     {

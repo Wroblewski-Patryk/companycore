@@ -1,23 +1,23 @@
 # Architecture Evidence Summary
 
-Generated at: 2026-05-25T01:40:28.698Z
+Generated at: 2026-05-25T01:45:43.965Z
 
 ## Counts
 
-- Nodes: 451
-- Relations: 760
+- Nodes: 452
+- Relations: 761
 - Chains: 34
 - Test mappings: 8
-- Evidence rows: 451
+- Evidence rows: 452
 
 ## Verification Status
 
-- tested: 385
+- tested: 386
 - verified: 66
 
 ## Evidence Status
 
-- tested: 385
+- tested: 386
 - verified: 66
 
 ## Missing Evidence Queue

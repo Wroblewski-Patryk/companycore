@@ -23,6 +23,7 @@
     "mcp:server": "node scripts/companycore-mcp-server.mjs",
     "mcp:smoke": "node scripts/companycore-mcp-smoke.mjs",
     "ai-ready:smoke": "node scripts/companycore-ai-ready-smoke.mjs",
+    "aog:deploy-smoke": "node scripts/aog-deploy-smoke.mjs",
     "google-drive:smoke": "node scripts/google-drive-production-smoke.mjs",
     "clickup:bootstrap": "node scripts/clickup-production-bootstrap.mjs",
     "architecture:graph": "node scripts/generate-architecture-graph.mjs",
