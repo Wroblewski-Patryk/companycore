@@ -143,6 +143,19 @@ function runMcpSmoke(apiKey, options = {}) {
   });
 }
 
+async function firstAvailableAreaGraph(readerHeaders) {
+  const candidateAreaKeys = ["01-strategia", "main-general", "04-operacje", "03-sprzedaz"];
+  for (const areaKey of candidateAreaKeys) {
+    const response = await request(`/v1/operating-graph/areas/${encodeURIComponent(areaKey)}?limit=50`, {
+      headers: readerHeaders
+    });
+    if (response.ok) {
+      return { areaKey, body: response.body?.data };
+    }
+  }
+  fail(`No candidate operating area graph endpoint returned 200. Tried: ${candidateAreaKeys.join(", ")}`);
+}
+
 async function main() {
   if (process.argv.includes("--help")) {
     printHelp();
@@ -195,6 +208,7 @@ async function main() {
   assert(manifest?.service === "companycore", "Manifest service mismatch.");
   assert(Array.isArray(manifest.tools), "Manifest did not return tools.");
   assert(manifest.tools.some((tool) => tool.name === "companycore_get_relationships_graph" && tool.path === "/v1/relationships/graph"), "Manifest is missing relationship graph tool.");
+  assert(manifest.tools.some((tool) => tool.path === "/v1/operating-graph/areas/:areaKey" && tool.capability === "operating-graph:read"), "Manifest is missing operating graph read tool.");
   assert(!manifest.tools.some((tool) => tool.capability === "company-os:stage-run:write"), "Reader manifest exposes stage-run write tools.");
 
   const relationshipGraphResponse = await expectOk(
@@ -209,6 +223,14 @@ async function main() {
   assert(Array.isArray(graph?.reviewItems), "Relationship graph did not return graph.reviewItems.");
   assert(Array.isArray(graph?.unsupportedFamilies), "Relationship graph did not return graph.unsupportedFamilies.");
   assert(graphSummary && typeof graphSummary.nodes === "number", "Relationship graph did not return summary counts.");
+
+  const areaGraphResult = await firstAvailableAreaGraph(readerHeaders);
+  const areaGraph = areaGraphResult.body;
+  assert(areaGraph && typeof areaGraph === "object", "Operating graph response did not return data.");
+  assert(areaGraph.area && typeof areaGraph.area.key === "string", "Operating graph did not return area metadata.");
+  assert(Array.isArray(areaGraph.graph?.nodes), "Operating graph did not return graph.nodes.");
+  assert(Array.isArray(areaGraph.graph?.edges), "Operating graph did not return graph.edges.");
+  assert(Array.isArray(areaGraph.graph?.gaps), "Operating graph did not return graph.gaps.");
 
   const graphBridgeSmoke = await runMcpSmoke(readerKey.key, {
     toolName: "companycore_get_relationships_graph",
@@ -225,6 +247,16 @@ async function main() {
   assert(guardedCommandSmoke.ok === true, "MCP guarded command smoke did not pass.");
   assert(guardedCommandSmoke.callError === "mcp_tool_requires_supervision", "Guarded command did not fail closed with mcp_tool_requires_supervision.");
 
+  const operatingGraphBridgeSmoke = await runMcpSmoke(readerKey.key, {
+    toolName: "companycore_get_operating_graph_areas_by_areaKey",
+    arguments: {
+      areaKey: areaGraphResult.areaKey,
+      query: { limit: 50 }
+    }
+  });
+  assert(operatingGraphBridgeSmoke.ok === true, "MCP operating graph smoke did not pass.");
+  assert(operatingGraphBridgeSmoke.calledTool === "companycore_get_operating_graph_areas_by_areaKey", "MCP operating graph smoke called the wrong tool.");
+
   process.stdout.write(JSON.stringify({
     ok: true,
     baseUrl,
@@ -240,9 +272,18 @@ async function main() {
       summaryNodes: graphSummary.nodes,
       summaryEdges: graphSummary.edges
     },
+    operatingGraph: {
+      requestedAreaKey: areaGraphResult.areaKey,
+      resolvedAreaKey: areaGraph.area.key,
+      nodes: areaGraph.graph.nodes.length,
+      edges: areaGraph.graph.edges.length,
+      gaps: areaGraph.graph.gaps.length
+    },
     mcpBridge: {
       graphTool: graphBridgeSmoke.calledTool,
       graphStatus: graphBridgeSmoke.callStatus,
+      operatingGraphTool: operatingGraphBridgeSmoke.calledTool,
+      operatingGraphStatus: operatingGraphBridgeSmoke.callStatus,
       guardedTool: guardedCommandSmoke.calledTool,
       guardedError: guardedCommandSmoke.callError
     }

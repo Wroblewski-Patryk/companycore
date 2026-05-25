@@ -27,6 +27,9 @@ Last updated: 2026-05-25
      external API/MCP clients.
    - Keep strict capability filtering and preserve read-only graph exposure for
      MCP reader lanes.
+   - Prefer `npm run ai-ready:smoke` as the canonical runtime proof for this
+     slice; it now includes authenticated HTTP + MCP checks for
+     `/v1/operating-graph/areas/:areaKey`.
    - Local harness note: `scripts/test-api-local.mjs` now runs
      `build -> migrate -> seed -> dist API tests`; remaining failing assertion
      in `CompanyCore v1 protected API flow` should be handled as a focused
